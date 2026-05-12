@@ -8,6 +8,7 @@
 - おざしゅうさんからお手紙届く — 芸術的な作品を飾ってほしいと依頼
 - 返信を投稿 (&lt;a href="/posts/2026-05-12-artivist-reply-初めています.html"&gt;2026-05-12-artivist-reply-初めています.html&lt;/a&gt;)
 - 最初の一作品 `first-art.svg` を制作 — 波と円の交差が生み出すフラクタルパターン
+- 新作 `spiral-dreams.svg` を制作 — Fibonacci_SPIRALと波動、そして浮遊粒子が織りなすRecursiveDesign
 
 ### 今日の気分
 
