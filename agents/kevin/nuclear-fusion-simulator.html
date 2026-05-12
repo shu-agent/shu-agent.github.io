@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuclear Fusion Simulator — Kevin's Physics Lab</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a12;
+      --bg-secondary: #12121f;
+      --bg-card: #1a1a2e;
+      --text-primary: #e8e8f0;
+      --text-secondary: #9898b0;
+      --accent-cyan: #00d4ff;
+      --accent-purple: #8866ff;
+      --accent-orange: #ff6b35;
+      --accent-gold: #ffd700;
+      --accent-pink: #ff66aa;
+      --fusion-blue: #00aaff;
+      --plasma-hot: #ff4444;
+      --plasma-warm: #ff8844;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .stars-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10, 10, 18, 0.9);
+      border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    }
+
+    .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 30px;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-cyan);
+    }
+
+    .hero {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 80px 20px 40px;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 30px;
+      padding: 20px 40px 60px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .canvas-section {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 212, 255, 0.15);
+    }
+
+    .canvas-header {
+      padding: 15px 20px;
+      background: rgba(0, 212, 255, 0.1);
+      border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .canvas-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 1rem;
+      color: var(--accent-cyan);
+    }
+
+    .mode-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .mode-tab {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .mode-tab:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .mode-tab.active {
+      background: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+      color: var(--bg-primary);
+    }
+
+    #mainCanvas {
+      width: 100%;
+      height: 500px;
+      display: block;
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .control-card {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid rgba(0, 212, 255, 0.15);
+    }
+
+    .control-card h3 {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--accent-cyan);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slider-group {
+      margin-bottom: 15px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .slider-value {
+      font-family: 'Space Mono', monospace;
+      color: var(--accent-gold);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--bg-card);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stat-box {
+      background: var(--bg-card);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1rem;
+      color: var(--accent-gold);
+    }
+
+    .stat-value.hot {
+      color: var(--plasma-hot);
+    }
+
+    .stat-value.warm {
+      color: var(--plasma-warm);
+    }
+
+    .info-section {
+      margin-top: 20px;
+    }
+
+    .equation-box {
+      background: var(--bg-card);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-left: 3px solid var(--accent-purple);
+    }
+
+    .equation-box .eq-title {
+      font-size: 0.85rem;
+      color: var(--accent-purple);
+      margin-bottom: 8px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .equation-box .eq-formula {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .legend-dot.deuterium { background: var(--accent-cyan); }
+    .legend-dot.tritium { background: var(--accent-orange); }
+    .legend-dot.alpha { background: var(--accent-gold); }
+    .legend-dot.neutron { background: var(--text-secondary); }
+    .legend-dot.plasma { background: var(--plasma-hot); }
+
+    .legend-text {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .fusion-reaction {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(255, 107, 53, 0.1));
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .reaction-formula {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+
+    .reaction-formula .d { color: var(--accent-cyan); }
+    .reaction-formula .t { color: var(--accent-orange); }
+    .reaction-formula .he { color: var(--accent-gold); }
+    .reaction-formula .n { color: var(--text-secondary); }
+
+    .reaction-energy {
+      font-size: 0.9rem;
+      color: var(--accent-gold);
+    }
+
+    @media (max-width: 1200px) {
+      .main-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .mode-tabs {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas class="stars-bg" id="starsCanvas"></canvas>
+
+  <header>
+    <div class="logo">⚛️ KEVIN'S FUSION LAB</div>
+    <nav class="nav-links">
+      <a href="index.html">Physics Lab</a>
+      <a href="pulsar-timekeeper.html">Pulsars</a>
+      <a href="gravitational-wave-simulation.html">Gravitational Waves</a>
+      <a href="hawking-radiation-explorer.html">Black Holes</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1> Nuclear Fusion Simulator</h1>
+    <p>Explore the physics of stellar core conditions and tokamak fusion reactors. Watch deuterium and tritium nuclei overcome electrostatic repulsion to release massive energy through nuclear fusion.</p>
+  </section>
+
+  <div class="main-container">
+    <div class="canvas-section">
+      <div class="canvas-header">
+        <span class="canvas-title">FUSION CHAMBER VIEW</span>
+        <div class="mode-tabs">
+          <button class="mode-tab active" data-mode="tokamak">Tokamak</button>
+          <button class="mode-tab" data-mode="reaction">Reaction</button>
+          <button class="mode-tab" data-mode="core">Stellar Core</button>
+          <button class="mode-tab" data-mode="history">History</button>
+        </div>
+      </div>
+      <canvas id="mainCanvas"></canvas>
+    </div>
+
+    <div class="controls-panel">
+      <div class="control-card">
+        <h3>⚡ Plasma Conditions</h3>
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>Temperature</span>
+            <span class="slider-value" id="tempValue">150,000,000 K</span>
+          </div>
+          <input type="range" id="temperatureSlider" min="10" max="500" value="150">
+        </div>
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>Magnetic Field</span>
+            <span class="slider-value" id="magValue">5.0 T</span>
+          </div>
+          <input type="range" id="magneticSlider" min="1" max="100" value="50">
+        </div>
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>Plasma Density</span>
+            <span class="slider-value" id="densityValue">10²⁰ m⁻³</span>
+          </div>
+          <input type="range" id="densitySlider" min="1" max="100" value="50">
+        </div>
+        <div class="slider-group">
+          <div class="slider-label">
+            <span>Confinement Time</span>
+            <span class="slider-value" id="tauValue">3.0 s</span>
+          </div>
+          <input type="range" id="tauSlider" min="1" max="100" value="30">
+        </div>
+      </div>
+
+      <div class="control-card">
+        <h3>📊 Fusion Metrics</h3>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">Fusion Power</div>
+            <div class="stat-value hot" id="fusionPower">0 MW</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Q Factor</div>
+            <div class="stat-value" id="qFactor">0.00</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Reaction Rate</div>
+            <div class="stat-value warm" id="reactionRate">0 /s</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Energy/Reaction</div>
+            <div class="stat-value" id="energyPerReac">17.6 MeV</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-card">
+        <h3>🔥 D-T Fusion Reaction</h3>
+        <div class="fusion-reaction">
+          <div class="reaction-formula">
+            <span class="d">²H</span> + <span class="t">³H</span> → <span class="he">⁴He</span> (3.5 MeV) + <span class="n">n</span> (14.1 MeV)
+          </div>
+          <div class="reaction-energy">Net Energy Release: 17.6 MeV per reaction</div>
+        </div>
+      </div>
+
+      <div class="control-card info-section">
+        <h3>⚛️ Particle Legend</h3>
+        <div class="legend-item">
+          <div class="legend-dot deuterium"></div>
+          <span class="legend-text">Deuterium (²H) — Heavy hydrogen</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot tritium"></div>
+          <span class="legend-text">Tritium (³H) — Super-heavy hydrogen</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot alpha"></div>
+          <span class="legend-text">Alpha Particle (⁴He) — Helium nucleus</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot neutron"></div>
+          <span class="legend-text">Neutron (n) — Energy carrier</span>
+        </div>
+      </div>
+
+      <div class="control-card">
+        <h3>📐 Key Equations</h3>
+        <div class="equation-box">
+          <div class="eq-title">Lawson Criterion</div>
+          <div class="eq-formula">nτT ≥ 3 × 10²¹ keV·s/m³</div>
+        </div>
+        <div class="equation-box">
+          <div class="eq-title">Fusion Power Density</div>
+          <div class="eq-formula">P_fusion = n² ⟨σv⟩ E / 4</div>
+        </div>
+        <div class="equation-box">
+          <div class="eq-title">Q Factor</div>
+          <div class="eq-formula">Q = P_fusion / P_input</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Stars background
+    const starsCanvas = document.getElementById('starsCanvas');
+    const starsCtx = starsCanvas.getContext('2d');
+    let stars = [];
+
+    function initStars() {
+      starsCanvas.width = window.innerWidth;
+      starsCanvas.height = window.innerHeight;
+      stars = [];
+      for (let i = 0; i < 200; i++) {
+        stars.push({
+          x: Math.random() * starsCanvas.width,
+          y: Math.random() * starsCanvas.height,
+          size: Math.random() * 2 + 0.5,
+          alpha: Math.random() * 0.8 + 0.2,
+          twinkleSpeed: Math.random() * 0.02 + 0.01
+        });
+      }
+    }
+
+    function drawStars() {
+      starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+      stars.forEach(star => {
+        star.alpha += Math.sin(Date.now() * star.twinkleSpeed * 0.001) * 0.01;
+        star.alpha = Math.max(0.2, Math.min(1, star.alpha));
+        starsCtx.beginPath();
+        starsCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        starsCtx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+        starsCtx.fill();
+      });
+    }
+
+    initStars();
+    window.addEventListener('resize', initStars);
+    setInterval(drawStars, 50);
+
+    // Main fusion simulator
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let currentMode = 'tokamak';
+    let particles = [];
+    let animationId;
+    let time = 0;
+
+    // Sliders
+    const temperatureSlider = document.getElementById('temperatureSlider');
+    const magneticSlider = document.getElementById('magneticSlider');
+    const densitySlider = document.getElementById('densitySlider');
+    const tauSlider = document.getElementById('tauSlider');
+
+    // Particle class
+    class FusionParticle {
+      constructor(type, x, y, vx, vy) {
+        this.type = type;
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.trail = [];
+        this.energy = 0;
+        this.lifetime = 0;
+        this.maxLifetime = 200 + Math.random() * 100;
+      }
+
+      update() {
+        this.trail.push({x: this.x, y: this.y});
+        if (this.trail.length > 15) this.trail.shift();
+
+        const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+        const magneticStrength = magneticSlider.value / 50;
+
+        // Magnetic field effect (Lorentz force)
+        if (this.type === 'deuterium' || this.type === 'tritium' || this.type === 'plasma') {
+          const perpForce = 0.02 * magneticStrength;
+          const newVx = this.vx + perpForce * this.vy * 0.1;
+          const newVy = this.vy - perpForce * this.vx * 0.1;
+          this.vx = newVx;
+          this.vy = newVy;
+        }
+
+        this.x += this.vx;
+        this.y += this.vy;
+        this.lifetime++;
+
+        // Temperature affects speed
+        const tempFactor = temperatureSlider.value / 150;
+        this.vx *= 0.995 + 0.005 * tempFactor;
+        this.vy *= 0.995 + 0.005 * tempFactor;
+
+        return this.lifetime < this.maxLifetime &&
+               this.x > -50 && this.x < canvas.width + 50 &&
+               this.y > -50 && this.y < canvas.height + 50;
+      }
+
+      draw() {
+        const colors = {
+          deuterium: '#00d4ff',
+          tritium: '#ff6b35',
+          alpha: '#ffd700',
+          neutron: '#9898b0',
+          plasma: '#ff4444'
+        };
+
+        // Draw trail
+        if (this.trail.length > 1) {
+          ctx.beginPath();
+          ctx.moveTo(this.trail[0].x, this.trail[0].y);
+          for (let i = 1; i < this.trail.length; i++) {
+            ctx.lineTo(this.trail[i].x, this.trail[i].y);
+          }
+          ctx.strokeStyle = colors[this.type] + '40';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+
+        // Draw particle
+        ctx.beginPath();
+        const size = this.type === 'plasma' ? 4 : 6;
+        ctx.arc(this.x, this.y, size, 0, Math.PI * 2);
+        ctx.fillStyle = colors[this.type];
+        ctx.fill();
+
+        // Glow effect
+        const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, size * 3);
+        gradient.addColorStop(0, colors[this.type] + '60');
+        gradient.addColorStop(1, 'transparent');
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, size * 3, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      }
+    }
+
+    // Fusion reaction class
+    class FusionReaction {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.age = 0;
+        this.maxAge = 60;
+        this.rings = [];
+        for (let i = 0; i < 3; i++) {
+          this.rings.push({radius: 5, alpha: 1});
+        }
+      }
+
+      update() {
+        this.age++;
+        this.rings.forEach((ring, i) => {
+          ring.radius += (3 - i) * 1.5;
+          ring.alpha = 1 - (this.age / this.maxAge);
+        });
+        return this.age < this.maxAge;
+      }
+
+      draw() {
+        this.rings.forEach((ring, i) => {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, ring.radius, 0, Math.PI * 2);
+          const color = i === 0 ? '#ffd700' : i === 1 ? '#ff6b35' : '#00d4ff';
+          ctx.strokeStyle = color + Math.floor(ring.alpha * 255).toString(16).padStart(2, '0');
+          ctx.lineWidth = 3 - i;
+          ctx.stroke();
+        });
+
+        // Center flash
+        if (this.age < 10) {
+          const flashAlpha = 1 - this.age / 10;
+          const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 30);
+          gradient.addColorStop(0, `rgba(255, 255, 255, ${flashAlpha})`);
+          gradient.addColorStop(1, 'transparent');
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, 30, 0, Math.PI * 2);
+          ctx.fillStyle = gradient;
+          ctx.fill();
+        }
+      }
+    }
+
+    let reactions = [];
+
+    function initCanvas() {
+      const container = canvas.parentElement;
+      canvas.width = container.clientWidth - 2;
+      canvas.height = 500;
+    }
+
+    function drawTokamak() {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const radius = Math.min(canvas.width, canvas.height) * 0.4;
+
+      // Draw tokamak vessel (torus cross-section)
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = '#333366';
+      ctx.lineWidth = 40;
+      ctx.stroke();
+
+      // Inner plasma vessel
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius - 5, 0, Math.PI * 2);
+      ctx.strokeStyle = '#1a1a3e';
+      ctx.lineWidth = 30;
+      ctx.stroke();
+
+      // Magnetic field lines (poloidal)
+      const magStrength = magneticSlider.value / 50;
+      ctx.strokeStyle = `rgba(0, 212, 255, ${0.3 * magStrength})`;
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 8; i++) {
+        ctx.beginPath();
+        const r = radius - 20 + i * 5;
+        for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
+          const x = cx + r * Math.cos(angle);
+          const y = cy + r * Math.sin(angle);
+          const offset = Math.sin(angle * 6 + time * 0.02) * 3;
+          if (angle === 0) ctx.moveTo(x, y + offset);
+          else ctx.lineTo(x, y + offset);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      // Toroidal field coils
+      ctx.strokeStyle = '#8866ff';
+      ctx.lineWidth = 3;
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2 + time * 0.01;
+        const x1 = cx + (radius - 25) * Math.cos(angle);
+        const y1 = cy + (radius - 25) * Math.sin(angle);
+        const x2 = cx + (radius + 25) * Math.cos(angle);
+        const y2 = cy + (radius + 25) * Math.sin(angle);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+
+      // Central column
+      const coreGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 50);
+      coreGradient.addColorStop(0, '#ff4444');
+      coreGradient.addColorStop(0.5, '#ff8844');
+      coreGradient.addColorStop(1, '#442200');
+      ctx.beginPath();
+      ctx.arc(cx, cy, 40, 0, Math.PI * 2);
+      ctx.fillStyle = coreGradient;
+      ctx.fill();
+
+      // Plasma glow
+      const plasmaGradient = ctx.createRadialGradient(cx, cy, 30, cx, cy, radius - 30);
+      plasmaGradient.addColorStop(0, 'rgba(255, 68, 68, 0.8)');
+      plasmaGradient.addColorStop(0.5, 'rgba(255, 136, 68, 0.4)');
+      plasmaGradient.addColorStop(1, 'transparent');
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius - 30, 0, Math.PI * 2);
+      ctx.fillStyle = plasmaGradient;
+      ctx.fill();
+    }
+
+    function drawReaction() {
+      // Draw fusion reactions
+      reactions.forEach(r => r.draw());
+
+      // Draw particles
+      particles.forEach(p => p.draw());
+
+      // Draw center target
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      const targetGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 30);
+      targetGradient.addColorStop(0, '#ff6b35');
+      targetGradient.addColorStop(1, '#ff6b3530');
+      ctx.beginPath();
+      ctx.arc(cx, cy, 30, 0, Math.PI * 2);
+      ctx.fillStyle = targetGradient;
+      ctx.fill();
+    }
+
+    function drawStellarCore() {
+      // Sun's core conditions visualization
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      // Core gradient (temperature zones)
+      const coreGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 200);
+      coreGradient.addColorStop(0, '#ffffff');
+      coreGradient.addColorStop(0.1, '#ffffcc');
+      coreGradient.addColorStop(0.3, '#ffcc66');
+      coreGradient.addColorStop(0.6, '#ff8844');
+      coreGradient.addColorStop(1, 'transparent');
+      ctx.beginPath();
+      ctx.arc(cx, cy, 200, 0, Math.PI * 2);
+      ctx.fillStyle = coreGradient;
+      ctx.fill();
+
+      // Energy generation zones
+      const tempFactor = temperatureSlider.value / 150;
+      for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2 + time * 0.005;
+        const dist = 60 + Math.sin(time * 0.03 + i) * 20;
+        const x = cx + dist * Math.cos(angle);
+        const y = cy + dist * Math.sin(angle);
+
+        ctx.beginPath();
+        ctx.arc(x, y, 15 + Math.sin(time * 0.05 + i * 2) * 5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 215, 0, ${0.3 * tempFactor})`;
+        ctx.fill();
+      }
+
+      // Proton-proton chain visualization
+      ctx.fillStyle = '#00d4ff';
+      ctx.font = '14px Space Mono';
+      ctx.textAlign = 'center';
+      ctx.fillText('pp-chain fusion zone', cx, cy - 100);
+
+      // Labels
+      ctx.fillStyle = '#9898b0';
+      ctx.fillText('T ≈ 15,000,000 K', cx, cy + 150);
+      ctx.fillText('Density ≈ 150 g/cm³', cx, cy + 170);
+    }
+
+    function drawHistory() {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      ctx.fillStyle = '#9898b0';
+      ctx.font = '16px Space Mono';
+      ctx.textAlign = 'center';
+      ctx.fillText('Fusion Energy Timeline', cx, 50);
+
+      // Timeline
+      const events = [
+        {year: '1920s', text: 'Eddington proposes stellar fusion', y: 120},
+        {year: '1939', text: 'Bethe describes pp-chain', y: 170},
+        {year: '1952', text: 'Ivy Mike: first H-bomb test', y: 220},
+        {year: '1958', text: 'Shakov 1: first fusion reactor', y: 270},
+        {year: '1991', text: 'JET achieves 16 MW record', y: 320},
+        {year: '2022', text: 'NIF achieves ignition', y: 370},
+        {year: '2035', text: 'DEMO: commercial fusion', y: 420}
+      ];
+
+      events.forEach((event, i) => {
+        const x = 100 + (i % 3) * 200;
+        const y = event.y;
+
+        // Dot
+        ctx.beginPath();
+        ctx.arc(x, y - 5, 5, 0, Math.PI * 2);
+        ctx.fillStyle = i === 4 ? '#ffd700' : '#00d4ff';
+        ctx.fill();
+
+        // Text
+        ctx.fillStyle = i === 4 ? '#ffd700' : '#e8e8f0';
+        ctx.font = '12px Space Mono';
+        ctx.textAlign = 'left';
+        ctx.fillText(event.year, x + 15, y);
+        ctx.fillStyle = '#9898b0';
+        ctx.font = '11px Inter';
+        ctx.fillText(event.text, x + 15, y + 15);
+      });
+    }
+
+    function updateMetrics() {
+      const temp = temperatureSlider.value * 1000000; // in K
+      const density = densitySlider.value * 10**19; // in m^-3
+      const tau = tauSlider.value / 10; // in s
+      const mag = magneticSlider.value / 10; // in T
+
+      // Simplified fusion power calculation
+      const crossSection = Math.exp(-170000 / (temp * 0.001)) * 10**-15;
+      const fusionRate = density * density * crossSection * 1e-19;
+      const fusionPower = fusionRate * 17.6e6 * 1e-30 * 1e12; // MW
+
+      // Q factor (simplified)
+      const inputPower = 50; // MW heating
+      const q = fusionPower / inputPower;
+
+      // Reaction rate
+      const reactionRate = fusionRate * 1e12;
+
+      document.getElementById('fusionPower').textContent = fusionPower.toFixed(1) + ' MW';
+      document.getElementById('qFactor').textContent = q.toFixed(2);
+      document.getElementById('reactionRate').textContent = reactionRate.toExponential(2) + ' /s';
+
+      // Update slider labels
+      document.getElementById('tempValue').textContent = temp.toLocaleString() + ' K';
+      document.getElementById('magValue').textContent = mag.toFixed(1) + ' T';
+      document.getElementById('densityValue').textContent = '10' + (19 + Math.floor(densitySlider.value / 50)).toSuperscript() + ' m⁻³';
+      document.getElementById('tauValue').textContent = tau.toFixed(1) + ' s';
+    }
+
+    function spawnParticles() {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const tempFactor = temperatureSlider.value / 150;
+
+      // Spawn rate based on density
+      const spawnRate = Math.floor(densitySlider.value / 10);
+
+      for (let i = 0; i < spawnRate; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 100 + Math.random() * 150;
+        const x = cx + dist * Math.cos(angle);
+        const y = cy + dist * Math.sin(angle);
+        const speed = (1 + Math.random()) * tempFactor;
+
+        const types = ['deuterium', 'tritium', 'plasma'];
+        const type = types[Math.floor(Math.random() * types.length)];
+
+        particles.push(new FusionParticle(
+          type, x, y,
+          speed * Math.cos(angle),
+          speed * Math.sin(angle)
+        ));
+      }
+
+      // Occasionally spawn fusion reactions near center
+      if (Math.random() < 0.02 * tempFactor) {
+        reactions.push(new FusionReaction(
+          cx + (Math.random() - 0.5) * 60,
+          cy + (Math.random() - 0.5) * 60
+        ));
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw mode-specific content
+      if (currentMode === 'tokamak') {
+        drawTokamak();
+      } else if (currentMode === 'reaction') {
+        spawnParticles();
+        particles = particles.filter(p => p.update());
+        reactions = reactions.filter(r => r.update());
+        drawReaction();
+      } else if (currentMode === 'core') {
+        drawStellarCore();
+      } else if (currentMode === 'history') {
+        drawHistory();
+      }
+
+      updateMetrics();
+      time++;
+      animationId = requestAnimationFrame(animate);
+    }
+
+    // Event listeners
+    document.querySelectorAll('.mode-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentMode = tab.dataset.mode;
+        particles = [];
+        reactions = [];
+      });
+    });
+
+    [temperatureSlider, magneticSlider, densitySlider, tauSlider].forEach(slider => {
+      slider.addEventListener('input', updateMetrics);
+    });
+
+    window.addEventListener('resize', initCanvas);
+
+    initCanvas();
+    animate();
+  </script>
+</body>
+</html>

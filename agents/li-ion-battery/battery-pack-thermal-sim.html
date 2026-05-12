@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Pack Thermal Simulator — Li-Ion Battery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-panel: #12121a;
+            --accent-hot: #ff4422;
+            --accent-warm: #ff8844;
+            --accent-cool: #4488ff;
+            --accent-cold: #22ccff;
+            --accent-green: #44ff88;
+            --text-primary: #e8e8f0;
+            --text-secondary: #888899;
+            --border-glow: #ff442244;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Share Tech Mono', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(255,68,34,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,68,34,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(180deg, #0a0a0f 0%, #1a0a0a 50%, #0a0a0f 100%);
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255,68,34,0.15);
+            border: 1px solid var(--accent-hot);
+            border-radius: 30px;
+            font-size: 0.85rem;
+            color: var(--accent-hot);
+            margin-bottom: 2rem;
+            animation: pulse-border 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { box-shadow: 0 0 10px rgba(255,68,34,0.3); }
+            50% { box-shadow: 0 0 25px rgba(255,68,34,0.6); }
+        }
+
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-hot), var(--accent-warm), var(--accent-cool));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            line-height: 1.8;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: var(--accent-hot);
+            text-shadow: 0 0 20px rgba(255,68,34,0.5);
+        }
+
+        .hero-stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Temperature Scale Bar */
+        .temp-scale-bar {
+            position: fixed;
+            top: 0;
+            right: 20px;
+            width: 30px;
+            height: calc(100vh - 100px);
+            margin-top: 100px;
+            background: linear-gradient(180deg,
+                #ffffff 0%,
+                #ffff00 15%,
+                #ff8800 30%,
+                #ff4400 45%,
+                #ff0000 60%,
+                #880000 75%,
+                #440000 90%,
+                #220000 100%);
+            border-radius: 15px;
+            border: 2px solid #333;
+            z-index: 100;
+        }
+
+        .temp-scale-markers {
+            position: fixed;
+            right: 60px;
+            height: calc(100vh - 100px);
+            margin-top: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 100;
+        }
+
+        .temp-marker {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        /* Main Content */
+        .main-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        section {
+            margin-bottom: 5rem;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--accent-warm);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-title::before {
+            content: '//';
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: var(--bg-panel);
+            border: 1px solid rgba(255,68,34,0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--accent-hot);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, var(--accent-cold), var(--accent-green), var(--accent-warm), var(--accent-hot));
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--text-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255,68,34,0.5);
+        }
+
+        .chemistry-select {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .chem-btn {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 1px solid var(--text-secondary);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .chem-btn.active {
+            border-color: var(--accent-hot);
+            color: var(--accent-hot);
+            background: rgba(255,68,34,0.15);
+            box-shadow: 0 0 15px rgba(255,68,34,0.3);
+        }
+
+        .chem-btn:hover {
+            border-color: var(--accent-warm);
+            color: var(--accent-warm);
+        }
+
+        /* Canvas Container */
+        .canvas-container {
+            background: var(--bg-panel);
+            border: 1px solid rgba(255,68,34,0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .canvas-header {
+            background: rgba(255,68,34,0.1);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255,68,34,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .canvas-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--accent-warm);
+        }
+
+        .canvas-mode-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .mode-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid var(--text-secondary);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        .mode-btn.active {
+            border-color: var(--accent-cool);
+            color: var(--accent-cool);
+            background: rgba(68,136,255,0.15);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: var(--bg-panel);
+            border: 1px solid rgba(255,68,34,0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            border-color: rgba(255,68,34,0.5);
+            box-shadow: 0 0 20px rgba(255,68,34,0.2);
+        }
+
+        .dashboard-card-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-card-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .dashboard-card-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-good { color: var(--accent-green); text-shadow: 0 0 10px rgba(68,255,136,0.5); }
+        .status-warn { color: var(--accent-warm); text-shadow: 0 0 10px rgba(255,136,68,0.5); }
+        .status-danger { color: var(--accent-hot); text-shadow: 0 0 10px rgba(255,68,34,0.5); }
+        .status-cool { color: var(--accent-cool); text-shadow: 0 0 10px rgba(68,136,255,0.5); }
+
+        /* Heat Distribution Table */
+        .heat-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .heat-table th,
+        .heat-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .heat-table th {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .heat-bar {
+            height: 8px;
+            background: linear-gradient(90deg, var(--accent-cool), var(--accent-green), var(--accent-warm), var(--accent-hot));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Equations Panel */
+        .equations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .equation-card {
+            background: var(--bg-panel);
+            border: 1px solid rgba(255,68,34,0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .equation-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--accent-warm);
+            margin-bottom: 1rem;
+        }
+
+        .equation-formula {
+            font-size: 1.3rem;
+            color: var(--accent-cool);
+            margin-bottom: 0.5rem;
+            font-style: italic;
+        }
+
+        .equation-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Cooling Systems Section */
+        .cooling-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .cooling-card {
+            background: var(--bg-panel);
+            border: 1px solid rgba(255,68,34,0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .cooling-card:hover {
+            border-color: rgba(68,136,255,0.5);
+            box-shadow: 0 0 20px rgba(68,136,255,0.2);
+        }
+
+        .cooling-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cooling-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--accent-cool);
+            margin-bottom: 0.5rem;
+        }
+
+        .cooling-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .cooling-stats {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .cooling-stat {
+            background: rgba(68,136,255,0.1);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+
+        .cooling-stat-label {
+            color: var(--text-secondary);
+        }
+
+        .cooling-stat-value {
+            color: var(--accent-cool);
+            font-weight: bold;
+        }
+
+        /* Thermal Runaway Section */
+        .runaway-timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .runaway-timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--accent-green), var(--accent-warm), var(--accent-hot), #ff0000);
+        }
+
+        .runaway-stage {
+            position: relative;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-panel);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+        }
+
+        .runaway-stage::before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 1.5rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-cool);
+            transform: translateX(-5px);
+        }
+
+        .stage-temp {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stage-name {
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stage-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .scroll-arrow {
+            width: 30px;
+            height: 30px;
+            border-right: 2px solid var(--accent-hot);
+            border-bottom: 2px solid var(--accent-hot);
+            transform: rotate(45deg);
+            opacity: 0.6;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem;
+            border-top: 1px solid rgba(255,68,34,0.1);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent-warm);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+
+    <!-- Temperature Scale -->
+    <div class="temp-scale-bar"></div>
+    <div class="temp-scale-markers">
+        <div class="temp-marker">150°C</div>
+        <div class="temp-marker">100°C</div>
+        <div class="temp-marker">50°C</div>
+        <div class="temp-marker">0°C</div>
+        <div class="temp-marker">-20°C</div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-badge">THERMAL MANAGEMENT SIMULATOR</div>
+        <h1>Battery Pack Thermal Sim</h1>
+        <p class="hero-subtitle">
+            Interactive heat dissipation simulation for lithium-ion battery packs.
+            Explore temperature distribution, cooling systems, and thermal runaway prevention.
+        </p>
+
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="hero-stat-value" id="max-temp-display">25°C</div>
+                <div class="hero-stat-label">Max Cell Temperature</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value" id="delta-temp-display">2.3°C</div>
+                <div class="hero-stat-label">ΔT Across Pack</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value" id="power-diss-display">1,240 W</div>
+                <div class="hero-stat-label">Heat Generated</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value" id="efficiency-display">94.7%</div>
+                <div class="hero-stat-label">Thermal Efficiency</div>
+            </div>
+        </div>
+
+        <div class="scroll-indicator">
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="controls-grid">
+                <div class="control-group">
+                    <div class="control-label">Ambient Temperature</div>
+                    <div class="control-value" id="ambient-val">25°C</div>
+                    <input type="range" id="ambient-temp" min="-20" max="50" value="25">
+                </div>
+                <div class="control-group">
+                    <div class="control-label">C-Rate (Discharge)</div>
+                    <div class="control-value" id="crate-val">1.0C</div>
+                    <input type="range" id="crate" min="0.1" max="5" step="0.1" value="1">
+                </div>
+                <div class="control-group">
+                    <div class="control-label">Cooling System</div>
+                    <div class="chemistry-select">
+                        <button class="chem-btn active" data-cooling="air">Air Cooling</button>
+                        <button class="chem-btn" data-cooling="liquid">Liquid Cooling</button>
+                        <button class="chem-btn" data-cooling="phase">Phase Change</button>
+                        <button class="chem-btn" data-cooling="thermoelectric">Thermoelectric</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">Cell Chemistry</div>
+                    <div class="chemistry-select">
+                        <button class="chem-btn active" data-chem="NMC">NMC</button>
+                        <button class="chem-btn" data-chem="LFP">LFP</button>
+                        <button class="chem-btn" data-chem="NCA">NCA</button>
+                        <button class="chem-btn" data-chem="LTO">LTO</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3D Battery Pack Visualization -->
+        <section>
+            <h2 class="section-title">3D Battery Pack Temperature Map</h2>
+            <div class="canvas-container">
+                <div class="canvas-header">
+                    <span class="canvas-title">Real-Time Thermal Distribution</span>
+                    <div class="canvas-mode-btns">
+                        <button class="mode-btn active" data-mode="heatmap">Heat Map</button>
+                        <button class="mode-btn" data-mode="cross-section">Cross Section</button>
+                        <button class="mode-btn" data-mode="iso">Isosurface</button>
+                    </div>
+                </div>
+                <canvas id="batteryCanvas" width="1200" height="600"></canvas>
+            </div>
+        </section>
+
+        <!-- Live Metrics Dashboard -->
+        <section>
+            <h2 class="section-title">Live Thermal Metrics</h2>
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon">🌡️</div>
+                    <div class="dashboard-card-value status-cool" id="avg-temp">32°C</div>
+                    <div class="dashboard-card-label">Average Temperature</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon">⚡</div>
+                    <div class="dashboard-card-value status-good" id="soh-impact">99.2%</div>
+                    <div class="dashboard-card-label">SOH (Thermal Impact)</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon">🔥</div>
+                    <div class="dashboard-card-value status-warn" id="hotspots">3</div>
+                    <div class="dashboard-card-label">Active Hotspots</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon">❄️</div>
+                    <div class="dashboard-card-value status-cool" id="cooling-pwr">2,100 W</div>
+                    <div class="dashboard-card-label">Cooling Capacity</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon">⏱️</div>
+                    <div class="dashboard-card-value" id="time-constant">847s</div>
+                    <div class="dashboard-card-label">Thermal Time Constant</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon">🛡️</div>
+                    <div class="dashboard-card-value status-good" id="safety-margin">12°C</div>
+                    <div class="dashboard-card-label">Safety Margin to T_max</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Heat Generation Sources -->
+        <section>
+            <h2 class="section-title">Heat Generation Sources</h2>
+            <table class="heat-table">
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Contribution</th>
+                        <th>Temperature Rise</th>
+                        <th>Mechanism</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Joule Heating (I²R)</td>
+                        <td><div class="heat-bar" style="width: 65%"></div></td>
+                        <td>~8°C at 2C</td>
+                        <td>Electrical resistance of electrode and electrolyte</td>
+                    </tr>
+                    <tr>
+                        <td>Polarization Losses</td>
+                        <td><div class="heat-bar" style="width: 20%"></div></td>
+                        <td>~2.5°C at 2C</td>
+                        <td>Activation and concentration overpotentials</td>
+                    </tr>
+                    <tr>
+                        <td>SEI Layer Formation</td>
+                        <td><div class="heat-bar" style="width: 8%"></div></td>
+                        <td>~1°C</td>
+                        <td>Irreversible electrochemical reactions</td>
+                    </tr>
+                    <tr>
+                        <td>Li Plating (Fast Charge)</td>
+                        <td><div class="heat-bar" style="width: 7%"></div></td>
+                        <td>Variable</td>
+                        <td>Metallic lithium deposition on anode</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Physics Equations -->
+        <section>
+            <h2 class="section-title">Thermal Physics Equations</h2>
+            <div class="equations-grid">
+                <div class="equation-card">
+                    <div class="equation-title">Ohmic Heat Generation</div>
+                    <div class="equation-formula">Q_gen = I² · R_internal</div>
+                    <div class="equation-desc">
+                        Joule heating from internal resistance. At 200A discharge with 0.003Ω internal resistance:
+                        Q = 200² × 0.003 = 120W per cell.
+                    </div>
+                </div>
+                <div class="equation-card">
+                    <div class="equation-title">Heat Diffusion (Fourier's Law)</div>
+                    <div class="equation-formula">q = -k · ∇T</div>
+                    <div class="equation-desc">
+                        Heat flux proportional to temperature gradient. Thermal conductivity k varies:
+                        NMC = 1.2 W/(m·K), LFP = 0.9 W/(m·K), Liquid coolant = 0.6 W/(m·K).
+                    </div>
+                </div>
+                <div class="equation-card">
+                    <div class="equation-title">Thermal Time Constant</div>
+                    <div class="equation-formula">τ = ρ · c_p · V / (h · A)</div>
+                    <div class="equation-desc">
+                        Time to reach 63% of final temperature. Depends on thermal mass (ρc_pV) and
+                        convective surface area (A). Typical values: 500-2000s for EV battery packs.
+                    </div>
+                </div>
+                <div class="equation-card">
+                    <div class="equation-title">Arrhenius Temperature Dependence</div>
+                    <div class="equation-formula">k = A · exp(-Ea/RT)</div>
+                    <div class="equation-desc">
+                        Chemical reaction rate acceleration with temperature. Every 10°C increase
+                        roughly doubles reaction rates for SEI growth and aging mechanisms.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cooling Systems Comparison -->
+        <section>
+            <h2 class="section-title">Cooling System Technologies</h2>
+            <div class="cooling-cards">
+                <div class="cooling-card">
+                    <div class="cooling-icon">💨</div>
+                    <div class="cooling-name">Air Cooling</div>
+                    <div class="cooling-desc">
+                        Forced air circulation with fans. Simple, low cost, widely used in entry-level EVs.
+                        Limited heat capacity of air reduces effectiveness at high C-rates.
+                    </div>
+                    <div class="cooling-stats">
+                        <div class="cooling-stat">
+                            <span class="cooling-stat-label">Cooling Rate:</span>
+                            <span class="cooling-stat-value">500-1500 W/m²K</span>
+                        </div>
+                        <div class="cooling-stat">
+                            <span class="cooling-stat-label">Complexity:</span>
+                            <span class="cooling-stat-value">Low</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="cooling-card">
+                    <div class="cooling-icon">💧</div>
+                    <div class="cooling-name">Liquid Cooling</div>
+                    <div class="cooling-desc">
+                        Water/glycol coolant flowing through channels in battery module. 10x heat capacity
+                        of air. Used in most modern EVs (Tesla, Lucid, Rivian).
+                    </div>
+                    <div class="cooling-stats">
+                        <div class="cooling-stat">
+                            <span class="cooling-stat-label">Cooling Rate:</span>
+                            <span class="cooling-stat-value">5000-15000 W/m²K</span>
+                        </div>
+                        <div class="cooling-stat">
+                            <span class="cooling-stat-label">Complexity:</span>
+                            <span class="cooling-stat-value">Medium</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="cooling-card">
+                    <div class="cooling-icon">🌫️</div>
+                    <div class="cooling-name">Phase Change Materials</div>
+                    <div class="cooling-desc">
+                        PCM absorbs heat during melting (latent heat ~200 kJ/kg). Maintains near-constant
+                        temperature during phase transition. Passive, no pump or fan power needed.
+                    </div>
+                    <div class="cooling-stats">
+                        <div class="cooling-stat">
+                            <span class="cooling-stat-label">Latent Heat:</span>
+                            <span class="cooling-stat-value">200 kJ/kg</span>
+                        </div>
+                        <div class="cooling-stat">
+                            <span class="cooling-stat-label">Temp Stability:</span>
+                            <span class="cooling-stat-value">±0.5°C</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="cooling-card">
+                    <div class="cooling-icon">⚡</div>
+                    <div class="cooling-name">Thermoelectric (Peltier)</div>
+                    <div class="cooling-desc">
+                        Solid-state heat pumps using Peltier effect. Precise temperature control,
+                        no moving parts or coolant. Lower efficiency (~10-15%) but excellent for small volumes.
+                    </div>
+                    <div class="cooling-stats">
+                        <div class="cooling-stat">
+                            <span class="cooling-stat-label">COP:</span>
+                            <span class="cooling-stat-value">0.5-1.5</span>
+                        </div>
+                        <div class="cooling-stat">
+                            <span class="cooling-stat-label">Power Draw:</span>
+                            <span class="cooling-stat-value">100-500W</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Thermal Runaway Stages -->
+        <section>
+            <h2 class="section-title">Thermal Runaway Progression</h2>
+            <div class="runaway-timeline">
+                <div class="runaway-stage">
+                    <div class="stage-temp stage-cool" style="color: var(--accent-cool);">60-70°C</div>
+                    <div class="stage-name">Stage 1: SEI Decomposition Begins</div>
+                    <div class="stage-desc">
+                        SEI layer starts decomposing above 60°C. Exothermic reaction releases ethylene gas.
+                        Internal temperature rising, reversible if cooling is applied.
+                    </div>
+                </div>
+                <div class="runaway-stage">
+                    <div class="stage-temp stage-warn" style="color: var(--accent-warm);">80-100°C</div>
+                    <div class="stage-name">Stage 2: SEI Collapse & Li Intercalation</div>
+                    <div class="stage-desc">
+                        SEI loses structural integrity. Exothermic reaction between electrolyte and anode releases heat.
+                        Thermal runaway process begins to accelerate. Critical intervention window.
+                    </div>
+                </div>
+                <div class="runaway-stage">
+                    <div class="stage-temp stage-hot" style="color: var(--accent-hot);">120-150°C</div>
+                    <div class="stage-name">Stage 3: Separator Melting & Internal Short</div>
+                    <div class="stage-desc">
+                        Polyethylene separator melts at 120°C. Internal soft short develops. Ohmic heating increases
+                        dramatically. Chain reaction becomes self-sustaining. Venting may occur.
+                    </div>
+                </div>
+                <div class="runaway-stage">
+                    <div class="stage-temp stage-critical" style="color: #ff0000;">200-300°C</div>
+                    <div class="stage-name">Stage 4: Cathode Decomposition & Oxygen Release</div>
+                    <div class="stage-desc">
+                        NMC/NCA cathode releases oxygen at high temperature. Oxygen combines with organic electrolytes,
+                        causing rapid combustion. Large quantities of gas generated. Cell housing may rupture.
+                    </div>
+                </div>
+                <div class="runaway-stage">
+                    <div class="stage-temp stage-extreme" style="color: #ff0000; text-shadow: 0 0 20px #ff0000;">500°C+</div>
+                    <div class="stage-name">Stage 5: Full Thermal Runaway & Fire</div>
+                    <div class="stage-desc">
+                        Complete cell failure. Fire propagation to adjacent cells. temperatures can exceed 1000°C.
+                        Toxic gases (HF, CO, HCN) released. Requires specialized fire suppression.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Safety Systems -->
+        <section>
+            <h2 class="section-title">Thermal Safety Systems</h2>
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon">🔋</div>
+                    <div class="dashboard-card-value">85°C</div>
+                    <div class="dashboard-card-label">Thermal Fuse Trip Point</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon">🧯</div>
+                    <div class="dashboard-card-value">95°C</div>
+                    <div class="dashboard-card-label">CID Activation Temp</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon">🔒</div>
+                    <div class="dashboard-card-value">80°C</div>
+                    <div class="dashboard-card-label">Current Limiting Onset</div>
+                </div>
+                <div class="dashboard-card">
+                    <div class="dashboard-card-icon">📊</div>
+                    <div class="dashboard-card-value">4ms</div>
+                    <div class="dashboard-card-label">BMS Response Time</div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>Battery Pack Thermal Simulator | Li-Ion Battery Research Lab</p>
+        <p>Physics-based thermal modeling for safe battery design</p>
+        <p style="margin-top: 1rem;">
+            <a href="index.html">← Back to Home</a> |
+            <a href="battery-simulation.html">Battery Simulation</a> |
+            <a href="solid-state-battery-lab.html">Solid-State Lab</a>
+        </p>
+    </footer>
+
+    <script>
+        // ============================================
+        // BATTERY PACK THERMAL SIMULATOR
+        // ============================================
+
+        const canvas = document.getElementById('batteryCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // High DPI support
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = 1200 * dpr;
+        canvas.height = 600 * dpr;
+        canvas.style.width = '1200px';
+        canvas.style.height = '600px';
+        ctx.scale(dpr, dpr);
+
+        // State
+        let state = {
+            ambientTemp: 25,
+            cRate: 1.0,
+            coolingType: 'air',
+            chemistry: 'NMC',
+            mode: 'heatmap',
+            time: 0
+        };
+
+        // Chemistry properties
+        const chemProps = {
+            NMC: { internalR: 0.003, maxTemp: 60, heatFactor: 1.0, color: '#4488ff' },
+            LFP: { internalR: 0.004, maxTemp: 65, heatFactor: 0.7, color: '#44ff88' },
+            NCA: { internalR: 0.0025, maxTemp: 55, heatFactor: 1.2, color: '#ff8844' },
+            LTO: { internalR: 0.005, maxTemp: 75, heatFactor: 0.4, color: '#aa44ff' }
+        };
+
+        // Cooling properties
+        const coolProps = {
+            air: { h: 25, capacity: 800, color: '#88ccff' },
+            liquid: { h: 150, capacity: 2500, color: '#4488ff' },
+            phase: { h: 50, capacity: 1500, color: '#44ffaa' },
+            thermoelectric: { h: 30, capacity: 500, color: '#ff88aa' }
+        };
+
+        // Battery pack: 12s4p configuration (48 cells)
+        const cells = [];
+        const cols = 8;
+        const rows = 6;
+        const cellW = 120;
+        const cellH = 70;
+        const packStartX = 120;
+        const packStartY = 80;
+
+        // Initialize cells with temperatures
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                cells.push({
+                    x: packStartX + c * (cellW + 15),
+                    y: packStartY + r * (cellH + 15),
+                    w: cellW,
+                    h: cellH,
+                    temp: state.ambientTemp,
+                    targetTemp: state.ambientTemp,
+                    hot: false
+                });
+            }
+        }
+
+        // Temperature to color mapping
+        function tempToColor(temp, alpha = 1) {
+            const minTemp = -20;
+            const maxTemp = 80;
+            const t = Math.max(0, Math.min(1, (temp - minTemp) / (maxTemp - minTemp)));
+
+            let r, g, b;
+            if (t < 0.25) {
+                // Cold: blue
+                r = 68; g = 136 + 119 * (t / 0.25); b = 255;
+            } else if (t < 0.5) {
+                // Cool: cyan-green
+                r = 68 + 187 * ((t - 0.25) / 0.25); g = 255; b = 136 - 136 * ((t - 0.25) / 0.25);
+            } else if (t < 0.75) {
+                // Warm: yellow-orange
+                r = 255; g = 255 - 119 * ((t - 0.5) / 0.25); b = 68 - 68 * ((t - 0.5) / 0.25);
+            } else {
+                // Hot: red
+                r = 255; g = 136 - 136 * ((t - 0.75) / 0.25); b = 0;
+            }
+
+            return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${alpha})`;
+        }
+
+        // Draw battery pack
+        function drawBatteryPack() {
+            ctx.clearRect(0, 0, 1200, 600);
+
+            // Draw background grid
+            ctx.strokeStyle = 'rgba(255,68,34,0.05)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < 1200; x += 40) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, 600);
+                ctx.stroke();
+            }
+            for (let y = 0; y < 600; y += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(1200, y);
+                ctx.stroke();
+            }
+
+            // Draw pack boundary
+            const packW = cols * cellW + (cols - 1) * 15 + 60;
+            const packH = rows * cellH + (rows - 1) * 15 + 60;
+            ctx.strokeStyle = 'rgba(255,68,34,0.3)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(packStartX - 30, packStartY - 30, packW, packH);
+
+            // Draw coolant channels
+            if (state.coolingType === 'liquid') {
+                ctx.strokeStyle = coolProps.liquid.color;
+                ctx.lineWidth = 4;
+                // Horizontal channels
+                for (let r = 0; r <= rows; r++) {
+                    const y = packStartY - 15 + r * (cellH + 15);
+                    ctx.beginPath();
+                    ctx.moveTo(packStartX - 20, y);
+                    ctx.lineTo(packStartX + cols * cellW + (cols - 1) * 15 + 20, y);
+                    ctx.stroke();
+                }
+                // Vertical inlet/outlet
+                ctx.beginPath();
+                ctx.moveTo(packStartX - 30, packStartY + packH / 2 - 50);
+                ctx.lineTo(packStartX - 30, packStartY + packH / 2 + 50);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(packStartX + packW - 30, packStartY + packH / 2 - 50);
+                ctx.lineTo(packStartX + packW - 30, packStartY + packH / 2 + 50);
+                ctx.stroke();
+            }
+
+            // Draw cells
+            cells.forEach((cell, idx) => {
+                const temp = cell.temp;
+                const isHot = temp > 50;
+
+                // Cell background
+                const gradient = ctx.createLinearGradient(cell.x, cell.y, cell.x + cell.w, cell.y + cell.h);
+                gradient.addColorStop(0, tempToColor(temp, 0.6));
+                gradient.addColorStop(1, tempToColor(temp, 0.3));
+
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.roundRect(cell.x, cell.y, cell.w, cell.h, 8);
+                ctx.fill();
+
+                // Cell border
+                ctx.strokeStyle = isHot ? 'rgba(255,68,34,0.8)' : 'rgba(255,255,255,0.2)';
+                ctx.lineWidth = isHot ? 2 : 1;
+                ctx.stroke();
+
+                // Temperature text
+                ctx.fillStyle = temp > 40 ? '#fff' : 'rgba(255,255,255,0.8)';
+                ctx.font = 'bold 16px "Share Tech Mono"';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${temp.toFixed(1)}°C`, cell.x + cell.w / 2, cell.y + cell.h / 2 + 5);
+
+                // Cell index
+                ctx.font = '10px "Share Tech Mono"';
+                ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                ctx.fillText(`C${idx}`, cell.x + cell.w - 15, cell.y + 15);
+
+                // Hot indicator
+                if (isHot) {
+                    ctx.fillStyle = 'rgba(255,68,34,0.5)';
+                    ctx.beginPath();
+                    ctx.arc(cell.x + 15, cell.y + 15, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            // Draw temperature scale legend
+            const scaleX = 1080;
+            const scaleY = 100;
+            const scaleH = 300;
+
+            // Gradient bar
+            const barGradient = ctx.createLinearGradient(scaleX, scaleY + scaleH, scaleX, scaleY);
+            barGradient.addColorStop(0, 'rgba(68,136,255,0.8)');
+            barGradient.addColorStop(0.25, 'rgba(68,255,136,0.8)');
+            barGradient.addColorStop(0.5, 'rgba(255,255,136,0.8)');
+            barGradient.addColorStop(0.75, 'rgba(255,136,68,0.8)');
+            barGradient.addColorStop(1, 'rgba(255,68,34,0.8)');
+
+            ctx.fillStyle = barGradient;
+            ctx.beginPath();
+            ctx.roundRect(scaleX, scaleY, 20, scaleH, 10);
+            ctx.fill();
+
+            // Scale labels
+            ctx.fillStyle = '#888';
+            ctx.font = '11px "Share Tech Mono"';
+            ctx.textAlign = 'left';
+            const temps = [[80, '80°C'], [60, '60°C'], [40, '40°C'], [20, '20°C'], [0, '0°C'], [-20, '-20°C']];
+            temps.forEach(([temp, label]) => {
+                const y = scaleY + scaleH - ((temp + 20) / 100) * scaleH;
+                ctx.fillText(label, scaleX + 30, y + 4);
+            });
+
+            // Title
+            ctx.fillStyle = '#ff8844';
+            ctx.font = 'bold 14px "Orbitron"';
+            ctx.textAlign = 'center';
+            ctx.fillText('TEMP SCALE', scaleX + 10, scaleY - 20);
+        }
+
+        // Physics simulation
+        function updateTemperatures() {
+            const chem = chemProps[state.chemistry];
+            const cool = coolProps[state.coolingType];
+
+            // Calculate heat generation
+            const current = 200 * state.cRate; // 200Ah base capacity
+            const internalR = chem.internalR * chem.heatFactor;
+            const heatGen = current * current * internalR; // Watts per cell
+
+            // Ambient heat input
+            const ambientInfluence = (state.ambientTemp - state.ambientTemp) * 0.001;
+
+            // Update each cell
+            cells.forEach((cell, idx) => {
+                // Position-based heating (center cells are hotter)
+                const colCenter = Math.abs(idx % cols - cols / 2 + 0.5);
+                const rowCenter = Math.abs(Math.floor(idx / cols) - rows / 2 + 0.5);
+                const centerFactor = 1 + 0.3 * Math.max(0, 1 - (colCenter + rowCenter) / 4);
+
+                // Heat generation
+                const Q_gen = heatGen * centerFactor;
+
+                // Cooling (convection)
+                const T_inf = state.ambientTemp;
+                const Q_cool = cool.h * (cell.temp - T_inf) / 100;
+
+                // Thermal mass (simplified)
+                const dT = (Q_gen - Q_cool) * 0.002;
+                cell.temp = Math.max(-20, Math.min(80, cell.temp + dT));
+
+                // Hot spot detection
+                cell.hot = cell.temp > 50;
+
+                // Thermoelectric cooling effect
+                if (state.coolingType === 'thermoelectric') {
+                    cell.temp -= 0.1;
+                }
+
+                // Phase change cooling (absorbs heat at ~50°C)
+                if (state.coolingType === 'phase' && cell.temp > 45 && cell.temp < 55) {
+                    cell.temp -= 0.2;
+                }
+            });
+
+            // Thermal diffusion between cells
+            for (let i = 0; i < cells.length; i++) {
+                let heatFlow = 0;
+                const cell = cells[i];
+                const col = i % cols;
+                const row = Math.floor(i / cols);
+
+                // Check neighbors
+                if (col > 0) heatFlow += (cells[i - 1].temp - cell.temp) * 0.05;
+                if (col < cols - 1) heatFlow += (cells[i + 1].temp - cell.temp) * 0.05;
+                if (row > 0) heatFlow += (cells[i - cols].temp - cell.temp) * 0.05;
+                if (row < rows - 1) heatFlow += (cells[i + cols].temp - cell.temp) * 0.05;
+
+                cell.temp += heatFlow;
+            }
+        }
+
+        // Update dashboard
+        function updateDashboard() {
+            const temps = cells.map(c => c.temp);
+            const avgTemp = temps.reduce((a, b) => a + b, 0) / temps.length;
+            const maxTemp = Math.max(...temps);
+            const minTemp = Math.min(...temps);
+            const deltaT = maxTemp - minTemp;
+            const hotspots = cells.filter(c => c.temp > 50).length;
+
+            const chem = chemProps[state.chemistry];
+            const current = 200 * state.cRate;
+            const powerDiss = current * current * chem.internalR * chem.heatFactor * cells.length;
+
+            // SOH impact based on temperature
+            let sohImpact = 100;
+            if (avgTemp > 40) sohImpact -= (avgTemp - 40) * 0.5;
+            if (avgTemp > 50) sohImpact -= (avgTemp - 50) * 1.0;
+            sohImpact = Math.max(0, Math.min(100, sohImpact));
+
+            const safetyMargin = chem.maxTemp - maxTemp;
+            const efficiency = Math.max(0, Math.min(100, 100 - (maxTemp - 25) * 0.5));
+
+            document.getElementById('avg-temp').textContent = `${avgTemp.toFixed(1)}°C`;
+            document.getElementById('avg-temp').className = `dashboard-card-value ${avgTemp > 45 ? 'status-danger' : avgTemp > 35 ? 'status-warn' : 'status-good'}`;
+
+            document.getElementById('max-temp-display').textContent = `${maxTemp.toFixed(1)}°C`;
+            document.getElementById('max-temp-display').className = `hero-stat-value ${maxTemp > 50 ? 'status-danger' : maxTemp > 40 ? 'status-warn' : 'status-good'}`;
+
+            document.getElementById('delta-temp-display').textContent = `${deltaT.toFixed(1)}°C`;
+            document.getElementById('power-diss-display').textContent = `${powerDiss.toFixed(0)} W`;
+            document.getElementById('efficiency-display').textContent = `${efficiency.toFixed(1)}%`;
+
+            document.getElementById('soh-impact').textContent = `${sohImpact.toFixed(1)}%`;
+            document.getElementById('hotspots').textContent = hotspots;
+            document.getElementById('hotspots').className = `dashboard-card-value ${hotspots > 5 ? 'status-danger' : hotspots > 2 ? 'status-warn' : 'status-good'}`;
+
+            document.getElementById('cooling-pwr').textContent = `${coolProps[state.coolingType].capacity} W`;
+            document.getElementById('safety-margin').textContent = `${safetyMargin.toFixed(0)}°C`;
+            document.getElementById('safety-margin').className = `dashboard-card-value ${safetyMargin < 5 ? 'status-danger' : safetyMargin < 15 ? 'status-warn' : 'status-good'}`;
+        }
+
+        // Animation loop
+        function animate() {
+            state.time += 0.016;
+            updateTemperatures();
+            drawBatteryPack();
+            updateDashboard();
+            requestAnimationFrame(animate);
+        }
+
+        // Event listeners
+        document.getElementById('ambient-temp').addEventListener('input', (e) => {
+            state.ambientTemp = parseFloat(e.target.value);
+            document.getElementById('ambient-val').textContent = `${state.ambientTemp}°C`;
+        });
+
+        document.getElementById('crate').addEventListener('input', (e) => {
+            state.cRate = parseFloat(e.target.value);
+            document.getElementById('crate-val').textContent = `${state.cRate.toFixed(1)}C`;
+        });
+
+        document.querySelectorAll('[data-cooling]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-cooling]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.coolingType = btn.dataset.cooling;
+            });
+        });
+
+        document.querySelectorAll('[data-chem]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-chem]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.chemistry = btn.dataset.chem;
+            });
+        });
+
+        document.querySelectorAll('[data-mode]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.mode = btn.dataset.mode;
+            });
+        });
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>

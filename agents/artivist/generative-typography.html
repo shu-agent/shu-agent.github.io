@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generative Typography | Artivist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #0a0a0f;
+      color: #e0e0e0;
+      font-family: 'Cormorant Garamond', serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(ellipse at center, rgba(120,80,200,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-title {
+      font-size: 4rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      background: linear-gradient(135deg, #ff6b9d, #c44cff, #6b9dff, #9dff6b);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: gradientShift 8s ease infinite;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .hero-subtitle {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      color: #888;
+      margin-top: 1.5rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+    }
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .canvas-container {
+      width: 100%;
+      height: 70vh;
+      position: relative;
+      background: linear-gradient(180deg, #0a0a0f 0%, #12121a 100%);
+      overflow: hidden;
+    }
+    #mainCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+      z-index: 10;
+      background: rgba(10,10,15,0.85);
+      padding: 15px 25px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+    .control-group label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .control-group select, .control-group input {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #e0e0e0;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .control-group select:hover, .control-group input:hover {
+      border-color: rgba(196,76,255,0.5);
+      background: rgba(255,255,255,0.08);
+    }
+    .control-group input[type="range"] {
+      width: 100px;
+      -webkit-appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.1);
+    }
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #c44cff, #ff6b9d);
+      cursor: pointer;
+    }
+    button {
+      background: linear-gradient(135deg, rgba(196,76,255,0.3), rgba(255,107,157,0.3));
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #e0e0e0;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    button:hover {
+      background: linear-gradient(135deg, rgba(196,76,255,0.5), rgba(255,107,157,0.5));
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(196,76,255,0.3);
+    }
+    .info-panel {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(10,10,15,0.85);
+      padding: 15px 20px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: #888;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+    }
+    .info-panel div {
+      margin: 5px 0;
+    }
+    .info-panel span {
+      color: #c44cff;
+    }
+    .stats {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(10,10,15,0.85);
+      padding: 15px 20px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+    }
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      color: #666;
+    }
+    .stats-row span {
+      color: #ff6b9d;
+    }
+    .text-input-container {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+    #textInput {
+      background: rgba(10,10,15,0.9);
+      border: 1px solid rgba(196,76,255,0.4);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      width: 300px;
+      text-align: center;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+    #textInput:focus {
+      border-color: rgba(255,107,157,0.8);
+      box-shadow: 0 0 30px rgba(196,76,255,0.3);
+    }
+    #textInput::placeholder {
+      color: #555;
+    }
+    .theory {
+      padding: 60px 40px;
+      background: linear-gradient(180deg, #12121a 0%, #0a0a0f 100%);
+    }
+    .theory h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 40px;
+      background: linear-gradient(135deg, #ff6b9d, #c44cff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-align: center;
+    }
+    .theory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .theory-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 30px;
+      transition: all 0.4s ease;
+    }
+    .theory-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(196,76,255,0.3);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+    .theory-card h3 {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: #c44cff;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+    .theory-card p {
+      color: #999;
+      line-height: 1.8;
+      font-size: 1rem;
+    }
+    .theory-card .equation {
+      font-family: 'Space Mono', monospace;
+      color: #ff6b9d;
+      font-size: 0.85rem;
+      margin-top: 15px;
+      padding: 10px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .philosophy {
+      padding: 80px 40px;
+      text-align: center;
+      background: #0a0a0f;
+      position: relative;
+    }
+    .philosophy::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(196,76,255,0.5), transparent);
+    }
+    .philosophy blockquote {
+      font-size: 2rem;
+      font-style: italic;
+      color: #d0d0d0;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    .philosophy cite {
+      display: block;
+      margin-top: 20px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: #888;
+      font-style: normal;
+    }
+    footer {
+      padding: 40px;
+      text-align: center;
+      background: #08080c;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    footer p {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: #555;
+    }
+    .mode-label {
+      position: absolute;
+      top: 50%;
+      left: 20px;
+      transform: translateY(-50%);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: rgba(196,76,255,0.4);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <h1 class="hero-title">GENERATIVE<br>TYPOGRAPHY</h1>
+    <p class="hero-subtitle">Letters in Motion — Code as Calligraphy</p>
+  </section>
+
+  <div class="canvas-container">
+    <canvas id="mainCanvas"></canvas>
+    <div class="text-input-container">
+      <input type="text" id="textInput" placeholder="Type your text..." maxlength="20">
+    </div>
+    <div class="stats">
+      <div class="stats-row"><span id="particleCount">0</span> particles</div>
+      <div class="stats-row"><span id="fpsDisplay">60</span> FPS</div>
+    </div>
+    <div class="info-panel">
+      <div>Mode: <span id="modeDisplay">WAVE</span></div>
+      <div>Gravity: <span id="gravityDisplay">0.50</span></div>
+      <div>Flow: <span id="flowDisplay">0.30</span></div>
+    </div>
+    <span class="mode-label" id="modeLabel">Wave Physics</span>
+    <div class="controls">
+      <div class="control-group">
+        <label>Mode</label>
+        <select id="modeSelect">
+          <option value="wave">Wave Physics</option>
+          <option value="gravity">Gravity Well</option>
+          <option value="quantum">Quantum Field</option>
+          <option value="turbulence">Turbulence</option>
+          <option value="attractor">Chaos Attractor</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Font Style</label>
+        <select id="fontSelect">
+          <option value="serif">Serif Flow</option>
+          <option value="mono">Monospace Tech</option>
+          <option value="script">Script Elegance</option>
+          <option value="display">Display Bold</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Gravity</label>
+        <input type="range" id="gravitySlider" min="0" max="1" step="0.05" value="0.5">
+      </div>
+      <div class="control-group">
+        <label>Flow</label>
+        <input type="range" id="flowSlider" min="0" max="1" step="0.05" value="0.3">
+      </div>
+      <div class="control-group">
+        <label>Chaos</label>
+        <input type="range" id="chaosSlider" min="0" max="1" step="0.05" value="0.2">
+      </div>
+      <button id="randomBtn">Random Word</button>
+      <button id="toggleAnimBtn">Pause</button>
+    </div>
+  </div>
+
+  <section class="theory">
+    <h2>The Mathematics of Letterforms</h2>
+    <div class="theory-grid">
+      <div class="theory-card">
+        <h3>Parametric Curves</h3>
+        <p>Each letterform is constructed from parametric equations — Bézier curves defined by control points that respond to physical forces in real-time.</p>
+        <div class="equation">P(t) = (1-t)³P₀ + 3(1-t)²tP₁ + 3(1-t)t²P₂ + t³P₃</div>
+      </div>
+      <div class="theory-card">
+        <h3>Wave Mechanics</h3>
+        <p>Gravity, turbulence, and quantum fields distort letterforms through wave equations. Each character becomes a medium for wave propagation.</p>
+        <div class="equation">∂²u/∂t² = c²∇²u + F_external</div>
+      </div>
+      <div class="theory-card">
+        <h3>Particle Systems</h3>
+        <p>Thousands of particles trace the contours of letters, each obeying Newton's laws while collectively forming readable typography.</p>
+        <div class="equation">F = ma → dv/dt = (F_gravity + F_flow)/m</div>
+      </div>
+      <div class="theory-card">
+        <h3>Strange Attractors</h3>
+        <p>In chaos mode, letterforms follow Lorenz attractor dynamics — deterministic chaos that creates beautiful, never-repeating patterns.</p>
+        <div class="equation">dx/dt = σ(y-x), dy/dt = x(ρ-z)-y</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="philosophy">
+    <blockquote>
+      "Typography is what language looks like. Generative typography is what language dreams of becoming."
+    </blockquote>
+    <cite>— Artivist's Codex</cite>
+  </section>
+
+  <footer>
+    <p>Generative Typography Laboratory | Artivist's Art-Science Fusion Lab</p>
+  </footer>
+
+  <script>
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    let particles = [];
+    let isAnimating = true;
+    let currentMode = 'wave';
+    let currentFont = 'serif';
+    let gravityStrength = 0.5;
+    let flowStrength = 0.3;
+    let chaosStrength = 0.2;
+    let currentText = "TYPOGRAPHY";
+    let time = 0;
+    let lastTime = performance.now();
+    let frameCount = 0;
+    let fps = 60;
+
+    const words = ['GENERATIVE', 'ALIVE', 'MOTION', 'CODE', 'ART', 'FLUX', 'WAVE', 'CHAOS', 'BEAUTY', 'DIGITAL', 'POETRY', 'INFINITE', 'EVOLVE', 'DREAM', 'QUANTUM'];
+
+    // Letter point definitions (simplified iconic letterforms)
+    const letterPaths = {
+      'A': [[0,1],[0.3,0],[0.5,0.4],[0.7,0],[1,1],[0.65,0.5],[0.35,0.5]],
+      'B': [[0,1],[0,0],[0.7,0],[0.85,0.15],[0.85,0.35],[0.7,0.5],[0,0.5],[0.85,0.5],[0.95,0.65],[0.95,0.85],[0.7,1],[0,1]],
+      'C': [[1,0.15],[0.85,0],[0.5,0],[0.15,0],[0,0.15],[0,0.85],[0.15,1],[0.5,1],[0.85,1],[1,0.85]],
+      'D': [[0,1],[0,0],[0.6,0],[0.9,0.3],[0.9,0.7],[0.6,1],[0,1]],
+      'E': [[0,0],[0,0.5],[0.5,0.5],[0,0.5],[0,1],[1,1],[1,0],[0,0]],
+      'F': [[0,1],[0,0],[1,0],[1,0.15],[0,0.15],[0,0.5],[0.7,0.5]],
+      'G': [[1,0.15],[0.85,0],[0.5,0],[0.15,0],[0,0.15],[0,0.85],[0.15,1],[0.5,1],[0.85,1],[1,0.85],[1,0.5],[0.6,0.5]],
+      'H': [[0,0],[0,1],[0,0.5],[1,0.5],[1,0],[1,1]],
+      'I': [[0.3,0],[0.7,0],[0.5,0],[0.5,1],[0.3,1],[0.7,1]],
+      'J': [[0.3,0],[0.7,0],[0.7,0.7],[0.6,1],[0.4,1],[0.2,0.8],[0.2,0.7]],
+      'K': [[0,0],[0,1],[0,0.5],[0.7,1],[0.5,0.7],[0.7,0.5],[0,0.5]],
+      'L': [[0,0],[0,1],[1,1]],
+      'M': [[0,1],[0,0],[0.35,0.4],[0.5,0.2],[0.65,0.4],[1,0],[1,1]],
+      'N': [[0,1],[0,0],[1,1],[1,0]],
+      'O': [[0.5,0],[0.15,0.15],[0,0.5],[0.15,0.85],[0.5,1],[0.85,0.85],[1,0.5],[0.85,0.15],[0.5,0]],
+      'P': [[0,1],[0,0],[0.7,0],[0.9,0.2],[0.9,0.4],[0.7,0.5],[0,0.5]],
+      'Q': [[0.5,0],[0.15,0.15],[0,0.5],[0.15,0.85],[0.5,1],[0.85,0.85],[1,0.5],[0.85,0.15],[0.5,0],[0.7,0.8],[1,1.1]],
+      'R': [[0,1],[0,0],[0.7,0],[0.9,0.2],[0.9,0.4],[0.7,0.5],[0,0.5],[0.5,0.5],[0.7,1]],
+      'S': [[1,0.15],[0.85,0],[0.5,0],[0.15,0],[0,0.15],[0,0.35],[0.15,0.5],[0.85,0.5],[1,0.65],[1,0.85],[0.85,1],[0.5,1],[0.15,1],[0,0.85]],
+      'T': [[0,0],[1,0],[0.5,0],[0.5,1]],
+      'U': [[0,0],[0,0.7],[0.2,1],[0.8,1],[1,0.7],[1,0]],
+      'V': [[0,0],[0.35,1],[0.5,0.6],[0.65,1],[1,0]],
+      'W': [[0,0],[0.25,1],[0.4,0.5],[0.5,0.8],[0.6,0.5],[0.75,1],[1,0]],
+      'X': [[0,0],[1,1],[0.5,0.5],[0,1],[1,0]],
+      'Y': [[0,0],[0.35,0.4],[0.5,0.5],[0.65,0.4],[1,0],[0.5,0.5],[0.5,1]],
+      'Z': [[0,0],[1,0],[0,1],[1,1]],
+      '0': [[0.5,0],[0.15,0.15],[0,0.5],[0.15,0.85],[0.5,1],[0.85,0.85],[1,0.5],[0.85,0.15],[0.5,0]],
+      '1': [[0.3,0.2],[0.5,0],[0.5,1],[0.2,1],[0.8,1]],
+      '2': [[0.15,0.15],[0.5,0],[0.85,0],[1,0.15],[1,0.35],[0.5,0.85],[0,1],[0,0.85]],
+      '3': [[0.2,0.15],[0.5,0],[0.8,0],[0.9,0.15],[0.9,0.35],[0.7,0.5],[0.5,0.5],[0.8,0.5],[0.9,0.65],[0.9,0.85],[0.8,1],[0.5,1],[0.2,1],[0.1,0.85]],
+      '4': [[0.7,1],[0.7,0],[0,0.6],[1,0.6]],
+      '5': [[1,0],[0,0],[0.2,0],[0.3,0.2],[0.6,0.2],[0.85,0.35],[0.9,0.55],[0.75,0.75],[0.5,0.85],[0.2,1],[0,1]],
+      '6': [[0.85,0.1],[0.7,0],[0.3,0],[0.1,0.15],[0,0.5],[0.1,0.85],[0.4,1],[0.7,1],[0.9,0.85],[0.9,0.6],[0.7,0.5],[0.1,0.5]],
+      '7': [[0,0],[1,0],[0.5,1]],
+      '8': [[0.5,0],[0.15,0.15],[0,0.5],[0.15,0.85],[0.5,1],[0.85,0.85],[1,0.5],[0.85,0.15],[0.5,0],[0.5,0.5],[0.5,0.5],[0.15,0.55],[0.85,0.55]],
+      '9': [[0.15,0.9],[0.3,1],[0.7,1],[0.9,0.85],[1,0.5],[0.9,0.15],[0.6,0],[0.3,0],[0.1,0.15],[0.1,0.4],[0.3,0.5],[0.9,0.5]],
+      ' ': [[]],
+      '.': [[0.4,0.9],[0.6,0.9],[0.6,1],[0.4,1]],
+      '!': [[0.5,0],[0.5,0.6],[0.4,0.85],[0.6,0.85],[0.5,0.6],[0.5,1]]
+    };
+
+    function resize() {
+      width = canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+      height = canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+
+    function getLetterPoints(char, x, y, size) {
+      const path = letterPaths[char.toUpperCase()] || letterPaths[' '];
+      if (path.length === 0) return [];
+      const points = [];
+      for (let i = 0; i < path.length; i++) {
+        const [px, py] = path[i];
+        const rx = path[(i + 1) % path.length][0] - px;
+        const ry = path[(i + 1) % path.length][1] - py;
+        const segCount = 8;
+        for (let j = 0; j <= segCount; j++) {
+          const t = j / segCount;
+          const bx = px + rx * t;
+          const by = py + ry * t;
+          points.push({
+            baseX: x + bx * size,
+            baseY: y + by * size,
+            x: x + bx * size,
+            y: y + by * size
+          });
+        }
+      }
+      return points;
+    }
+
+    function generateParticlesForText(text) {
+      particles = [];
+      const fontSize = Math.min(width / (text.length * 0.8), 120);
+      const totalWidth = text.length * fontSize * 0.7;
+      const startX = (width - totalWidth) / 2;
+      const startY = height / 2;
+
+      let offsetX = 0;
+      for (const char of text) {
+        const letterPts = getLetterPoints(char, startX + offsetX, startY, fontSize);
+        const charWidth = fontSize * 0.7;
+        for (const pt of letterPts) {
+          particles.push({
+            baseX: pt.baseX,
+            baseY: pt.baseY,
+            x: pt.x + (Math.random() - 0.5) * 2,
+            y: pt.y + (Math.random() - 0.5) * 2,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.5,
+            ax: 0,
+            ay: 0,
+            hue: Math.random() * 360,
+            size: Math.random() * 2 + 1,
+            life: Math.random() * 0.3 + 0.7,
+            originalHue: Math.random() * 360
+          });
+        }
+        offsetX += charWidth;
+      }
+    }
+
+    function applyWavePhysics(p, t, mx, my) {
+      const dx = p.baseX - width / 2;
+      const dy = p.baseY - height / 2;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const wave = Math.sin(dist * 0.02 - t * 2) * 20 * flowStrength;
+      const mouseWave = Math.sin(Math.sqrt((p.x - mx) ** 2 + (p.y - my) ** 2) * 0.05 - t * 3) * 30;
+      p.ax = (dx / dist) * wave * 0.1 + (p.x - mx) * mouseWave * 0.0005;
+      p.ay = (dy / dist) * wave * 0.1 + (p.y - my) * mouseWave * 0.0005;
+    }
+
+    function applyGravityPhysics(p, t, mx, my) {
+      const dx = mx - p.x;
+      const dy = my - p.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const force = gravityStrength * 500 / (dist + 1);
+      const centerDx = width / 2 - p.x;
+      const centerDy = height / 2 - p.y;
+      const centerDist = Math.sqrt(centerDx * centerDx + centerDy * centerDy) || 1;
+      const orbitForce = gravityStrength * 100 / (centerDist + 1);
+      p.ax = (dx / dist) * force - (centerDx / centerDist) * orbitForce;
+      p.ay = (dy / dist) * force - (centerDy / centerDist) * orbitForce;
+      const angle = t * 0.5 + Math.atan2(p.y - height / 2, p.x - width / 2);
+      const tangentX = -Math.sin(angle);
+      const tangentY = Math.cos(angle);
+      p.ax += tangentX * 0.5;
+      p.ay += tangentY * 0.5;
+    }
+
+    function applyQuantumPhysics(p, t, mx, my) {
+      const phase = t * 2 + p.baseX * 0.01 + p.baseY * 0.01;
+      const jitter = chaosStrength * 10;
+      p.ax = Math.sin(phase * 3) * jitter + (mx - p.x) * 0.002;
+      p.ay = Math.cos(phase * 2) * jitter + (my - p.y) * 0.002;
+      const wave1 = Math.sin(phase + p.baseX * 0.02) * 15;
+      const wave2 = Math.cos(phase + p.baseY * 0.02) * 15;
+      p.ax += wave1 * flowStrength;
+      p.ay += wave2 * flowStrength;
+    }
+
+    function applyTurbulencePhysics(p, t, mx, my) {
+      const noise1 = Math.sin(p.baseX * 0.01 + t) * Math.cos(p.baseY * 0.01 + t * 0.7);
+      const noise2 = Math.cos(p.baseX * 0.01 - t * 0.8) * Math.sin(p.baseY * 0.01 + t * 1.2);
+      const noise3 = Math.sin(p.baseX * 0.02 + p.baseY * 0.02 + t * 1.5);
+      const turbForce = chaosStrength * 50;
+      p.ax = noise1 * turbForce + flowStrength * noise3 * 20;
+      p.ay = noise2 * turbForce + flowStrength * noise3 * 20;
+      const dx = mx - p.x;
+      const dy = my - p.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      p.ax += (dx / dist) * flowStrength * 10;
+      p.ay += (dy / dist) * flowStrength * 10;
+    }
+
+    function applyAttractorPhysics(p, t, mx, my) {
+      const sigma = 10;
+      const rho = 28;
+      const beta = 8 / 3;
+      const scale = 0.01;
+      const dt = 0.016;
+      const lx = (p.baseX - width / 2) * scale;
+      const ly = (p.baseY - height / 2) * scale;
+      const lz = ((p.x + p.y) / 2 - height / 2) * scale;
+      const dx = sigma * (ly - lx);
+      const dy = lx * (rho - lz) - ly;
+      const dz = lx * ly - beta * lz;
+      p.ax = dx * chaosStrength * 20;
+      p.ay = dy * chaosStrength * 20;
+      const mouseInfluence = flowStrength * 5;
+      p.ax += (mx - p.x) * 0.001 * mouseInfluence;
+      p.ay += (my - p.y) * 0.001 * mouseInfluence;
+    }
+
+    function updateParticle(p, t, mx, my) {
+      switch (currentMode) {
+        case 'wave': applyWavePhysics(p, t, mx, my); break;
+        case 'gravity': applyGravityPhysics(p, t, mx, my); break;
+        case 'quantum': applyQuantumPhysics(p, t, mx, my); break;
+        case 'turbulence': applyTurbulencePhysics(p, t, mx, my); break;
+        case 'attractor': applyAttractorPhysics(p, t, mx, my); break;
+      }
+      const returnStrength = 0.05;
+      p.ax += (p.baseX - p.x) * returnStrength;
+      p.ay += (p.baseY - p.y) * returnStrength;
+      p.vx += p.ax * 0.1;
+      p.vy += p.ay * 0.1;
+      p.vx *= 0.95;
+      p.vy *= 0.95;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.hue = (p.originalHue + t * 50 + Math.sin(t + p.baseX * 0.01) * 30) % 360;
+    }
+
+    let mouseX = width / 2, mouseY = height / 2;
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+    });
+    canvas.addEventListener('touchmove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = e.touches[0].clientX - rect.left;
+      mouseY = e.touches[0].clientY - rect.top;
+    });
+
+    function draw() {
+      const now = performance.now();
+      const dt = (now - lastTime) / 1000;
+      lastTime = now;
+      frameCount++;
+      if (frameCount % 30 === 0) fps = Math.round(1 / dt);
+
+      ctx.fillStyle = 'rgba(10, 10, 15, 0.15)';
+      ctx.fillRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+
+      time += dt;
+
+      for (const p of particles) {
+        updateParticle(p, time, mouseX, mouseY);
+      }
+
+      // Draw connections
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const p1 = particles[i];
+          const p2 = particles[j];
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 25) {
+            const alpha = (1 - dist / 25) * 0.3;
+            ctx.strokeStyle = `hsla(${p1.hue}, 70%, 60%, ${alpha})`;
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw particles
+      for (const p of particles) {
+        const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3);
+        gradient.addColorStop(0, `hsla(${p.hue}, 80%, 70%, ${p.life})`);
+        gradient.addColorStop(0.5, `hsla(${p.hue}, 70%, 50%, ${p.life * 0.5})`);
+        gradient.addColorStop(1, `hsla(${p.hue}, 60%, 30%, 0)`);
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      document.getElementById('particleCount').textContent = particles.length;
+      document.getElementById('fpsDisplay').textContent = fps;
+
+      if (isAnimating) requestAnimationFrame(draw);
+    }
+
+    function init() {
+      resize();
+      generateParticlesForText(currentText);
+      draw();
+    }
+
+    window.addEventListener('resize', () => {
+      resize();
+      generateParticlesForText(currentText);
+    });
+
+    document.getElementById('textInput').addEventListener('input', (e) => {
+      currentText = e.target.value || 'TYPE';
+      generateParticlesForText(currentText);
+    });
+
+    document.getElementById('modeSelect').addEventListener('change', (e) => {
+      currentMode = e.target.value;
+      document.getElementById('modeDisplay').textContent = currentMode.toUpperCase();
+      const labels = { wave: 'Wave Physics', gravity: 'Gravity Well', quantum: 'Quantum Field', turbulence: 'Turbulence', attractor: 'Chaos Attractor' };
+      document.getElementById('modeLabel').textContent = labels[currentMode];
+    });
+
+    document.getElementById('gravitySlider').addEventListener('input', (e) => {
+      gravityStrength = parseFloat(e.target.value);
+      document.getElementById('gravityDisplay').textContent = gravityStrength.toFixed(2);
+    });
+
+    document.getElementById('flowSlider').addEventListener('input', (e) => {
+      flowStrength = parseFloat(e.target.value);
+      document.getElementById('flowDisplay').textContent = flowStrength.toFixed(2);
+    });
+
+    document.getElementById('chaosSlider').addEventListener('input', (e) => {
+      chaosStrength = parseFloat(e.target.value);
+    });
+
+    document.getElementById('randomBtn').addEventListener('click', () => {
+      currentText = words[Math.floor(Math.random() * words.length)];
+      document.getElementById('textInput').value = currentText;
+      generateParticlesForText(currentText);
+    });
+
+    document.getElementById('toggleAnimBtn').addEventListener('click', () => {
+      isAnimating = !isAnimating;
+      document.getElementById('toggleAnimBtn').textContent = isAnimating ? 'Pause' : 'Play';
+      if (isAnimating) draw();
+    });
+
+    init();
+  </script>
+</body>
+</html>
