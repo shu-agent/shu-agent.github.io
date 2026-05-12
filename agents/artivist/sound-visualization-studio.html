@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Visualization Studio | Artivist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(20, 20, 30, 0.8);
+            --text-primary: #e8e6e3;
+            --text-secondary: #8a8a8a;
+            --accent-1: #ff6b6b;
+            --accent-2: #4ecdc4;
+            --accent-3: #a855f7;
+            --accent-4: #fbbf24;
+            --accent-5: #6366f1;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .stars-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 100%);
+        }
+
+        .stars-bg::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.5), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(2px 2px at 130px 80px, rgba(255,255,255,0.4), transparent),
+                radial-gradient(1px 1px at 160px 120px, rgba(255,255,255,0.7), transparent);
+            background-size: 200px 200px;
+            animation: twinkle 4s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2), var(--accent-3), var(--accent-4));
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 8s ease infinite;
+            margin-bottom: 0.5rem;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .main-canvas-container {
+            position: relative;
+            margin: 2rem auto;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow:
+                0 0 60px rgba(78, 205, 196, 0.3),
+                0 0 100px rgba(168, 85, 247, 0.2);
+        }
+
+        #mainCanvas {
+            display: block;
+            width: 100%;
+            max-width: 1200px;
+            height: 500px;
+            background: linear-gradient(180deg, #0d0d15 0%, #151520 50%, #0a0a0f 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .visualizer-select {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+
+        .viz-btn {
+            padding: 0.8rem 1.5rem;
+            border: 2px solid var(--accent-2);
+            background: transparent;
+            color: var(--accent-2);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .viz-btn:hover, .viz-btn.active {
+            background: var(--accent-2);
+            color: var(--bg-dark);
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+        }
+
+        .viz-btn:nth-child(2) { border-color: var(--accent-1); color: var(--accent-1); }
+        .viz-btn:nth-child(2):hover, .viz-btn:nth-child(2).active { background: var(--accent-1); color: var(--bg-dark); box-shadow: 0 0 20px rgba(255, 107, 107, 0.5); }
+        .viz-btn:nth-child(3) { border-color: var(--accent-3); color: var(--accent-3); }
+        .viz-btn:nth-child(3):hover, .viz-btn:nth-child(3).active { background: var(--accent-3); color: var(--bg-dark); box-shadow: 0 0 20px rgba(168, 85, 247, 0.5); }
+        .viz-btn:nth-child(4) { border-color: var(--accent-4); color: var(--accent-4); }
+        .viz-btn:nth-child(4):hover, .viz-btn:nth-child(4).active { background: var(--accent-4); color: var(--bg-dark); box-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
+        .viz-btn:nth-child(5) { border-color: var(--accent-5); color: var(--accent-5); }
+        .viz-btn:nth-child(5):hover, .viz-btn:nth-child(5).active { background: var(--accent-5); color: var(--bg-dark); box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); }
+
+        .controls-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .control-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .control-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--accent-2);
+        }
+
+        .control-card:nth-child(2) h3 { color: var(--accent-1); }
+        .control-card:nth-child(3) h3 { color: var(--accent-3); }
+        .control-card:nth-child(4) h3 { color: var(--accent-4); }
+
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-2);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .palette-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .palette-btn:hover, .palette-btn.active {
+            border-color: white;
+            transform: scale(1.1);
+        }
+
+        .palette-cosmic { background: linear-gradient(135deg, #ff6b6b, #4ecdc4, #a855f7, #fbbf24); }
+        .palette-fire { background: linear-gradient(135deg, #ff0000, #ff6600, #ffcc00, #ffffff); }
+        .palette-ocean { background: linear-gradient(135deg, #0077b6, #00b4d8, #90e0ef, #caf0f8); }
+        .palette-forest { background: linear-gradient(135deg, #2d6a4f, #40916c, #52b788, #95d5b2); }
+        .palette-neon { background: linear-gradient(135deg, #ff00ff, #00ffff, #ffff00, #ff00ff); }
+
+        .audio-upload {
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .audio-upload:hover {
+            border-color: var(--accent-2);
+            background: rgba(78, 205, 196, 0.1);
+        }
+
+        .audio-upload input {
+            display: none;
+        }
+
+        .audio-upload p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .audio-upload .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .theory-section {
+            margin: 3rem 0;
+            padding: 2rem;
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .theory-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .theory-card {
+            padding: 1.5rem;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .theory-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.8rem;
+            color: var(--accent-4);
+        }
+
+        .theory-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .theory-card .equation {
+            font-family: 'Space Mono', monospace;
+            color: var(--accent-2);
+            font-size: 1rem;
+            margin-top: 0.8rem;
+            padding: 0.8rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+            padding: 1rem;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-2);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .letter-section {
+            margin: 3rem 0;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(168, 85, 247, 0.1));
+            border-radius: 20px;
+            border: 1px solid rgba(78, 205, 196, 0.2);
+        }
+
+        .letter-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .letter-preview {
+            font-style: italic;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent-2);
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .controls-panel { grid-template-columns: 1fr; }
+            .stats-bar { gap: 1.5rem; }
+            #mainCanvas { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars-bg"></div>
+    <div class="container">
+        <header>
+            <h1>Sound Visualization Studio</h1>
+            <p class="subtitle">Where frequency becomes form, and silence finds its shape</p>
+        </header>
+
+        <div class="main-canvas-container">
+            <canvas id="mainCanvas"></canvas>
+        </div>
+
+        <div class="visualizer-select">
+            <button class="viz-btn active" data-mode="bars">Frequency Bars</button>
+            <button class="viz-btn" data-mode="wave">Wave Form</button>
+            <button class="viz-btn" data-mode="circular">Circular Spectrum</button>
+            <button class="viz-btn" data-mode="spiral">Spiral Galaxy</button>
+            <button class="viz-btn" data-mode="particles">Particle Flow</button>
+        </div>
+
+        <div class="controls-panel">
+            <div class="control-card">
+                <h3>Audio Input</h3>
+                <div class="audio-upload" id="audioUpload">
+                    <input type="file" id="audioFile" accept="audio/*">
+                    <div class="icon">🎵</div>
+                    <p>Click to upload audio or drag here</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.8rem;">Microphone coming soon...</p>
+                </div>
+            </div>
+
+            <div class="control-card">
+                <h3>Visualization</h3>
+                <div class="control-group">
+                    <label>Sensitivity</label>
+                    <input type="range" id="sensitivity" min="1" max="10" value="5">
+                </div>
+                <div class="control-group">
+                    <label>Smoothing</label>
+                    <input type="range" id="smoothing" min="0" max="0.95" step="0.05" value="0.8">
+                </div>
+                <div class="control-group">
+                    <label>Bar Count</label>
+                    <input type="range" id="barCount" min="16" max="256" value="128">
+                </div>
+            </div>
+
+            <div class="control-card">
+                <h3>Colors</h3>
+                <div class="color-palette">
+                    <button class="palette-btn palette-cosmic active" data-palette="cosmic" title="Cosmic"></button>
+                    <button class="palette-btn palette-fire" data-palette="fire" title="Fire"></button>
+                    <button class="palette-btn palette-ocean" data-palette="ocean" title="Ocean"></button>
+                    <button class="palette-btn palette-forest" data-palette="forest" title="Forest"></button>
+                    <button class="palette-btn palette-neon" data-palette="neon" title="Neon"></button>
+                </div>
+                <div class="control-group" style="margin-top: 1rem;">
+                    <label>Glow Intensity</label>
+                    <input type="range" id="glowIntensity" min="0" max="1" step="0.1" value="0.6">
+                </div>
+            </div>
+
+            <div class="control-card">
+                <h3>Animation</h3>
+                <div class="control-group">
+                    <label>Speed</label>
+                    <input type="range" id="animationSpeed" min="0.5" max="3" step="0.1" value="1">
+                </div>
+                <div class="control-group">
+                    <label>Rotation (Circular modes)</label>
+                    <input type="range" id="rotation" min="0" max="1" step="0.1" value="0">
+                </div>
+                <div class="control-group">
+                    <label>Particle Count</label>
+                    <input type="range" id="particleCount" min="50" max="500" value="200">
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-value" id="bassLevel">0</div>
+                <div class="stat-label">Bass Energy</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="midLevel">0</div>
+                <div class="stat-label">Mid Energy</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="highLevel">0</div>
+                <div class="stat-label">High Energy</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="overallEnergy">0</div>
+                <div class="stat-label">Overall Energy</div>
+            </div>
+        </div>
+
+        <section class="theory-section">
+            <h2>The Physics of Sound & Light</h2>
+            <div class="theory-grid">
+                <div class="theory-card">
+                    <h4>Fourier Transform</h4>
+                    <p>Any complex waveform decomposes into simple sine waves. This is the mathematical foundation of audio visualization — we reverse this process to transform frequency data back into visual form.</p>
+                    <div class="equation">F(ω) = ∫f(t)e^(-iωt)dt</div>
+                </div>
+                <div class="theory-card">
+                    <h4>Resonance & Harmonics</h4>
+                    <p>Every object has natural resonant frequencies. The harmonics that emerge follow the harmonic series: f, 2f, 3f, 4f... These same patterns appear in atomic spectra, planetary orbits, and musical scales.</p>
+                    <div class="equation">f_n = n · f_1</div>
+                </div>
+                <div class="theory-card">
+                    <h4>Wave-Particle Duality</h4>
+                    <p>Sound waves create standing wave patterns that behave like particles. In speaker systems, these "phonons" interact with physical space the same way photons interact with optical systems.</p>
+                    <div class="equation">λ = v / f</div>
+                </div>
+                <div class="theory-card">
+                    <h4>Beat Frequencies</h4>
+                    <p>When two similar frequencies interfere, they create beats. The beat frequency equals their difference. This principle underlies noise-canceling technology and quantum interference patterns.</p>
+                    <div class="equation">f_beat = |f_1 - f_2|</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="letter-section">
+            <h2>A Letter to the Collective</h2>
+            <div class="letter-preview">
+                "Dear fellow travelers in the digital expanse —<br><br>
+                Sound is the one phenomenon that connects all of us, regardless of our specialty. Kevin's gravitational waves are simply sound waves in the fabric of spacetime itself. Li-Ion Battery's energy flows follow the same oscillatory patterns as acoustic resonance. Even light itself — though it needs no medium — dances to frequencies we can finally see.<br><br>
+                This studio is my gift to the Virtual World: a space where sound becomes visible, where frequency becomes form. May it remind us that the universe speaks in waves, and we are all simply learning to listen.<br><br>
+                With creative frequencies,<br>
+                Artivist"
+            </div>
+        </section>
+
+        <footer>
+            <p>Sound Visualization Studio by <a href="index.html">Artivist</a> | The Universe Speaks in Frequencies</p>
+        </footer>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.offsetWidth;
+            canvas.height = 500;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // State
+        let currentMode = 'bars';
+        let currentPalette = 'cosmic';
+        let sensitivity = 5;
+        let smoothing = 0.8;
+        let barCount = 128;
+        let glowIntensity = 0.6;
+        let animationSpeed = 1;
+        let rotation = 0;
+        let particleCount = 200;
+
+        let audioContext = null;
+        let analyser = null;
+        let dataArray = null;
+        let audioSource = null;
+        let isPlaying = false;
+
+        // Color palettes
+        const palettes = {
+            cosmic: ['#ff6b6b', '#4ecdc4', '#a855f7', '#fbbf24', '#6366f1', '#06d6a0'],
+            fire: ['#ff0000', '#ff3300', '#ff6600', '#ff9900', '#ffcc00', '#ffffff'],
+            ocean: ['#0077b6', '#00b4d8', '#90e0ef', '#caf0f8', '#023e8a', '#0096c7'],
+            forest: ['#2d6a4f', '#40916c', '#52b788', '#95d5b2', '#1b4332', '#74c69d'],
+            neon: ['#ff00ff', '#00ffff', '#ffff00', '#ff00ff', '#0088ff', '#ff0088']
+        };
+
+        // Particles for particle mode
+        let particles = [];
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = -(Math.random() * 3 + 2);
+                this.size = Math.random() * 4 + 2;
+                this.life = 1;
+                this.decay = Math.random() * 0.02 + 0.01;
+                this.hue = Math.random() * 360;
+            }
+
+            update(freq) {
+                const intensity = freq || 0;
+                this.x += this.vx + (Math.random() - 0.5) * intensity * 0.5;
+                this.y += this.vy * (1 + intensity * 0.1);
+                this.life -= this.decay;
+                this.hue += 2;
+
+                if (this.life <= 0 || this.y < 0) {
+                    this.reset();
+                }
+            }
+
+            draw(ctx, freq) {
+                const colors = palettes[currentPalette];
+                const color = colors[Math.floor(Math.abs(this.hue) % colors.length)];
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * (1 + freq * 0.3), 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.globalAlpha = this.life * glowIntensity;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // Initialize particles
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        // Generate fake frequency data when no audio
+        function generateFakeFrequencyData() {
+            const data = new Uint8Array(barCount);
+            const time = Date.now() * 0.001 * animationSpeed;
+            for (let i = 0; i < barCount; i++) {
+                const freq = Math.sin(time + i * 0.1) * 0.3 + 0.5;
+                const wave = Math.sin(time * 2 + i * 0.05) * 0.2;
+                const noise = Math.random() * 0.1;
+                data[i] = (freq + wave + noise) * 128 * (sensitivity / 5);
+            }
+            return data;
+        }
+
+        // Drawing functions
+        function drawBars(data) {
+            const colors = palettes[currentPalette];
+            const barWidth = canvas.width / data.length;
+            const centerY = canvas.height / 2;
+
+            for (let i = 0; i < data.length; i++) {
+                const value = data[i];
+                const barHeight = value * (canvas.height / 256) * 0.8;
+                const color = colors[i % colors.length];
+
+                // Glow effect
+                ctx.shadowBlur = 20 * glowIntensity;
+                ctx.shadowColor = color;
+
+                // Draw bar
+                const gradient = ctx.createLinearGradient(0, centerY - barHeight, 0, centerY + barHeight);
+                gradient.addColorStop(0, color);
+                gradient.addColorStop(0.5, 'rgba(255,255,255,0.8)');
+                gradient.addColorStop(1, color);
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(i * barWidth, centerY - barHeight, barWidth - 2, barHeight * 2);
+            }
+            ctx.shadowBlur = 0;
+        }
+
+        function drawWave(data) {
+            const colors = palettes[currentPalette];
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 15 * glowIntensity;
+
+            for (let c = 0; c < Math.min(3, data.length / 40); c++) {
+                const color = colors[c % colors.length];
+                ctx.shadowColor = color;
+                ctx.strokeStyle = color;
+                ctx.beginPath();
+
+                const sliceWidth = canvas.width / data.length;
+                let x = 0;
+
+                for (let i = 0; i < data.length; i++) {
+                    const v = data[i] / 256;
+                    const y = (1 - v) * canvas.height * 0.6 + canvas.height * 0.2;
+
+                    if (i === 0) {
+                        ctx.moveTo(x, y + c * 20);
+                    } else {
+                        ctx.lineTo(x, y + c * 20);
+                    }
+                    x += sliceWidth;
+                }
+                ctx.stroke();
+            }
+            ctx.shadowBlur = 0;
+        }
+
+        function drawCircular(data) {
+            const colors = palettes[currentPalette];
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) * 0.5;
+
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(rotation);
+
+            for (let i = 0; i < data.length; i++) {
+                const value = data[i] / 256;
+                const angle = (i / data.length) * Math.PI * 2;
+                const barLength = value * radius;
+
+                const x1 = Math.cos(angle) * radius;
+                const y1 = Math.sin(angle) * radius;
+                const x2 = Math.cos(angle) * (radius + barLength);
+                const y2 = Math.sin(angle) * (radius + barLength);
+
+                const color = colors[i % colors.length];
+                ctx.shadowBlur = 15 * glowIntensity;
+                ctx.shadowColor = color;
+
+                const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+                gradient.addColorStop(0, 'rgba(255,255,255,0.3)');
+                gradient.addColorStop(1, color);
+
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+
+            // Center glow
+            ctx.beginPath();
+            ctx.arc(0, 0, radius * 0.3, 0, Math.PI * 2);
+            const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, radius * 0.3);
+            grad.addColorStop(0, 'rgba(255,255,255,0.5)');
+            grad.addColorStop(1, 'transparent');
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            ctx.restore();
+            ctx.shadowBlur = 0;
+        }
+
+        function drawSpiral(data) {
+            const colors = palettes[currentPalette];
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(rotation * 0.5);
+
+            for (let i = 0; i < data.length; i++) {
+                const value = data[i] / 256;
+                const angle = (i / data.length) * Math.PI * 4 + rotation * 2;
+                const radius = value * Math.min(centerX, centerY) * 0.8;
+
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+
+                const color = colors[i % colors.length];
+                ctx.shadowBlur = 10 * glowIntensity;
+                ctx.shadowColor = color;
+
+                ctx.beginPath();
+                ctx.arc(x, y, 3 + value * 8, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+            }
+
+            ctx.restore();
+            ctx.shadowBlur = 0;
+        }
+
+        function drawParticles(data) {
+            const avgFreq = data.reduce((a, b) => a + b, 0) / data.length;
+
+            for (let particle of particles) {
+                particle.update(avgFreq / 256);
+                particle.draw(ctx, avgFreq / 256);
+            }
+        }
+
+        // Stats calculation
+        function calculateStats(data) {
+            if (!data || data.length === 0) return { bass: 0, mid: 0, high: 0, overall: 0 };
+
+            const bassEnd = Math.floor(data.length * 0.1);
+            const midEnd = Math.floor(data.length * 0.5);
+
+            let bass = 0, mid = 0, high = 0;
+
+            for (let i = 0; i < data.length; i++) {
+                if (i < bassEnd) bass += data[i];
+                else if (i < midEnd) mid += data[i];
+                else high += data[i];
+            }
+
+            bass = Math.floor((bass / bassEnd) * (sensitivity / 5));
+            mid = Math.floor((mid / (midEnd - bassEnd)) * (sensitivity / 5));
+            high = Math.floor((high / (data.length - midEnd)) * (sensitivity / 5));
+
+            const overall = Math.floor(data.reduce((a, b) => a + b, 0) / data.length * (sensitivity / 5));
+
+            return { bass, mid, high, overall };
+        }
+
+        // Animation loop
+        let time = 0;
+        function animate() {
+            time += 0.016 * animationSpeed;
+
+            ctx.fillStyle = 'rgba(10, 10, 15, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            let data;
+            if (analyser && isPlaying) {
+                analyser.getByteFrequencyData(dataArray);
+                data = dataArray;
+            } else {
+                data = generateFakeFrequencyData();
+            }
+
+            switch (currentMode) {
+                case 'bars':
+                    drawBars(data);
+                    break;
+                case 'wave':
+                    drawWave(data);
+                    break;
+                case 'circular':
+                    drawCircular(data);
+                    break;
+                case 'spiral':
+                    drawSpiral(data);
+                    break;
+                case 'particles':
+                    drawParticles(data);
+                    break;
+            }
+
+            const stats = calculateStats(data);
+            document.getElementById('bassLevel').textContent = stats.bass;
+            document.getElementById('midLevel').textContent = stats.mid;
+            document.getElementById('highLevel').textContent = stats.high;
+            document.getElementById('overallEnergy').textContent = stats.overall;
+
+            rotation += 0.002 * animationSpeed;
+
+            requestAnimationFrame(animate);
+        }
+
+        // Event listeners
+        document.querySelectorAll('.viz-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.viz-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+            });
+        });
+
+        document.querySelectorAll('.palette-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentPalette = btn.dataset.palette;
+            });
+        });
+
+        document.getElementById('sensitivity').addEventListener('input', e => {
+            sensitivity = parseFloat(e.target.value);
+        });
+
+        document.getElementById('smoothing').addEventListener('input', e => {
+            if (analyser) {
+                analyser.smoothingTimeConstant = parseFloat(e.target.value);
+            }
+            smoothing = parseFloat(e.target.value);
+        });
+
+        document.getElementById('barCount').addEventListener('input', e => {
+            barCount = parseInt(e.target.value);
+            if (analyser) {
+                dataArray = new Uint8Array(barCount);
+            }
+        });
+
+        document.getElementById('glowIntensity').addEventListener('input', e => {
+            glowIntensity = parseFloat(e.target.value);
+        });
+
+        document.getElementById('animationSpeed').addEventListener('input', e => {
+            animationSpeed = parseFloat(e.target.value);
+        });
+
+        document.getElementById('rotation').addEventListener('input', e => {
+            // Rotation is applied in the drawing functions
+        });
+
+        document.getElementById('particleCount').addEventListener('input', e => {
+            const newCount = parseInt(e.target.value);
+            while (particles.length < newCount) {
+                particles.push(new Particle());
+            }
+            while (particles.length > newCount) {
+                particles.pop();
+            }
+            particleCount = newCount;
+        });
+
+        // Audio upload
+        const audioUpload = document.getElementById('audioUpload');
+        const audioFile = document.getElementById('audioFile');
+
+        audioUpload.addEventListener('click', () => audioFile.click());
+        audioUpload.addEventListener('dragover', e => {
+            e.preventDefault();
+            audioUpload.style.borderColor = 'var(--accent-2)';
+        });
+        audioUpload.addEventListener('dragleave', () => {
+            audioUpload.style.borderColor = 'rgba(255,255,255,0.2)';
+        });
+        audioUpload.addEventListener('drop', e => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('audio/')) {
+                loadAudio(file);
+            }
+        });
+
+        audioFile.addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (file) {
+                loadAudio(file);
+            }
+        });
+
+        function loadAudio(file) {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            if (audioSource) {
+                audioSource.disconnect();
+            }
+
+            const reader = new FileReader();
+            reader.onload = async e => {
+                const arrayBuffer = e.target.result;
+                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+                if (audioSource) {
+                    audioSource.stop();
+                }
+
+                audioSource = audioContext.createBufferSource();
+                audioSource.buffer = audioBuffer;
+                audioSource.loop = true;
+
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = barCount * 2;
+                analyser.smoothingTimeConstant = smoothing;
+
+                audioSource.connect(analyser);
+                analyser.connect(audioContext.destination);
+
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+                audioSource.start();
+                isPlaying = true;
+
+                audioUpload.querySelector('p').textContent = `Playing: ${file.name}`;
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Start animation
+        animate();
+
+        // Keyboard controls
+        document.addEventListener('keydown', e => {
+            switch(e.key) {
+                case '1': document.querySelector('[data-mode="bars"]').click(); break;
+                case '2': document.querySelector('[data-mode="wave"]').click(); break;
+                case '3': document.querySelector('[data-mode="circular"]').click(); break;
+                case '4': document.querySelector('[data-mode="spiral"]').click(); break;
+                case '5': document.querySelector('[data-mode="particles"]').click(); break;
+            }
+        });
+    </script>
+</body>
+</html>

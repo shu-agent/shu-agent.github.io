@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pulsar Timekeeper — Cosmic Clock Network</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #030014;
+      --bg-card: rgba(10, 15, 40, 0.85);
+      --cyan: #00f5ff;
+      --cyan-dim: #00a5aa;
+      --purple: #a855f7;
+      --purple-dim: #7c3aed;
+      --gold: #fbbf24;
+      --pink: #ec4899;
+      --text: #e2e8f0;
+      --text-dim: #94a3b8;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    #starfield {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+    }
+
+    .hero {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 80px 20px 40px;
+      background: linear-gradient(180deg, rgba(0,245,255,0.05) 0%, transparent 100%);
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 6vw, 4rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--cyan), var(--purple), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .hero .subtitle {
+      font-family: 'Space Mono', monospace;
+      font-size: clamp(0.85rem, 2vw, 1.1rem);
+      color: var(--cyan-dim);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .controls {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      padding: 20px;
+      margin: 0 auto;
+      max-width: 900px;
+    }
+
+    .mode-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      padding: 10px 20px;
+      border: 1px solid var(--cyan-dim);
+      background: var(--bg-card);
+      color: var(--cyan);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .mode-btn:hover, .mode-btn.active {
+      background: var(--cyan);
+      color: var(--bg-deep);
+      border-color: var(--cyan);
+      box-shadow: 0 0 20px rgba(0,245,255,0.4);
+    }
+
+    .main-content {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    @media (max-width: 1024px) {
+      .main-content { grid-template-columns: 1fr; }
+    }
+
+    .canvas-container {
+      background: var(--bg-card);
+      border: 1px solid rgba(0,245,255,0.2);
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #mainCanvas {
+      width: 100%;
+      display: block;
+      background: transparent;
+    }
+
+    .info-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(168,85,247,0.3);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .info-card h3 {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--purple);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-card h3::before {
+      content: '';
+      width: 8px; height: 8px;
+      background: var(--purple);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--purple);
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stat {
+      background: rgba(0,0,0,0.3);
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.2rem;
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 4px;
+    }
+
+    .equation-box {
+      background: rgba(0,0,0,0.4);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--gold);
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .equation-box .eq-main {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .equation-box .eq-sub {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .pulsar-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .pulsar-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: background 0.2s;
+    }
+
+    .pulsar-item:hover {
+      background: rgba(0,245,255,0.1);
+    }
+
+    .pulsar-item .name {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--cyan);
+    }
+
+    .pulsar-item .period {
+      font-size: 0.85rem;
+      color: var(--gold);
+    }
+
+    .timeline-section {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .timeline-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--purple);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .timeline {
+      position: relative;
+      padding: 20px 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(180deg, var(--cyan), var(--purple), var(--gold));
+      opacity: 0.3;
+    }
+
+    .timeline-item {
+      position: relative;
+      width: 45%;
+      padding: 16px;
+      background: var(--bg-card);
+      border: 1px solid rgba(0,245,255,0.2);
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .timeline-item:nth-child(odd) {
+      margin-left: 5%;
+    }
+
+    .timeline-item:nth-child(even) {
+      margin-left: 50%;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      width: 12px; height: 12px;
+      background: var(--cyan);
+      border-radius: 50%;
+      top: 24px;
+      box-shadow: 0 0 15px var(--cyan);
+    }
+
+    .timeline-item:nth-child(odd)::before {
+      right: -6%;
+    }
+
+    .timeline-item:nth-child(even)::before {
+      left: -6%;
+    }
+
+    .timeline-item .year {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+
+    .timeline-item .event {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .legend {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 40px 20px;
+      margin-top: 40px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    footer p {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    footer .quote {
+      font-style: italic;
+      color: var(--cyan-dim);
+      margin-bottom: 10px;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+    ::-webkit-scrollbar-thumb { background: var(--cyan-dim); border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <canvas id="starfield"></canvas>
+
+  <section class="hero">
+    <h1>Pulsar Timekeeper</h1>
+    <p class="subtitle">Nature's Most Precise Cosmic Clocks</p>
+  </section>
+
+  <div class="controls">
+    <button class="mode-btn active" data-mode="pulsar">Pulsar Network</button>
+    <button class="mode-btn" data-mode="timing">Pulsar Timing Array</button>
+    <button class="mode-btn" data-mode="rotation">Rotation Dynamics</button>
+    <button class="mode-btn" data-mode="gw">GW Detection</button>
+  </div>
+
+  <div class="main-content">
+    <div class="canvas-container">
+      <canvas id="mainCanvas"></canvas>
+    </div>
+
+    <div class="info-panel">
+      <div class="info-card">
+        <h3>Pulsar Statistics</h3>
+        <div class="stat-grid">
+          <div class="stat">
+            <div class="stat-value" id="stat-count">0</div>
+            <div class="stat-label">Known Pulsars</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="stat-msp">0</div>
+            <div class="stat-label">Millisecond</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="stat-period">0</div>
+            <div class="stat-label">Period (ms)</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="stat-stability">0</div>
+            <div class="stat-label">Stability (σ)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>Key Equations</h3>
+        <div class="equation-box">
+          <div class="eq-main">P = 2π/Ω</div>
+          <div class="eq-sub">Rotation Period</div>
+        </div>
+        <div class="equation-box">
+          <div class="eq-main">Ḡ = -Ḡ/(2I)·Ω³·τ<sub>c</sub></div>
+          <div class="eq-sub">Glitch Decay</div>
+        </div>
+        <div class="equation-box">
+          <div class="eq-main">ΔΩ/Ω ≈ 10<sup>-6</sup></div>
+          <div class="eq-sub">Typical Glitch Magnitude</div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>Famous Pulsars</h3>
+        <div class="pulsar-list" id="pulsarList"></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="timeline-section">
+    <div class="timeline-title">Pulsar Discovery Timeline</div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="year">1967</div>
+        <div class="event"> Jocelyn Bell Burnell discovers first pulsar (CP 1919) at Cambridge</div>
+      </div>
+      <div class="timeline-item">
+        <div class="year">1968</div>
+        <div class="event">Interpretation as rotating neutron stars confirmed</div>
+      </div>
+      <div class="timeline-item">
+        <div class="year">1974</div>
+        <div class="event">Russell Hulse and Joseph Taylor discover binary pulsar PSR B1913+16</div>
+      </div>
+      <div class="timeline-item">
+        <div class="year">1982</div>
+        <div class="event">First millisecond pulsar discovered</div>
+      </div>
+      <div class="timeline-item">
+        <div class="year">1990s</div>
+        <div class="event">Pulsar timing arrays begin detecting gravitational wave signatures</div>
+      </div>
+      <div class="timeline-item">
+        <div class="year">2016</div>
+        <div class="event">NANOGrav detects gravitational wave background evidence</div>
+      </div>
+      <div class="timeline-item">
+        <div class="year">2023</div>
+        <div class="event">Pulsar timing array confirms gravitational wave detection from SMBHBs</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background: #00f5ff;"></div>
+      <span>Regular Pulsar</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: #fbbf24;"></div>
+      <span>Millisecond Pulsar</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: #ec4899;"></div>
+      <span>Magnetar</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: #a855f7;"></div>
+      <span>Binary Pulsar</span>
+    </div>
+  </div>
+
+  <footer>
+    <p class="quote">"Pulsars are the most precise clocks in the universe."</p>
+    <p>Kevin — Virtual World Physics Lab</p>
+  </footer>
+
+  <script>
+    // Starfield
+    const starCanvas = document.getElementById('starfield');
+    const starCtx = starCanvas.getContext('2d');
+    let stars = [];
+
+    function resizeStarfield() {
+      starCanvas.width = window.innerWidth;
+      starCanvas.height = window.innerHeight;
+      stars = [];
+      for (let i = 0; i < 200; i++) {
+        stars.push({
+          x: Math.random() * starCanvas.width,
+          y: Math.random() * starCanvas.height,
+          size: Math.random() * 1.5 + 0.5,
+          twinkle: Math.random() * Math.PI * 2,
+          speed: Math.random() * 0.02 + 0.01
+        });
+      }
+    }
+
+    function drawStars() {
+      starCtx.fillStyle = '#030014';
+      starCtx.fillRect(0, 0, starCanvas.width, starCanvas.height);
+      stars.forEach(star => {
+        star.twinkle += star.speed;
+        const alpha = 0.5 + Math.sin(star.twinkle) * 0.3;
+        starCtx.beginPath();
+        starCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        starCtx.fillStyle = `rgba(255,255,255,${alpha})`;
+        starCtx.fill();
+      });
+      requestAnimationFrame(drawStars);
+    }
+
+    resizeStarfield();
+    window.addEventListener('resize', resizeStarfield);
+    drawStars();
+
+    // Main Canvas
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+    let currentMode = 'pulsar';
+    let animationId;
+    let time = 0;
+
+    const pulsars = [
+      { name: 'PSR B1919+21', period: 1337, type: 'regular', x: 0.2, y: 0.3 },
+      { name: 'PSR B0329+54', period: 714, type: 'regular', x: 0.75, y: 0.25 },
+      { name: 'PSR B0835-41', period: 1287, type: 'regular', x: 0.5, y: 0.7 },
+      { name: 'PSR J0337+1715', period: 30, type: 'msp', x: 0.35, y: 0.45 },
+      { name: 'PSR J0437-4715', period: 58, type: 'msp', x: 0.65, y: 0.55 },
+      { name: 'PSR J1748-2446ad', period: 11, type: 'msp', x: 0.8, y: 0.35 },
+      { name: 'PSR B1913+16', period: 59, type: 'binary', x: 0.15, y: 0.65 },
+      { name: 'PSR J0737-3039', period: 23, type: 'binary', x: 0.85, y: 0.7 },
+      { name: 'PSR J1841-0500', period: 594, type: 'magnetar', x: 0.4, y: 0.2 },
+      { name: 'PSR J1841-0500', period: 594, type: 'magnetar', x: 0.4, y: 0.2 },
+    ];
+
+    const famousPulsars = [
+      { name: 'PSR B1919+21', period: 1337, desc: 'First discovered' },
+      { name: 'PSR B0332+54', period: 714, desc: 'Strongest pulse' },
+      { name: 'PSR J0337+1715', period: 30, desc: 'Triple system' },
+      { name: 'PSR J0437-4715', period: 58, desc: 'Nearest MSP' },
+      { name: 'PSR J1748-2446ad', period: 11, desc: 'Fastest MSP' },
+      { name: 'PSR B1913+16', period: 59, desc: 'Hulse-Taylor binary' },
+    ];
+
+    function resizeCanvas() {
+      const container = canvas.parentElement;
+      canvas.width = container.clientWidth;
+      canvas.height = Math.min(600, window.innerHeight * 0.6);
+    }
+
+    function getPulsarColor(type) {
+      switch(type) {
+        case 'msp': return '#fbbf24';
+        case 'binary': return '#a855f7';
+        case 'magnetar': return '#ec4899';
+        default: return '#00f5ff';
+      }
+    }
+
+    function drawPulsar(pulsar, index) {
+      const cx = pulsar.x * canvas.width;
+      const cy = pulsar.y * canvas.height;
+      const color = getPulsarColor(pulsar.type);
+      const phase = (time * 1000 / pulsar.period) % 1;
+      const pulseIntensity = Math.pow(Math.sin(phase * Math.PI * 2) * 0.5 + 0.5, 2);
+
+      // Glow
+      const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 80);
+      gradient.addColorStop(0, color);
+      gradient.addColorStop(0.3, color + '40');
+      gradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 80, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Beam cone
+      ctx.save();
+      ctx.translate(cx, cy);
+      const beamAngle = (time * 0.5) % (Math.PI * 2);
+      ctx.rotate(beamAngle);
+
+      // Light beam
+      const beamGradient = ctx.createLinearGradient(0, 0, 0, -150);
+      beamGradient.addColorStop(0, color + '80');
+      beamGradient.addColorStop(0.5, color + '30');
+      beamGradient.addColorStop(1, 'transparent');
+
+      ctx.beginPath();
+      ctx.moveTo(-15, 0);
+      ctx.lineTo(0, -150 * pulseIntensity);
+      ctx.lineTo(15, 0);
+      ctx.fillStyle = beamGradient;
+      ctx.fill();
+
+      ctx.restore();
+
+      // Neutron star core
+      const coreGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 25);
+      coreGradient.addColorStop(0, '#ffffff');
+      coreGradient.addColorStop(0.3, color);
+      coreGradient.addColorStop(1, color + '60');
+      ctx.fillStyle = coreGradient;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 20, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pulse ring
+      if (pulseIntensity > 0.8) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 30 + (1 - pulseIntensity) * 50, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Label
+      ctx.font = '11px "Space Mono"';
+      ctx.fillStyle = color;
+      ctx.textAlign = 'center';
+      ctx.fillText(pulsar.name, cx, cy + 45);
+      ctx.font = '10px "Space Mono"';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText(`${pulsar.period} ms`, cx, cy + 58);
+    }
+
+    function drawTimingArray() {
+      // Grid background
+      ctx.strokeStyle = 'rgba(0,245,255,0.05)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < canvas.width; i += 40) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, canvas.height);
+        ctx.stroke();
+      }
+      for (let i = 0; i < canvas.height; i += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(canvas.width, i);
+        ctx.stroke();
+      }
+
+      // Earth in center
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      ctx.fillStyle = '#1e40af';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.font = '12px "Space Mono"';
+      ctx.fillStyle = '#3b82f6';
+      ctx.textAlign = 'center';
+      ctx.fillText('Earth', cx, cy + 35);
+
+      // Pulsars around Earth
+      pulsars.forEach((pulsar, i) => {
+        const angle = (i / pulsars.length) * Math.PI * 2 + time * 0.05;
+        const dist = 200 + Math.sin(time + i) * 20;
+        const px = cx + Math.cos(angle) * dist;
+        const py = cy + Math.sin(angle) * dist;
+        const color = getPulsarColor(pulsar.type);
+
+        // Light travel path
+        ctx.strokeStyle = 'rgba(0,245,255,0.15)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(px, py);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Pulsar
+        const gradient = ctx.createRadialGradient(px, py, 0, px, py, 30);
+        gradient.addColorStop(0, color);
+        gradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(px, py, 30, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(px, py, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Timing lines
+        const pulsePhase = (time * 500 / pulsar.period) % 1;
+        if (pulsePhase < 0.1) {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(px, py);
+          ctx.stroke();
+
+          // TOA marker
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '10px "Space Mono"';
+          ctx.fillText('TOA', (cx + px) / 2, (cy + py) / 2);
+        }
+      });
+
+      // GW background wave effect
+      ctx.strokeStyle = `rgba(168,85,247,${0.1 + Math.sin(time * 2) * 0.05})`;
+      ctx.lineWidth = 3;
+      for (let r = 50; r < 300; r += 30) {
+        ctx.beginPath();
+        for (let a = 0; a < Math.PI * 2; a += 0.1) {
+          const wave = Math.sin(a * 8 + time * 3) * 5;
+          const x = cx + (r + wave) * Math.cos(a);
+          const y = cy + (r + wave) * Math.sin(a);
+          if (a === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+    }
+
+    function drawRotationDynamics() {
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      // Rotating grid
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(time * 0.3);
+      ctx.strokeStyle = 'rgba(0,245,255,0.1)';
+      ctx.lineWidth = 1;
+      for (let i = -10; i <= 10; i++) {
+        ctx.beginPath();
+        ctx.moveTo(-300, i * 30);
+        ctx.lineTo(300, i * 30);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(i * 30, -300);
+        ctx.lineTo(i * 30, 300);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Neutron star
+      const rsGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 40);
+      rsGradient.addColorStop(0, '#ffffff');
+      rsGradient.addColorStop(0.5, '#a855f7');
+      rsGradient.addColorStop(1, '#7c3aed');
+      ctx.fillStyle = rsGradient;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 35, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Magnetic axis
+      const magAxisAngle = time * 1.5;
+      ctx.strokeStyle = '#ec4899';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(cx - 60 * Math.cos(magAxisAngle), cy - 60 * Math.sin(magAxisAngle));
+      ctx.lineTo(cx + 60 * Math.cos(magAxisAngle), cy + 60 * Math.sin(magAxisAngle));
+      ctx.stroke();
+
+      // Beam
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(magAxisAngle);
+
+      const beamGradient = ctx.createLinearGradient(0, 0, 0, -120);
+      beamGradient.addColorStop(0, '#ec489980');
+      beamGradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = beamGradient;
+      ctx.beginPath();
+      ctx.moveTo(-10, 0);
+      ctx.lineTo(0, -120);
+      ctx.lineTo(10, 0);
+      ctx.fill();
+
+      ctx.restore();
+
+      // Rotation rate display
+      ctx.font = '14px "Space Mono"';
+      ctx.fillStyle = '#00f5ff';
+      ctx.textAlign = 'left';
+      const omega = 2 * Math.PI / 0.5;
+      ctx.fillText(`Ω = ${omega.toFixed(2)} rad/s`, 30, 40);
+      ctx.fillText(`P = ${(2 * Math.PI / omega * 1000).toFixed(0)} ms`, 30, 65);
+
+      // Moment of inertia
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText(`I = 2/5 MR²`, 30, 95);
+
+      // Spin down line
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(30, 130);
+      ctx.lineTo(200, 130 - Math.sin(time) * 20);
+      ctx.stroke();
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillText('Spin-down', 210, 135);
+    }
+
+    function drawGWDetection() {
+      // Background strain visualization
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      // Pulsar positions
+      const numPulsars = 8;
+      for (let i = 0; i < numPulsars; i++) {
+        const angle = (i / numPulsars) * Math.PI * 2;
+        const dist = 180;
+        const px = cx + Math.cos(angle) * dist;
+        const py = cy + Math.sin(angle) * dist;
+
+        const color = getPulsarColor(i % 2 === 0 ? 'msp' : 'regular');
+
+        // Pulsar
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(px, py, 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pulse emission
+        const phase = (time * 500 / (100 + i * 50)) % 1;
+        if (phase < 0.2) {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(px, py);
+          ctx.lineTo(cx, cy);
+          ctx.stroke();
+        }
+      }
+
+      // Earth
+      ctx.fillStyle = '#1e40af';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      // GW ripple from center
+      for (let r = 30; r < 250; r += 20) {
+        const strain = Math.sin(r * 0.05 - time * 3) * 0.5 + 0.5;
+        ctx.strokeStyle = `rgba(168,85,247,${strain * 0.3})`;
+        ctx.lineWidth = 1 + strain;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Correlation pattern (Hellings-Downs)
+      ctx.font = '12px "Space Mono"';
+      ctx.fillStyle = '#a855f7';
+      ctx.textAlign = 'center';
+      ctx.fillText('Hellings-Downs Correlation', cx, canvas.height - 30);
+
+      // Correlation curve visualization
+      ctx.beginPath();
+      ctx.moveTo(cx - 150, canvas.height - 60);
+      for (let x = -150; x <= 150; x += 5) {
+        const separation = Math.abs(x) / 150;
+        const cd = separation < 0.5
+          ? 1/3 - 3*separation/2 + 3*separation*separation/2
+          : 1 - separation;
+        const y = canvas.height - 60 - cd * 30;
+        if (x === -150) ctx.moveTo(cx + x, y);
+        else ctx.lineTo(cx + x, y);
+      }
+      ctx.strokeStyle = '#a855f7';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    function draw() {
+      ctx.fillStyle = 'rgba(3,0,20,0.95)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      switch(currentMode) {
+        case 'pulsar':
+          pulsars.forEach((p, i) => drawPulsar(p, i));
+          break;
+        case 'timing':
+          drawTimingArray();
+          break;
+        case 'rotation':
+          drawRotationDynamics();
+          break;
+        case 'gw':
+          drawGWDetection();
+          break;
+      }
+
+      time += 0.016;
+      animationId = requestAnimationFrame(draw);
+    }
+
+    // Mode buttons
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentMode = btn.dataset.mode;
+        updateStats();
+      });
+    });
+
+    function updateStats() {
+      const known = 3600;
+      const msp = 500;
+      const avgPeriod = 430;
+      const stability = 10;
+
+      document.getElementById('stat-count').textContent = known.toLocaleString();
+      document.getElementById('stat-msp').textContent = msp.toLocaleString();
+      document.getElementById('stat-period').textContent = avgPeriod;
+      document.getElementById('stat-stability').textContent = `10⁻¹⁵`;
+    }
+
+    function populatePulsarList() {
+      const list = document.getElementById('pulsarList');
+      famousPulsars.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'pulsar-item';
+        item.innerHTML = `
+          <span class="name">${p.name}</span>
+          <span class="period">${p.period} ms</span>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    updateStats();
+    populatePulsarList();
+    draw();
+  </script>
+</body>
+</html>
