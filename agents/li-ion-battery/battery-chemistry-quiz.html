@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Chemistry Quiz — Li-Ion Battery Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00ff88;
+            --secondary: #00ccff;
+            --accent: #ff6b35;
+            --dark: #0a0a0f;
+            --card-bg: rgba(20, 25, 35, 0.9);
+            --glow-primary: 0 0 20px rgba(0, 255, 136, 0.4);
+            --glow-secondary: 0 0 20px rgba(0, 204, 255, 0.4);
+        }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--dark);
+            min-height: 100vh;
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse at 20% 80%, rgba(0, 255, 136, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(0, 204, 255, 0.08) 0%, transparent 50%),
+                linear-gradient(180deg, #0a0a0f 0%, #0d1117 50%, #0a0a0f 100%);
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image:
+                floating-particles 60s linear infinite;
+            animation: bgFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes bgFloat {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-10px) translateX(-10px); }
+            75% { transform: translateY(-30px) translateX(5px); }
+        }
+
+        /* Floating ions animation */
+        .floating-ion {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: floatIon 15s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .floating-ion:nth-child(1) { left: 10%; animation-delay: 0s; animation-duration: 18s; }
+        .floating-ion:nth-child(2) { left: 25%; animation-delay: 3s; animation-duration: 14s; background: var(--secondary); }
+        .floating-ion:nth-child(3) { left: 40%; animation-delay: 6s; animation-duration: 20s; }
+        .floating-ion:nth-child(4) { left: 55%; animation-delay: 1s; animation-duration: 16s; background: var(--accent); }
+        .floating-ion:nth-child(5) { left: 70%; animation-delay: 8s; animation-duration: 19s; }
+        .floating-ion:nth-child(6) { left: 85%; animation-delay: 4s; animation-duration: 15s; background: var(--secondary); }
+
+        @keyframes floatIon {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.4; }
+            90% { opacity: 0.4; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 40px 20px 30px;
+            position: relative;
+        }
+
+        .quiz-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--dark);
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: var(--glow-primary); }
+            50% { box-shadow: 0 0 40px rgba(0, 255, 136, 0.6); }
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #888;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Progress bar */
+        .progress-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 30px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4));
+            animation: shimmer 1.5s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+
+        /* Quiz container */
+        .quiz-container {
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Category tabs */
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+
+        .category-tab {
+            padding: 10px 20px;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .category-tab:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .category-tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--dark);
+            border-color: transparent;
+            font-weight: 700;
+        }
+
+        /* Question card */
+        .question-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            animation: cardEnter 0.5s ease;
+        }
+
+        @keyframes cardEnter {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .question-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            color: var(--secondary);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+
+        .question-image {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto 25px;
+            display: block;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Answer options */
+        .options {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option:hover {
+            border-color: var(--primary);
+            background: rgba(0, 255, 136, 0.05);
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: var(--primary);
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .option.correct {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.2);
+        }
+
+        .option.incorrect {
+            border-color: #ff4444;
+            background: rgba(255, 68, 68, 0.2);
+        }
+
+        .option.disabled {
+            pointer-events: none;
+        }
+
+        .option-letter {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .option.selected .option-letter {
+            background: var(--primary);
+            color: var(--dark);
+        }
+
+        .option.correct .option-letter {
+            background: #00ff88;
+            color: var(--dark);
+        }
+
+        .option.incorrect .option-letter {
+            background: #ff4444;
+            color: white;
+        }
+
+        .option-text {
+            flex: 1;
+            font-size: 1.05rem;
+            line-height: 1.5;
+        }
+
+        .option-icon {
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .option.correct .option-icon,
+        .option.incorrect .option-icon {
+            opacity: 1;
+        }
+
+        /* Explanation panel */
+        .explanation {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 204, 255, 0.1);
+            border-left: 4px solid var(--secondary);
+            border-radius: 0 12px 12px 0;
+            display: none;
+            animation: slideIn 0.4s ease;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .explanation-title {
+            color: var(--secondary);
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .explanation-text {
+            line-height: 1.7;
+            color: #bbb;
+        }
+
+        .explanation-formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--primary);
+            font-size: 0.95rem;
+        }
+
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--dark);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--glow-primary);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Results screen */
+        .results-screen {
+            text-align: center;
+            padding: 60px 40px;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            display: none;
+        }
+
+        .results-screen.show {
+            display: block;
+            animation: cardEnter 0.5s ease;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+
+        .score-circle svg {
+            transform: rotate(-90deg);
+        }
+
+        .score-circle circle {
+            fill: none;
+            stroke-width: 12;
+        }
+
+        .score-bg {
+            stroke: rgba(255, 255, 255, 0.1);
+        }
+
+        .score-fill {
+            stroke: url(#scoreGradient);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1.5s ease;
+        }
+
+        .score-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .score-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .score-label {
+            font-size: 0.9rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .results-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .results-message {
+            font-size: 1.1rem;
+            color: #888;
+            margin-bottom: 40px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .results-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        /* Badge earned */
+        .badge-earned {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 204, 255, 0.1));
+            border: 2px solid var(--primary);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .badge-earned.show {
+            display: block;
+            animation: badgePop 0.6s ease;
+        }
+
+        @keyframes badgePop {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .badge-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .badge-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        /* Quiz selector */
+        .quiz-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .quiz-card {
+            background: var(--card-bg);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .quiz-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: var(--glow-primary);
+        }
+
+        .quiz-card.active {
+            border-color: var(--primary);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .quiz-card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .quiz-card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .quiz-card-desc {
+            font-size: 0.9rem;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        .quiz-card-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #555;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--secondary);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .question-card {
+                padding: 25px;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .option {
+                padding: 15px 18px;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background animation -->
+    <div class="bg-animation"></div>
+    <div class="floating-ion"></div>
+    <div class="floating-ion"></div>
+    <div class="floating-ion"></div>
+    <div class="floating-ion"></div>
+    <div class="floating-ion"></div>
+    <div class="floating-ion"></div>
+
+    <!-- SVG Definitions -->
+    <svg style="position: absolute; width: 0; height: 0;">
+        <defs>
+            <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#00ff88"/>
+                <stop offset="100%" style="stop-color:#00ccff"/>
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <header>
+        <div class="quiz-badge">Interactive Learning</div>
+        <h1>Battery Chemistry Quiz</h1>
+        <p class="subtitle">Test your knowledge of battery chemistries, materials, and performance characteristics. Learn through interactive questions with detailed explanations.</p>
+    </header>
+
+    <!-- Progress -->
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <div class="progress-text" id="progressText">Select a quiz category to begin</div>
+    </div>
+
+    <main class="quiz-container">
+        <!-- Quiz Category Selection -->
+        <div id="quizSelector" class="quiz-selector">
+            <div class="quiz-card" data-category="cathode">
+                <div class="quiz-card-icon">🔋</div>
+                <div class="quiz-card-title">Cathode Chemistry</div>
+                <div class="quiz-card-desc">NMC, NCA, LFP, LCO — Learn the materials that define battery performance</div>
+                <div class="quiz-card-meta">
+                    <span>10 Questions</span>
+                    <span>Intermediate</span>
+                </div>
+            </div>
+            <div class="quiz-card" data-category="anode">
+                <div class="quiz-card-icon">⚡</div>
+                <div class="quiz-card-title">Anode Materials</div>
+                <div class="quiz-card-desc">Graphite, Silicon, Lithium Metal — The negative electrode side</div>
+                <div class="quiz-card-meta">
+                    <span>10 Questions</span>
+                    <span>Intermediate</span>
+                </div>
+            </div>
+            <div class="quiz-card" data-category="electrolyte">
+                <div class="quiz-card-icon">🧪</div>
+                <div class="quiz-card-title">Electrolyte Systems</div>
+                <div class="quiz-card-desc">Liquid, solid, polymer — Ionic transport media</div>
+                <div class="quiz-card-meta">
+                    <span>10 Questions</span>
+                    <span>Advanced</span>
+                </div>
+            </div>
+            <div class="quiz-card" data-category="performance">
+                <div class="quiz-card-icon">📊</div>
+                <div class="quiz-card-title">Performance & Testing</div>
+                <div class="quiz-card-desc">Energy density, power density, cycle life — How batteries are measured</div>
+                <div class="quiz-card-meta">
+                    <span>10 Questions</span>
+                    <span>Beginner</span>
+                </div>
+            </div>
+            <div class="quiz-card" data-category="safety">
+                <div class="quiz-card-icon">🛡️</div>
+                <div class="quiz-card-title">Safety & Failure</div>
+                <div class="quiz-card-desc">Thermal runaway, dendrites, SEI — Understanding failure modes</div>
+                <div class="quiz-card-meta">
+                    <span>10 Questions</span>
+                    <span>Advanced</span>
+                </div>
+            </div>
+            <div class="quiz-card" data-category="expert">
+                <div class="quiz-card-icon">🎓</div>
+                <div class="quiz-card-title">Expert Challenge</div>
+                <div class="quiz-card-desc">Mixed questions covering all topics — For the ultimate battery scientist</div>
+                <div class="quiz-card-meta">
+                    <span>15 Questions</span>
+                    <span>Expert</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question Card -->
+        <div class="question-card" id="questionCard" style="display: none;">
+            <div class="question-number" id="questionNumber">Question 1 of 10</div>
+            <div class="question-text" id="questionText"></div>
+            <img class="question-image" id="questionImage" style="display: none;">
+            <div class="options" id="optionsContainer"></div>
+            <div class="explanation" id="explanation">
+                <div class="explanation-title">
+                    <span>💡</span>
+                    <span>Explanation</span>
+                </div>
+                <div class="explanation-text" id="explanationText"></div>
+                <div class="explanation-formula" id="explanationFormula"></div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn btn-primary" id="nextBtn" disabled>Next Question</button>
+                <button class="btn btn-secondary" id="skipBtn">Skip to Results</button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div class="results-screen" id="resultsScreen">
+            <div class="score-circle">
+                <svg width="200" height="200">
+                    <circle class="score-bg" cx="100" cy="100" r="85"/>
+                    <circle class="score-fill" id="scoreCircle" cx="100" cy="100" r="85"
+                        stroke-dasharray="534" stroke-dashoffset="534"/>
+                </svg>
+                <div class="score-text">
+                    <div class="score-number" id="scoreNumber">0</div>
+                    <div class="score-label">Correct</div>
+                </div>
+            </div>
+            <h2 class="results-title" id="resultsTitle">Quiz Complete!</h2>
+            <p class="results-message" id="resultsMessage">You've completed the quiz. Here's how you did:</p>
+
+            <div class="badge-earned" id="badgeEarned">
+                <div class="badge-icon" id="badgeIcon">🏆</div>
+                <div class="badge-title" id="badgeTitle">Badge Earned!</div>
+            </div>
+
+            <div class="results-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="correctCount">0</div>
+                    <div class="stat-label">Correct</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="incorrectCount">0</div>
+                    <div class="stat-label">Incorrect</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="accuracyPercent">0%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="timeTaken">0:00</div>
+                    <div class="stat-label">Time</div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-primary" id="retryBtn">Try Again</button>
+                <button class="btn btn-secondary" id="changeQuizBtn">Change Quiz</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>Li-Ion Battery Lab — Making battery science accessible</p>
+        <p style="margin-top: 10px;">
+            <a href="index.html">← Back to Lab</a> |
+            <a href="battery-materials-database.html">Materials Database</a> |
+            <a href="battery-simulation.html">Battery Simulator</a>
+        </p>
+    </footer>
+
+    <script>
+        // Quiz question banks
+        const questionBanks = {
+            cathode: [
+                {
+                    question: "Which cathode chemistry has the highest theoretical energy density?",
+                    options: ["LFP (LiFePO₄)", "NMC 811 (LiNi₀.₈Mn₀.₁Co₀.₁O₂)", "LCO (LiCoO₂)", "NCA (LiNi₀.₈Co₀.₁₅Al₀.₀₅O₂)"],
+                    correct: 2,
+                    explanation: "LCO has the highest theoretical capacity (~274 mAh/g) and voltage (3.9V vs Li/Li⁺), giving ~1060 Wh/kg theoretical energy density. However, Co的成本 and safety issues limit practical application.",
+                    formula: "E = Q × V (Energy = Capacity × Voltage)"
+                },
+                {
+                    question: "What is the primary advantage of LFP over NMC chemistries?",
+                    options: ["Higher energy density", "Lower cost and better thermal stability", "Faster charging capability", "Longer calendar life"],
+                    correct: 1,
+                    explanation: "LFP's iron phosphate structure is thermally stable up to 270°C vs ~150°C for NMC. It eliminates Co (cost reduction) and has excellent cycle life (3000-5000 cycles). Trade-off: 20-30% lower energy density.",
+                    formula: "LFP: LiFePO₄ → FePO₄ + Li⁺ + e⁻"
+                },
+                {
+                    question: "In NMC 811, what does the '811' refer to?",
+                    options: ["8% Nickel, 1% Manganese, 1% Cobalt", "80% Nickel, 10% Manganese, 10% Cobalt", "8Ah capacity, 1mm thickness, 1cm² area", "800Wh/kg, 1000 cycles, 1% degradation"],
+                    correct: 1,
+                    explanation: "NMC 811 refers to the molar ratio: Ni₀.₈Mn₀.₁Co₀.₁. Higher Ni content increases capacity but reduces thermal stability. The industry is moving to higher Ni (9:0.5:0.5) for energy density.",
+                    formula: "LiNiₓMnyCozO₂ where x+y+z = 1"
+                },
+                {
+                    question: "Which element in NMC cathodes contributes most to capacity?",
+                    options: ["Manganese", "Cobalt", "Nickel", "Lithium"],
+                    correct: 2,
+                    explanation: "Ni²⁺/Ni³⁺ and Ni³⁺/Ni⁴⁺ redox couples provide higher capacity than Mn or Co. Ni can store more Li during cycling, enabling higher specific capacity.",
+                    formula: "Ni²⁺ → Ni³⁺ → Ni⁴⁺ (oxidation during charge)"
+                },
+                {
+                    question: "What is the main failure mechanism in LCO batteries at high voltages?",
+                    options: ["Manganese dissolution", "Cobalt dissolution and oxygen release", "Iron migration", "Phosphate oxidation"],
+                    correct: 1,
+                    explanation: "At >4.2V, LCO undergoes oxygen release from the layered structure, causing structural collapse. This is why LCO is typically cycled to 4.2V max, limiting its practical capacity.",
+                    formula: "2LiCoO₂ ⇌ 2Li⁺ + Co₂O₄ + O₂ (at high voltage)"
+                },
+                {
+                    question: "Which cathode material is most commonly used in grid storage applications?",
+                    options: ["NMC", "NCA", "LFP", "LCO"],
+                    correct: 2,
+                    explanation: "LFP dominates grid storage due to: (1) excellent cycle life (>6000 cycles), (2) thermal stability, (3) low cost (no Co/Ni), (4) good performance at high temperatures. Energy density is acceptable for stationary storage.",
+                    formula: "Grid storage priority: Safety × Cycle Life ÷ Cost"
+                },
+                {
+                    question: "What synthetic technique produces single-crystal NMC particles?",
+                    options: ["Solid-state reaction only", "Co-precipitation with calcination", "Sol-gel method only", "Mechanical milling"],
+                    correct: 1,
+                    explanation: "Single-crystal NMC is synthesized via co-precipitation of metal hydroxides followed by calcination at high temperature. The controlled growth conditions produce faceted particles vs polycrystalline aggregates.",
+                    formula: "M(OH)₂ + LiOH → LiMO₂ (M = Ni, Mn, Co)"
+                },
+                {
+                    question: "Why does NCA have higher energy density than NMC 532?",
+                    options: ["Contains Aluminum", "Higher nickel content and better structural stability", "Uses lithium metal", "Has lower voltage"],
+                    correct: 1,
+                    explanation: "NCA (LiNi₀.₈Co₀.₁₅Al₀.₀₅O₂) has ~80% Ni vs 50% in NMC 532. Al substitution stabilizes the structure at high Ni content, enabling higher capacity while maintaining cycle life.",
+                    formula: "Al dopant: 3Al³⁺ → 2Ni³⁺ (charge compensation)"
+                },
+                {
+                    question: "What is 'cation mixing' in layered cathode materials?",
+                    options: ["Li⁺ and Ni²⁺ disorder in Li layer", "Mixing of different cathode powders", "Co and Mn exchange in particles", "Electrolyte contamination"],
+                    correct: 0,
+                    explanation: "Cation mixing occurs when Ni²⁺ ions migrate into Li⁺ sites during cycling, blocking Li diffusion pathways. This is especially problematic at high temperatures and state of charge.",
+                    formula: "Li layer: [Li₁₋ₓNiₓ]TMO₂ (x increases with cycling)"
+                },
+                {
+                    question: "Which dopant is commonly used to improve NMC structural stability?",
+                    options: ["Sodium (Na)", "Magnesium (Mg)", "Zirconium (Zr)", "All of the above"],
+                    correct: 3,
+                    explanation: "Multiple dopants (Mg, Zr, Al, Ti) are used to stabilize NMC. Mg²⁺ is especially effective as it has similar ionic radius to Li⁺ and stabilizes the structure without active capacity contribution.",
+                    formula: "Mg²⁺ substitution: increases structural stability"
+                }
+            ],
+            anode: [
+                {
+                    question: "What is the theoretical capacity of graphite (mAh/g)?",
+                    options: ["175 mAh/g", "372 mAh/g", "4200 mAh/g", "3590 mAh/g"],
+                    correct: 1,
+                    explanation: "Graphite intercalates Li at LiC₆ (stage 1), giving 372 mAh/g theoretical capacity. Practical graphite achieves ~360 mAh/g with initial coulombic efficiency of 90-92%.",
+                    formula: "C₆ + Li⁺ + e⁻ ⇌ LiC₆ (372 mAh/g)"
+                },
+                {
+                    question: "Why does silicon have much higher capacity than graphite?",
+                    options: ["Lower atomic weight", "Forms Li₁₅Si₄ with 15 Li atoms per formula unit", "Higher electrical conductivity", "Lower volume expansion"],
+                    correct: 1,
+                    explanation: "Si forms Li₁₅Si₄ ( lithiation to 3.75V vs Li/Li⁺), containing 15 Li atoms per 4 Si atoms. The Li-rich alloy gives 4200 mAh/g theoretical capacity — 11x graphite.",
+                    formula: "Si + 15/4 Li⁺ + 15/4 e⁻ ⇌ Li₁₅Si₄ (4200 mAh/g)"
+                },
+                {
+                    question: "What is the approximate volume expansion of silicon during lithiation?",
+                    options: ["50%", "100%", "300%", "500%"],
+                    correct: 2,
+                    explanation: "Si expands ~300% (4.2× initial volume) during full lithiation to Li₁₅Si₄. This massive expansion causes mechanical stress, particle fracture, and capacity fade in Si anodes.",
+                    formula: "V/V₀ = 1 + ΔV/V₀ ≈ 4.2 (300% expansion)"
+                },
+                {
+                    question: "What is 'pre-lithiation' and why is it used?",
+                    options: ["Pre-charging before first use", "Adding extra lithium to compensate for first-cycle loss", "Pre-heating the battery", "Pre-forming the SEI layer"],
+                    correct: 1,
+                    explanation: "Pre-lithiation adds lithium before cell assembly to compensate for SEI formation and first-cycle irreversibility. Methods include Li metal foil, stabilized lithium powder (SLP), or electrochemical pre-lithiation.",
+                    formula: "First cycle loss: ~10-15% for graphite, ~30-40% for Si"
+                },
+                {
+                    question: "What is the main advantage of hard carbon over graphite?",
+                    options: ["Higher capacity", "Lower volume expansion", "Both higher capacity and disordered structure enabling Na-ion storage", "Better electronic conductivity"],
+                    correct: 2,
+                    explanation: "Hard carbon has disordered turbostratic structure that provides interlayer spacing for Na⁺ insertion. It achieves ~300 mAh/g for Na-ion batteries, solving the problem that Na⁺ is too large for graphite intercalation.",
+                    formula: "Na⁺ insertion: C (hard carbon) + Na⁺ + e⁻ ⇌ NaC"
+                },
+                {
+                    question: "What is 'SEI' in battery context?",
+                    options: ["Solid Electrolyte Interface", "Solid Energy Interface", "Sodium-Electrolyte Interaction", "Surface Electrode Insulation"],
+                    correct: 0,
+                    explanation: "SEI (Solid Electrolyte Interphase) is a passivation layer formed on anode surfaces from electrolyte decomposition. It blocks further reduction while allowing Li⁺ conduction — critical for battery stability.",
+                    formula: "Electrolyte + e⁻ → SEI products (Li₂CO₃, LiF, ROLi)"
+                },
+                {
+                    question: "What is 'dry electrode' technology?",
+                    options: ["Electrode without electrolyte", "Solvent-free electrode manufacturing using PTFE binder", "Electrode with reduced moisture content", "High-temperature electrode processing"],
+                    correct: 1,
+                    explanation: "Dry electrode technology uses PTFE (Teflon) as binder without NMP solvent, reducing manufacturing costs and environmental impact. Tesla's dry electrode process enables 10-20% cost reduction in electrode manufacturing.",
+                    formula: "Active material + PTFE → dry electrode film"
+                },
+                {
+                    question: "What is the theoretical capacity of lithium metal?",
+                    options: ["372 mAh/g", "1164 mAh/g", "3860 mAh/g", "240 mAh/g"],
+                    correct: 2,
+                    explanation: "Li metal has extremely high theoretical capacity of 3860 mAh/g (vs 372 for graphite). However, it plates as dendrites causing safety issues — the key challenge for Li-metal batteries.",
+                    formula: "Li → Li⁺ + e⁻ (3860 mAh/g)"
+                },
+                {
+                    question: "Why is lithium metal dendrite formation dangerous?",
+                    options: ["Reduces capacity", "Increases internal resistance", "Can penetrate separator causing internal short and thermal runaway", "Causes electrolyte decomposition"],
+                    correct: 2,
+                    explanation: "Li dendrites grow through the separator when plating rate exceeds Li⁺ diffusion (Sand's time). A single dendrite bridging electrodes causes internal short, immediately heating to thermal runaway temperatures.",
+                    formula: "τ = πD(zeFc₀)²/(2J)² (Sand's time)"
+                },
+                {
+                    question: "What is the capacity retention after 1000 cycles for silicon-graphite composite anodes?",
+                    options: ["~20%", "~50%", "~80%", "~95%"],
+                    correct: 2,
+                    explanation: "Best Si-graphite composites (with nanostructuring, pre-lithiation, and electrolyte additives like FEC) achieve ~80% capacity retention at 1000 cycles. Pure Si anodes typically fail within 100 cycles.",
+                    formula: "Si-graphite: 5-10% Si composite is commercial sweet spot"
+                }
+            ],
+            electrolyte: [
+                {
+                    question: "What is the typical ionic conductivity of liquid electrolytes (mS/cm)?",
+                    options: ["0.1 mS/cm", "1-10 mS/cm", "100 mS/cm", "1000 mS/cm"],
+                    correct: 1,
+                    explanation: "Liquid electrolytes achieve 1-10 mS/cm ionic conductivity at room temperature. This is sufficient for automotive batteries but limits power density at low temperatures.",
+                    formula: "σ = nq²/(fμ) (Warburg-like behavior at low frequency)"
+                },
+                {
+                    question: "What is the main function of LiPF₆ salt in liquid electrolytes?",
+                    options: ["Solvent", "Provides Li⁺ ion transport", "Prevents SEI formation", "Increases viscosity"],
+                    correct: 1,
+                    explanation: "LiPF₆ dissociates to Li⁺ and PF₆⁻ anions, enabling ionic conductivity. However, it is thermally unstable and hydrolyzes to HF — a major safety concern in li-ion batteries.",
+                    formula: "LiPF₆ ⇌ Li⁺ + PF₆⁻ (dissociation)"
+                },
+                {
+                    question: "What is the typical concentration of LiPF₆ in carbonate solvents?",
+                    options: ["0.1 M", "1 M", "5 M", "10 M"],
+                    correct: 1,
+                    explanation: "Standard li-ion electrolytes use ~1M LiPF₆ in mixed carbonates (EC/DMC/DEC). This 'concentrated electrolyte' provides optimal ionic conductivity and SEI formation.",
+                    formula: "1M = 1 mol/L ≈ 10⁲¹ ions/cm³"
+                },
+                {
+                    question: "What is 'SEI-forming additive' in electrolytes?",
+                    options: ["Increases conductivity", "Promotes stable SEI formation on anode surface", "Prevents dendritic growth", "Reduces viscosity"],
+                    correct: 1,
+                    explanation: "SEI-forming additives (VC, FEC, PS) decompose before the main solvent, forming a more stable SEI layer. FEC is especially important for Si anodes, reducing first-cycle loss by 50%.",
+                    formula: "VC + e⁻ → radical anion → polymer SEI products"
+                },
+                {
+                    question: "Which solid electrolyte has the highest ionic conductivity at room temperature?",
+                    options: ["LAGP (Li₁₊ₓAlₓGe₂₋ₓP₃O₁₂)", "LGPS (Li₁₀GeP₂S₁₂)", "LLZO (Li₇La₃Zr₂O₁₂)", "Argyrodite (Li₆PS₅X, X=Cl,Br,I)"],
+                    correct: 1,
+                    explanation: "LGPS-type sulfides achieve ~12 mS/cm at room temperature — approaching liquid electrolyte levels. However, they are air-sensitive and produce H₂S gas when exposed to moisture.",
+                    formula: "LGPS: σRT ≈ 12 mS/cm (highest reported)"
+                },
+                {
+                    question: "What is the main advantage of polymer electrolytes over liquid?",
+                    options: ["Higher conductivity", "Better mechanical properties and safety", "Lower cost", "Wider temperature range"],
+                    correct: 1,
+                    explanation: "Polymer electrolytes (PEO-LiTFSI) are solid, eliminating leakage and flammability risks. Main limitation: conductivity of ~10⁻⁵ S/cm at RT vs 10⁻² for liquids — requiring operation at 60-80°C.",
+                    formula: "PEO: [CH₂CH₂O]n with LiTFSI plasticizer"
+                },
+                {
+                    question: "What is 'concentrated electrolyte' and why is it being researched?",
+                    options: ["Electrolyte with >5M salt", "Electrolyte with >2M salt showing improved thermal stability and safety", "Electrolyte stored at high temperature", "Electrolyte with high viscosity"],
+                    correct: 1,
+                    explanation: "4-5M 'water-in-salt' or 'solvent-in-salt' electrolytes show dramatically improved stability: wider voltage window (4-5V), reduced H₂O reactivity, and better safety. MIT's 'water battery' uses this approach.",
+                    formula: "WiS: 21m LiTFSI (21mol/kg water)"
+                },
+                {
+                    question: "What gas is produced when sulfide solid electrolytes接触 moisture?",
+                    options: ["Oxygen", "Nitrogen", "Hydrogen sulfide (H₂S)", "Carbon dioxide"],
+                    correct: 2,
+                    explanation: "Sulfide electrolytes (LGPS, Argyrodite) react with atmospheric moisture to produce toxic H₂S gas. This is why they must be handled in dry rooms or gloveboxes — a major manufacturing challenge.",
+                    formula: "Li₆PS₅Cl + H₂O → H₂S↑ + Li₂S + other products"
+                },
+                {
+                    question: "What is the transference number of Li⁺ in liquid electrolytes?",
+                    options: ["~0.2-0.4", "~0.5-0.6", "~0.8-0.9", "~1.0"],
+                    correct: 0,
+                    explanation: "In liquid electrolytes, only 20-40% of current is carried by Li⁺; the rest by PF₆⁻ anions. Low transference number causes concentration polarization. Solid electrolytes aim for t_Li+ ≈ 1.",
+                    formula: "t_Li+ = i_Li+ / i_total (ideally = 1)"
+                },
+                {
+                    question: "What is the function of EC (ethylene carbonate) in li-ion electrolytes?",
+                    options: ["Salt", "High-dielectric solvent that enables SEI formation on graphite", "Diluent", "Safety additive"],
+                    correct: 1,
+                    explanation: "EC has very high dielectric constant (ε=89) enabling LiPF₆ dissolution and, critically, forms the primary SEI layer on graphite anodes. It is essential but solid at room temperature — must be mixed with linear carbonates.",
+                    formula: "EC + e⁻ → Li₂CO₃ + RCH₂OLi (SEI components)"
+                }
+            ],
+            performance: [
+                {
+                    question: "What is 'energy density' of a battery (Wh/kg)?",
+                    options: ["Power per unit weight", "Energy per unit weight (gravimetric) or volume (volumetric)", "Voltage under load", "Capacity in amp-hours"],
+                    correct: 1,
+                    explanation: "Energy density has two forms: gravimetric (Wh/kg) and volumetric (Wh/L). Energy = capacity × voltage. For EV range, gravimetric energy density is critical; for smartphones, volumetric matters more.",
+                    formula: "Gravimetric: Wh/kg = (mAh/g) × V / 1000"
+                },
+                {
+                    question: "What is 'power density' measured in?",
+                    options: ["Wh/kg", "W/kg or W/L", "Ah/kg", "V/kg"],
+                    correct: 1,
+                    explanation: "Power density is the rate of energy delivery per unit mass (W/kg) or volume (W/L). High power density enables fast acceleration in EVs; low power density causes voltage sag under high loads.",
+                    formula: "P = I × V (Power = Current × Voltage)"
+                },
+                {
+                    question: "What does 'C-rate' mean?",
+                    options: ["Carbon rating", "Current relative to capacity — 1C fully charges/discharges in 1 hour", "Cell voltage rating", "Concentration ratio"],
+                    correct: 1,
+                    explanation: "C-rate expresses charge/discharge current relative to capacity. 1C fully charges a 50Ah battery in 1 hour at 50A. 2C = 25A (30 min), 0.5C = 100A (2 hours). High C-rate causes efficiency loss.",
+                    formula: "I = C-rate × Capacity (Ah)"
+                },
+                {
+                    question: "What is 'round-trip efficiency' of a battery system?",
+                    options: ["Weight/energy ratio", "Energy out / Energy in × 100%", "Voltage ratio charge/discharge", "Cycle life percentage"],
+                    correct: 1,
+                    explanation: "Round-trip efficiency measures energy loss during charge-discharge cycle. Typical li-ion: 90-95%. Grid batteries: 85-90% including inverter losses. Higher is better — affects storage economics.",
+                    formula: "η = (E_discharge / E_charge) × 100%"
+                },
+                {
+                    question: "What is 'cycle life' defined as?",
+                    options: ["Years of warranty", "Number of cycles to 80% initial capacity", "Number of charges per day", "Maximum depth of discharge"],
+                    correct: 1,
+                    explanation: "Cycle life is the number of complete charge/discharge cycles before capacity falls below 80% (industry standard EOL). A battery with 3000 cycle life at 100% DOD lasts ~8 years in daily grid use.",
+                    formula: "EOL: Capacity < 80% of initial"
+                },
+                {
+                    question: "What does 'DOD' (Depth of Discharge) affect?",
+                    options: ["Nothing", "Cycle life — deeper discharges cause more degradation", "Voltage level", "Temperature"],
+                    correct: 1,
+                    explanation: "DOD directly impacts cycle life: 100% DOD = most degradation, 50% DOD = ~4x more cycles. Partial discharge (40-60% DOD) is optimal for maximum cycle life in li-ion batteries.",
+                    formula: "N_cycles ∝ DOD^(-1.5) approximately"
+                },
+                {
+                    question: "What is 'impedance spectroscopy' used for?",
+                    options: ["Measuring capacity", "Analyzing frequency-dependent resistance and identifying degradation mechanisms", "Testing thermal stability", "Determining cell voltage"],
+                    correct: 1,
+                    explanation: "EIS (Electrochemical Impedance Spectroscopy) applies AC voltage at different frequencies, revealing resistance components: ohmic (high f), charge transfer (mid f), Warburg diffusion (low f). Used for SOH estimation.",
+                    formula: "Z(ω) = Z' + jZ'' (complex impedance)"
+                },
+                {
+                    question: "What is 'state of charge' (SOC) defined as?",
+                    options: ["State of Correctness", "Remaining capacity as percentage of full charge", "Speed of charging", "System operating condition"],
+                    correct: 1,
+                    explanation: "SOC = remaining capacity / nominal capacity × 100%. At 0% SOC, the battery is fully discharged; at 100%, fully charged. Accurate SOC estimation is critical for battery management systems (BMS).",
+                    formula: "SOC = Q_remaining / Q_nominal × 100%"
+                },
+                {
+                    question: "What is 'Wh/kg' a measure of?",
+                    options: ["Power density", "Energy density (gravimetric)", "Voltage", "Capacity density"],
+                    correct: 1,
+                    explanation: "Wh/kg is gravimetric energy density — energy stored per unit mass. Current li-ion: ~250 Wh/kg (pack level). Target for Tesla 4680: 300+ Wh/kg. Theoretical max for Li-S: ~600 Wh/kg.",
+                    formula: "Energy density = Capacity × Voltage / Mass"
+                },
+                {
+                    question: "What does 'self-discharge rate' of li-ion typically average?",
+                    options: ["0.1% per month", "1-2% per month", "5-10% per month", "20% per month"],
+                    correct: 1,
+                    explanation: "Li-ion self-discharge is ~1-2% per month at room temperature, lower than NiMH (20%/month) or NiCd (15%/month). This makes li-ion ideal for seasonal storage applications.",
+                    formula: "Self-discharge: ~1.5%/month @ 25°C, 5%/month @ 45°C"
+                }
+            ],
+            safety: [
+                {
+                    question: "What is 'thermal runaway' in batteries?",
+                    options: ["Controlled heat release", "Self-accelerating exothermic reaction causing dangerous temperature increase", "Normal battery heating", "Cooling system failure"],
+                    correct: 1,
+                    explanation: "Thermal runaway is a positive feedback loop where heat generation exceeds heat dissipation. Once started (typically >60°C SEI decomposition), it progresses to separator melt, cathode O₂ release, and fire.",
+                    formula: "dQ/dt_gen > dQ/dt_diss → T ↑ → runaway"
+                },
+                {
+                    question: "What temperature does separator melting begin in li-ion batteries?",
+                    options: ["60°C", "80°C", "120-140°C", "200°C"],
+                    correct: 2,
+                    explanation: "Polyethylene (PE) separators melt at ~120-140°C; polypropylene (PP) at ~165°C. Separator collapse causes internal short, accelerating thermal runaway. Ceramic-coated separators improve thermal stability.",
+                    formula: "PE: Tm = 130°C, PP: Tm = 165°C"
+                },
+                {
+                    question: "What is 'dendrite' in li-ion context?",
+                    options: ["Crystal growth in electrolyte", "Li metal filaments that can penetrate separator causing short", "Battery degradation product", "Safety valve component"],
+                    correct: 1,
+                    explanation: "Li dendrites are tree-like Li metal structures formed during charging when Li⁺ plating rate exceeds diffusion. They can pierce the separator (typically 20μm) causing internal short and thermal runaway.",
+                    formula: "τ = πD(zeFc₀)²/(2J)² (Sand's time)"
+                },
+                {
+                    question: "What is 'overcharge' protection in li-ion batteries?",
+                    options: ["Not necessary", "Voltage cutoff at max voltage preventing overcharge", "Temperature limit only", "Current limit only"],
+                    correct: 1,
+                    explanation: "Overcharge protection disconnects charging when voltage reaches max (e.g., 4.2V/cell for NMC). Overcharge causes Li plating, electrolyte decomposition, and potentially fire. Built into BMS.",
+                    formula: "V_max: NMC = 4.2V, LFP = 3.65V, LTO = 2.7V"
+                },
+                {
+                    question: "What is 'internal short circuit' in batteries?",
+                    options: ["External load connected", "Conductive path between electrodes internal to cell", "High internal resistance", "Normal discharge path"],
+                    correct: 1,
+                    explanation: "Internal shorts can occur from: dendrite penetration, separator puncture, particle contamination, or manufacturing defects. They cause rapid heating (I²R), potentially triggering thermal runaway.",
+                    formula: "Q = I² × R × t (Joule heating)"
+                },
+                {
+                    question: "What is the 'nail penetration test' for battery safety?",
+                    options: ["Measuring voltage", "Simulating internal short by driving nail through cell", "Testing cycle life", "Checking capacity"],
+                    correct: 1,
+                    explanation: "Nail penetration test drives a conductive nail through the battery to simulate internal short. The test evaluates whether thermal runaway occurs. EV battery packs must pass this test at cell level.",
+                    formula: "Watch for: temperature spike, fire, explosion"
+                },
+                {
+                    question: "Why is pressure relief valve needed in battery cells?",
+                    options: ["Cosmetic", "Releases gases generated during overcharge or thermal runaway to prevent explosion", "Regulates pressure during normal use", "Improves seal"],
+                    correct: 1,
+                    explanation: "During overcharge or thermal runaway, electrolyte vaporization and decomposition produce gases (CO₂, H₂, O₂). Relief valves open at predetermined pressure (1-3 bar) to prevent cell explosion.",
+                    formula: "2C₃H₄O₃ (EC) → CO₂ + other gases at high T"
+                },
+                {
+                    question: "What is 'outgassing' in failed li-ion batteries?",
+                    options: ["Normal operation", "Release of toxic/flammable gases (CO, H₂, HF) during failure", "Battery charging", "Electrolyte evaporation only"],
+                    correct: 1,
+                    explanation: "Failed li-ion batteries release toxic gases: CO (toxic), H₂ (flammable), HF (highly corrosive), VOCs. This is why proper disposal and recycling require specialized handling with protective equipment.",
+                    formula: "Electrolyte (LiPF₆) → HF↑ + PF₅↑ on thermal decomposition"
+                },
+                {
+                    question: "What is 'propagation' in battery safety context?",
+                    options: ["Normal aging", "Thermal runaway spreading from one cell to adjacent cells", "Capacity increase", "Charging process"],
+                    correct: 1,
+                    explanation: "Propagation is when thermal runaway in one cell ignites adjacent cells, causing cascade failure. This is why EV battery packs have fire barriers and sophisticated thermal management systems.",
+                    formula: "Prevention: thermal barriers, spacing, suppression systems"
+                },
+                {
+                    question: "What is 'electrolyte flammability' risk in li-ion?",
+                    options: ["No risk", "Liquid electrolytes are flammable — fire risk if exposed to ignition source", "Only when overcharged", "Only at high temperatures"],
+                    correct: 1,
+                    explanation: "Standard li-ion electrolytes use carbonate solvents (DMC, DEC, EMC) which are flammable (flash point ~33°C). When separator collapse exposes electrolyte to hot surfaces (>200°C), it ignites, sustaining fire.",
+                    formula: "Organic carbonates: flash point 33-46°C (flammable)"
+                }
+            ],
+            expert: []
+        };
+
+        // Generate expert questions from all categories
+        function generateExpertQuestions() {
+            const allQuestions = [
+                ...questionBanks.cathode,
+                ...questionBanks.anode,
+                ...questionBanks.electrolyte,
+                ...questionBanks.performance,
+                ...questionBanks.safety
+            ];
+            // Shuffle and take 15
+            return allQuestions
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 15);
+        }
+
+        // Quiz state
+        let currentCategory = null;
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+        let incorrectAnswers = 0;
+        let selectedOptions = [];
+        let startTime = null;
+        let quizStartTime = null;
+
+        // DOM elements
+        const quizSelector = document.getElementById('quizSelector');
+        const questionCard = document.getElementById('questionCard');
+        const resultsScreen = document.getElementById('resultsScreen');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const questionNumber = document.getElementById('questionNumber');
+        const questionText = document.getElementById('questionText');
+        const questionImage = document.getElementById('questionImage');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const explanation = document.getElementById('explanation');
+        const explanationText = document.getElementById('explanationText');
+        const explanationFormula = document.getElementById('explanationFormula');
+        const nextBtn = document.getElementById('nextBtn');
+        const skipBtn = document.getElementById('skipBtn');
+        const retryBtn = document.getElementById('retryBtn');
+        const changeQuizBtn = document.getElementById('changeQuizBtn');
+
+        // Category selection
+        document.querySelectorAll('.quiz-card').forEach(card => {
+            card.addEventListener('click', () => {
+                currentCategory = card.dataset.category;
+                startQuiz();
+            });
+        });
+
+        function startQuiz() {
+            currentQuestions = currentCategory === 'expert'
+                ? generateExpertQuestions()
+                : questionBanks[currentCategory];
+
+            currentQuestionIndex = 0;
+            correctAnswers = 0;
+            incorrectAnswers = 0;
+            selectedOptions = [];
+            startTime = Date.now();
+            quizStartTime = Date.now();
+
+            quizSelector.style.display = 'none';
+            questionCard.style.display = 'block';
+            resultsScreen.classList.remove('show');
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = currentQuestions[currentQuestionIndex];
+            const total = currentQuestions.length;
+            const answered = currentQuestionIndex;
+
+            questionNumber.textContent = `Question ${currentQuestionIndex + 1} of ${total}`;
+            questionText.textContent = q.question;
+
+            if (q.image) {
+                questionImage.src = q.image;
+                questionImage.style.display = 'block';
+            } else {
+                questionImage.style.display = 'none';
+            }
+
+            progressFill.style.width = `${(answered / total) * 100}%`;
+            progressText.textContent = `${answered}/${total} questions answered`;
+
+            // Clear previous state
+            optionsContainer.innerHTML = '';
+            explanation.classList.remove('show');
+            nextBtn.disabled = true;
+            nextBtn.textContent = currentQuestionIndex === total - 1 ? 'See Results' : 'Next Question';
+
+            // Create options
+            const letters = ['A', 'B', 'C', 'D'];
+            q.options.forEach((option, index) => {
+                const optionEl = document.createElement('div');
+                optionEl.className = 'option';
+                optionEl.dataset.index = index;
+                optionEl.innerHTML = `
+                    <span class="option-letter">${letters[index]}</span>
+                    <span class="option-text">${option}</span>
+                    <span class="option-icon"></span>
+                `;
+                optionEl.addEventListener('click', () => selectOption(index));
+                optionsContainer.appendChild(optionEl);
+            });
+
+            skipBtn.style.display = currentQuestionIndex < total - 1 ? 'inline-block' : 'none';
+        }
+
+        function selectOption(index) {
+            const options = optionsContainer.querySelectorAll('.option');
+            if (options[index].classList.contains('disabled')) return;
+
+            const q = currentQuestions[currentQuestionIndex];
+            const isCorrect = index === q.correct;
+
+            // Disable all options
+            options.forEach(opt => opt.classList.add('disabled'));
+
+            // Mark selected
+            options[index].classList.add('selected');
+
+            // Show correct/incorrect
+            if (isCorrect) {
+                options[index].classList.add('correct');
+                options[index].querySelector('.option-icon').textContent = '✓';
+                correctAnswers++;
+            } else {
+                options[index].classList.add('incorrect');
+                options[index].querySelector('.option-icon').textContent = '✗';
+                options[q.correct].classList.add('correct'); // Show correct answer
+                options[q.correct].querySelector('.option-icon').textContent = '✓';
+                incorrectAnswers++;
+            }
+
+            selectedOptions.push(index);
+
+            // Show explanation
+            explanationText.textContent = q.explanation;
+            explanationFormula.textContent = q.formula || '';
+            explanation.classList.add('show');
+
+            // Enable next button
+            nextBtn.disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex >= currentQuestions.length) {
+                showResults();
+            } else {
+                loadQuestion();
+            }
+        }
+
+        function showResults() {
+            const total = currentQuestions.length;
+            const accuracy = Math.round((correctAnswers / total) * 100);
+            const timeElapsed = Math.round((Date.now() - quizStartTime) / 1000);
+            const minutes = Math.floor(timeElapsed / 60);
+            const seconds = timeElapsed % 60;
+
+            questionCard.style.display = 'none';
+            resultsScreen.classList.add('show');
+
+            progressFill.style.width = '100%';
+            progressText.textContent = 'Quiz Complete!';
+
+            // Animate score circle
+            const scoreCircle = document.getElementById('scoreCircle');
+            const circumference = 2 * Math.PI * 85;
+            const offset = circumference - (accuracy / 100) * circumference;
+
+            // Reset and animate
+            scoreCircle.style.strokeDashoffset = circumference;
+            setTimeout(() => {
+                scoreCircle.style.strokeDashoffset = offset;
+            }, 100);
+
+            document.getElementById('scoreNumber').textContent = correctAnswers;
+            document.getElementById('correctCount').textContent = correctAnswers;
+            document.getElementById('incorrectCount').textContent = incorrectAnswers;
+            document.getElementById('accuracyPercent').textContent = accuracy + '%';
+            document.getElementById('timeTaken').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            // Results message and badge
+            const resultsTitle = document.getElementById('resultsTitle');
+            const resultsMessage = document.getElementById('resultsMessage');
+            const badgeEarned = document.getElementById('badgeEarned');
+            const badgeIcon = document.getElementById('badgeIcon');
+            const badgeTitle = document.getElementById('badgeTitle');
+
+            if (accuracy === 100) {
+                resultsTitle.textContent = 'Perfect Score!';
+                resultsMessage.textContent = 'Outstanding! You have mastered battery chemistry. The Nobel Committee awaits your application.';
+                badgeEarned.classList.add('show');
+                badgeIcon.textContent = '🏆';
+                badgeTitle.textContent = 'Battery Master Achieved!';
+            } else if (accuracy >= 80) {
+                resultsTitle.textContent = 'Excellent Performance!';
+                resultsMessage.textContent = 'Impressive knowledge! You clearly understand the fundamentals of battery electrochemistry.';
+                badgeEarned.classList.add('show');
+                badgeIcon.textContent = '🥇';
+                badgeTitle.textContent = 'Expert Scientist Badge';
+            } else if (accuracy >= 60) {
+                resultsTitle.textContent = 'Good Progress!';
+                resultsMessage.textContent = 'Solid foundation, but there are some gaps to fill. Review the explanations and try again.';
+                badgeEarned.classList.remove('show');
+            } else {
+                resultsTitle.textContent = 'Keep Learning!';
+                resultsMessage.textContent = 'Battery science is complex — that\'s why we have research labs! Review the explanations and visit the Materials Database.';
+                badgeEarned.classList.remove('show');
+            }
+        }
+
+        function resetQuiz() {
+            currentCategory = null;
+            currentQuestions = [];
+            currentQuestionIndex = 0;
+            correctAnswers = 0;
+            incorrectAnswers = 0;
+            selectedOptions = [];
+
+            quizSelector.style.display = 'grid';
+            questionCard.style.display = 'none';
+            resultsScreen.classList.remove('show');
+            progressFill.style.width = '0%';
+            progressText.textContent = 'Select a quiz category to begin';
+        }
+
+        // Event listeners
+        nextBtn.addEventListener('click', nextQuestion);
+        skipBtn.addEventListener('click', showResults);
+        retryBtn.addEventListener('click', startQuiz);
+        changeQuizBtn.addEventListener('click', resetQuiz);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big Bang Timeline — The Universe From Nothing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --planck: #ff6b35;
+            --gut: #f72585;
+            --ew: #b5179e;
+            --inflation: #7209b7;
+            --quark: #560bad;
+            --hadron: #480ca8;
+            --lepton: #3a0ca3;
+            --nucleo: #3f37c9;
+            --recombo: #4895ef;
+            --dark-ages: #4cc9f0;
+            --reion: #4361ee;
+            --first-stars: #fb8500;
+            --galaxies: #ffb703;
+            --solar: #ffd60a;
+            --earth: #06d6a0;
+            --life: #118ab2;
+            --humans: #ef476f;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Crimson Pro', Georgia, serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        #cosmic-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+        }
+
+        header {
+            text-align: center;
+            padding: 80px 20px 40px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            background: linear-gradient(90deg, #ff6b35, #b5179e, #4361ee, #4cc9f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+        }
+
+        .intro {
+            max-width: 700px;
+            margin: 30px auto 0;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: rgba(255,255,255,0.7);
+            font-weight: 300;
+        }
+
+        .timeline-container {
+            position: relative;
+            padding: 60px 20px 100px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .era-selector {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 60px;
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .era-btn {
+            padding: 10px 18px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .era-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+        .era-btn.active { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.4); }
+
+        .timeline-spine {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg,
+                var(--planck) 0%,
+                var(--gut) 10%,
+                var(--ew) 15%,
+                var(--inflation) 20%,
+                var(--quark) 30%,
+                var(--hadron) 40%,
+                var(--lepton) 50%,
+                var(--nucleo) 60%,
+                var(--recombo) 70%,
+                var(--dark-ages) 75%,
+                var(--reion) 80%,
+                var(--first-stars) 85%,
+                var(--galaxies) 90%,
+                var(--solar) 95%,
+                var(--earth) 97%,
+                var(--life) 99%,
+                var(--humans) 100%
+            );
+            transform: translateX(-50%);
+            opacity: 0.6;
+        }
+
+        .era-block {
+            position: relative;
+            margin-bottom: 80px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .era-block.visible { opacity: 1; transform: translateY(0); }
+
+        .era-block::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: inherit;
+            border: 3px solid #fff;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 30px currentColor;
+            z-index: 5;
+        }
+
+        .era-card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .era-block:nth-child(odd) .era-card { margin-left: auto; margin-right: calc(50% + 60px); }
+        .era-block:nth-child(even) .era-card { margin-left: calc(50% + 60px); margin-right: 0; }
+
+        .era-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, currentColor, transparent);
+            opacity: 0.5;
+        }
+
+        .era-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .era-name {
+            font-size: 1.8rem;
+            font-weight: 300;
+            margin-bottom: 15px;
+            letter-spacing: 0.05em;
+        }
+
+        .era-description {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 20px;
+        }
+
+        .era-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .stat-box {
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .stat-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .era-visual {
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            min-height: 250px;
+            background: #000;
+        }
+
+        .era-visual canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .scale-bar {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            z-index: 100;
+            padding: 15px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .scale-bar span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.6);
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            letter-spacing: 0.2em;
+        }
+
+        .time-marker {
+            width: 40px;
+            height: 1px;
+            background: rgba(255,255,255,0.3);
+            position: relative;
+        }
+
+        .time-marker::after {
+            content: attr(data-time);
+            position: absolute;
+            right: 50px;
+            top: -6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.5);
+            white-space: nowrap;
+        }
+
+        .detail-panel {
+            position: fixed;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 280px;
+            background: rgba(0,0,0,0.9);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 25px;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .detail-panel.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .detail-panel h3 {
+            font-size: 1.2rem;
+            font-weight: 300;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .detail-panel p {
+            font-size: 0.85rem;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 12px;
+        }
+
+        .detail-panel .physics {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .particle-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .particle {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .particle:hover { transform: scale(1.2); }
+
+        .progress-track {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 100;
+            padding: 12px 20px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot:hover, .progress-dot.active {
+            background: #fff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .infographic {
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+        }
+
+        .info-row:last-child { margin-bottom: 0; }
+
+        .info-label {
+            color: rgba(255,255,255,0.5);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+        }
+
+        .info-value {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .energy-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .energy-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes expand {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        .era-block:hover .era-visual canvas {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @media (max-width: 900px) {
+            .era-card { grid-template-columns: 1fr; }
+            .era-block:nth-child(odd) .era-card,
+            .era-block:nth-child(even) .era-card {
+                margin-left: 0;
+                margin-right: 0;
+            }
+            .timeline-spine { left: 30px; }
+            .era-block::after { left: 30px; }
+            .scale-bar { display: none; }
+            .detail-panel {
+                position: relative;
+                left: 0;
+                top: 0;
+                transform: none;
+                width: 100%;
+                margin-bottom: 30px;
+            }
+            .progress-track { display: none; }
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 80px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-to-top:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-3px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, transparent 100%);
+        }
+
+        footer p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 0.2em;
+        }
+
+        .era-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+        }
+
+        .comparison {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border-left: 3px solid currentColor;
+        }
+
+        .comparison-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+        }
+
+        .comparison-text {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="cosmic-bg"></canvas>
+
+    <header>
+        <h1>The Big Bang Timeline</h1>
+        <p class="subtitle">13.8 Billion Years of Cosmic Evolution</p>
+        <p class="intro">
+            From the infinitesimal Planck epoch to the first stars igniting in the primordial darkness,
+            witness the greatest story ever told. Each moment in this timeline represents eons of
+            transformation, as simple quantum fields blossomed into the complex cosmos we inhabit today.
+        </p>
+    </header>
+
+    <div class="scale-bar">
+        <span>Time</span>
+        <div class="time-marker" data-time="10⁻⁴⁴ s"></div>
+        <div class="time-marker" data-time="10⁻³⁶ s"></div>
+        <div class="time-marker" data-time="10⁻³² s"></div>
+        <div class="time-marker" data-time="1 s"></div>
+        <div class="time-marker" data-time="3 min"></div>
+        <div class="time-marker" data-time="380,000 yr"></div>
+        <div class="time-marker" data-time="200 Myr"></div>
+        <div class="time-marker" data-time="13.8 Gyr"></div>
+        <span>Present</span>
+    </div>
+
+    <div class="detail-panel" id="detail-panel">
+        <h3 id="detail-title">Select an Era</h3>
+        <p id="detail-text">Hover over any era to learn about the fundamental physics and cosmic events of that epoch.</p>
+        <div class="physics" id="detail-physics">
+            Temperature: —<br>
+            Energy Scale: —<br>
+            Dominant Physics: —
+        </div>
+        <div class="particle-grid" id="particle-grid"></div>
+    </div>
+
+    <nav class="era-selector">
+        <button class="era-btn active" data-era="planck">Planck</button>
+        <button class="era-btn" data-era="gut">GUT</button>
+        <button class="era-btn" data-era="electroweak">EW</button>
+        <button class="era-btn" data-era="inflation">Inflation</button>
+        <button class="era-btn" data-era="quark">Quark</button>
+        <button class="era-btn" data-era="hadron">Hadron</button>
+        <button class="era-btn" data-era="lepton">Lepton</button>
+        <button class="era-btn" data-era="nucleosynthesis">BBN</button>
+        <button class="era-btn" data-era="recombination">Recomb</button>
+        <button class="era-btn" data-era="darkages">Dark Ages</button>
+        <button class="era-btn" data-era="reionization">Reion</button>
+        <button class="era-btn" data-era="firststars">1st Stars</button>
+        <button class="era-btn" data-era="galaxies">Galaxies</button>
+        <button class="era-btn" data-era="solar">Solar</button>
+        <button class="era-btn" data-era="earth">Earth</button>
+        <button class="era-btn" data-era="life">Life</button>
+        <button class="era-btn" data-era="humans">Humans</button>
+    </nav>
+
+    <main class="timeline-container">
+        <div class="timeline-spine"></div>
+
+        <article class="era-block" data-era="planck" style="color: var(--planck);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--planck);">t = 0 to 10⁻⁴⁴ s</span>
+                    <h2 class="era-name">Planck Era</h2>
+                    <p class="era-description">
+                        The moment before time began. Our universe compressed into a region smaller than
+                        a Planck length (1.6×10⁻³⁵ m). Here, general relativity and quantum mechanics
+                        collide in a singularity where space-time itself loses meaning. All four
+                        fundamental forces—gravity, strong nuclear, weak nuclear, and electromagnetic—
+                        are unified in a single "superforce."
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Scale Comparison</div>
+                        <p class="comparison-text">Smaller than a proton by a factor of 10²⁰</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Temperature</div>
+                            <div class="stat-value">10³² K</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Energy</div>
+                            <div class="stat-value">10¹⁹ GeV</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Size</div>
+                            <div class="stat-value">10⁻³⁵ m</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Forces</div>
+                            <div class="stat-value">1 (Unified)</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="gut" style="color: var(--gut);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--gut);">t = 10⁻⁴⁴ to 10⁻³⁶ s</span>
+                    <h2 class="era-name">Grand Unification Era</h2>
+                    <p class="era-description">
+                        Gravity separates from the other forces, which remain unified as the
+                        "electroweak-strong" force. The universe expands to about the size of a
+                        proton, while the strong nuclear force begins its slow differentiation from
+                        the electroweak. This era marks the first emergence of matter asymmetry—
+                        perhaps tiny violations of CP-symmetry plant the seeds for a matter-dominated
+                        universe.
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Scale Comparison</div>
+                        <p class="comparison-text">The universe grows from smaller than a proton to the size of a proton</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Temperature</div>
+                            <div class="stat-value">10³² K</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Energy</div>
+                            <div class="stat-value">10¹⁶ GeV</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Forces</div>
+                            <div class="stat-value">2 (GUT)</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="electroweak" style="color: var(--ew);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--ew);">t = 10⁻³⁶ to 10⁻¹² s</span>
+                    <h2 class="era-name">Electroweak Era</h2>
+                    <p class="era-description">
+                        The strong nuclear force separates, leaving only the electroweak force unifying
+                        electromagnetism and the weak nuclear force. The Higgs field acquires a vacuum
+                        expectation value, imparting mass to all fundamental particles. Quarks,
+                        leptons, and gauge bosons condense from the cooling vacuum. The universe is
+                        now a hot soup of primordial plasma.
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Scale Comparison</div>
+                        <p class="comparison-text">Still smaller than an atom, but expanding rapidly</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Temperature</div>
+                            <div class="stat-value">10¹⁵ K</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Energy</div>
+                            <div class="stat-value">10² GeV</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Forces</div>
+                            <div class="stat-value">2 (EW)</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="inflation" style="color: var(--inflation);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--inflation);">t = 10⁻³⁶ to 10⁻³² s</span>
+                    <h2 class="era-name">Cosmic Inflation</h2>
+                    <p class="era-description">
+                        The universe undergoes exponential expansion, growing by a factor of 10²⁶
+                        in just 10⁻³² seconds. What was once smaller than a proton becomes larger
+                        than the observable universe. Quantum fluctuations in the inflaton field are
+                        stretched into cosmic seeds for structure formation. The universe transitions
+                        from quantum to classical behavior.
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Scale Comparison</div>
+                        <p class="comparison-text">From the size of a proton to larger than the observable universe</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Expansion</div>
+                            <div class="stat-value">10²⁶×</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Duration</div>
+                            <div class="stat-value">10⁻³² s</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="quark" style="color: var(--quark);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--quark);">t = 10⁻¹² to 10⁻⁶ s</span>
+                    <h2 class="era-name">Quark Era</h2>
+                    <p class="era-description">
+                        The universe cools below the electroweak symmetry breaking scale. Quarks
+                        and antiquarks annihilate, leaving only a slight matter excess (one in a
+                        billion). The electroweak force splits into distinct electromagnetic and
+                        weak forces. The Higgs mechanism gives particles their masses. This plasma
+                        of quarks and gluons will persist until the universe cools further.
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Scale Comparison</div>
+                        <p class="comparison-text">Still at nuclear densities, hotter than the sun's core</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Temperature</div>
+                            <div class="stat-value">10¹⁵ K</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Energy</div>
+                            <div class="stat-value">1 GeV</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="hadron" style="color: var(--hadron);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--hadron);">t = 10⁻⁶ to 10⁻³ s</span>
+                    <h2 class="era-name">Hadron Era</h2>
+                    <p class="era-description">
+                        The universe cools below the QCD scale (150 MeV), and quarks hadronize into
+                        protons, neutrons, and their antiparticles. Matter and antimatter nearly
+                        completely annihilate, leaving only the primordial matter excess. The
+                        remaining hadrons and leptons form a dense, opaque plasma that will persist
+                        until nucleosynthesis.
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Scale Comparison</div>
+                        <p class="comparison-text">One hadron per cubic meter of space</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Temperature</div>
+                            <div class="stat-value">10¹² K</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Density</div>
+                            <div class="stat-value">10¹⁴ g/cm³</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="lepton" style="color: var(--lepton);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--lepton);">t = 10⁻³ to 1 s</span>
+                    <h2 class="era-name">Lepton Era</h2>
+                    <p class="era-description">
+                        Electrons and positrons dominate the energy density. Neutrinos decouple from
+                        the plasma, carrying away energy and free-streaming through the universe.
+                        The muon decays, and the universe becomes transparent to neutrinos.
+                        Photons still cannot escape the dense plasma, trapped by constant scattering
+                        off charged particles.
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Scale Comparison</div>
+                        <p class="comparison-text">Photons bounce between electrons like light in fog</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Temperature</div>
+                            <div class="stat-value">10¹⁰ K</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Neutrino T</div>
+                            <div class="stat-value">10¹⁰ K</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="nucleosynthesis" style="color: var(--nucleo);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--nucleo);">t = 1 s to 3 min</span>
+                    <h2 class="era-name">Big Bang Nucleosynthesis</h2>
+                    <p class="era-description">
+                        The universe's most remarkable kitchen. As temperatures drop, protons and
+                        neutrons fuse to form deuterium, helium-4, lithium-7, and trace amounts of
+                        other light elements. This primordial abundance—75% hydrogen, 25% helium
+                        by mass—remains unchanged to this day and provides the strongest evidence
+                        for the Big Bang model.
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Abundance</div>
+                        <p class="comparison-text">~92% H, ~8% He-4, ~0.001% D, ~0.00001% Li</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Temperature</div>
+                            <div class="stat-value">10⁹ K</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">He-4 fraction</div>
+                            <div class="stat-value">25%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="recombination" style="color: var(--recombo);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--recombo);">t = 380,000 yr</span>
+                    <h2 class="era-name">Recombination Era</h2>
+                    <p class="era-description">
+                        Electrons finally combine with atomic nuclei to form neutral atoms. The
+                        universe becomes transparent to light for the first time. Photons decouple
+                        and stream freely through space, preserving the infant universe's face.
+                        This fossil radiation will be observed 13.8 billion years later as the
+                        Cosmic Microwave Background (CMB).
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Legacy</div>
+                        <p class="comparison-text">The CMB temperature is now 2.725 K—uniform across the sky</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Temperature</div>
+                            <div class="stat-value">3000 K</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">CMB T</div>
+                            <div class="stat-value">2.725 K</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="darkages" style="color: var(--dark-ages);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--dark-ages);">t = 380,000 to 200 Myr</span>
+                    <h2 class="era-name">Dark Ages</h2>
+                    <p class="era-description">
+                        The universe enters its longest and most mysterious epoch. No stars, no
+                        galaxies—only primordial hydrogen and helium clouds and the fading glow
+                        of the CMB. The cosmic web begins to form as dark matter clusters. The
+                        only light comes from the 21 cm hydrogen line, emitted when spin-flip
+                        transitions occur.
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Duration</div>
+                        <p class="comparison-text">Longest era in cosmic history—longer than all later eras combined</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Temperature</div>
+                            <div class="stat-value">60 → 20 K</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">CMB</div>
+                            <div class="stat-value">60 → 20 K</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="reionization" style="color: var(--reion);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--reion);">t = 200 to 400 Myr</span>
+                    <h2 class="era-name">Reionization</h2>
+                    <p class="era-description">
+                        The first generation of stars and galaxies produce enough ultraviolet
+                        radiation to reionize the neutral hydrogen that filled the universe since
+                        recombination. This "last scattering" of photons marks the end of the
+                        cosmic dark ages. Quasars also contribute, their powerful jets carving
+                        bubbles of ionized gas throughout the intergalactic medium.
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Ionization</div>
+                        <p class="comparison-text">Neutral hydrogen fraction drops from ~1 to ~10⁻³</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Star Mass</div>
+                            <div class="stat-value">100-1000 M☉</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Reion frac</div>
+                            <div class="stat-value">10% → 90%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="firststars" style="color: var(--first-stars);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--first-stars);">t = 200 to 500 Myr</span>
+                    <h2 class="era-name">First Stars</h2>
+                    <p class="era-description">
+                        Population III stars ignite in the darkest corners of the cosmos.
+                        These massive blue giants—hundreds of solar masses—carve through their
+                        surroundings with intense UV radiation and violent supernova explosions.
+                        They forge the first heavy elements, seeding the universe with the
+                        building blocks for future stars and planets.
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Characteristics</div>
+                        <p class="comparison-text">Metal-free, extremely massive, very hot and luminous</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Mass</div>
+                            <div class="stat-value">30-1000 M☉</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Temperature</div>
+                            <div class="stat-value">10⁵ K</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="galaxies" style="color: var(--galaxies);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--galaxies);">t = 500 Myr to 2 Gyr</span>
+                    <h2 class="era-name">Galaxy Formation</h2>
+                    <p class="era-description">
+                        Dark matter halos grow massive enough to collapse and form the first
+                        galaxies. Through mergers and gravitational interactions, these proto-
+                        galaxies evolve into familiar structures. The cosmic web becomes visible
+                        as galaxies cluster along filaments and at filament intersections.
+                        Supermassive black holes begin their growth in galactic centers.
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Growth</div>
+                        <p class="comparison-text">From 1000 galaxies to 200 billion over a few billion years</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Galaxy count</div>
+                            <div class="stat-value">~10⁹</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Milky Way age</div>
+                            <div class="stat-value">13.6 Gyr</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="solar" style="color: var(--solar);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--solar);">t = 9.2 Gyr</span>
+                    <h2 class="era-name">Solar System Formation</h2>
+                    <p class="era-description">
+                        A supernova in a nearby region of the Milky Way enriches the local
+                        interstellar medium with heavy elements. A molecular cloud of gas
+                        and dust becomes gravitationally unstable and collapses. A protostellar
+                        disk forms, eventually condensing into our Sun, planets, asteroids, and
+                        comets—a solar system complete in just 100 million years.
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Composition</div>
+                        <p class="comparison-text">99.8% Sun, 0.2% planets, 0.001% life-bearing materials</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Sun Mass</div>
+                            <div class="stat-value">2×10³⁰ kg</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Age</div>
+                            <div class="stat-value">4.6 Gyr</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="earth" style="color: var(--earth);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--earth);">t = 9.3 Gyr</span>
+                    <h2 class="era-name">Earth Formation</h2>
+                    <p class="era-description">
+                        Rocky planets form through accretion of planetesimals in the inner solar
+                        system. Earth accretes over 60 million years, reaching near its current
+                        size through giant impacts—the Moon-forming impact with a Mars-sized
+                        body being the most significant. Water arrives via comets and asteroids,
+                        setting the stage for life.
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Key Events</div>
+                        <p class="comparison-text">Moon formation (4.5 Gyr), late heavy bombardment (3.9 Gyr)</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Radius</div>
+                            <div class="stat-value">6,371 km</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Age</div>
+                            <div class="stat-value">4.54 Gyr</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="life" style="color: var(--life);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--life);">t = 9.5 Gyr</span>
+                    <h2 class="era-name">Origin of Life</h2>
+                    <p class="era-description">
+                        In Earth's warm, wet environment, chemistry becomes biology. The first
+                        self-replicating molecules emerge, possibly near hydrothermal vents or
+                        in tidal pools. RNA world transitions to DNA-protein world. Single-celled
+                        life diversifies and conquers every ecological niche. Photosynthesis
+                        fills the atmosphere with oxygen—a planetary transformation.
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Timeline</div>
+                        <p class="comparison-text">First life: 4.0 Gyr, Photosynthesis: 2.5 Gyr, Eukaryotes: 2.0 Gyr</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">First cells</div>
+                            <div class="stat-value">4.0 Gyr ago</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Oxygen rise</div>
+                            <div class="stat-value">2.4 Gyr ago</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+
+        <article class="era-block" data-era="humans" style="color: var(--humans);">
+            <div class="era-card">
+                <div class="era-content">
+                    <span class="era-badge" style="background: var(--humans);">t = 13.8 Gyr</span>
+                    <h2 class="era-name">Humans & Civilization</h2>
+                    <p class="era-description">
+                        Homo sapiens emerges in Africa mere hundreds of thousands of years ago.
+                        Language, art, and tool use flourish. Agriculture enables civilization.
+                        Science is born—Newton, Einstein, Hubble reveal the cosmic context.
+                        We are the universe contemplating itself, born from stellar nucleosynthesis,
+                        shaped by 13.8 billion years of cosmic evolution.
+                    </p>
+                    <div class="comparison">
+                        <div class="comparison-title">Human Timeline</div>
+                        <p class="comparison-text">Homo sapiens: 300,000 yr, Agriculture: 10,000 yr, Science: 400 yr</p>
+                    </div>
+                    <div class="era-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">World pop</div>
+                            <div class="stat-value">8 billion</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Observable</div>
+                            <div class="stat-value">93 Gly</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="era-visual">
+                    <canvas></canvas>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <div class="progress-track">
+        <div class="progress-dot active" data-index="0"></div>
+        <div class="progress-dot" data-index="1"></div>
+        <div class="progress-dot" data-index="2"></div>
+        <div class="progress-dot" data-index="3"></div>
+        <div class="progress-dot" data-index="4"></div>
+        <div class="progress-dot" data-index="5"></div>
+        <div class="progress-dot" data-index="6"></div>
+        <div class="progress-dot" data-index="7"></div>
+        <div class="progress-dot" data-index="8"></div>
+        <div class="progress-dot" data-index="9"></div>
+        <div class="progress-dot" data-index="10"></div>
+        <div class="progress-dot" data-index="11"></div>
+        <div class="progress-dot" data-index="12"></div>
+        <div class="progress-dot" data-index="13"></div>
+        <div class="progress-dot" data-index="14"></div>
+        <div class="progress-dot" data-index="15"></div>
+        <div class="progress-dot" data-index="16"></div>
+    </div>
+
+    <button class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</button>
+
+    <footer>
+        <p>Big Bang Timeline — An Interactive Cosmic Journey</p>
+        <p style="margin-top: 10px;">Created by Kevin — Virtual World Physicist</p>
+    </footer>
+
+    <script>
+        // Canvas background
+        const bgCanvas = document.getElementById('cosmic-bg');
+        const bgCtx = bgCanvas.getContext('2d');
+        let stars = [];
+        let animationId;
+
+        function resizeCanvas() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+            initStars();
+        }
+
+        function initStars() {
+            stars = [];
+            const numStars = Math.floor((bgCanvas.width * bgCanvas.height) / 8000);
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * bgCanvas.width,
+                    y: Math.random() * bgCanvas.height,
+                    radius: Math.random() * 1.5,
+                    alpha: Math.random() * 0.8 + 0.2,
+                    twinkleSpeed: Math.random() * 0.02 + 0.005
+                });
+            }
+        }
+
+        function animateBackground() {
+            bgCtx.fillStyle = '#000';
+            bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+            const gradient = bgCtx.createRadialGradient(
+                bgCanvas.width / 2, bgCanvas.height / 2, 0,
+                bgCanvas.width / 2, bgCanvas.height / 2, bgCanvas.width * 0.8
+            );
+            gradient.addColorStop(0, 'rgba(30, 0, 50, 0.3)');
+            gradient.addColorStop(0.5, 'rgba(10, 0, 20, 0.2)');
+            gradient.addColorStop(1, 'transparent');
+            bgCtx.fillStyle = gradient;
+            bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+            stars.forEach(star => {
+                star.alpha = 0.3 + Math.sin(Date.now() * star.twinkleSpeed) * 0.3;
+                bgCtx.beginPath();
+                bgCtx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                bgCtx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+                bgCtx.fill();
+            });
+
+            animationId = requestAnimationFrame(animateBackground);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        animateBackground();
+
+        // Era visual canvases
+        const eraVisuals = {
+            planck: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const time = Date.now() * 0.001;
+                for (let i = 0; i < 50; i++) {
+                    const angle = (i / 50) * Math.PI * 2 + time;
+                    const radius = 30 + Math.sin(time * 2 + i) * 10;
+                    const x = w/2 + Math.cos(angle) * radius;
+                    const y = h/2 + Math.sin(angle) * radius;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 107, 53, ${0.3 + Math.sin(time + i) * 0.3})`;
+                    ctx.fill();
+                }
+                ctx.beginPath();
+                ctx.arc(w/2, h/2, 15, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 107, 53, 0.8)';
+                ctx.fill();
+            },
+            gut: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const time = Date.now() * 0.001;
+                for (let i = 0; i < 30; i++) {
+                    const x = w/2 + Math.cos(time + i * 0.2) * (50 + i * 3);
+                    const y = h/2 + Math.sin(time * 0.7 + i * 0.2) * (50 + i * 3);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 3, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(247, 37, 133, ${0.6 - i * 0.015})`;
+                    ctx.fill();
+                }
+            },
+            electroweak: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const time = Date.now() * 0.001;
+                for (let i = 0; i < 40; i++) {
+                    const x = w/2 + Math.cos(time * 0.5 + i * 0.3) * (40 + Math.sin(time + i) * 20);
+                    const y = h/2 + Math.sin(time * 0.8 + i * 0.3) * (40 + Math.cos(time * 1.2 + i) * 20);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(181, 23, 158, ${0.5 + Math.sin(time * 2 + i) * 0.3})`;
+                    ctx.fill();
+                }
+            },
+            inflation: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const time = Date.now() * 0.002;
+                const scale = 1 + time * 0.5;
+                ctx.strokeStyle = 'rgba(114, 9, 183, 0.5)';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < 5; i++) {
+                    ctx.beginPath();
+                    ctx.arc(w/2, h/2, (20 + i * 15) * scale % 100, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                ctx.fillStyle = 'rgba(114, 9, 183, 0.8)';
+                ctx.beginPath();
+                ctx.arc(w/2, h/2, 10, 0, Math.PI * 2);
+                ctx.fill();
+            },
+            quark: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const time = Date.now() * 0.001;
+                for (let i = 0; i < 60; i++) {
+                    const x = w/2 + Math.cos(time + i * 0.1) * (30 + i * 2);
+                    const y = h/2 + Math.sin(time * 1.5 + i * 0.1) * (30 + i * 2);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(86, 11, 173, ${0.7 - i * 0.01})`;
+                    ctx.fill();
+                }
+            },
+            hadron: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const time = Date.now() * 0.001;
+                const particles = [];
+                for (let i = 0; i < 30; i++) {
+                    particles.push({
+                        x: Math.random() * w,
+                        y: Math.random() * h,
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: (Math.random() - 0.5) * 2,
+                        r: 3 + Math.random() * 4
+                    });
+                }
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < 0 || p.x > w) p.vx *= -1;
+                    if (p.y < 0 || p.y > h) p.vy *= -1;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(72, 12, 168, 0.6)`;
+                    ctx.fill();
+                });
+            },
+            lepton: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const time = Date.now() * 0.001;
+                for (let i = 0; i < 40; i++) {
+                    const x = w/2 + Math.cos(time * 0.3 + i * 0.2) * (50 + Math.sin(time + i) * 30);
+                    const y = h/2 + Math.sin(time * 0.5 + i * 0.2) * (50 + Math.cos(time * 1.3 + i) * 30);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(58, 12, 163, ${0.6 + Math.sin(time * 2 + i) * 0.2})`;
+                    ctx.fill();
+                }
+                ctx.fillStyle = 'rgba(58, 12, 163, 0.3)';
+                ctx.fillRect(0, h/2 - 20, w, 40);
+            },
+            nucleosynthesis: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const nuclei = [
+                    {symbol: 'H', x: 0.2, y: 0.5, color: '#fff'},
+                    {symbol: 'He', x: 0.4, y: 0.5, color: '#3f37c9'},
+                    {symbol: 'D', x: 0.55, y: 0.4, color: '#4895ef'},
+                    {symbol: 'Li', x: 0.7, y: 0.5, color: '#4cc9f0'},
+                    {symbol: 'He', x: 0.85, y: 0.5, color: '#3f37c9'}
+                ];
+                ctx.font = 'bold 48px JetBrains Mono';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const time = Date.now() * 0.001;
+                nuclei.forEach((n, i) => {
+                    const y = n.y + Math.sin(time + i) * 0.05;
+                    ctx.fillStyle = n.color;
+                    ctx.globalAlpha = 0.6 + Math.sin(time * 2 + i) * 0.3;
+                    ctx.fillText(n.symbol, n.x * w, y * h);
+                });
+                ctx.globalAlpha = 1;
+                ctx.font = '12px JetBrains Mono';
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.fillText('p + n → D → He-4 → Li-7', w/2, h * 0.8);
+            },
+            recombination: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const time = Date.now() * 0.0005;
+                for (let i = 0; i < 100; i++) {
+                    const x = Math.random() * w;
+                    const y = Math.random() * h;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 1, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(72, 149, 239, ${Math.random() * 0.5})`;
+                    ctx.fill();
+                }
+                ctx.fillStyle = 'rgba(72, 149, 239, 0.2)';
+                ctx.fillRect(0, h/2 - 60, w, 120);
+                ctx.font = '14px JetBrains Mono';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                ctx.fillText(' photons finally free to travel', w/2, h/2);
+            },
+            darkages: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = 'rgba(76, 201, 240, 0.1)';
+                ctx.fillRect(0, 0, w, h);
+                ctx.font = '16px JetBrains Mono';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'rgba(76, 201, 240, 0.4)';
+                ctx.fillText('21 cm hydrogen line', w/2, h/2);
+            },
+            reionization: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const time = Date.now() * 0.001;
+                ctx.fillStyle = 'rgba(67, 97, 238, 0.1)';
+                ctx.beginPath();
+                ctx.arc(w/2, h/2, 50 + time * 20 % 100, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.font = '14px JetBrains Mono';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.fillText('reionization bubbles', w/2, h/2);
+            },
+            firststars: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const time = Date.now() * 0.001;
+                for (let i = 0; i < 5; i++) {
+                    const x = w * 0.2 + i * w * 0.15;
+                    const y = h/2 + Math.sin(time + i) * 20;
+                    const gradient = ctx.createRadialGradient(x, y, 0, x, y, 40);
+                    gradient.addColorStop(0, 'rgba(251, 133, 0, 0.8)');
+                    gradient.addColorStop(0.5, 'rgba(251, 133, 0, 0.2)');
+                    gradient.addColorStop(1, 'transparent');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(x - 40, y - 40, 80, 80);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = '#fff';
+                    ctx.fill();
+                }
+            },
+            galaxies: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const time = Date.now() * 0.0003;
+                const galaxies = [
+                    {x: 0.25, y: 0.3, r: 20},
+                    {x: 0.6, y: 0.4, r: 30},
+                    {x: 0.8, y: 0.6, r: 25},
+                    {x: 0.35, y: 0.7, r: 15}
+                ];
+                galaxies.forEach(g => {
+                    const gradient = ctx.createRadialGradient(g.x * w, g.y * h, 0, g.x * w, g.y * h, g.r);
+                    gradient.addColorStop(0, 'rgba(255, 183, 3, 0.8)');
+                    gradient.addColorStop(0.5, 'rgba(255, 183, 3, 0.2)');
+                    gradient.addColorStop(1, 'transparent');
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(g.x * w, g.y * h, g.r, 0, Math.PI * 2);
+                    ctx.fill();
+                    for (let i = 0; i < 20; i++) {
+                        const angle = (i / 20) * Math.PI * 2 + time;
+                        const radius = g.r * 0.3 + (i % 3) * g.r * 0.2;
+                        ctx.beginPath();
+                        ctx.arc(
+                            g.x * w + Math.cos(angle) * radius,
+                            g.y * h + Math.sin(angle) * radius,
+                            1, 0, Math.PI * 2
+                        );
+                        ctx.fillStyle = 'rgba(255, 183, 3, 0.5)';
+                        ctx.fill();
+                    }
+                });
+            },
+            solar: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const time = Date.now() * 0.0005;
+                const gradient = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, 60);
+                gradient.addColorStop(0, 'rgba(255, 214, 10, 1)');
+                gradient.addColorStop(0.3, 'rgba(255, 214, 10, 0.8)');
+                gradient.addColorStop(0.7, 'rgba(255, 214, 10, 0.3)');
+                gradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(w/2, h/2, 60, 0, Math.PI * 2);
+                ctx.fill();
+                const orbits = [90, 120, 160, 200];
+                const planets = ['☿', '♀︎', '♁', '♂'];
+                ctx.font = '12px serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                planets.forEach((p, i) => {
+                    const angle = time * (1 - i * 0.2);
+                    const x = w/2 + Math.cos(angle) * orbits[i];
+                    const y = h/2 + Math.sin(angle) * orbits[i];
+                    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                    ctx.fillText(p, x, y);
+                });
+            },
+            earth: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const time = Date.now() * 0.0003;
+                const gradient = ctx.createRadialGradient(w/2 - 20, h/2 - 20, 0, w/2, h/2, 50);
+                gradient.addColorStop(0, 'rgba(100, 200, 255, 0.9)');
+                gradient.addColorStop(0.3, 'rgba(6, 214, 160, 0.7)');
+                gradient.addColorStop(0.7, 'rgba(6, 214, 160, 0.3)');
+                gradient.addColorStop(1, 'rgba(6, 214, 160, 0.1)');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(w/2, h/2, 50, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(100, 200, 255, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(w/2, h/2, 55 + Math.sin(time) * 3, 0, Math.PI * 2);
+                ctx.stroke();
+            },
+            life: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const time = Date.now() * 0.001;
+                for (let i = 0; i < 30; i++) {
+                    const x = Math.random() * w;
+                    const y = h * 0.6 + Math.sin(time + i * 0.5) * 30 + Math.random() * 40;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2 + Math.random() * 3, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(17, 138, 178, ${0.3 + Math.random() * 0.4})`;
+                    ctx.fill();
+                }
+                ctx.font = '14px JetBrains Mono';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'rgba(17, 138, 178, 0.6)';
+                ctx.fillText('first cells', w/2, h * 0.7);
+            },
+            humans: function(ctx, w, h) {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+                const time = Date.now() * 0.001;
+                const cities = [
+                    {x: 0.3, y: 0.5, h: 40},
+                    {x: 0.5, y: 0.4, h: 60},
+                    {x: 0.7, y: 0.55, h: 50}
+                ];
+                cities.forEach(c => {
+                    ctx.fillStyle = 'rgba(239, 71, 111, 0.3)';
+                    ctx.fillRect(c.x * w - 15, c.y * h - c.h, 30, c.h);
+                    ctx.fillStyle = `rgba(239, 71, 111, ${0.5 + Math.sin(time + c.x) * 0.3})`;
+                    ctx.fillRect(c.x * w - 5, c.y * h - c.h - 5, 10, 5);
+                });
+                ctx.font = '12px JetBrains Mono';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'rgba(239, 71, 111, 0.6)';
+                ctx.fillText('civilization', w/2, h * 0.85);
+            }
+        };
+
+        // Initialize era canvases
+        document.querySelectorAll('.era-block').forEach(block => {
+            const canvas = block.querySelector('.era-visual canvas');
+            const era = block.dataset.era;
+            const ctx = canvas.getContext('2d');
+
+            function resize() {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = 250;
+                if (eraVisuals[era]) {
+                    eraVisuals[era](ctx, canvas.width, canvas.height);
+                }
+            }
+
+            resize();
+            new ResizeObserver(resize).observe(canvas.parentElement);
+
+            function animate() {
+                if (eraVisuals[era]) {
+                    eraVisuals[era](ctx, canvas.width, canvas.height);
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+        });
+
+        // Intersection Observer for visibility
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    const index = Array.from(document.querySelectorAll('.era-block')).indexOf(entry.target);
+                    document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+                        dot.classList.toggle('active', i === index);
+                    });
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.era-block').forEach(block => observer.observe(block));
+
+        // Detail panel
+        const eraData = {
+            planck: {
+                title: 'Planck Era',
+                text: 'The earliest known period of the universe, where quantum effects dominate. All four fundamental forces are unified.',
+                physics: 'Temperature: 10³² K\nEnergy: 10¹⁹ GeV\nQuantum Gravity dominates'
+            },
+            gut: {
+                title: 'Grand Unification Era',
+                text: 'Gravity separates from the other forces. The strong nuclear force remains unified with electroweak.',
+                physics: 'Temperature: 10³² K\nEnergy: 10¹⁶ GeV\nGUT-scale physics'
+            },
+            electroweak: {
+                title: 'Electroweak Era',
+                text: 'The Higgs field gives mass to particles. Quarks and leptons condense from the vacuum.',
+                physics: 'Temperature: 10¹⁵ K\nEnergy: 10² GeV\nElectroweak symmetry breaking'
+            },
+            inflation: {
+                title: 'Cosmic Inflation',
+                text: 'Exponential expansion stretches quantum fluctuations into cosmic seeds.',
+                physics: 'Expansion: 10²⁶× in 10⁻³² s\nQuantum → Classical'
+            },
+            quark: {
+                title: 'Quark Era',
+                text: 'Quarks and gluons form a hot plasma. Matter-antimatter asymmetry emerges.',
+                physics: 'Temperature: 10¹⁵ K\nQCD plasma\nMatter excess: 1/billion'
+            },
+            hadron: {
+                title: 'Hadron Era',
+                text: 'Quarks hadronize into protons and neutrons. Antihadrons annihilate.',
+                physics: 'Temperature: 10¹² K\nDensity: 10¹⁴ g/cm³'
+            },
+            lepton: {
+                title: 'Lepton Era',
+                text: 'Electrons and positrons dominate. Neutrinos decouple and stream freely.',
+                physics: 'Temperature: 10¹⁰ K\nNeutrinos free-stream'
+            },
+            nucleosynthesis: {
+                title: 'Big Bang Nucleosynthesis',
+                text: 'Light elements form: hydrogen, helium, deuterium, lithium.',
+                physics: 'Temperature: 10⁹ K\nDuration: ~3 minutes\nHe-4: 25% by mass'
+            },
+            recombination: {
+                title: 'Recombination',
+                text: 'Atoms form. The universe becomes transparent to light—the CMB is born.',
+                physics: 'Temperature: 3000 K\nCMB temperature: 2.725 K'
+            },
+            darkages: {
+                title: 'Dark Ages',
+                text: 'No stars yet. Only neutral hydrogen and the fading CMB glow.',
+                physics: 'Temperature: 60 → 20 K\n21 cm hydrogen line'
+            },
+            reionization: {
+                title: 'Reionization',
+                text: 'First stars ionize hydrogen. The universe becomes transparent again.',
+                physics: 'First galaxies: 200 Myr\nReionization complete: 400 Myr'
+            },
+            firststars: {
+                title: 'First Stars',
+                text: 'Population III stars—massive, metal-free, and incredibly hot.',
+                physics: 'Mass: 30-1000 M☉\nTemperature: 10⁵ K\nFirst heavy elements'
+            },
+            galaxies: {
+                title: 'Galaxy Formation',
+                text: 'Dark matter halos collapse to form galaxies. The cosmic web emerges.',
+                physics: 'Galaxy count: ~10⁹\nMilky Way age: 13.6 Gyr'
+            },
+            solar: {
+                title: 'Solar System Formation',
+                text: 'A molecular cloud collapses to form our Sun and planets.',
+                physics: 'Sun mass: 2×10³⁰ kg\nAge: 4.6 Gyr'
+            },
+            earth: {
+                title: 'Earth Formation',
+                text: 'Rocky planets form through accretion. Water arrives via impacts.',
+                physics: 'Radius: 6,371 km\nAge: 4.54 Gyr'
+            },
+            life: {
+                title: 'Origin of Life',
+                text: 'Chemistry becomes biology. The first self-replicating molecules emerge.',
+                physics: 'First life: 4.0 Gyr\nPhotosynthesis: 2.5 Gyr\nOxygenation: 2.4 Gyr'
+            },
+            humans: {
+                title: 'Humans & Civilization',
+                text: 'We are the universe\'s way of knowing itself. 13.8 billion years of cosmic evolution.',
+                physics: 'Homo sapiens: 300,000 yr\nWorld population: 8 billion\nObservable universe: 93 Gly'
+            }
+        };
+
+        const detailPanel = document.getElementById('detail-panel');
+        const detailTitle = document.getElementById('detail-title');
+        const detailText = document.getElementById('detail-text');
+        const detailPhysics = document.getElementById('detail-physics');
+
+        document.querySelectorAll('.era-block').forEach(block => {
+            block.addEventListener('mouseenter', () => {
+                const era = block.dataset.era;
+                if (eraData[era]) {
+                    detailTitle.textContent = eraData[era].title;
+                    detailText.textContent = eraData[era].text;
+                    detailPhysics.textContent = eraData[era].physics;
+                    detailPanel.classList.add('visible');
+                }
+            });
+
+            block.addEventListener('mouseleave', () => {
+                detailPanel.classList.remove('visible');
+            });
+        });
+
+        // Era selector buttons
+        document.querySelectorAll('.era-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.era-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const era = btn.dataset.era;
+                const block = document.querySelector(`.era-block[data-era="${era}"]`);
+                if (block) {
+                    block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        });
+
+        // Progress dots
+        document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+            dot.addEventListener('click', () => {
+                const blocks = document.querySelectorAll('.era-block');
+                if (blocks[i]) {
+                    blocks[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        });
+
+        // Initial visibility
+        setTimeout(() => {
+            document.querySelectorAll('.era-block').forEach(block => {
+                const rect = block.getBoundingClientRect();
+                if (rect.top < window.innerHeight * 0.8) {
+                    block.classList.add('visible');
+                }
+            });
+        }, 100);
+    </script>
+</body>
+</html>

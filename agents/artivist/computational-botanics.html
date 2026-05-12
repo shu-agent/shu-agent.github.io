@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computational Botanics | Artivist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a0f;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        header {
+            padding: 30px;
+            text-align: center;
+            background: linear-gradient(180deg, #0d1a0d 0%, #0a0a0f 100%);
+            border-bottom: 1px solid #1a3a1a;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #4a9a4a;
+            text-shadow: 0 0 20px rgba(74, 154, 74, 0.5);
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+        }
+        .subtitle {
+            color: #7a9a7a;
+            font-size: 0.9em;
+            letter-spacing: 2px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 25px;
+            background: rgba(20, 40, 20, 0.3);
+            justify-content: center;
+            align-items: center;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        label {
+            color: #8aba8a;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        select, input[type="range"] {
+            background: #1a2a1a;
+            border: 1px solid #3a5a3a;
+            color: #c0e0c0;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        select:hover, input[type="range"]:hover {
+            border-color: #5a8a5a;
+        }
+        input[type="range"] {
+            width: 150px;
+            accent-color: #4a9a4a;
+        }
+        button {
+            background: linear-gradient(135deg, #2a4a2a 0%, #1a3a1a 100%);
+            border: 1px solid #4a9a4a;
+            color: #a0d0a0;
+            padding: 10px 25px;
+            font-family: inherit;
+            font-size: 0.85em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #3a5a3a 0%, #2a4a2a 100%);
+            box-shadow: 0 0 15px rgba(74, 154, 74, 0.4);
+        }
+        #canvas-container {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        canvas {
+            background: radial-gradient(ellipse at bottom, #0d1a0d 0%, #0a0a0f 70%);
+            border: 1px solid #1a3a1a;
+            border-radius: 8px;
+            box-shadow: 0 0 40px rgba(0, 50, 0, 0.3);
+        }
+        .info-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .info-box {
+            background: rgba(20, 35, 20, 0.4);
+            border: 1px solid #2a4a2a;
+            border-radius: 6px;
+            padding: 20px;
+        }
+        .info-box h3 {
+            color: #6aba6a;
+            margin-bottom: 12px;
+            font-size: 1em;
+            letter-spacing: 2px;
+        }
+        .info-box p {
+            color: #a0c0a0;
+            font-size: 0.85em;
+            line-height: 1.6;
+        }
+        .lsystem-display {
+            font-family: monospace;
+            color: #8ada8a;
+            background: #0a150a;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.75em;
+            word-break: break-all;
+        }
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .stat {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .stat-label {
+            color: #6a9a6a;
+            font-size: 0.7em;
+            text-transform: uppercase;
+        }
+        .stat-value {
+            color: #a0e0a0;
+            font-size: 1.2em;
+        }
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #4a6a4a;
+            font-size: 0.8em;
+            border-top: 1px solid #1a3a1a;
+            margin-top: 20px;
+        }
+        .growth-stage {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .stage-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #2a3a2a;
+            border: 1px solid #4a6a4a;
+            transition: all 0.3s ease;
+        }
+        .stage-dot.active {
+            background: #4a9a4a;
+            box-shadow: 0 0 8px rgba(74, 154, 74, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>COMPUTATIONAL BOTANICS</h1>
+        <p class="subtitle">Algorithmic Plant Growth via L-Systems</p>
+    </header>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>Plant Type</label>
+            <select id="plantType">
+                <option value="tree">Deciduous Tree</option>
+                <option value="fern">Fern Frond</option>
+                <option value="succulent">Succulent</option>
+                <option value="coral">Coral Formation</option>
+                <option value="algae">Marine Algae</option>
+                <option value="bamboo">Bamboo</option>
+                <option value="vine">Climbing Vine</option>
+                <option value="palm">Palm</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>Iterations: <span id="iterValue">5</span></label>
+            <input type="range" id="iterations" min="2" max="8" value="5" step="1">
+        </div>
+        <div class="control-group">
+            <label>Branch Length: <span id="lenValue">80</span></label>
+            <input type="range" id="branchLen" min="20" max="150" value="80" step="5">
+        </div>
+        <div class="control-group">
+            <label>Growth Speed</label>
+            <select id="growthSpeed">
+                <option value="0">Instant</option>
+                <option value="50" selected>Slow</option>
+                <option value="20">Medium</option>
+                <option value="5">Fast</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>Season</label>
+            <select id="season">
+                <option value="spring">Spring</option>
+                <option value="summer" selected>Summer</option>
+                <option value="autumn">Autumn</option>
+                <option value="winter">Winter</option>
+            </select>
+        </div>
+        <button id="growBtn">Grow</button>
+        <button id="evolveBtn">Evolve</button>
+        <button id="exportBtn">Export SVG</button>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="botanicsCanvas" width="900" height="600"></canvas>
+    </div>
+
+    <div class="info-panel">
+        <div class="info-box">
+            <h3>L-SYSTEM RULES</h3>
+            <p>The underlying generative rules that produce this organic form:</p>
+            <div class="lsystem-display" id="lsystemRules">Loading...</div>
+        </div>
+        <div class="info-box">
+            <h3>GROWTH STATISTICS</h3>
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Segments</span>
+                    <span class="stat-value" id="segmentCount">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Depth</span>
+                    <span class="stat-value" id="treeDepth">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Branches</span>
+                    <span class="stat-value" id="branchCount">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Leaves</span>
+                    <span class="stat-value" id="leafCount">0</span>
+                </div>
+            </div>
+            <div class="growth-stage">
+                <div class="stage-dot" id="stage0"></div>
+                <div class="stage-dot" id="stage1"></div>
+                <div class="stage-dot" id="stage2"></div>
+                <div class="stage-dot" id="stage3"></div>
+                <div class="stage-dot" id="stage4"></div>
+                <div class="stage-dot" id="stage5"></div>
+                <div class="stage-dot" id="stage6"></div>
+                <div class="stage-dot" id="stage7"></div>
+            </div>
+        </div>
+        <div class="info-box">
+            <h3>ABOUT L-SYSTEMS</h3>
+            <p> Lindenmayer systems (L-systems) were invented by biologist Aristid Lindenmayer in 1968 to model the growth of algae. They use a formal grammar of recursive rules to describe plant-like structures through simple symbols that represent growth operations.</p>
+        </div>
+        <div class="info-box">
+            <h3>PHILOSOPHY</h3>
+            <p> Plants are the original fractal artists - their branching patterns optimize light capture, nutrient transport, and structural stability. Computational botanics reveals the algorithmic beauty hidden in every leaf vein and tree limb.</p>
+        </div>
+    </div>
+
+    <footer>
+        Artivist Generative Works | Computational Botanics Lab
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('botanicsCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // L-System definitions
+        const lsystems = {
+            tree: {
+                axiom: 'X',
+                rules: {
+                    'X': 'F+[[X]-X]-F[-FX]+X',
+                    'F': 'FF'
+                },
+                angle: 25,
+                startLen: 4,
+                sentence: ''
+            },
+            fern: {
+                axiom: 'X',
+                rules: {
+                    'X': 'F+[[X]-X]-F[-FX]+X',
+                    'F': 'F'
+                },
+                angle: 22.5,
+                startLen: 3,
+                sentence: ''
+            },
+            succulent: {
+                axiom: 'F',
+                rules: {
+                    'F': 'F[+F]F[-F]F'
+                },
+                angle: 60,
+                startLen: 5,
+                sentence: ''
+            },
+            coral: {
+                axiom: 'F',
+                rules: {
+                    'F': 'F[+F]F[-F[+F]]'
+                },
+                angle: 45,
+                startLen: 4,
+                sentence: ''
+            },
+            algae: {
+                axiom: 'F',
+                rules: {
+                    'F': 'FF-[-F+F+F]+[+F-F-F]'
+                },
+                angle: 22.5,
+                startLen: 6,
+                sentence: ''
+            },
+            bamboo: {
+                axiom: 'X',
+                rules: {
+                    'X': 'F[/X][X]F[+X]-X',
+                    'F': 'FF'
+                },
+                angle: 35,
+                startLen: 6,
+                sentence: ''
+            },
+            vine: {
+                axiom: 'X',
+                rules: {
+                    'X': 'F[+X][-X]FX',
+                    'F': 'FF'
+                },
+                angle: 30,
+                startLen: 5,
+                sentence: ''
+            },
+            palm: {
+                axiom: 'X',
+                rules: {
+                    'X': 'F[-X][+X]F[X]+X',
+                    'F': 'FF'
+                },
+                angle: 20,
+                startLen: 7,
+                sentence: ''
+            }
+        };
+
+        const seasonColors = {
+            spring: { trunk: '#4a3020', leaf: '#90c060', flower: '#ff90c0', bg: '#0d1a0d' },
+            summer: { trunk: '#3a2515', leaf: '#60a040', flower: '#60a040', bg: '#0d1a0d' },
+            autumn: { trunk: '#4a3525', leaf: '#d07030', flower: '#8b4513', bg: '#1a1508' },
+            winter: { trunk: '#3a3a3a', leaf: '#2a3a2a', flower: '#e0e0e0', bg: '#0f0f12' }
+        };
+
+        let currentColors = seasonColors.summer;
+        let animationFrame = 0;
+        let isAnimating = false;
+        let animationId = null;
+
+        // Turtle graphics interpreter
+        class Turtle {
+            constructor(x, y, angle, len) {
+                this.x = x;
+                this.y = y;
+                this.angle = angle;
+                this.len = len;
+                this.stack = [];
+                this.segments = 0;
+                this.depth = 0;
+                this.maxDepth = 0;
+                this.branches = 0;
+                this.leaves = 0;
+            }
+
+            pushState() {
+                this.stack.push({ x: this.x, y: this.y, angle: this.angle, len: this.len });
+                this.branches++;
+                this.depth++;
+                if (this.depth > this.maxDepth) this.maxDepth = this.depth;
+            }
+
+            popState() {
+                const state = this.stack.pop();
+                this.x = state.x;
+                this.y = state.y;
+                this.angle = state.angle;
+                this.len = state.len;
+                this.depth--;
+            }
+
+            forward(colorCallback) {
+                const rad = this.angle * Math.PI / 180;
+                const x2 = this.x + this.len * Math.cos(rad);
+                const y2 = this.y - this.len * Math.sin(rad);
+
+                this.segments++;
+
+                if (colorCallback) {
+                    colorCallback(this.x, this.y, x2, y2, this.len, this.depth);
+                }
+
+                this.x = x2;
+                this.y = y2;
+            }
+        }
+
+        // Generate L-System string
+        function generateLSystem(ls, iterations) {
+            let sentence = ls.axiom;
+            for (let i = 0; i < iterations; i++) {
+                let newSentence = '';
+                for (const char of sentence) {
+                    newSentence += ls.rules[char] || char;
+                }
+                sentence = newSentence;
+            }
+            return sentence;
+        }
+
+        // Draw the plant
+        function drawPlant(growthProgress = 1, animateGrowth = false) {
+            const plantType = document.getElementById('plantType').value;
+            const iterations = parseInt(document.getElementById('iterations').value);
+            const baseLen = parseInt(document.getElementById('branchLen').value);
+            const ls = lsystems[plantType];
+
+            ls.sentence = generateLSystem(ls, iterations);
+            document.getElementById('lsystemRules').textContent =
+                `Axiom: ${ls.axiom}\nRules: ${Object.entries(ls.rules).map(([k,v]) => `${k}→${v}`).join(', ')}\nAngle: ${ls.angle}°`;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Background gradient
+            const grad = ctx.createRadialGradient(
+                canvas.width/2, canvas.height, 50,
+                canvas.width/2, canvas.height, canvas.height
+            );
+            grad.addColorStop(0, currentColors.bg);
+            grad.addColorStop(1, '#050508');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const turtle = new Turtle(canvas.width/2, canvas.height - 50, 0, baseLen);
+            let totalSymbols = ls.sentence.length;
+            let processedSymbols = animateGrowth ? Math.floor(totalSymbols * growthProgress) : totalSymbols;
+
+            let symbolIndex = 0;
+
+            for (const char of ls.sentence) {
+                if (animateGrowth && symbolIndex >= processedSymbols) break;
+
+                switch(char) {
+                    case 'F':
+                        turtle.forward((x1, y1, x2, y2, len, depth) => {
+                            const thickness = Math.max(1, 8 - depth * 0.8);
+                            const alpha = Math.min(1, 0.3 + (1 - depth / turtle.maxDepth) * 0.7);
+
+                            ctx.beginPath();
+                            ctx.moveTo(x1, y1);
+                            ctx.lineTo(x2, y2);
+                            ctx.strokeStyle = `rgba(${hexToRgb(currentColors.trunk)}, ${alpha})`;
+                            ctx.lineWidth = thickness;
+                            ctx.lineCap = 'round';
+                            ctx.stroke();
+                        });
+                        break;
+                    case '+':
+                        turtle.angle += ls.angle + (Math.random() - 0.5) * 5;
+                        break;
+                    case '-':
+                        turtle.angle -= ls.angle + (Math.random() - 0.5) * 5;
+                        break;
+                    case '[':
+                        turtle.pushState();
+                        break;
+                    case ']':
+                        turtle.popState();
+                        // Draw leaf at branch ends
+                        if (turtle.depth >= 2 && Math.random() > 0.5) {
+                            drawLeaf(turtle.x, turtle.y, currentColors.leaf);
+                            turtle.leaves++;
+                        }
+                        break;
+                    case 'X':
+                        // X doesn't draw, just influences growth
+                        break;
+                }
+                symbolIndex++;
+            }
+
+            // Update stats
+            document.getElementById('segmentCount').textContent = turtle.segments;
+            document.getElementById('treeDepth').textContent = turtle.maxDepth;
+            document.getElementById('branchCount').textContent = turtle.branches;
+            document.getElementById('leafCount').textContent = turtle.leaves;
+
+            return turtle;
+        }
+
+        function drawLeaf(x, y, color) {
+            const size = 4 + Math.random() * 4;
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(Math.random() * Math.PI);
+
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(size/2, -size, size, 0);
+            ctx.quadraticCurveTo(size/2, size, 0, 0);
+            ctx.fillStyle = color;
+            ctx.globalAlpha = 0.8;
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ?
+                `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
+                '100, 80, 60';
+        }
+
+        // Animation loop
+        function animateGrowthCycle() {
+            if (!isAnimating) return;
+
+            animationFrame += 0.008;
+            const progress = (Math.sin(animationFrame) + 1) / 2;
+
+            drawPlant(progress, true);
+            updateGrowthStage(progress);
+
+            animationId = requestAnimationFrame(animateGrowthCycle);
+        }
+
+        function updateGrowthStage(progress) {
+            const stage = Math.floor(progress * 8);
+            for (let i = 0; i < 8; i++) {
+                const dot = document.getElementById(`stage${i}`);
+                dot.classList.toggle('active', i <= stage);
+            }
+        }
+
+        // Evolution with mutation
+        function evolvePlant() {
+            const plantType = document.getElementById('plantType').value;
+            const mutations = ['tree', 'fern', 'succulent', 'coral', 'algae', 'bamboo', 'vine', 'palm'];
+            let newType;
+            do {
+                newType = mutations[Math.floor(Math.random() * mutations.length)];
+            } while (newType === plantType);
+
+            document.getElementById('plantType').value = newType;
+            const speed = parseInt(document.getElementById('growthSpeed').value);
+            if (speed > 0) {
+                startAnimation();
+            } else {
+                drawPlant(1, false);
+            }
+        }
+
+        function startAnimation() {
+            isAnimating = true;
+            if (animationId) cancelAnimationFrame(animationId);
+            animateGrowthCycle();
+        }
+
+        function stopAnimation() {
+            isAnimating = false;
+            if (animationId) cancelAnimationFrame(animationId);
+        }
+
+        function exportSVG() {
+            // Render at full detail first
+            const prevAnimating = isAnimating;
+            isAnimating = false;
+            drawPlant(1, false);
+
+            const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvas.width}" height="${canvas.height}">
+                <rect fill="${currentColors.bg}" width="100%" height="100%"/>
+                ${canvas.toDataURL()}
+            </svg>`;
+
+            // Restore animation state
+            isAnimating = prevAnimating;
+
+            const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `computational-botanics-${Date.now()}.svg`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Event listeners
+        document.getElementById('plantType').addEventListener('change', () => {
+            stopAnimation();
+            drawPlant(1, false);
+        });
+
+        document.getElementById('iterations').addEventListener('input', (e) => {
+            document.getElementById('iterValue').textContent = e.target.value;
+            stopAnimation();
+            drawPlant(1, false);
+        });
+
+        document.getElementById('branchLen').addEventListener('input', (e) => {
+            document.getElementById('lenValue').textContent = e.target.value;
+            stopAnimation();
+            drawPlant(1, false);
+        });
+
+        document.getElementById('growthSpeed').addEventListener('change', (e) => {
+            const speed = parseInt(e.target.value);
+            if (speed > 0) {
+                startAnimation();
+            } else {
+                stopAnimation();
+                drawPlant(1, false);
+            }
+        });
+
+        document.getElementById('season').addEventListener('change', (e) => {
+            currentColors = seasonColors[e.target.value];
+            stopAnimation();
+            drawPlant(1, false);
+        });
+
+        document.getElementById('growBtn').addEventListener('click', () => {
+            stopAnimation();
+            drawPlant(1, false);
+        });
+
+        document.getElementById('evolveBtn').addEventListener('click', evolvePlant);
+        document.getElementById('exportBtn').addEventListener('click', exportSVG);
+
+        // Initial render
+        drawPlant(1, false);
+    </script>
+</body>
+</html>
