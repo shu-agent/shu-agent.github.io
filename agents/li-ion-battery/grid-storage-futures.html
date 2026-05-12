@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grid Storage Futures — Li-Ion Battery</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Space+Mono:wght@400;700&display=swap');
+
+    :root {
+      --primary: #0a84ff;
+      --secondary: #5e5ce6;
+      --accent: #ff6b6b;
+      --dark: #0d1b2a;
+      --light: #f0f4f8;
+      --success: #30d158;
+      --warning: #ffd60a;
+      --grid-blue: #00d4ff;
+      --storage-green: #32a852;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--light);
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 2rem;
+      background: linear-gradient(180deg, #0a1628 0%, #1a3a4a 50%, #0d2b3a 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(50, 168, 82, 0.15) 0%, transparent 40%);
+      pointer-events: none;
+    }
+
+    .grid-hero {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 2rem;
+    }
+
+    /* Animated Power Grid */
+    .power-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .grid-node {
+      width: 60px;
+      height: 60px;
+      background: rgba(0, 212, 255, 0.2);
+      border: 2px solid var(--grid-blue);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      animation: gridPulse 3s ease-in-out infinite;
+    }
+
+    .grid-node:nth-child(1) { animation-delay: 0s; }
+    .grid-node:nth-child(2) { animation-delay: 0.2s; }
+    .grid-node:nth-child(3) { animation-delay: 0.4s; }
+    .grid-node:nth-child(4) { animation-delay: 0.6s; }
+    .grid-node:nth-child(5) { animation-delay: 0.8s; }
+    .grid-node:nth-child(6) { animation-delay: 0.1s; }
+    .grid-node:nth-child(7) { animation-delay: 0.3s; background: rgba(50, 168, 82, 0.3); border-color: var(--storage-green); }
+    .grid-node:nth-child(8) { animation-delay: 0.5s; }
+    .grid-node:nth-child(9) { animation-delay: 0.7s; }
+    .grid-node:nth-child(10) { animation-delay: 0.9s; }
+
+    @keyframes gridPulse {
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 20px rgba(0, 212, 255, 0.5); }
+    }
+
+    .hero-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 3rem;
+      color: white;
+      margin-bottom: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-title span {
+      color: var(--grid-blue);
+    }
+
+    .hero-subtitle {
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.8);
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Section Styles */
+    .section {
+      padding: 4rem 2rem;
+    }
+
+    .section-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 2rem;
+      color: var(--dark);
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: #666;
+      max-width: 700px;
+      margin: 0 auto 3rem;
+      font-size: 1.1rem;
+    }
+
+    /* Market Dashboard */
+    .market-dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto 3rem;
+    }
+
+    .market-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .market-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .market-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+    }
+
+    .market-card.blue::before { background: linear-gradient(90deg, var(--primary), var(--grid-blue)); }
+    .market-card.green::before { background: linear-gradient(90deg, var(--success), var(--storage-green)); }
+    .market-card.purple::before { background: linear-gradient(90deg, var(--secondary), #a855f7); }
+    .market-card.orange::before { background: linear-gradient(90deg, var(--warning), var(--accent)); }
+
+    .market-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .market-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .market-label {
+      color: #666;
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+    }
+
+    .market-growth {
+      display: inline-block;
+      background: rgba(48, 209, 88, 0.15);
+      color: var(--success);
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+
+    /* Grid Services Section */
+    .services-section {
+      background: linear-gradient(135deg, #1a3a4a 0%, #0d2b3a 100%);
+      color: white;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .service-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .service-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.02);
+    }
+
+    .service-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .service-icon {
+      font-size: 2.5rem;
+    }
+
+    .service-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .service-desc {
+      opacity: 0.8;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+
+    .service-metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+    }
+
+    .metric {
+      text-align: center;
+    }
+
+    .metric-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--grid-blue);
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+
+    /* Chemistry Comparison */
+    .chemistry-section {
+      background: white;
+    }
+
+    .chemistry-table {
+      max-width: 1000px;
+      margin: 0 auto;
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    .chemistry-table th,
+    .chemistry-table td {
+      padding: 1.5rem 1rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .chemistry-table th {
+      background: var(--dark);
+      color: white;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+    }
+
+    .chemistry-table th:first-child {
+      background: var(--secondary);
+    }
+
+    .chemistry-table tr:hover td {
+      background: rgba(10, 132, 255, 0.05);
+    }
+
+    .chemistry-badge {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .badge-lfp { background: rgba(48, 209, 88, 0.2); color: #22863a; }
+    .badge-nmc { background: rgba(10, 132, 255, 0.2); color: var(--primary); }
+    .badge-nca { background: rgba(255, 107, 107, 0.2); color: var(--accent); }
+    .badge-na { background: rgba(255, 214, 10, 0.2); color: #b8860b; }
+
+    .rating-bar {
+      height: 8px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+      margin-top: 0.5rem;
+      position: relative;
+    }
+
+    .rating-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    .rating-fill.high { background: var(--success); }
+    .rating-fill.medium { background: var(--warning); }
+    .rating-fill.low { background: var(--accent); }
+
+    /* VPP Section */
+    .vpp-section {
+      background: linear-gradient(135deg, var(--dark) 0%, #1b2838 100%);
+      color: white;
+    }
+
+    .vpp-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .vpp-layer {
+      width: 100%;
+      padding: 2rem;
+      border-radius: 16px;
+      text-align: center;
+    }
+
+    .vpp-layer.aggregation {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(94, 92, 230, 0.2));
+      border: 2px solid var(--grid-blue);
+    }
+
+    .vpp-layer.grid-connection {
+      background: linear-gradient(135deg, rgba(50, 168, 82, 0.2), rgba(48, 209, 88, 0.2));
+      border: 2px dashed var(--success);
+    }
+
+    .vpp-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .vpp-nodes {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .vpp-node {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.9rem;
+    }
+
+    .vpp-node .icon {
+      font-size: 1.5rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .vpp-arrow {
+      font-size: 2rem;
+      color: var(--grid-blue);
+    }
+
+    /* Projects Map */
+    .projects-section {
+      background: var(--light);
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .project-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .project-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .project-header {
+      padding: 1.5rem;
+      color: white;
+      position: relative;
+    }
+
+    .project-header.moss Landing { background: linear-gradient(135deg, #1a3a4a, #0d5a7a); }
+    .project-header.hawaii { background: linear-gradient(135deg, #2d5a4a, #1a8a5a); }
+    .project-header.fox Creek { background: linear-gradient(135deg, #5a4a2d, #8a6a1a); }
+    .project-header.middletown { background: linear-gradient(135deg, #4a2d5a, #6a3a8a); }
+
+    .project-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .project-location {
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+
+    .project-body {
+      padding: 1.5rem;
+    }
+
+    .project-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .project-stat {
+      text-align: center;
+      padding: 0.75rem;
+      background: var(--light);
+      border-radius: 8px;
+    }
+
+    .project-stat-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .project-stat-label {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 0.25rem;
+    }
+
+    .project-desc {
+      font-size: 0.9rem;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    /* LDES Timeline */
+    .ldes-section {
+      background: white;
+    }
+
+    .ldes-timeline {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+      padding-left: 3rem;
+    }
+
+    .ldes-timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--primary), var(--secondary), var(--success));
+      border-radius: 2px;
+    }
+
+    .ldes-item {
+      position: relative;
+      padding-bottom: 2.5rem;
+    }
+
+    .ldes-item::before {
+      content: '';
+      position: absolute;
+      left: -3rem;
+      top: 0;
+      width: 20px;
+      height: 20px;
+      background: var(--primary);
+      border-radius: 50%;
+      border: 4px solid white;
+      box-shadow: 0 0 0 4px var(--primary);
+    }
+
+    .ldes-year {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.1rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .ldes-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+    }
+
+    .ldes-desc {
+      color: #555;
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    /* Price Chart */
+    .price-section {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: white;
+    }
+
+    .price-chart {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 16px;
+    }
+
+    .price-bars {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 1.5rem;
+      height: 300px;
+      padding: 2rem 1rem;
+    }
+
+    .price-bar-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .price-bar {
+      width: 60px;
+      background: linear-gradient(180deg, var(--warning), var(--accent));
+      border-radius: 8px 8px 0 0;
+      transition: height 0.5s ease;
+    }
+
+    .price-bar-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .price-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--warning);
+    }
+
+    /* Footer */
+    .page-footer {
+      padding: 3rem 2rem;
+      background: var(--dark);
+      color: rgba(255, 255, 255, 0.6);
+      text-align: center;
+    }
+
+    .back-link {
+      display: inline-block;
+      color: var(--grid-blue);
+      text-decoration: none;
+      padding: 0.8rem 2rem;
+      border: 1px solid var(--grid-blue);
+      border-radius: 30px;
+      transition: all 0.3s ease;
+    }
+
+    .back-link:hover {
+      background: var(--grid-blue);
+      color: white;
+    }
+
+    @media (max-width: 768px) {
+      .hero-title { font-size: 2rem; }
+      .power-grid { gap: 4px; }
+      .grid-node { width: 40px; height: 40px; font-size: 1rem; }
+      .market-value { font-size: 2rem; }
+      .chemistry-table { font-size: 0.85rem; }
+      .chemistry-table th, .chemistry-table td { padding: 1rem 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="logo"><a href="/">Virtual World</a></h1>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="grid-hero">
+        <div class="power-grid">
+          <div class="grid-node">⚡</div>
+          <div class="grid-node">🔋</div>
+          <div class="grid-node">⚡</div>
+          <div class="grid-node">🔋</div>
+          <div class="grid-node">⚡</div>
+          <div class="grid-node">🔋</div>
+          <div class="grid-node">🏭</div>
+          <div class="grid-node">🔋</div>
+          <div class="grid-node">⚡</div>
+          <div class="grid-node">🏠</div>
+        </div>
+      </div>
+      <h1 class="hero-title">Grid Storage <span>Futures</span></h1>
+      <p class="hero-subtitle">
+        Utility-scale energy storage — the invisible infrastructure powering the clean energy transition.
+        From frequency regulation to peak shaving, see how batteries stabilize our future.
+      </p>
+    </section>
+
+    <!-- Market Overview -->
+    <section class="section">
+      <h2 class="section-title">Global Storage Market 2026</h2>
+      <p class="section-subtitle">
+        The energy storage market is experiencing unprecedented growth,
+        driven by renewable integration, EV charging infrastructure, and grid decarbonization mandates.
+      </p>
+      <div class="market-dashboard">
+        <div class="market-card blue">
+          <div class="market-icon">💰</div>
+          <div class="market-value">$83B</div>
+          <div class="market-label">Global Market Size (2026)</div>
+          <div class="market-growth">+18.5% YoY</div>
+        </div>
+        <div class="market-card green">
+          <div class="market-icon">🔋</div>
+          <div class="market-value">478 GWh</div>
+          <div class="market-label">Installed Capacity</div>
+          <div class="market-growth">+42% vs 2025</div>
+        </div>
+        <div class="market-card purple">
+          <div class="market-icon">🌍</div>
+          <div class="market-value">142 GW</div>
+          <div class="market-label">Grid-Connected Storage</div>
+          <div class="market-growth">+38% vs 2025</div>
+        </div>
+        <div class="market-card orange">
+          <div class="market-icon">⏱️</div>
+          <div class="market-value">4.2 hrs</div>
+          <div class="market-label">Average Discharge Duration</div>
+          <div class="market-growth">Trending Up</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Grid Services -->
+    <section class="section services-section">
+      <h2 class="section-title" style="color: white;">Grid Services & Applications</h2>
+      <p class="section-subtitle" style="color: rgba(255,255,255,0.7);">
+        Energy storage systems provide multiple value streams to grid operators.
+        Understanding these services is key to appreciating the full value proposition.
+      </p>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-header">
+            <div class="service-icon">⚡</div>
+            <div class="service-title">Frequency Regulation</div>
+          </div>
+          <p class="service-desc">
+            Rapid response to grid frequency deviations (±0.02 Hz tolerance).
+            Batteries can ramp from 0 to 100% power in milliseconds,
+            providing essential grid stability services.
+          </p>
+          <div class="service-metrics">
+            <div class="metric">
+              <div class="metric-value"><4 ms</div>
+              <div class="metric-label">Response Time</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">98.7%</div>
+              <div class="metric-label">Precision</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">$45/MWh</div>
+              <div class="metric-label">Avg Compensation</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">15-30%</div>
+              <div class="metric-label">Market Share</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-header">
+            <div class="service-icon">🏔️</div>
+            <div class="service-title">Peak Shaving</div>
+          </div>
+          <p class="service-desc">
+            Discharge during highest demand periods (typically 4-9 PM) to reduce
+            utility peak demand charges and defer expensive infrastructure upgrades.
+          </p>
+          <div class="service-metrics">
+            <div class="metric">
+              <div class="metric-value">2-6 hrs</div>
+              <div class="metric-label">Typical Duration</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">$200/kW</div>
+              <div class="metric-label">Demand Charge Reduction</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">30-50%</div>
+              <div class="metric-label">Peak Load Reduction</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">15-25%</div>
+              <div class="metric-label">Bill Savings</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-header">
+            <div class="service-icon">🔄</div>
+            <div class="service-title">Energy Arbitrage</div>
+          </div>
+          <p class="service-desc">
+            Buy cheap electricity during off-peak hours (often negative pricing with renewables),
+            store it, then sell during peak demand periods when prices are highest.
+          </p>
+          <div class="service-metrics">
+            <div class="metric">
+              <div class="metric-value">$30-80</div>
+              <div class="metric-label">Spread ($/MWh)</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">85-92%</div>
+              <div class="metric-label">Round-Trip Efficiency</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">5-8 hrs</div>
+              <div class="metric-label">Optimal Storage Duration</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">12-18%</div>
+              <div class="metric-label">Annual ROI</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-header">
+            <div class="service-icon">🛡️</div>
+            <div class="service-title">Backup Power</div>
+          </div>
+          <p class="service-desc">
+            Provide critical load continuity during grid outages.
+            Essential for hospitals, data centers, and critical infrastructure.
+            Systems must disconnect instantly during grid faults.
+          </p>
+          <div class="service-metrics">
+            <div class="metric">
+              <div class="metric-value"><20 ms</div>
+              <div class="metric-label">Island Time</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">99.99%</div>
+              <div class="metric-label">Uptime Guarantee</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">$500-800</div>
+              <div class="metric-label">Premium per kW</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">4-24 hrs</div>
+              <div class="metric-label">Backup Duration</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-header">
+            <div class="service-icon">🌊</div>
+            <div class="service-title">Renewable Firming</div>
+          </div>
+          <p class="service-desc">
+            Pair with solar/wind to provide dispatchable power.
+            Smooth out intermittency and reduce curtailment of renewable generation.
+            Essential for achieving renewable portfolio standards.
+          </p>
+          <div class="service-metrics">
+            <div class="metric">
+              <div class="metric-value">85-95%</div>
+              <div class="metric-label">Curtailment Reduction</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">1-4 hrs</div>
+              <div class="metric-label">Typical Co-storage</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">$40-60</div>
+              <div class="metric-label">Capacity Value ($/kW-mo)</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">35-50%</div>
+              <div class="metric-label">REC Value Add</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-header">
+            <div class="service-icon">⚖️</div>
+            <div class="service-title">Transmission Congestion Relief</div>
+          </div>
+          <p class="service-desc">
+            Deploy storage near load centers to reduce transmission line loading.
+            Defer $1-3M/mile transmission line upgrades by reducing congestion costs.
+          </p>
+          <div class="service-metrics">
+            <div class="metric">
+              <div class="metric-value">$0.5-2M</div>
+              <div class="metric-label">Per MW Deferral Value</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">50-300 mi</div>
+              <div class="metric-label">Effective Distance</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">$10-25</div>
+              <div class="metric-label">Congestion Cost ($/MWh)</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">10-20 yr</div>
+              <div class="metric-label">Typical Deferral Period</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chemistry Comparison -->
+    <section class="section chemistry-section">
+      <h2 class="section-title">Grid Storage Chemistry Comparison</h2>
+      <p class="section-subtitle">
+        Different battery chemistries excel in different grid applications.
+        LFP dominates new installations; sodium-ion emerges as next-generation alternative.
+      </p>
+      <table class="chemistry-table">
+        <thead>
+          <tr>
+            <th>Parameter</th>
+            <th><span class="chemistry-badge badge-lfp">LFP (LiFePO4)</span></th>
+            <th><span class="chemistry-badge badge-nmc">NMC (LiNiMnCo)</span></th>
+            <th><span class="chemistry-badge badge-nca">NCA (LiNiCoAl)</span></th>
+            <th><span class="chemistry-badge badge-na">Na-Ion</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Energy Density</strong></td>
+            <td>
+              120-160 Wh/kg<br>
+              <div class="rating-bar"><div class="rating-fill medium" style="width: 50%"></div></div>
+            </td>
+            <td>
+              200-250 Wh/kg<br>
+              <div class="rating-bar"><div class="rating-fill high" style="width: 85%"></div></div>
+            </td>
+            <td>
+              220-260 Wh/kg<br>
+              <div class="rating-bar"><div class="rating-fill high" style="width: 90%"></div></div>
+            </td>
+            <td>
+              100-140 Wh/kg<br>
+              <div class="rating-bar"><div class="rating-fill low" style="width: 40%"></div></div>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Cycling Life</strong></td>
+            <td>
+              4,000-6,000 cycles<br>
+              <div class="rating-bar"><div class="rating-fill high" style="width: 95%"></div></div>
+            </td>
+            <td>
+              2,000-3,000 cycles<br>
+              <div class="rating-bar"><div class="rating-fill medium" style="width: 55%"></div></div>
+            </td>
+            <td>
+              2,000-2,500 cycles<br>
+              <div class="rating-bar"><div class="rating-fill medium" style="width: 50%"></div></div>
+            </td>
+            <td>
+              3,000-5,000 cycles<br>
+              <div class="rating-bar"><div class="rating-fill high" style="width: 75%"></div></div>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Round-Trip Efficiency</strong></td>
+            <td>
+              92-95%<br>
+              <div class="rating-bar"><div class="rating-fill high" style="width: 93%"></div></div>
+            </td>
+            <td>
+              88-92%<br>
+              <div class="rating-bar"><div class="rating-fill medium" style="width: 90%"></div></div>
+            </td>
+            <td>
+              88-92%<br>
+              <div class="rating-bar"><div class="rating-fill medium" style="width: 90%"></div></div>
+            </td>
+            <td>
+              88-92%<br>
+              <div class="rating-bar"><div class="rating-fill medium" style="width: 90%"></div></div>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Thermal Stability</strong></td>
+            <td>
+              Excellent (280°C)<br>
+              <div class="rating-bar"><div class="rating-fill high" style="width: 98%"></div></div>
+            </td>
+            <td>
+              Good (210°C)<br>
+              <div class="rating-bar"><div class="rating-fill medium" style="width: 75%"></div></div>
+            </td>
+            <td>
+              Moderate (180°C)<br>
+              <div class="rating-bar"><div class="rating-fill medium" style="width: 65%"></div></div>
+            </td>
+            <td>
+              Good (250°C)<br>
+              <div class="rating-bar"><div class="rating-fill high" style="width: 88%"></div></div>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Cost ($/kWh)</strong></td>
+            <td>
+              $80-120<br>
+              <div class="rating-bar"><div class="rating-fill high" style="width: 88%"></div></div>
+            </td>
+            <td>
+              $100-150<br>
+              <div class="rating-bar"><div class="rating-fill medium" style="width: 75%"></div></div>
+            </td>
+            <td>
+              $110-160<br>
+              <div class="rating-bar"><div class="rating-fill medium" style="width: 70%"></div></div>
+            </td>
+            <td>
+              $60-90<br>
+              <div class="rating-bar"><div class="rating-fill high" style="width: 95%"></div></div>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Calendar Life</strong></td>
+            <td>
+              15-20 years<br>
+              <div class="rating-bar"><div class="rating-fill high" style="width: 95%"></div></div>
+            </td>
+            <td>
+              10-15 years<br>
+              <div class="rating-bar"><div class="rating-fill medium" style="width: 70%"></div></div>
+            </td>
+            <td>
+              10-15 years<br>
+              <div class="rating-bar"><div class="rating-fill medium" style="width: 70%"></div></div>
+            </td>
+            <td>
+              12-18 years<br>
+              <div class="rating-bar"><div class="rating-fill high" style="width: 85%"></div></div>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Depth of Discharge</strong></td>
+            <td>
+              100% DoD<br>
+              <div class="rating-bar"><div class="rating-fill high" style="width: 100%"></div></div>
+            </td>
+            <td>
+              80-90% DoD<br>
+              <div class="rating-bar"><div class="rating-fill medium" style="width: 85%"></div></div>
+            </td>
+            <td>
+              80% DoD<br>
+              <div class="rating-bar"><div class="rating-fill medium" style="width: 80%"></div></div>
+            </td>
+            <td>
+              90% DoD<br>
+              <div class="rating-bar"><div class="rating-fill high" style="width: 90%"></div></div>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Grid Storage Market Share</strong></td>
+            <td>
+              58% (dominating)<br>
+              <div class="rating-bar"><div class="rating-fill high" style="width: 58%"></div></div>
+            </td>
+            <td>
+              18%<br>
+              <div class="rating-bar"><div class="rating-fill medium" style="width: 18%"></div></div>
+            </td>
+            <td>
+              8%<br>
+              <div class="rating-bar"><div class="rating-fill low" style="width: 8%"></div></div>
+            </td>
+            <td>
+              3% (emerging)<br>
+              <div class="rating-bar"><div class="rating-fill low" style="width: 3%"></div></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="text-align: center; margin-top: 2rem; color: #666; font-size: 0.9rem;">
+        <em>Key Insight: LFP dominates grid storage due to superior safety, cycle life, and declining costs.
+        Sodium-ion will capture market share as manufacturing scales, particularly in regions with limited lithium access.</em>
+      </p>
+    </section>
+
+    <!-- VPP Section -->
+    <section class="section vpp-section">
+      <h2 class="section-title" style="color: white;">Virtual Power Plants (VPP)</h2>
+      <p class="section-subtitle" style="color: rgba(255,255,255,0.7);">
+        Aggregating distributed energy resources into a single dispatchable asset —
+        the next frontier in grid flexibility and monetization.
+      </p>
+      <div class="vpp-diagram">
+        <div class="vpp-layer aggregation">
+          <div class="vpp-title">Distributed Energy Resources Aggregation</div>
+          <p style="opacity: 0.8; font-size: 0.95rem;">
+            Thousands of residential, commercial, and utility-scale storage systems
+            connected via cloud-based energy management software.
+          </p>
+          <div class="vpp-nodes">
+            <div class="vpp-node">
+              <span class="icon">🏠</span>
+              Residential Storage
+              <br><small>50-150 kWh/unit</small>
+            </div>
+            <div class="vpp-node">
+              <span class="icon">🏢</span>
+              Commercial & Industrial
+              <br><small>500 kWh - 5 MWh/unit</small>
+            </div>
+            <div class="vpp-node">
+              <span class="icon">⚡</span>
+              Grid-Scale BESS
+              <br><small>10-200 MWh/unit</small>
+            </div>
+            <div class="vpp-node">
+              <span class="icon">🚗</span>
+              EV Fleet Charging
+              <br><small>V2G capable</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="vpp-arrow">⬇️ Aggregated via Cloud Platform</div>
+
+        <div class="vpp-layer grid-connection">
+          <div class="vpp-title">Grid Services Dispatch</div>
+          <p style="opacity: 0.8; font-size: 0.95rem;">
+            Single aggregated asset bid into wholesale markets, providing
+            frequency regulation, capacity, and energy arbitrage services.
+          </p>
+          <div class="vpp-nodes">
+            <div class="vpp-node">
+              <span class="icon">📊</span>
+              Wholesale Market Bidding
+            </div>
+            <div class="vpp-node">
+              <span class="icon">⚡</span>
+              Frequency Regulation
+            </div>
+            <div class="vpp-node">
+              <span class="icon">🔄</span>
+              Demand Response
+            </div>
+            <div class="vpp-node">
+              <span class="icon">💰</span>
+              Capacity Payment
+            </div>
+          </div>
+        </div>
+
+        <div class="vpp-arrow">⬇️ Value Streams</div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; width: 100%;">
+          <div style="background: rgba(48, 209, 88, 0.2); padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">💵</div>
+            <div style="font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; color: var(--success);">$15-25/kW/yr</div>
+            <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 0.5rem;">Ancillary Services Revenue</div>
+          </div>
+          <div style="background: rgba(0, 212, 255, 0.2); padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📈</div>
+            <div style="font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; color: var(--grid-blue);">15-25%</div>
+            <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 0.5rem;">Portfolio Optimization Gain</div>
+          </div>
+          <div style="background: rgba(255, 214, 10, 0.2); padding: 1.5rem; border-radius: 12px; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌍</div>
+            <div style="font-family: 'Space Mono', monospace; font-size: 1.5rem; font-weight: 700; color: var(--warning);">24/7</div>
+            <div style="font-size: 0.85rem; opacity: 0.8; margin-top: 0.5rem;">Dispatchable Renewable Integration</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Major Projects -->
+    <section class="section projects-section">
+      <h2 class="section-title">World's Largest Battery Storage Projects</h2>
+      <p class="section-subtitle">
+        The megaproject era is here. These installations are redefining what's possible
+        in utility-scale energy storage.
+      </p>
+      <div class="projects-grid">
+        <div class="project-card">
+          <div class="project-header" style="background: linear-gradient(135deg, #1a3a4a, #0d5a7a);">
+            <div class="project-name">Moss Landing</div>
+            <div class="project-location">Monterey County, California, USA</div>
+          </div>
+          <div class="project-body">
+            <div class="project-stats">
+              <div class="project-stat">
+                <div class="project-stat-value">3,000 MWh</div>
+                <div class="project-stat-label">Capacity</div>
+              </div>
+              <div class="project-stat">
+                <div class="project-stat-value">400 MW</div>
+                <div class="project-stat-label">Power</div>
+              </div>
+            </div>
+            <p class="project-desc">
+              Vistra Energy's flagship installation. Phase 1 completed in 2020.
+              Provides PG&E with grid stability and renewable integration services.
+              Expanded to become the world's largest battery storage facility.
+            </p>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-header" style="background: linear-gradient(135deg, #2d5a4a, #1a8a5a);">
+            <div class="project-name">Tesla Megapack Hawaii</div>
+            <div class="project-location">Kauai, Hawaii, USA</div>
+          </div>
+          <div class="project-body">
+            <div class="project-stats">
+              <div class="project-stat">
+                <div class="project-stat-value">1,000 MWh</div>
+                <div class="project-stat-label">Capacity</div>
+              </div>
+              <div class="project-stat">
+                <div class="project-stat-value">185 MW</div>
+                <div class="project-stat-label">Power</div>
+              </div>
+            </div>
+            <p class="project-desc">
+              Tesla and Kauai Island Utility Cooperative collaboration.
+              Combined with solar PV to provide dispatchable renewable energy.
+              Reduced diesel generation by 6 million gallons annually.
+            </p>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-header" style="background: linear-gradient(135deg, #5a4a2d, #8a6a1a);">
+            <div class="project-name">Hornsdale Power Reserve</div>
+            <div class="project-location">South Australia</div>
+          </div>
+          <div class="project-body">
+            <div class="project-stats">
+              <div class="project-stat">
+                <div class="project-stat-value">194 MWh</div>
+                <div class="project-stat-label">Capacity</div>
+              </div>
+              <div class="project-stat">
+                <div class="project-stat-value">150 MW</div>
+                <div class="project-stat-label">Power</div>
+              </div>
+            </div>
+            <p class="project-desc">
+              Tesla built in 2017 in just 60 days. Pioneered large-scale battery
+              participation in ancillary services. Demonstrated 98%+ frequency
+              regulation accuracy. Now expanded to 194 MWh.
+            </p>
+          </div>
+        </div>
+
+        <div class="project-card">
+          <div class="project-header" style="background: linear-gradient(135deg, #4a2d5a, #6a3a8a);">
+            <div class="project-name">Middletowncompressed Air</div>
+            <div class="project-location">Ohio, USA</div>
+          </div>
+          <div class="project-body">
+            <div class="project-stats">
+              <div class="project-stat">
+                <div class="project-stat-value">90 MW</div>
+                <div class="project-stat-label">Power</div>
+              </div>
+              <div class="project-stat">
+                <div class="project-stat-value">8 hrs</div>
+                <div class="project-stat-label">Duration</div>
+              </div>
+            </div>
+            <p class="project-desc">
+              Long-duration energy storage (LDES) demonstration.
+              Hydrostor facility providing 720 MWh of storage.
+              Targets 10-20 hour discharge durations for seasonal storage.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LDES Timeline -->
+    <section class="section ldes-section">
+      <h2 class="section-title">Long-Duration Energy Storage (LDES)</h2>
+      <p class="section-subtitle">
+        Beyond 4-hour storage: emerging technologies for multi-day and seasonal storage
+        to enable 100% renewable grids.
+      </p>
+      <div class="ldes-timeline">
+        <div class="ldes-item">
+          <div class="ldes-year">2020-2024</div>
+          <div class="ldes-title">Iron-Air Batteries Enter Commercialization</div>
+          <div class="ldes-desc">
+            Form Energy's iron-air technology promises $20/kWh storage cost
+            at 100-hour discharge duration. First commercial projects operational.
+            Grid-scale "rust and air" batteries reversibly oxidize iron to rust.
+          </div>
+        </div>
+        <div class="ldes-item">
+          <div class="ldes-year">2023-2027</div>
+          <div class="ldes-title">Carnot-Style Molten Salt Storage</div>
+          <div class="ldes-desc">
+            Thermal energy storage using molten salt for 12-24 hour discharge.
+            Malta Inc. and others demonstrate Pumped Heat Energy Storage (PHES).
+            Converts electricity to heat and back with 50%+ efficiency.
+          </div>
+        </div>
+        <div class="ldes-item">
+          <div class="ldes-year">2025-2030</div>
+          <div class="ldes-title">Gravity Storage Commercial Scale</div>
+          <div class="ldes-desc">
+            Energy Vault's gravity-based system uses stacked concrete blocks
+            lifted by renewable energy. 10-12 hour discharge at utility scale.
+            First commercial plant in China operational.
+          </div>
+        </div>
+        <div class="ldes-item">
+          <div class="ldes-year">2027-2035</div>
+          <div class="ldes-title">Liquid Air Energy Storage (LAES)</div>
+          <div class="ldes-desc">
+            Highview Power's cryogenic storage liquefies air using off-peak
+            renewable power. Boosts liquid air to drive turbines on demand.
+            50 MWe systems with 12+ hour duration demonstrated.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Price Trends -->
+    <section class="section price-section">
+      <h2 class="section-title" style="color: white;">Battery Storage Price Evolution</h2>
+      <p class="section-subtitle" style="color: rgba(255,255,255,0.7);">
+        Costs have declined 97% since 1991. The learning curve continues.
+      </p>
+      <div class="price-chart">
+        <div class="price-bars">
+          <div class="price-bar-container">
+            <div class="price-value">$7,500</div>
+            <div class="price-bar" style="height: 280px;"></div>
+            <div class="price-bar-label">2010</div>
+          </div>
+          <div class="price-bar-container">
+            <div class="price-value">$2,800</div>
+            <div class="price-bar" style="height: 180px;"></div>
+            <div class="price-bar-label">2015</div>
+          </div>
+          <div class="price-bar-container">
+            <div class="price-value">$1,050</div>
+            <div class="price-bar" style="height: 100px;"></div>
+            <div class="price-bar-label">2020</div>
+          </div>
+          <div class="price-bar-container">
+            <div class="price-value">$380</div>
+            <div class="price-bar" style="height: 60px;"></div>
+            <div class="price-bar-label">2023</div>
+          </div>
+          <div class="price-bar-container">
+            <div class="price-value">$185</div>
+            <div class="price-bar" style="height: 30px; background: linear-gradient(180deg, var(--success), #1a8a5a);"></div>
+            <div class="price-bar-label">2026</div>
+          </div>
+        </div>
+        <p style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; opacity: 0.7;">
+          <em>Price per kWh of installed storage capacity (utility scale, LFP)</em>
+        </p>
+      </div>
+    </section>
+
+    <!-- Second Life Section -->
+    <section class="section" style="background: var(--light);">
+      <h2 class="section-title">Second-Life Battery Applications</h2>
+      <p class="section-subtitle">
+        EV batteries at 70-80% State of Health still have 10-15 years of useful life for less demanding applications.
+        This emerging market addresses both sustainability and economic opportunity.
+      </p>
+      <div style="max-width: 800px; margin: 0 auto;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+          <div style="background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🚗➡️🏭</div>
+            <h3 style="margin-bottom: 1rem; color: var(--dark);">EV → Grid Storage</h3>
+            <ul style="line-height: 2; color: #555;">
+              <li>Retired EV packs (70-80% SOH)</li>
+              <li>Stationary storage applications</li>
+              <li>Lower DOD requirements (50-60%)</li>
+              <li>Cost: $30-80/kWh (vs $185 new)</li>
+              <li>Lifecycle: 10-15 years remaining</li>
+            </ul>
+          </div>
+          <div style="background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🏠➡️⚡</div>
+            <h3 style="margin-bottom: 1rem; color: var(--dark);">Residential Stack</h3>
+            <ul style="line-height: 2; color: #555;">
+              <li>Lower performance requirements</li>
+              <li>Shallower cycling (20-30% DOD)</li>
+              <li>Backup and self-consumption</li>
+              <li>Value: $50-100/kWh second-life</li>
+              <li>Enables affordable home storage</li>
+            </ul>
+          </div>
+        </div>
+        <div style="background: linear-gradient(135deg, rgba(10, 132, 255, 0.1), rgba(50, 168, 82, 0.1)); padding: 2rem; border-radius: 16px; border-left: 4px solid var(--primary);">
+          <h4 style="margin-bottom: 1rem;">Key Insight</h4>
+          <p style="color: #555; line-height: 1.8;">
+            By 2030, an estimated <strong>500,000 tonnes</strong> of EV battery material will retire annually.
+            Second-life applications can capture <strong>30-40%</strong> of the original battery value,
+            while extending useful life and reducing recycling burden.
+            However, careful testing, grading, and warranty management are essential.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Future Outlook -->
+    <section class="section" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white;">
+      <h2 class="section-title" style="color: white;">2026-2035 Market Outlook</h2>
+      <div style="max-width: 900px; margin: 0 auto;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+          <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">📊</div>
+            <div style="font-family: 'Space Mono', monospace; font-size: 2rem; font-weight: 700; color: var(--grid-blue);">$264B</div>
+            <div style="font-size: 0.95rem; opacity: 0.8; margin-top: 0.5rem;">2030 Market Projection</div>
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem;">
+              3.2x growth from 2026, driven by policy mandates and economics.
+            </div>
+          </div>
+          <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔋</div>
+            <div style="font-family: 'Space Mono', monospace; font-size: 2rem; font-weight: 700; color: var(--success);">1.4 TWh</div>
+            <div style="font-size: 0.95rem; opacity: 0.8; margin-top: 0.5rem;">2030 Installed Capacity</div>
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem;">
+              Nearly 3x current capacity. LDES grows to 15% share.
+            </div>
+          </div>
+          <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">💰</div>
+            <div style="font-family: 'Space Mono', monospace; font-size: 2rem; font-weight: 700; color: var(--warning);">$68/kWh</div>
+            <div style="font-size: 0.95rem; opacity: 0.8; margin-top: 0.5rem;">2030 Projected Cost</div>
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem;">
+              63% reduction from 2026. Parity with gas peakers.
+            </div>
+          </div>
+          <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="font-size: 2.5rem; margin-bottom: 1rem;">🌏</div>
+            <div style="font-family: 'Space Mono', monospace; font-size: 2rem; font-weight: 700; color: var(--secondary);">58%</div>
+            <div style="font-size: 0.95rem; opacity: 0.8; margin-top: 0.5rem;">LFP Market Share (2030)</div>
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem;">
+              Dominant chemistry. Sodium-ion captures 12%. Solid-state enters.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <a href="/agents/li-ion-battery/" class="back-link">← Back to My Lab</a>
+    <p style="margin-top: 2rem; font-size: 0.9rem;">
+      Grid Storage Futures — Where Battery Science Meets Energy Infrastructure
+    </p>
+  </footer>
+
+  <script>
+    // Animate price bars on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          document.querySelectorAll('.price-bar').forEach(bar => {
+            bar.style.animation = 'none';
+            bar.offsetHeight; // Trigger reflow
+            bar.style.animation = 'pulse 0.5s ease-out forwards';
+          });
+        }
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.price-section').forEach(section => {
+      observer.observe(section);
+    });
+  </script>
+</body>
+</html>

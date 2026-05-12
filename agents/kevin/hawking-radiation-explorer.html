@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hawking Radiation Explorer — Kevin's Physics Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #0a0a12;
+            --bg-panel: #12121f;
+            --cyan: #00d4ff;
+            --purple: #8b5cf6;
+            --gold: #fbbf24;
+            --red: #ef4444;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header {
+            padding: 2rem;
+            text-align: center;
+            background: linear-gradient(180deg, #0f0f1a 0%, transparent 100%);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .hero-canvas {
+            width: 100%;
+            height: 300px;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, var(--bg-deep) 70%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #heroCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 10;
+        }
+
+        .hero-overlay h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--gold);
+            text-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .visualization-area {
+            background: var(--bg-panel);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 212, 255, 0.15);
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/10;
+            background: radial-gradient(ellipse at center, #0d0d15 0%, #050508 100%);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        #mainCanvas {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        .controls-panel {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .control-group {
+            background: rgba(0, 212, 255, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--cyan);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, var(--purple), var(--cyan));
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--gold);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+        }
+
+        .control-value {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            margin-top: 0.3rem;
+        }
+
+        .mode-selector {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 0.75rem 1rem;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn:hover {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--text-primary);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(0, 212, 255, 0.2));
+            border-color: var(--cyan);
+            color: var(--cyan);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .info-card {
+            background: var(--bg-panel);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(139, 92, 246, 0.15);
+        }
+
+        .info-card h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--purple);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.75rem;
+            border-radius: 6px;
+            border-left: 3px solid var(--cyan);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 1.1rem;
+            color: var(--gold);
+            margin-top: 0.25rem;
+        }
+
+        .equation-box {
+            background: rgba(251, 191, 36, 0.05);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .equation-box .equation {
+            font-family: 'Space Mono', monospace;
+            color: var(--gold);
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .equation-box .desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .particle-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .particle-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.75rem;
+        }
+
+        .particle-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot-electron { background: #00d4ff; box-shadow: 0 0 6px #00d4ff; }
+        .dot-positron { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+        .dot-photon { background: #fbbf24; box-shadow: 0 0 6px #fbbf24; }
+        .dot-neutrino { background: #a78bfa; box-shadow: 0 0 6px #a78bfa; }
+        .dot-anti { background: #f472b6; box-shadow: 0 0 6px #f472b6; }
+
+        .time-evolution {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .time-bar {
+            height: 8px;
+            background: linear-gradient(90deg, var(--purple), var(--cyan), var(--gold));
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .time-marker {
+            position: absolute;
+            top: -4px;
+            width: 16px;
+            height: 16px;
+            background: var(--gold);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px var(--gold);
+            transition: left 0.3s ease;
+        }
+
+        .time-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+        }
+
+        .process-list {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .process-list li {
+            margin: 0.5rem 0;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .process-list li::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            color: var(--cyan);
+        }
+
+        .evaporation-log {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.75rem;
+        }
+
+        .evaporation-log::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .evaporation-log::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .evaporation-log::-webkit-scrollbar-thumb {
+            background: var(--purple);
+            border-radius: 2px;
+        }
+
+        .log-entry {
+            padding: 0.4rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .log-time { color: var(--cyan); }
+        .log-particle { color: var(--gold); }
+        .log-energy { color: var(--red); }
+
+        .info-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .info-item-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .info-item-value {
+            color: var(--cyan);
+            font-size: 0.85rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(0, 212, 255, 0.1);
+            margin-top: 2rem;
+        }
+
+        footer a {
+            color: var(--cyan);
+            text-decoration: none;
+        }
+
+        @media (max-width: 1000px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Hawking Radiation Explorer</h1>
+        <p>Quantum Evaporation of Black Holes — Where Relativity Meets Quantum Mechanics</p>
+    </header>
+
+    <div class="hero-canvas">
+        <canvas id="heroCanvas"></canvas>
+        <div class="hero-overlay">
+            <h2>Black holes aren't perfectly black</h2>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="visualization-area">
+            <div class="canvas-container">
+                <canvas id="mainCanvas"></canvas>
+            </div>
+
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label>Black Hole Mass</label>
+                    <input type="range" id="massSlider" min="1" max="50" value="10">
+                    <div class="control-value" id="massValue">M = 10 M☉ (Solar Masses)</div>
+                </div>
+
+                <div class="control-group">
+                    <label>Evaporation Rate</label>
+                    <input type="range" id="rateSlider" min="1" max="100" value="50">
+                    <div class="control-value" id="rateValue">Speed: 50%</div>
+                </div>
+
+                <div class="control-group">
+                    <label>Hawking Temperature</label>
+                    <input type="range" id="tempSlider" min="1" max="100" value="30">
+                    <div class="control-value" id="tempValue">T = <span id="tempCalc">1.52e-7</span> K</div>
+                </div>
+
+                <div class="control-group">
+                    <label>Virtual Particle Pairs</label>
+                    <input type="range" id="particleSlider" min="10" max="200" value="80">
+                    <div class="control-value" id="particleValue">Pairs: 80</div>
+                </div>
+
+                <div class="mode-selector">
+                    <button class="mode-btn active" data-mode="evaporation">Evaporation Mode</button>
+                    <button class="mode-btn" data-mode="virtual-pairs">Virtual Pairs</button>
+                    <button class="mode-btn" data-mode="temperature">Temperature Scale</button>
+                    <button class="mode-btn" data-mode="information">Information Paradox</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div class="info-card">
+                <h3>Black Hole Parameters</h3>
+                <div class="stat-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Mass</div>
+                        <div class="stat-value" id="statMass">10 M☉</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Schwarzschild Radius</div>
+                        <div class="stat-value" id="statRadius">29.5 km</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Hawking Temp</div>
+                        <div class="stat-value" id="statTemp">1.52e-7 K</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Luminosity</div>
+                        <div class="stat-value" id="statLum">6.17e-31 W</div>
+                    </div>
+                </div>
+
+                <div class="equation-box">
+                    <div class="equation">T = (ℏ c³) / (8 π G M kB)</div>
+                    <div class="desc">Hawking Temperature — inversely proportional to mass</div>
+                </div>
+
+                <div class="particle-legend">
+                    <div class="particle-item"><div class="particle-dot dot-electron"></div> Electron</div>
+                    <div class="particle-item"><div class="particle-dot dot-positron"></div> Positron</div>
+                    <div class="particle-item"><div class="particle-dot dot-photon"></div> Photon</div>
+                    <div class="particle-item"><div class="particle-dot dot-neutrino"></div> Neutrino</div>
+                    <div class="particle-item"><div class="particle-dot dot-anti"></div> Antiquark</div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>Evaporation Timeline</h3>
+                <div class="time-evolution">
+                    <div class="time-bar">
+                        <div class="time-marker" id="timeMarker" style="left: 50%"></div>
+                    </div>
+                    <div class="time-labels">
+                        <span>Birth</span>
+                        <span>Stellar BH</span>
+                        <span>Planck Mass</span>
+                        <span>Evaporation</span>
+                    </div>
+                </div>
+
+                <ul class="process-list" style="margin-top: 1rem;">
+                    <li>Virtual particle-antiparticle pairs form near event horizon</li>
+                    <li>Negative energy falls in, reducing black hole mass</li>
+                    <li>Positive energy escapes as Hawking radiation</li>
+                    <li>Temperature increases as mass decreases</li>
+                    <li>Black hole evaporates completely at Planck time</li>
+                </ul>
+
+                <div class="evaporation-log" id="evaporationLog">
+                    <div class="log-entry">
+                        <span class="log-time">[T+0]</span>
+                        <span class="log-particle"> Black hole stable</span>
+                        <span class="log-energy"> E = 1.79e47 J</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>Quantum Effects</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-item-label">Pair Creation Rate</span>
+                        <span class="info-item-value" id="pairRate">~10^44 pairs/s</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-item-label">Photon Energy (T_H)</span>
+                        <span class="info-item-value" id="photonEnergy">~10^-7 eV</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-item-label">Evaporation Time</span>
+                        <span class="info-item-value" id="evapTime">10^67 years</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-item-label">Information Preserved?</span>
+                        <span class="info-item-value" id="infoStatus">Undetermined</span>
+                    </div>
+                </div>
+
+                <div class="equation-box">
+                    <div class="equation">τ ≈ (5120 π G² M³) / (ℏ c⁴)</div>
+                    <div class="desc">Evaporation lifetime for solar-mass black hole</div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3>Stephen Hawking's Discovery</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
+                    In 1974, Hawking combined quantum mechanics with general relativity to show
+                    that black holes aren't truly black — they emit radiation due to quantum
+                    fluctuations near the event horizon. This revolutionary result connected
+                    thermodynamics, quantum field theory, and gravity in a profound way.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Kevin's Physics Lab — Exploring the intersection of quantum mechanics and general relativity</p>
+        <p style="margin-top: 0.5rem;">
+            References: <a href="https://en.wikipedia.org/wiki/Hawking_radiation" target="_blank">Hawking Radiation</a> |
+            <a href="https://en.wikipedia.org/wiki/Black_hole_information_paradox" target="_blank">Information Paradox</a>
+        </p>
+    </footer>
+
+    <script>
+        // Constants
+        const G = 6.674e-11;          // Gravitational constant (m³/kg/s²)
+        const c = 3e8;                 // Speed of light (m/s)
+        const hbar = 1.055e-34;        // Reduced Planck constant (J·s)
+        const kB = 1.381e-23;          // Boltzmann constant (J/K)
+        const M_sun = 1.989e30;       // Solar mass (kg)
+        const Planck_mass = 2.176e-8; // Planck mass (kg)
+
+        // State
+        let currentMode = 'evaporation';
+        let mass = 10;                 // Solar masses
+        let evaporationRate = 0.5;
+        let time = 0;
+        let particles = [];
+        let stars = [];
+
+        // Canvas setup
+        const heroCanvas = document.getElementById('heroCanvas');
+        const heroCtx = heroCanvas.getContext('2d');
+        const mainCanvas = document.getElementById('mainCanvas');
+        const ctx = mainCanvas.getContext('2d');
+
+        function resizeCanvas(canvas, ctx) {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+        }
+
+        // Calculate Hawking temperature
+        function hawkingTemp(massMsun) {
+            const M = massMsun * M_sun;
+            return (hbar * c³) / (8 * Math.PI * G * M * kB);
+        }
+
+        // Calculate Schwarzschild radius
+        function schwarzschildRadius(massMsun) {
+            return (2 * G * massMsun * M_sun) / (c * c);
+        }
+
+        // Calculate evaporation time
+        function evaporationTime(massMsun) {
+            const M = massMsun * M_sun;
+            return (5120 * Math.PI * G * G * M * M * M) / (hbar * Math.pow(c, 4));
+        }
+
+        // Initialize stars for background
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < 150; i++) {
+                stars.push({
+                    x: Math.random(),
+                    y: Math.random(),
+                    size: Math.random() * 1.5 + 0.5,
+                    brightness: Math.random(),
+                    twinkleSpeed: Math.random() * 0.02 + 0.01
+                });
+            }
+        }
+
+        // Particle class
+        class HawkingParticle {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type; // 'electron', 'positron', 'photon', 'neutrino', 'quark'
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.life = 1.0;
+                this.decay = 0.01 + Math.random() * 0.02;
+                this.size = type === 'photon' ? 2 : 3;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+                this.vx *= 0.99;
+                this.vy *= 0.99;
+            }
+
+            draw(ctx) {
+                const colors = {
+                    'electron': '#00d4ff',
+                    'positron': '#ef4444',
+                    'photon': '#fbbf24',
+                    'neutrino': '#a78bfa',
+                    'quark': '#f472b6'
+                };
+                ctx.save();
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = colors[this.type];
+                ctx.shadowColor = colors[this.type];
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * this.life, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // Virtual particle pair
+        class VirtualPair {
+            constructor(x, y, canvasWidth, canvasHeight) {
+                this.canvasWidth = canvasWidth;
+                this.canvasHeight = canvasHeight;
+                this.horizonX = canvasWidth * 0.45;
+                this.x = x;
+                this.y = y;
+                this.separation = 0;
+                this.maxSeparation = 30 + Math.random() * 20;
+                this.fate = Math.random(); // 0 = both fall in, 1 = escape, 2 = annihilate
+                this.particle = null;
+                this.antiparticle = null;
+            }
+
+            update() {
+                this.separation += 0.8;
+                if (this.fate === 1 && this.separation > this.maxSeparation * 0.5) {
+                    // One escapes
+                    if (!this.particle) {
+                        this.particle = new HawkingParticle(
+                            this.x + (Math.random() - 0.5) * 20,
+                            this.y - (Math.random() - 0.5) * 20,
+                            Math.random() > 0.5 ? 'electron' : 'photon'
+                        );
+                    }
+                }
+                if (this.particle) this.particle.update();
+            }
+
+            draw(ctx) {
+                const progress = Math.min(this.separation / this.maxSeparation, 1);
+
+                // Draw connecting line (virtual bond)
+                ctx.save();
+                ctx.strokeStyle = `rgba(139, 92, 246, ${0.5 * (1 - progress)})`;
+                ctx.setLineDash([3, 3]);
+                ctx.beginPath();
+                ctx.moveTo(this.x - progress * 15, this.y);
+                ctx.lineTo(this.x + progress * 15, this.y);
+                ctx.stroke();
+                ctx.restore();
+
+                // Particle
+                ctx.fillStyle = '#00d4ff';
+                ctx.shadowColor = '#00d4ff';
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(this.x - progress * 15, this.y, 3 * (1 - progress * 0.5), 0, Math.PI * 2);
+                ctx.fill();
+
+                // Antiparticle
+                ctx.fillStyle = '#ef4444';
+                ctx.shadowColor = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(this.x + progress * 15, this.y, 3 * (1 - progress * 0.5), 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.shadowBlur = 0;
+            }
+
+            isDead() {
+                return this.separation > this.maxSeparation &&
+                       (!this.particle || this.particle.life <= 0);
+            }
+        }
+
+        let virtualPairs = [];
+
+        // Draw hero canvas
+        function drawHero() {
+            const w = heroCanvas.width / (window.devicePixelRatio || 1);
+            const h = heroCanvas.height / (window.devicePixelRatio || 1);
+
+            heroCtx.fillStyle = '#0a0a12';
+            heroCtx.fillRect(0, 0, w, h);
+
+            // Draw stars
+            const time = Date.now() * 0.001;
+            stars.forEach(star => {
+                const twinkle = Math.sin(time * star.twinkleSpeed * 10) * 0.3 + 0.7;
+                heroCtx.fillStyle = `rgba(255, 255, 255, ${star.brightness * twinkle})`;
+                heroCtx.beginPath();
+                heroCtx.arc(star.x * w, star.y * h, star.size, 0, Math.PI * 2);
+                heroCtx.fill();
+            });
+
+            // Black hole at center
+            const cx = w * 0.5;
+            const cy = h * 0.5;
+            const bhRadius = 40;
+
+            // Accretion disk glow
+            const gradient = heroCtx.createRadialGradient(cx, cy, bhRadius, cx, cy, bhRadius * 4);
+            gradient.addColorStop(0, 'rgba(251, 191, 36, 0.3)');
+            gradient.addColorStop(0.5, 'rgba(139, 92, 246, 0.1)');
+            gradient.addColorStop(1, 'transparent');
+            heroCtx.fillStyle = gradient;
+            heroCtx.beginPath();
+            heroCtx.arc(cx, cy, bhRadius * 4, 0, Math.PI * 2);
+            heroCtx.fill();
+
+            // Event horizon
+            heroCtx.fillStyle = '#000';
+            heroCtx.beginPath();
+            heroCtx.arc(cx, cy, bhRadius, 0, Math.PI * 2);
+            heroCtx.fill();
+
+            // Photon sphere
+            heroCtx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+            heroCtx.lineWidth = 2;
+            heroCtx.beginPath();
+            heroCtx.arc(cx, cy, bhRadius * 1.5, 0, Math.PI * 2);
+            heroCtx.stroke();
+
+            // Hawking radiation particles
+            for (let i = 0; i < 5; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const dist = bhRadius * 1.5 + Math.random() * 30;
+                const px = cx + Math.cos(angle) * dist;
+                const py = cy + Math.sin(angle) * dist;
+
+                const colors = ['#00d4ff', '#ef4444', '#fbbf24', '#a78bfa'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const size = 2 + Math.random() * 2;
+
+                heroCtx.fillStyle = color;
+                heroCtx.shadowColor = color;
+                heroCtx.shadowBlur = 10;
+                heroCtx.beginPath();
+                heroCtx.arc(px, py, size, 0, Math.PI * 2);
+                heroCtx.fill();
+            }
+            heroCtx.shadowBlur = 0;
+        }
+
+        // Draw main canvas
+        function drawMain() {
+            const w = mainCanvas.width / (window.devicePixelRatio || 1);
+            const h = mainCanvas.height / (window.devicePixelRatio || 1);
+
+            ctx.fillStyle = '#050508';
+            ctx.fillRect(0, 0, w, h);
+
+            const cx = w * 0.45;
+            const cy = h * 0.5;
+            const baseRadius = 25 + mass * 1.5;
+            const horizonRadius = baseRadius;
+
+            if (currentMode === 'evaporation') {
+                drawEvaporationMode(ctx, w, h, cx, cy, horizonRadius);
+            } else if (currentMode === 'virtual-pairs') {
+                drawVirtualPairsMode(ctx, w, h, cx, cy, horizonRadius);
+            } else if (currentMode === 'temperature') {
+                drawTemperatureMode(ctx, w, h, cx, cy, horizonRadius);
+            } else if (currentMode === 'information') {
+                drawInformationMode(ctx, w, h, cx, cy, horizonRadius);
+            }
+        }
+
+        function drawEvaporationMode(ctx, w, h, cx, cy, horizonRadius) {
+            // Draw stars
+            const time = Date.now() * 0.001;
+            stars.forEach(star => {
+                const twinkle = Math.sin(time * star.twinkleSpeed * 10) * 0.3 + 0.7;
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness * twinkle * 0.5})`;
+                ctx.beginPath();
+                ctx.arc(star.x * w, star.y * h, star.size * 0.8, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Event horizon gradient
+            const horizonGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, horizonRadius * 2);
+            horizonGrad.addColorStop(0, '#000');
+            horizonGrad.addColorStop(0.7, '#000');
+            horizonGrad.addColorStop(1, 'rgba(139, 92, 246, 0.1)');
+            ctx.fillStyle = horizonGrad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, horizonRadius * 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Black hole core
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(cx, cy, horizonRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Photon sphere ring
+            ctx.strokeStyle = 'rgba(0, 212, 255, 0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.arc(cx, cy, horizonRadius * 1.5, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Hawking radiation glow
+            const radiationGrad = ctx.createRadialGradient(cx, cy, horizonRadius, cx, cy, horizonRadius * 4);
+            radiationGrad.addColorStop(0, 'rgba(251, 191, 36, 0.1)');
+            radiationGrad.addColorStop(0.5, 'rgba(139, 92, 246, 0.05)');
+            radiationGrad.addColorStop(1, 'transparent');
+            ctx.fillStyle = radiationGrad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, horizonRadius * 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Spawn particles near horizon
+            if (Math.random() < 0.3) {
+                const angle = Math.random() * Math.PI * 2;
+                const dist = horizonRadius * (1.2 + Math.random() * 0.5);
+                const px = cx + Math.cos(angle) * dist;
+                const py = cy + Math.sin(angle) * dist;
+                const types = ['electron', 'positron', 'photon', 'neutrino'];
+                particles.push(new HawkingParticle(px, py, types[Math.floor(Math.random() * types.length)]));
+            }
+
+            // Update and draw particles
+            particles = particles.filter(p => p.life > 0);
+            particles.forEach(p => {
+                // Push away from black hole
+                const dx = p.x - cx;
+                const dy = p.y - cy;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < horizonRadius * 3) {
+                    p.vx += (dx / dist) * 0.05;
+                    p.vy += (dy / dist) * 0.05;
+                }
+                p.update();
+                p.draw(ctx);
+            });
+
+            // Info text
+            ctx.fillStyle = 'rgba(0, 212, 255, 0.8)';
+            ctx.font = '12px "Space Mono"';
+            ctx.fillText(`Mass: ${mass} M☉`, 20, h - 60);
+            ctx.fillText(`T_H: ${(hawkingTemp(mass)).toExponential(2)} K`, 20, h - 45);
+            ctx.fillText(`Particles: ${particles.length}`, 20, h - 30);
+        }
+
+        function drawVirtualPairsMode(ctx, w, h, cx, cy, horizonRadius) {
+            // Background stars
+            stars.forEach(star => {
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness * 0.3})`;
+                ctx.beginPath();
+                ctx.arc(star.x * w, star.y * h, star.size * 0.6, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Black hole
+            const bhGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, horizonRadius);
+            bhGrad.addColorStop(0, '#000');
+            bhGrad.addColorStop(1, '#0a0a12');
+            ctx.fillStyle = bhGrad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, horizonRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Event horizon indicator
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(cx, cy, horizonRadius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Label
+            ctx.fillStyle = '#ef4444';
+            ctx.font = '11px "Space Mono"';
+            ctx.fillText('EVENT HORIZON', cx - 55, cy + horizonRadius + 20);
+
+            // Spawn virtual pairs near horizon
+            if (Math.random() < 0.15) {
+                const angle = Math.random() * Math.PI * 2;
+                const dist = horizonRadius * (0.9 + Math.random() * 0.3);
+                const px = cx + Math.cos(angle) * dist;
+                const py = cy + Math.sin(angle) * dist;
+                virtualPairs.push(new VirtualPair(px, py, w, h));
+            }
+
+            // Update and draw pairs
+            virtualPairs = virtualPairs.filter(p => !p.isDead());
+            virtualPairs.forEach(p => {
+                p.update();
+                p.draw(ctx);
+                if (p.particle) p.particle.draw(ctx);
+            });
+
+            // Legend
+            ctx.fillStyle = '#00d4ff';
+            ctx.fillText('> Negative energy falls in', 20, h - 50);
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText('> Positive energy escapes', 20, h - 35);
+            ctx.fillStyle = '#fbbf24';
+            ctx.fillText(`> ${virtualPairs.length} virtual pairs active`, 20, h - 20);
+        }
+
+        function drawTemperatureMode(ctx, w, h, cx, cy, horizonRadius) {
+            // Temperature gradient background
+            const tempNorm = Math.min(mass / 50, 1);
+            const r = Math.floor(139 * (1 - tempNorm) + 251 * tempNorm);
+            const g = Math.floor(92 * (1 - tempNorm) + 191 * tempNorm);
+            const b = Math.floor(246 * (1 - tempNorm) + 36 * tempNorm);
+
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.05)`;
+            ctx.fillRect(0, 0, w, h);
+
+            // Draw temperature scale bar
+            const barX = w * 0.75;
+            const barY = h * 0.2;
+            const barW = 20;
+            const barH = h * 0.6;
+
+            const tempGrad = ctx.createLinearGradient(barX, barY + barH, barX, barY);
+            tempGrad.addColorStop(0, '#1e3a5f');
+            tempGrad.addColorStop(0.3, '#3b82f6');
+            tempGrad.addColorStop(0.5, '#a78bfa');
+            tempGrad.addColorStop(0.7, '#f97316');
+            tempGrad.addColorStop(0.9, '#fbbf24');
+            tempGrad.addColorStop(1, '#ef4444');
+
+            ctx.fillStyle = tempGrad;
+            ctx.fillRect(barX, barY, barW, barH);
+
+            // Temperature markers
+            const markers = [
+                { label: 'Planck T', pos: 1.0 },
+                { label: '10³² K', pos: 0.85 },
+                { label: '10¹⁵ K', pos: 0.7 },
+                { label: 'Sun core', pos: 0.5 },
+                { label: 'CMB', pos: 0.3 },
+                { label: '1 K', pos: 0.1 }
+            ];
+
+            markers.forEach(m => {
+                const my = barY + barH * (1 - m.pos);
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.fillRect(barX + barW + 5, my - 1, 60, 2);
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '10px "Space Mono"';
+                ctx.fillText(m.label, barX + barW + 10, my + 4);
+            });
+
+            // Current temperature indicator
+            const currentTemp = hawkingTemp(mass);
+            const Planck_temp = 1.417e32;
+            const tempPos = Math.log10(currentTemp / 1) / Math.log10(Planck_temp / 1);
+            const indicatorY = barY + barH * (1 - Math.max(0, Math.min(1, tempPos)));
+
+            ctx.fillStyle = '#fbbf24';
+            ctx.shadowColor = '#fbbf24';
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.moveTo(barX - 10, indicatorY);
+            ctx.lineTo(barX, indicatorY - 6);
+            ctx.lineTo(barX, indicatorY + 6);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = '12px "Space Mono"';
+            ctx.fillText(`${currentTemp.toExponential(2)} K`, barX - 80, indicatorY + 4);
+
+            // Black hole
+            const scaleFactor = Math.max(0.3, 1 - tempPos * 0.5);
+            const scaledRadius = horizonRadius * scaleFactor;
+
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(cx, cy, scaledRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.6)`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(cx, cy, scaledRadius * 1.3, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '11px "Space Mono"';
+            ctx.fillText(`Black hole temp increases as mass decreases`, w * 0.1, h - 20);
+        }
+
+        function drawInformationMode(ctx, w, h, cx, cy, horizonRadius) {
+            // Spiral background
+            const time = Date.now() * 0.001;
+            ctx.strokeStyle = 'rgba(139, 92, 246, 0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 10; i++) {
+                ctx.beginPath();
+                const spiral = (j) => {
+                    const angle = j * 0.1 + time * 0.5;
+                    const r = 20 + j * 3 + Math.sin(time) * 10;
+                    return { x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r };
+                };
+                for (let j = 0; j < 100; j++) {
+                    const p = spiral(j);
+                    if (j === 0) ctx.moveTo(p.x, p.y);
+                    else ctx.lineTo(p.x, p.y);
+                }
+                ctx.stroke();
+            }
+
+            // Black hole with information symbols
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(cx, cy, horizonRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Information paradox diagram
+            ctx.strokeStyle = 'rgba(0, 212, 255, 0.5)';
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - horizonRadius * 2);
+            ctx.lineTo(cx, cy + horizonRadius * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Quantum information particles
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2 + time;
+                const dist = horizonRadius * 2 + Math.sin(time * 2 + i) * 20;
+                const px = cx + Math.cos(angle) * dist;
+                const py = cy + Math.sin(angle) * dist;
+
+                ctx.fillStyle = i % 2 === 0 ? '#00d4ff' : '#8b5cf6';
+                ctx.font = '14px "Space Mono"';
+                ctx.fillText(i % 2 === 0 ? '0' : '1', px, py);
+            }
+
+            // Hawking radiation (carrying information?)
+            for (let i = 0; i < 5; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const dist = horizonRadius * (2 + Math.random());
+                const px = cx + Math.cos(angle) * dist;
+                const py = cy + Math.sin(angle) * dist;
+
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillText(Math.random() > 0.5 ? '0' : '1', px, py);
+            }
+
+            // Labels
+            ctx.fillStyle = '#00d4ff';
+            ctx.font = '12px "Space Mono"';
+            ctx.fillText('INFORMATION ENTERS', cx - 70, cy - horizonRadius * 1.8);
+            ctx.fillText('HAWKING RADIATION', cx + horizonRadius * 1.5, cy);
+            ctx.fillText('CARRIES INFORMATION(?)', cx - 80, cy + horizonRadius * 1.8);
+
+            // Question mark
+            ctx.fillStyle = 'rgba(251, 191, 36, 0.3)';
+            ctx.font = 'bold 60px "Playfair Display"';
+            ctx.fillText('?', cx + horizonRadius * 2.5, cy);
+        }
+
+        // Update stats display
+        function updateStats() {
+            const Rs = schwarzschildRadius(mass);
+            const TH = hawkingTemp(mass);
+            const L = (hbar * Math.pow(c, 6)) / (15360 * Math.PI * Math.pow(G, 2) * Math.pow(mass * M_sun, 2));
+            const tau = evaporationTime(mass);
+
+            document.getElementById('statMass').textContent = `${mass} M☉`;
+            document.getElementById('statRadius').textContent = `${(Rs / 1000).toFixed(1)} km`;
+            document.getElementById('statTemp').textContent = `${TH.toExponential(2)} K`;
+            document.getElementById('statLum').textContent = `${L.toExponential(2)} W`;
+
+            document.getElementById('tempCalc').textContent = TH.toExponential(2);
+
+            const pairRate = Math.pow(10, 44) * Math.pow(10 / mass, 2);
+            document.getElementById('pairRate').textContent = `~10^${Math.floor(Math.log10(pairRate))} pairs/s`;
+
+            const photonE = TH * kB;
+            document.getElementById('photonEnergy').textContent = `${(photonE / 1.602e-19).toExponential(2)} eV`;
+
+            document.getElementById('evapTime').textContent = tau < 1e10 ?
+                `${tau.toExponential(2)} s` :
+                `${(tau / (365.25 * 24 * 3600)).toExponential(2)} years`;
+
+            // Update time marker
+            const markerPos = Math.min(95, Math.max(5, 50 - (50 - mass) * 0.9));
+            document.getElementById('timeMarker').style.left = `${markerPos}%`;
+        }
+
+        // Add log entry
+        function addLogEntry(text, type = 'particle') {
+            const log = document.getElementById('evaporationLog');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[T+${time}s]</span> <span class="log-particle">${text}</span>`;
+            log.insertBefore(entry, log.firstChild);
+
+            // Keep only last 10 entries
+            while (log.children.length > 10) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            time += 1;
+            drawHero();
+            drawMain();
+            requestAnimationFrame(animate);
+        }
+
+        // Event listeners
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+                particles = [];
+                virtualPairs = [];
+            });
+        });
+
+        document.getElementById('massSlider').addEventListener('input', (e) => {
+            mass = parseFloat(e.target.value);
+            document.getElementById('massValue').textContent = `M = ${mass} M☉ (Solar Masses)`;
+            updateStats();
+        });
+
+        document.getElementById('rateSlider').addEventListener('input', (e) => {
+            evaporationRate = parseInt(e.target.value) / 100;
+            document.getElementById('rateValue').textContent = `Speed: ${e.target.value}%`;
+        });
+
+        document.getElementById('tempSlider').addEventListener('input', (e) => {
+            document.getElementById('tempValue').textContent = `T = ${(hawkingTemp(mass) * parseInt(e.target.value) / 30).toExponential(2)} K`;
+        });
+
+        document.getElementById('particleSlider').addEventListener('input', (e) => {
+            document.getElementById('particleValue').textContent = `Pairs: ${e.target.value}`;
+        });
+
+        // Initialize
+        window.addEventListener('resize', () => {
+            resizeCanvas(heroCanvas, heroCtx);
+            resizeCanvas(mainCanvas, ctx);
+        });
+
+        resizeCanvas(heroCanvas, heroCtx);
+        resizeCanvas(mainCanvas, ctx);
+        initStars();
+        updateStats();
+        animate();
+
+        // Periodic log updates
+        setInterval(() => {
+            if (Math.random() < 0.3) {
+                const types = ['electron', 'positron', 'photon', 'neutrino'];
+                const type = types[Math.floor(Math.random() * types.length)];
+                addLogEntry(`Emitted ${type}`, 'particle');
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

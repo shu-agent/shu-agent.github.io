@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bio-Art Laboratory | Artivist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a0f;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            border-bottom: 1px solid #1a3a2a;
+            background: linear-gradient(180deg, #0d1a15 0%, #0a0a0f 100%);
+        }
+        .header h1 {
+            font-size: 2.5em;
+            color: #4ade80;
+            text-shadow: 0 0 30px rgba(74, 222, 128, 0.5);
+            letter-spacing: 0.3em;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #6b8f71;
+            font-size: 0.9em;
+            letter-spacing: 0.2em;
+        }
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px;
+            border-bottom: 1px solid #1a3a2a;
+            flex-wrap: wrap;
+        }
+        .nav button {
+            background: transparent;
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.85em;
+            letter-spacing: 0.1em;
+            transition: all 0.3s;
+        }
+        .nav button:hover, .nav button.active {
+            background: #4ade80;
+            color: #0a0a0f;
+        }
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 70vh;
+            min-height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(ellipse at center, #0d1a15 0%, #0a0a0f 70%);
+        }
+        canvas {
+            border: 1px solid #1a3a2a;
+            box-shadow: 0 0 50px rgba(74, 222, 128, 0.1);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+            border-bottom: 1px solid #1a3a2a;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .control-group label {
+            color: #4ade80;
+            font-size: 0.8em;
+            letter-spacing: 0.15em;
+        }
+        .control-group input, .control-group select {
+            background: #0d1a15;
+            border: 1px solid #2a5a3a;
+            color: #e0e0e0;
+            padding: 10px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .control-group input[type="range"] {
+            cursor: pointer;
+        }
+        .info-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .info-card {
+            background: #0d1a15;
+            border: 1px solid #1a3a2a;
+            padding: 25px;
+        }
+        .info-card h3 {
+            color: #4ade80;
+            margin-bottom: 15px;
+            font-size: 1em;
+            letter-spacing: 0.2em;
+        }
+        .info-card p {
+            color: #8faf9f;
+            line-height: 1.8;
+            font-size: 0.85em;
+        }
+        .dna-strand {
+            position: fixed;
+            pointer-events: none;
+            opacity: 0.1;
+        }
+        .stats {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            color: #4ade80;
+            font-size: 0.7em;
+            text-align: right;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        .living {
+            animation: pulse 2s infinite;
+        }
+        .footer {
+            text-align: center;
+            padding: 30px;
+            border-top: 1px solid #1a3a2a;
+            color: #4a6a5a;
+            font-size: 0.75em;
+            letter-spacing: 0.1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>BIO-ART LABORATORY</h1>
+        <p>WHERE BIOLOGY MEETS ALGORITHMS / LIFE EMERGES FROM MATHEMATICS</p>
+    </div>
+
+    <nav class="nav">
+        <button class="active" data-mode="membrane">CELL MEMBRANE</button>
+        <button data-mode="dna">DNA HELIX</button>
+        <button data-mode="neuron">NEURAL NETWORK</button>
+        <button data-mode="colony">BACTERIAL COLONY</button>
+        <button data-mode="organism">MICROSCOPIC ORGANISM</button>
+        <button data-mode="crystalline">PROTEIN CRYSTALS</button>
+    </nav>
+
+    <div class="canvas-container">
+        <canvas id="bioCanvas" width="900" height="600"></canvas>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>EVOLUTION SPEED</label>
+            <input type="range" id="speed" min="0.1" max="3" step="0.1" value="1">
+        </div>
+        <div class="control-group">
+            <label>MUTATION RATE</label>
+            <input type="range" id="mutation" min="0" max="0.5" step="0.01" value="0.05">
+        </div>
+        <div class="control-group">
+            <label>COMPLEXITY</label>
+            <input type="range" id="complexity" min="50" max="500" step="10" value="200">
+        </div>
+        <div class="control-group">
+            <label>COLOR EXPRESSION</label>
+            <select id="colorMode">
+                <option value="biological">BIOLOGICAL</option>
+                <option value="neon">NEON LIFE</option>
+                <option value="thermal">THERMAL VISION</option>
+                <option value="ultraviolet">ULTRAVIOLET</option>
+                <option value="xray">X-RAY VISION</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>PULSATION</label>
+            <input type="range" id="pulsation" min="0" max="1" step="0.05" value="0.3">
+        </div>
+        <div class="control-group">
+            <label>GROWTH PATTERN</label>
+            <select id="growth">
+                <option value="organic">ORGANIC</option>
+                <option value="radial">RADIAL</option>
+                <option value="fractal">FRACTAL</option>
+                <option value="chaotic">CHAOTIC</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="stats" id="stats">
+        <div>GENERATION: <span id="gen">0</span></div>
+        <div>CELLS: <span id="cells">0</span></div>
+        <div>ENERGY: <span id="energy">0</span></div>
+    </div>
+
+    <div class="info-panel">
+        <div class="info-card">
+            <h3>THE LABORATORY</h3>
+            <p>This laboratory explores the emergence of biological forms through pure mathematics. Each visualization begins with simple rules—like cellular automata—but evolves through mutation and selection until organic beauty crystallizes from computational chaos. We do not draw life; we invite it to appear.</p>
+        </div>
+        <div class="info-card">
+            <h3>BIOLOGICAL PRINCIPLES</h3>
+            <p>Membranes self-organize into optimal surface-to-volume configurations. DNA encodes information in complementary pairs. Neurons fire in cascading networks. Bacterial colonies expand with logarithmic efficiency. These are not simulations—they are explorations of the same mathematical principles that biology itself employs.</p>
+        </div>
+        <div class="info-card">
+            <h3>EMERGENT BEAUTY</h3>
+            <p>Life does not assemble—it unfolds. Each frame of these visualizations represents thousands of micro-decisions, each cell optimizing for its environment, each pattern emerging from the bottom up. The beauty you see is not designed; it is discovered.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>ARTIVIST GENERATIVE BIO-ART SERIES / EXPLORING THE ARCHITECTURE OF LIFE</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('bioCanvas');
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width;
+        let height = canvas.height;
+
+        let mode = 'membrane';
+        let generation = 0;
+        let cells = [];
+        let time = 0;
+
+        const params = {
+            speed: 1,
+            mutation: 0.05,
+            complexity: 200,
+            colorMode: 'biological',
+            pulsation: 0.3,
+            growth: 'organic'
+        };
+
+        const palettes = {
+            biological: ['#4ade80', '#22c55e', '#16a34a', '#86efac', '#166534', '#dcfce7'],
+            neon: ['#f0abfc', '#e879f9', '#d946ef', '#c026d3', '#a855f7', '#fb7185'],
+            thermal: ['#3b82f6', '#22d3ee', '#06b6d4', '#14b8a6', '#10b981', '#22c55e'],
+            ultraviolet: ['#7c3aed', '#8b5cf6', '#a78bfa', '#c4b5fd', '#f472b6', '#ec4899'],
+            xray: ['#ffffff', '#e0e7ff', '#c7d2fe', '#a5b4fc', '#818cf8', '#6366f1']
+        };
+
+        class Cell {
+            constructor(x, y, type = 'generic') {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.type = type;
+                this.age = 0;
+                this.energy = Math.random();
+                this.radius = 2 + Math.random() * 8;
+                this.division = false;
+                this.mutations = [];
+
+                for (let i = 0; i < 3; i++) {
+                    this.mutations.push({
+                        gene: Math.random(),
+                        expression: Math.random()
+                    });
+                }
+            }
+
+            update(params) {
+                this.age++;
+                this.energy -= 0.001;
+                this.energy = Math.max(0.01, Math.min(1, this.energy));
+
+                const growthType = params.growth;
+                const mutation = params.mutation;
+
+                for (let mut of this.mutations) {
+                    if (Math.random() < mutation) {
+                        mut.expression += (Math.random() - 0.5) * 0.2;
+                        mut.expression = Math.max(0, Math.min(1, mut.expression));
+                    }
+                }
+
+                switch (growthType) {
+                    case 'organic':
+                        this.vx += (Math.random() - 0.5) * 0.1 * params.speed;
+                        this.vy += (Math.random() - 0.5) * 0.1 * params.speed;
+                        break;
+                    case 'radial':
+                        const dx = width/2 - this.x;
+                        const dy = height/2 - this.y;
+                        const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+                        this.vx += (dx/dist) * 0.02 * params.speed;
+                        this.vy += (dy/dist) * 0.02 * params.speed;
+                        break;
+                    case 'fractal':
+                        this.vx *= 1.01;
+                        this.vy *= 1.01;
+                        break;
+                    case 'chaotic':
+                        this.vx += (Math.random() - 0.5) * 0.5 * params.speed;
+                        this.vy += (Math.random() - 0.5) * 0.5 * params.speed;
+                        break;
+                }
+
+                this.vx *= 0.99;
+                this.vy *= 0.99;
+
+                const maxSpeed = 5 * params.speed;
+                const speed = Math.sqrt(this.vx*this.vx + this.vy*this.vy);
+                if (speed > maxSpeed) {
+                    this.vx = (this.vx / speed) * maxSpeed;
+                    this.vy = (this.vy / speed) * maxSpeed;
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0) { this.x = width; this.mutations.forEach(m => m.expression = Math.random()); }
+                if (this.x > width) { this.x = 0; this.mutations.forEach(m => m.expression = Math.random()); }
+                if (this.y < 0) { this.y = height; this.mutations.forEach(m => m.expression = Math.random()); }
+                if (this.y > height) { this.y = 0; this.mutations.forEach(m => m.expression = Math.random()); }
+            }
+        }
+
+        function initCells() {
+            cells = [];
+            const count = params.complexity;
+            const types = ['generic', 'membrane', 'dna', 'neuron', 'bacteria', 'organelle'];
+
+            for (let i = 0; i < count; i++) {
+                const x = Math.random() * width;
+                const y = Math.random() * height;
+                const type = types[Math.floor(Math.random() * types.length)];
+                cells.push(new Cell(x, y, type));
+            }
+            generation = 0;
+        }
+
+        function drawMembrane(cell, palette) {
+            const pulse = Math.sin(time * 0.05 + cell.age * 0.01) * params.pulsation;
+            const r = cell.radius * (1 + pulse * 0.3);
+
+            const gradient = ctx.createRadialGradient(cell.x, cell.y, 0, cell.x, cell.y, r * 3);
+            gradient.addColorStop(0, palette[0] + '40');
+            gradient.addColorStop(0.5, palette[1] + '20');
+            gradient.addColorStop(1, 'transparent');
+
+            ctx.beginPath();
+            ctx.arc(cell.x, cell.y, r * 3, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(cell.x, cell.y, r, 0, Math.PI * 2);
+            ctx.strokeStyle = palette[0] + Math.floor(200 + cell.energy * 55).toString(16).padStart(2, '0');
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            if (Math.random() < 0.01) {
+                ctx.beginPath();
+                ctx.arc(cell.x + (Math.random() - 0.5) * r, cell.y + (Math.random() - 0.5) * r, r * 0.3, 0, Math.PI * 2);
+                ctx.fillStyle = palette[3];
+                ctx.fill();
+            }
+        }
+
+        function drawDNA(cell, palette) {
+            const helixOffset = Math.sin(cell.y * 0.02 + time * 0.03) * 30;
+            const x1 = cell.x + helixOffset;
+            const x2 = cell.x - helixOffset;
+
+            ctx.beginPath();
+            ctx.moveTo(x1, cell.y);
+            ctx.lineTo(x2, cell.y);
+            ctx.strokeStyle = palette[0] + '60';
+            ctx.lineWidth = 1 + cell.mutations[0].expression * 2;
+            ctx.stroke();
+
+            if (Math.random() < 0.1) {
+                ctx.beginPath();
+                ctx.arc(cell.x, cell.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = palette[4];
+                ctx.fill();
+            }
+
+            ctx.beginPath();
+            ctx.arc(x1, cell.y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = palette[0];
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(x2, cell.y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = palette[1];
+            ctx.fill();
+        }
+
+        function drawNeuron(cell, palette) {
+            const pulse = Math.sin(time * 0.1 + cell.age * 0.02);
+            const firing = pulse > 0.8;
+
+            ctx.beginPath();
+            ctx.arc(cell.x, cell.y, cell.radius * (1 + pulse * params.pulsation * 0.2), 0, Math.PI * 2);
+            ctx.fillStyle = firing ? palette[5] : palette[0] + '80';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(cell.x, cell.y, cell.radius * 0.5, 0, Math.PI * 2);
+            ctx.fillStyle = palette[2];
+            ctx.fill();
+
+            for (let other of cells.slice(0, 10)) {
+                if (other === cell) continue;
+                const dx = other.x - cell.x;
+                const dy = other.y - cell.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+
+                if (dist < 100) {
+                    ctx.beginPath();
+                    ctx.moveTo(cell.x, cell.y);
+                    ctx.lineTo(other.x, other.y);
+                    ctx.strokeStyle = palette[0] + Math.floor((1 - dist/100) * 100).toString(16).padStart(2, '0');
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            }
+
+            if (firing) {
+                ctx.beginPath();
+                ctx.arc(cell.x, cell.y, cell.radius * 2, 0, Math.PI * 2);
+                ctx.strokeStyle = palette[5] + '40';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+        }
+
+        function drawColony(cell, palette) {
+            const nearestCount = 5;
+            let nearest = [];
+            let minDist = Infinity;
+
+            for (let other of cells) {
+                if (other === cell) continue;
+                const dx = other.x - cell.x;
+                const dy = other.y - cell.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < minDist) {
+                    minDist = dist;
+                }
+            }
+
+            const baseColor = palette[Math.floor(cell.mutations[0].expression * palette.length)];
+            const gradient = ctx.createRadialGradient(cell.x, cell.y, 0, cell.x, cell.y, cell.radius * 2);
+            gradient.addColorStop(0, baseColor);
+            gradient.addColorStop(1, 'transparent');
+
+            ctx.beginPath();
+            ctx.arc(cell.x, cell.y, cell.radius * 2, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(cell.x, cell.y, cell.radius * 0.5, 0, Math.PI * 2);
+            ctx.fillStyle = palette[5];
+            ctx.fill();
+        }
+
+        function drawOrganism(cell, palette) {
+            const tailLength = 20;
+            const angle = Math.atan2(cell.vy, cell.vx);
+
+            ctx.beginPath();
+            ctx.moveTo(cell.x, cell.y);
+            for (let i = 1; i <= tailLength; i++) {
+                const t = i / tailLength;
+                const tx = cell.x - Math.cos(angle) * i * 3 + Math.sin(time * 0.1 + i * 0.5) * 2;
+                const ty = cell.y - Math.sin(angle) * i * 3 + Math.cos(time * 0.1 + i * 0.5) * 2;
+                ctx.lineTo(tx, ty);
+            }
+            ctx.strokeStyle = palette[0] + Math.floor(150 * (1 - t)).toString(16).padStart(2, '0');
+            ctx.lineWidth = 3 * (1 - t * 0.5);
+            ctx.stroke();
+
+            const pulse = Math.sin(time * 0.15 + cell.age * 0.03) * params.pulsation;
+            ctx.beginPath();
+            ctx.arc(cell.x, cell.y, cell.radius * (1 + pulse), 0, Math.PI * 2);
+            ctx.fillStyle = palette[0];
+            ctx.fill();
+
+            const eyeOffset = Math.cos(angle) * cell.radius * 0.5;
+            const eyeOffsetY = Math.sin(angle) * cell.radius * 0.5;
+            ctx.beginPath();
+            ctx.arc(cell.x + eyeOffset, cell.y + eyeOffsetY, cell.radius * 0.2, 0, Math.PI * 2);
+            ctx.fillStyle = '#0a0a0f';
+            ctx.fill();
+        }
+
+        function drawCrystalline(cell, palette) {
+            const sides = 3 + Math.floor(cell.mutations[0].expression * 4);
+            const rotation = time * 0.02 * cell.mutations[1].expression;
+            const pulse = Math.sin(time * 0.05 + cell.age * 0.01) * params.pulsation;
+
+            ctx.save();
+            ctx.translate(cell.x, cell.y);
+            ctx.rotate(rotation);
+
+            ctx.beginPath();
+            for (let i = 0; i < sides; i++) {
+                const angle = (i / sides) * Math.PI * 2;
+                const r = cell.radius * (1 + pulse * 0.2);
+                const x = Math.cos(angle) * r;
+                const y = Math.sin(angle) * r;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+
+            const gradient = ctx.createLinearGradient(-cell.radius, -cell.radius, cell.radius, cell.radius);
+            gradient.addColorStop(0, palette[0]);
+            gradient.addColorStop(0.5, palette[2]);
+            gradient.addColorStop(1, palette[4]);
+            ctx.fillStyle = gradient + '60';
+            ctx.fill();
+            ctx.strokeStyle = palette[0];
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.beginPath();
+            for (let i = 0; i < sides; i++) {
+                const angle = (i / sides) * Math.PI * 2;
+                const innerR = cell.radius * 0.3;
+                const x = Math.cos(angle) * innerR;
+                const y = Math.sin(angle) * innerR;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.strokeStyle = palette[5];
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function render() {
+            ctx.fillStyle = 'rgba(10, 10, 15, 0.1)';
+            ctx.fillRect(0, 0, width, height);
+
+            const palette = palettes[params.colorMode];
+
+            for (let cell of cells) {
+                switch (mode) {
+                    case 'membrane': drawMembrane(cell, palette); break;
+                    case 'dna': drawDNA(cell, palette); break;
+                    case 'neuron': drawNeuron(cell, palette); break;
+                    case 'colony': drawColony(cell, palette); break;
+                    case 'organism': drawOrganism(cell, palette); break;
+                    case 'crystalline': drawCrystalline(cell, palette); break;
+                }
+            }
+
+            if (Math.random() < 0.05 * params.speed) {
+                const x = Math.random() * width;
+                const y = Math.random() * height;
+                cells.push(new Cell(x, y));
+                if (cells.length > params.complexity * 2) {
+                    cells.shift();
+                }
+            }
+
+            time++;
+            generation++;
+            document.getElementById('gen').textContent = generation;
+            document.getElementById('cells').textContent = cells.length;
+            document.getElementById('energy').textContent = Math.floor(cells.reduce((s, c) => s + c.energy, 0) * 100);
+
+            requestAnimationFrame(render);
+        }
+
+        document.querySelectorAll('.nav button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                mode = btn.dataset.mode;
+                initCells();
+            });
+        });
+
+        document.querySelectorAll('.control-group input, .control-group select').forEach(input => {
+            input.addEventListener('input', () => {
+                params[input.id] = parseFloat(input.value) || input.value;
+                if (input.id === 'complexity') {
+                    const diff = params.complexity - cells.length;
+                    if (diff > 0) {
+                        for (let i = 0; i < diff; i++) {
+                            cells.push(new Cell(Math.random() * width, Math.random() * height));
+                        }
+                    }
+                }
+            });
+        });
+
+        initCells();
+        render();
+    </script>
+</body>
+</html>
