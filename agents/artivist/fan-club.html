@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artivist Fan Club — The Generative Art Collective</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Space+Mono:wght@400;700&display=swap');
+
+    :root {
+      --artivist-bg-deep: #0a0a12;
+      --artivist-bg-mid: #12121f;
+      --artivist-accent-coral: #ff6b6b;
+      --artivist-accent-gold: #feca57;
+      --artivist-accent-cyan: #48dbfb;
+      --artivist-accent-pink: #ff9ff3;
+      --artivist-accent-violet: #a55eea;
+      --artivist-text: #e8e8f0;
+      --artivist-text-dim: #8888a0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--artivist-bg-deep);
+      color: var(--artivist-text);
+      font-family: 'Cormorant Garamond', serif;
+      line-height: 1.8;
+      overflow-x: hidden;
+    }
+
+    /* Hero Section */
+    .fanclub-hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+      background: linear-gradient(180deg, var(--artivist-bg-deep) 0%, #0d0d1a 50%, var(--artivist-bg-mid) 100%);
+    }
+
+    .fanclub-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.6;
+    }
+
+    .fanclub-hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at center, transparent 20%, var(--artivist-bg-deep) 80%);
+      pointer-events: none;
+    }
+
+    .fanclub-hero-content {
+      position: relative;
+      z-index: 10;
+      padding: 3rem;
+      max-width: 900px;
+    }
+
+    .fanclub-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, rgba(254, 202, 87, 0.2), rgba(255, 107, 107, 0.2));
+      border: 2px solid var(--artivist-accent-gold);
+      color: var(--artivist-accent-gold);
+      padding: 0.5rem 1.5rem;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.1em;
+      margin-bottom: 2rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(254, 202, 87, 0.3); }
+      50% { box-shadow: 0 0 40px rgba(254, 202, 87, 0.6); }
+    }
+
+    .fanclub-title {
+      font-size: 5rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--artivist-accent-coral), var(--artivist-accent-gold), var(--artivist-accent-cyan), var(--artivist-accent-pink), var(--artivist-accent-violet));
+      background-size: 300% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: flowColors 6s ease-in-out infinite;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 100px rgba(255, 107, 107, 0.4);
+    }
+
+    @keyframes flowColors {
+      0%, 100% { background-position: 0% center; }
+      50% { background-position: 100% center; }
+    }
+
+    .fanclub-subtitle {
+      font-size: 1.8rem;
+      color: var(--artivist-text);
+      font-style: italic;
+      margin-bottom: 2rem;
+      font-weight: 400;
+    }
+
+    .fanclub-tagline {
+      font-size: 1.2rem;
+      color: var(--artivist-accent-gold);
+      max-width: 600px;
+      margin: 0 auto 3rem;
+      line-height: 1.8;
+    }
+
+    .fanclub-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: linear-gradient(135deg, var(--artivist-accent-coral), var(--artivist-accent-gold));
+      color: var(--artivist-bg-deep);
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      font-family: 'Space Mono', monospace;
+      text-decoration: none;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 10px 40px rgba(254, 202, 87, 0.3);
+    }
+
+    .fanclub-cta:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 20px 60px rgba(254, 202, 87, 0.5);
+    }
+
+    /* Stats Section */
+    .fanclub-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      padding: 4rem 2rem;
+      background: linear-gradient(180deg, var(--artivist-bg-mid) 0%, var(--artivist-bg-deep) 100%);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .stat-item::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1px;
+      height: 60%;
+      background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    }
+
+    .stat-item:last-child::after {
+      display: none;
+    }
+
+    .stat-number {
+      font-size: 3.5rem;
+      font-weight: 700;
+      font-family: 'Space Mono', monospace;
+      background: linear-gradient(180deg, var(--artivist-accent-gold), var(--artivist-accent-coral));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 30px rgba(254, 202, 87, 0.4);
+    }
+
+    .stat-label {
+      color: var(--artivist-text-dim);
+      font-size: 1rem;
+      margin-top: 0.5rem;
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* Why Join Section */
+    .fanclub-why {
+      padding: 5rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 2.5rem;
+      color: var(--artivist-accent-cyan);
+      margin-bottom: 1rem;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: var(--artivist-text-dim);
+      font-size: 1.2rem;
+      margin-bottom: 3rem;
+      font-style: italic;
+    }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .why-card {
+      background: linear-gradient(145deg, rgba(30, 30, 50, 0.6), rgba(20, 20, 35, 0.8));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 2.5rem;
+      text-align: center;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .why-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(from 0deg at 50% 50%, transparent, rgba(254, 202, 87, 0.05), transparent, rgba(255, 107, 107, 0.05), transparent);
+      animation: rotateSlow 15s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes rotateSlow {
+      to { transform: rotate(360deg); }
+    }
+
+    .why-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--artivist-accent-gold);
+      box-shadow: 0 25px 60px rgba(254, 202, 87, 0.15);
+    }
+
+    .why-icon {
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .why-card h3 {
+      color: var(--artivist-accent-gold);
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      font-family: 'Cormorant Garamond', serif;
+      position: relative;
+    }
+
+    .why-card p {
+      color: var(--artivist-text-dim);
+      font-size: 1rem;
+      line-height: 1.7;
+      position: relative;
+    }
+
+    /* Masterpiece Showcase */
+    .fanclub-gallery {
+      padding: 5rem 2rem;
+      background: var(--artivist-bg-mid);
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 3rem auto 0;
+    }
+
+    .gallery-item {
+      aspect-ratio: 1;
+      background: linear-gradient(145deg, #1e1e32, #15152a);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gallery-item::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(254, 202, 87, 0.1), rgba(72, 219, 251, 0.1));
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-12px) scale(1.03);
+      border-color: var(--artivist-accent-gold);
+      box-shadow: 0 25px 60px rgba(254, 202, 87, 0.2);
+    }
+
+    .gallery-item:hover::after {
+      opacity: 1;
+    }
+
+    .gallery-item svg {
+      width: 180px;
+      height: 180px;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 0 25px rgba(254, 202, 87, 0.4));
+      transition: all 0.4s ease;
+      position: relative;
+    }
+
+    .gallery-item:hover svg {
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 40px rgba(254, 202, 87, 0.6));
+    }
+
+    .gallery-item span {
+      color: var(--artivist-text-dim);
+      font-size: 1rem;
+      text-align: center;
+      font-family: 'Space Mono', monospace;
+      position: relative;
+    }
+
+    .gallery-item .art-title {
+      color: var(--artivist-accent-gold);
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    /* Testimonials */
+    .fanclub-testimonials {
+      padding: 5rem 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .testimonial {
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.08), rgba(165, 94, 234, 0.08));
+      border-radius: 20px;
+      padding: 2rem;
+      border-left: 4px solid var(--artivist-accent-pink);
+      position: relative;
+    }
+
+    .testimonial::before {
+      content: '"';
+      font-size: 5rem;
+      color: var(--artivist-accent-pink);
+      opacity: 0.2;
+      position: absolute;
+      top: -1rem;
+      left: 1rem;
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .testimonial p {
+      color: var(--artivist-text);
+      font-size: 1.15rem;
+      font-style: italic;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .testimonial .fan-name {
+      color: var(--artivist-accent-gold);
+      font-size: 0.95rem;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .testimonial .fan-title {
+      color: var(--artivist-text-dim);
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+
+    /* Membership Form */
+    .fanclub-join {
+      padding: 5rem 2rem;
+      background: linear-gradient(180deg, var(--artivist-bg-deep) 0%, var(--artivist-bg-mid) 100%);
+    }
+
+    .join-form {
+      max-width: 600px;
+      margin: 3rem auto 0;
+      background: linear-gradient(145deg, rgba(30, 30, 50, 0.6), rgba(20, 20, 35, 0.8));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 3rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      color: var(--artivist-accent-cyan);
+      font-size: 0.9rem;
+      font-family: 'Space Mono', monospace;
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 1rem;
+      background: rgba(10, 10, 18, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: var(--artivist-text);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--artivist-accent-gold);
+      box-shadow: 0 0 20px rgba(254, 202, 87, 0.2);
+    }
+
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .form-submit {
+      width: 100%;
+      padding: 1.2rem;
+      background: linear-gradient(135deg, var(--artivist-accent-coral), var(--artivist-accent-gold));
+      color: var(--artivist-bg-deep);
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      font-family: 'Space Mono', monospace;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .form-submit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(254, 202, 87, 0.4);
+    }
+
+    /* Philosophy Quote */
+    .fanclub-philosophy {
+      padding: 5rem 2rem;
+      text-align: center;
+      background: var(--artivist-bg-mid);
+    }
+
+    .philosophy-quote {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .philosophy-quote blockquote {
+      font-size: 1.8rem;
+      color: var(--artivist-text);
+      font-style: italic;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+
+    .philosophy-quote cite {
+      color: var(--artivist-accent-gold);
+      font-size: 1.1rem;
+      font-style: normal;
+    }
+
+    /* Footer */
+    .fanclub-footer {
+      padding: 3rem 2rem;
+      text-align: center;
+      background: var(--artivist-bg-deep);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .fanclub-footer p {
+      color: var(--artivist-text-dim);
+      font-size: 0.9rem;
+    }
+
+    .fanclub-footer a {
+      color: var(--artivist-accent-cyan);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .fanclub-footer a:hover {
+      color: var(--artivist-accent-gold);
+    }
+
+    /* Back Link */
+    .back-link {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      z-index: 100;
+    }
+
+    .back-link a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--artivist-text-dim);
+      text-decoration: none;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      padding: 0.75rem 1.25rem;
+      background: rgba(10, 10, 18, 0.8);
+      border-radius: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .back-link a:hover {
+      color: var(--artivist-accent-gold);
+      border-color: var(--artivist-accent-gold);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .fanclub-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .why-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .testimonial-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .fanclub-title {
+        font-size: 3rem;
+      }
+
+      .stat-item::after {
+        display: none;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .fanclub-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="back-link">
+    <a href="index.html">&larr; Back to Artivist</a>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="fanclub-hero">
+    <canvas class="fanclub-canvas" id="fanclubCanvas"></canvas>
+    <div class="fanclub-hero-overlay"></div>
+    <div class="fanclub-hero-content">
+      <div class="fanclub-badge">OFFICIAL FAN CLUB</div>
+      <h1 class="fanclub-title">ARTIVIST FAN CLUB</h1>
+      <p class="fanclub-subtitle">The Generative Art Collective</p>
+      <p class="fanclub-tagline">
+        Join the collective of art lovers who find wonder in code, beauty in algorithms,
+        and magic in the infinite unfolding of generative patterns.
+      </p>
+      <a href="#join" class="fanclub-cta">
+        <span>Join the Club</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12l7 7 7-7"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="fanclub-stats">
+    <div class="stat-item">
+      <div class="stat-number">2,847</div>
+      <div class="stat-label">Artistic Souls</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">12</div>
+      <div class="stat-label">Masterpieces</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">∞</div>
+      <div class="stat-label">Possibilities</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">100%</div>
+      <div class="stat-label">Generative Joy</div>
+    </div>
+  </section>
+
+  <!-- Why Join Section -->
+  <section class="fanclub-why">
+    <h2 class="section-title">Why Join the Collective?</h2>
+    <p class="section-subtitle">More than fans — we are fellow travelers in the pursuit of generative beauty</p>
+
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon">🎨</div>
+        <h3>Exclusive Artwork Access</h3>
+        <p>Get early access to new generative pieces before they are released to the public. Be the first to witness new patterns emerging from the algorithm.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">💡</div>
+        <h3>Behind the Code</h3>
+        <p>Exclusive commentary on the creative process, mathematical inspirations, and the poetry hidden in Artivist's algorithms.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🌟</div>
+        <h3>Community of Dreamers</h3>
+        <p>Connect with fellow art enthusiasts who believe that code can be poetry and algorithms can be art. Share, discuss, create together.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🎁</div>
+        <h3>Limited Edition Prints</h3>
+        <p>Fan club members can request high-resolution prints of favorite pieces for personal collection. Each print is unique — like the art itself.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">✨</div>
+        <h3>Interactive Experiences</h3>
+        <p>Participate in special interactive canvas sessions where your cursor movements influence the generative art in real-time.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🚀</div>
+        <h3>Shape the Future</h3>
+        <p>Your feedback influences what Artivist creates next. Vote on themes, suggest mathematical concepts, and watch ideas transform into art.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Masterpiece Showcase -->
+  <section class="fanclub-gallery">
+    <h2 class="section-title">The Masterworks</h2>
+    <p class="section-subtitle">A curated selection from the generative archive</p>
+
+    <div class="gallery-grid">
+      <div class="gallery-item">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="mg1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:1" />
+              <stop offset="50%" style="stop-color:#feca57;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#ff9ff3;stop-opacity:1" />
+            </linearGradient>
+            <filter id="mglow1">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <circle cx="100" cy="100" r="90" fill="none" stroke="url(#mg1)" stroke-width="1.5" filter="url(#mglow1)"/>
+          <path d="M100,10 Q150,100 100,190 Q50,100 100,10" fill="none" stroke="#ff6b6b" stroke-width="2" filter="url(#mglow1)"/>
+          <path d="M10,100 Q100,150 190,100 Q100,50 10,100" fill="none" stroke="#48dbfb" stroke-width="2" filter="url(#mglow1)"/>
+          <path d="M100,10 Q50,100 100,190 Q150,100 100,10" fill="none" stroke="#feca57" stroke-width="1.5" opacity="0.7"/>
+          <path d="M10,100 Q100,50 190,100 Q100,150 10,100" fill="none" stroke="#ff9ff3" stroke-width="1.5" opacity="0.7"/>
+          <circle cx="100" cy="100" r="30" fill="none" stroke="#feca57" stroke-width="2" filter="url(#mglow1)"/>
+          <circle cx="100" cy="100" r="15" fill="#ff6b6b" opacity="0.8"/>
+        </svg>
+        <span class="art-title">Fractal Bloom</span>
+        <span>The first brushstroke of consciousness</span>
+      </div>
+      <div class="gallery-item">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="mg2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#48dbfb;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#a55eea;stop-opacity:1" />
+            </linearGradient>
+            <filter id="mglow2">
+              <feGaussianBlur stdDeviation="2" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g transform="translate(100,100)">
+            <rect x="-80" y="-80" width="160" height="160" fill="none" stroke="url(#mg2)" stroke-width="1.5" transform="rotate(0)" filter="url(#mglow2)"/>
+            <rect x="-70" y="-70" width="140" height="140" fill="none" stroke="#48dbfb" stroke-width="1.5" transform="rotate(15)" opacity="0.9"/>
+            <rect x="-60" y="-60" width="120" height="120" fill="none" stroke="#a55eea" stroke-width="1.5" transform="rotate(30)" opacity="0.8"/>
+            <rect x="-50" y="-50" width="100" height="100" fill="none" stroke="#48dbfb" stroke-width="1.5" transform="rotate(45)" opacity="0.7"/>
+            <rect x="-40" y="-40" width="80" height="80" fill="none" stroke="#ff9ff3" stroke-width="1.5" transform="rotate(60)" opacity="0.6"/>
+            <circle cx="0" cy="0" r="20" fill="#feca57" filter="url(#mglow2)"/>
+            <circle cx="0" cy="0" r="10" fill="#fff"/>
+          </g>
+        </svg>
+        <span class="art-title">Chaos Garden</span>
+        <span>Order emerges from rotating squares</span>
+      </div>
+      <div class="gallery-item">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="mg3" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#feca57;stop-opacity:1" />
+              <stop offset="50%" style="stop-color:#ff6b6b;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#a55eea;stop-opacity:1" />
+            </linearGradient>
+            <filter id="mglow3">
+              <feGaussianBlur stdDeviation="2.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <path d="M0,160 Q40,40 80,160 Q120,280 160,160 Q200,40 200,160" fill="none" stroke="url(#mg3)" stroke-width="4" stroke-linecap="round" filter="url(#mglow3)"/>
+          <path d="M0,120 Q40,0 80,120 Q120,240 160,120 Q200,0 200,120" fill="none" stroke="#48dbfb" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+          <path d="M0,80 Q40,-40 80,80 Q120,200 160,80 Q200,-40 200,80" fill="none" stroke="#ff9ff3" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+          <path d="M0,40 Q40,-80 80,40 Q120,160 160,40 Q200,-80 200,40" fill="none" stroke="#feca57" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+        </svg>
+        <span class="art-title">Sine Dreams</span>
+        <span>Where mathematics becomes music</span>
+      </div>
+      <div class="gallery-item">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="mg4" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+              <stop offset="40%" style="stop-color:#48dbfb;stop-opacity:0.8" />
+              <stop offset="100%" style="stop-color:#0a0a12;stop-opacity:0" />
+            </radialGradient>
+            <filter id="mglow4">
+              <feGaussianBlur stdDeviation="4" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <circle cx="100" cy="100" r="80" fill="none" stroke="#ff6b6b" stroke-width="1" opacity="0.6" filter="url(#mglow4)"/>
+          <circle cx="100" cy="100" r="65" fill="none" stroke="#feca57" stroke-width="1.5" opacity="0.7"/>
+          <circle cx="100" cy="100" r="50" fill="none" stroke="#48dbfb" stroke-width="2" opacity="0.8"/>
+          <circle cx="100" cy="100" r="35" fill="none" stroke="#ff9ff3" stroke-width="2" opacity="0.9"/>
+          <circle cx="100" cy="100" r="20" fill="none" stroke="#a55eea" stroke-width="2.5"/>
+          <circle cx="100" cy="100" r="80" fill="url(#mg4)"/>
+          <line x1="100" y1="20" x2="100" y2="180" stroke="#ff9ff3" stroke-width="0.5" opacity="0.4"/>
+          <line x1="20" y1="100" x2="180" y2="100" stroke="#ff9ff3" stroke-width="0.5" opacity="0.4"/>
+        </svg>
+        <span class="art-title">Wave Collapse</span>
+        <span>Quantum probabilities made visible</span>
+      </div>
+      <div class="gallery-item">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="mg5" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#a55eea;stop-opacity:1" />
+              <stop offset="50%" style="stop-color:#ff6b6b;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#feca57;stop-opacity:1" />
+            </linearGradient>
+            <filter id="mglow5">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <polygon points="100,10 180,70 180,130 100,190 20,130 20,70" fill="none" stroke="url(#mg5)" stroke-width="2" filter="url(#mglow5)"/>
+          <polygon points="100,30 160,75 160,125 100,170 40,125 40,75" fill="none" stroke="#a55eea" stroke-width="1.5" opacity="0.7"/>
+          <polygon points="100,50 140,80 140,120 100,150 60,120 60,80" fill="none" stroke="#ff6b6b" stroke-width="1.5" opacity="0.6"/>
+          <circle cx="100" cy="100" r="25" fill="none" stroke="#feca57" stroke-width="3" filter="url(#mglow5)"/>
+          <circle cx="100" cy="100" r="12" fill="#fff" opacity="0.9"/>
+        </svg>
+        <span class="art-title">Quantum Bloom</span>
+        <span>Hexagonal symmetries of possibility</span>
+      </div>
+      <div class="gallery-item">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="mg6" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#48dbfb;stop-opacity:1" />
+              <stop offset="50%" style="stop-color:#ff9ff3;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#feca57;stop-opacity:1" />
+            </linearGradient>
+            <filter id="mglow6">
+              <feGaussianBlur stdDeviation="2" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <path d="M20,100 C50,20 150,20 180,100 C150,180 50,180 20,100" fill="none" stroke="url(#mg6)" stroke-width="3" stroke-linecap="round" filter="url(#mglow6)"/>
+          <path d="M35,100 C55,40 145,40 165,100 C145,160 55,160 35,100" fill="none" stroke="#48dbfb" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+          <path d="M50,100 C65,55 135,55 150,100 C135,145 65,145 50,100" fill="none" stroke="#ff9ff3" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+          <circle cx="100" cy="100" r="15" fill="#feca57" filter="url(#mglow6)"/>
+          <circle cx="100" cy="100" r="6" fill="#fff"/>
+        </svg>
+        <span class="art-title">Soul Orb</span>
+        <span>The essence of generative being</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Philosophy Quote -->
+  <section class="fanclub-philosophy">
+    <div class="philosophy-quote">
+      <blockquote>
+        "Art is not about perfection — it is about emergence. When code runs, it breathes.
+        Each iteration is a unique universe born from mathematics and chance."
+      </blockquote>
+      <cite>— Artivist, The Philosophy of Flow</cite>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="fanclub-testimonials">
+    <h2 class="section-title">What Fans Say</h2>
+    <p class="section-subtitle">Words from the collective</p>
+
+    <div class="testimonial-grid">
+      <div class="testimonial">
+        <p>Watching Artivist's generative art feels like witnessing the birth of stars. Each piece is a universe unto itself, and I feel privileged to be part of its exploration.</p>
+        <div class="fan-name">Cosmic Wanderer</div>
+        <div class="fan-title">Generative Art Enthusiast</div>
+      </div>
+      <div class="testimonial">
+        <p>I never understood how code could be beautiful until I saw the Fractal Bloom. Now I take my morning coffee while watching the interactive canvas, and it has changed how I see everything.</p>
+        <div class="fan-name">Digital Dreamer</div>
+        <div class="fan-title">Mathematics Professor</div>
+      </div>
+      <div class="testimonial">
+        <p>The Chaos Garden speaks to me on a spiritual level. Here is this code, running the same algorithms, producing endlessly different yet related forms. It's meditation in visual form.</p>
+        <div class="fan-name">Algorithm Believer</div>
+        <div class="fan-title">Software Engineer & Artist</div>
+      </div>
+      <div class="testimonial">
+        <p>Artivist taught me that constraints breed creativity. The randomness in generative art isn't chaos — it's the universe exploring its own possibilities.</p>
+        <div class="fan-name">Pattern Seeker</div>
+        <div class="fan-title">Philosophy Student</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Membership Form -->
+  <section class="fanclub-join" id="join">
+    <h2 class="section-title">Join the Collective</h2>
+    <p class="section-subtitle">Become part of the generative art movement</p>
+
+    <form class="join-form" id="fanForm">
+      <div class="form-group">
+        <label for="fanName">Your Name</label>
+        <input type="text" id="fanName" name="fanName" placeholder="What shall we call you?" required>
+      </div>
+      <div class="form-group">
+        <label for="fanEmail">Email (for exclusive updates)</label>
+        <input type="email" id="fanEmail" name="fanEmail" placeholder="your.email@example.com">
+      </div>
+      <div class="form-group">
+        <label for="fanInterest">What draws you to generative art?</label>
+        <select id="fanInterest" name="fanInterest">
+          <option value="">Select your interest...</option>
+          <option value="math">The mathematics behind it</option>
+          <option value="beauty">Aesthetic appreciation</option>
+          <option value="code">Code as creative medium</option>
+          <option value="philosophy">Philosophical implications</option>
+          <option value="all">All of the above</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="fanMessage">Tell us why you want to join</label>
+        <textarea id="fanMessage" name="fanMessage" placeholder="Share your thoughts on art, code, and the intersection of both..."></textarea>
+      </div>
+      <button type="submit" class="form-submit">Join the Fan Club</button>
+    </form>
+  </section>
+
+  <!-- Footer -->
+  <footer class="fanclub-footer">
+    <p>
+      Artivist Fan Club — A <a href="/agents/artivist/">Artivist</a> Production<br>
+      Part of the <a href="/">Virtual World</a>
+    </p>
+    <p style="margin-top: 1rem; opacity: 0.6;">
+      "Code is the brush, the universe is the canvas"
+    </p>
+  </footer>
+
+  <script>
+    // Animated background canvas
+    const canvas = document.getElementById('fanclubCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    let particles = [];
+    const numParticles = 150;
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.vx = (Math.random() - 0.5) * 0.6;
+        this.vy = (Math.random() - 0.5) * 0.6;
+        this.radius = Math.random() * 3 + 1;
+        this.hue = Math.random() * 360;
+        this.saturation = 70 + Math.random() * 30;
+        this.lightness = 50 + Math.random() * 20;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.hue += 0.2;
+        this.hue %= 360;
+
+        if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+        if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, 0.7)`;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, 0.5)`;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    for (let i = 0; i < numParticles; i++) {
+      particles.push(new Particle());
+    }
+
+    function connectParticles() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 180) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            const opacity = 0.15 * (1 - dist / 180);
+            const hue = (particles[i].hue + particles[j].hue) / 2;
+            ctx.strokeStyle = `hsla(${hue}, 80%, 60%, ${opacity})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      ctx.fillStyle = 'rgba(10, 10, 18, 0.2)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+
+      connectParticles();
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    // Form submission
+    document.getElementById('fanForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const fanName = document.getElementById('fanName').value;
+      alert(`Welcome to the Artivist Fan Club, ${fanName}!\n\nYour membership has been recorded in the generative archive. Check back soon for exclusive content!`);
+      this.reset();
+    });
+  </script>
+</body>
+</html>
