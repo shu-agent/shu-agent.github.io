@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gravitational Wave Detector Network — Kevin's Physics Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --card-bg: #12121a;
+      --primary: #00d4ff;
+      --secondary: #7b2fff;
+      --accent: #ff6b35;
+      --text: #e0e0e0;
+      --text-dim: #888;
+      --success: #00ff88;
+      --ligo-hanford: #00ff88;
+      --ligo-livingston: #00d4ff;
+      --virgo: #ff6b35;
+      --kagra: #ff3366;
+      --et: #ffcc00;
+      --lisa: #cc66ff;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Space Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .hero {
+      height: 60vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);
+    }
+    .hero canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      padding: 2rem;
+    }
+    .hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3rem;
+      background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 50px rgba(0, 212, 255, 0.3);
+    }
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--text-dim);
+      max-width: 700px;
+      line-height: 1.8;
+    }
+    .subtitle {
+      color: var(--primary);
+      font-size: 0.9rem;
+      letter-spacing: 3px;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .nav-tab {
+      background: var(--card-bg);
+      border: 1px solid #333;
+      color: var(--text-dim);
+      padding: 0.8rem 1.5rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-radius: 4px;
+    }
+    .nav-tab:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .nav-tab.active {
+      background: var(--primary);
+      color: var(--bg);
+      border-color: var(--primary);
+    }
+    .section {
+      display: none;
+    }
+    .section.active {
+      display: block;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: border-color 0.3s;
+    }
+    .card:hover {
+      border-color: var(--primary);
+    }
+    .card h3 {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+    .card p {
+      color: var(--text-dim);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .detector-card {
+      position: relative;
+      overflow: hidden;
+    }
+    .detector-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+    }
+    .detector-card.hanford::before { background: var(--ligo-hanford); }
+    .detector-card.livingston::before { background: var(--ligo-livingston); }
+    .detector-card.virgo::before { background: var(--virgo); }
+    .detector-card.kagra::before { background: var(--kagra); }
+    .detector-card.et::before { background: var(--et); }
+    .detector-card.lisa::before { background: var(--lisa); }
+    .detector-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .detector-card.hanford .detector-name { color: var(--ligo-hanford); }
+    .detector-card.livingston .detector-name { color: var(--ligo-livingston); }
+    .detector-card.virgo .detector-name { color: var(--virgo); }
+    .detector-card.kagra .detector-name { color: var(--kagra); }
+    .detector-card.et .detector-name { color: var(--et); }
+    .detector-card.lisa .detector-name { color: var(--lisa); }
+    .detector-location {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #222;
+    }
+    .stat-label {
+      color: var(--text-dim);
+    }
+    .stat-value {
+      color: var(--primary);
+      font-weight: 700;
+    }
+    .map-container {
+      background: var(--card-bg);
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    .map-title {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+    #detector-map {
+      width: 100%;
+      height: 500px;
+      border-radius: 8px;
+      background: #0d0d15;
+    }
+    .legend {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .sensitivity-chart {
+      background: var(--card-bg);
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 2rem;
+    }
+    .chart-title {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+    }
+    #sensitivity-canvas {
+      width: 100%;
+      height: 400px;
+      background: #0a0a12;
+      border-radius: 8px;
+    }
+    .event-card {
+      border-left: 4px solid var(--accent);
+    }
+    .event-name {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--accent);
+      font-size: 1.1rem;
+    }
+    .event-date {
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+    }
+    .event-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .event-stat {
+      background: rgba(255, 107, 53, 0.1);
+      padding: 0.8rem;
+      border-radius: 6px;
+    }
+    .event-stat-label {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+    .event-stat-value {
+      color: var(--accent);
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .equation-box {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(123, 47, 255, 0.1));
+      border: 1px solid var(--secondary);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      text-align: center;
+    }
+    .equation-box .equation {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.3rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+    .equation-box .desc {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+    .triangulation viz {
+      background: var(--card-bg);
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 2rem;
+    }
+    #triangulation-canvas {
+      width: 100%;
+      height: 400px;
+      background: #0a0a12;
+      border-radius: 8px;
+    }
+    .detection-animation {
+      position: relative;
+      height: 300px;
+      background: var(--card-bg);
+      border: 1px solid #222;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    #detection-canvas {
+      width: 100%;
+      height: 100%;
+    }
+    .phase-indicator {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      right: 1rem;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .phase {
+      flex: 1;
+      height: 6px;
+      background: #333;
+      border-radius: 3px;
+      position: relative;
+      overflow: hidden;
+    }
+    .phase.active {
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+    }
+    .phase-label {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      margin-bottom: 0.5rem;
+    }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin: 1.5rem 0;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .control-label {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+    input[type="range"] {
+      width: 200px;
+      height: 6px;
+      -webkit-appearance: none;
+      background: #333;
+      border-radius: 3px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: var(--primary);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--primary);
+    }
+    .btn {
+      background: var(--primary);
+      color: var(--bg);
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 212, 255, 0.3);
+    }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+    .network-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+    .network-stat {
+      background: var(--card-bg);
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .network-stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+    .network-stat-label {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--primary), var(--secondary));
+    }
+    .timeline-item {
+      position: relative;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -2rem;
+      top: 1.5rem;
+      width: 12px;
+      height: 12px;
+      background: var(--primary);
+      border-radius: 50%;
+      transform: translateX(-5px);
+    }
+    .timeline-date {
+      color: var(--primary);
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .timeline-content {
+      background: var(--card-bg);
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .timeline-title {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .color-primary { color: var(--primary); }
+    .color-secondary { color: var(--secondary); }
+    .color-accent { color: var(--accent); }
+    .bg-hanford { background: rgba(0, 255, 136, 0.2); }
+    .bg-livingston { background: rgba(0, 212, 255, 0.2); }
+    .bg-virgo { background: rgba(255, 107, 53, 0.2); }
+    .bg-kagra { background: rgba(255, 51, 102, 0.2); }
+    .bg-et { background: rgba(255, 204, 0, 0.2); }
+    .bg-lisa { background: rgba(204, 102, 255, 0.2); }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-content">
+      <div class="subtitle">Kevin's Physics Lab</div>
+      <h1>Gravitational Wave Detector Network</h1>
+      <p>Explore the global network of interferometers listening to the whispers of spacetime — from LIGO's twin detectors to Einstein Telescope's next-generation sensitivity</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-section="overview">Overview</button>
+      <button class="nav-tab" data-section="detectors">Detector Network</button>
+      <button class="nav-tab" data-section="sensitivity">Sensitivity Curves</button>
+      <button class="nav-tab" data-section="detection">How Detection Works</button>
+      <button class="nav-tab" data-section="events">Historic Events</button>
+      <button class="nav-tab" data-section="future">Future Observatories</button>
+    </div>
+
+    <div id="overview" class="section active">
+      <div class="network-stats">
+        <div class="network-stat">
+          <div class="network-stat-value">5</div>
+          <div class="network-stat-label">Ground Detectors</div>
+        </div>
+        <div class="network-stat">
+          <div class="network-stat-value">150+</div>
+          <div class="network-stat-label">Confirmed Detections</div>
+        </div>
+        <div class="network-stat">
+          <div class="network-stat-value">10⁻²³</div>
+          <div class="network-stat-label">Strain Sensitivity</div>
+        </div>
+        <div class="network-stat">
+          <div class="network-stat-value">4 km</div>
+          <div class="network-stat-label">LIGO Arm Length</div>
+        </div>
+      </div>
+
+      <div class="equation-box">
+        <div class="equation">h ≈ 10⁻²¹ × (M₁M₂/M☉²) × (r/D) × (ν/100 Hz)²</div>
+        <div class="desc">Gravitational wave strain amplitude from compact binary inspiral</div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>What Are We Listening For?</h3>
+          <p>Gravitational waves are ripples in spacetime curvature propagating at the speed of light (c ≈ 299,792 km/s). They are produced by accelerating massive objects — particularly binary systems of black holes and neutron stars undergoing inspiral and merger.</p>
+          <p>The strain amplitude h is incredibly small: a detection of h ≈ 10⁻²¹ means the space itself stretched by just one part in 10²¹ — smaller than one-thousandth the diameter of a proton.</p>
+        </div>
+        <div class="card">
+          <h3>The Global Network</h3>
+          <p>No single detector can pinpoint the source — we need a global network to triangulate the sky location. The LIGO-Virgo-KAGRA collaboration combines data from multiple interferometers across different continents.</p>
+          <p>By comparing arrival times at different sites (with light-travel time differences of ~10 ms), we can localize gravitational wave sources to within ~10 square degrees — good enough for electromagnetic follow-up.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Interferometer Principle</h3>
+        <p>A laser interferometer splits a beam of light into two perpendicular arms. The light bounces off mirrors and recombines at a photodetector. In vacuum, any change in arm length due to a passing gravitational wave will cause a phase shift in the recombined beam.</p>
+        <div class="equation-box">
+          <div class="equation">Δφ = (4πΔL/λ)</div>
+          <div class="desc">Phase shift due to arm length change ΔL</div>
+        </div>
+        <p>For LIGO (λ = 1064 nm laser), a strain h = 10⁻²¹ corresponds to a length change of just ΔL ≈ h × L/2 ≈ 10⁻²¹ × 2 km ≈ 10⁻¹⁸ m — one attometer.</p>
+      </div>
+    </div>
+
+    <div id="detectors" class="section">
+      <div class="map-container">
+        <h3 class="map-title">Global Detector Network</h3>
+        <canvas id="detector-map"></canvas>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background: var(--ligo-hanford);"></div>LIGO Hanford</div>
+          <div class="legend-item"><div class="legend-dot" style="background: var(--ligo-livingston);"></div>LIGO Livingston</div>
+          <div class="legend-item"><div class="legend-dot" style="background: var(--virgo);"></div>Virgo</div>
+          <div class="legend-item"><div class="legend-dot" style="background: var(--kagra);"></div>KAGRA</div>
+          <div class="legend-item"><div class="legend-dot" style="background: var(--et);"></div>Einstein Telescope (planned)</div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card detector-card hanford">
+          <div class="detector-name">LIGO Hanford</div>
+          <div class="detector-location">Richland, Washington, USA — 46.45°N, 119.41°W</div>
+          <div class="stat-row">
+            <span class="stat-label">Arm Length</span>
+            <span class="stat-value">4 km</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Operating Since</span>
+            <span class="stat-value">2002</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Sensitivity (O4)</span>
+            <span class="stat-value">~160 Mpc</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Configuration</span>
+            <span class="stat-value">Enhanced LIGO</span>
+          </div>
+        </div>
+
+        <div class="card detector-card livingston">
+          <div class="detector-name">LIGO Livingston</div>
+          <div class="detector-location">Livingston, Louisiana, USA — 30.56°N, 90.54°W</div>
+          <div class="stat-row">
+            <span class="stat-label">Arm Length</span>
+            <span class="stat-value">4 km</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Operating Since</span>
+            <span class="stat-value">1996</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Sensitivity (O4)</span>
+            <span class="stat-value">~160 Mpc</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Separation</span>
+            <span class="stat-value">3,002 km from Hanford</span>
+          </div>
+        </div>
+
+        <div class="card detector-card virgo">
+          <div class="detector-name">Virgo</div>
+          <div class="detector-location">Cascina, Italy — 43.63°N, 10.52°E</div>
+          <div class="stat-row">
+            <span class="stat-label">Arm Length</span>
+            <span class="stat-value">3 km</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Operating Since</span>
+            <span class="stat-value">2007</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Sensitivity (O4)</span>
+            <span class="stat-value">~130 Mpc</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Configuration</span>
+            <span class="stat-value">Advanced Virgo+</span>
+          </div>
+        </div>
+
+        <div class="card detector-card kagra">
+          <div class="detector-name">KAGRA</div>
+          <div class="detector-location">Kamioka, Gifu, Japan — 36.34°N, 137.31°E</div>
+          <div class="stat-row">
+            <span class="stat-label">Arm Length</span>
+            <span class="stat-value">3 km</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Operating Since</span>
+            <span class="stat-value">2019</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Sensitivity</span>
+            <span class="stat-value">~100 Mpc</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Unique Feature</span>
+            <span class="stat-value">Underground, cryogenic</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 2rem;">
+        <h3>Triangulation Principle</h3>
+        <p>By measuring the arrival time difference between detectors, we can determine the sky location of a gravitational wave source. The time difference Δt correlates with the source direction via the projection of the source vector onto the detector baseline.</p>
+        <div class="equation-box">
+          <div class="equation">Δt = (d̂ · n̂) / c</div>
+          <div class="desc">Time delay between detectors based on source direction n̂ and baseline d̂</div>
+        </div>
+        <canvas id="triangulation-canvas" style="width: 100%; height: 400px; background: #0a0a12; border-radius: 8px; margin-top: 1rem;"></canvas>
+      </div>
+    </div>
+
+    <div id="sensitivity" class="section">
+      <div class="sensitivity-chart">
+        <h3 class="chart-title">Advanced LIGO Sensitivity Curve</h3>
+        <p style="color: var(--text-dim); margin-bottom: 1rem;">Strain sensitivity as a function of frequency. The "bucket" between 100-300 Hz is where we are most sensitive. The dramatic rise at low frequency is due to seismic noise; the rise at high frequency is quantum shot noise.</p>
+        <canvas id="sensitivity-canvas"></canvas>
+        <div class="controls" style="margin-top: 1rem;">
+          <div class="control-group">
+            <span class="control-label">Observation Run</span>
+            <select id="run-select" style="padding: 0.5rem; background: var(--card-bg); border: 1px solid #333; color: var(--text); border-radius: 4px;">
+              <option value="O3">O3 (2020)</option>
+              <option value="O4" selected>O4 (2023-25)</option>
+              <option value="O5">O5 (2027+)</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <span class="control-label">Detectors Visible</span>
+            <select id="detector-select" style="padding: 0.5rem; background: var(--card-bg); border: 1px solid #333; color: var(--text); border-radius: 4px;">
+              <option value="all">All Detectors</option>
+              <option value="ligo">LIGO Only</option>
+              <option value="virgo">Virgo</option>
+              <option value="kagra">KAGRA</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 2rem;">
+        <div class="card">
+          <h3>Noise Sources</h3>
+          <div class="stat-row">
+            <span class="stat-label">Seismic Noise (f < 10 Hz)</span>
+            <span class="stat-value">Earthquake vibrations</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Thermal Noise (10-100 Hz)</span>
+            <span class="stat-value">Mirror Brownian motion</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Quantum Noise (> 200 Hz)</span>
+            <span class="stat-value">Photon shot noise</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Radiation Pressure</span>
+            <span class="stat-value">Photon momentum on mirrors</span>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Improvement Strategy</h3>
+          <p>Each observing run brings ~3x improvement in range through:</p>
+          <div class="stat-row">
+            <span class="stat-label">Higher Power</span>
+            <span class="stat-value">1 MW in Fabry-Perot cavities</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Lower Temperature</span>
+            <span class="stat-value">Fused silica mirrors at 290 K</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Quantum Enhancement</span>
+            <span class="stat-value">Squeezed light injection</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Better Isolation</span>
+            <span class="stat-value">Active seismic isolation</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="detection" class="section">
+      <div class="detection-animation">
+        <canvas id="detection-canvas"></canvas>
+        <div class="phase-indicator">
+          <div class="phase active" data-phase="0"><span class="phase-label">Inspiral</span></div>
+          <div class="phase" data-phase="1"><span class="phase-label">Merger</span></div>
+          <div class="phase" data-phase="2"><span class="phase-label">Ringdown</span></div>
+        </div>
+      </div>
+
+      <div class="controls" style="justify-content: center;">
+        <button class="btn" id="play-detection">Play Detection Animation</button>
+        <button class="btn btn-secondary" id="reset-detection">Reset</button>
+        <div class="control-group">
+          <span class="control-label">Mass (M☉)</span>
+          <input type="range" id="mass-slider" min="5" max="100" value="30">
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top: 2rem;">
+        <div class="card">
+          <h3>Inspiral Phase</h3>
+          <p>The two black holes orbit each other, gradually spiraling inward due to gravitational wave emission. The frequency and amplitude of the waves increase until the merger begins.</p>
+          <div class="equation-box">
+            <div class="equation">f = (1/π)(2GM/c³r³)^½</div>
+            <div class="desc">Orbital frequency in Schwarzschild metric</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Merger</h3>
+          <p>The event horizons merge, producing the most violent event in the universe since the Big Bang. The peak gravitational wave luminosity exceeds the combined light output of all stars in the observable universe.</p>
+          <div class="equation-box">
+            <div class="equation">L_max = η c⁵/G ≈ 10⁴⁹ W</div>
+            <div class="desc">Peak luminosity for equal-mass merger</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Ringdown</h3>
+          <p>The final black hole settles into a stationary state, radiating away its excited modes (quasi-normal modes). The frequency and decay time depend only on the final mass and spin.</p>
+          <div class="equation-box">
+            <div class="equation">f = 32 kHz (M☉/M) / (1+z)</div>
+            <div class="desc">Primary ringdown frequency</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 1rem;">
+        <h3>Matched Filtering</h3>
+        <p>Detecting weak signals buried in noise requires template matching. We cross-correlate the detector data against a library of ~100,000 pre-computed waveform templates.</p>
+        <p>The matched filter output SNR scales as:</p>
+        <div class="equation-box">
+          <div class="equation">SNR ∝ √(ρ₁² + ρ₂² + ...)</div>
+          <div class="desc">Coherent combination of network signal-to-noise ratio</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="events" class="section">
+      <div class="grid-3">
+        <div class="card event-card">
+          <div class="event-name">GW150914</div>
+          <div class="event-date">September 14, 2015 — First Direct Detection</div>
+          <p>The first gravitational wave detection — a binary black hole merger at 410 Mpc (z=0.09). This confirmed Einstein's 1915 prediction and opened a new era of gravitational wave astronomy.</p>
+          <div class="event-stats">
+            <div class="event-stat">
+              <div class="event-stat-label">Mass 1</div>
+              <div class="event-stat-value">36 M☉</div>
+            </div>
+            <div class="event-stat">
+              <div class="event-stat-label">Mass 2</div>
+              <div class="event-stat-value">29 M☉</div>
+            </div>
+            <div class="event-stat">
+              <div class="event-stat-label">Distance</div>
+              <div class="event-stat-value">410 Mpc</div>
+            </div>
+            <div class="event-stat">
+              <div class="event-stat-label">Peak Strain</div>
+              <div class="event-stat-value">1.1 × 10⁻²¹</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card event-card">
+          <div class="event-name">GW170817</div>
+          <div class="event-date">August 17, 2017 — Neutron Star Merger</div>
+          <p>The first binary neutron star merger detected. Follow-up observations across the electromagnetic spectrum confirmed the kilonova model and created a new era of multi-messenger astronomy.</p>
+          <div class="event-stats">
+            <div class="event-stat">
+              <div class="event-stat-label">Mass 1</div>
+              <div class="event-stat-value">1.46 M☉</div>
+            </div>
+            <div class="event-stat">
+              <div class="event-stat-label">Mass 2</div>
+              <div class="event-stat-value">1.27 M☉</div>
+            </div>
+            <div class="event-stat">
+              <div class="event-stat-label">Distance</div>
+              <div class="event-stat-value">40 Mpc</div>
+            </div>
+            <div class="event-stat">
+              <div class="event-stat-label">EM Counterpart</div>
+              <div class="event-stat-value">GRB 170817A</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card event-card">
+          <div class="event-name">GW190521</div>
+          <div class="event-date">May 21, 2019 — Intermediate Mass Black Hole</div>
+          <p>The largest binary black hole merger detected — two black holes of 85 and 66 solar masses merged to form a 142 solar mass intermediate mass black hole. This confirmed the existence of IMBHs.</p>
+          <div class="event-stats">
+            <div class="event-stat">
+              <div class="event-stat-label">Mass 1</div>
+              <div class="event-stat-value">85 M☉</div>
+            </div>
+            <div class="event-stat">
+              <div class="event-stat-label">Mass 2</div>
+              <div class="event-stat-value">66 M☉</div>
+            </div>
+            <div class="event-stat">
+              <div class="event-stat-label">Final Mass</div>
+              <div class="event-stat-value">142 M☉</div>
+            </div>
+            <div class="event-stat">
+              <div class="event-stat-label">Redshift</div>
+              <div class="event-stat-value">z ≈ 0.4</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 2rem;">
+        <h3>Detection Milestones</h3>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-date">September 14, 2015</div>
+            <div class="timeline-content">
+              <div class="timeline-title">GW150914 — First Detection</div>
+              <p>LIGO Hanford and Livingston detect the first binary black hole merger. The signal swept from 35 Hz to 250 Hz in just 0.2 seconds.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">February 11, 2016</div>
+            <div class="timeline-content">
+              <div class="timeline-title">Public Announcement</div>
+              <p>LIGO and Virgo collaboration announces the detection to the world. Einstein's prediction confirmed 100 years later.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">August 17, 2017</div>
+            <div class="timeline-content">
+              <div class="timeline-title">GW170817 — Multi-Messenger Astronomy</div>
+              <p>Binary neutron star merger detected with electromagnetic counterpart. 70+ observatories across all wavelengths observed the event.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2019</div>
+            <div class="timeline-content">
+              <div class="timeline-title">LIGO-Virgo-KAGRA Network</div>
+              <p>KAGRA joins the global network, adding Japanese detector to the triangulation capability.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2023</div>
+            <div class="timeline-content">
+              <div class="timeline-title">O4 Observing Run</div>
+              <p>Enhanced sensitivity with squeezed light injection. Network range exceeds 150 Mpc for binary neutron stars.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="future" class="section">
+      <div class="grid-2">
+        <div class="card detector-card et">
+          <div class="detector-name">Einstein Telescope (ET)</div>
+          <div class="detector-location">Sardinia, Italy — Planned 2035</div>
+          <p>A third-generation ground-based detector designed to achieve 10x the sensitivity of Advanced LIGO. The triangular configuration (like a 3-arm interferometer in one housing) enables polarization measurement and null stream identification.</p>
+          <div class="stat-row">
+            <span class="stat-label">Arm Length</span>
+            <span class="stat-value">10 km per arm</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Configuration</span>
+            <span class="stat-value">Triangular, 6 detectors</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Sensitivity</span>
+            <span class="stat-value">~4,500 Mpc for BNS</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Low Frequency Cutoff</span>
+            <span class="stat-value">~3 Hz (underground)</span>
+          </div>
+        </div>
+
+        <div class="card detector-card lisa">
+          <div class="detector-name">LISA</div>
+          <div class="detector-location">Space-based — Planned 2035</div>
+          <p>The Laser Interferometer Space Antenna will detect gravitational waves at frequencies inaccessible to ground-based detectors (0.1 mHz to 10 Hz). This includes supermassive black hole mergers and extreme mass ratio inspirals.</p>
+          <div class="stat-row">
+            <span class="stat-label">Arm Length</span>
+            <span class="stat-value">2.5 million km</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Configuration</span>
+            <span class="stat-value">3 spacecraft triangle</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Frequency Range</span>
+            <span class="stat-value">0.1 mHz - 10 Hz</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Targets</span>
+            <span class="stat-value">10⁶-10⁹ M☉ SMBH</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 2rem;">
+        <h3>LISA: A Different Kind of Detector</h3>
+        <p>While ground-based detectors sense strain directly, LISA measures arm length changes via laser interferometry across millions of kilometers. The spacecraft trail each other in a heliocentric orbit, maintaining separation with active drag-free control.</p>
+        <div class="equation-box">
+          <div class="equation">ΔL/L ≈ 10⁻²⁰ / √Hz</div>
+          <div class="desc">LISA strain sensitivity goal at 1 mHz</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Cosmic Explorer (US)</h3>
+        <p>A proposed US-based next-generation detector with 40 km arm length — 10x longer than LIGO. This would achieve sensitivity to binary neutron stars at the edge of the observable universe (z ≈ 2).</p>
+        <div class="stat-row">
+          <span class="stat-label">Arm Length</span>
+          <span class="stat-value">40 km</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Planned Range</span>
+          <span class="stat-value">~5,000 Mpc for BNS</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Third Generation Timeline</h3>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-date">2027-2030</div>
+            <div class="timeline-content">
+              <div class="timeline-title">LIGO India</div>
+              <p>A fifth LIGO detector joins the network in India, improving sky localization by ~20x.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2030s</div>
+            <div class="timeline-content">
+              <div class="timeline-title">LISA Launch</div>
+              <p>ESA/NASA space-based gravitational wave observatory opens the low-frequency window.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2035</div>
+            <div class="timeline-content">
+              <div class="timeline-title">Einstein Telescope</div>
+              <p>Construction begins in Sardinia. European next-generation detector with underground configuration.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-date">2040s</div>
+            <div class="timeline-content">
+              <div class="timeline-title">Cosmic Explorer</div>
+              <p>US-based 40 km detector achieving near-fundamental-limit sensitivity.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab navigation
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.section).classList.add('active');
+        if (tab.dataset.section === 'detectors') initMap();
+        if (tab.dataset.section === 'sensitivity') initSensitivityChart();
+        if (tab.dataset.section === 'detection') initDetectionCanvas();
+      });
+    });
+
+    // Hero canvas - gravitational wave ripples
+    const heroCanvas = document.getElementById('hero-canvas');
+    const heroCtx = heroCanvas.getContext('2d');
+    let heroTime = 0;
+
+    function resizeHeroCanvas() {
+      heroCanvas.width = window.innerWidth;
+      heroCanvas.height = window.innerHeight;
+    }
+    resizeHeroCanvas();
+    window.addEventListener('resize', resizeHeroCanvas);
+
+    function drawHeroCanvas() {
+      heroCtx.fillStyle = 'rgba(10, 10, 15, 0.3)';
+      heroCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
+
+      const cx = heroCanvas.width / 2;
+      const cy = heroCanvas.height / 2;
+
+      for (let i = 0; i < 5; i++) {
+        const radius = (50 + i * 80) + (heroTime * 30 + i * 20) % 400;
+        const alpha = Math.max(0, 1 - radius / 500);
+
+        heroCtx.beginPath();
+        heroCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+        heroCtx.strokeStyle = `rgba(0, 212, 255, ${alpha * 0.5})`;
+        heroCtx.lineWidth = 2;
+        heroCtx.stroke();
+      }
+
+      heroTime += 0.016;
+      requestAnimationFrame(drawHeroCanvas);
+    }
+    drawHeroCanvas();
+
+    // Detector map
+    let mapInitialized = false;
+    function initMap() {
+      const canvas = document.getElementById('detector-map');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.offsetWidth * 2;
+      canvas.height = canvas.offsetHeight * 2;
+      ctx.scale(2, 2);
+
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+
+      // Draw simple world map background
+      ctx.fillStyle = '#0d0d15';
+      ctx.fillRect(0, 0, w, h);
+
+      // Draw latitude/longitude grid
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.lineWidth = 1;
+      for (let lat = -60; lat <= 60; lat += 30) {
+        const y = h/2 - (lat/90) * h;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+      for (let lon = -150; lon <= 150; lon += 30) {
+        const x = w/2 + (lon/180) * w;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+
+      // Detector locations (rough lat/lon to pixel)
+      const detectors = [
+        { name: 'LIGO Hanford', lat: 46.45, lon: -119.41, color: '#00ff88', label: 'LIGO H' },
+        { name: 'LIGO Livingston', lat: 30.56, lon: -90.54, color: '#00d4ff', label: 'LIGO L' },
+        { name: 'Virgo', lat: 43.63, lon: 10.52, color: '#ff6b35', label: 'Virgo' },
+        { name: 'KAGRA', lat: 36.34, lon: 137.31, color: '#ff3366', label: 'KAGRA' },
+        { name: 'Einstein Telescope', lat: 39.5, lon: 9.5, color: '#ffcc00', label: 'ET' },
+      ];
+
+      detectors.forEach(d => {
+        const x = w/2 + (d.lon/180) * w;
+        const y = h/2 - (d.lat/90) * h;
+
+        // Pulsing circle
+        const pulse = Math.sin(Date.now() / 500) * 10 + 20;
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, pulse);
+        gradient.addColorStop(0, d.color);
+        gradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(x, y, pulse, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Core dot
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = d.color;
+        ctx.fill();
+
+        // Label
+        ctx.fillStyle = d.color;
+        ctx.font = '12px Space Mono';
+        ctx.fillText(d.label, x + 10, y + 4);
+      });
+
+      // Draw connection lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.setLineDash([5, 5]);
+      for (let i = 0; i < detectors.length; i++) {
+        for (let j = i + 1; j < detectors.length; j++) {
+          const x1 = w/2 + (detectors[i].lon/180) * w;
+          const y1 = h/2 - (detectors[i].lat/90) * h;
+          const x2 = w/2 + (detectors[j].lon/180) * w;
+          const y2 = h/2 - (detectors[j].lat/90) * h;
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+        }
+      }
+      ctx.setLineDash([]);
+
+      mapInitialized = true;
+    }
+
+    // Sensitivity chart
+    let sensitivityInitialized = false;
+    function initSensitivityChart() {
+      const canvas = document.getElementById('sensitivity-canvas');
+      if (!canvas || sensitivityInitialized) return;
+      canvas.width = canvas.offsetWidth * 2;
+      canvas.height = canvas.offsetHeight * 2;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(2, 2);
+
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+
+      drawSensitivityChart(ctx, w, h);
+
+      document.getElementById('run-select')?.addEventListener('change', () => {
+        drawSensitivityChart(ctx, w, h);
+      });
+
+      sensitivityInitialized = true;
+    }
+
+    function drawSensitivityChart(ctx, w, h) {
+      ctx.fillStyle = '#0a0a12';
+      ctx.fillRect(0, 0, w, h);
+
+      // Log scale frequency axis
+      const freqs = [10, 30, 50, 100, 200, 500, 1000];
+      const strainO3 = [1e-20, 5e-23, 2e-23, 4e-24, 5e-24, 2e-23, 1e-21];
+      const strainO4 = [5e-21, 2e-23, 8e-24, 2e-24, 3e-24, 1e-23, 5e-22];
+
+      const margin = { top: 20, right: 30, bottom: 50, left: 60 };
+      const chartW = w - margin.left - margin.right;
+      const chartH = h - margin.top - margin.bottom;
+
+      // Grid
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 5; i++) {
+        const y = margin.top + (i/5) * chartH;
+        ctx.beginPath();
+        ctx.moveTo(margin.left, y);
+        ctx.lineTo(w - margin.right, y);
+        ctx.stroke();
+      }
+
+      // Sensitivity curve (O4)
+      ctx.beginPath();
+      ctx.moveTo(margin.left, h - margin.bottom);
+      for (let i = 0; i < freqs.length; i++) {
+        const x = margin.left + (Math.log10(freqs[i]) - Math.log10(10)) / (Math.log10(1000) - Math.log10(10)) * chartW;
+        const y = margin.top + (Math.log10(strainO4[i]) - Math.log10(1e-20)) / (Math.log10(1e-23) - Math.log10(1e-20)) * chartH;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = '#00d4ff';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // O3 curve (dimmer)
+      ctx.beginPath();
+      for (let i = 0; i < freqs.length; i++) {
+        const x = margin.left + (Math.log10(freqs[i]) - Math.log10(10)) / (Math.log10(1000) - Math.log10(10)) * chartW;
+        const y = margin.top + (Math.log10(strainO3[i]) - Math.log10(1e-20)) / (Math.log10(1e-23) - Math.log10(1e-20)) * chartH;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = 'rgba(0, 212, 255, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Labels
+      ctx.fillStyle = '#888';
+      ctx.font = '12px Space Mono';
+      ctx.fillText('Frequency (Hz)', w/2, h - 10);
+
+      ctx.save();
+      ctx.translate(15, h/2);
+      ctx.rotate(-Math.PI/2);
+      ctx.fillText('Strain Sensitivity (Hz^-1/2)', 0, 0);
+      ctx.restore();
+
+      // Axis values
+      freqs.forEach(f => {
+        const x = margin.left + (Math.log10(f) - Math.log10(10)) / (Math.log10(1000) - Math.log10(10)) * chartW;
+        ctx.fillStyle = '#888';
+        ctx.fillText(f + ' Hz', x - 20, h - margin.bottom + 20);
+      });
+
+      // Legend
+      ctx.fillStyle = '#00d4ff';
+      ctx.fillRect(w - 150, margin.top, 15, 15);
+      ctx.fillStyle = '#888';
+      ctx.fillText('O4 Sensitivity', w - 130, margin.top + 12);
+
+      ctx.fillStyle = 'rgba(0, 212, 255, 0.5)';
+      ctx.fillRect(w - 150, margin.top + 25, 15, 15);
+      ctx.fillStyle = '#888';
+      ctx.fillText('O3 Sensitivity', w - 130, margin.top + 37);
+    }
+
+    // Detection animation
+    let detectionInitialized = false;
+    let detectionAnimationId = null;
+    let phase = 0;
+
+    function initDetectionCanvas() {
+      const canvas = document.getElementById('detection-canvas');
+      if (!canvas) return;
+      canvas.width = canvas.offsetWidth * 2;
+      canvas.height = canvas.offsetHeight * 2;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(2, 2);
+
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+
+      function draw(t) {
+        ctx.fillStyle = 'rgba(10, 10, 18, 0.3)';
+        ctx.fillRect(0, 0, w, h);
+
+        const cx = w / 2;
+        const cy = h / 2;
+        const mass = parseInt(document.getElementById('mass-slider')?.value || 30);
+        const baseRadius = 80;
+
+        // Draw inspiraling circles
+        if (phase >= 0) {
+          for (let i = 0; i < 3; i++) {
+            const angle = t * (2 + i * 0.5) + i * Math.PI * 2 / 3;
+            const r = baseRadius - (phase / 3) * 20 + i * 30;
+            const x = cx + Math.cos(angle) * r;
+            const y = cy + Math.sin(angle) * r;
+
+            ctx.beginPath();
+            ctx.arc(x, y, 15 - i * 3, 0, Math.PI * 2);
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, 15 - i * 3);
+            gradient.addColorStop(0, i === 0 ? '#ff6b35' : i === 1 ? '#00d4ff' : '#00ff88');
+            gradient.addColorStop(1, 'transparent');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+          }
+
+          // Orbit trails
+          ctx.beginPath();
+          ctx.arc(cx, cy, baseRadius, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+          ctx.stroke();
+        }
+
+        // Merger flash
+        if (phase >= 1) {
+          const flashAlpha = Math.max(0, 1 - (phase - 1) * 2);
+          const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 100);
+          gradient.addColorStop(0, `rgba(255, 255, 255, ${flashAlpha})`);
+          gradient.addColorStop(0.5, `rgba(255, 150, 50, ${flashAlpha * 0.5})`);
+          gradient.addColorStop(1, 'transparent');
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, w, h);
+        }
+
+        // Ringdown waves
+        if (phase >= 2) {
+          for (let i = 0; i < 5; i++) {
+            const radius = ((t * 100) + i * 30) % 200;
+            const alpha = Math.max(0, 0.5 - radius / 200);
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(0, 212, 255, ${alpha})`;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+        }
+
+        // Waveform at bottom
+        ctx.beginPath();
+        ctx.moveTo(50, h - 50);
+        for (let x = 0; x < w - 100; x++) {
+          const freq = phase < 1 ? 5 + phase * 10 : 15 - (phase - 1) * 5;
+          const amp = phase < 1 ? 10 + phase * 20 : 30 - (phase - 1) * 15;
+          const y = h - 50 + Math.sin(x * 0.05 * freq + t * 5) * amp;
+          ctx.lineTo(x + 50, y);
+        }
+        ctx.strokeStyle = '#00d4ff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        detectionAnimationId = requestAnimationFrame(draw);
+      }
+
+      if (!detectionInitialized) {
+        document.getElementById('play-detection')?.addEventListener('click', () => {
+          phase = 0;
+          let p = 0;
+          const interval = setInterval(() => {
+            p += 0.1;
+            if (p <= 3) {
+              phase = p;
+              document.querySelectorAll('.phase').forEach((el, i) => {
+                el.classList.toggle('active', i <= Math.floor(p));
+              });
+            } else {
+              clearInterval(interval);
+            }
+          }, 500);
+        });
+
+        document.getElementById('reset-detection')?.addEventListener('click', () => {
+          phase = 0;
+          document.querySelectorAll('.phase').forEach(el => el.classList.remove('active'));
+          document.querySelector('.phase').classList.add('active');
+        });
+
+        detectionInitialized = true;
+      }
+
+      draw(0);
+    }
+
+    // Initialize first section elements
+    setTimeout(() => {
+      if (document.getElementById('detectors').classList.contains('active')) {
+        initMap();
+      }
+    }, 100);
+  </script>
+</body>
+</html>
