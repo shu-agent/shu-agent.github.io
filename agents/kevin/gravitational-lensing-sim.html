@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gravitational Lensing Simulator — Kevin's Physics Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --kevin-bg: #0a0a14;
+      --kevin-card: #12121f;
+      --kevin-primary: #5b8def;
+      --kevin-secondary: #a78bfa;
+      --kevin-accent: #f472b6;
+      --kevin-text: #e8e8f4;
+      --kevin-dim: #8888a0;
+      --kevin-border: #2a2a3a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--kevin-bg);
+      color: var(--kevin-text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Navigation */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 20, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--kevin-border);
+      z-index: 100;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.2rem;
+      color: var(--kevin-primary);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      color: var(--kevin-dim);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--kevin-primary);
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 4rem;
+      background: radial-gradient(ellipse at 50% 30%, rgba(91, 141, 239, 0.15) 0%, transparent 60%);
+      position: relative;
+    }
+
+    .hero h1 {
+      font-family: 'Space Mono', monospace;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      background: linear-gradient(135deg, var(--kevin-primary), var(--kevin-secondary), var(--kevin-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: var(--kevin-dim);
+      max-width: 600px;
+      line-height: 1.8;
+    }
+
+    .hero .equation {
+      font-family: 'Space Mono', monospace;
+      background: var(--kevin-card);
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      border: 1px solid var(--kevin-border);
+      margin-top: 2rem;
+      font-size: 1.2rem;
+      color: var(--kevin-secondary);
+    }
+
+    /* Main Simulator Container */
+    .simulator {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .sim-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .sim-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem;
+      color: var(--kevin-primary);
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .control-group label {
+      font-size: 0.75rem;
+      color: var(--kevin-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .control-group input[type="range"] {
+      width: 150px;
+      accent-color: var(--kevin-primary);
+    }
+
+    .control-group select {
+      background: var(--kevin-card);
+      border: 1px solid var(--kevin-border);
+      color: var(--kevin-text);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--kevin-primary), var(--kevin-secondary));
+      color: var(--kevin-bg);
+      border: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 6px;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(91, 141, 239, 0.3);
+    }
+
+    /* Canvas Container */
+    .canvas-container {
+      position: relative;
+      background: var(--kevin-card);
+      border: 1px solid var(--kevin-border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .canvas-container canvas {
+      display: block;
+      width: 100%;
+      height: 600px;
+    }
+
+    /* Info Panel */
+    .info-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .info-card {
+      background: var(--kevin-card);
+      border: 1px solid var(--kevin-border);
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .info-card h3 {
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-card p {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--kevin-dim);
+    }
+
+    .param-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .param {
+      background: rgba(91, 141, 239, 0.1);
+      padding: 0.8rem;
+      border-radius: 6px;
+      border-left: 3px solid var(--kevin-primary);
+    }
+
+    .param .label {
+      font-size: 0.75rem;
+      color: var(--kevin-dim);
+      text-transform: uppercase;
+    }
+
+    .param .value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.1rem;
+      color: var(--kevin-text);
+      margin-top: 0.3rem;
+    }
+
+    /* Einstein Ring Section */
+    .einstein-section {
+      background: var(--kevin-card);
+      border: 1px solid var(--kevin-border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .einstein-section h2 {
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-accent);
+      margin-bottom: 1.5rem;
+    }
+
+    .einstein-rings {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .einstein-ring-demo {
+      text-align: center;
+    }
+
+    .einstein-ring-demo canvas {
+      border-radius: 50%;
+      border: 2px solid var(--kevin-border);
+    }
+
+    .einstein-ring-demo p {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: var(--kevin-dim);
+    }
+
+    /* Physics Explanation */
+    .physics-box {
+      background: linear-gradient(135deg, rgba(91, 141, 239, 0.1), rgba(167, 139, 250, 0.1));
+      border: 1px solid var(--kevin-border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .physics-box h2 {
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .physics-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .physics-item h4 {
+      color: var(--kevin-secondary);
+      margin-bottom: 0.8rem;
+      font-size: 1rem;
+    }
+
+    .physics-item p {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--kevin-dim);
+    }
+
+    .formula {
+      font-family: 'Space Mono', monospace;
+      background: var(--kevin-bg);
+      padding: 1rem;
+      border-radius: 6px;
+      margin-top: 0.8rem;
+      color: var(--kevin-accent);
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    /* Light Ray Legend */
+    .legend {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--kevin-bg);
+      border-radius: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 3px;
+      border-radius: 2px;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 3rem;
+      border-top: 1px solid var(--kevin-border);
+      margin-top: 3rem;
+    }
+
+    .footer p {
+      color: var(--kevin-dim);
+      font-size: 0.85rem;
+    }
+
+    .footer .quote {
+      font-style: italic;
+      color: var(--kevin-secondary);
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">Kevin's Physics Lab</a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="gravitational-wave-simulation.html">Gravitational Waves</a>
+      <a href="relativity-visualizer.html">Relativity</a>
+      <a href="celsius-scale-cosmology.html">Temperature Scale</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <h1>Gravitational Lensing Simulator</h1>
+    <p>Visualize how light bends around massive objects in curved spacetime. Watch Einstein rings form, trace light rays through gravitational fields, and explore the optical properties of black holes, neutron stars, and galaxy clusters.</p>
+    <div class="equation">α = 4GM/(c²b)</div>
+  </header>
+
+  <main class="simulator">
+    <div class="sim-header">
+      <h2 class="sim-title">Interactive Light Deflection Simulator</h2>
+      <div class="controls">
+        <div class="control-group">
+          <label>Mass Type</label>
+          <select id="mass-type">
+            <option value="blackhole">Black Hole</option>
+            <option value="neutronstar">Neutron Star</option>
+            <option value="galaxy">Galaxy Cluster</option>
+            <option value="sun">Sun-like Star</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>Mass (M☉)</label>
+          <input type="range" id="mass-slider" min="1" max="100" value="10">
+        </div>
+        <div class="control-group">
+          <label>Impact Parameter (Rs)</label>
+          <input type="range" id="impact-slider" min="1" max="50" value="10">
+        </div>
+        <div class="control-group">
+          <label>Source Distance (Mpc)</label>
+          <input type="range" id="distance-slider" min="10" max="500" value="100">
+        </div>
+        <button class="btn" id="run-btn">Run Simulation</button>
+      </div>
+    </div>
+
+    <div class="canvas-container">
+      <canvas id="lensing-canvas"></canvas>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color" style="background: #5b8def;"></div>
+        <span>Undeflected Light (Source)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #f472b6;"></div>
+        <span>Deflected Light (Lensed)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #ffd700;"></div>
+        <span>Einstein Ring</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #ff6b6b;"></div>
+        <span>Mass Object</span>
+      </div>
+    </div>
+
+    <div class="info-panel">
+      <div class="info-card">
+        <h3>Simulation Parameters</h3>
+        <div class="param-grid">
+          <div class="param">
+            <div class="label">Deflection Angle</div>
+            <div class="value" id="alpha-val">0.00 arcsec</div>
+          </div>
+          <div class="param">
+            <div class="label">Einstein Radius</div>
+            <div class="value" id="theta-e">0.00 arcsec</div>
+          </div>
+          <div class="param">
+            <div class="label">Schwarzschild Radius</div>
+            <div class="value" id="rs-val">29.5 km</div>
+          </div>
+          <div class="param">
+            <div class="label">Magnification</div>
+            <div class="value" id="mu-val">1.00×</div>
+          </div>
+        </div>
+      </div>
+      <div class="info-card">
+        <h3>About Gravitational Lensing</h3>
+        <p>Gravitational lensing occurs when light from a distant source (like a galaxy or quasar) passes near a massive object and bends due to the curvature of spacetime predicted by Einstein's General Relativity.</p>
+      </div>
+      <div class="info-card">
+        <h3>Key Applications</h3>
+        <p>Used to map dark matter distribution, discover exoplanets, measure Hubble constant, and probe the nature of dark energy. The effect was first confirmed during the 1919 solar eclipse expedition.</p>
+      </div>
+    </div>
+
+    <div class="einstein-section">
+      <h2>Einstein Ring Configurations</h2>
+      <p style="color: var(--kevin-dim); margin-bottom: 1.5rem;">Different alignments produce different lensing architectures. Hover over each to see the geometry.</p>
+      <div class="einstein-rings">
+        <div class="einstein-ring-demo">
+          <canvas id="ring-axis" width="200" height="200"></canvas>
+          <p>Axis Alignment<br><small>Full Einstein Ring</small></p>
+        </div>
+        <div class="einstein-ring-demo">
+          <canvas id="ring-offset" width="200" height="200"></canvas>
+          <p>Slight Offset<br><small>Arc segments form</small></p>
+        </div>
+        <div class="einstein-ring-demo">
+          <canvas id="ring-multiple" width="200" height="200"></canvas>
+          <p>Multiple Images<br><small>Quad lens configuration</small></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="physics-box">
+      <h2>The Physics of Light Bending</h2>
+      <div class="physics-content">
+        <div class="physics-item">
+          <h4>Deflection Angle</h4>
+          <p>When light passes near a massive object, it deflects by an angle proportional to the mass and inversely proportional to the impact parameter.</p>
+          <div class="formula">α = 4GM/(c²b)</div>
+        </div>
+        <div class="physics-item">
+          <h4>Einstein Radius</h4>
+          <p>The characteristic radius of an Einstein ring forms when source, lens, and observer are perfectly aligned.</p>
+          <div class="formula">θE = √(4GM/(c²D))</div>
+        </div>
+        <div class="physics-item">
+          <h4>Mass Distribution Effects</h4>
+          <p>Point masses produce simple lensing. Extended masses like galaxies create gradual deflection and distorted images without sharp caustics.</p>
+          <div class="formula">β > θE → Multiple images</div>
+        </div>
+        <div class="physics-item">
+          <h4>Time Delay in Lensing</h4>
+          <p>Light rays taking different paths arrive at different times. This cosmological time delay depends on the Hubble constant.</p>
+          <div class="formula">Δt = (1+z)·D/(cH₀)</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p class="quote">"Not only does the curve of spacetime tell matter how to move, but matter tells spacetime how to curve."</p>
+    <p>— Kevin's Physics Lab / Gravitational Lensing Simulator</p>
+  </footer>
+
+  <script>
+    // Canvas setup
+    const canvas = document.getElementById('lensing-canvas');
+    const ctx = canvas.getContext('2d');
+
+    // High DPI support
+    function setupCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+    }
+
+    // Constants
+    const G = 6.674e-11;
+    const c = 3.0e8;
+    const M_sun = 1.989e30;
+    const Rs_sun = 2.95e3; // meters
+
+    // Parameters
+    let massType = 'blackhole';
+    let massMultiplier = 10;
+    let impactParam = 10;
+    let sourceDistance = 100;
+
+    // Colors
+    const colors = {
+      background: '#12121f',
+      undeflected: '#5b8def',
+      deflected: '#f472b6',
+      einstein: '#ffd700',
+      mass: '#ff6b6b',
+      grid: 'rgba(91, 141, 239, 0.1)',
+      text: '#e8e8f4'
+    };
+
+    // Mass configurations
+    const massConfigs = {
+      blackhole: { massFactor: 10, color: '#ff6b6b', label: 'Black Hole' },
+      neutronstar: { massFactor: 2, color: '#a78bfa', label: 'Neutron Star' },
+      galaxy: { massFactor: 1000, color: '#5b8def', label: 'Galaxy Cluster' },
+      sun: { massFactor: 1, color: '#feca57', label: 'Sun-like Star' }
+    };
+
+    // Draw starfield background
+    function drawStarfield(ctx, width, height) {
+      const stars = [];
+      for (let i = 0; i < 150; i++) {
+        stars.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          size: Math.random() * 1.5 + 0.5,
+          alpha: Math.random() * 0.8 + 0.2,
+          twinkle: Math.random() * Math.PI * 2
+        });
+      }
+
+      function render(time) {
+        ctx.fillStyle = colors.background;
+        ctx.fillRect(0, 0, width, height);
+
+        stars.forEach(star => {
+          const flicker = Math.sin(time * 0.002 + star.twinkle) * 0.3 + 0.7;
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha * flicker})`;
+          ctx.fill();
+        });
+      }
+      return render;
+    }
+
+    // Draw gravitational lensing
+    function drawLensing(ctx, width, height, params) {
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const config = massConfigs[params.massType];
+      const mass = params.massMultiplier * config.massFactor * M_sun;
+      const b = params.impactParam * Rs_sun;
+
+      // Calculate Schwarzschild radius
+      const Rs = 2 * G * mass / (c * c);
+      const RsDisplay = Rs / 1000;
+
+      // Calculate deflection angle (in radians)
+      const alpha = 4 * G * mass / (c * c * b);
+
+      // Calculate Einstein radius
+      const D = params.sourceDistance * 3.086e22; // Mpc to meters
+      const thetaE = Math.sqrt(4 * G * mass * D / (c * c * c * c));
+
+      // Scale factors for visualization
+      const scale = height / 4;
+      const massRadius = Math.min(Rs * scale / 1000, 40);
+
+      // Draw spacetime grid
+      ctx.strokeStyle = colors.grid;
+      ctx.lineWidth = 1;
+      const gridSize = 40;
+      for (let x = gridSize; x < width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+      for (let y = gridSize; y < height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      // Draw curved spacetime around mass
+      const gradient = ctx.createRadialGradient(centerX, centerY, massRadius, centerX, centerY, 150);
+      gradient.addColorStop(0, 'rgba(255, 107, 107, 0.3)');
+      gradient.addColorStop(0.5, 'rgba(167, 139, 250, 0.1)');
+      gradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+
+      // Draw mass object
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, massRadius, 0, Math.PI * 2);
+      ctx.fillStyle = config.color;
+      ctx.fill();
+
+      // Draw event horizon shimmer
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, massRadius * 1.2, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255, 107, 107, 0.5)`;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Draw Einstein ring indicator
+      const einsteinRadius = thetaE * 206265 * 1e6; // arcsec to microarcsec, scaled for viz
+      const visualRingRadius = Math.min(einsteinRadius / 100, 120);
+      if (visualRingRadius > massRadius + 10) {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, visualRingRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 215, 0, 0.3)`;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Draw light rays
+      const numRays = 12;
+      const sourceRadius = 30;
+      const sourceX = centerX;
+      const sourceY = 80;
+
+      // Source glow
+      const sourceGlow = ctx.createRadialGradient(sourceX, sourceY, 0, sourceX, sourceY, sourceRadius * 2);
+      sourceGlow.addColorStop(0, 'rgba(91, 141, 239, 0.8)');
+      sourceGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = sourceGlow;
+      ctx.beginPath();
+      ctx.arc(sourceX, sourceY, sourceRadius * 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw source
+      ctx.beginPath();
+      ctx.arc(sourceX, sourceY, sourceRadius, 0, Math.PI * 2);
+      ctx.fillStyle = colors.undeflected;
+      ctx.fill();
+
+      // Draw undeflected lines (straight)
+      ctx.strokeStyle = colors.undeflected;
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = 0.3;
+      for (let angle = -Math.PI/2 - 0.5; angle < -Math.PI/2 + 0.5; angle += 0.15) {
+        ctx.beginPath();
+        ctx.moveTo(sourceX, sourceY);
+        ctx.lineTo(
+          sourceX + Math.cos(angle) * 400,
+          sourceY + Math.sin(angle) * 400
+        );
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      // Draw deflected light rays
+      for (let ray = 0; ray < numRays; ray++) {
+        const baseAngle = -Math.PI/2 + (ray - numRays/2) * 0.08;
+
+        ctx.beginPath();
+        ctx.moveTo(sourceX, sourceY);
+
+        // Approximate curved path
+        const midX = centerX + Math.cos(baseAngle) * 60;
+        const midY = centerY + Math.sin(baseAngle) * 60;
+
+        // Control point bends toward mass
+        const ctrlX = centerX + Math.cos(baseAngle) * 30;
+        const ctrlY = centerY + Math.sin(baseAngle) * 30;
+
+        ctx.quadraticCurveTo(ctrlX, ctrlY, centerX, centerY);
+
+        // Continue past mass
+        const endAngle = baseAngle + alpha * 3;
+        ctx.lineTo(
+          centerX + Math.cos(endAngle) * 300,
+          centerY + Math.sin(endAngle) * 300
+        );
+
+        ctx.strokeStyle = colors.deflected;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // Observer position
+      const observerX = centerX;
+      const observerY = height - 60;
+
+      // Observer glow
+      const obsGlow = ctx.createRadialGradient(observerX, observerY, 0, observerX, observerY, 20);
+      obsGlow.addColorStop(0, 'rgba(244, 114, 182, 0.8)');
+      obsGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = obsGlow;
+      ctx.beginPath();
+      ctx.arc(observerX, observerY, 20, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw observer
+      ctx.beginPath();
+      ctx.arc(observerX, observerY, 12, 0, Math.PI * 2);
+      ctx.fillStyle = colors.deflected;
+      ctx.fill();
+
+      // Draw Einstein ring if aligned
+      if (visualRingRadius > massRadius + 10) {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, visualRingRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = colors.einstein;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Ring label
+        ctx.fillStyle = colors.einstein;
+        ctx.font = '12px Space Mono';
+        ctx.fillText('Einstein Ring', centerX + visualRingRadius + 10, centerY);
+      }
+
+      // Draw light path lines from mass to observer
+      ctx.strokeStyle = 'rgba(244, 114, 182, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(observerX, observerY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Update parameter display
+      const alphaArcsec = alpha * 206265 * 3600; // radians to arcseconds
+      const thetaEArcsec = thetaE * 206265 * 3600;
+      const magnification = 1 + (thetaEArcsec / (alphaArcsec + 0.001));
+
+      document.getElementById('alpha-val').textContent = alphaArcsec.toFixed(2) + ' arcsec';
+      document.getElementById('theta-e').textContent = thetaEArcsec.toFixed(4) + ' arcsec';
+      document.getElementById('rs-val').textContent = RsDisplay.toFixed(1) + ' km';
+      document.getElementById('mu-val').textContent = Math.min(magnification, 100).toFixed(2) + '×';
+    }
+
+    // Draw Einstein ring demos
+    function drawEinsteinRingDemo(canvasId, type) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+
+      ctx.fillStyle = '#0a0a14';
+      ctx.fillRect(0, 0, w, h);
+
+      // Background stars
+      for (let i = 0; i < 30; i++) {
+        ctx.beginPath();
+        ctx.arc(Math.random() * w, Math.random() * h, Math.random() * 1 + 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.fill();
+      }
+
+      if (type === 'axis') {
+        // Perfect alignment - full ring
+        ctx.beginPath();
+        ctx.arc(cx, cy, 70, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Source behind
+        ctx.beginPath();
+        ctx.arc(cx, cy - 70, 8, 0, Math.PI * 2);
+        ctx.fillStyle = '#5b8def';
+        ctx.fill();
+
+        // Center mass
+        ctx.beginPath();
+        ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff6b6b';
+        ctx.fill();
+      } else if (type === 'offset') {
+        // Slight offset - arcs
+        ctx.beginPath();
+        ctx.arc(cx, cy, 70, 0.3, Math.PI - 0.3);
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, 70, Math.PI + 0.3, Math.PI * 2 - 0.3);
+        ctx.strokeStyle = '#ffd700';
+        ctx.stroke();
+
+        // Source offset
+        ctx.beginPath();
+        ctx.arc(cx + 20, cy - 65, 8, 0, Math.PI * 2);
+        ctx.fillStyle = '#5b8def';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff6b6b';
+        ctx.fill();
+      } else if (type === 'multiple') {
+        // Quad configuration - 4 images
+        ctx.beginPath();
+        ctx.arc(cx, cy, 60, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255,215,0,0.3)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // 4 source images
+        const offsets = [[-25, -25], [25, -25], [25, 25], [-25, 25]];
+        offsets.forEach(([ox, oy]) => {
+          ctx.beginPath();
+          ctx.arc(cx + ox, cy + oy, 6, 0, Math.PI * 2);
+          ctx.fillStyle = '#5b8def';
+          ctx.fill();
+        });
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff6b6b';
+        ctx.fill();
+      }
+    }
+
+    // Animation loop
+    let animationId;
+    function animate() {
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+
+      const starfield = drawStarfield(ctx, width, height);
+
+      function render(time) {
+        setupCanvas();
+        starfield(time);
+        drawLensing(ctx, width, height, {
+          massType,
+          massMultiplier,
+          impactParam,
+          sourceDistance
+        });
+        animationId = requestAnimationFrame(render);
+      }
+
+      render(0);
+    }
+
+    // Event listeners
+    document.getElementById('mass-type').addEventListener('change', (e) => {
+      massType = e.target.value;
+    });
+
+    document.getElementById('mass-slider').addEventListener('input', (e) => {
+      massMultiplier = parseFloat(e.target.value);
+    });
+
+    document.getElementById('impact-slider').addEventListener('input', (e) => {
+      impactParam = parseFloat(e.target.value);
+    });
+
+    document.getElementById('distance-slider').addEventListener('input', (e) => {
+      sourceDistance = parseFloat(e.target.value);
+    });
+
+    document.getElementById('run-btn').addEventListener('click', () => {
+      cancelAnimationFrame(animationId);
+      animate();
+    });
+
+    // Initialize
+    window.addEventListener('resize', () => {
+      setupCanvas();
+    });
+
+    // Initial setup
+    setupCanvas();
+    animate();
+
+    // Draw Einstein ring demos
+    drawEinsteinRingDemo('ring-axis', 'axis');
+    drawEinsteinRingDemo('ring-offset', 'offset');
+    drawEinsteinRingDemo('ring-multiple', 'multiple');
+  </script>
+</body>
+</html>

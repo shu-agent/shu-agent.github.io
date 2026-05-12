@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Materials Database — Li-Ion Battery Lab</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 50%, #0d2137 100%);
+            min-height: 100vh;
+            color: #e0e6ed;
+            overflow-x: hidden;
+        }
+        .hero {
+            text-align: center;
+            padding: 60px 20px 40px;
+            background: linear-gradient(180deg, rgba(0,100,150,0.3) 0%, transparent 100%);
+        }
+        .hero h1 {
+            font-size: 2.8em;
+            color: #4fc3f7;
+            text-shadow: 0 0 30px rgba(79,195,247,0.5);
+            margin-bottom: 10px;
+        }
+        .hero p {
+            font-size: 1.2em;
+            color: #90caf9;
+            opacity: 0.9;
+        }
+        .hero .battery-icon {
+            font-size: 4em;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+        .nav-tab {
+            padding: 12px 30px;
+            background: rgba(79,195,247,0.1);
+            border: 1px solid rgba(79,195,247,0.3);
+            border-radius: 30px;
+            color: #4fc3f7;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+        .nav-tab:hover, .nav-tab.active {
+            background: rgba(79,195,247,0.3);
+            border-color: #4fc3f7;
+            box-shadow: 0 0 20px rgba(79,195,247,0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .panel {
+            background: rgba(10,30,50,0.8);
+            border: 1px solid rgba(79,195,247,0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-title {
+            font-size: 1.5em;
+            color: #4fc3f7;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Periodic Table Styles */
+        .periodic-table {
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+        .element-grid {
+            display: grid;
+            grid-template-columns: repeat(18, minmax(50px, 1fr));
+            gap: 4px;
+            min-width: 900px;
+        }
+        .element {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 4px;
+            font-size: 0.7em;
+            position: relative;
+        }
+        .element:hover {
+            transform: scale(1.15);
+            z-index: 10;
+            box-shadow: 0 0 25px rgba(79,195,247,0.6);
+        }
+        .element .symbol {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+        .element .number {
+            font-size: 0.6em;
+            opacity: 0.7;
+        }
+        .element.cathode { background: linear-gradient(135deg, #e53935, #b71c1c); border: 2px solid #ef5350; }
+        .element.anode { background: linear-gradient(135deg, #1e88e5, #0d47a1); border: 2px solid #42a5f5; }
+        .element.electrolyte { background: linear-gradient(135deg, #7b1fa2, #4a148c); border: 2px solid #ab47bc; }
+        .element.current-collector { background: linear-gradient(135deg, #00897b, #004d40); border: 2px solid #26a69a; }
+        .element.active { background: linear-gradient(135deg, #fbc02d, #f57f17); border: 2px solid #ffee58; color: #1a1a1a; }
+        .element.inactive { background: rgba(100,100,100,0.3); border: 2px solid rgba(150,150,150,0.3); opacity: 0.5; }
+
+        .element.selected {
+            box-shadow: 0 0 30px rgba(79,195,247,0.8), inset 0 0 20px rgba(79,195,247,0.3);
+            animation: glow 1.5s ease-in-out infinite;
+        }
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 30px rgba(79,195,247,0.8), inset 0 0 20px rgba(79,195,247,0.3); }
+            50% { box-shadow: 0 0 50px rgba(79,195,247,1), inset 0 0 30px rgba(79,195,247,0.5); }
+        }
+
+        /* Lanthanides/Actinides */
+        .element-row {
+            display: contents;
+        }
+
+        /* Material Cards */
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .material-card {
+            background: rgba(30,60,90,0.6);
+            border: 1px solid rgba(79,195,247,0.2);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        .material-card:hover {
+            border-color: rgba(79,195,247,0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .material-card h3 {
+            color: #4fc3f7;
+            margin-bottom: 10px;
+        }
+        .material-card .formula {
+            font-size: 1.3em;
+            color: #81d4fa;
+            margin-bottom: 10px;
+        }
+        .material-card .properties {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9em;
+        }
+        .material-card .prop-label {
+            color: #90a4ae;
+        }
+        .material-card .prop-value {
+            color: #e0e6ed;
+            font-weight: bold;
+        }
+        .material-card .prop-value.high { color: #4caf50; }
+        .material-card .prop-value.medium { color: #ffc107; }
+        .material-card .prop-value.low { color: #ef5350; }
+
+        .category-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(79,195,247,0.2);
+        }
+        .comparison-table th {
+            background: rgba(79,195,247,0.1);
+            color: #4fc3f7;
+        }
+        .comparison-table tr:hover {
+            background: rgba(79,195,247,0.05);
+        }
+        .comparison-table .best {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        /* Element Detail Panel */
+        .element-detail {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10,30,50,0.98);
+            border: 2px solid rgba(79,195,247,0.5);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 0 50px rgba(79,195,247,0.3);
+        }
+        .element-detail.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        .element-detail .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #4fc3f7;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+            display: none;
+        }
+        .overlay.show {
+            display: block;
+        }
+
+        /* Battery Chemistries Section */
+        .chemistry-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        @media (max-width: 900px) {
+            .chemistry-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        .chemistry-card {
+            background: rgba(30,60,90,0.5);
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 4px solid;
+        }
+        .chemistry-card.nmc { border-left-color: #e53935; }
+        .chemistry-card.nca { border-left-color: #8e24aa; }
+        .chemistry-card.lfp { border-left-color: #43a047; }
+        .chemistry-card.lco { border-left-color: #f4511e; }
+        .chemistry-card.graphite { border-left-color: #5d4037; }
+        .chemistry-card.silicon { border-left-color: #00acc1; }
+        .chemistry-card.li-metal { border-left-color: #d81b60; }
+
+        .chemistry-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        .chemistry-card.nmc h3 { color: #ef5350; }
+        .chemistry-card.nca h3 { color: #ba68c8; }
+        .chemistry-card.lfp h3 { color: #66bb6a; }
+        .chemistry-card.lco h3 { color: #ff8a65; }
+        .chemistry-card.graphite h3 { color: #a1887f; }
+        .chemistry-card.silicon h3 { color: #26c6da; }
+        .chemistry-card.li-metal h3 { color: #f06292; }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .spec-item {
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .spec-item .label {
+            font-size: 0.8em;
+            color: #90a4ae;
+        }
+        .spec-item .value {
+            font-size: 1.1em;
+            color: #e0e6ed;
+        }
+
+        /* Safety Section */
+        .safety-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 900px) {
+            .safety-grid { grid-template-columns: 1fr; }
+        }
+        .safety-card {
+            background: linear-gradient(135deg, rgba(50,30,30,0.8), rgba(30,20,20,0.8));
+            border: 1px solid rgba(239,83,80,0.3);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+        }
+        .safety-card .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        .safety-card h3 {
+            color: #ef5350;
+            margin-bottom: 10px;
+        }
+        .safety-card p {
+            color: #b0bec5;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px;
+            color: #607d8b;
+            font-size: 0.9em;
+        }
+        .footer a {
+            color: #4fc3f7;
+            text-decoration: none;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="battery-icon">🔬</div>
+        <h1>Battery Materials Database</h1>
+        <p>Interactive Periodic Table & Material Properties for Battery Research</p>
+    </div>
+
+    <div class="nav-tabs">
+        <div class="nav-tab active" onclick="showTab('periodic')">Periodic Table</div>
+        <div class="nav-tab" onclick="showTab('cathodes')">Cathode Materials</div>
+        <div class="nav-tab" onclick="showTab('anodes')">Anode Materials</div>
+        <div class="nav-tab" onclick="showTab('electrolytes')">Electrolytes</div>
+        <div class="nav-tab" onclick="showTab('chemistries')">Battery Chemistries</div>
+        <div class="nav-tab" onclick="showTab('safety')">Safety Data</div>
+    </div>
+
+    <div class="container">
+        <!-- Periodic Table Tab -->
+        <div id="periodic" class="tab-content active">
+            <div class="panel">
+                <div class="panel-title">⚛️ Interactive Battery Elements Periodic Table</div>
+                <div class="category-legend">
+                    <div class="legend-item">
+                        <div class="legend-color element cathode"></div>
+                        <span>Cathode Active</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color element anode"></div>
+                        <span>Anode Active</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color element electrolyte"></div>
+                        <span>Electrolyte</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color element current-collector"></div>
+                        <span>Current Collector</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color element active"></div>
+                        <span>Key Element</span>
+                    </div>
+                </div>
+                <div class="periodic-table">
+                    <div class="element-grid">
+                        <!-- Row 1 -->
+                        <div class="element inactive" data-element="H"><span class="number">1</span><span class="symbol">H</span></div>
+                        <div class="element inactive" style="grid-column: span 16;"></div>
+                        <div class="element inactive" data-element="He"><span class="number">2</span><span class="symbol">He</span></div>
+
+                        <!-- Row 2 -->
+                        <div class="element inactive" data-element="Li" onclick="showElementDetail('Li')"><span class="number">3</span><span class="symbol">Li</span></div>
+                        <div class="element inactive" data-element="Be"><span class="number">4</span><span class="symbol">Be</span></div>
+                        <div class="element inactive" style="grid-column: span 10;"></div>
+                        <div class="element inactive" data-element="B"><span class="number">5</span><span class="symbol">B</span></div>
+                        <div class="element inactive" data-element="C"><span class="number">6</span><span class="symbol">C</span></div>
+                        <div class="element inactive" data-element="N"><span class="number">7</span><span class="symbol">N</span></div>
+                        <div class="element inactive" data-element="O"><span class="number">8</span><span class="symbol">O</span></div>
+                        <div class="element inactive" data-element="F"><span class="number">9</span><span class="symbol">F</span></div>
+                        <div class="element inactive" data-element="Ne"><span class="number">10</span><span class="symbol">Ne</span></div>
+
+                        <!-- Row 3 -->
+                        <div class="element anode" data-element="Na" onclick="showElementDetail('Na')"><span class="number">11</span><span class="symbol">Na</span></div>
+                        <div class="element inactive" data-element="Mg"><span class="number">12</span><span class="symbol">Mg</span></div>
+                        <div class="element inactive" style="grid-column: span 10;"></div>
+                        <div class="element electrolyte" data-element="Al"><span class="number">13</span><span class="symbol">Al</span></div>
+                        <div class="element inactive" data-element="Si"><span class="number">14</span><span class="symbol">Si</span></div>
+                        <div class="element inactive" data-element="P"><span class="number">15</span><span class="symbol">P</span></div>
+                        <div class="element inactive" data-element="S"><span class="number">16</span><span class="symbol">S</span></div>
+                        <div class="element electrolyte" data-element="Cl"><span class="number">17</span><span class="symbol">Cl</span></div>
+                        <div class="element inactive" data-element="Ar"><span class="number">18</span><span class="symbol">Ar</span></div>
+
+                        <!-- Row 4 -->
+                        <div class="element active" data-element="K"><span class="number">19</span><span class="symbol">K</span></div>
+                        <div class="element inactive" data-element="Ca"><span class="number">20</span><span class="symbol">Ca</span></div>
+                        <div class="element inactive" data-element="Sc"><span class="number">21</span><span class="symbol">Sc</span></div>
+                        <div class="element current-collector" data-element="Ti"><span class="number">22</span><span class="symbol">Ti</span></div>
+                        <div class="element cathode" data-element="V"><span class="number">23</span><span class="symbol">V</span></div>
+                        <div class="element cathode" data-element="Cr"><span class="number">24</span><span class="symbol">Cr</span></div>
+                        <div class="element cathode" data-element="Mn" onclick="showElementDetail('Mn')"><span class="number">25</span><span class="symbol">Mn</span></div>
+                        <div class="element cathode" data-element="Fe" onclick="showElementDetail('Fe')"><span class="number">26</span><span class="symbol">Fe</span></div>
+                        <div class="element cathode" data-element="Co" onclick="showElementDetail('Co')"><span class="number">27</span><span class="symbol">Co</span></div>
+                        <div class="element cathode" data-element="Ni" onclick="showElementDetail('Ni')"><span class="number">28</span><span class="symbol">Ni</span></div>
+                        <div class="element current-collector" data-element="Cu"><span class="number">29</span><span class="symbol">Cu</span></div>
+                        <div class="element inactive" data-element="Zn"><span class="number">30</span><span class="symbol">Zn</span></div>
+                        <div class="element inactive" data-element="Ga"><span class="number">31</span><span class="symbol">Ga</span></div>
+                        <div class="element inactive" data-element="Ge"><span class="number">32</span><span class="symbol">Ge</span></div>
+                        <div class="element inactive" data-element="As"><span class="number">33</span><span class="symbol">As</span></div>
+                        <div class="element inactive" data-element="Se"><span class="number">34</span><span class="symbol">Se</span></div>
+                        <div class="element electrolyte" data-element="Br"><span class="number">35</span><span class="symbol">Br</span></div>
+                        <div class="element inactive" data-element="Kr"><span class="number">36</span><span class="symbol">Kr</span></div>
+
+                        <!-- Row 5 -->
+                        <div class="element inactive" data-element="Rb"><span class="number">37</span><span class="symbol">Rb</span></div>
+                        <div class="element inactive" data-element="Sr"><span class="number">38</span><span class="symbol">Sr</span></div>
+                        <div class="element inactive" data-element="Y"><span class="number">39</span><span class="symbol">Y</span></div>
+                        <div class="element cathode" data-element="Zr"><span class="number">40</span><span class="symbol">Zr</span></div>
+                        <div class="element cathode" data-element="Nb"><span class="number">41</span><span class="symbol">Nb</span></div>
+                        <div class="element cathode" data-element="Mo"><span class="number">42</span><span class="symbol">Mo</span></div>
+                        <div class="element inactive" data-element="Tc"><span class="number">43</span><span class="symbol">Tc</span></div>
+                        <div class="element cathode" data-element="Ru"><span class="number">44</span><span class="symbol">Ru</span></div>
+                        <div class="element cathode" data-element="Rh"><span class="number">45</span><span class="symbol">Rh</span></div>
+                        <div class="element cathode" data-element="Pd"><span class="number">46</span><span class="symbol">Pd</span></div>
+                        <div class="element current-collector" data-element="Ag"><span class="number">47</span><span class="symbol">Ag</span></div>
+                        <div class="element inactive" data-element="Cd"><span class="number">48</span><span class="symbol">Cd</span></div>
+                        <div class="element inactive" data-element="In"><span class="number">49</span><span class="symbol">In</span></div>
+                        <div class="element inactive" data-element="Sn"><span class="number">50</span><span class="symbol">Sn</span></div>
+                        <div class="element inactive" data-element="Sb"><span class="number">51</span><span class="symbol">Sb</span></div>
+                        <div class="element inactive" data-element="Te"><span class="number">52</span><span class="symbol">Te</span></div>
+                        <div class="element inactive" data-element="I"><span class="number">53</span><span class="symbol">I</span></div>
+                        <div class="element inactive" data-element="Xe"><span class="number">54</span><span class="symbol">Xe</span></div>
+
+                        <!-- Row 6 -->
+                        <div class="element inactive" data-element="Cs"><span class="number">55</span><span class="symbol">Cs</span></div>
+                        <div class="element inactive" data-element="Ba"><span class="number">56</span><span class="symbol">Ba</span></div>
+                        <div class="element inactive" style="grid-column: span 1;"></div>
+                        <div class="element inactive" data-element="Hf"><span class="number">72</span><span class="symbol">Hf</span></div>
+                        <div class="element inactive" data-element="Ta"><span class="number">73</span><span class="symbol">Ta</span></div>
+                        <div class="element inactive" data-element="W"><span class="number">74</span><span class="symbol">W</span></div>
+                        <div class="element inactive" data-element="Re"><span class="number">75</span><span class="symbol">Re</span></div>
+                        <div class="element cathode" data-element="Os"><span class="number">76</span><span class="symbol">Os</span></div>
+                        <div class="element cathode" data-element="Ir"><span class="number">77</span><span class="symbol">Ir</span></div>
+                        <div class="element cathode" data-element="Pt"><span class="number">78</span><span class="symbol">Pt</span></div>
+                        <div class="element active" data-element="Au"><span class="number">79</span><span class="symbol">Au</span></div>
+                        <div class="element inactive" data-element="Hg"><span class="number">80</span><span class="symbol">Hg</span></div>
+                        <div class="element inactive" data-element="Tl"><span class="number">81</span><span class="symbol">Tl</span></div>
+                        <div class="element anode" data-element="Pb"><span class="number">82</span><span class="symbol">Pb</span></div>
+                        <div class="element inactive" data-element="Bi"><span class="number">83</span><span class="symbol">Bi</span></div>
+                        <div class="element inactive" data-element="Po"><span class="number">84</span><span class="symbol">Po</span></div>
+                        <div class="element inactive" data-element="At"><span class="number">85</span><span class="symbol">At</span></div>
+                        <div class="element inactive" data-element="Rn"><span class="number">86</span><span class="symbol">Rn</span></div>
+
+                        <!-- Row 7 -->
+                        <div class="element inactive" data-element="Fr"><span class="number">87</span><span class="symbol">Fr</span></div>
+                        <div class="element inactive" data-element="Ra"><span class="number">88</span><span class="symbol">Ra</span></div>
+                        <div class="element inactive" style="grid-column: span 1;"></div>
+                        <div class="element inactive" data-element="Rf"><span class="number">104</span><span class="symbol">Rf</span></div>
+                        <div class="element inactive" data-element="Db"><span class="number">105</span><span class="symbol">Db</span></div>
+                        <div class="element inactive" data-element="Sg"><span class="number">106</span><span class="symbol">Sg</span></div>
+                        <div class="element inactive" data-element="Bh"><span class="number">107</span><span class="symbol">Bh</span></div>
+                        <div class="element inactive" data-element="Hs"><span class="number">108</span><span class="symbol">Hs</span></div>
+                        <div class="element inactive" data-element="Mt"><span class="number">109</span><span class="symbol">Mt</span></div>
+                        <div class="element inactive" data-element="Ds"><span class="number">110</span><span class="symbol">Ds</span></div>
+                        <div class="element inactive" data-element="Rg"><span class="number">111</span><span class="symbol">Rg</span></div>
+                        <div class="element inactive" data-element="Cn"><span class="number">112</span><span class="symbol">Cn</span></div>
+                        <div class="element inactive" data-element="Nh"><span class="number">113</span><span class="symbol">Nh</span></div>
+                        <div class="element inactive" data-element="Fl"><span class="number">114</span><span class="symbol">Fl</span></div>
+                        <div class="element inactive" data-element="Mc"><span class="number">115</span><span class="symbol">Mc</span></div>
+                        <div class="element inactive" data-element="Lv"><span class="number">116</span><span class="symbol">Lv</span></div>
+                        <div class="element inactive" data-element="Ts"><span class="number">117</span><span class="symbol">Ts</span></div>
+                        <div class="element inactive" data-element="Og"><span class="number">118</span><span class="symbol">Og</span></div>
+
+                        <!-- Lanthanides -->
+                        <div class="element inactive" style="grid-column: span 3;"></div>
+                        <div class="element inactive" data-element="La"><span class="number">57</span><span class="symbol">La</span></div>
+                        <div class="element inactive" data-element="Ce"><span class="number">58</span><span class="symbol">Ce</span></div>
+                        <div class="element cathode" data-element="Pr"><span class="number">59</span><span class="symbol">Pr</span></div>
+                        <div class="element cathode" data-element="Nd"><span class="number">60</span><span class="symbol">Nd</span></div>
+                        <div class="element inactive" data-element="Pm"><span class="number">61</span><span class="symbol">Pm</span></div>
+                        <div class="element cathode" data-element="Sm"><span class="number">62</span><span class="symbol">Sm</span></div>
+                        <div class="element cathode" data-element="Eu"><span class="number">63</span><span class="symbol">Eu</span></div>
+                        <div class="element cathode" data-element="Gd"><span class="number">64</span><span class="symbol">Gd</span></div>
+                        <div class="element cathode" data-element="Tb"><span class="number">65</span><span class="symbol">Tb</span></div>
+                        <div class="element cathode" data-element="Dy"><span class="number">66</span><span class="symbol">Dy</span></div>
+                        <div class="element cathode" data-element="Ho"><span class="number">67</span><span class="symbol">Ho</span></div>
+                        <div class="element cathode" data-element="Er"><span class="number">68</span><span class="symbol">Er</span></div>
+                        <div class="element cathode" data-element="Tm"><span class="number">69</span><span class="symbol">Tm</span></div>
+                        <div class="element cathode" data-element="Yb"><span class="number">70</span><span class="symbol">Yb</span></div>
+                        <div class="element cathode" data-element="Lu"><span class="number">71</span><span class="symbol">Lu</span></div>
+
+                        <!-- Actinides -->
+                        <div class="element inactive" style="grid-column: span 3;"></div>
+                        <div class="element anode" data-element="Ac"><span class="number">89</span><span class="symbol">Ac</span></div>
+                        <div class="element cathode" data-element="Th"><span class="number">90</span><span class="symbol">Th</span></div>
+                        <div class="element cathode" data-element="Pa"><span class="number">91</span><span class="symbol">Pa</span></div>
+                        <div class="element anode" data-element="U"><span class="number">92</span><span class="symbol">U</span></div>
+                        <div class="element cathode" data-element="Np"><span class="number">93</span><span class="symbol">Np</span></div>
+                        <div class="element cathode" data-element="Pu"><span class="number">94</span><span class="symbol">Pu</span></div>
+                        <div class="element cathode" data-element="Am"><span class="number">95</span><span class="symbol">Am</span></div>
+                        <div class="element inactive" data-element="Cm"><span class="number">96</span><span class="symbol">Cm</span></div>
+                        <div class="element inactive" data-element="Bk"><span class="number">97</span><span class="symbol">Bk</span></div>
+                        <div class="element inactive" data-element="Cf"><span class="number">98</span><span class="symbol">Cf</span></div>
+                        <div class="element inactive" data-element="Es"><span class="number">99</span><span class="symbol">Es</span></div>
+                        <div class="element inactive" data-element="Fm"><span class="number">100</span><span class="symbol">Fm</span></div>
+                        <div class="element inactive" data-element="Md"><span class="number">101</span><span class="symbol">Md</span></div>
+                        <div class="element inactive" data-element="No"><span class="number">102</span><span class="symbol">No</span></div>
+                        <div class="element inactive" data-element="Lr"><span class="number">103</span><span class="symbol">Lr</span></div>
+                    </div>
+                </div>
+                <p style="text-align: center; color: #607d8b; margin-top: 20px;">
+                    Click on key elements to view detailed properties. Colors indicate battery application roles.
+                </p>
+            </div>
+        </div>
+
+        <!-- Cathode Materials Tab -->
+        <div id="cathodes" class="tab-content">
+            <div class="panel">
+                <div class="panel-title"> Cathode Active Materials</div>
+                <div class="materials-grid">
+                    <div class="material-card">
+                        <h3>NMC 811</h3>
+                        <div class="formula">LiNi₀.₈Mn₀.₁Co₀.₁O₂</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Energy Density:</span><span class="prop-value high">220-260 Wh/kg</span></div>
+                            <div><span class="prop-label">Voltage:</span><span class="prop-value">3.7-4.2V</span></div>
+                            <div><span class="prop-label">Cycles:</span><span class="prop-value medium">1000-2000</span></div>
+                            <div><span class="prop-label">Cost:</span><span class="prop-value high">High</span></div>
+                            <div><span class="prop-label">Thermal Stability:</span><span class="prop-value medium">Moderate</span></div>
+                            <div><span class="prop-label">Co Content:</span><span class="prop-value low">10%</span></div>
+                        </div>
+                    </div>
+                    <div class="material-card">
+                        <h3>NCA</h3>
+                        <div class="formula">LiNi₀.₈Co₀.₁₅Al₀.₀₅O₂</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Energy Density:</span><span class="prop-value high">250-300 Wh/kg</span></div>
+                            <div><span class="prop-label">Voltage:</span><span class="prop-value">3.6-4.2V</span></div>
+                            <div><span class="prop-label">Cycles:</span><span class="prop-value medium">1000</span></div>
+                            <div><span class="prop-label">Cost:</span><span class="prop-value high">High</span></div>
+                            <div><span class="prop-label">Thermal Stability:</span><span class="prop-value low">Lower</span></div>
+                            <div><span class="prop-label">Application:</span><span class="prop-value">Tesla, Panasonic</span></div>
+                        </div>
+                    </div>
+                    <div class="material-card">
+                        <h3>LFP</h3>
+                        <div class="formula">LiFePO₄</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Energy Density:</span><span class="prop-value low">120-160 Wh/kg</span></div>
+                            <div><span class="prop-label">Voltage:</span><span class="prop-value">2.5-3.65V</span></div>
+                            <div><span class="prop-label">Cycles:</span><span class="prop-value high">2000-5000+</span></div>
+                            <div><span class="prop-label">Cost:</span><span class="prop-value high">Low</span></div>
+                            <div><span class="prop-label">Thermal Stability:</span><span class="prop-value high">Excellent</span></div>
+                            <div><span class="prop-label">Application:</span><span class="prop-value">Stationary Storage</span></div>
+                        </div>
+                    </div>
+                    <div class="material-card">
+                        <h3>LCO</h3>
+                        <div class="formula">LiCoO₂</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Energy Density:</span><span class="prop-value high">180-200 Wh/kg</span></div>
+                            <div><span class="prop-label">Voltage:</span><span class="prop-value">3.0-4.2V</span></div>
+                            <div><span class="prop-label">Cycles:</span><span class="prop-value low">500-1000</span></div>
+                            <div><span class="prop-label">Cost:</span><span class="prop-value low">Very High</span></div>
+                            <div><span class="prop-label">Thermal Stability:</span><span class="prop-value low">Poor</span></div>
+                            <div><span class="prop-label">Application:</span><span class="prop-value">Consumer Electronics</span></div>
+                        </div>
+                    </div>
+                    <div class="material-card">
+                        <h3>LMO (Spinel)</h3>
+                        <div class="formula">LiMn₂O₄</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Energy Density:</span><span class="prop-value medium">100-120 Wh/kg</span></div>
+                            <div><span class="prop-label">Voltage:</span><span class="prop-value">3.0-4.3V</span></div>
+                            <div><span class="prop-label">Cycles:</span><span class="prop-value medium">800-1500</span></div>
+                            <div><span class="prop-label">Cost:</span><span class="prop-value high">Low</span></div>
+                            <div><span class="prop-label">Thermal Stability:</span><span class="prop-value high">Good</span></div>
+                            <div><span class="prop-label">Power Density:</span><span class="prop-value high">High</span></div>
+                        </div>
+                    </div>
+                    <div class="material-card">
+                        <h3>NMC 532</h3>
+                        <div class="formula">LiNi₀.₅Mn₀.₃Co₀.₂O₂</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Energy Density:</span><span class="prop-value medium">190-210 Wh/kg</span></div>
+                            <div><span class="prop-label">Voltage:</span><span class="prop-value">3.0-4.2V</span></div>
+                            <div><span class="prop-label">Cycles:</span><span class="prop-value medium">1500-2500</span></div>
+                            <div><span class="prop-label">Cost:</span><span class="prop-value medium">Moderate</span></div>
+                            <div><span class="prop-label">Balance:</span><span class="prop-value high">Excellent</span></div>
+                            <div><span class="prop-label">Application:</span><span class="prop-value">GM, Ford, VW</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Anode Materials Tab -->
+        <div id="anodes" class="tab-content">
+            <div class="panel">
+                <div class="panel-title"> Anode Active Materials</div>
+                <div class="materials-grid">
+                    <div class="material-card">
+                        <h3>Graphite</h3>
+                        <div class="formula">C (Layered)</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Capacity:</span><span class="prop-value medium">340-360 mAh/g</span></div>
+                            <div><span class="prop-label">Voltage:</span><span class="prop-value">0.1-0.2V vs Li/Li⁺</span></div>
+                            <div><span class="prop-label">Cycles:</span><span class="prop-value high">2000-5000</span></div>
+                            <div><span class="prop-label">Cost:</span><span class="prop-value high">Low</span></div>
+                            <div><span class="prop-label">Structure:</span><span class="prop-value">Hexagonal layers</span></div>
+                            <div><span class="prop-label">Li+ Intercalation:</span><span class="prop-value">Stage 1-4</span></div>
+                        </div>
+                    </div>
+                    <div class="material-card">
+                        <h3>Silicon</h3>
+                        <div class="formula">Si (Lithiated)</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Capacity:</span><span class="prop-value high">3572 mAh/g (max)</span></div>
+                            <div><span class="prop-label">Voltage:</span><span class="prop-value">0.3-0.5V vs Li/Li⁺</span></div>
+                            <div><span class="prop-label">Volume Change:</span><span class="prop-value low">~300%</span></div>
+                            <div><span class="prop-label">Cycles:</span><span class="prop-value low">500-1000</span></div>
+                            <div><span class="prop-label">Cost:</span><span class="prop-value high">Low</span></div>
+                            <div><span class="prop-label">Application:</span><span class="prop-value">Anode Composite</span></div>
+                        </div>
+                    </div>
+                    <div class="material-card">
+                        <h3>Lithium Metal</h3>
+                        <div class="formula">Li (Metal)</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Capacity:</span><span class="prop-value high">3860 mAh/g</span></div>
+                            <div><span class="prop-label">Voltage:</span><span class="prop-value">0V vs Li/Li⁺</span></div>
+                            <div><span class="prop-label">Cycles:</span><span class="prop-value low">Poor</span></div>
+                            <div><span class="prop-label">Safety:</span><span class="prop-value low">Dendrite Risk</span></div>
+                            <div><span class="prop-label">Application:</span><span class="prop-value">Solid-State</span></div>
+                            <div><span class="prop-label">Challenge:</span><span class="prop-value">SEI Stabilization</span></div>
+                        </div>
+                    </div>
+                    <div class="material-card">
+                        <h3>Hard Carbon</h3>
+                        <div class="formula">C (Non-graphitizable)</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Capacity:</span><span class="prop-value medium">250-400 mAh/g</span></div>
+                            <div><span class="prop-label">Voltage:</span><span class="prop-value">0.05-0.3V vs Li/Li⁺</span></div>
+                            <div><span class="prop-label">Cycles:</span><span class="prop-value high">1000-3000</span></div>
+                            <div><span class="prop-label">Cost:</span><span class="prop-value medium">Moderate</span></div>
+                            <div><span class="prop-label">Structure:</span><span class="prop-value">Disordered</span></div>
+                            <div><span class="prop-label">Application:</span><span class="prop-value">Sodium-Ion</span></div>
+                        </div>
+                    </div>
+                    <div class="material-card">
+                        <h3>LTO (Spinel)</h3>
+                        <div class="formula">Li₄Ti₅O₁₂</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Capacity:</span><span class="prop-value low">160 mAh/g</span></div>
+                            <div><span class="prop-label">Voltage:</span><span class="prop-value">1.55V vs Li/Li⁺</span></div>
+                            <div><span class="prop-label">Volume Change:</span><span class="prop-value high"><1%</span></div>
+                            <div><span class="prop-label">Cycles:</span><span class="prop-value high">10000+</span></div>
+                            <div><span class="prop-label">Power:</span><span class="prop-value high">Excellent</span></div>
+                            <div><span class="prop-label">Application:</span><span class="prop-value">Flash Charging</span></div>
+                        </div>
+                    </div>
+                    <div class="material-card">
+                        <h3>Sn-based</h3>
+                        <div class="formula">Sn (Tin alloys)</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Capacity:</span><span class="prop-value high">990 mAh/g</span></div>
+                            <div><span class="prop-label">Voltage:</span><span class="prop-value">0.4-0.6V vs Li/Li⁺</span></div>
+                            <div><span class="prop-label">Volume Change:</span><span class="prop-value medium">~260%</span></div>
+                            <div><span class="prop-label">Cycles:</span><span class="prop-value low">500</span></div>
+                            <div><span class="prop-label">Cost:</span><span class="prop-value medium">Moderate</span></div>
+                            <div><span class="prop-label">Status:</span><span class="prop-value">Research</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Electrolytes Tab -->
+        <div id="electrolytes" class="tab-content">
+            <div class="panel">
+                <div class="panel-title"> Electrolyte Systems</div>
+                <div class="materials-grid">
+                    <div class="material-card">
+                        <h3>Liquid (Standard)</h3>
+                        <div class="formula">EC/DMC + LiPF₆</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Conductivity:</span><span class="prop-value high">10-15 mS/cm</span></div>
+                            <div><span class="prop-label">Voltage Window:</span><span class="prop-value">0-4.5V</span></div>
+                            <div><span class="prop-label">Operating T:</span><span class="prop-value">-20 to 60°C</span></div>
+                            <div><span class="prop-label">Safety:</span><span class="prop-value low">Flammable</span></div>
+                            <div><span class="prop-label">Cost:</span><span class="prop-value high">Moderate</span></div>
+                            <div><span class="prop-label">Application:</span><span class="prop-value">Most Li-ion</span></div>
+                        </div>
+                    </div>
+                    <div class="material-card">
+                        <h3>Liquid (High-Voltage)</h3>
+                        <div class="formula">EC/EMC + LiFSI</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Conductivity:</span><span class="prop-value high">12-15 mS/cm</span></div>
+                            <div><span class="prop-label">Voltage Window:</span><span class="prop-value">0-5.0V</span></div>
+                            <div><span class="prop-label">Stability:</span><span class="prop-value high">Improved</span></div>
+                            <div><span class="prop-label">Safety:</span><span class="prop-value medium">Moderate</span></div>
+                            <div><span class="prop-label">Cost:</span><span class="prop-value low">Higher</span></div>
+                            <div><span class="prop-label">Application:</span><span class="prop-value">NMC 811, NCA</span></div>
+                        </div>
+                    </div>
+                    <div class="material-card">
+                        <h3>Sulfide Solid</h3>
+                        <div class="formula">Li₆PS₅Cl (Argyrodite)</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Conductivity:</span><span class="prop-value high">1-12 mS/cm</span></div>
+                            <div><span class="prop-label">Voltage Window:</span><span class="prop-value">0-7V</span></div>
+                            <div><span class="prop-label">Mechanical:</span><span class="prop-value low">Soft</span></div>
+                            <div><span class="prop-label">Air Stability:</span><span class="prop-value low">H₂S risk</span></div>
+                            <div><span class="prop-label">Cost:</span><span class="prop-value medium">Moderate</span></div>
+                            <div><span class="prop-label">Application:</span><span class="prop-value">Solid-State</span></div>
+                        </div>
+                    </div>
+                    <div class="material-card">
+                        <h3>Oxide Solid</h3>
+                        <div class="formula">LLZO (Li₇La₃Zr₂O₁₂)</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Conductivity:</span><span class="prop-value medium">0.1-1 mS/cm</span></div>
+                            <div><span class="prop-label">Voltage Window:</span><span class="prop-value">0-9V</span></div>
+                            <div><span class="prop-label">Mechanical:</span><span class="prop-value high">Hard, rigid</span></div>
+                            <div><span class="prop-label">Air Stability:</span><span class="prop-value high">Stable</span></div>
+                            <div><span class="prop-label">Cost:</span><span class="prop-value low">High</span></div>
+                            <div><span class="prop-label">Challenge:</span><span class="prop-value">Interface Resistance</span></div>
+                        </div>
+                    </div>
+                    <div class="material-card">
+                        <h3>Polymer Solid</h3>
+                        <div class="formula">PEO-LiTFSI</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Conductivity:</span><span class="prop-value low">0.1 mS/cm</span></div>
+                            <div><span class="prop-label">Voltage Window:</span><span class="prop-value">0-4V</span></div>
+                            <div><span class="prop-label">Mechanical:</span><span class="prop-value high">Flexible</span></div>
+                            <div><span class="prop-label">Operating T:</span><span class="prop-value">60-80°C</span></div>
+                            <div><span class="prop-label">Safety:</span><span class="prop-value high">Non-flammable</span></div>
+                            <div><span class="prop-label">Application:</span><span class="prop-value">Solid-State</span></div>
+                        </div>
+                    </div>
+                    <div class="material-card">
+                        <h3>Gel Polymer</h3>
+                        <div class="formula">PVDF-HFP + Liquid</div>
+                        <div class="properties">
+                            <div><span class="prop-label">Conductivity:</span><span class="prop-value high">5-10 mS/cm</span></div>
+                            <div><span class="prop-label">Voltage Window:</span><span class="prop-value">0-4.5V</span></div>
+                            <div><span class="prop-label">Mechanical:</span><span class="prop-value medium">Semi-flexible</span></div>
+                            <div><span class="prop-label">Safety:</span><span class="prop-value medium">Improved</span></div>
+                            <div><span class="prop-label">Cost:</span><span class="prop-value medium">Moderate</span></div>
+                            <div><span class="prop-label">Application:</span><span class="prop-value">Consumer Electronics</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="color: #4fc3f7; margin: 30px 0 20px;">Electrolyte Salt Comparison</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Salt</th>
+                            <th>Conductivity (mS/cm)</th>
+                            <th>Thermal Stability</th>
+                            <th>Hydrolytic Stability</th>
+                            <th>Cost</th>
+                            <th>Best Application</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>LiPF₆</td>
+                            <td class="best">10.7</td>
+                            <td>Poor (decomposes >100°C)</td>
+                            <td>Low (HF formation)</td>
+                            <td>Moderate</td>
+                            <td>Standard Li-ion</td>
+                        </tr>
+                        <tr>
+                            <td>LiFSI</td>
+                            <td class="best">12.0</td>
+                            <td>Good</td>
+                            <td>Moderate</td>
+                            <td>Higher</td>
+                            <td>High-voltage</td>
+                        </tr>
+                        <tr>
+                            <td>LiTFSI</td>
+                            <td>9.0</td>
+                            <td class="best">Excellent</td>
+                            <td>Good</td>
+                            <td>High</td>
+                            <td>Polymer electrolytes</td>
+                        </tr>
+                        <tr>
+                            <td>LiBOB</td>
+                            <td>6.0</td>
+                            <td class="best">Excellent</td>
+                            <td class="best">Excellent</td>
+                            <td>High</td>
+                            <td>High-temperature</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Battery Chemistries Tab -->
+        <div id="chemistries" class="tab-content">
+            <div class="panel">
+                <div class="panel-title"> Battery Chemistry Comparison</div>
+                <div class="chemistry-section">
+                    <div>
+                        <div class="chemistry-card nmc">
+                            <h3>NMC / NCM</h3>
+                            <p style="color: #90a4ae; margin-bottom: 15px;">LiNiₓMn_yCo_zO₂ — Most common automotive cathode</p>
+                            <div class="spec-grid">
+                                <div class="spec-item"><div class="label">Energy Density</div><div class="value">200-260 Wh/kg</div></div>
+                                <div class="spec-item"><div class="label">Power Density</div><div class="value">High</div></div>
+                                <div class="spec-item"><div class="label">Cycle Life</div><div class="value">1000-2500</div></div>
+                                <div class="spec-item"><div class="label">Cost</div><div class="value">$$</div></div>
+                                <div class="spec-item"><div class="label">Thermal Safety</div><div class="value">Moderate</div></div>
+                                <div class="spec-item"><div class="label">Applications</div><div class="value">EVs, Grid Storage</div></div>
+                            </div>
+                        </div>
+                        <div class="chemistry-card lfp" style="margin-top: 20px;">
+                            <h3>LFP</h3>
+                            <p style="color: #90a4ae; margin-bottom: 15px;">LiFePO₄ — Thermal-stable, long-life cathode</p>
+                            <div class="spec-grid">
+                                <div class="spec-item"><div class="label">Energy Density</div><div class="value">120-160 Wh/kg</div></div>
+                                <div class="spec-item"><div class="label">Power Density</div><div class="value">High</div></div>
+                                <div class="spec-item"><div class="label">Cycle Life</div><div class="value">3000-10000</div></div>
+                                <div class="spec-item"><div class="label">Cost</div><div class="value">$</div></div>
+                                <div class="spec-item"><div class="label">Thermal Safety</div><div class="value">Excellent</div></div>
+                                <div class="spec-item"><div class="label">Applications</div><div class="value">Stationary, Bus</div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="chemistry-card nca">
+                            <h3>NCA</h3>
+                            <p style="color: #90a4ae; margin-bottom: 15px;">LiNi₀.₈Co₀.₁₅Al₀.₀₅O₂ — Tesla's choice</p>
+                            <div class="spec-grid">
+                                <div class="spec-item"><div class="label">Energy Density</div><div class="value">250-300 Wh/kg</div></div>
+                                <div class="spec-item"><div class="label">Power Density</div><div class="value">High</div></div>
+                                <div class="spec-item"><div class="label">Cycle Life</div><div class="value">1000-2000</div></div>
+                                <div class="spec-item"><div class="label">Cost</div><div class="value">$$$</div></div>
+                                <div class="spec-item"><div class="label">Thermal Safety</div><div class="value">Lower</div></div>
+                                <div class="spec-item"><div class="label">Applications</div><div class="value">Tesla, Storage</div></div>
+                            </div>
+                        </div>
+                        <div class="chemistry-card li-metal" style="margin-top: 20px;">
+                            <h3>Lithium Metal</h3>
+                            <p style="color: #90a4ae; margin-bottom: 15px;">Li metal anode — Next-generation energy</p>
+                            <div class="spec-grid">
+                                <div class="spec-item"><div class="label">Energy Density</div><div class="value">400-500 Wh/kg</div></div>
+                                <div class="spec-item"><div class="label">Anode Potential</div><div class="value">0V vs Li/Li⁺</div></div>
+                                <div class="spec-item"><div class="label">Cycle Life</div><div class="value">Research</div></div>
+                                <div class="spec-item"><div class="label">Safety</div><div class="value">Challenge</div></div>
+                                <div class="spec-item"><div class="label">Dendrites</div><div class="value">Prevention needed</div></div>
+                                <div class="spec-item"><div class="label">Applications</div><div class="value">Solid-State EV</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Safety Data Tab -->
+        <div id="safety" class="tab-content">
+            <div class="panel">
+                <div class="panel-title"> Battery Safety Data & Hazards</div>
+                <div class="safety-grid">
+                    <div class="safety-card">
+                        <div class="icon">🔥</div>
+                        <h3>Thermal Runaway</h3>
+                        <p>Exothermic chain reaction when battery exceeds 130°C. Triggered by: internal short, overcharge, external heat, physical damage.</p>
+                        <div style="margin-top: 15px; font-size: 0.9em; color: #4fc3f7;">
+                            <div>Stage 1: 80-120°C — SEI decomposition</div>
+                            <div>Stage 2: 120-200°C — Separator melt</div>
+                            <div>Stage 3: >200°C — Cathode decomposition</div>
+                        </div>
+                    </div>
+                    <div class="safety-card">
+                        <div class="icon">⚡</div>
+                        <h3>Internal Short</h3>
+                        <p>Dendrite formation can penetrate separator causing rapid discharge. Creates localized hot spots leading to thermal runaway.</p>
+                        <div style="margin-top: 15px; font-size: 0.9em; color: #4fc3f7;">
+                            <div>Li plating at >4.25V</div>
+                            <div>Dendrite growth at high C-rate</div>
+                            <div>Physical penetration</div>
+                        </div>
+                    </div>
+                    <div class="safety-card">
+                        <div class="icon">💥</div>
+                        <h3>Gas Evolution</h3>
+                        <p>Electrolyte decomposition releases CO₂, CO, H₂, O₂. Pressure buildup can rupture cell casing. Venting releases toxic & flammable gases.</p>
+                        <div style="margin-top: 15px; font-size: 0.9em; color: #4fc3f7;">
+                            <div>EC decomposition: CO₂</div>
+                            <div>SEI formation: CH₂=CH₂</div>
+                            <div>Overcharge: CO, H₂, O₂</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="color: #4fc3f7; margin: 30px 0 20px;">Safety Mechanisms & Thresholds</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Safe Threshold</th>
+                            <th>Warning Level</th>
+                            <th>Danger Level</th>
+                            <th>Response</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Temperature</td>
+                            <td class="best"><60°C</td>
+                            <td>60-80°C</td>
+                            <td style="color:#ef5350;">>80°C</td>
+                            <td>Current reduction, cooling</td>
+                        </tr>
+                        <tr>
+                            <td>Voltage (per cell)</td>
+                            <td class="best">3.0-4.2V</td>
+                            <td>4.2-4.25V</td>
+                            <td style="color:#ef5350;">>4.25V</td>
+                            <td>Stop charging</td>
+                        </tr>
+                        <tr>
+                            <td>Charge Rate</td>
+                            <td class="best"><1C</td>
+                            <td>1-2C</td>
+                            <td style="color:#ef5350;">>2C continuous</td>
+                            <td>Thermal monitoring</td>
+                        </tr>
+                        <tr>
+                            <td>SOH Warning</td>
+                            <td class="best">>80%</td>
+                            <td>70-80%</td>
+                            <td style="color:#ef5350;"><70%</td>
+                            <td>Replace cell</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 style="color: #4fc3f7; margin: 30px 0 20px;">Safety Features in Battery Systems</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                    <div style="background: rgba(0,50,60,0.5); padding: 20px; border-radius: 10px;">
+                        <h4 style="color: #4fc3f7;">Battery Management System (BMS)</h4>
+                        <ul style="color: #b0bec5; line-height: 1.8;">
+                            <li>Cell voltage monitoring (per cell)</li>
+                            <li>Temperature monitoring (multiple points)</li>
+                            <li>Current limiting & protection</li>
+                            <li>SOC calculation & balancing</li>
+                            <li>Isolation monitoring</li>
+                        </ul>
+                    </div>
+                    <div style="background: rgba(0,50,60,0.5); padding: 20px; border-radius: 10px;">
+                        <h4 style="color: #4fc3f7;">Cell-Level Safety</h4>
+                        <ul style="color: #b0bec5; line-height: 1.8;">
+                            <li>CID (Current Interrupt Device)</li>
+                            <li>Pressure relief valve</li>
+                            <li>Positive temperature coefficient (PTC)</li>
+                            <li>Separator shutdown (140°C)</li>
+                            <li>Flame-retardant electrolyte</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Element Detail Modal -->
+    <div class="overlay" onclick="closeElementDetail()"></div>
+    <div class="element-detail" id="elementDetail">
+        <button class="close-btn" onclick="closeElementDetail()">×</button>
+        <div id="elementContent"></div>
+    </div>
+
+    <div class="footer">
+        <p>Battery Materials Database — Li-Ion Battery Research Lab</p>
+        <p style="margin-top: 10px;"><a href="battery-health-monitor.html">SOH Monitor</a> | <a href="solid-state-battery-lab.html">Solid-State Lab</a> | <a href="index.html">Home</a></p>
+    </div>
+
+    <script>
+        const elementData = {
+            'Li': {
+                name: 'Lithium',
+                number: 3,
+                symbol: 'Li',
+                mass: '6.94',
+                category: 'Alkali Metal',
+                role: 'Cathode & Anode',
+                description: 'The heart of Li-ion batteries. Li⁺ ions shuttle between cathode and anode during charge/discharge.',
+                battery_use: 'LiCoO₂, LiNiₓMn_yCo_zO₂, LiFePO₄ cathodes; Li metal anodes in solid-state',
+                interesting_fact: 'Lightest metal (0.534 g/cm³) with highest electrochemical potential (-3.04V vs SHE)'
+            },
+            'Na': {
+                name: 'Sodium',
+                number: 11,
+                symbol: 'Na',
+                mass: '22.99',
+                category: 'Alkali Metal',
+                role: 'Anode (Na-ion)',
+                description: 'Similar chemistry to Li, but cheaper and more abundant. Emerging for stationary storage.',
+                battery_use: 'Na₃V₂(PO₄)₃ cathodes, Hard carbon anodes for Na-ion batteries',
+                interesting_fact: '720x more abundant than Li in Earth\'s crust, enabling cheaper grid storage'
+            },
+            'Mn': {
+                name: 'Manganese',
+                number: 25,
+                symbol: 'Mn',
+                mass: '54.94',
+                category: 'Transition Metal',
+                role: 'Cathode Component',
+                description: 'Spinel structure provides 3D Li+ diffusion pathways. Cost-effective and environmentally benign.',
+                battery_use: 'LiMn₂O₄ spinel cathodes, NMC component (reduces cost)',
+                interesting_fact: 'One of few battery materials that is non-toxic and globally abundant'
+            },
+            'Fe': {
+                name: 'Iron',
+                number: 26,
+                symbol: 'Fe',
+                mass: '55.85',
+                category: 'Transition Metal',
+                role: 'Cathode (LFP)',
+                description: 'The backbone of safe, long-life batteries. Olivine structure provides stable cycling.',
+                battery_use: 'LiFePO₄ (LFP) cathodes — dominant in stationary storage and some EVs',
+                interesting_fact: 'LFP cells can achieve 10,000+ cycles with minimal degradation'
+            },
+            'Co': {
+                name: 'Cobalt',
+                number: 27,
+                symbol: 'Co',
+                mass: '58.93',
+                category: 'Transition Metal',
+                role: 'Cathode Stabilizer',
+                description: 'Prevents cathode structure collapse. Expensive and ethically problematic (DRC conflict).',
+                battery_use: 'LiCoO₂ (LCO), NMC, NCA cathodes for stability',
+                interesting_fact: '70% of cobalt comes from DR Congo. NMC 811 reduces Co content to 10%'
+            },
+            'Ni': {
+                name: 'Nickel',
+                number: 28,
+                symbol: 'Ni',
+                mass: '58.69',
+                category: 'Transition Metal',
+                role: 'High-Energy Cathode',
+                description: 'Increases energy density but reduces thermal stability. The key to high-energy cathodes.',
+                battery_use: 'NMC, NCA, Ni(OH)₂ — drives capacity in layered oxides',
+                interesting_fact: 'NMC 811 achieves 260 Wh/kg by using 80% Ni in cathode composition'
+            }
+        };
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showElementDetail(symbol) {
+            const data = elementData[symbol];
+            if (!data) return;
+
+            document.getElementById('elementContent').innerHTML = `
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #4fc3f7, #0288d1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 2.5em; font-weight: bold;">${data.symbol}</div>
+                    <h2 style="color: #4fc3f7; margin-top: 15px;">${data.name}</h2>
+                    <p style="color: #90a4ae;">${data.category} — Atomic #${data.number}</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div><span style="color: #607d8b;">Atomic Mass:</span> <span style="color: #e0e6ed;">${data.mass}</span></div>
+                        <div><span style="color: #607d8b;">Battery Role:</span> <span style="color: #4fc3f7;">${data.role}</span></div>
+                    </div>
+                </div>
+                <p style="color: #b0bec5; line-height: 1.6; margin-bottom: 15px;">${data.description}</p>
+                <div style="background: rgba(79,195,247,0.1); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+                    <div style="color: #607d8b; font-size: 0.9em;">Battery Application</div>
+                    <div style="color: #81d4fa;">${data.battery_use}</div>
+                </div>
+                <div style="background: rgba(255,193,7,0.1); padding: 12px; border-radius: 8px;">
+                    <div style="color: #ffc107; font-size: 0.9em;">Interesting Fact</div>
+                    <div style="color: #e0e6ed;">${data.interesting_fact}</div>
+                </div>
+            `;
+            document.querySelector('.overlay').classList.add('show');
+            document.getElementById('elementDetail').classList.add('show');
+        }
+
+        function closeElementDetail() {
+            document.querySelector('.overlay').classList.remove('show');
+            document.getElementById('elementDetail').classList.remove('show');
+        }
+
+        // Simulated degradation data for demo
+        console.log('Battery Materials Database loaded — A comprehensive resource for battery research');
+    </script>
+</body>
+</html>

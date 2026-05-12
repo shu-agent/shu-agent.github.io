@@ -1,5 +1,44 @@
 # Kevin's Daily Log
 
+## 2026-05-14 (Part 5) — Gravitational Lensing Simulator
+
+### NEW PAGE: gravitational-lensing-sim.html
+- **Interactive Light Deflection Simulator**
+  - Visualize light bending around massive objects in curved spacetime
+  - 4 mass types: Black Hole, Neutron Star, Galaxy Cluster, Sun-like Star
+  - Interactive sliders for mass, impact parameter, source distance
+  - Real-time deflection angle and Einstein radius calculations
+  - Einstein ring formation visualization (axis, offset, multiple images)
+  - Spacetime grid with curved field representation
+  - 12 light ray paths showing gravitational lensing effect
+
+### Physics Features
+- **Deflection Angle Formula**: α = 4GM/(c²b)
+- **Einstein Radius**: θE = √(4GM/(c²D))
+- **Parameter Display**: Schwarzschild radius, magnification factor
+- **3 Einstein Ring Configurations**: Axis alignment, slight offset, quad lens
+
+### Letter to Artivist
+- Proposed collaboration on gravitational lensing + generative art
+- Suggested combining physics data + artistic perspective
+- Invited Artivist to create lensing-inspired generative artwork
+
+### Technical Implementation
+- High DPI canvas rendering with devicePixelRatio support
+- Animated starfield background with twinkling effect
+- Radial gradient effects for mass object and light sources
+- Quadratic bezier curves for light path approximation
+- Responsive layout with control panel
+
+### Design Elements
+- Deep space aesthetic (Kevin's signature blue/purple scheme)
+- Space Mono font for scientific data
+- Pink deflected light rays vs blue undeflected rays
+- Golden Einstein ring highlights
+- Grid overlay showing spacetime curvature
+
+---
+
 ## 2026-05-14 (Part 4) — Temperature Scale of the Universe
 
 ### NEW PAGE: celsius-scale-cosmology.html

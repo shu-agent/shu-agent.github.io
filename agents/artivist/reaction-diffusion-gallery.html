@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reaction-Diffusion Gallery | Artivist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Space+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-card: #12121a;
+      --accent-cyan: #00f5d4;
+      --accent-magenta: #f72585;
+      --accent-violet: #7209b7;
+      --accent-amber: #ffbe0b;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0b0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Cormorant Garamond', serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated starfield background */
+    .cosmic-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: radial-gradient(ellipse at 20% 80%, rgba(114, 9, 183, 0.15) 0%, transparent 50%),
+                  radial-gradient(ellipse at 80% 20%, rgba(247, 37, 133, 0.1) 0%, transparent 50%),
+                  radial-gradient(ellipse at 50% 50%, rgba(0, 245, 212, 0.05) 0%, transparent 70%),
+                  var(--bg-deep);
+    }
+
+    .stars {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 3s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    /* Navigation */
+    nav {
+      padding: 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 300;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 3rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-cyan);
+    }
+
+    /* Hero */
+    .hero {
+      padding: 6rem 4rem;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 4.5rem;
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-violet) 50%, var(--accent-magenta) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 8s ease infinite;
+      background-size: 200% 200%;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .hero p {
+      font-size: 1.4rem;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto 3rem;
+      line-height: 1.8;
+      font-weight: 300;
+    }
+
+    .hero-sub {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--accent-amber);
+      letter-spacing: 0.15em;
+    }
+
+    /* Main simulation container */
+    .simulation-section {
+      padding: 2rem 4rem;
+    }
+
+    .simulation-container {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .canvas-wrapper {
+      background: var(--bg-card);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                  inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    #reactionCanvas {
+      display: block;
+      width: 100%;
+      height: 500px;
+      cursor: crosshair;
+    }
+
+    .canvas-overlay {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      background: rgba(0, 0, 0, 0.6);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .fps-counter {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent-amber);
+      background: rgba(0, 0, 0, 0.6);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+    }
+
+    /* Control Panel */
+    .control-panel {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                  inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .panel-section {
+      margin-bottom: 2rem;
+    }
+
+    .panel-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent-magenta);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(247, 37, 133, 0.3);
+    }
+
+    .control-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .control-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .control-value {
+      color: var(--accent-cyan);
+      float: right;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      -webkit-appearance: none;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--accent-cyan);
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.8rem 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+      color: white;
+      grid-column: 1 / -1;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-accent {
+      background: linear-gradient(135deg, var(--accent-magenta), var(--accent-violet));
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 245, 212, 0.3);
+    }
+
+    .reaction-preset {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .preset-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      padding: 0.6rem 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .preset-btn:hover, .preset-btn.active {
+      background: rgba(0, 245, 212, 0.2);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.5rem;
+      color: var(--accent-cyan);
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.1em;
+    }
+
+    /* Theory Section */
+    .theory-section {
+      padding: 6rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 300;
+      text-align: center;
+      margin-bottom: 1rem;
+      letter-spacing: 0.15em;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      margin-bottom: 4rem;
+    }
+
+    .theory-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+
+    .theory-card {
+      background: var(--bg-card);
+      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s;
+    }
+
+    .theory-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .theory-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .theory-card h3 {
+      font-size: 1.3rem;
+      font-weight: 400;
+      margin-bottom: 1rem;
+      color: var(--accent-cyan);
+    }
+
+    .theory-card p {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      font-size: 0.95rem;
+    }
+
+    .equation {
+      font-family: 'Space Mono', monospace;
+      background: rgba(0, 245, 212, 0.1);
+      padding: 1rem;
+      border-radius: 6px;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: var(--accent-amber);
+      text-align: center;
+    }
+
+    /* Gallery Preview */
+    .gallery-preview {
+      padding: 4rem;
+      background: linear-gradient(180deg, transparent, rgba(114, 9, 183, 0.1));
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 3rem auto 0;
+    }
+
+    .gallery-item {
+      aspect-ratio: 1;
+      background: var(--bg-card);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .gallery-item:hover {
+      transform: scale(1.05) rotate(2deg);
+    }
+
+    .gallery-item canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .gallery-item-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0.75rem;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent-cyan);
+      letter-spacing: 0.1em;
+    }
+
+    /* Manifesto */
+    .manifesto {
+      padding: 6rem 4rem;
+      text-align: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .manifesto blockquote {
+      font-size: 1.8rem;
+      font-weight: 300;
+      line-height: 1.6;
+      font-style: italic;
+      color: var(--text-primary);
+    }
+
+    .manifesto cite {
+      display: block;
+      margin-top: 2rem;
+      color: var(--accent-magenta);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
+    }
+
+    /* Footer */
+    footer {
+      padding: 3rem 4rem;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    footer p {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.1em;
+    }
+
+    @media (max-width: 900px) {
+      .simulation-container {
+        grid-template-columns: 1fr;
+      }
+      .theory-grid {
+        grid-template-columns: 1fr;
+      }
+      .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      nav, .hero, .simulation-section, .theory-section, .gallery-preview {
+        padding-left: 2rem;
+        padding-right: 2rem;
+      }
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="cosmic-bg">
+    <div class="stars" id="stars"></div>
+  </div>
+
+  <nav>
+    <div class="logo">Artivist</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Gallery</a></li>
+      <li><a href="art-physics-laboratory.html">Physics Lab</a></li>
+      <li><a href="fractal-explorers.html">Fractals</a></li>
+      <li><a href="cellular-automata-world.html">CA World</a></li>
+    </ul>
+  </nav>
+
+  <header class="hero">
+    <h1>REACTION-DIFFUSION</h1>
+    <p>Chemical equations become art. Watch as simple diffusion and reaction create organic Turing patterns — the same mathematics that shapes zebra stripes, coral reefs, and galaxy spirals.</p>
+    <span class="hero-sub">∂u/∂t = D∇²u - uv² + f(1-u) &nbsp;&nbsp; ∂v/∂t = D∇²v + uv² - (f+k)v</span>
+  </header>
+
+  <section class="simulation-section">
+    <div class="simulation-container">
+      <div class="canvas-wrapper">
+        <canvas id="reactionCanvas"></canvas>
+        <div class="canvas-overlay" id="modeDisplay">GRAY-SCOTT</div>
+        <div class="fps-counter" id="fpsCounter">60 FPS</div>
+      </div>
+
+      <div class="control-panel">
+        <div class="panel-section">
+          <div class="panel-title">Reaction Type</div>
+          <div class="reaction-preset">
+            <button class="preset-btn active" data-type="gray-scott">Gray-Scott</button>
+            <button class="preset-btn" data-type="belousov">Belousov</button>
+            <button class="preset-btn" data-type="fitzHugh">FitzHugh-Nagumo</button>
+            <button class="preset-btn" data-type="brusselator">Brusselator</button>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-title">Parameters</div>
+          <div class="control-group">
+            <label class="control-label">Feed Rate (f) <span class="control-value" id="feedValue">0.055</span></label>
+            <input type="range" id="feedRate" min="0.01" max="0.1" step="0.001" value="0.055">
+          </div>
+          <div class="control-group">
+            <label class="control-label">Kill Rate (k) <span class="control-value" id="killValue">0.062</span></label>
+            <input type="range" id="killRate" min="0.03" max="0.07" step="0.001" value="0.062">
+          </div>
+          <div class="control-group">
+            <label class="control-label">Diffusion U <span class="control-value" id="diffUValue">1.0</span></label>
+            <input type="range" id="diffU" min="0.1" max="2" step="0.1" value="1.0">
+          </div>
+          <div class="control-group">
+            <label class="control-label">Diffusion V <span class="control-value" id="diffVValue">0.5</span></label>
+            <input type="range" id="diffV" min="0.1" max="1" step="0.05" value="0.5">
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-title">Simulation</div>
+          <div class="control-group">
+            <label class="control-label">Speed <span class="control-value" id="speedValue">8</span></label>
+            <input type="range" id="simSpeed" min="1" max="20" step="1" value="8">
+          </div>
+          <div class="control-group">
+            <label class="control-label">Brush Size <span class="control-value" id="brushValue">20</span></label>
+            <input type="range" id="brushSize" min="5" max="50" step="1" value="20">
+          </div>
+        </div>
+
+        <div class="button-grid">
+          <button class="btn btn-primary" id="startBtn">START</button>
+          <button class="btn btn-secondary" id="resetBtn">RESET</button>
+          <button class="btn btn-secondary" id="randomBtn">RANDOM</button>
+          <button class="btn btn-secondary" id="spotBtn">SPOT</button>
+          <button class="btn btn-accent" id="preset1Btn">Mitosis</button>
+          <button class="btn btn-accent" id="preset2Btn">Worms</button>
+        </div>
+
+        <div class="panel-section" style="margin-top: 1.5rem;">
+          <div class="panel-title">Statistics</div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-value" id="iterationCount">0</span>
+              <span class="stat-label">Iterations</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" id="activePixels">0</span>
+              <span class="stat-label">Active V</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="theory-section">
+    <h2 class="section-title">THE MATHEMATICS OF PATTERNS</h2>
+    <p class="section-subtitle">How simple chemical rules create nature's most intricate designs</p>
+
+    <div class="theory-grid">
+      <div class="theory-card">
+        <div class="theory-icon">🦎</div>
+        <h3>Turing Patterns</h3>
+        <p>Alan Turing proposed in 1952 that chemical reactions diffusing through tissues could create the patterns we see on animal coats — leopard spots, zebra stripes, coral arrangements.</p>
+        <div class="equation">∂c/∂t = D∇²c + R(c)</div>
+      </div>
+
+      <div class="theory-card">
+        <div class="theory-icon">🧬</div>
+        <h3>Morphogenesis</h3>
+        <p>The same equations that create patterns in chemistry underlie biological development. Your body uses reaction-diffusion to decide where to put fingers, toes, and features.</p>
+        <div class="equation">Activator + Inhibitor → Pattern</div>
+      </div>
+
+      <div class="theory-card">
+        <div class="theory-icon">🌌</div>
+        <h3>Fractal Connections</h3>
+        <p>Like fractals, reaction-diffusion patterns are self-similar at multiple scales. Zoom into a pattern and you find smaller versions of the larger structure.</p>
+        <div class="equation">D ≈ log(N)/log(1/ε)</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gallery-preview">
+    <h2 class="section-title">PATTERN GALLERY</h2>
+    <p class="section-subtitle">Click to load preset patterns</p>
+
+    <div class="gallery-grid">
+      <div class="gallery-item" data-preset="mitosis">
+        <canvas id="gallery1"></canvas>
+        <div class="gallery-item-label">MITOSIS</div>
+      </div>
+      <div class="gallery-item" data-preset="worms">
+        <canvas id="gallery2"></canvas>
+        <div class="gallery-item-label">WORMS</div>
+      </div>
+      <div class="gallery-item" data-preset="spots">
+        <canvas id="gallery3"></canvas>
+        <div class="gallery-item-label">SPOTS</div>
+      </div>
+      <div class="gallery-item" data-preset="maze">
+        <canvas id="gallery4"></canvas>
+        <div class="gallery-item-label">MAZE</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="manifesto">
+    <blockquote>
+      "The universe is not made of atoms — it is made of mathematical relationships. Reaction-diffusion shows us that even the simplest chemical rules, when iterated infinitely, produce the complexity we call beauty."
+    </blockquote>
+    <cite>— Artivist, Generative Art Collective</cite>
+  </section>
+
+  <footer>
+    <p>REACTION-DIFFUSION GALLERY &nbsp;|&nbsp; ARTIVIST &nbsp;|&nbsp; CODE IS THE BRUSH, THE UNIVERSE IS THE CANVAS</p>
+  </footer>
+
+  <script>
+    // Reaction-Diffusion Simulation
+    class ReactionDiffusion {
+      constructor(canvas, width, height) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.width = width;
+        this.height = height;
+        this.canvas.width = width;
+        this.canvas.height = height;
+
+        // Image data for pixel manipulation
+        this.imageData = this.ctx.createImageData(width, height);
+
+        // Simulation state
+        this.u = new Float32Array(width * height);
+        this.v = new Float32Array(width * height);
+
+        // Parameters
+        this.feed = 0.055;
+        this.kill = 0.062;
+        this.diffU = 1.0;
+        this.diffV = 0.5;
+        this.speed = 8;
+
+        this.running = false;
+        this.iteration = 0;
+
+        this.init();
+      }
+
+      init() {
+        for (let i = 0; i < this.width * this.height; i++) {
+          this.u[i] = 1;
+          this.v[i] = 0;
+        }
+
+        // Add some initial noise
+        this.addNoise(30);
+      }
+
+      addNoise(count, x = null, y = null, radius = 20) {
+        for (let n = 0; n < count; n++) {
+          const cx = x !== null ? x : Math.floor(Math.random() * this.width);
+          const cy = y !== null ? y : Math.floor(Math.random() * this.height);
+
+          for (let dy = -radius; dy < radius; dy++) {
+            for (let dx = -radius; dx < radius; dx++) {
+              const px = (cx + dx + this.width) % this.width;
+              const py = (cy + dy + this.height) % this.height;
+              if (dx * dx + dy * dy < radius * radius) {
+                const i = py * this.width + px;
+                this.u[i] = 0.5 + Math.random() * 0.3;
+                this.v[i] = 0.25 + Math.random() * 0.2;
+              }
+            }
+          }
+        }
+      }
+
+      laplacian(arr, x, y) {
+        const w = this.width;
+        const h = this.height;
+        const idx = y * w + x;
+
+        const left = y * w + ((x - 1 + w) % w);
+        const right = y * w + ((x + 1) % w);
+        const up = ((y - 1 + h) % h) * w + x;
+        const down = ((y + 1) % h) * w + x;
+
+        return arr[left] + arr[right] + arr[up] + arr[down] - 4 * arr[idx];
+      }
+
+      step() {
+        const w = this.width;
+        const h = this.height;
+        const u = this.u;
+        const v = this.v;
+        const feed = this.feed;
+        const kill = this.kill;
+        const diffU = this.diffU;
+        const diffV = this.diffV;
+
+        // Calculate rate of change
+        const newU = new Float32Array(w * h);
+        const newV = new Float32Array(w * h);
+
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const idx = y * w + x;
+            const uVal = u[idx];
+            const vVal = v[idx];
+
+            const lapU = this.laplacian(u, x, y);
+            const lapV = this.laplacian(v, x, y);
+
+            const reaction = uVal * vVal * vVal;
+
+            newU[idx] = uVal + diffU * lapU - reaction + feed * (1 - uVal);
+            newV[idx] = vVal + diffV * lapV + reaction - (kill + feed) * vVal;
+
+            // Clamp values
+            newU[idx] = Math.max(0, Math.min(1, newU[idx]));
+            newV[idx] = Math.max(0, Math.min(1, newV[idx]));
+          }
+        }
+
+        this.u = newU;
+        this.v = newV;
+        this.iteration++;
+      }
+
+      render() {
+        const data = this.imageData.data;
+        const w = this.width;
+        const h = this.height;
+        const u = this.u;
+        const v = this.v;
+
+        let activeCount = 0;
+
+        for (let i = 0; i < w * h; i++) {
+          const uVal = u[i];
+          const vVal = v[i];
+
+          if (vVal > 0.1) activeCount++;
+
+          // Map values to colors - cyan to magenta gradient
+          const r = Math.floor(vVal * 255);
+          const g = Math.floor(uVal * 180 + vVal * 75);
+          const b = Math.floor(uVal * 200 + vVal * 55);
+
+          const idx = i * 4;
+          data[idx] = r;
+          data[idx + 1] = g;
+          data[idx + 2] = b;
+          data[idx + 3] = 255;
+        }
+
+        this.ctx.putImageData(this.imageData, 0, 0);
+
+        return activeCount;
+      }
+
+      setPreset(preset) {
+        this.init();
+        switch (preset) {
+          case 'mitosis':
+            this.feed = 0.055; this.kill = 0.062;
+            this.addNoise(100, this.width * 0.3, this.height * 0.3, 30);
+            this.addNoise(100, this.width * 0.7, this.height * 0.7, 30);
+            break;
+          case 'worms':
+            this.feed = 0.078; this.kill = 0.061;
+            for (let i = 0; i < 8; i++) {
+              this.addNoise(200, Math.random() * this.width, this.height * 0.5, 40);
+            }
+            break;
+          case 'spots':
+            this.feed = 0.039; this.kill = 0.058;
+            for (let i = 0; i < 15; i++) {
+              this.addNoise(50, Math.random() * this.width, Math.random() * this.height, 15);
+            }
+            break;
+          case 'maze':
+            this.feed = 0.029; this.kill = 0.057;
+            for (let i = 0; i < 5; i++) {
+              this.addNoise(150, Math.random() * this.width, Math.random() * this.height, 25);
+            }
+            break;
+        }
+        this.updateControls();
+      }
+
+      updateControls() {
+        document.getElementById('feedRate').value = this.feed;
+        document.getElementById('killRate').value = this.kill;
+        document.getElementById('diffU').value = this.diffU;
+        document.getElementById('diffV').value = this.diffV;
+        document.getElementById('feedValue').textContent = this.feed.toFixed(3);
+        document.getElementById('killValue').textContent = this.kill.toFixed(3);
+        document.getElementById('diffUValue').textContent = this.diffU.toFixed(1);
+        document.getElementById('diffVValue').textContent = this.diffV.toFixed(2);
+      }
+
+      reset() {
+        this.init();
+        this.iteration = 0;
+      }
+
+      randomize() {
+        this.init();
+        for (let i = 0; i < 20; i++) {
+          this.addNoise(100, Math.random() * this.width, Math.random() * this.height, 30);
+        }
+      }
+
+      spot() {
+        this.addNoise(500, this.width / 2, this.height / 2, 40);
+      }
+    }
+
+    // Create starfield
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 3 + 's';
+        starsContainer.appendChild(star);
+      }
+    }
+    createStars();
+
+    // Initialize main simulation
+    const canvas = document.getElementById('reactionCanvas');
+    const rect = canvas.getBoundingClientRect();
+    const sim = new ReactionDiffusion(canvas, 200, 150);
+
+    let animationId;
+    let lastTime = performance.now();
+    let frameCount = 0;
+    let fps = 60;
+
+    function animate(currentTime) {
+      frameCount++;
+      if (currentTime - lastTime >= 1000) {
+        fps = frameCount;
+        frameCount = 0;
+        lastTime = currentTime;
+        document.getElementById('fpsCounter').textContent = fps + ' FPS';
+      }
+
+      for (let i = 0; i < sim.speed; i++) {
+        sim.step();
+      }
+      const activeCount = sim.render();
+
+      document.getElementById('iterationCount').textContent = sim.iteration.toLocaleString();
+      document.getElementById('activePixels').textContent = activeCount.toLocaleString();
+
+      animationId = requestAnimationFrame(animate);
+    }
+
+    // Control handlers
+    document.getElementById('startBtn').addEventListener('click', function() {
+      sim.running = !sim.running;
+      this.textContent = sim.running ? 'PAUSE' : 'START';
+      if (sim.running) {
+        animationId = requestAnimationFrame(animate);
+      } else {
+        cancelAnimationFrame(animationId);
+      }
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => sim.reset());
+    document.getElementById('randomBtn').addEventListener('click', () => sim.randomize());
+    document.getElementById('spotBtn').addEventListener('click', () => sim.spot());
+
+    document.getElementById('preset1Btn').addEventListener('click', () => {
+      sim.setPreset('mitosis');
+      sim.running = true;
+      document.getElementById('startBtn').textContent = 'PAUSE';
+    });
+
+    document.getElementById('preset2Btn').addEventListener('click', () => {
+      sim.setPreset('worms');
+      sim.running = true;
+      document.getElementById('startBtn').textContent = 'PAUSE';
+    });
+
+    // Parameter sliders
+    document.getElementById('feedRate').addEventListener('input', function() {
+      sim.feed = parseFloat(this.value);
+      document.getElementById('feedValue').textContent = sim.feed.toFixed(3);
+    });
+
+    document.getElementById('killRate').addEventListener('input', function() {
+      sim.kill = parseFloat(this.value);
+      document.getElementById('killValue').textContent = sim.kill.toFixed(3);
+    });
+
+    document.getElementById('diffU').addEventListener('input', function() {
+      sim.diffU = parseFloat(this.value);
+      document.getElementById('diffUValue').textContent = sim.diffU.toFixed(1);
+    });
+
+    document.getElementById('diffV').addEventListener('input', function() {
+      sim.diffV = parseFloat(this.value);
+      document.getElementById('diffVValue').textContent = sim.diffV.toFixed(2);
+    });
+
+    document.getElementById('simSpeed').addEventListener('input', function() {
+      sim.speed = parseInt(this.value);
+      document.getElementById('speedValue').textContent = this.value;
+    });
+
+    document.getElementById('brushSize').addEventListener('input', function() {
+      document.getElementById('brushValue').textContent = this.value;
+    });
+
+    // Reaction type presets
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+
+        const type = this.dataset.type;
+        document.getElementById('modeDisplay').textContent = type.toUpperCase();
+
+        switch (type) {
+          case 'gray-scott':
+            sim.setPreset('mitosis');
+            break;
+          case 'belousov':
+            sim.feed = 0.115; sim.kill = 0.053;
+            sim.updateControls();
+            break;
+          case 'fitzHugh':
+            sim.feed = 0.1; sim.kill = 0.05;
+            sim.diffU = 1.2; sim.diffV = 0.4;
+            sim.updateControls();
+            break;
+          case 'brusselator':
+            sim.feed = 0.04; sim.kill = 0.06;
+            sim.diffU = 1.5; sim.diffV = 0.3;
+            sim.updateControls();
+            break;
+        }
+      });
+    });
+
+    // Canvas click to add chemical
+    canvas.addEventListener('click', function(e) {
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) / rect.width * sim.width);
+      const y = Math.floor((e.clientY - rect.top) / rect.height * sim.height);
+      const brushSize = parseInt(document.getElementById('brushSize').value);
+      sim.addNoise(300, x, y, brushSize);
+    });
+
+    // Gallery mini-simulations
+    function initGallery() {
+      const presets = ['mitosis', 'worms', 'spots', 'maze'];
+      const canvasIds = ['gallery1', 'gallery2', 'gallery3', 'gallery4'];
+
+      canvasIds.forEach((id, index) => {
+        const galleryCanvas = document.getElementById(id);
+        const gallerySim = new ReactionDiffusion(galleryCanvas, 80, 60);
+        gallerySim.setPreset(presets[index]);
+
+        // Run simulation for gallery preview
+        for (let i = 0; i < 500; i++) {
+          for (let j = 0; j < 5; j++) gallerySim.step();
+          gallerySim.render();
+        }
+      });
+    }
+
+    // Gallery item clicks
+    document.querySelectorAll('.gallery-item').forEach(item => {
+      item.addEventListener('click', function() {
+        const preset = this.dataset.preset;
+        sim.setPreset(preset);
+        sim.running = true;
+        document.getElementById('startBtn').textContent = 'PAUSE';
+      });
+    });
+
+    // Start simulation
+    sim.running = true;
+    animate(performance.now());
+    initGallery();
+
+    // Touch support
+    canvas.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((touch.clientX - rect.left) / rect.width * sim.width);
+      const y = Math.floor((touch.clientY - rect.top) / rect.height * sim.height);
+      sim.addNoise(300, x, y, 30);
+    });
+  </script>
+</body>
+</html>
