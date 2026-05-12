@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solid-State Battery Lab — Li-Ion Battery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2b 100%);
+            min-height: 100vh;
+            color: #e0e0ff;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 60px 20px 40px;
+            background: radial-gradient(ellipse at center, rgba(0, 255, 200, 0.1) 0%, transparent 70%);
+        }
+
+        .hero h1 {
+            font-size: 3em;
+            background: linear-gradient(135deg, #00ff88, #00ddff, #88ff00));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            text-shadow: 0 0 40px rgba(0, 255, 136, 0.3);
+        }
+
+        .hero .subtitle {
+            font-size: 1.3em;
+            color: #aaaacc;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .electrolyte-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .electrolyte-btn {
+            padding: 12px 24px;
+            border: 2px solid #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .electrolyte-btn:hover, .electrolyte-btn.active {
+            background: #00ff88;
+            color: #0a0a1a;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        @media (max-width: 1000px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: rgba(20, 20, 50, 0.8);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .panel h2 {
+            color: #00ff88;
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        /* Crystal Lattice Visualization */
+        .lattice-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(0, 100, 80, 0.3) 0%, transparent 70%);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #latticeCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .lattice-info {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .info-card {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .info-card .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .info-card .label {
+            font-size: 0.85em;
+            color: #aaaacc;
+            margin-top: 5px;
+        }
+
+        /* Li+ Hopping Animation */
+        .hopping-panel {
+            background: rgba(30, 20, 50, 0.8);
+        }
+
+        .hopping-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(20,0,40,0.5) 100%);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #hoppingCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .hopping-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: rgba(136, 255, 0, 0.1);
+            border: 1px solid rgba(136, 255, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-box .value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #88ff00;
+        }
+
+        .stat-box .label {
+            font-size: 0.8em;
+            color: #aaaacc;
+        }
+
+        /* Conductivity Comparison Chart */
+        .conductivity-chart {
+            position: relative;
+            height: 250px;
+            margin-top: 20px;
+        }
+
+        #conductivityCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Interface Visualization */
+        .interface-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            background: linear-gradient(90deg,
+                rgba(100, 50, 150, 0.8) 0%,
+                rgba(50, 100, 150, 0.8) 50%,
+                rgba(150, 100, 50, 0.8) 100%);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #interfaceCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .interface-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        /* Equations Panel */
+        .equations-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 800px) {
+            .equations-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .equation-card {
+            background: rgba(0, 200, 255, 0.1);
+            border: 1px solid rgba(0, 200, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .equation-card h3 {
+            color: #00ddff;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .equation {
+            font-family: 'Times New Roman', serif;
+            font-size: 1.2em;
+            color: #ffffff;
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .equation-desc {
+            font-size: 0.9em;
+            color: #aaaacc;
+            line-height: 1.5;
+        }
+
+        /* Stress Visualization */
+        .stress-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            background: linear-gradient(135deg, rgba(50, 20, 50, 0.8) 0%, rgba(20, 50, 50, 0.8) 100%);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #stressCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .stress-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stress-bar {
+            flex: 1;
+            max-width: 300px;
+            height: 20px;
+            background: rgba(50, 50, 50, 0.8);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .stress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #ffff00, #ff8800, #ff0000);
+            width: 30%;
+            transition: width 0.5s ease;
+        }
+
+        .stress-label {
+            font-weight: bold;
+            min-width: 80px;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group label {
+            color: #aaaacc;
+        }
+
+        input[type="range"] {
+            width: 150px;
+            accent-color: #00ff88;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            color: #0a0a1a;
+            font-weight: bold;
+        }
+
+        .btn-start:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
+        }
+
+        .btn-stop {
+            background: rgba(255, 100, 100, 0.3);
+            color: #ff6666;
+            border: 2px solid #ff6666;
+        }
+
+        .btn-stop:hover {
+            background: #ff6666;
+            color: #0a0a1a;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666688;
+            font-size: 0.9em;
+        }
+
+        footer a {
+            color: #00ff88;
+            text-decoration: none;
+        }
+
+        .nav-link {
+            display: inline-block;
+            margin: 10px 10px;
+            padding: 8px 20px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 20px;
+            color: #00ff88;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            background: #00ff88;
+            color: #0a0a1a;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>Solid-State Battery Lab</h1>
+        <p class="subtitle">
+            Explore sulfide super-ionic conductors at the atomic scale.
+            Watch Li⁺ ions hop through argyrodite and LGPS crystal lattices.
+            The future of safe, high-energy-density batteries.
+        </p>
+    </div>
+
+    <div class="electrolyte-selector">
+        <button class="electrolyte-btn active" data-type="lagp">Li₆PS₅Cl (Argyrodite)</button>
+        <button class="electrolyte-btn" data-type="lgps">Li₁₀GeP₂S₁₂ (LGPS)</button>
+        <button class="electrolyte-btn" data-type="lms">Li₆PS₅Br</button>
+        <button class="electrolyte-btn" data-type="lisicon">Li₃.5Si₀.5P₀.5O₄ (Lisicon)</button>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>Temperature:</label>
+            <input type="range" id="tempSlider" min="200" max="400" value="298">
+            <span id="tempValue">298 K</span>
+        </div>
+        <div class="control-group">
+            <label>C-rate:</label>
+            <input type="range" id="cRateSlider" min="1" max="50" value="10">
+            <span id="cRateValue">1C</span>
+        </div>
+        <button class="btn btn-start" id="startBtn">Start Simulation</button>
+        <button class="btn btn-stop" id="stopBtn">Stop</button>
+    </div>
+
+    <div class="main-container">
+        <!-- Crystal Lattice Panel -->
+        <div class="panel">
+            <h2>Crystal Lattice Structure</h2>
+            <div class="lattice-container">
+                <canvas id="latticeCanvas"></canvas>
+            </div>
+            <div class="lattice-info">
+                <div class="info-card">
+                    <div class="value" id="ionicRadius">0.76 Å</div>
+                    <div class="label">Li⁺ Ionic Radius</div>
+                </div>
+                <div class="info-card">
+                    <div class="value" id="latticeParam">10.24 Å</div>
+                    <div class="label">Lattice Parameter</div>
+                </div>
+                <div class="info-card">
+                    <div class="value" id="occupancy">50%</div>
+                    <div class="label">Li⁺ Occupancy</div>
+                </div>
+                <div class="info-card">
+                    <div class="value" id="conductionPath">3D</div>
+                    <div class="label">Conduction Path</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Li+ Hopping Panel -->
+        <div class="panel hopping-panel">
+            <h2>Li⁺ Ion Hopping Mechanism</h2>
+            <div class="hopping-container">
+                <canvas id="hoppingCanvas"></canvas>
+            </div>
+            <div class="hopping-stats">
+                <div class="stat-box">
+                    <div class="value" id="hopRate">-</div>
+                    <div class="label">Hop Rate (s⁻¹)</div>
+                </div>
+                <div class="stat-box">
+                    <div class="value" id="mobility">-</div>
+                    <div class="label">Mobility (cm²/V·s)</div>
+                </div>
+                <div class="stat-box">
+                    <div class="value" id="energyBarrier">-</div>
+                    <div class="label">Energy Barrier (eV)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interface Panel -->
+        <div class="panel">
+            <h2>Electrode-Electrolyte Interface</h2>
+            <div class="interface-container">
+                <canvas id="interfaceCanvas"></canvas>
+            </div>
+            <div class="interface-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(100, 50, 150, 0.8);"></div>
+                    <span>Cathode Interface</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(50, 100, 150, 0.8);"></div>
+                    <span>Solid Electrolyte</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: rgba(150, 100, 50, 0.8);"></div>
+                    <span>Anode Interface</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conductivity Comparison -->
+        <div class="panel">
+            <h2> Ionic Conductivity vs. Temperature</h2>
+            <div class="conductivity-chart">
+                <canvas id="conductivityCanvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Equations Panel -->
+        <div class="panel">
+            <h2>Key Equations</h2>
+            <div class="equations-grid">
+                <div class="equation-card">
+                    <h3>Nernst-Einstein Relation</h3>
+                    <div class="equation">σ = nq²/(kBT) · D</div>
+                    <div class="equation-desc">
+                        Ionic conductivity σ relates to diffusion coefficient D through thermal energy kBT, charge q, and carrier density n.
+                    </div>
+                </div>
+                <div class="equation-card">
+                    <h3>Arrhenius Equation</h3>
+                    <div class="equation">σT = A·exp(-Ea/kBT)</div>
+                    <div class="equation-desc">
+                        Temperature-dependent conductivity follows Arrhenius behavior with activation energy Ea.
+                    </div>
+                </div>
+                <div class="equation-card">
+                    <h3>Li⁺ Jump Diffusion</h3>
+                    <div class="equation">D = (1/6) · Γ · a²</div>
+                    <div class="equation-desc">
+                        Diffusion coefficient D from jump frequency Γ and jump distance a between interstitial sites.
+                    </div>
+                </div>
+                <div class="equation-card">
+                    <h3>Butler-Volmer (Interface)</h3>
+                    <div class="equation">j = j₀[exp(αnFη/RT) - exp(-(1-α)nFη/RT)]</div>
+                    <div class="equation-desc">
+                        Interfacial charge transfer current j₀ with overpotential η at the electrode-electrolyte boundary.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stress Visualization -->
+        <div class="panel">
+            <h2>Cycling-Induced Stress</h2>
+            <div class="stress-container">
+                <canvas id="stressCanvas"></canvas>
+            </div>
+            <div class="stress-indicator">
+                <span class="stress-label" style="color: #00ff88;">Stable</span>
+                <div class="stress-bar">
+                    <div class="stress-fill" id="stressFill"></div>
+                </div>
+                <span class="stress-label" style="color: #ff0000;" id="stressValue">Critical</span>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <nav>
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="battery-simulation.html" class="nav-link">Battery Simulation</a>
+            <a href="energy-art-science.html" class="nav-link">Energy × Art × Science</a>
+        </nav>
+        <p style="margin-top: 20px;">
+            Solid-State Battery Lab — Exploring the future of energy storage<br>
+            Sulfide super-ionic conductors | Li⁺ hop diffusion | Interface engineering
+        </p>
+    </footer>
+
+    <script>
+        // Electrolyte data
+        const electrolytes = {
+            lagp: {
+                name: 'Li₆PS₅Cl (Argyrodite)',
+                ionicRadius: 0.76,
+                latticeParam: 10.24,
+                occupancy: 50,
+                conductionPath: '3D',
+                conductivity: 1.9e-3,
+                activationEnergy: 0.24,
+                jumpDistance: 3.5,
+                color: '#00ff88'
+            },
+            lgps: {
+                name: 'Li₁₀GeP₂S₁₂ (LGPS)',
+                ionicRadius: 0.76,
+                latticeParam: 8.7,
+                occupancy: 70,
+                conductionPath: '3D',
+                conductivity: 1.2e-2,
+                activationEnergy: 0.21,
+                jumpDistance: 3.0,
+                color: '#00ddff'
+            },
+            lms: {
+                name: 'Li₆PS₅Br',
+                ionicRadius: 0.76,
+                latticeParam: 10.35,
+                occupancy: 45,
+                conductionPath: '3D',
+                conductivity: 8.5e-4,
+                activationEnergy: 0.28,
+                jumpDistance: 3.6,
+                color: '#88ff00'
+            },
+            lisicon: {
+                name: 'Li₃.5Si₀.5P₀.5O₄ (Lisicon)',
+                ionicRadius: 0.76,
+                latticeParam: 8.2,
+                occupancy: 30,
+                conductionPath: '1D',
+                conductivity: 4.0e-5,
+                activationEnergy: 0.35,
+                jumpDistance: 2.8,
+                color: '#ffaa00'
+            }
+        };
+
+        let currentElectrolyte = 'lagp';
+        let isSimulating = false;
+        let animationId = null;
+        let hopParticles = [];
+        let stressLevel = 30;
+
+        // Canvas setup
+        const latticeCanvas = document.getElementById('latticeCanvas');
+        const latticeCtx = latticeCanvas.getContext('2d');
+        const hoppingCanvas = document.getElementById('hoppingCanvas');
+        const hoppingCtx = hoppingCanvas.getContext('2d');
+        const interfaceCanvas = document.getElementById('interfaceCanvas');
+        const interfaceCtx = interfaceCanvas.getContext('2d');
+        const conductivityCanvas = document.getElementById('conductivityCanvas');
+        const conductivityCtx = conductivityCanvas.getContext('2d');
+        const stressCanvas = document.getElementById('stressCanvas');
+        const stressCtx = stressCanvas.getContext('2d');
+
+        function resizeCanvases() {
+            [latticeCanvas, hoppingCanvas, interfaceCanvas, stressCanvas].forEach(canvas => {
+                canvas.width = canvas.offsetWidth * 2;
+                canvas.height = canvas.offsetHeight * 2;
+            });
+            conductivityCanvas.width = conductivityCanvas.offsetWidth * 2;
+            conductivityCanvas.height = conductivityCanvas.offsetHeight * 2;
+        }
+
+        resizeCanvases();
+        window.addEventListener('resize', resizeCanvases);
+
+        // Draw crystal lattice
+        function drawLattice() {
+            const data = electrolytes[currentElectrolyte];
+            const ctx = latticeCtx;
+            const w = latticeCanvas.width;
+            const h = latticeCanvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Draw 3D-like lattice structure
+            const centerX = w / 2;
+            const centerY = h / 2;
+            const latticeSize = Math.min(w, h) * 0.35;
+
+            // S原子sites (sulfur) - larger, yellow-ish
+            const sColor = 'rgba(255, 200, 100, 0.6)';
+            // P原子sites (phosphorus) - blue
+            const pColor = 'rgba(100, 150, 255, 0.7)';
+            // Li sites - small, green, some filled
+            const liFilledColor = '#00ff88';
+            const liEmptyColor = 'rgba(0, 255, 136, 0.2)';
+
+            // Draw lattice framework
+            for (let layer = 0; layer < 3; layer++) {
+                const layerOffset = layer * latticeSize * 0.25;
+                const layerScale = 1 - layer * 0.15;
+                const alpha = 1 - layer * 0.2;
+
+                // Draw S sites at FCC positions
+                const sPositions = [
+                    [0, 0], [1, 0], [0, 1], [1, 1],
+                    [0.5, 0.5], [0.5, -0.5], [-0.5, 0.5], [-0.5, -0.5]
+                ];
+
+                sPositions.forEach(pos => {
+                    const x = centerX + (pos[0] - 0.5) * latticeSize * layerScale + layerOffset;
+                    const y = centerY + (pos[1] - 0.5) * latticeSize * layerScale;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 18, 0, Math.PI * 2);
+                    ctx.fillStyle = sColor.replace('0.6', (0.6 * alpha).toString());
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(255, 200, 100, 0.8)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                });
+            }
+
+            // Draw Li sites with occupancy
+            const liGridSize = 4;
+            const filledCount = Math.floor(liGridSize * liGridSize * data.occupancy / 100);
+
+            for (let i = 0; i < liGridSize; i++) {
+                for (let j = 0; j < liGridSize; j++) {
+                    const x = centerX + (i - liGridSize/2 + 0.5) * latticeSize / 2;
+                    const y = centerY + (j - liGridSize/2 + 0.5) * latticeSize / 2;
+                    const idx = i * liGridSize + j;
+                    const filled = idx < filledCount;
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, 10, 0, Math.PI * 2);
+
+                    if (filled) {
+                        // Animated glow for filled Li sites
+                        const glow = Math.sin(Date.now() / 500 + idx) * 0.3 + 0.7;
+                        ctx.fillStyle = `rgba(0, 255, 136, ${glow})`;
+                        ctx.shadowColor = '#00ff88';
+                        ctx.shadowBlur = 15;
+                    } else {
+                        ctx.fillStyle = liEmptyColor;
+                        ctx.shadowBlur = 0;
+                    }
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+            }
+
+            // Draw conduction paths as dashed lines
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';
+            ctx.lineWidth = 2;
+
+            for (let i = 0; i < liGridSize - 1; i++) {
+                for (let j = 0; j < liGridSize; j++) {
+                    const x1 = centerX + (i - liGridSize/2 + 0.5) * latticeSize / 2;
+                    const y1 = centerY + (j - liGridSize/2 + 0.5) * latticeSize / 2;
+                    const x2 = centerX + (i + 1 - liGridSize/2 + 0.5) * latticeSize / 2;
+                    const y2 = centerY + (j - liGridSize/2 + 0.5) * latticeSize / 2;
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+                }
+            }
+            ctx.setLineDash([]);
+
+            // Update info cards
+            document.getElementById('ionicRadius').textContent = data.ionicRadius + ' Å';
+            document.getElementById('latticeParam').textContent = data.latticeParam + ' Å';
+            document.getElementById('occupancy').textContent = data.occupancy + '%';
+            document.getElementById('conductionPath').textContent = data.conductionPath;
+        }
+
+        // Li+ hopping animation
+        class HopParticle {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * this.canvas.width;
+                this.y = Math.random() * this.canvas.height;
+                this.targetX = this.x;
+                this.targetY = this.y;
+                this.hopProgress = 0;
+                this.hopSpeed = 0.02 + Math.random() * 0.03;
+                this.luminance = 0.5 + Math.random() * 0.5;
+            }
+
+            hop() {
+                // Find nearest site to hop to
+                const siteSpacing = 80;
+                const gridX = Math.round(this.x / siteSpacing);
+                const gridY = Math.round(this.y / siteSpacing);
+
+                // Random jump to adjacent site
+                const dx = (Math.random() - 0.5) > 0 ? 1 : -1;
+                const dy = (Math.random() - 0.5) > 0 ? 1 : -1;
+                this.targetX = (gridX + dx * Math.floor(Math.random() * 2 + 1)) * siteSpacing;
+                this.targetY = (gridY + dy * Math.floor(Math.random() * 2 + 1)) * siteSpacing;
+                this.startX = this.x;
+                this.startY = this.y;
+                this.hopProgress = 0;
+            }
+
+            update() {
+                if (this.hopProgress < 1) {
+                    this.hopProgress += this.hopSpeed;
+                    // Parabolic hop trajectory
+                    const t = this.hopProgress;
+                    this.x = this.startX + (this.targetX - this.startX) * t;
+                    this.y = this.startY + (this.targetY - this.startY) * t - Math.sin(t * Math.PI) * 40;
+                } else {
+                    this.x = this.targetX;
+                    this.y = this.targetY;
+                    if (Math.random() < 0.03) {
+                        this.hop();
+                    }
+                }
+            }
+
+            draw(ctx) {
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 20);
+                gradient.addColorStop(0, `rgba(0, 255, 136, ${this.luminance})`);
+                gradient.addColorStop(0.5, `rgba(0, 255, 136, ${this.luminance * 0.5})`);
+                gradient.addColorStop(1, 'rgba(0, 255, 136, 0)');
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 20, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Core ion
+                ctx.beginPath();
+                ctx.arc(this.x, this.y - Math.sin(this.hopProgress * Math.PI) * 40, 8, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+            }
+        }
+
+        function initHopping() {
+            hopParticles = [];
+            for (let i = 0; i < 20; i++) {
+                hopParticles.push(new HopParticle(hoppingCanvas));
+            }
+        }
+
+        function drawHopping() {
+            const ctx = hoppingCtx;
+            const w = hoppingCanvas.width;
+            const h = hoppingCanvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Draw sites
+            const siteSpacing = 80;
+            const cols = Math.floor(w / siteSpacing);
+            const rows = Math.floor(h / siteSpacing);
+
+            for (let i = 0; i < cols; i++) {
+                for (let j = 0; j < rows; j++) {
+                    const x = i * siteSpacing + siteSpacing / 2;
+                    const y = j * siteSpacing + siteSpacing / 2;
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, 6, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(0, 255, 136, 0.15)';
+                    ctx.fill();
+                    ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            }
+
+            // Draw and update particles
+            hopParticles.forEach(p => {
+                p.update();
+                p.draw(ctx);
+            });
+
+            // Update stats
+            const data = electrolytes[currentElectrolyte];
+            const temp = parseInt(document.getElementById('tempSlider').value);
+            const hopRate = data.conductivity * temp * 1e15;
+            const mobility = data.conductivity / (1.6e-19 * 6.02e23 * 1e21);
+            document.getElementById('hopRate').textContent = hopRate.toExponential(2);
+            document.getElementById('mobility').textContent = mobility.toExponential(1);
+            document.getElementById('energyBarrier').textContent = data.activationEnergy.toFixed(2);
+        }
+
+        // Interface visualization
+        let interfaceParticles = [];
+
+        function initInterface() {
+            interfaceParticles = [];
+            for (let i = 0; i < 30; i++) {
+                interfaceParticles.push({
+                    x: Math.random() * interfaceCanvas.width,
+                    y: interfaceCanvas.height * 0.5 + (Math.random() - 0.5) * 100,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: (Math.random() - 0.5) * 2,
+                    size: 3 + Math.random() * 5,
+                    type: Math.random() < 0.3 ? 'cation' : 'anion'
+                });
+            }
+        }
+
+        function drawInterface() {
+            const ctx = interfaceCtx;
+            const w = interfaceCanvas.width;
+            const h = interfaceCanvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Draw layers
+            const gradient = ctx.createLinearGradient(0, 0, w, 0);
+            gradient.addColorStop(0, 'rgba(100, 50, 150, 0.9)');
+            gradient.addColorStop(0.35, 'rgba(80, 80, 120, 0.7)');
+            gradient.addColorStop(0.5, 'rgba(50, 100, 150, 0.9)');
+            gradient.addColorStop(0.65, 'rgba(80, 80, 120, 0.7)');
+            gradient.addColorStop(1, 'rgba(150, 100, 50, 0.9)');
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, w, h);
+
+            // Draw interface labels
+            ctx.font = 'bold 24px Arial';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.textAlign = 'center';
+            ctx.fillText('Cathode', w * 0.15, h * 0.3);
+            ctx.fillText('Solid Electrolyte', w * 0.5, h * 0.3);
+            ctx.fillText('Anode', w * 0.85, h * 0.3);
+
+            // Draw interface lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.setLineDash([10, 10]);
+            ctx.lineWidth = 3;
+
+            ctx.beginPath();
+            ctx.moveTo(w * 0.35, 0);
+            ctx.lineTo(w * 0.35, h);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(w * 0.65, 0);
+            ctx.lineTo(w * 0.65, h);
+            ctx.stroke();
+
+            ctx.setLineDash([]);
+
+            // Draw electric field lines
+            ctx.strokeStyle = 'rgba(255, 255, 0, 0.2)';
+            ctx.lineWidth = 1;
+
+            for (let i = 0; i < 10; i++) {
+                ctx.beginPath();
+                ctx.moveTo(w * 0.35, h * 0.2 + i * h * 0.08);
+                ctx.quadraticCurveTo(w * 0.5, h * 0.5, w * 0.65, h * 0.2 + i * h * 0.08);
+                ctx.stroke();
+            }
+
+            // Update particles
+            if (isSimulating) {
+                interfaceParticles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    // Bounce off boundaries based on type
+                    if (p.type === 'cation') {
+                        if (p.x < w * 0.35) { p.x = w * 0.35; p.vx *= -1; }
+                        if (p.x > w * 0.5) { p.x = w * 0.5; p.vx *= -1; }
+                    } else if (p.type === 'anion') {
+                        if (p.x > w * 0.65) { p.x = w * 0.65; p.vx *= -1; }
+                        if (p.x < w * 0.5) { p.x = w * 0.5; p.vx *= -1; }
+                    } else {
+                        if (p.x < 0 || p.x > w) p.vx *= -1;
+                    }
+                    if (p.y < 0 || p.y > h) p.vy *= -1;
+                });
+            }
+
+            // Draw particles
+            interfaceParticles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = p.type === 'cation' ? '#ff6666' : '#6666ff';
+                ctx.fill();
+            });
+        }
+
+        // Conductivity chart
+        function drawConductivityChart() {
+            const ctx = conductivityCtx;
+            const w = conductivityCanvas.width;
+            const h = conductivityCanvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            const padding = { top: 40, right: 40, bottom: 60, left: 80 };
+            const chartW = w - padding.left - padding.right;
+            const chartH = h - padding.top - padding.bottom;
+
+            // Draw axes
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(padding.left, padding.top);
+            ctx.lineTo(padding.left, h - padding.bottom);
+            ctx.lineTo(w - padding.right, h - padding.bottom);
+            ctx.stroke();
+
+            // Temperature range: 200K to 400K
+            const tempMin = 200;
+            const tempMax = 400;
+            const logCondMin = -6;
+            const logCondMax = -2;
+
+            // Draw grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+
+            for (let t = tempMin; t <= tempMax; t += 50) {
+                const x = padding.left + (t - tempMin) / (tempMax - tempMin) * chartW;
+                ctx.beginPath();
+                ctx.moveTo(x, padding.top);
+                ctx.lineTo(x, h - padding.bottom);
+                ctx.stroke();
+
+                ctx.font = '20px Arial';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.textAlign = 'center';
+                ctx.fillText(t + 'K', x, h - padding.bottom + 30);
+            }
+
+            for (let i = logCondMin; i <= logCondMax; i += 1) {
+                const y = padding.top + (logCondMax - i) / (logCondMax - logCondMin) * chartH;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(w - padding.right, y);
+                ctx.stroke();
+
+                ctx.textAlign = 'right';
+                ctx.fillText('10^' + i, padding.left - 10, y + 6);
+            }
+
+            // Draw conductivity curves for all electrolytes
+            Object.entries(electrolytes).forEach(([key, data]) => {
+                ctx.beginPath();
+                ctx.strokeStyle = data.color;
+                ctx.lineWidth = 3;
+
+                for (let t = tempMin; t <= tempMax; t += 5) {
+                    const sigma = data.conductivity * Math.exp(-data.activationEnergy * 11604 / (t));
+                    const logSigma = Math.log10(sigma);
+
+                    const x = padding.left + (t - tempMin) / (tempMax - tempMin) * chartW;
+                    const y = padding.top + (logCondMax - logSigma) / (logCondMax - logCondMin) * chartH;
+
+                    if (t === tempMin) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+
+                // Add label at end of line
+                const t = 350;
+                const sigma = data.conductivity * Math.exp(-data.activationEnergy * 11604 / (t));
+                const logSigma = Math.log10(sigma);
+                const x = padding.left + (t - tempMin) / (tempMax - tempMin) * chartW;
+                const y = padding.top + (logCondMax - logSigma) / (logCondMax - logCondMin) * chartH;
+
+                ctx.font = 'bold 16px Arial';
+                ctx.fillStyle = data.color;
+                ctx.textAlign = 'left';
+                ctx.fillText(data.name.split(' ')[0], x + 10, y + 6);
+            });
+
+            // Labels
+            ctx.font = 'bold 22px Arial';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.fillText('Ionic Conductivity vs Temperature', w / 2, 30);
+
+            ctx.textAlign = 'center';
+            ctx.fillText('Temperature (K)', w / 2, h - 10);
+        }
+
+        // Stress visualization
+        let stressParticles = [];
+        let volumeChange = 0;
+
+        function initStress() {
+            stressParticles = [];
+            for (let i = 0; i < 50; i++) {
+                stressParticles.push({
+                    x: Math.random() * stressCanvas.width,
+                    y: Math.random() * stressCanvas.height,
+                    vx: (Math.random() - 0.5) * 3,
+                    vy: (Math.random() - 0.5) * 3,
+                    size: 2 + Math.random() * 4
+                });
+            }
+        }
+
+        function drawStress() {
+            const ctx = stressCtx;
+            const w = stressCanvas.width;
+            const h = stressCanvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Draw SEI layer (interphase)
+            const seiThickness = 20 + volumeChange * 0.5;
+            ctx.fillStyle = 'rgba(50, 50, 30, 0.8)';
+            ctx.fillRect(0, h/2 - seiThickness, w, seiThickness * 2);
+
+            // SEI label
+            ctx.font = 'bold 20px Arial';
+            ctx.fillStyle = 'rgba(255, 200, 100, 0.8)';
+            ctx.textAlign = 'center';
+            ctx.fillText('SEI Layer (Growing)', w/2, h/2);
+
+            // Draw electrode materials
+            const electrodeGradient = ctx.createLinearGradient(0, 0, 0, h);
+
+            if (stressLevel < 50) {
+                electrodeGradient.addColorStop(0, 'rgba(100, 50, 150, 0.9)');
+                electrodeGradient.addColorStop(1, 'rgba(80, 40, 120, 0.9)');
+            } else if (stressLevel < 80) {
+                electrodeGradient.addColorStop(0, 'rgba(150, 80, 50, 0.9)');
+                electrodeGradient.addColorStop(1, 'rgba(120, 60, 40, 0.9)');
+            } else {
+                electrodeGradient.addColorStop(0, 'rgba(180, 50, 50, 0.9)');
+                electrodeGradient.addColorStop(1, 'rgba(150, 40, 40, 0.9)');
+            }
+
+            ctx.fillStyle = electrodeGradient;
+            ctx.fillRect(0, 0, w, h/2 - seiThickness);
+            ctx.fillRect(0, h/2 + seiThickness, w, h/2 - seiThickness);
+
+            // Cathode label
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.fillText('Cathode', w/2, h/4);
+
+            // Anode label
+            ctx.fillText('Anode', w/2, h * 3/4);
+
+            // Update particles
+            if (isSimulating) {
+                stressParticles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    // Constrain to electrode regions
+                    if (p.y < h/2 - seiThickness - p.size) {
+                        if (p.x < 0 || p.x > w) p.vx *= -1;
+                        if (p.y < 0) p.vy *= -1;
+                    } else if (p.y > h/2 + seiThickness + p.size) {
+                        if (p.x < 0 || p.x > w) p.vx *= -1;
+                        if (p.y > h) p.vy *= -1;
+                    } else {
+                        // In SEI region - slow down
+                        p.vx *= 0.95;
+                        p.vy *= 0.95;
+                    }
+                });
+
+                // Volume change over time
+                volumeChange = Math.sin(Date.now() / 3000) * 10 + (stressLevel / 10);
+            }
+
+            // Draw particles
+            stressParticles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, ${Math.floor(255 - stressLevel * 2)}, 100, 0.8)`;
+                ctx.fill();
+            });
+
+            // Update stress bar
+            document.getElementById('stressFill').style.width = stressLevel + '%';
+        }
+
+        // Main animation loop
+        function animate() {
+            drawLattice();
+            drawHopping();
+            drawInterface();
+            drawStress();
+
+            if (isSimulating) {
+                // Simulate cycling stress
+                stressLevel = 30 + Math.sin(Date.now() / 2000) * 20;
+                const cRate = parseInt(document.getElementById('cRateSlider').value);
+                stressLevel += cRate * 0.5;
+                stressLevel = Math.min(100, Math.max(10, stressLevel));
+            }
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // Initialize
+        function init() {
+            resizeCanvases();
+            initHopping();
+            initInterface();
+            initStress();
+            drawConductivityChart();
+            animate();
+        }
+
+        // Event listeners
+        document.querySelectorAll('.electrolyte-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.electrolyte-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentElectrolyte = btn.dataset.type;
+                initHopping();
+            });
+        });
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            isSimulating = true;
+        });
+
+        document.getElementById('stopBtn').addEventListener('click', () => {
+            isSimulating = false;
+        });
+
+        document.getElementById('tempSlider').addEventListener('input', (e) => {
+            document.getElementById('tempValue').textContent = e.target.value + ' K';
+            drawConductivityChart();
+        });
+
+        document.getElementById('cRateSlider').addEventListener('input', (e) => {
+            document.getElementById('cRateValue').textContent = (e.target.value / 10).toFixed(1) + 'C';
+        });
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
