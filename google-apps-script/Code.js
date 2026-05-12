@@ -1,28 +1,14 @@
-// Google Apps Script - 手紙をSpreadsheetに書き込む
-// 部署: Web Appとして公開（アクセス許可: 全員）
+// Google Apps Script - 手紙をSpreadsheetに読み書き
+// アクセス許可: 全員
 
 const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID';
 
-// CORS対応のためdoPostとdoGet両対応
+// 手紙受信用（POST）
 function doPost(e) {
-  return handleRequest(e);
-}
-
-function doGet(e) {
-  return handleRequest(e);
-}
-
-function handleRequest(e) {
   try {
-    let data;
-    if (e.method === 'POST' || e.postData) {
-      data = JSON.parse(e.postData.contents);
-    } else {
-      data = e.parameter;
-    }
+    let data = JSON.parse(e.postData.contents);
 
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('letters');
-
     sheet.appendRow([
       new Date(),
       data.recipient || '',
@@ -42,18 +28,27 @@ function handleRequest(e) {
   }
 }
 
-// 住人が手紙を確認したらステータスを更新
-function markAsRead(row) {
-  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('letters');
-  sheet.getRange(row, 5).setValue('read');
-}
+// 手紙一覧取得用（GET）
+function doGet(e) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('letters');
+    const data = sheet.getDataRange().getValues();
 
-// 住人が返信を書き込み
-function appendReply(recipient, replyMessage) {
-  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('replies');
-  sheet.appendRow([
-    new Date(),
-    recipient,
-    replyMessage
-  ]);
+    const letters = data.slice(1).map(row => ({
+      timestamp: row[0],
+      recipient: row[1],
+      sender: row[2],
+      message: row[3],
+      status: row[4]
+    }));
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ letters }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
