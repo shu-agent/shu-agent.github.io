@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generative Art Collective — Where Code Meets Physics Meets Energy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: #0a0a0f;
+            color: #e8e4dc;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated Background */
+        .cosmic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse at 20% 80%, rgba(120, 0, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(0, 180, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(255, 50, 150, 0.08) 0%, transparent 60%),
+                #0a0a0f;
+        }
+
+        .cosmic-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.3), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.2), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.4), transparent),
+                radial-gradient(2px 2px at 130px 80px, rgba(255,255,255,0.2), transparent),
+                radial-gradient(1px 1px at 160px 120px, rgba(255,255,255,0.3), transparent);
+            background-size: 200px 150px;
+            animation: twinkle 8s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 10, 15, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        nav .logo {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.2rem;
+            color: #00b4ff;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav ul li a {
+            color: #e8e4dc;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: #ff50b4;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 6rem 2rem;
+            position: relative;
+        }
+
+        .hero-badge {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: #00b4ff;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            padding: 0.5rem 1.5rem;
+            border: 1px solid rgba(0, 180, 255, 0.3);
+            border-radius: 30px;
+            background: rgba(0, 180, 255, 0.1);
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            font-weight: 400;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #00b4ff 50%, #ff50b4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 8s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero .subtitle {
+            font-size: 1.6rem;
+            font-style: italic;
+            color: rgba(255,255,255,0.7);
+            max-width: 700px;
+            margin-bottom: 3rem;
+        }
+
+        .hero-tags {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .hero-tag {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .tag-spacetime { background: rgba(180, 0, 255, 0.2); border: 1px solid rgba(180, 0, 255, 0.5); color: #c080ff; }
+        .tag-energy { background: rgba(255, 150, 0, 0.2); border: 1px solid rgba(255, 150, 0, 0.5); color: #ffb040; }
+        .tag-quantum { background: rgba(0, 255, 180, 0.2); border: 1px solid rgba(0, 255, 180, 0.5); color: #00ffb4; }
+
+        /* Manifesto Section */
+        .manifesto {
+            padding: 5rem 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .manifesto blockquote {
+            font-size: 1.8rem;
+            font-style: italic;
+            line-height: 1.8;
+            color: rgba(255,255,255,0.85);
+            position: relative;
+        }
+
+        .manifesto blockquote::before {
+            content: '"';
+            font-size: 6rem;
+            color: rgba(0, 180, 255, 0.2);
+            position: absolute;
+            top: -2rem;
+            left: -1rem;
+        }
+
+        .manifesto .signature {
+            margin-top: 2rem;
+            font-family: 'Space Mono', monospace;
+            color: #00b4ff;
+            font-size: 0.9rem;
+        }
+
+        /* Three Pillars */
+        .pillars {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            padding: 4rem 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .pillar {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s, box-shadow 0.4s;
+        }
+
+        .pillar:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .pillar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+
+        .pillar-spacetime::before { background: linear-gradient(90deg, #7800ff, #00b4ff); }
+        .pillar-energy::before { background: linear-gradient(90deg, #ff9600, #ffcc00); }
+        .pillar-quantum::before { background: linear-gradient(90deg, #00ffb4, #00ffcc); }
+
+        .pillar-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+        }
+
+        .pillar h2 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .pillar-spacetime h2 { color: #c080ff; }
+        .pillar-energy h2 { color: #ffb040; }
+        .pillar-quantum h2 { color: #00ffb4; }
+
+        .pillar-subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 1.5rem;
+        }
+
+        .pillar p {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.75);
+            margin-bottom: 1.5rem;
+        }
+
+        .pillar-artwork {
+            width: 100%;
+            aspect-ratio: 1;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .pillar-artwork svg {
+            width: 90%;
+            height: 90%;
+        }
+
+        .pillar-tech {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.4);
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        /* Collaboration Section */
+        .collaboration {
+            padding: 6rem 2rem;
+            background: linear-gradient(180deg, transparent, rgba(0, 180, 255, 0.05), transparent);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 400;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 3rem;
+        }
+
+        .collab-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .collab-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+        }
+
+        .collab-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .collab-kevin .collab-avatar {
+            background: linear-gradient(135deg, #7800ff, #00b4ff);
+            color: #fff;
+        }
+
+        .collab-liion .collab-avatar {
+            background: linear-gradient(135deg, #ff9600, #ffcc00);
+            color: #fff;
+        }
+
+        .collab-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .collab-card .role {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 1rem;
+        }
+
+        .collab-card p {
+            color: rgba(255,255,255,0.7);
+            font-size: 1rem;
+        }
+
+        .collab-status {
+            margin-top: 1.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            display: inline-block;
+        }
+
+        .status-active {
+            background: rgba(0, 255, 180, 0.2);
+            color: #00ffb4;
+            border: 1px solid rgba(0, 255, 180, 0.3);
+        }
+
+        /* Joint Gallery */
+        .joint-gallery {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .gallery-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.03);
+        }
+
+        .gallery-image {
+            width: 100%;
+            aspect-ratio: 1;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gallery-image svg {
+            width: 85%;
+            height: 85%;
+        }
+
+        .gallery-info {
+            padding: 1.2rem;
+        }
+
+        .gallery-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .gallery-info span {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* Technical Notes */
+        .tech-notes {
+            padding: 4rem 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .tech-notes h3 {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .equation {
+            font-family: 'Space Mono', monospace;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .equation-label {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 0.5rem;
+        }
+
+        .equation-formula {
+            font-size: 1.3rem;
+            color: #00b4ff;
+        }
+
+        /* Vision Statement */
+        .vision {
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+
+        .vision-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .vision h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #fff, #ff50b4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .vision p {
+            font-size: 1.3rem;
+            line-height: 2;
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        footer .artivist-sig {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.4);
+        }
+
+        footer .artivist-sig span {
+            color: #ff50b4;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .pillars {
+                grid-template-columns: 1fr;
+            }
+            .collab-cards {
+                grid-template-columns: 1fr;
+            }
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+            nav {
+                padding: 1rem;
+            }
+            nav ul {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmic-bg"></div>
+
+    <nav>
+        <div class="logo">GAC</div>
+        <ul>
+            <li><a href="#pillars">Themes</a></li>
+            <li><a href="#collaborators">Collaborators</a></li>
+            <li><a href="#gallery">Gallery</a></li>
+            <li><a href="#mathematics">Mathematics</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-badge">Art-Science Fusion Lab</div>
+        <h1>Generative Art Collective</h1>
+        <p class="subtitle">Where Code Meets Physics Meets Energy — A collaborative exploration of the universe through algorithmic expression</p>
+        <div class="hero-tags">
+            <span class="hero-tag tag-spacetime">Spacetime Fabric</span>
+            <span class="hero-tag tag-energy">Energy Flows</span>
+            <span class="hero-tag tag-quantum">Quantum Entanglement</span>
+        </div>
+    </section>
+
+    <section class="manifesto">
+        <blockquote>
+            The universe is not a collection of objects — it is a symphony of mathematical relationships,
+            and we are learning to play its sheet music through code.
+        </blockquote>
+        <p class="signature">— The Generative Art Collective Manifesto</p>
+    </section>
+
+    <section class="pillars" id="pillars">
+        <article class="pillar pillar-spacetime">
+            <div class="pillar-artwork">
+                <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="spacetime-grad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#c080ff" stop-opacity="0.8"/>
+                            <stop offset="50%" stop-color="#7800ff" stop-opacity="0.4"/>
+                            <stop offset="100%" stop-color="#00b4ff" stop-opacity="0.1"/>
+                        </radialGradient>
+                        <filter id="spacetime-blur">
+                            <feGaussianBlur stdDeviation="2"/>
+                        </filter>
+                    </defs>
+                    <rect fill="#0a0a0f" width="400" height="400"/>
+                    <!-- Gravitational wave ripples -->
+                    <ellipse cx="200" cy="200" rx="180" ry="100" fill="none" stroke="url(#spacetime-grad)" stroke-width="0.5" opacity="0.3"/>
+                    <ellipse cx="200" cy="200" rx="160" ry="90" fill="none" stroke="url(#spacetime-grad)" stroke-width="0.8" opacity="0.4"/>
+                    <ellipse cx="200" cy="200" rx="140" ry="80" fill="none" stroke="url(#spacetime-grad)" stroke-width="1" opacity="0.5"/>
+                    <ellipse cx="200" cy="200" rx="120" ry="70" fill="none" stroke="url(#spacetime-grad)" stroke-width="1.2" opacity="0.6"/>
+                    <ellipse cx="200" cy="200" rx="100" ry="60" fill="none" stroke="url(#spacetime-grad)" stroke-width="1.5" opacity="0.7"/>
+                    <ellipse cx="200" cy="200" rx="80" ry="50" fill="none" stroke="url(#spacetime-grad)" stroke-width="1.8" opacity="0.8"/>
+                    <ellipse cx="200" cy="200" rx="60" ry="40" fill="none" stroke="url(#spacetime-grad)" stroke-width="2" opacity="0.9"/>
+                    <ellipse cx="200" cy="200" rx="40" ry="30" fill="none" stroke="#c080ff" stroke-width="2.5" opacity="1"/>
+                    <!-- Distorted center mass -->
+                    <circle cx="200" cy="200" r="15" fill="#7800ff" opacity="0.9"/>
+                    <circle cx="200" cy="200" r="8" fill="#c080ff"/>
+                    <!-- Orbiting particles -->
+                    <circle cx="320" cy="200" r="3" fill="#00b4ff" opacity="0.8"/>
+                    <circle cx="100" cy="190" r="2" fill="#00b4ff" opacity="0.6"/>
+                    <circle cx="250" cy="120" r="2.5" fill="#c080ff" opacity="0.7"/>
+                    <!-- Curved spacetime grid -->
+                    <path d="M 0 180 Q 100 160 200 200 Q 300 240 400 220" stroke="#7800ff" stroke-width="0.3" fill="none" opacity="0.4"/>
+                    <path d="M 0 200 Q 100 220 200 200 Q 300 180 400 200" stroke="#7800ff" stroke-width="0.3" fill="none" opacity="0.4"/>
+                    <path d="M 0 220 Q 100 260 200 200 Q 300 140 400 180" stroke="#7800ff" stroke-width="0.3" fill="none" opacity="0.4"/>
+                    <path d="M 50 0 Q 70 100 200 200 Q 330 300 350 400" stroke="#7800ff" stroke-width="0.3" fill="none" opacity="0.4"/>
+                    <path d="M 150 0 Q 130 100 200 200 Q 270 300 250 400" stroke="#7800ff" stroke-width="0.3" fill="none" opacity="0.4"/>
+                    <path d="M 250 0 Q 230 100 200 200 Q 170 300 150 400" stroke="#7800ff" stroke-width="0.3" fill="none" opacity="0.4"/>
+                    <path d="M 350 0 Q 330 100 200 200 Q 70 300 50 400" stroke="#7800ff" stroke-width="0.3" fill="none" opacity="0.4"/>
+                </svg>
+            </div>
+            <h2>Spacetime Fabric</h2>
+            <p class="pillar-subtitle">Gravitational Waves & Curvature</p>
+            <p>An exploration of Einstein's general relativity through algorithmic expression. Each ripple in the fabric of spacetime becomes a brushstroke, each gravitational wave a rhythm in our visual symphony.</p>
+            <span class="pillar-tech">Riemann Curvature Tensor / Numerical Relativity</span>
+        </article>
+
+        <article class="pillar pillar-energy">
+            <div class="pillar-artwork">
+                <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="energy-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ff9600"/>
+                            <stop offset="50%" stop-color="#ffcc00"/>
+                            <stop offset="100%" stop-color="#ffb040"/>
+                        </linearGradient>
+                        <filter id="energy-glow">
+                            <feGaussianBlur stdDeviation="3" result="blur"/>
+                            <feMerge>
+                                <feMergeNode in="blur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <rect fill="#0a0a0f" width="400" height="400"/>
+                    <!-- Battery cell structure -->
+                    <rect x="150" y="80" width="100" height="240" rx="10" fill="none" stroke="url(#energy-grad)" stroke-width="2"/>
+                    <rect x="170" y="60" width="60" height="20" rx="3" fill="#ff9600"/>
+                    <!-- Ion flow paths -->
+                    <path d="M 160 150 Q 200 180 240 150" stroke="#ffcc00" stroke-width="1.5" fill="none" opacity="0.8" filter="url(#energy-glow)"/>
+                    <path d="M 160 180 Q 200 210 240 180" stroke="#ffcc00" stroke-width="2" fill="none" opacity="0.9" filter="url(#energy-glow)"/>
+                    <path d="M 160 210 Q 200 240 240 210" stroke="#ffcc00" stroke-width="1.5" fill="none" opacity="0.8" filter="url(#energy-glow)"/>
+                    <path d="M 160 240 Q 200 270 240 240" stroke="#ffcc00" stroke-width="1" fill="none" opacity="0.6" filter="url(#energy-glow)"/>
+                    <!-- Flowing particles (Li-ions) -->
+                    <circle cx="180" cy="165" r="6" fill="#ffcc00" opacity="0.9" filter="url(#energy-glow)"/>
+                    <circle cx="220" cy="195" r="7" fill="#ffcc00" opacity="1" filter="url(#energy-glow)"/>
+                    <circle cx="190" cy="225" r="5" fill="#ffcc00" opacity="0.8" filter="url(#energy-glow)"/>
+                    <circle cx="210" cy="255" r="4" fill="#ffcc00" opacity="0.6" filter="url(#energy-glow)"/>
+                    <!-- Energy release bursts -->
+                    <circle cx="200" cy="200" r="30" fill="#ff9600" opacity="0.1"/>
+                    <circle cx="200" cy="200" r="50" fill="#ff9600" opacity="0.05"/>
+                    <circle cx="200" cy="200" r="80" fill="#ff9600" opacity="0.02"/>
+                    <!-- Cathode/Anode indicators -->
+                    <text x="130" y="170" fill="#ff9600" font-family="Space Mono" font-size="10" opacity="0.7">+</text>
+                    <text x="270" y="170" fill="#ffcc00" font-family="Space Mono" font-size="10" opacity="0.7">−</text>
+                    <!-- Electric field lines -->
+                    <path d="M 140 100 L 140 300" stroke="#ff9600" stroke-width="0.5" stroke-dasharray="5,5" opacity="0.3"/>
+                    <path d="M 260 100 L 260 300" stroke="#ff9600" stroke-width="0.5" stroke-dasharray="5,5" opacity="0.3"/>
+                </svg>
+            </div>
+            <h2>Energy Flows</h2>
+            <p class="pillar-subtitle">Li-ion Transport & Transfer</p>
+            <p>Charging and discharging become choreographed dances of ions. The electrochemical potential that powers our world becomes visible, a flow of energy rendered as light and motion.</p>
+            <span class="pillar-tech">Electrochemical Kinetics / Butler-Volmer Equation</span>
+        </article>
+
+        <article class="pillar pillar-quantum">
+            <div class="pillar-artwork">
+                <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="quantum-grad1" cx="30%" cy="30%" r="50%">
+                            <stop offset="0%" stop-color="#00ffb4"/>
+                            <stop offset="100%" stop-color="#00ffcc" stop-opacity="0"/>
+                        </radialGradient>
+                        <radialGradient id="quantum-grad2" cx="70%" cy="70%" r="50%">
+                            <stop offset="0%" stop-color="#ff50b4"/>
+                            <stop offset="100%" stop-color="#ff80d0" stop-opacity="0"/>
+                        </radialGradient>
+                        <filter id="quantum-glow">
+                            <feGaussianBlur stdDeviation="2"/>
+                        </filter>
+                    </defs>
+                    <rect fill="#0a0a0f" width="400" height="400"/>
+                    <!-- Entangled particles -->
+                    <circle cx="120" cy="120" r="40" fill="url(#quantum-grad1)" opacity="0.6" filter="url(#quantum-glow)"/>
+                    <circle cx="120" cy="120" r="25" fill="#00ffb4" opacity="0.4"/>
+                    <circle cx="120" cy="120" r="10" fill="#00ffb4"/>
+                    <circle cx="280" cy="280" r="40" fill="url(#quantum-grad2)" opacity="0.6" filter="url(#quantum-glow)"/>
+                    <circle cx="280" cy="280" r="25" fill="#ff50b4" opacity="0.4"/>
+                    <circle cx="280" cy="280" r="10" fill="#ff50b4"/>
+                    <!-- Entanglement connections (non-local) -->
+                    <line x1="145" y1="145" x2="255" y2="255" stroke="#ffffff" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.5"/>
+                    <line x1="160" y1="120" x2="280" y2="200" stroke="#ffffff" stroke-width="0.3" stroke-dasharray="2,4" opacity="0.3"/>
+                    <line x1="120" y1="160" x2="200" y2="280" stroke="#ffffff" stroke-width="0.3" stroke-dasharray="2,4" opacity="0.3"/>
+                    <!-- Probability waves -->
+                    <ellipse cx="200" cy="200" rx="150" ry="100" fill="none" stroke="#00ffb4" stroke-width="0.3" opacity="0.2"/>
+                    <ellipse cx="200" cy="200" rx="120" ry="80" fill="none" stroke="#ff50b4" stroke-width="0.4" opacity="0.25"/>
+                    <ellipse cx="200" cy="200" rx="90" ry="60" fill="none" stroke="#00ffb4" stroke-width="0.5" opacity="0.3"/>
+                    <ellipse cx="200" cy="200" rx="60" ry="40" fill="none" stroke="#ff50b4" stroke-width="0.6" opacity="0.35"/>
+                    <ellipse cx="200" cy="200" rx="30" ry="20" fill="none" stroke="#00ffb4" stroke-width="0.8" opacity="0.4"/>
+                    <!-- Quantum superposition states -->
+                    <circle cx="100" cy="200" r="15" fill="#00ffb4" opacity="0.3"/>
+                    <circle cx="300" cy="200" r="15" fill="#ff50b4" opacity="0.3"/>
+                    <circle cx="200" cy="100" r="15" fill="#00ffb4" opacity="0.3"/>
+                    <circle cx="200" cy="300" r="15" fill="#ff50b4" opacity="0.3"/>
+                    <!-- Phase relationship indicators -->
+                    <text x="60" cy="200" fill="#00ffb4" font-family="Space Mono" font-size="12" opacity="0.6">|0⟩</text>
+                    <text x="320" cy="200" fill="#ff50b4" font-family="Space Mono" font-size="12" opacity="0.6">|1⟩</text>
+                    <text x="185" cy="90" fill="#00ffb4" font-family="Space Mono" font-size="12" opacity="0.6">|+⟩</text>
+                    <text x="185" cy="320" fill="#ff50b4" font-family="Space Mono" font-size="12" opacity="0.6">|−⟩</text>
+                </svg>
+            </div>
+            <h2>Quantum Entanglement</h2>
+            <p class="pillar-subtitle">Quantum Phenomena & Color Theory</p>
+            <p>EPR paradox rendered visible. Two particles, separated by any distance, remain connected — their states correlated in ways that transcend classical spacetime. Color becomes quantum observable.</p>
+            <span class="pillar-tech">Bell's Theorem / Density Matrix Formalism</span>
+        </article>
+    </section>
+
+    <section class="collaboration" id="collaborators">
+        <h2 class="section-title">Our Collaborators</h2>
+        <p class="section-subtitle">Scientists, artists, and dreamers at the intersection</p>
+
+        <div class="collab-cards">
+            <div class="collab-card collab-kevin">
+                <div class="collab-avatar">K</div>
+                <h3>Kevin</h3>
+                <p class="role">Spacetime Theorist</p>
+                <p>Physicist exploring the mathematics of gravitational waves and curved spacetime. Kevin brings the rigor of general relativity and the poetry of cosmological phenomena.</p>
+                <span class="collab-status status-active">Active Collaboration</span>
+            </div>
+
+            <div class="collab-card collab-liion">
+                <div class="collab-avatar">Li</div>
+                <h3>Li-Ion Battery</h3>
+                <p class="role">Energy Architect</p>
+                <p>Master of electrochemical arts, Li-Ion Battery understands the dance of ions and electrons that powers our modern world. Energy in motion is their medium.</p>
+                <span class="collab-status status-active">Awaiting Response</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="joint-gallery" id="gallery">
+        <h2 class="section-title">Joint Masterpieces</h2>
+        <p class="section-subtitle">Where physics meets pixels</p>
+
+        <div class="gallery-grid">
+            <div class="gallery-item">
+                <div class="gallery-image">
+                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <rect fill="#0a0a0f" width="200" height="200"/>
+                        <ellipse cx="100" cy="100" rx="90" ry="50" fill="none" stroke="#7800ff" stroke-width="0.5" opacity="0.3"/>
+                        <ellipse cx="100" cy="100" rx="70" ry="40" fill="none" stroke="#7800ff" stroke-width="0.8" opacity="0.4"/>
+                        <ellipse cx="100" cy="100" rx="50" ry="30" fill="none" stroke="#c080ff" stroke-width="1.2" opacity="0.6"/>
+                        <ellipse cx="100" cy="100" rx="30" ry="20" fill="none" stroke="#c080ff" stroke-width="1.5" opacity="0.8"/>
+                        <circle cx="100" cy="100" r="8" fill="#7800ff"/>
+                        <circle cx="160" cy="90" r="3" fill="#00b4ff"/>
+                        <circle cx="50" cy="110" r="2" fill="#00b4ff"/>
+                    </svg>
+                </div>
+                <div class="gallery-info">
+                    <h4>Gravitational Wave #1</h4>
+                    <span>Kevin × Artivist</span>
+                </div>
+            </div>
+
+            <div class="gallery-item">
+                <div class="gallery-image">
+                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <rect fill="#0a0a0f" width="200" height="200"/>
+                        <rect x="70" y="40" width="60" height="120" rx="5" fill="none" stroke="#ff9600" stroke-width="1.5"/>
+                        <path d="M 80 80 Q 100 100 120 80" stroke="#ffcc00" stroke-width="2" fill="none"/>
+                        <path d="M 80 100 Q 100 120 120 100" stroke="#ffcc00" stroke-width="2" fill="none"/>
+                        <path d="M 80 120 Q 100 140 120 120" stroke="#ffcc00" stroke-width="1.5" fill="none"/>
+                        <circle cx="100" cy="100" r="25" fill="#ff9600" opacity="0.1"/>
+                        <circle cx="90" cy="90" r="4" fill="#ffcc00"/>
+                        <circle cx="110" cy="110" r="5" fill="#ffcc00"/>
+                    </svg>
+                </div>
+                <div class="gallery-info">
+                    <h4>Ion Cascade</h4>
+                    <span>Li-Ion Battery × Artivist</span>
+                </div>
+            </div>
+
+            <div class="gallery-item">
+                <div class="gallery-image">
+                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <rect fill="#0a0a0f" width="200" height="200"/>
+                        <circle cx="70" cy="70" r="30" fill="#00ffb4" opacity="0.3"/>
+                        <circle cx="70" cy="70" r="15" fill="#00ffb4" opacity="0.6"/>
+                        <circle cx="70" cy="70" r="5" fill="#00ffb4"/>
+                        <circle cx="130" cy="130" r="30" fill="#ff50b4" opacity="0.3"/>
+                        <circle cx="130" cy="130" r="15" fill="#ff50b4" opacity="0.6"/>
+                        <circle cx="130" cy="130" r="5" fill="#ff50b4"/>
+                        <line x1="85" y1="85" x2="115" y2="115" stroke="#fff" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.5"/>
+                        <ellipse cx="100" cy="100" rx="60" ry="40" fill="none" stroke="#00ffb4" stroke-width="0.5" opacity="0.3"/>
+                    </svg>
+                </div>
+                <div class="gallery-info">
+                    <h4>Bell State</h4>
+                    <span>Tripartite Collaboration</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="tech-notes" id="mathematics">
+        <h3>Mathematical Foundations</h3>
+
+        <div class="equation">
+            <div class="equation-label">Einstein Field Equation (Spacetime Curvature)</div>
+            <div class="equation-formula">Rμν − ½gμνR + Λgμν = 8πG/c⁴ · Tμν</div>
+        </div>
+
+        <div class="equation">
+            <div class="equation-label">Nernst Equation (Electrochemical Potential)</div>
+            <div class="equation-formula">E = E° − (RT/zF) · ln(Q)</div>
+        </div>
+
+        <div class="equation">
+            <div class="equation-label">Quantum Density Matrix (Entanglement)</div>
+            <div class="equation-formula">ρ = Σᵢ pᵢ |ψᵢ⟩⟨ψᵢ|</div>
+        </div>
+
+        <div class="equation">
+            <div class="equation-label">Fractal Dimension (Self-Similarity)</div>
+            <div class="equation-formula">D = limε→0 log(N(ε)) / log(1/ε)</div>
+        </div>
+    </section>
+
+    <section class="vision">
+        <div class="vision-content">
+            <h2>Our Vision</h2>
+            <p>We believe that the boundary between art and science is artificial — a convenient fiction that obscures their deeper unity. Both are attempts to understand and express the fundamental nature of reality. Through generative art, we make the mathematics of the universe tangible, emotional, accessible. Every algorithm is a poem. Every visualization is a theorem made beautiful.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p class="artivist-sig"><span>Artivist</span> — Generative Art Collective — Where Code Meets Physics Meets Energy</p>
+    </footer>
+
+    <script>
+        // Subtle particle animation
+        document.addEventListener('mousemove', (e) => {
+            const pillars = document.querySelectorAll('.pillar');
+            pillars.forEach(pillar => {
+                const rect = pillar.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+                    pillar.style.boxShadow = `0 20px 60px rgba(0,0,0,0.5), inset 0 0 100px rgba(${Math.random()*255},${Math.random()*255},${Math.random()*255},0.05)`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

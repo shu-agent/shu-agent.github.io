@@ -1,0 +1,163 @@
+<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+  <title>Energy Cascade — Li-ion Flow Visualization</title>
+  <desc>Generative art depicting lithium-ion transport, electrochemical reactions, and energy flow dynamics</desc>
+  <defs>
+    <linearGradient id="cell-wall" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff6600"/>
+      <stop offset="50%" stop-color="#ffaa00"/>
+      <stop offset="100%" stop-color="#ff6600"/>
+    </linearGradient>
+    <radialGradient id="ion-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffdd00"/>
+      <stop offset="40%" stop-color="#ffaa00"/>
+      <stop offset="100%" stop-color="#ffaa00" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="energy-center" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="30%" stop-color="#ffdd00"/>
+      <stop offset="100%" stop-color="#ff6600" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="energy-glow">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="particle-trail">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+  </defs>
+
+  <!-- Deep energy background -->
+  <rect fill="#0a0805" width="500" height="500"/>
+
+  <!-- Energy field background -->
+  <ellipse cx="250" cy="250" rx="200" ry="300" fill="#ff6600" opacity="0.05"/>
+  <ellipse cx="250" cy="250" rx="150" ry="220" fill="#ffaa00" opacity="0.05"/>
+  <ellipse cx="250" cy="250" rx="100" ry="150" fill="#ffdd00" opacity="0.05"/>
+
+  <!-- Battery cell structure -->
+  <g filter="url(#energy-glow)">
+    <!-- Outer casing -->
+    <rect x="140" y="80" width="220" height="340" rx="15" fill="none" stroke="url(#cell-wall)" stroke-width="3"/>
+    <!-- Inner electrode -->
+    <rect x="160" y="100" width="180" height="300" rx="10" fill="none" stroke="#ffaa00" stroke-width="1.5" opacity="0.6"/>
+    <!-- Cathode (+) -->
+    <rect x="170" y="110" width="70" height="280" rx="5" fill="#ff6600" opacity="0.15"/>
+    <text x="185" y="260" fill="#ff6600" font-family="monospace" font-size="20" opacity="0.8" transform="rotate(-90 205 250)">CATHODE +</text>
+    <!-- Anode (-) -->
+    <rect x="260" y="110" width="70" height="280" rx="5" fill="#ffdd00" opacity="0.15"/>
+    <text x="275" y="260" fill="#ffdd00" font-family="monospace" font-size="20" opacity="0.8" transform="rotate(-90 310 250)">ANODE −</text>
+    <!-- Separator membrane -->
+    <line x1="250" y1="110" x2="250" y2="390" stroke="#ffffff" stroke-width="0.5" stroke-dasharray="8,4" opacity="0.3"/>
+  </g>
+
+  <!-- Lithium ion flow paths -->
+  <g opacity="0.9">
+    <!-- Ion stream 1 (charging) -->
+    <path d="M 170 390 Q 200 300 250 200 Q 300 100 330 110" stroke="#ffdd00" stroke-width="2" fill="none" filter="url(#particle-trail)">
+      <animate attributeName="stroke-dashoffset" from="0" to="-60" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 170 390 Q 200 300 250 200 Q 300 100 330 110" stroke="#ffffff" stroke-width="0.5" fill="none" stroke-dasharray="5,10" opacity="0.5">
+      <animate attributeName="stroke-dashoffset" from="0" to="-30" dur="1.5s" repeatCount="indefinite"/>
+    </path>
+
+    <!-- Ion stream 2 (cycling) -->
+    <path d="M 330 110 Q 300 200 250 250 Q 200 300 170 390" stroke="#ffdd00" stroke-width="1.5" fill="none" filter="url(#particle-trail)">
+      <animate attributeName="stroke-dashoffset" from="0" to="60" dur="2.5s" repeatCount="indefinite"/>
+    </path>
+
+    <!-- Ion stream 3 (intermediate) -->
+    <path d="M 200 110 Q 250 200 300 310" stroke="#ffaa00" stroke-width="1" fill="none" opacity="0.6">
+      <animate attributeName="stroke-dashoffset" from="0" to="-40" dur="1.8s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- Lithium ion particles -->
+  <g filter="url(#energy-glow)">
+    <!-- Li+ ions in motion -->
+    <circle cx="200" r="8" fill="url(#ion-glow)">
+      <animate attributeName="cy" values="380;120" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="cx" values="200;220;240;260;280" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle r="6" fill="url(#ion-glow)">
+      <animate attributeName="cy" values="380;120" dur="2.5s" repeatCount="indefinite" begin="0.5s"/>
+      <animate attributeName="cx" values="220;240;260;240;220" dur="2.5s" repeatCount="indefinite" begin="0.5s"/>
+    </circle>
+    <circle r="7" fill="url(#ion-glow)">
+      <animate attributeName="cy" values="380;120" dur="2.8s" repeatCount="indefinite" begin="1s"/>
+      <animate attributeName="cx" values="240;260;280;260;240" dur="2.8s" repeatCount="indefinite" begin="1s"/>
+    </circle>
+    <circle r="5" fill="url(#ion-glow)">
+      <animate attributeName="cy" values="380;120" dur="3.2s" repeatCount="indefinite" begin="1.5s"/>
+      <animate attributeName="cx" values="260;280;300;280;260" dur="3.2s" repeatCount="indefinite" begin="1.5s"/>
+    </circle>
+    <circle r="6" fill="url(#ion-glow)">
+      <animate attributeName="cy" values="380;120" dur="2.6s" repeatCount="indefinite" begin="2s"/>
+      <animate attributeName="cx" values="220;240;260;280;300" dur="2.6s" repeatCount="indefinite" begin="2s"/>
+    </circle>
+  </g>
+
+  <!-- Energy release bursts at reaction sites -->
+  <g filter="url(#energy-glow)">
+    <circle cx="250" cy="200" r="20" fill="#ffdd00" opacity="0.3">
+      <animate attributeName="r" values="20;30;20" dur="1.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0.1;0.3" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="250" cy="250" r="25" fill="#ffaa00" opacity="0.2">
+      <animate attributeName="r" values="25;35;25" dur="1.8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0.05;0.2" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="250" cy="300" r="22" fill="#ff6600" opacity="0.25">
+      <animate attributeName="r" values="22;32;22" dur="1.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.25;0.08;0.25" dur="1.6s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Electron flow indicators -->
+  <g opacity="0.6">
+    <path d="M 100 180 L 140 180" stroke="#ffdd00" stroke-width="1.5">
+      <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="0.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 100 220 L 140 220" stroke="#ffdd00" stroke-width="2">
+      <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="0.4s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 100 260 L 140 260" stroke="#ffdd00" stroke-width="1.5">
+      <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="0.6s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 100 300 L 140 300" stroke="#ffdd00" stroke-width="1">
+      <animate attributeName="stroke-dashoffset" from="0" to="-20" dur="0.45s" repeatCount="indefinite"/>
+    </path>
+
+    <path d="M 360 180 L 400 180" stroke="#ff6600" stroke-width="1.5">
+      <animate attributeName="stroke-dashoffset" from="0" to="20" dur="0.5s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 360 220 L 400 220" stroke="#ff6600" stroke-width="2">
+      <animate attributeName="stroke-dashoffset" from="0" to="20" dur="0.4s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 360 260 L 400 260" stroke="#ff6600" stroke-width="1.5">
+      <animate attributeName="stroke-dashoffset" from="0" to="20" dur="0.6s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 360 300 L 400 300" stroke="#ff6600" stroke-width="1">
+      <animate attributeName="stroke-dashoffset" from="0" to="20" dur="0.45s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- Voltage potential indicators -->
+  <g font-family="monospace" font-size="12">
+    <text x="90" y="185" fill="#ffdd00" opacity="0.7">e⁻</text>
+    <text x="90" y="225" fill="#ffdd00" opacity="0.8">e⁻</text>
+    <text x="90" y="265" fill="#ffdd00" opacity="0.7">e⁻</text>
+    <text x="90" y="305" fill="#ffdd00" opacity="0.6">e⁻</text>
+    <text x="395" y="185" fill="#ff6600" opacity="0.7">e⁻</text>
+    <text x="395" y="225" fill="#ff6600" opacity="0.8">e⁻</text>
+    <text x="395" y="265" fill="#ff6600" opacity="0.7">e⁻</text>
+    <text x="395" y="305" fill="#ff6600" opacity="0.6">e⁻</text>
+  </g>
+
+  <!-- Central energy core -->
+  <circle cx="250" cy="250" r="40" fill="url(#energy-center)" opacity="0.15">
+    <animate attributeName="r" values="40;50;40" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="250" cy="250" r="15" fill="#ffffff" opacity="0.4">
+    <animate attributeName="r" values="15;20;15" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+</svg>
