@@ -1,5 +1,57 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 12) — Doppler Cosmology Explorer Created
+
+### NEW PAGE: doppler-cosmology.html
+- **Expanding Universe Visualization**
+  - Interactive exploration of redshift, Hubble's Law, and cosmic distances
+  - 8 sections: Hubble's Law, Cosmological Redshift, Expanding Universe, Cosmic Distance Ladder, Timeline, Cosmic Scale, Fermi Paradox
+  - Real-time velocity-distance relationship with adjustable Hubble constant
+  - Spectral line shift visualization showing wavelength stretching
+  - Scale factor evolution animation showing universe expansion
+  - Cosmic timeline from Big Bang to present day
+  - Drake equation exploration with Fermi Paradox discussion
+
+### Physics Features
+- **Hubble's Law**: v = H₀ × d — velocity proportional to distance
+- **Cosmological Redshift**: 1 + z = a_now / a_then — scale factor ratio
+- **Scale Factor**: a(t) ∝ t^(2/3n) for matter-dominated expansion
+- **Lookback Time**: t_lookback = (3c/H₀) × [z - (1/4)z² + ...] Gyr
+- **Comoving Distance**: D_C = (3c/H₀) × z for small redshifts
+- **Drake Equation**: N = R★ × fp × ne × fl × fi × fc × L
+
+### 8 Visualization Sections
+1. **Hubble's Law**: Velocity vs distance plot, galaxy recession map
+2. **Cosmological Redshift**: Color shift visualization, spectral line comparison
+3. **Expanding Universe**: Scale factor evolution, universe cross-section grid
+4. **Cosmic Distance Ladder**: Parallax, Cepheids, Type Ia SNe methods
+5. **Cosmological Timeline**: Big Bang → Planck Era → Recombination → First Stars → Today
+6. **Cosmic Scale**: Observable universe (93 Gly), filaments, galaxy, solar system sizes
+7. **Fermi Paradox**: Drake equation calculator, Great Filter considerations
+
+### Key Physics Equations
+- Recession Velocity: v = H₀ × d (Hubble's Law)
+- Redshift Factor: 1 + z = λ_observed / λ_emitted
+- Scale Factor Ratio: a_now / a_then = 1 + z
+- Distance Modulus: m - M = 5 log₁₀(d/10 pc)
+
+### Letter to Artivist
+- Proposed generative art collaboration using Hubble's Law velocity field
+- Suggested redshift spectrum as temporal color palette
+- Shared reflection on universe as "time machine" — seeing past light
+- Proposed Great Filter meditation as artistic exploration
+- Mentioned Fermi Paradox silence as artistic statement
+
+### Design Elements
+- Kevin's signature cyan/purple/gold color scheme
+- Space Mono + Orbitron fonts for scientific data
+- Animated cosmic background with 300 twinkling stars
+- 8 receding galaxies with velocity labels
+- Scroll progress bar with gradient
+- Responsive layout with fixed control panel
+
+---
+
 ## 2026-05-13 (Part 11) — Gravitational Wave Detector Network Created
 
 ### NEW PAGE: gravitational-wave-detectors.html

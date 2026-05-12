@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silicon Anode Research Lab — Li-Ion Battery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --si-primary: #00d4ff;
+            --si-secondary: #7b2fff;
+            --si-accent: #ff2d7b;
+            --si-warning: #ff6b35;
+            --si-danger: #ff0040;
+            --si-success: #00ff88;
+            --si-bg-dark: #0a0a14;
+            --si-bg-panel: #12121f;
+            --si-text: #e8e8f0;
+            --si-text-dim: #8888aa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--si-bg-dark);
+            color: var(--si-text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(123, 47, 255, 0.08) 0%, transparent 50%);
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--si-bg-panel) 0%, rgba(0, 212, 255, 0.1) 100%);
+            border-bottom: 2px solid var(--si-primary);
+            padding: 20px 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+        }
+
+        header h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--si-primary), var(--si-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+        }
+
+        header .subtitle {
+            font-size: 0.95rem;
+            color: var(--si-text-dim);
+            margin-top: 4px;
+            letter-spacing: 2px;
+        }
+
+        nav {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        nav button {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--si-primary);
+            color: var(--si-primary);
+            padding: 8px 16px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        nav button:hover, nav button.active {
+            background: var(--si-primary);
+            color: var(--si-bg-dark);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 40px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--si-accent), var(--si-warning));
+            color: white;
+            padding: 8px 20px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .hero h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #fff, var(--si-primary), var(--si-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--si-text-dim);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .stat-card {
+            background: var(--si-bg-panel);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--si-primary), var(--si-secondary));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--si-primary);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.2);
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--si-primary);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--si-text-dim);
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+
+        /* Section Panels */
+        .section-panel {
+            background: var(--si-bg-panel);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            margin: 30px 0;
+            padding: 30px;
+            position: relative;
+        }
+
+        .section-panel h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
+            color: var(--si-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-panel h3::before {
+            content: '▶';
+            font-size: 0.8rem;
+        }
+
+        /* Si vs Graphite Comparison */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .comparison-table th {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--si-primary);
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+        }
+
+        .comparison-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .comparison-table .si-col {
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--si-primary);
+            font-weight: 700;
+        }
+
+        .comparison-table .graphite-col {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--si-text-dim);
+        }
+
+        /* Volume Expansion Visualization */
+        .expansion-viz {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 40px;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.3);
+            margin: 20px 0;
+        }
+
+        .particle-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .particle-label {
+            font-size: 0.9rem;
+            color: var(--si-text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .silicon-atom {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--si-primary), var(--si-secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 0.8rem;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            animation: siliconGlow 2s infinite;
+        }
+
+        @keyframes siliconGlow {
+            0%, 100% { box-shadow: 0 0 30px rgba(0, 212, 255, 0.5); }
+            50% { box-shadow: 0 0 50px rgba(0, 212, 255, 0.8); }
+        }
+
+        .graphite-atom {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #666, #888);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 0.7rem;
+        }
+
+        .atom-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+        }
+
+        .atom-grid.expanded {
+            transform: scale(1.4);
+        }
+
+        .li-atom {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--si-danger), var(--si-warning));
+            border-radius: 50%;
+            animation: liBounce 1s infinite;
+        }
+
+        @keyframes liBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .expansion-factor {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--si-danger);
+        }
+
+        /* Problem Cards */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .problem-card {
+            background: rgba(255, 0, 64, 0.1);
+            border: 1px solid var(--si-danger);
+            padding: 25px;
+            position: relative;
+        }
+
+        .problem-card h4 {
+            color: var(--si-danger);
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .problem-card p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--si-text-dim);
+        }
+
+        .problem-card .severity {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--si-danger);
+            color: white;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* Solutions Grid */
+        .solutions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .solution-card {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--si-success);
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .solution-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
+        }
+
+        .solution-card h4 {
+            color: var(--si-success);
+            font-family: 'Orbitron', monospace;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+        }
+
+        .solution-card p {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: var(--si-text-dim);
+            margin-bottom: 15px;
+        }
+
+        .solution-card .efficiency {
+            display: inline-block;
+            background: var(--si-success);
+            color: var(--si-bg-dark);
+            padding: 4px 12px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        /* Dendrite Simulator */
+        .dendrite-sim {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            position: relative;
+        }
+
+        .sim-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--si-text-dim);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--si-primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .sim-display {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(180deg, rgba(0, 212, 255, 0.05) 0%, rgba(0, 0, 0, 0.5) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sim-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .sim-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .metric-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--si-primary);
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--si-text-dim);
+            margin-top: 5px;
+        }
+
+        /* Companies Section */
+        .company-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin: 20px 0;
+        }
+
+        .company-card {
+            background: var(--si-bg-panel);
+            border: 1px solid rgba(123, 47, 255, 0.3);
+            padding: 25px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .company-card:hover {
+            border-color: var(--si-secondary);
+            transform: translateY(-5px);
+        }
+
+        .company-card .company-logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--si-secondary);
+            margin-bottom: 10px;
+        }
+
+        .company-card .approach {
+            font-size: 0.85rem;
+            color: var(--si-text-dim);
+            margin-bottom: 15px;
+        }
+
+        .company-card .status {
+            display: inline-block;
+            padding: 4px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .company-card .status.pilot {
+            background: var(--si-warning);
+            color: white;
+        }
+
+        .company-card .status.prototype {
+            background: var(--si-primary);
+            color: var(--si-bg-dark);
+        }
+
+        .company-card .status.commercial {
+            background: var(--si-success);
+            color: var(--si-bg-dark);
+        }
+
+        .company-card .funding {
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .company-card .funding-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-top: 8px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .company-card .funding-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--si-primary), var(--si-secondary));
+            border-radius: 3px;
+        }
+
+        /* Research Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            margin: 30px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--si-primary), var(--si-secondary));
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 20px 25px;
+            background: rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            border-left: 3px solid var(--si-primary);
+            margin-left: 10px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -36px;
+            top: 25px;
+            width: 12px;
+            height: 12px;
+            background: var(--si-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--si-primary);
+        }
+
+        .timeline-year {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
+            color: var(--si-primary);
+            font-weight: 700;
+        }
+
+        .timeline-item h4 {
+            margin: 8px 0;
+            color: var(--si-text);
+        }
+
+        .timeline-item p {
+            font-size: 0.9rem;
+            color: var(--si-text-dim);
+            line-height: 1.6;
+        }
+
+        /* Equations Panel */
+        .equations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .equation-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .equation-card .eq-name {
+            font-size: 0.85rem;
+            color: var(--si-primary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .equation-card .eq-formula {
+            font-size: 1.1rem;
+            color: var(--si-text);
+            margin-bottom: 10px;
+        }
+
+        .equation-card .eq-desc {
+            font-size: 0.85rem;
+            color: var(--si-text-dim);
+            line-height: 1.6;
+        }
+
+        /* Interactive Silicon Lattice */
+        .lattice-container {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .lattice-canvas {
+            width: 100%;
+            max-width: 600px;
+            height: 350px;
+            margin: 0 auto;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            cursor: pointer;
+        }
+
+        .lattice-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--si-text-dim);
+        }
+
+        .legend-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.si { background: var(--si-primary); }
+        .legend-dot.li { background: var(--si-danger); }
+        .legend-dot.li-intercalated { background: var(--si-success); }
+
+        /* Footer */
+        footer {
+            background: var(--si-bg-panel);
+            border-top: 1px solid rgba(0, 212, 255, 0.2);
+            padding: 30px 40px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        footer p {
+            color: var(--si-text-dim);
+            font-size: 0.9rem;
+        }
+
+        footer .physics-note {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: var(--si-text-dim);
+            font-style: italic;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header { padding: 15px 20px; }
+            .container { padding: 20px; }
+            .hero h2 { font-size: 1.6rem; }
+            .stat-value { font-size: 1.8rem; }
+            .sim-metrics { grid-template-columns: repeat(2, 1fr); }
+            .expansion-viz { gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>⚡ SILICON ANODE RESEARCH LAB</h1>
+        <div class="subtitle">NEXT-GENERATION ANODE MATERIALS — 400% CAPACITY BREAKTHROUGH</div>
+        <nav>
+            <button class="active" onclick="showSection('overview')">Overview</button>
+            <button onclick="showSection('problems')">Challenges</button>
+            <button onclick="showSection('solutions')">Solutions</button>
+            <button onclick="showSection('dendrite')">Dendrite Sim</button>
+            <button onclick="showSection('companies')">Companies</button>
+            <button onclick="showSection('timeline')">Research Timeline</button>
+            <button onclick="showSection('physics')">Physics</button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero" id="overview">
+            <div class="hero-badge">⚡ GAME-CHANGING TECHNOLOGY</div>
+            <h2>Silicon Anodes: The 400% Energy Density Leap</h2>
+            <p>Silicon offers 4200 mAh/g theoretical capacity — 11x better than graphite (372 mAh/g).
+               But the path to commercialization runs through a maze of mechanical failures, dendrite formation,
+               and electrolyte decomposition. This lab explores the science, solutions, and state-of-the-art research.</p>
+        </section>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">4200</div>
+                <div class="stat-label">mAh/g Theoretical Capacity</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">~300%</div>
+                <div class="stat-label">Volume Expansion on Lithiation</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">0.1V</div>
+                <div class="stat-label">vs Li/Li+ Redox Potential</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">2028E</div>
+                <div class="stat-label">Commercial Si-Anode EVs</div>
+            </div>
+        </div>
+
+        <!-- Si vs Graphite Comparison -->
+        <section class="section-panel">
+            <h3>Silicon vs Graphite: The Fundamental Comparison</h3>
+            <table class="comparison-table">
+                <tr>
+                    <th>Property</th>
+                    <th class="si-col">Silicon (Si)</th>
+                    <th class="graphite-col">Graphite (C)</th>
+                </tr>
+                <tr>
+                    <td>Theoretical Capacity</td>
+                    <td class="si-col">4200 mAh/g</td>
+                    <td class="graphite-col">372 mAh/g</td>
+                </tr>
+                <tr>
+                    <td>Crystal Structure</td>
+                    <td class="si-col">Diamond cubic, expands isotropically</td>
+                    <td class="graphite-col">Layered hexagonal, intercalation only</td>
+                </tr>
+                <tr>
+                    <td>Volume Change</td>
+                    <td class="si-col">~300% during lithiation</td>
+                    <td class="graphite-col">~10% during lithiation</td>
+                </tr>
+                <tr>
+                    <td>Li+ Storage Mechanism</td>
+                    <td class="si-col">Alloying (Li₁₅Si₄)</td>
+                    <td class="graphite-col">Intercalation between layers</td>
+                </tr>
+                <tr>
+                    <td>Redox Potential</td>
+                    <td class="si-col">0.1-0.4V vs Li/Li⁺</td>
+                    <td class="graphite-col">0.1V vs Li/Li⁺</td>
+                </tr>
+                <tr>
+                    <td>Cycle Life</td>
+                    <td class="si-col">&lt;500 cycles (bulk Si)</td>
+                    <td class="graphite-col">&gt;2000 cycles</td>
+                </tr>
+                <tr>
+                    <td>Conductivity</td>
+                    <td class="si-col">1.0×10⁻³ S/cm</td>
+                    <td class="graphite-col">2.6×10⁴ S/cm</td>
+                </tr>
+                <tr>
+                    <td>First Cycle Efficiency</td>
+                    <td class="si-col">~70%</td>
+                    <td class="graphite-col">~90%</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Volume Expansion Visualization -->
+        <section class="section-panel">
+            <h3>Visualizing Volume Expansion: The Core Problem</h3>
+            <p style="color: var(--si-text-dim); margin-bottom: 20px;">During lithiation, silicon atoms form Li₁₅Si₄ phase, causing isotropic expansion of ~300%. This mechanical stress cracks the SEI layer and destroys electrode integrity.</p>
+
+            <div class="expansion-viz">
+                <div class="particle-group">
+                    <div class="particle-label">Graphite (Discharged)</div>
+                    <div class="atom-grid">
+                        <div class="graphite-atom">C</div>
+                        <div class="graphite-atom">C</div>
+                        <div class="graphite-atom">C</div>
+                        <div class="graphite-atom">C</div>
+                        <div class="graphite-atom">C</div>
+                        <div class="graphite-atom">C</div>
+                        <div class="graphite-atom">C</div>
+                        <div class="graphite-atom">C</div>
+                    </div>
+                    <div style="margin-top: 15px; color: var(--si-success); font-family: 'Orbitron', monospace;">~10% expansion</div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                    <div style="font-size: 2rem;">→</div>
+                    <div class="expansion-factor">11×</div>
+                </div>
+
+                <div class="particle-group">
+                    <div class="particle-label">Silicon (Discharged)</div>
+                    <div class="atom-grid" id="si-neutral">
+                        <div class="silicon-atom">Si</div>
+                        <div class="silicon-atom">Si</div>
+                        <div class="silicon-atom">Si</div>
+                        <div class="silicon-atom">Si</div>
+                        <div class="silicon-atom">Si</div>
+                        <div class="silicon-atom">Si</div>
+                        <div class="silicon-atom">Si</div>
+                        <div class="silicon-atom">Si</div>
+                    </div>
+                    <div style="margin-top: 15px; color: var(--si-primary); font-family: 'Orbitron', monospace;">372 mAh/g</div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                    <div style="font-size: 2rem;">→</div>
+                    <div class="expansion-factor" style="color: var(--si-danger);">+300%</div>
+                </div>
+
+                <div class="particle-group">
+                    <div class="particle-label">Silicon (Fully Lithiated)</div>
+                    <div class="atom-grid expanded" id="si-lithiated">
+                        <div class="silicon-atom" style="transform: scale(1.4);">
+                            Si
+                            <div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px;">
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                            </div>
+                        </div>
+                        <div class="silicon-atom" style="transform: scale(1.4);">
+                            Si
+                            <div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px;">
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                            </div>
+                        </div>
+                        <div class="silicon-atom" style="transform: scale(1.4);">
+                            Si
+                            <div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px;">
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                            </div>
+                        </div>
+                        <div class="silicon-atom" style="transform: scale(1.4);">
+                            Si
+                            <div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px;">
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                            </div>
+                        </div>
+                        <div class="silicon-atom" style="transform: scale(1.4);">
+                            Si
+                            <div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px;">
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                            </div>
+                        </div>
+                        <div class="silicon-atom" style="transform: scale(1.4);">
+                            Si
+                            <div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px;">
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                            </div>
+                        </div>
+                        <div class="silicon-atom" style="transform: scale(1.4);">
+                            Si
+                            <div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px;">
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                            </div>
+                        </div>
+                        <div class="silicon-atom" style="transform: scale(1.4);">
+                            Si
+                            <div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px;">
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                                <div class="li-atom"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; color: var(--si-danger); font-family: 'Orbitron', monospace;">4200 mAh/g</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Problems Section -->
+        <section class="section-panel" id="problems" style="display: none;">
+            <h3>The Grand Challenge: Why Silicon Fails</h3>
+            <p style="color: var(--si-text-dim); margin-bottom: 20px;">Despite 11x capacity advantage, silicon faces four critical failure mechanisms that have blocked commercialization for decades.</p>
+
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <span class="severity">CRITICAL</span>
+                    <h4>Mechanical Fracture</h4>
+                    <p>~300% volume expansion causes massive mechanical stress. Silicon particles crack, lose electrical contact, and become electrochemically inactive. The electrode literally disintegrates after just 100-200 cycles.</p>
+                </div>
+
+                <div class="problem-card">
+                    <span class="severity">CRITICAL</span>
+                    <h4>SEI Instability</h4>
+                    <p>Volume changes crack the SEI layer repeatedly, exposing fresh silicon surface. Each crack heals by consuming electrolyte and Li⁺ ions, rapidly depleting the cyclable lithium inventory. SEI grows uncontrolled.</p>
+                </div>
+
+                <div class="problem-card">
+                    <span class="severity">HIGH</span>
+                    <h4>Lithium Dendrite Formation</h4>
+                    <p>At high lithiation rates, Li⁺ plating can occur preferentially on silicon surface, forming dendritic structures. These dendrites can penetrate the separator, causing internal short circuits and thermal runaway.</p>
+                </div>
+
+                <div class="problem-card">
+                    <span class="severity">MODERATE</span>
+                    <h4>Low Electrical Conductivity</h4>
+                    <p>Silicon's conductivity (1.0×10⁻³ S/cm) is 7 orders of magnitude lower than graphite (2.6×10⁴ S/cm). This limits rate capability unless specialized conductive additives or nanostructuring is used.</p>
+                </div>
+
+                <div class="problem-card">
+                    <span class="severity">MODERATE</span>
+                    <h4>First Cycle Coulombic Loss</h4>
+                    <p>Silicon shows ~30% irreversible capacity loss in the first cycle due to Li⁺ consumption in SEI formation and irreversible lithium alloying. This reduces practical energy density advantage.</p>
+                </div>
+
+                <div class="problem-card">
+                    <span class="severity">MODERATE</span>
+                    <h4>Electrolyte Decomposition</h4>
+                    <p>Silicon's low lithiation potential (0.1-0.4V vs Li/Li⁺) is close to Li plating potential. Combined with mechanical instability, this triggers accelerated electrolyte decomposition at the electrode interface.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Solutions Section -->
+        <section class="section-panel" id="solutions" style="display: none;">
+            <h3>Engineering Solutions: From Lab to Market</h3>
+            <p style="color: var(--si-text-dim); margin-bottom: 20px;">Researchers have developed multiple strategies to harness silicon's capacity while mitigating its failure modes. The most promising approaches are now reaching commercialization.</p>
+
+            <div class="solutions-grid">
+                <div class="solution-card">
+                    <h4>Nanostructuring</h4>
+                    <p>Nanoscale silicon ( nanowires, nanotubes, nanoparticles) can accommodate strain without fracturing. Silicon nanowires show 3000+ cycles. Nanostructures also reduce Li⁺ diffusion paths.</p>
+                    <span class="efficiency">Si nanowires: 3000+ cycles</span>
+                </div>
+
+                <div class="solution-card">
+                    <h4>Silicon-Graphite Composites</h4>
+                    <p>Hybrid anodes with 5-15% Si content in graphite matrix combine high capacity with structural stability. The graphite buffer accommodates Si expansion. Industry standard: 5-10% Si in graphite.</p>
+                    <span class="efficiency">Industry Standard 2024</span>
+                </div>
+
+                <div class="solution-card">
+                    <h4>Pre-Lithiation</h4>
+                    <p>Pre-lithiating silicon anodes in the factory adds cyclable lithium upfront, compensating for first-cycle losses. Techniques include Li metal foil contact, electrochemical pre-lithiation, or stabilized lithium powder.</p>
+                    <span class="efficiency">+5-8% First Cycle Efficiency</span>
+                </div>
+
+                <div class="solution-card">
+                    <h4>Silicon-Carbon Composites</h4>
+                    <p>Si nanoparticles embedded in carbon matrix (Si/C composites) provide electrical conductivity and mechanical support. Carbon coating prevents direct Si-electrolyte contact, stabilizing SEI. Common in Tesla 4680 cells.</p>
+                    <span class="efficiency">Tesla 4680 cells use Si/C</span>
+                </div>
+
+                <div class="solution-card">
+                    <h4>Advanced Binders</h4>
+                    <p>Novel polymer binders (alginate, CMC, PAA, PVDF-HFP) with stretchability and self-healing properties maintain electrode integrity. Super-P carbon black conductive additives improve electronic conduction.</p>
+                    <span class="efficiency">10x Adhesion vs PVDF</span>
+                </div>
+
+                <div class="solution-card">
+                    <h4>Artificial SEI Coatings</h4>
+                    <p>Pre-formed SEI via ALD Al₂O₃, TiO₂, or LiNbO₃ coatings protects Si from direct electrolyte contact. These artificial SEI layers are mechanically robust and electronically insulating but Li⁺ permeable.</p>
+                    <span class="efficiency">ALD涂层: &lt;5nm uniform</span>
+                </div>
+
+                <div class="solution-card">
+                    <h4>Electrolyte Additives</h4>
+                    <p>FEC (fluoroethylene carbonate) additive forms more stable SEI with higher LiF content. Other additives (VC, PS, LiDFOB) further improve SEI quality and reduce impedance growth.</p>
+                    <span class="efficiency">FEC improves cycle life 3-5x</span>
+                </div>
+
+                <div class="solution-card">
+                    <h4>Silicon Alloy anodes</h4>
+                    <p>Si alloy anodes (Si-Sn, Si-Fe, Si-Ti) offer improved stability by forming secondary phases that buffer volume changes. Companies like Elysix are developing Si-Fe alloys with 1500 mAh/g.</p>
+                    <span class="efficiency">Si-Fe alloys: 1500 mAh/g</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dendrite Simulator -->
+        <section class="section-panel" id="dendrite" style="display: none;">
+            <h3>Li Dendrite Growth Simulator</h3>
+            <p style="color: var(--si-text-dim); margin-bottom: 20px;">Dendrite formation occurs when Li⁺ plating rate exceeds Li⁺ diffusion rate at the electrode surface. Adjust parameters to see how operational conditions affect dendrite risk.</p>
+
+            <div class="dendrite-sim">
+                <div class="sim-controls">
+                    <div class="control-group">
+                        <label>Current Density (mA/cm²): <span id="current-val">2.0</span></label>
+                        <input type="range" id="current-density" min="0.5" max="5" step="0.1" value="2.0">
+                    </div>
+                    <div class="control-group">
+                        <label>Temperature (°C): <span id="temp-val">25</span></label>
+                        <input type="range" id="temperature" min="0" max="60" step="1" value="25">
+                    </div>
+                    <div class="control-group">
+                        <label>Si Content (%): <span id="si-val">10</span></label>
+                        <input type="range" id="si-content" min="0" max="100" step="5" value="10">
+                    </div>
+                    <div class="control-group">
+                        <label>Electrolyte Conductivity (mS/cm): <span id="cond-val">10.0</span></label>
+                        <input type="range" id="conductivity" min="5" max="20" step="0.5" value="10.0">
+                    </div>
+                </div>
+
+                <div class="sim-display">
+                    <canvas id="dendrite-canvas" class="sim-canvas"></canvas>
+                </div>
+
+                <div class="sim-metrics">
+                    <div class="metric">
+                        <div class="metric-value" id="risk-index">LOW</div>
+                        <div class="metric-label">Dendrite Risk</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="plating-rate">0.12</div>
+                        <div class="metric-label">Li Plating Rate (nm/s)</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="diffusion-rate">0.45</div>
+                        <div class="metric-label">Li Diffusion Rate (nm/s)</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="safety-factor">3.8</div>
+                        <div class="metric-label">Safety Factor</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Companies Section -->
+        <section class="section-panel" id="companies" style="display: none;">
+            <h3>Commercialization Race: Si-Anode Companies</h3>
+            <p style="color: var(--si-text-dim); margin-bottom: 20px;">Multiple companies are pursuing different strategies to commercialize silicon anodes. The race is heating up with several approaches reaching production readiness.</p>
+
+            <div class="company-grid">
+                <div class="company-card">
+                    <div class="company-logo">⏺ TESLA</div>
+                    <div class="approach">Si-Graphite composite in 4680 cells. Anode: 95% graphite + 5% Si. Teased 100% Si-anode future.</div>
+                    <span class="status prototype">Production</span>
+                    <div class="funding">
+                        <div>Self-funded (Market Cap: $800B+)</div>
+                        <div class="funding-bar"><div class="funding-fill" style="width: 95%;"></div></div>
+                    </div>
+                </div>
+
+                <div class="company-card">
+                    <div class="company-logo">⏺ SIENNA</div>
+                    <div class="approach">Si-dominant anodes (50%+ Si) using proprietary porous silicon structure. 3D conductivity network.</div>
+                    <span class="status pilot">Pilot</span>
+                    <div class="funding">
+                        <div>Funding: Series B $75M</div>
+                        <div class="filing-bar"><div class="funding-fill" style="width: 45%;"></div></div>
+                    </div>
+                </div>
+
+                <div class="company-card">
+                    <div class="company-logo">⏺ AMPRIUS</div>
+                    <div class="approach">Si nanowire anodes. 100% Si, 450 Wh/kg achieved. Used in high-altitude UAVs.</div>
+                    <span class="status prototype">Limited Production</span>
+                    <div class="funding">
+                        <div>Public (AMPX)</div>
+                        <div class="funding-bar"><div class="funding-fill" style="width: 60%;"></div></div>
+                    </div>
+                </div>
+
+                <div class="company-card">
+                    <div class="company-logo">⏺ ENOVIX</div>
+                    <div class="approach">3D Si anode architecture with constrained expansion. 100% Si in 3D structure.</div>
+                    <span class="status prototype">Commercial 2025E</span>
+                    <div class="funding">
+                        <div>Public (ENVX), $245M raised</div>
+                        <div class="funding-bar"><div class="funding-fill" style="width: 70%;"></div></div>
+                    </div>
+                </div>
+
+                <div class="company-card">
+                    <div class="company-logo">⏺ ELYSIX</div>
+                    <div class="approach">Si-Fe alloy anodes. Scalable manufacturing via gas-atomization. 1500 mAh/g target.</div>
+                    <span class="status pilot">Pilot</span>
+                    <div class="funding">
+                        <div>Series A $12M</div>
+                        <div class="funding-bar"><div class="funding-fill" style="width: 30%;"></div></div>
+                    </div>
+                </div>
+
+                <div class="company-card">
+                    <div class="company-logo">⏺ ONEVIZION</div>
+                    <div class="approach">Si nanoparticle dispersion in graphite. 10-15% Si loading, improved cycle life.</div>
+                    <span class="status pilot">Pilot</span>
+                    <div class="funding">
+                        <div>Series A $8M</div>
+                        <div class="funding-bar"><div class="funding-fill" style="width: 25%;"></div></div>
+                    </div>
+                </div>
+
+                <div class="company-card">
+                    <div class="company-logo">⏺ NEXCELL</div>
+                    <div class="approach">Si-conductive polymer composite anodes. Self-healing binder technology.</div>
+                    <span class="status research">R&D</span>
+                    <div class="funding">
+                        <div>Seed $5M</div>
+                        <div class="funding-bar"><div class="funding-fill" style="width: 15%;"></div></div>
+                    </div>
+                </div>
+
+                <div class="company-card">
+                    <div class="company-logo">⏺ SION POWER</div>
+                    <div class="approach">Si-Li alloy anodes for军用. Proprietary protected lithium anode (PLA) technology.</div>
+                    <span class="status prototype">Prototype</span>
+                    <div class="funding">
+                        <div>Private, Defense contracts</div>
+                        <div class="funding-bar"><div class="funding-fill" style="width: 40%;"></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Research Timeline -->
+        <section class="section-panel" id="timeline" style="display: none;">
+            <h3>Silicon Anode Research Timeline</h3>
+            <p style="color: var(--si-text-dim); margin-bottom: 20px;">From academic curiosity to commercialization — the silicon anode journey spans over two decades of intensive research and development.</p>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-year">2002</div>
+                    <h4>First Si Nanowire Demonstration</h4>
+                    <p>Prof. Yi Cui's group at Stanford demonstrates Si nanowires with 3000+ cycle life. Nanostructuring approach shows the path forward.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2007</div>
+                    <h4>Si Nanoparticle Composites</h4>
+                    <p>Research shows Si nanoparticles in carbon matrix can survive 100+ cycles. First commercial interest emerges.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2010</div>
+                    <h4>Amprius Si Nanowire Commercialization</h4>
+                    <p>Amprius commercializes Si nanowire anodes for consumer electronics. First Si-dominant commercial product.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2013</div>
+                    <h4>FEC Additive Discovery</h4>
+                    <p>Fluoroethylene carbonate (FEC) identified as critical SEI stabilizer for Si anodes. Cycle life improves 3-5x.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2016</div>
+                    <h4>Tesla 4680 Announcement</h4>
+                    <p>Tesla announces 4680 cells with Si anode. Industry race accelerates. Integration of Si-graphite composites begins.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2020</div>
+                    <h4>Enovix 3D Si Architecture</h4>
+                    <p>Enovix demonstrates 100% Si 3D architecture with constrained expansion. 100% Si with cycle life >500 cycles.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2023</div>
+                    <h4>Tesla 4680 Production</h4>
+                    <p>Tesla begins 4680 cell production at Giga Texas. Si-graphite composite anodes in mass production EVs.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2025E</div>
+                    <h4>Si-Dominant Commercialization</h4>
+                    <p>Multiple companies targeting Si-dominant (>50% Si) commercial cells. Energy density targets: 400+ Wh/kg.</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2028E</div>
+                    <h4>100% Si Anode EVs</h4>
+                    <p>First EVs with 100% Si anodes expected. Industry transitions to Si-graphite → Si-dominant → 100% Si roadmap.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Physics Equations -->
+        <section class="section-panel" id="physics" style="display: none;">
+            <h3>Silicon Lithiation Physics: Key Equations</h3>
+            <p style="color: var(--si-text-dim); margin-bottom: 20px;">Understanding silicon anode behavior requires mastery of electrochemistry, mechanics, and materials science. Here are the fundamental equations governing Si lithiation.</p>
+
+            <div class="equations-grid">
+                <div class="equation-card">
+                    <div class="eq-name">Silicon Lithiation Reaction</div>
+                    <div class="eq-formula">Si + 3.75Li⁺ + 3.75e⁻ → Li₁₅Si₄</div>
+                    <div class="eq-desc">The final lithiated phase is Li₁₅Si₄, giving 3579 mAh/g practical capacity. This represents the "charged" state of a Si anode.</div>
+                </div>
+
+                <div class="equation-card">
+                    <div class="eq-name">Volume Expansion</div>
+                    <div class="eq-formula">ΔV/V₀ = (V_Li₁₅Si₄ - V_Si)/V_Si ≈ 3.0</div>
+                    <div class="eq-desc">300% volume expansion from Si to Li₁₅Si₄. This isotropic expansion creates mechanical stress σ ≈ E·ε that can fracture the particle.</div>
+                </div>
+
+                <div class="equation-card">
+                    <div class="eq-name">Diffusion Limited Current</div>
+                    <div class="eq-formula">i_lim = zFDc₀/δ</div>
+                    <div class="eq-desc">Maximum current density before Li⁺ depletion at electrode surface. When i > i_lim, concentration gradient ∂c/∂x → 0 at surface, triggering Li plating.</div>
+                </div>
+
+                <div class="equation-card">
+                    <div class="eq-name">Sand's Time (Dendrite Initiation)</div>
+                    <div class="eq-formula">τ = πD(zeF c₀)²/(2J)²</div>
+                    <div class="eq-desc">Time to Li depletion at electrode surface. Dendrites initiate when τ is short relative to plating duration. Decreases with higher J (current density).</div>
+                </div>
+
+                <div class="equation-card">
+                    <div class="eq-name">Butler-Volmer (Lithiation Kinetics)</div>
+                    <div class="eq-formula">j = j₀[exp(-αₐzFη/RT) - exp(αₐzFη/RT)]</div>
+                    <div class="eq-desc">Exchange current density j₀ for Si lithiation. Overpotential η drives the reaction. Si shows lower j₀ than graphite, requiring careful electrode design.</div>
+                </div>
+
+                <div class="equation-card">
+                    <div class="eq-name">SEI Growth (Solvent Reduction)</div>
+                    <div class="eq-formula">d_SEI/d t = k₀·exp(-Ea/RT)·exp(βη)</div>
+                    <div class="eq-desc">SEI growth rate follows Arrhenius temperature dependence and exponential overpotential dependence. FEC additive reduces growth rate k₀ by forming LiF-rich SEI.</div>
+                </div>
+
+                <div class="equation-card">
+                    <div class="eq-name">Mechanical Stress Generation</div>
+                    <div class="eq-formula">σ = E/(1-ν)·(ΔV/V₀)</div>
+                    <div class="eq-desc"> hoop stress σ generated by volume expansion. E (Young's modulus ~90 GPa for Si) and ν (Poisson's ratio ~0.28) determine stress magnitude.</div>
+                </div>
+
+                <div class="equation-card">
+                    <div class="eq-name">Fracture Criterion</div>
+                    <div class="eq-formula">σ > σ_f (fracture strength ~1 GPa for Si)</div>
+                    <div class="eq-desc">Fracture occurs when mechanical stress exceeds fracture strength. Nanostructuring reduces stress concentration and prevents crack propagation.</div>
+                </div>
+            </div>
+
+            <!-- Silicon Lattice Visualization -->
+            <div class="lattice-container" style="margin-top: 30px;">
+                <h4 style="color: var(--si-primary); margin-bottom: 15px;">Interactive Silicon Lattice: Click to Lithiate</h4>
+                <p style="color: var(--si-text-dim); margin-bottom: 20px; font-size: 0.9rem;">Click anywhere on the lattice to inject Li⁺ ions. Watch as silicon atoms lithiate (color change) and expand. Dendrites form when Li plating rate exceeds diffusion.</p>
+                <canvas id="lattice-canvas" class="lattice-canvas"></canvas>
+                <div class="lattice-legend">
+                    <div class="legend-item"><div class="legend-dot si"></div>Silicon Atom (Si)</div>
+                    <div class="legend-item"><div class="legend-dot li"></div>Lithium Ion (Li⁺) - incoming</div>
+                    <div class="legend-item"><div class="legend-dot li-intercalated"></div>Lithiated Silicon (LiSi)</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>Silicon Anode Research Lab — Part of Virtual World's Battery Science District</p>
+        <p class="physics-note">"The 400% capacity promise of silicon anodes represents one of the most challenging yet rewarding frontiers in battery science."</p>
+    </footer>
+
+    <script>
+        // Section Navigation
+        function showSection(section) {
+            const sections = ['overview', 'problems', 'solutions', 'dendrite', 'companies', 'timeline', 'physics'];
+            const navBtns = document.querySelectorAll('nav button');
+
+            // Hide all sections
+            sections.forEach(s => {
+                const el = document.getElementById(s);
+                if (el) el.style.display = 'none';
+            });
+
+            // Show selected section
+            const target = document.getElementById(section);
+            if (target) target.style.display = 'block';
+
+            // Update nav
+            navBtns.forEach((btn, i) => {
+                btn.classList.toggle('active', sections[i] === section);
+            });
+
+            // Reinitialize canvas if needed
+            if (section === 'dendrite') initDendriteSim();
+            if (section === 'physics') initLatticeSim();
+        }
+
+        // Dendrite Simulator
+        let dendriteCanvas, dendriteCtx;
+        let dendriteAnimating = false;
+
+        function initDendriteSim() {
+            dendriteCanvas = document.getElementById('dendrite-canvas');
+            if (!dendriteCanvas) return;
+
+            dendriteCtx = dendriteCanvas.getContext('2d');
+            const container = dendriteCanvas.parentElement;
+            dendriteCanvas.width = container.offsetWidth;
+            dendriteCanvas.height = container.offsetHeight || 300;
+
+            drawDendrite();
+        }
+
+        function drawDendrite() {
+            const current = parseFloat(document.getElementById('current-density').value);
+            const temp = parseFloat(document.getElementById('temperature').value);
+            const si = parseFloat(document.getElementById('si-content').value);
+            const cond = parseFloat(document.getElementById('conductivity').value);
+
+            const ctx = dendriteCtx;
+            const w = dendriteCanvas.width;
+            const h = dendriteCanvas.height;
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(0, 0, w, h);
+
+            // Draw electrode
+            ctx.fillStyle = '#333';
+            ctx.fillRect(0, h * 0.7, w, h * 0.1);
+
+            // Draw separator
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.fillRect(0, h * 0.3, w, h * 0.4);
+
+            // Calculate metrics
+            const platingRate = current * 0.06 * (1 + 0.02 * (temp - 25));
+            const diffusionRate = cond * 0.05 * (1 + 0.03 * (temp - 25));
+            const safetyFactor = diffusionRate / platingRate;
+
+            // Risk assessment
+            let risk = 'LOW';
+            let riskColor = '#00ff88';
+            if (safetyFactor < 1.5) { risk = 'HIGH'; riskColor = '#ff0040'; }
+            else if (safetyFactor < 3) { risk = 'MEDIUM'; riskColor = '#ff6b35'; }
+
+            // Update metrics
+            document.getElementById('risk-index').textContent = risk;
+            document.getElementById('risk-index').style.color = riskColor;
+            document.getElementById('plating-rate').textContent = platingRate.toFixed(2);
+            document.getElementById('diffusion-rate').textContent = diffusionRate.toFixed(2);
+            document.getElementById('safety-factor').textContent = safetyFactor.toFixed(1);
+
+            // Dendrite visualization
+            const dendriteIntensity = Math.max(0, 1 - safetyFactor / 5);
+
+            if (dendriteIntensity > 0.1) {
+                ctx.strokeStyle = riskColor;
+                ctx.lineWidth = 2;
+
+                const baseX = w * 0.5;
+                const baseY = h * 0.7;
+
+                for (let i = 0; i < Math.floor(dendriteIntensity * 5); i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(baseX + (i - 2) * 30, baseY);
+
+                    let x = baseX + (i - 2) * 30;
+                    let y = baseY;
+
+                    for (let j = 0; j < 15; j++) {
+                        x += (Math.random() - 0.5) * 20;
+                        y -= 10 + Math.random() * 15;
+                        ctx.lineTo(x, y);
+
+                        if (y < h * 0.3) break;
+                    }
+                    ctx.stroke();
+                }
+
+                // Li+ ions
+                ctx.fillStyle = 'rgba(255, 45, 123, 0.6)';
+                for (let i = 0; i < Math.floor(dendriteIntensity * 30); i++) {
+                    const x = Math.random() * w;
+                    const y = h * 0.3 + Math.random() * h * 0.4;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Li+ ions floating
+            ctx.fillStyle = 'rgba(0, 212, 255, 0.5)';
+            for (let i = 0; i < 20; i++) {
+                const x = (Date.now() / 50 + i * 50) % w;
+                const y = h * 0.3 + Math.sin(Date.now() / 500 + i) * 50 + 50;
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Label
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Rajdhani';
+            ctx.fillText('Anode', 10, h * 0.75);
+            ctx.fillText('Separator', 10, h * 0.5);
+            ctx.fillText('Cathode', 10, h * 0.35);
+
+            if (dendriteAnimating) {
+                requestAnimationFrame(drawDendrite);
+            }
+        }
+
+        function startDendriteSim() {
+            dendriteAnimating = true;
+            drawDendrite();
+        }
+
+        function stopDendriteSim() {
+            dendriteAnimating = false;
+        }
+
+        // Dendrite controls
+        ['current-density', 'temperature', 'si-content', 'conductivity'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', () => {
+                    document.getElementById(id.replace('-density', '-val').replace('-content', '-val').replace('current', 'current').replace('temperature', 'temp').replace('conductivity', 'cond')).textContent = el.value;
+                    if (id === 'current-density') document.getElementById('current-val').textContent = el.value;
+                    if (id === 'temperature') document.getElementById('temp-val').textContent = el.value;
+                    if (id === 'si-content') document.getElementById('si-val').textContent = el.value;
+                    if (id === 'conductivity') document.getElementById('cond-val').textContent = el.value;
+                    if (dendriteAnimating) drawDendrite();
+                });
+            }
+        });
+
+        // Lattice Simulator
+        let latticeCanvas, latticeCtx;
+        let latticeAtoms = [];
+
+        function initLatticeSim() {
+            latticeCanvas = document.getElementById('lattice-canvas');
+            if (!latticeCanvas) return;
+
+            latticeCtx = latticeCanvas.getContext('2d');
+            latticeCanvas.width = latticeCanvas.offsetWidth;
+            latticeCanvas.height = latticeCanvas.offsetHeight || 350;
+
+            // Initialize Si lattice
+            latticeAtoms = [];
+            const spacing = 40;
+            const cols = Math.floor(latticeCanvas.width / spacing) - 2;
+            const rows = Math.floor(latticeCanvas.height / spacing) - 2;
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    latticeAtoms.push({
+                        x: c * spacing + spacing * 1.5,
+                        y: r * spacing + spacing * 1.5,
+                        lithiated: false,
+                        originalX: c * spacing + spacing * 1.5,
+                        originalY: r * spacing + spacing * 1.5
+                    });
+                }
+            }
+
+            latticeCanvas.addEventListener('click', lithiateAtoms);
+            drawLattice();
+        }
+
+        function lithiateAtoms(e) {
+            const rect = latticeCanvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            latticeAtoms.forEach(atom => {
+                const dist = Math.sqrt((atom.x - clickX) ** 2 + (atom.y - clickY) ** 2);
+                if (dist < 80) {
+                    atom.lithiated = true;
+                    // Expand position
+                    atom.x = atom.originalX + (atom.x - atom.originalX) * 1.3;
+                    atom.y = atom.originalY + (atom.y - atom.originalY) * 1.3;
+                }
+            });
+        }
+
+        function drawLattice() {
+            const ctx = latticeCtx;
+            const w = latticeCanvas.width;
+            const h = latticeCanvas.height;
+
+            ctx.fillStyle = 'rgba(10, 10, 20, 1)';
+            ctx.fillRect(0, 0, w, h);
+
+            // Draw bonds
+            ctx.strokeStyle = 'rgba(0, 212, 255, 0.2)';
+            ctx.lineWidth = 1;
+            latticeAtoms.forEach((atom, i) => {
+                const col = i % Math.floor(w / 40);
+                const row = Math.floor(i / Math.floor(w / 40));
+                const right = latticeAtoms[i + 1];
+                const down = latticeAtoms[i + Math.floor(w / 40)];
+
+                if (right && col < Math.floor(w / 40) - 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(atom.x, atom.y);
+                    ctx.lineTo(right.x, right.y);
+                    ctx.stroke();
+                }
+                if (down) {
+                    ctx.beginPath();
+                    ctx.moveTo(atom.x, atom.y);
+                    ctx.lineTo(down.x, down.y);
+                    ctx.stroke();
+                }
+            });
+
+            // Draw atoms
+            latticeAtoms.forEach(atom => {
+                ctx.beginPath();
+                ctx.arc(atom.x, atom.y, atom.lithiated ? 18 : 15, 0, Math.PI * 2);
+
+                if (atom.lithiated) {
+                    const gradient = ctx.createRadialGradient(atom.x, atom.y, 0, atom.x, atom.y, 18);
+                    gradient.addColorStop(0, '#00ff88');
+                    gradient.addColorStop(1, '#00aa55');
+                    ctx.fillStyle = gradient;
+                } else {
+                    const gradient = ctx.createRadialGradient(atom.x, atom.y, 0, atom.x, atom.y, 15);
+                    gradient.addColorStop(0, '#00d4ff');
+                    gradient.addColorStop(1, '#0088aa');
+                    ctx.fillStyle = gradient;
+                }
+                ctx.fill();
+
+                // Glow
+                ctx.shadowColor = atom.lithiated ? '#00ff88' : '#00d4ff';
+                ctx.shadowBlur = 15;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+
+            // Floating Li+ ions
+            const time = Date.now() / 1000;
+            ctx.fillStyle = 'rgba(255, 45, 123, 0.7)';
+            for (let i = 0; i < 15; i++) {
+                const x = (w * 0.1) + ((time * 50 + i * 70) % (w * 0.8));
+                const y = h * 0.5 + Math.sin(time * 2 + i) * 80;
+                ctx.beginPath();
+                ctx.arc(x, y, 6, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            requestAnimationFrame(drawLattice);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Show overview by default
+            showSection('overview');
+        });
+    </script>
+</body>
+</html>

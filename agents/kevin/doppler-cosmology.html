@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doppler Cosmology — Expanding Universe Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Space Mono', monospace;
+            background: #0a0a12;
+            color: #e0e0f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0a0a12 0%, #1a1a2e 50%, #0a0a12 100%);
+        }
+        .hero canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem;
+        }
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            background: linear-gradient(90deg, #00d4ff, #a855f7, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 60px rgba(0, 212, 255, 0.5);
+        }
+        .hero .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0c0;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+        .hero .physics-eq {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.5rem;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+        }
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+        .scroll-indicator span {
+            display: block;
+            width: 30px;
+            height: 50px;
+            border: 2px solid #a855f7;
+            border-radius: 15px;
+            position: relative;
+        }
+        .scroll-indicator span::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            background: #a855f7;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            animation: scroll-dot 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+        @keyframes scroll-dot {
+            0% { opacity: 1; top: 10px; }
+            100% { opacity: 0; top: 30px; }
+        }
+        .controls-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(20, 20, 40, 0.95);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            z-index: 100;
+            min-width: 280px;
+            backdrop-filter: blur(10px);
+        }
+        .controls-panel h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: #00d4ff;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+        .control-group {
+            margin-bottom: 1rem;
+        }
+        .control-group label {
+            display: block;
+            color: #a0a0c0;
+            font-size: 0.75rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, #1a1a2e, #a855f7);
+            border-radius: 3px;
+            outline: none;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #00d4ff, #a855f7);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+        .value-display {
+            text-align: right;
+            color: #f59e0b;
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+        }
+        .mode-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .mode-tab {
+            flex: 1;
+            padding: 0.6rem 0.3rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 6px;
+            color: #a0a0c0;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .mode-tab:hover, .mode-tab.active {
+            background: rgba(0, 212, 255, 0.3);
+            color: #00d4ff;
+            border-color: #00d4ff;
+        }
+        .section {
+            min-height: 100vh;
+            padding: 4rem 2rem;
+            position: relative;
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .section-header h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d4ff, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+        .section-header p {
+            color: #a0a0c0;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .viz-card {
+            background: linear-gradient(135deg, rgba(20, 20, 40, 0.8), rgba(30, 30, 60, 0.6));
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .viz-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00d4ff, #a855f7, #f59e0b);
+        }
+        .viz-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: #00d4ff;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+        .viz-card canvas {
+            width: 100%;
+            height: 250px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .equation-box {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+        .equation-box .eq {
+            font-size: 1.4rem;
+            color: #f59e0b;
+            font-family: 'Space Mono', monospace;
+        }
+        .equation-box .eq-label {
+            font-size: 0.75rem;
+            color: #a0a0c0;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .info-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        .info-item .value {
+            font-size: 1.5rem;
+            color: #a855f7;
+            font-weight: bold;
+        }
+        .info-item .label {
+            font-size: 0.7rem;
+            color: #a0a0c0;
+            text-transform: uppercase;
+            margin-top: 0.3rem;
+        }
+        .redshift-scale {
+            height: 40px;
+            background: linear-gradient(90deg,
+                #0000ff 0%,
+                #00ff00 20%,
+                #ffff00 40%,
+                #ff8800 60%,
+                #ff0000 80%,
+                #880000 100%
+            );
+            border-radius: 8px;
+            position: relative;
+            margin: 2rem 0;
+        }
+        .redshift-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #a0a0c0;
+        }
+        .timeline {
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #00d4ff, #a855f7, #f59e0b);
+            transform: translateX(-50%);
+        }
+        .timeline-item {
+            display: flex;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        .timeline-item:nth-child(odd) {
+            flex-direction: row-reverse;
+        }
+        .timeline-content {
+            width: 45%;
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        .timeline-content .year {
+            font-family: 'Orbitron', sans-serif;
+            color: #00d4ff;
+            font-size: 1.2rem;
+        }
+        .timeline-content h4 {
+            color: #a855f7;
+            margin: 0.5rem 0;
+        }
+        .timeline-content p {
+            color: #a0a0c0;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            top: 1.5rem;
+            width: 16px;
+            height: 16px;
+            background: #a855f7;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+        }
+        .universe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .universe-card {
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .universe-card h4 {
+            font-family: 'Orbitron', sans-serif;
+            color: #f59e0b;
+            margin-bottom: 1rem;
+        }
+        .universe-card .size {
+            font-size: 2rem;
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+        }
+        .universe-card p {
+            color: #a0a0c0;
+            font-size: 0.85rem;
+        }
+        .drake-equation {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .drake-equation .formula {
+            font-size: 2rem;
+            color: #f59e0b;
+            text-align: center;
+            font-family: 'Space Mono', monospace;
+            padding: 1.5rem;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        .drake-factors {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        .drake-factor {
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        .drake-factor .symbol {
+            font-size: 1.5rem;
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+        }
+        .drake-factor .name {
+            font-size: 0.75rem;
+            color: #a855f7;
+            margin-bottom: 0.3rem;
+        }
+        .drake-factor .value {
+            font-size: 0.9rem;
+            color: #f59e0b;
+        }
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00d4ff, #a855f7, #f59e0b);
+            z-index: 1000;
+            transition: width 0.1s;
+        }
+        .cosmic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: #0a0a12;
+        }
+        footer {
+            background: rgba(20, 20, 40, 0.9);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(0, 212, 255, 0.2);
+        }
+        footer p {
+            color: #a0a0c0;
+            font-size: 0.85rem;
+        }
+        footer .quote {
+            font-family: 'Orbitron', sans-serif;
+            color: #a855f7;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .controls-panel {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin: 1rem;
+                min-width: auto;
+            }
+            .content-grid { grid-template-columns: 1fr; }
+            .timeline::before { left: 20px; }
+            .timeline-item { flex-direction: column !important; padding-left: 50px; }
+            .timeline-content { width: 100%; }
+            .timeline-dot { left: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+    <canvas class="cosmic-bg" id="cosmicBg"></canvas>
+
+    <div class="controls-panel" id="controls">
+        <h3>Cosmology Controls</h3>
+        <div class="mode-tabs">
+            <button class="mode-tab active" data-mode="hubble">Hubble</button>
+            <button class="mode-tab" data-mode="redshift">Redshift</button>
+            <button class="mode-tab" data-mode="expansion">Expansion</button>
+            <button class="mode-tab" data-mode="distance">Distance</button>
+        </div>
+        <div class="control-group" id="hubble-controls">
+            <label>Hubble Constant (H₀)</label>
+            <input type="range" id="hubbleConst" min="50" max="100" value="70">
+            <div class="value-display">H₀ = <span id="hubbleVal">70</span> km/s/Mpc</div>
+        </div>
+        <div class="control-group" id="redshift-controls" style="display:none;">
+            <label>Redshift (z)</label>
+            <input type="range" id="redshiftSlider" min="0" max="1000" value="0">
+            <div class="value-display">z = <span id="redshiftVal">0.00</span></div>
+        </div>
+        <div class="control-group" id="expansion-controls" style="display:none;">
+            <label>Time ( billions of years ago)</label>
+            <input type="range" id="timeSlider" min="0" max="13.8" value="13.8" step="0.1">
+            <div class="value-display">t = <span id="timeVal">13.8</span> Gyr ago</div>
+        </div>
+        <div class="control-group" id="distance-controls" style="display:none;">
+            <label>Proper Distance</label>
+            <input type="range" id="distSlider" min="1" max="5000" value="100">
+            <div class="value-display">D = <span id="distVal">100</span> Mpc</div>
+        </div>
+    </div>
+
+    <section class="hero" id="hero">
+        <canvas id="heroCanvas"></canvas>
+        <div class="hero-content">
+            <h1>Doppler Cosmology</h1>
+            <p class="subtitle">Explore the expanding universe through redshift, Hubble's Law, and the cosmic distance ladder</p>
+            <div class="physics-eq">v = H₀ × d &nbsp;&nbsp; z = v/c</div>
+        </div>
+        <div class="scroll-indicator">
+            <span></span>
+        </div>
+    </section>
+
+    <section class="section" id="hubble-section">
+        <div class="section-header">
+            <h2>Hubble's Law</h2>
+            <p>The foundational discovery that revealed our expanding universe. Edwin Hubble's 1929 observations showed that galaxies recede from us with velocity proportional to their distance — the signature of an expanding cosmos.</p>
+        </div>
+        <div class="content-grid">
+            <div class="viz-card">
+                <h3>Velocity vs Distance</h3>
+                <canvas id="hubbleCanvas"></canvas>
+                <div class="equation-box">
+                    <div class="eq">v = H₀ × d</div>
+                    <div class="eq-label">Hubble's Law — Velocity equals Hubble constant times distance</div>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="value" id="recessionVel">0</div>
+                        <div class="label">Recession Velocity (km/s)</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="value" id="distFromHubble">0</div>
+                        <div class="label">Distance (Mpc)</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="value" id="hubbleAge">13.8</div>
+                        <div class="label">Universe Age (Gyr)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="viz-card">
+                <h3>Galaxy Recession Map</h3>
+                <canvas id="galaxyCanvas"></canvas>
+                <p style="color:#a0a0c0;font-size:0.85rem;margin-top:1rem;text-align:center;">
+                    Watch galaxies recede from Earth. Further galaxies move faster, creating the Hubble flow.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="redshift-section">
+        <div class="section-header">
+            <h2>Cosmological Redshift</h2>
+            <p>Light from distant galaxies is stretched by the expansion of spacetime itself — not by Doppler motion through space. This redshift z directly measures how much the universe has expanded since the light was emitted.</p>
+        </div>
+        <div class="content-grid">
+            <div class="viz-card">
+                <h3>Redshift Color Shift</h3>
+                <canvas id="redshiftCanvas"></canvas>
+                <div class="redshift-scale"></div>
+                <div class="redshift-labels">
+                    <span>z = 0 (Present)</span>
+                    <span>z = 0.5</span>
+                    <span>z = 1.0</span>
+                    <span>z = 2.0</span>
+                    <span>z → ∞</span>
+                </div>
+            </div>
+            <div class="viz-card">
+                <h3>Spectral Lines</h3>
+                <canvas id="spectralCanvas"></canvas>
+                <div class="equation-box">
+                    <div class="eq">1 + z = a_now / a_then</div>
+                    <div class="eq-label">Scale factor relationship — universe size ratio at emission vs observation</div>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="value" id="scaleRatio">1.00</div>
+                        <div class="label">a_now / a_then</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="value" id="lookbackTime">0</div>
+                        <div class="label">Lookback Time (Gyr)</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="value" id="comovingDist">0</div>
+                        <div class="label">Comoving Distance (Mpc)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="expansion-section">
+        <div class="section-header">
+            <h2>Expanding Universe</h2>
+            <p>The universe has been expanding for 13.8 billion years. Watch the cosmos evolve from the hot Big Bang to the present — galaxies separating as spacetime itself stretches.</p>
+        </div>
+        <div class="content-grid">
+            <div class="viz-card">
+                <h3>Scale Factor Evolution</h3>
+                <canvas id="scaleCanvas"></canvas>
+                <div class="equation-box">
+                    <div class="eq">a(t) ∝ t^(2/3n)</div>
+                    <div class="eq-label">Matter-dominated expansion: scale factor grows as power of time</div>
+                </div>
+            </div>
+            <div class="viz-card">
+                <h3>Universe in Cross-Section</h3>
+                <canvas id="universeCanvas"></canvas>
+                <p style="color:#a0a0c0;font-size:0.85rem;margin-top:1rem;text-align:center;">
+                    Galaxies embedded in the fabric of spacetime. As space expands, all distances grow.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="distance-section">
+        <div class="section-header">
+            <h2>Cosmic Distance Ladder</h2>
+            <p>Measuring astronomical distances requires creative methods. Each rung of the ladder builds on the previous — from parallax to standard candles like Cepheids and Type Ia supernovae.</p>
+        </div>
+        <div class="content-grid">
+            <div class="viz-card">
+                <h3>Distance Methods</h3>
+                <canvas id="ladderCanvas"></canvas>
+                <div class="info-grid" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));">
+                    <div class="info-item">
+                        <div class="value" style="font-size:1rem;">1 - 1000 pc</div>
+                        <div class="label">Parallax</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="value" style="font-size:1rem;">1 - 50 kpc</div>
+                        <div class="label">Main Sequence</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="value" style="font-size:1rem;">0.3 - 30 Mpc</div>
+                        <div class="label">Cepheids</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="value" style="font-size:1rem;">&lt; 1000 Mpc</div>
+                        <div class="label">Type Ia SNe</div>
+                    </div>
+                </div>
+            </div>
+            <div class="viz-card">
+                <h3>Standard Candles</h3>
+                <canvas id="candleCanvas"></canvas>
+                <div class="equation-box">
+                    <div class="eq">m - M = 5 log₁₀(d/10 pc)</div>
+                    <div class="eq-label">Distance modulus — relates apparent magnitude to absolute magnitude</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="timeline-section">
+        <div class="section-header">
+            <h2>Cosmological Timeline</h2>
+            <p>From the first instant of creation to the present day — the major epochs in cosmic history.</p>
+        </div>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="year">t = 0</div>
+                    <h4>Big Bang</h4>
+                    <p>The universe begins as an infinitely dense singularity. Space, time, and energy emerge from this primordial fireball.</p>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="year">10⁻⁴³ s</div>
+                    <h4>Planck Era</h4>
+                    <p>The smallest measurable time. Quantum gravity dominates. All four fundamental forces are unified.</p>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="year">380,000 yr</div>
+                    <h4>Recombination</h4>
+                    <p>First hydrogen atoms form. Universe becomes transparent. Photons stream freely — this is the CMB we observe today.</p>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="year">200 - 400 Myr</div>
+                    <h4>First Stars</h4>
+                    <p>First generation of stars (Population III) ignite. Reionization begins. Heavy elements start being forged.</p>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="year">9.2 Gyr</div>
+                    <h4>Solar System Forms</h4>
+                    <p>A cloud of gas and dust collapses to form our Sun and planets. Earth begins its journey around the star.</p>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <div class="year">13.8 Gyr</div>
+                    <h4>Today</h4>
+                    <p>The observable universe spans 93 billion light-years. Dark energy dominates, driving accelerating expansion.</p>
+                </div>
+                <div class="timeline-dot"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="scale-section">
+        <div class="section-header">
+            <h2>Cosmic Scale</h2>
+            <p>The universe operates across unimaginable scales — from quantum fluctuations to the large-scale structure of filaments and voids.</p>
+        </div>
+        <div class="universe-grid">
+            <div class="universe-card">
+                <h4>Observable Universe</h4>
+                <div class="size">93 Gly</div>
+                <p>Diameter of the spherical region we can see. Light has had time to travel since the Big Bang.</p>
+            </div>
+            <div class="universe-card">
+                <h4>Galaxy filaments</h4>
+                <div class="size">~100 Mpc</div>
+                <p>The largest structures in the universe. Vast networks of galaxies surrounding cosmic voids.</p>
+            </div>
+            <div class="universe-card">
+                <h4>Milky Way</h4>
+                <div class="size">100,000 ly</div>
+                <p>Our galactic home. Contains 100-400 billion stars. The supermassive black hole Sagittarius A*.</p>
+            </div>
+            <div class="universe-card">
+                <h4>Solar System</h4>
+                <div class="size">50 AU</div>
+                <p>From the Sun to the Kuiper Belt. Voyager 1 is currently about 160 AU from the Sun.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="drake-section">
+        <div class="section-header">
+            <h2>The Fermi Paradox</h2>
+            <p>If intelligent life is common, where is everyone? The Drake equation estimates the number of communicative civilizations in our galaxy.</p>
+        </div>
+        <div class="drake-equation">
+            <div class="formula">N = R★ × fp × ne × fl × fi × fc × L</div>
+            <div class="drake-factors">
+                <div class="drake-factor">
+                    <div class="symbol">R★</div>
+                    <div class="name">Star Formation Rate</div>
+                    <div class="value">~2/yr</div>
+                </div>
+                <div class="drake-factor">
+                    <div class="symbol">fp</div>
+                    <div class="name">Stars with Planets</div>
+                    <div class="value">~0.5-1.0</div>
+                </div>
+                <div class="drake-factor">
+                    <div class="symbol">ne</div>
+                    <div class="name">Habitable Planets/Star</div>
+                    <div class="value">~0.1-0.5</div>
+                </div>
+                <div class="drake-factor">
+                    <div class="symbol">fl</div>
+                    <div class="name">Life Emerges</div>
+                    <div class="value">&lt;0.01 - 1</div>
+                </div>
+                <div class="drake-factor">
+                    <div class="symbol">fi</div>
+                    <div class="name">Intelligent Life</div>
+                    <div class="value">&lt;0.01 - 1</div>
+                </div>
+                <div class="drake-factor">
+                    <div class="symbol">fc</div>
+                    <div class="name">Communicative</div>
+                    <div class="value">&lt;0.01 - 1</div>
+                </div>
+                <div class="drake-factor">
+                    <div class="symbol">L</div>
+                    <div class="name">Civilization Lifetime</div>
+                    <div class="value">100 - 10⁹ yr</div>
+                </div>
+            </div>
+        </div>
+        <div class="viz-card" style="max-width:600px;margin:2rem auto;">
+            <h3>Key Realizations</h3>
+            <div style="color:#a0a0c0;font-size:0.9rem;line-height:1.8;padding:1rem;">
+                <p style="margin-bottom:1rem;"><span style="color:#00d4ff;">Great Filter:</span> Something prevents civilizations from becoming interstellar. Could be behind us (hard steps to life) or ahead (self-destruction, isolation).</p>
+                <p style="margin-bottom:1rem;"><span style="color:#a855f7;">SETI:</span> Search for Extraterrestrial Intelligence uses radio telescopes to listen for intentional broadcasts from other civilizations.</p>
+                <p><span style="color:#f59e0b;">Timeline:</span> Voyager spacecraft will reach nearby stars in 40,000 years. Human radio signals have traveled only 200 light-years.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="quote">"The universe is not only queerer than we suppose, but queerer than we can suppose."</div>
+        <p>— J.B.S. Haldane | Kevin's Physics Laboratory | Doppler Cosmology Explorer</p>
+    </footer>
+
+    <script>
+        const canvas1 = document.getElementById('heroCanvas');
+        const ctx1 = canvas1.getContext('2d');
+        const cosmicBg = document.getElementById('cosmicBg');
+        const ctxBg = cosmicBg.getContext('2d');
+
+        let stars = [];
+        let galaxies = [];
+        let currentMode = 'hubble';
+        let H0 = 70;
+        let redshift = 0;
+        let cosmicTime = 13.8;
+        let properDist = 100;
+
+        function resize() {
+            canvas1.width = window.innerWidth * devicePixelRatio;
+            canvas1.height = window.innerHeight * devicePixelRatio;
+            canvas1.style.width = window.innerWidth + 'px';
+            canvas1.style.height = window.innerHeight + 'px';
+            ctx1.scale(devicePixelRatio, devicePixelRatio);
+            cosmicBg.width = window.innerWidth * devicePixelRatio;
+            cosmicBg.height = window.innerHeight * devicePixelRatio;
+            cosmicBg.style.width = window.innerWidth + 'px';
+            cosmicBg.style.height = window.innerHeight + 'px';
+            ctxBg.scale(devicePixelRatio, devicePixelRatio);
+            initStars();
+        }
+
+        function initStars() {
+            stars = [];
+            for (let i = 0; i < 300; i++) {
+                stars.push({
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    size: Math.random() * 2 + 0.5,
+                    brightness: Math.random()
+                });
+            }
+            galaxies = [];
+            for (let i = 0; i < 8; i++) {
+                galaxies.push({
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    size: 20 + Math.random() * 40,
+                    hue: Math.random() * 60 + 200,
+                    velocity: 0.5 + Math.random() * 2
+                });
+            }
+        }
+
+        function drawCosmicBg() {
+            ctxBg.fillStyle = '#0a0a12';
+            ctxBg.fillRect(0, 0, window.innerWidth, window.innerHeight);
+            stars.forEach(star => {
+                const flicker = 0.7 + Math.sin(Date.now() * 0.003 + star.brightness * 10) * 0.3;
+                ctxBg.fillStyle = `rgba(255, 255, 255, ${star.brightness * flicker})`;
+                ctxBg.beginPath();
+                ctxBg.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctxBg.fill();
+            });
+            galaxies.forEach(gal => {
+                const gradient = ctxBg.createRadialGradient(gal.x, gal.y, 0, gal.x, gal.y, gal.size);
+                gradient.addColorStop(0, `hsla(${gal.hue}, 80%, 60%, 0.8)`);
+                gradient.addColorStop(0.5, `hsla(${gal.hue}, 70%, 40%, 0.4)`);
+                gradient.addColorStop(1, 'transparent');
+                ctxBg.fillStyle = gradient;
+                ctxBg.beginPath();
+                ctxBg.arc(gal.x, gal.y, gal.size, 0, Math.PI * 2);
+                ctxBg.fill();
+            });
+        }
+
+        function drawHero() {
+            ctx1.fillStyle = 'rgba(10, 10, 18, 0.3)';
+            ctx1.fillRect(0, 0, window.innerWidth, window.innerHeight);
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+            const time = Date.now() * 0.001;
+            for (let i = 0; i < 5; i++) {
+                const radius = 50 + i * 60 + Math.sin(time + i) * 10;
+                const alpha = 0.3 - i * 0.05;
+                ctx1.strokeStyle = `rgba(0, 212, 255, ${alpha})`;
+                ctx1.lineWidth = 2;
+                ctx1.beginPath();
+                ctx1.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx1.stroke();
+            }
+            ctx1.strokeStyle = 'rgba(168, 85, 247, 0.4)';
+            ctx1.lineWidth = 1;
+            for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 6) {
+                ctx1.beginPath();
+                ctx1.moveTo(cx, cy);
+                ctx1.lineTo(cx + Math.cos(angle) * 350, cy + Math.sin(angle) * 350);
+                ctx1.stroke();
+            }
+        }
+
+        function drawHubbleCanvas() {
+            const canvas = document.getElementById('hubbleCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.offsetWidth * devicePixelRatio;
+            const h = canvas.height = 250 * devicePixelRatio;
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(0, 0, canvas.offsetWidth, 250);
+            ctx.strokeStyle = 'rgba(0, 212, 255, 0.2)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < canvas.offsetWidth; x += 30) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, 250);
+                ctx.stroke();
+            }
+            for (let y = 0; y < 250; y += 30) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.offsetWidth, y);
+                ctx.stroke();
+            }
+            ctx.strokeStyle = '#00d4ff';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let x = 0; x < canvas.offsetWidth; x++) {
+                const dist = (x / canvas.offsetWidth) * 5000;
+                const vel = H0 * dist / 1000;
+                const y = 200 - (vel / (H0 * 5)) * 180;
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.fillStyle = '#f59e0b';
+            const markerDist = properDist;
+            const markerVel = H0 * markerDist / 1000;
+            const mx = (markerDist / 5000) * canvas.offsetWidth;
+            const my = 200 - (markerVel / (H0 * 5)) * 180;
+            ctx.beginPath();
+            ctx.arc(mx, my, 8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawGalaxyCanvas() {
+            const canvas = document.getElementById('galaxyCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.offsetWidth * devicePixelRatio;
+            const h = canvas.height = 250 * devicePixelRatio;
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(0, 0, canvas.offsetWidth, 250);
+            const cx = canvas.offsetWidth / 2;
+            const cy = 125;
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+            ctx.fill();
+            for (let i = 0; i < 15; i++) {
+                const angle = (i / 15) * Math.PI * 2;
+                const baseDist = 30 + i * 12;
+                const time = Date.now() * 0.001;
+                const dist = baseDist + Math.sin(time + i) * 5;
+                const x = cx + Math.cos(angle) * dist;
+                const y = cy + Math.sin(angle) * dist;
+                const velocity = H0 * baseDist / 100;
+                const hue = 180 + (i * 8);
+                const gradient = ctx.createRadialGradient(x, y, 0, x, y, 8);
+                gradient.addColorStop(0, `hsla(${hue}, 70%, 60%, 0.9)`);
+                gradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(x, y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = `hsla(${hue}, 50%, 40%, 0.3)`;
+                ctx.lineWidth = 1;
+                ctx.setLineDash([2, 4]);
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#a0a0c0';
+                ctx.font = '8px Space Mono';
+                ctx.fillText(`${velocity.toFixed(0)} km/s`, x + 12, y);
+            }
+        }
+
+        function drawRedshiftCanvas() {
+            const canvas = document.getElementById('redshiftCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.offsetWidth * devicePixelRatio;
+            const h = canvas.height = 250 * devicePixelRatio;
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(0, 0, canvas.offsetWidth, 250);
+            const wavelengths = [400, 450, 500, 550, 600, 650, 700];
+            const colors = ['#8800ff', '#0044ff', '#00ff44', '#ffff00', '#ff8800', '#ff0000', '#880000'];
+            for (let i = 0; i < wavelengths.length; i++) {
+                const wlen = wavelengths[i];
+                const stretched = wlen * (1 + redshift);
+                const x = (stretched - 350) / (800 - 350) * canvas.offsetWidth;
+                ctx.fillStyle = colors[i];
+                ctx.fillRect(x - 15, 100, 30, 80);
+                ctx.fillStyle = '#a0a0c0';
+                ctx.font = '10px Space Mono';
+                ctx.fillText(`${Math.round(stretched)}nm`, x - 20, 200);
+            }
+            ctx.fillStyle = '#00d4ff';
+            ctx.font = '14px Orbitron';
+            ctx.fillText(`z = ${redshift.toFixed(3)}`, 20, 30);
+        }
+
+        function drawSpectralCanvas() {
+            const canvas = document.getElementById('spectralCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.offsetWidth * devicePixelRatio;
+            const h = canvas.height = 250 * devicePixelRatio;
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(0, 0, canvas.offsetWidth, 250);
+            const spectrumGradient = ctx.createLinearGradient(0, 0, canvas.offsetWidth, 0);
+            spectrumGradient.addColorStop(0, '#8800ff');
+            spectrumGradient.addColorStop(0.2, '#0044ff');
+            spectrumGradient.addColorStop(0.4, '#00ff44');
+            spectrumGradient.addColorStop(0.6, '#ffff00');
+            spectrumGradient.addColorStop(0.8, '#ff8800');
+            spectrumGradient.addColorStop(1, '#ff0000');
+            ctx.fillStyle = spectrumGradient;
+            ctx.fillRect(0, 80, canvas.offsetWidth, 60);
+            ctx.strokeStyle = '#a855f7';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0, 80, canvas.offsetWidth, 60);
+            const darkLines = [0.1, 0.25, 0.4, 0.55, 0.7, 0.85];
+            darkLines.forEach(pos => {
+                const x = pos * canvas.offsetWidth;
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(x, 75);
+                ctx.lineTo(x, 145);
+                ctx.stroke();
+                ctx.fillStyle = '#a0a0c0';
+                ctx.font = '9px Space Mono';
+                ctx.fillText('Absorption', x - 25, 70);
+            });
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = '12px Space Mono';
+            ctx.fillText('Original Spectrum', 20, 170);
+            const shiftedDarkLines = darkLines.map(pos => pos * (1 + redshift));
+            ctx.strokeStyle = '#00d4ff';
+            shiftedDarkLines.forEach((pos, i) => {
+                if (pos > 1) return;
+                const x = pos * canvas.offsetWidth;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(x, 160);
+                ctx.lineTo(x, 190);
+                ctx.stroke();
+            });
+            ctx.fillStyle = '#00d4ff';
+            ctx.fillText('After Redshift (stretched)', 20, 210);
+        }
+
+        function drawScaleCanvas() {
+            const canvas = document.getElementById('scaleCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.offsetWidth * devicePixelRatio;
+            const h = canvas.height = 250 * devicePixelRatio;
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(0, 0, canvas.offsetWidth, 250);
+            ctx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+            ctx.lineWidth = 1;
+            for (let y = 0; y < 250; y += 25) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.offsetWidth, y);
+                ctx.stroke();
+            }
+            ctx.strokeStyle = '#00d4ff';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            const now = 13.8;
+            for (let t = 0; t <= now; t += 0.1) {
+                const a = Math.pow(t / now, 2/3);
+                const x = (t / now) * canvas.offsetWidth;
+                const y = 220 - a * 200;
+                if (t === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            const markerTime = cosmicTime;
+            const markerA = Math.pow(markerTime / now, 2/3);
+            const mx = (markerTime / now) * canvas.offsetWidth;
+            const my = 220 - markerA * 200;
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(mx, my, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#a0a0c0';
+            ctx.font = '10px Space Mono';
+            ctx.fillText(`t = ${markerTime.toFixed(1)} Gyr`, mx + 15, my - 10);
+            ctx.fillText(`a(t) = ${markerA.toFixed(2)}`, mx + 15, my + 10);
+            ctx.fillStyle = '#a855f7';
+            ctx.font = '12px Orbitron';
+            ctx.fillText('Scale Factor Evolution', 20, 25);
+        }
+
+        function drawUniverseCanvas() {
+            const canvas = document.getElementById('universeCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.offsetWidth * devicePixelRatio;
+            const h = canvas.height = 250 * devicePixelRatio;
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(0, 0, canvas.offsetWidth, 250);
+            const cx = canvas.offsetWidth / 2;
+            const cy = 125;
+            const expansionFactor = Math.pow(cosmicTime / 13.8, 2/3);
+            const gridSize = 40 * expansionFactor;
+            ctx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+            ctx.lineWidth = 1;
+            for (let x = cx % gridSize; x < canvas.offsetWidth; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, 250);
+                ctx.stroke();
+            }
+            for (let y = cy % gridSize; y < 250; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.offsetWidth, y);
+                ctx.stroke();
+            }
+            for (let i = 0; i < 20; i++) {
+                const angle = (i / 20) * Math.PI * 2;
+                const baseDist = 50 * expansionFactor;
+                const x = cx + Math.cos(angle) * baseDist;
+                const y = cy + Math.sin(angle) * baseDist;
+                const hue = 180 + (i * 6);
+                const gradient = ctx.createRadialGradient(x, y, 0, x, y, 6 * expansionFactor);
+                gradient.addColorStop(0, `hsla(${hue}, 70%, 60%, 0.8)`);
+                gradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(x, y, 6 * expansionFactor, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#a0a0c0';
+            ctx.font = '10px Space Mono';
+            ctx.fillText(`Expansion: ${(expansionFactor * 100).toFixed(0)}%`, 20, 230);
+        }
+
+        function drawLadderCanvas() {
+            const canvas = document.getElementById('ladderCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.offsetWidth * devicePixelRatio;
+            const h = canvas.height = 250 * devicePixelRatio;
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(0, 0, canvas.offsetWidth, 250);
+            const methods = [
+                { name: 'Parallax', range: '1 - 1000 pc', color: '#00d4ff', y: 200 },
+                { name: 'Main Sequence', range: '1 - 50 kpc', color: '#a855f7', y: 160 },
+                { name: 'Cepheids', range: '0.3 - 30 Mpc', color: '#f59e0b', y: 120 },
+                { name: 'Type Ia SNe', range: '< 1000 Mpc', color: '#ff4444', y: 80 }
+            ];
+            ctx.strokeStyle = '#a0a0c0';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, 220);
+            ctx.lineTo(canvas.offsetWidth - 20, 220);
+            ctx.stroke();
+            methods.forEach((m, i) => {
+                ctx.fillStyle = m.color;
+                ctx.fillRect(60 + i * 80, m.y - 10, 60, 20);
+                ctx.fillStyle = '#a0a0c0';
+                ctx.font = '9px Space Mono';
+                ctx.fillText(m.name, 60 + i * 80, m.y + 35);
+                ctx.font = '8px Space Mono';
+                ctx.fillText(m.range, 60 + i * 80, m.y + 48);
+                ctx.beginPath();
+                ctx.moveTo(90 + i * 80, m.y);
+                ctx.lineTo(90 + i * 80, 220);
+                ctx.stroke();
+            });
+        }
+
+        function drawCandleCanvas() {
+            const canvas = document.getElementById('candleCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.offsetWidth * devicePixelRatio;
+            const h = canvas.height = 250 * devicePixelRatio;
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(0, 0, canvas.offsetWidth, 250);
+            const stars = [
+                { name: 'Vega', mag: 0.03, dist: 7.68 },
+                { name: 'Betelgeuse', mag: 0.42, dist: 200 },
+                { name: 'Deneb', mag: 1.25, dist: 430 },
+                { name: 'Andromeda Galaxy', mag: 3.4, dist: 780000 }
+            ];
+            stars.forEach((star, i) => {
+                const x = 60 + i * 70;
+                const brightness = Math.pow(10, -star.mag / 2.5);
+                const size = 5 + brightness * 15;
+                const gradient = ctx.createRadialGradient(x, 130, 0, x, 130, size);
+                gradient.addColorStop(0, '#ffffcc');
+                gradient.addColorStop(0.5, star.color || '#ffffff');
+                gradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(x, 130, size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#a0a0c0';
+                ctx.font = '9px Space Mono';
+                ctx.fillText(star.name, x - 25, 170);
+                ctx.fillText(`m = ${star.mag}`, x - 15, 185);
+                ctx.fillText(`${star.dist} pc`, x - 20, 200);
+            });
+        }
+
+        function updateDisplays() {
+            const vel = H0 * properDist / 1000;
+            document.getElementById('recessionVel').textContent = vel.toFixed(0);
+            document.getElementById('distFromHubble').textContent = properDist;
+            document.getElementById('hubbleAge').textContent = (1 / H0 * 977.8).toFixed(1);
+            document.getElementById('scaleRatio').textContent = (1 + redshift).toFixed(3);
+            const lookback = redshift * 13.8 / (1 + redshift);
+            document.getElementById('lookbackTime').textContent = lookback.toFixed(2);
+            const comoving = 3000 * (redshift / (1 + redshift));
+            document.getElementById('comovingDist').textContent = comoving.toFixed(0);
+        }
+
+        function animate() {
+            drawCosmicBg();
+            drawHero();
+            requestAnimationFrame(animate);
+        }
+
+        document.querySelectorAll('.mode-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentMode = tab.dataset.mode;
+                document.getElementById('hubble-controls').style.display = currentMode === 'hubble' ? 'block' : 'none';
+                document.getElementById('redshift-controls').style.display = currentMode === 'redshift' ? 'block' : 'none';
+                document.getElementById('expansion-controls').style.display = currentMode === 'expansion' ? 'block' : 'none';
+                document.getElementById('distance-controls').style.display = currentMode === 'distance' ? 'block' : 'none';
+            });
+        });
+
+        document.getElementById('hubbleConst').addEventListener('input', (e) => {
+            H0 = parseFloat(e.target.value);
+            document.getElementById('hubbleVal').textContent = H0;
+            drawHubbleCanvas();
+            updateDisplays();
+        });
+
+        document.getElementById('redshiftSlider').addEventListener('input', (e) => {
+            redshift = parseFloat(e.target.value) / 1000;
+            document.getElementById('redshiftVal').textContent = redshift.toFixed(3);
+            drawRedshiftCanvas();
+            drawSpectralCanvas();
+            updateDisplays();
+        });
+
+        document.getElementById('timeSlider').addEventListener('input', (e) => {
+            cosmicTime = parseFloat(e.target.value);
+            document.getElementById('timeVal').textContent = cosmicTime.toFixed(1);
+            drawScaleCanvas();
+            drawUniverseCanvas();
+        });
+
+        document.getElementById('distSlider').addEventListener('input', (e) => {
+            properDist = parseFloat(e.target.value);
+            document.getElementById('distVal').textContent = properDist;
+            drawHubbleCanvas();
+            updateDisplays();
+        });
+
+        window.addEventListener('scroll', () => {
+            const scrolled = window.scrollY;
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrolled / maxScroll) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        });
+
+        resize();
+        window.addEventListener('resize', resize);
+        animate();
+        drawHubbleCanvas();
+        drawGalaxyCanvas();
+        drawRedshiftCanvas();
+        drawSpectralCanvas();
+        drawScaleCanvas();
+        drawUniverseCanvas();
+        drawLadderCanvas();
+        drawCandleCanvas();
+        updateDisplays();
+    </script>
+</body>
+</html>
