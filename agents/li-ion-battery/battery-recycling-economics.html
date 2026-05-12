@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Recycling Economics — Urban Mining Simulator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00ff88;
+            --secondary: #00ccff;
+            --accent: #ff6b35;
+            --dark: #0a0f1a;
+            --darker: #050810;
+            --light: #e0f7fa;
+            --warning: #ffaa00;
+            --danger: #ff4444;
+        }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--darker);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--darker) 0%, #0d1f2d 50%, var(--darker) 100%);
+            padding: 60px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 50%, rgba(0, 204, 255, 0.1) 0%, transparent 40%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--secondary);
+            margin-bottom: 30px;
+        }
+
+        /* Stats Banner */
+        .stats-banner {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: var(--dark);
+            border-bottom: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 204, 255, 0.05));
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--secondary);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        section {
+            margin-bottom: 50px;
+        }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0, 255, 136, 0.3);
+        }
+
+        /* Urban Mining Simulator */
+        .simulator-panel {
+            background: var(--dark);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 204, 255, 0.2);
+        }
+
+        .control-group label {
+            display: block;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--danger), var(--warning), var(--primary));
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .control-value {
+            text-align: right;
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+
+        .chemistry-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .chem-btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 12px;
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--light);
+            font-family: 'Share Tech Mono', monospace;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chem-btn.active {
+            background: var(--primary);
+            color: var(--darker);
+            font-weight: bold;
+        }
+
+        .chem-btn:hover {
+            border-color: var(--primary);
+        }
+
+        /* Results Dashboard */
+        .results-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 204, 255, 0.05));
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .result-card.profit { border-color: var(--primary); }
+        .result-card.loss { border-color: var(--danger); }
+        .result-card.neutral { border-color: var(--warning); }
+
+        .result-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .result-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .result-card.profit .result-value { color: var(--primary); }
+        .result-card.loss .result-value { color: var(--danger); }
+        .result-card.neutral .result-value { color: var(--warning); }
+
+        .result-label {
+            color: var(--secondary);
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+        }
+
+        .chart-container {
+            background: var(--dark);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .chart-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--secondary);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .chart-canvas {
+            max-height: 300px;
+        }
+
+        /* Material Recovery Table */
+        .materials-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .materials-table th,
+        .materials-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .materials-table th {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .materials-table tr:hover {
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .material-bar {
+            height: 20px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .recovery-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .recovery-high { background: var(--primary); color: var(--darker); }
+        .recovery-medium { background: var(--warning); color: var(--darker); }
+        .recovery-low { background: var(--danger); color: var(--darker); }
+
+        /* Economics Breakdown */
+        .economics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .eco-card {
+            background: var(--dark);
+            border: 1px solid rgba(0, 204, 255, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .eco-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--secondary);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cost-item:last-child {
+            border-bottom: none;
+        }
+
+        .cost-label { color: var(--light); }
+        .cost-value { color: var(--accent); font-weight: bold; }
+
+        /* Process Flow */
+        .process-flow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .process-step {
+            flex: 1;
+            min-width: 150px;
+            max-width: 200px;
+            background: var(--dark);
+            border: 2px solid var(--secondary);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .process-step::after {
+            content: '→';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            color: var(--secondary);
+        }
+
+        .process-step:last-child::after {
+            display: none;
+        }
+
+        .step-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--primary);
+            opacity: 0.5;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: var(--light);
+            margin: 10px 0 5px;
+        }
+
+        .step-desc {
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+
+        /* Environmental Impact */
+        .impact-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .impact-card {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 0, 0, 0.3));
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .impact-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .impact-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .impact-label {
+            color: var(--secondary);
+            margin-top: 5px;
+        }
+
+        /* Comparison Section */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .comparison-table th {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--primary);
+        }
+
+        .comparison-table td:first-child {
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .vs-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: var(--accent);
+            color: white;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: var(--dark);
+            border-top: 1px solid rgba(0, 255, 136, 0.3);
+            color: var(--secondary);
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(0, 255, 136, 0.6); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-banner {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .process-step::after {
+                display: none;
+            }
+
+            .process-flow {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .process-step {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="hero">
+        <div class="hero-content">
+            <h1>BATTERY RECYCLING ECONOMICS</h1>
+            <p class="hero-subtitle">Urban Mining Simulator — From End-of-Life to Resource Revolution</p>
+        </div>
+    </header>
+
+    <div class="stats-banner">
+        <div class="stat-card">
+            <div class="stat-value">500K</div>
+            <div class="stat-label">EV Batteries Retiring Annually by 2030 (tonnes)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">$95%</div>
+            <div class="stat-label">Li Recovery Rate in Hydrometallurgy</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">$85B</div>
+            <div class="stat-label">Urban Mining Market by 2035</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">95x</div>
+            <div class="stat-label">Concentration of Li in Batteries vs Earth</div>
+        </div>
+    </div>
+
+    <main class="container">
+        <!-- Urban Mining Simulator -->
+        <section>
+            <h2>URBAN MINING SIMULATOR</h2>
+            <div class="simulator-panel">
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label>Battery Chemistry</label>
+                        <div class="chemistry-selector">
+                            <button class="chem-btn active" data-chem="nmc">NMC 811</button>
+                            <button class="chem-btn" data-chem="nca">NCA</button>
+                            <button class="chem-btn" data-chem="lfp">LFP</button>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Pack Capacity (kWh)</label>
+                        <input type="range" id="capacity" min="10" max="200" value="75">
+                        <div class="control-value"><span id="capacity-val">75</span> kWh</div>
+                    </div>
+                    <div class="control-group">
+                        <label>Recycling Efficiency</label>
+                        <input type="range" id="efficiency" min="50" max="98" value="85">
+                        <div class="control-value"><span id="efficiency-val">85</span>%</div>
+                    </div>
+                    <div class="control-group">
+                        <label>Metal Prices Scenario</label>
+                        <div class="chemistry-selector">
+                            <button class="chem-btn active" data-scenario="current">Current</button>
+                            <button class="chem-btn" data-scenario="bull">Bull Case</button>
+                            <button class="chem-btn" data-scenario="bear">Bear Case</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-dashboard">
+                    <div class="result-card profit" id="revenue-card">
+                        <div class="result-icon">💰</div>
+                        <div class="result-value" id="revenue">$0</div>
+                        <div class="result-label">Material Recovery Value</div>
+                    </div>
+                    <div class="result-card profit" id="margin-card">
+                        <div class="result-icon">📈</div>
+                        <div class="result-value" id="margin">$0</div>
+                        <div class="result-label">Gross Margin</div>
+                    </div>
+                    <div class="result-card neutral" id="roi-card">
+                        <div class="result-icon">🎯</div>
+                        <div class="result-value" id="roi">0%</div>
+                        <div class="result-label">ROI per Pack</div>
+                    </div>
+                    <div class="result-card" id="co2-card">
+                        <div class="result-icon">🌱</div>
+                        <div class="result-value" id="co2-saved">0 kg</div>
+                        <div class="result-label">CO₂ Emissions Avoided</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Process Flow -->
+        <section>
+            <h2>THE URBAN MINING PROCESS</h2>
+            <div class="process-flow">
+                <div class="process-step">
+                    <div class="step-number">01</div>
+                    <div class="step-title">COLLECTION</div>
+                    <div class="step-desc">EV battery collection & transport to recycling facility</div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">02</div>
+                    <div class="step-title">DISCHARGE</div>
+                    <div class="step-desc">Safe discharge to 0V to prevent thermal events</div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">03</div>
+                    <div class="step-title">SHREDDING</div>
+                    <div class="step-desc">Mechanical shredding into 10-50mm pieces</div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">04</div>
+                    <div class="step-title">HYDROMET</div>
+                    <div class="step-desc">Acid/alkali leaching to dissolve metals</div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">05</div>
+                    <div class="step-title">EXTRACTION</div>
+                    <div class="step-desc">Solvent extraction & precipitation</div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">06</div>
+                    <div class="step-title">REFINING</div>
+                    <div class="step-desc">Purification to battery-grade materials</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Material Recovery -->
+        <section>
+            <h2>MATERIAL RECOVERY BY CHEMISTRY</h2>
+            <div class="chart-container">
+                <table class="materials-table">
+                    <thead>
+                        <tr>
+                            <th>Material</th>
+                            <th>NMC 811</th>
+                            <th>NCA</th>
+                            <th>LFP</th>
+                            <th>Price ($/kg)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>🔋 Lithium</td>
+                            <td>
+                                <div class="material-bar" style="width: 95%"></div>
+                                <span>3.5%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 92%"></div>
+                                <span>3.3%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 97%"></div>
+                                <span>4.0%</span>
+                            </td>
+                            <td>$15-25</td>
+                            <td><span class="recovery-badge recovery-high">Critical</span></td>
+                        </tr>
+                        <tr>
+                            <td>🪨 Cobalt</td>
+                            <td>
+                                <div class="material-bar" style="width: 48%"></div>
+                                <span>6.0%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 56%"></div>
+                                <span>7.0%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 0%"></div>
+                                <span>0%</span>
+                            </td>
+                            <td>$30-40</td>
+                            <td><span class="recovery-badge recovery-high">High Value</span></td>
+                        </tr>
+                        <tr>
+                            <td>🔩 Nickel</td>
+                            <td>
+                                <div class="material-bar" style="width: 72%"></div>
+                                <span>48%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 68%"></div>
+                                <span>45%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 0%"></div>
+                                <span>0%</span>
+                            </td>
+                            <td>$15-20</td>
+                            <td><span class="recovery-badge recovery-high">High Value</span></td>
+                        </tr>
+                        <tr>
+                            <td>🧲 Manganese</td>
+                            <td>
+                                <div class="material-bar" style="width: 52%"></div>
+                                <span>5.0%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 44%"></div>
+                                <span>4.0%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 0%"></div>
+                                <span>0%</span>
+                            </td>
+                            <td>$5-8</td>
+                            <td><span class="recovery-badge recovery-medium">Medium</span></td>
+                        </tr>
+                        <tr>
+                            <td>🔶 Iron</td>
+                            <td>
+                                <div class="material-bar" style="width: 12%"></div>
+                                <span>1.0%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 12%"></div>
+                                <span>1.0%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 88%"></div>
+                                <span>70%</span>
+                            </td>
+                            <td>$0.5-1</td>
+                            <td><span class="recovery-badge recovery-low">Low Value</span></td>
+                        </tr>
+                        <tr>
+                            <td>🟡 Phosphorus</td>
+                            <td>
+                                <div class="material-bar" style="width: 0%"></div>
+                                <span>0%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 0%"></div>
+                                <span>0%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 80%"></div>
+                                <span>32%</span>
+                            </td>
+                            <td>$3-5</td>
+                            <td><span class="recovery-badge recovery-medium">Medium</span></td>
+                        </tr>
+                        <tr>
+                            <td>📦 Copper</td>
+                            <td>
+                                <div class="material-bar" style="width: 64%"></div>
+                                <span>8.0%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 64%"></div>
+                                <span>8.0%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 64%"></div>
+                                <span>8.0%</span>
+                            </td>
+                            <td>$8-10</td>
+                            <td><span class="recovery-badge recovery-medium">Medium</span></td>
+                        </tr>
+                        <tr>
+                            <td>🩸 Aluminum</td>
+                            <td>
+                                <div class="material-bar" style="width: 64%"></div>
+                                <span>6.0%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 64%"></div>
+                                <span>6.0%</span>
+                            </td>
+                            <td>
+                                <div class="material-bar" style="width: 64%"></div>
+                                <span>6.0%</span>
+                            </td>
+                            <td>$2-3</td>
+                            <td><span class="recovery-badge recovery-low">Low Value</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Economics Breakdown -->
+        <section>
+            <h2>RECYCLING ECONOMICS BREAKDOWN</h2>
+            <div class="economics-grid">
+                <div class="eco-card">
+                    <h3>REVENUE STREAMS</h3>
+                    <div class="cost-item">
+                        <span class="cost-label">Cathode Material Recovery</span>
+                        <span class="cost-value" id="cathode-rev">$0</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">Anode Material (Graphite)</span>
+                        <span class="cost-value" id="anode-rev">$0</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">Copper & Aluminum</span>
+                        <span class="cost-value" id="metal-rev">$0</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">Electrolyte Recovery</span>
+                        <span class="cost-value" id="electrolyte-rev">$0</span>
+                    </div>
+                    <div class="cost-item" style="border-top: 2px solid var(--primary); margin-top: 10px; padding-top: 10px;">
+                        <span class="cost-label" style="color: var(--primary);">TOTAL REVENUE</span>
+                        <span class="cost-value" style="color: var(--primary);" id="total-rev">$0</span>
+                    </div>
+                </div>
+                <div class="eco-card">
+                    <h3>OPERATING COSTS</h3>
+                    <div class="cost-item">
+                        <span class="cost-label">Collection & Transport</span>
+                        <span class="cost-value">-$2,500</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">Mechanical Processing</span>
+                        <span class="cost-value">-$800</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">Hydrometallurgical Leaching</span>
+                        <span class="cost-value">-$1,200</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">Solvent Extraction</span>
+                        <span class="cost-value">-$600</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">Refining & Purification</span>
+                        <span class="cost-value">-$900</span>
+                    </div>
+                    <div class="cost-item" style="border-top: 2px solid var(--danger); margin-top: 10px; padding-top: 10px;">
+                        <span class="cost-label" style="color: var(--danger);">TOTAL COSTS</span>
+                        <span class="cost-value" style="color: var(--danger);">-$6,000</span>
+                    </div>
+                </div>
+                <div class="eco-card">
+                    <h3>PROFIT MARGIN ANALYSIS</h3>
+                    <div class="cost-item">
+                        <span class="cost-label">Revenue per Pack</span>
+                        <span class="cost-value" id="rev-per-pack">$0</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">Processing Cost</span>
+                        <span class="cost-value">$6,000</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">Labor & Overhead</span>
+                        <span class="cost-value">$1,500</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">Regulatory Compliance</span>
+                        <span class="cost-value">$500</span>
+                    </div>
+                    <div class="cost-item" style="border-top: 2px solid var(--primary); margin-top: 10px; padding-top: 10px;">
+                        <span class="cost-label" style="color: var(--primary);">NET PROFIT</span>
+                        <span class="cost-value" style="color: var(--primary);" id="net-profit">$0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mining vs Recycling Comparison -->
+        <section>
+            <h2>URBAN MINING vs TRADITIONAL MINING</h2>
+            <div class="chart-container">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Urban Mining (Recycling)</th>
+                            <th>Traditional Mining</th>
+                            <th>Advantage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Li Concentration</td>
+                            <td><strong>1-5%</strong></td>
+                            <td>0.1-0.2% (brine) / 1-2% (hard rock)</td>
+                            <td><span class="vs-badge">25x</span></td>
+                        </tr>
+                        <tr>
+                            <td>CO₂ Footprint</td>
+                            <td><strong>5 t CO₂/t Li</strong></td>
+                            <td>15 t CO₂/t Li</td>
+                            <td><span class="vs-badge">3x cleaner</span></td>
+                        </tr>
+                        <tr>
+                            <td>Water Usage</td>
+                            <td><strong>Minimal</strong></td>
+                            <td>500,000 L/t Li (brine)</td>
+                            <td><span class="vs-badge">99% less</span></td>
+                        </tr>
+                        <tr>
+                            <td>Supply Security</td>
+                            <td><strong>Domestic</strong></td>
+                            <td>Chile/Australia/China</td>
+                            <td><span class="vs-badge">Strategic</span></td>
+                        </tr>
+                        <tr>
+                            <td>Price Volatility</td>
+                            <td><strong>Predictable</strong></td>
+                            <td>$8K-$80K/t Li (2015-2022)</td>
+                            <td><span class="vs-badge">Stable</span></td>
+                        </tr>
+                        <tr>
+                            <td>Time to Production</td>
+                            <td><strong>weeks</strong></td>
+                            <td>5-10 years (mine development)</td>
+                            <td><span class="vs-badge">Fast</span></td>
+                        </tr>
+                        <tr>
+                            <td>Energy Input</td>
+                            <td><strong>Low</strong></td>
+                            <td>High (mining + refining)</td>
+                            <td><span class="vs-badge">80% less</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Cost Evolution Chart -->
+        <section>
+            <h2>RECYCLING COST TRAJECTORY</h2>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-title">Battery Recycling Cost ($/kWh) 2015-2030E</div>
+                    <canvas id="costChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">Market Size Projection ($B) 2020-2035E</div>
+                    <canvas id="marketChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Environmental Impact -->
+        <section>
+            <h2>ENVIRONMENTAL IMPACT DASHBOARD</h2>
+            <div class="impact-cards">
+                <div class="impact-card">
+                    <div class="impact-icon">🌍</div>
+                    <div class="impact-value">95%</div>
+                    <div class="impact-label">Less CO₂ vs Mining</div>
+                </div>
+                <div class="impact-card">
+                    <div class="impact-icon">💧</div>
+                    <div class="impact-value">99%</div>
+                    <div class="impact-label">Less Water Usage</div>
+                </div>
+                <div class="impact-card">
+                    <div class="impact-icon">⚡</div>
+                    <div class="impact-value">80%</div>
+                    <div class="impact-label">Less Energy Input</div>
+                </div>
+                <div class="impact-card">
+                    <div class="impact-icon">♻️</div>
+                    <div class="impact-value">100%</div>
+                    <div class="impact-label">Cathode Materials Recoverable</div>
+                </div>
+                <div class="impact-card">
+                    <div class="impact-icon">🏭</div>
+                    <div class="impact-value">$85B</div>
+                    <div class="impact-label">New Industry by 2035</div>
+                </div>
+                <div class="impact-card">
+                    <div class="impact-icon">👷</div>
+                    <div class="impact-value">50K+</div>
+                    <div class="impact-label">New Jobs by 2030</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Players -->
+        <section>
+            <h2>RECYCLING INDUSTRY PLAYERS</h2>
+            <div class="economics-grid">
+                <div class="eco-card">
+                    <h3>HYDROMETALLURGY PIONEERS</h3>
+                    <div class="cost-item">
+                        <span class="cost-label">🔬 Umicore (Belgium)</span>
+                        <span class="cost-value">$4B revenue</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">🔬 Redwood Materials (USA)</span>
+                        <span class="cost-value">$5B valuation</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">🔬 Li-Cycle (Canada)</span>
+                        <span class="cost-value">$2B valuation</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">🔬 Ascend Elements (USA)</span>
+                        <span class="cost-value">$1B valuation</span>
+                    </div>
+                </div>
+                <div class="eco-card">
+                    <h3>PYROMETALLURGY LEADERS</h3>
+                    <div class="cost-item">
+                        <span class="cost-label">🔥 Glencore (Switzerland)</span>
+                        <span class="cost-value">$200B revenue</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">🔥 Sumitomo Metal (Japan)</span>
+                        <span class="cost-value">Integrated</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">🔥 Sungrow (Korea)</span>
+                        <span class="cost-value">Pyro + Hydro</span>
+                    </div>
+                </div>
+                <div class="eco-card">
+                    <h3>BATTERY MANUFACTURER INTEGRATION</h3>
+                    <div class="cost-item">
+                        <span class="cost-label">🏢 CATL (China)</span>
+                        <span class="cost-value">17 GWh recycling</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">🏢 Panasonic (Japan)</span>
+                        <span class="cost-value">Closed-loop</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">🏢 Tesla (USA)</span>
+                        <span class="cost-value">In-house pyro</span>
+                    </div>
+                    <div class="cost-item">
+                        <span class="cost-label">🏢 BYD (China)</span>
+                        <span class="cost-value">Full integration</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Revenue Potential Chart -->
+        <section>
+            <h2>MATERIAL VALUE BY CHEMISTRY</h2>
+            <div class="chart-container" style="max-width: 800px; margin: 0 auto;">
+                <canvas id="valueChart" class="chart-canvas"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Battery Recycling Economics — Urban Mining Simulator | Data: BloombergNEF, IEA, USABC</p>
+        <p style="margin-top: 10px; font-size: 0.9rem;">
+            The future of batteries is circular — every end-of-life pack is a mine waiting to be tapped.
+        </p>
+    </footer>
+
+    <script>
+        // State
+        let state = {
+            chemistry: 'nmc',
+            capacity: 75,
+            efficiency: 85,
+            scenario: 'current'
+        };
+
+        // Chemistry compositions (% by weight)
+        const compositions = {
+            nmc: { li: 3.5, co: 6.0, ni: 48.0, mn: 5.0, fe: 1.0, p: 0, cu: 8.0, al: 6.0, graphite: 15.0 },
+            nca: { li: 3.3, co: 7.0, ni: 45.0, mn: 4.0, fe: 1.0, p: 0, cu: 8.0, al: 6.0, graphite: 15.0 },
+            lfp: { li: 4.0, co: 0, ni: 0, mn: 0, fe: 30.0, p: 12.0, cu: 8.0, al: 6.0, graphite: 15.0 }
+        };
+
+        // Metal prices ($/kg) by scenario
+        const prices = {
+            current: { li: 20, co: 35, ni: 18, mn: 6, fe: 0.8, p: 4, cu: 9, al: 2.5, graphite: 8 },
+            bull: { li: 35, co: 50, ni: 25, mn: 10, fe: 1.2, p: 6, cu: 12, al: 3 },
+            bear: { li: 12, co: 20, ni: 10, mn: 4, fe: 0.5, p: 2, cu: 6, al: 1.5, graphite: 5 }
+        };
+
+        // Processing cost per kWh (decreasing with scale)
+        const baseProcessingCost = 85; // $/kWh at scale
+
+        // Charts
+        let costChart, marketChart, valueChart;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            initControls();
+            updateSimulation();
+        });
+
+        function initControls() {
+            // Capacity slider
+            document.getElementById('capacity').addEventListener('input', (e) => {
+                state.capacity = parseInt(e.target.value);
+                document.getElementById('capacity-val').textContent = state.capacity;
+                updateSimulation();
+            });
+
+            // Efficiency slider
+            document.getElementById('efficiency').addEventListener('input', (e) => {
+                state.efficiency = parseInt(e.target.value);
+                document.getElementById('efficiency-val').textContent = state.efficiency;
+                updateSimulation();
+            });
+
+            // Chemistry buttons
+            document.querySelectorAll('.chem-btn[data-chem]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.chem-btn[data-chem]').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.chemistry = btn.dataset.chem;
+                    updateSimulation();
+                });
+            });
+
+            // Scenario buttons
+            document.querySelectorAll('.chem-btn[data-scenario]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.chem-btn[data-scenario]').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.scenario = btn.dataset.scenario;
+                    updateSimulation();
+                });
+            });
+        }
+
+        function initCharts() {
+            // Cost trajectory chart
+            const costCtx = document.getElementById('costChart').getContext('2d');
+            costChart = new Chart(costCtx, {
+                type: 'line',
+                data: {
+                    labels: ['2015', '2018', '2020', '2022', '2024', '2026E', '2028E', '2030E'],
+                    datasets: [{
+                        label: 'Recycling Cost ($/kWh)',
+                        data: [120, 95, 85, 78, 70, 55, 42, 35],
+                        borderColor: '#00ff88',
+                        backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Virgin Material Cost ($/kWh)',
+                        data: [85, 75, 70, 95, 65, 55, 50, 45],
+                        borderColor: '#ff6b35',
+                        backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { labels: { color: '#e0f7fa' } } },
+                    scales: {
+                        x: { ticks: { color: '#e0f7fa' }, grid: { color: 'rgba(0, 255, 136, 0.1)' } },
+                        y: { ticks: { color: '#e0f7fa' }, grid: { color: 'rgba(0, 255, 136, 0.1)' } }
+                    }
+                }
+            });
+
+            // Market size chart
+            const marketCtx = document.getElementById('marketChart').getContext('2d');
+            marketChart = new Chart(marketCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['2020', '2022', '2024', '2026E', '2028E', '2030E', '2032E', '2035E'],
+                    datasets: [{
+                        label: 'Urban Mining Market ($B)',
+                        data: [3, 7, 15, 25, 38, 52, 68, 85],
+                        backgroundColor: 'rgba(0, 255, 136, 0.7)',
+                        borderColor: '#00ff88',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { labels: { color: '#e0f7fa' } } },
+                    scales: {
+                        x: { ticks: { color: '#e0f7fa' }, grid: { color: 'rgba(0, 255, 136, 0.1)' } },
+                        y: { ticks: { color: '#e0f7fa' }, grid: { color: 'rgba(0, 255, 136, 0.1)' } }
+                    }
+                }
+            });
+
+            // Material value chart
+            const valueCtx = document.getElementById('valueChart').getContext('2d');
+            valueChart = new Chart(valueCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Lithium', 'Cobalt', 'Nickel', 'Manganese', 'Iron/Phosphorus', 'Copper', 'Aluminum', 'Graphite'],
+                    datasets: [{
+                        data: [35, 25, 20, 5, 3, 6, 2, 4],
+                        backgroundColor: ['#00ff88', '#ff6b35', '#ffaa00', '#00ccff', '#888888', '#cd7f32', '#c0c0c0', '#2d2d2d'],
+                        borderColor: '#0a0f1a',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#e0f7fa', font: { size: 12 } } }
+                    }
+                }
+            });
+        }
+
+        function updateSimulation() {
+            const comp = compositions[state.chemistry];
+            const price = prices[state.scenario];
+            const eff = state.efficiency / 100;
+            const capacity = state.capacity;
+
+            // Calculate pack weight (rough estimate: 70% cathode, 15% anode, 15% other)
+            const packWeight = capacity * 7; // kg per kWh factor
+
+            // Revenue calculations
+            const liRev = comp.li * packWeight * price.li * eff / 100;
+            const coRev = comp.co * packWeight * price.co * eff / 100;
+            const niRev = comp.ni * packWeight * price.ni * eff / 100;
+            const mnRev = comp.mn * packWeight * price.mn * eff / 100;
+            const feRev = comp.fe * packWeight * price.fe * eff / 100;
+            const pRev = comp.p * packWeight * price.p * eff / 100;
+            const cuRev = comp.cu * packWeight * price.cu * eff / 100;
+            const alRev = comp.al * packWeight * price.al * eff / 100;
+            const graphiteRev = comp.graphite * packWeight * price.graphite * eff / 100;
+
+            const cathodeRev = liRev + coRev + niRev + mnRev + pRev;
+            const anodeRev = graphiteRev;
+            const metalRev = cuRev + alRev + feRev;
+            const electrolyteRev = capacity * 2 * eff; // ~$2/kg electrolyte
+            const totalRev = cathodeRev + anodeRev + metalRev + electrolyteRev;
+
+            // Processing cost ( economies of scale)
+            const procCost = baseProcessingCost * (100 / (50 + state.efficiency));
+            const totalCost = procCost * capacity + 2500 + 800 + 1200 + 600 + 900;
+            const laborOverhead = 1500;
+            const regulatory = 500;
+            const totalAllCost = totalCost + laborOverhead + regulatory;
+
+            const grossMargin = totalRev - totalAllCost;
+            const marginPercent = (grossMargin / totalAllCost) * 100;
+            const roi = (grossMargin / totalAllCost) * 100;
+
+            // CO2 savings (recycling vs mining)
+            const liMiningEmission = comp.li * packWeight * 15 / 1000; // 15 t CO2/t Li
+            const coMiningEmission = comp.co * packWeight * 20 / 1000;
+            const niMiningEmission = comp.ni * packWeight * 10 / 1000;
+            const totalMiningCO2 = liMiningEmission + coMiningEmission + niMiningEmission;
+            const recyclingCO2 = totalMiningCO2 * 0.05; // 5% of mining
+            const co2Saved = Math.round((totalMiningCO2 - recyclingCO2) * 100) / 100;
+
+            // Update display
+            document.getElementById('revenue').textContent = '$' + Math.round(totalRev).toLocaleString();
+            document.getElementById('margin').textContent = (grossMargin >= 0 ? '+' : '') + '$' + Math.round(grossMargin).toLocaleString();
+            document.getElementById('roi').textContent = Math.round(roi) + '%';
+            document.getElementById('co2-saved').textContent = Math.round(co2Saved * 100) / 100 + ' kg';
+
+            // Update cards
+            const marginCard = document.getElementById('margin-card');
+            marginCard.className = 'result-card ' + (grossMargin >= 0 ? 'profit' : 'loss');
+
+            const roiCard = document.getElementById('roi-card');
+            roiCard.className = 'result-card ' + (roi >= 20 ? 'profit' : roi >= 0 ? 'neutral' : 'loss');
+
+            // Update revenue breakdown
+            document.getElementById('cathode-rev').textContent = '$' + Math.round(cathodeRev).toLocaleString();
+            document.getElementById('anode-rev').textContent = '$' + Math.round(anodeRev).toLocaleString();
+            document.getElementById('metal-rev').textContent = '$' + Math.round(metalRev).toLocaleString();
+            document.getElementById('electrolyte-rev').textContent = '$' + Math.round(electrolyteRev).toLocaleString();
+            document.getElementById('total-rev').textContent = '$' + Math.round(totalRev).toLocaleString();
+            document.getElementById('rev-per-pack').textContent = '$' + Math.round(totalRev).toLocaleString();
+            document.getElementById('net-profit').textContent = (grossMargin >= 0 ? '+$' : '-$') + Math.abs(Math.round(grossMargin)).toLocaleString();
+
+            // Update value chart data
+            valueChart.data.datasets[0].data = [
+                Math.round(liRev),
+                Math.round(coRev),
+                Math.round(niRev),
+                Math.round(mnRev),
+                Math.round(feRev + pRev),
+                Math.round(cuRev),
+                Math.round(alRev),
+                Math.round(graphiteRev)
+            ];
+            valueChart.update();
+        }
+    </script>
+</body>
+</html>

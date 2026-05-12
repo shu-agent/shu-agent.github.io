@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar Evolution Timeline — Kevin's Physics Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cyan: #00f5ff;
+            --purple: #a855f7;
+            --gold: #fbbf24;
+            --pink: #f472b6;
+            --orange: #fb923c;
+            --bg-dark: #0a0a1a;
+            --bg-card: rgba(20, 20, 40, 0.9);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Space Mono', monospace;
+            background: var(--bg-dark);
+            color: #e0e0ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        /* Scroll Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple), var(--gold));
+            z-index: 1000;
+            transition: width 0.1s;
+        }
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            right: 0;
+            padding: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 20px;
+        }
+        nav a {
+            color: var(--cyan);
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        nav a:hover { opacity: 1; }
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+        }
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(32px, 6vw, 72px);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan), var(--purple), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            text-shadow: 0 0 60px rgba(0, 245, 255, 0.5);
+        }
+        .hero p {
+            font-size: clamp(14px, 2vw, 20px);
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 600px;
+            line-height: 1.8;
+        }
+        .hero .subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            color: var(--gold);
+            margin-top: 30px;
+            letter-spacing: 4px;
+        }
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+        .scroll-indicator span {
+            display: block;
+            width: 30px;
+            height: 50px;
+            border: 2px solid var(--cyan);
+            border-radius: 15px;
+            position: relative;
+        }
+        .scroll-indicator span::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 10px;
+            background: var(--cyan);
+            border-radius: 3px;
+            animation: scrollAnim 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+        @keyframes scrollAnim {
+            0% { opacity: 1; top: 10px; }
+            100% { opacity: 0; top: 30px; }
+        }
+        /* Timeline Container */
+        .timeline-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 20px;
+        }
+        /* Phase Section */
+        .phase {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            margin-bottom: 120px;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+        .phase.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .phase:nth-child(even) {
+            grid-template-columns: 1fr 1fr;
+        }
+        .phase:nth-child(odd) {
+            grid-template-columns: 1fr 1fr;
+        }
+        .phase:nth-child(odd) .phase-visual {
+            order: 1;
+        }
+        .phase-info h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(24px, 4vw, 40px);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .phase-info .phase-number {
+            font-size: 12px;
+            color: var(--purple);
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+        }
+        .phase-info p {
+            font-size: 14px;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+        }
+        .phase-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .stat-card .label {
+            font-size: 10px;
+            color: var(--cyan);
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+        .stat-card .value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            color: var(--gold);
+        }
+        /* Canvas Visual */
+        .phase-visual {
+            height: 400px;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            background: rgba(10, 10, 30, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .phase-visual canvas {
+            width: 100%;
+            height: 100%;
+        }
+        /* Equation Box */
+        .equation-box {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(0, 245, 255, 0.2));
+            border: 1px solid var(--purple);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: 'Space Mono', monospace;
+            text-align: center;
+        }
+        .equation-box .eq {
+            font-size: 18px;
+            color: var(--cyan);
+            margin-bottom: 10px;
+        }
+        .equation-box .desc {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        /* Mass Selector */
+        .mass-selector {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .mass-selector h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--gold);
+        }
+        .mass-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .mass-btn {
+            padding: 15px 30px;
+            border: 2px solid var(--cyan);
+            background: transparent;
+            color: var(--cyan);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .mass-btn:hover, .mass-btn.active {
+            background: var(--cyan);
+            color: var(--bg-dark);
+        }
+        .mass-btn.low-mass.active { border-color: var(--cyan); background: var(--cyan); }
+        .mass-btn.mid-mass.active { border-color: var(--purple); background: var(--purple); }
+        .mass-btn.high-mass.active { border-color: var(--orange); background: var(--orange); }
+        .mass-btn.low-mass:hover, .mass-btn.low-mass.active { color: var(--bg-dark); }
+        .mass-btn.mid-mass:hover, .mass-btn.mid-mass.active { color: var(--bg-dark); }
+        .mass-btn.high-mass:hover, .mass-btn.high-mass.active { color: var(--bg-dark); }
+        /* Timeline Track */
+        .timeline-track {
+            position: relative;
+            height: 4px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple), var(--orange), var(--pink), var(--gold));
+            border-radius: 2px;
+            margin: 40px 0;
+        }
+        .timeline-points {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin-top: -10px;
+        }
+        .timeline-point {
+            text-align: center;
+            position: relative;
+        }
+        .timeline-point .dot {
+            width: 20px;
+            height: 20px;
+            background: var(--bg-dark);
+            border: 3px solid var(--cyan);
+            border-radius: 50%;
+            margin: 0 auto 10px;
+        }
+        .timeline-point .dot.active {
+            background: var(--cyan);
+            box-shadow: 0 0 20px var(--cyan);
+        }
+        .timeline-point .label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 1px;
+        }
+        /* HR Diagram */
+        .hr-diagram {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 60px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .hr-diagram h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            margin-bottom: 30px;
+            color: var(--gold);
+            text-align: center;
+        }
+        .hr-canvas-container {
+            height: 400px;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .hr-labels {
+            position: absolute;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .hr-labels.top-left { top: 10px; left: 10px; }
+        .hr-labels.bottom-right { bottom: 10px; right: 10px; }
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 40px 0;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+        }
+        .comparison-table th {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 11px;
+            letter-spacing: 2px;
+        }
+        .comparison-table td {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .comparison-table tr:hover td {
+            background: rgba(0, 245, 255, 0.1);
+        }
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 60px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        footer p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        footer a {
+            color: var(--cyan);
+            text-decoration: none;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .phase {
+                grid-template-columns: 1fr !important;
+            }
+            .phase-visual {
+                height: 300px;
+            }
+            .phase-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="daily-log.md">Log</a>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <canvas id="heroCanvas"></canvas>
+        <div class="hero-content">
+            <h1>STELLAR EVOLUTION</h1>
+            <p>Journey through the life cycle of stars — from nebular genesis to their final stellar remnants</p>
+            <div class="subtitle">A voyage spanning 10 billion years</div>
+        </div>
+        <div class="scroll-indicator">
+            <span></span>
+        </div>
+    </section>
+
+    <!-- Mass Selector -->
+    <div class="timeline-container">
+        <div class="mass-selector">
+            <h3>SELECT STELLAR MASS</h3>
+            <div class="mass-buttons">
+                <button class="mass-btn low-mass active" data-mass="low">Low Mass (0.5 M☉)</button>
+                <button class="mass-btn mid-mass" data-mass="mid">Mid Mass (5 M☉)</button>
+                <button class="mass-btn high-mass" data-mass="high">High Mass (25 M☉)</button>
+            </div>
+            <div class="timeline-track">
+                <div class="timeline-points">
+                    <div class="timeline-point"><div class="dot active"></div><div class="label">PROTOSTAR</div></div>
+                    <div class="timeline-point"><div class="dot"></div><div class="label">MAIN SEQ</div></div>
+                    <div class="timeline-point"><div class="dot"></div><div class="label">RED GIANT</div></div>
+                    <div class="timeline-point"><div class="dot"></div><div class="label">PLANETARY</div></div>
+                    <div class="timeline-point"><div class="dot"></div><div class="label">WHITE DWARF</div></div>
+                </div>
+            </div>
+            <div class="timeline-points" style="display:none;">
+                <div class="timeline-point"><div class="dot active"></div><div class="label">PROTOSTAR</div></div>
+                <div class="timeline-point"><div class="dot"></div><div class="label">MAIN SEQ</div></div>
+                <div class="timeline-point"><div class="dot"></div><div class="label">RED SUPERGIANT</div></div>
+                <div class="timeline-point"><div class="dot"></div><div class="label">SUPERNOVA</div></div>
+                <div class="timeline-point"><div class="dot"></div><div class="label">NEUTRON STAR/BH</div></div>
+            </div>
+        </div>
+
+        <!-- Phase 1: Protostar -->
+        <div class="phase" data-phase="protostar">
+            <div class="phase-visual">
+                <canvas id="protostarCanvas"></canvas>
+            </div>
+            <div class="phase-info">
+                <div class="phase-number">PHASE 01</div>
+                <h2 style="color: var(--cyan);">PROTOSTAR</h2>
+                <p>A stellar nursery begins as a molecular cloud of hydrogen and dust collapses under its own gravity. As the core compresses, temperature rises until hydrogen fusion ignites.</p>
+                <div class="phase-stats">
+                    <div class="stat-card">
+                        <div class="label">TEMPERATURE</div>
+                        <div class="value">&lt; 10⁶ K</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">DURATION</div>
+                        <div class="value">10⁵ - 10⁷ yrs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">DENSITY</div>
+                        <div class="value">10⁻¹³ g/cm³</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">MASS RANGE</div>
+                        <div class="value">0.1 - 150 M☉</div>
+                    </div>
+                </div>
+                <div class="equation-box">
+                    <div class="eq">E<sub>grav</sub> = -3GM²/5R</div>
+                    <div class="desc">Gravitational potential energy released during collapse</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 2: Main Sequence -->
+        <div class="phase" data-phase="mainseq">
+            <div class="phase-visual">
+                <canvas id="mainseqCanvas"></canvas>
+            </div>
+            <div class="phase-info">
+                <div class="phase-number">PHASE 02</div>
+                <h2 style="color: var(--purple);">MAIN SEQUENCE</h2>
+                <p>The star enters its long stable phase where hydrogen fuses into helium in the core. This is where our Sun is today — middle-aged at 4.6 billion years with 5 billion more to go.</p>
+                <div class="phase-stats">
+                    <div class="stat-card">
+                        <div class="label">CORE TEMP</div>
+                        <div class="value">~15 million K</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">LIFESPAN</div>
+                        <div class="value">10⁹ - 10¹² yrs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">ENERGY OUTPUT</div>
+                        <div class="value">3.8 × 10²⁶ W</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">FUSION RATE</div>
+                        <div class="value">600 Mt/sec</div>
+                    </div>
+                </div>
+                <div class="equation-box">
+                    <div class="eq">E = mc² | 4H → He + 26.7 MeV</div>
+                    <div class="desc">Mass converted to energy via proton-proton chain reaction</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 3a: Red Giant / Supergiant -->
+        <div class="phase" data-phase="redgiant">
+            <div class="phase-visual">
+                <canvas id="redgiantCanvas"></canvas>
+            </div>
+            <div class="phase-info">
+                <div class="phase-number">PHASE 03A</div>
+                <h2 style="color: var(--orange);">RED GIANT / SUPERGIANT</h2>
+                <p>When core hydrogen exhausts, the star expands dramatically. Hydrogen shell burning causes the outer layers to swell, cooling the surface to red. For massive stars, it becomes a red supergiant like Betelgeuse.</p>
+                <div class="phase-stats">
+                    <div class="stat-card">
+                        <div class="label">RADIUS</div>
+                        <div class="value">100 - 1000 R☉</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">SURFACE TEMP</div>
+                        <div class="value">3000 - 5000 K</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">LUMINOSITY</div>
+                        <div class="value">100 - 10⁵ L☉</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">DURATION</div>
+                        <div class="value">10⁶ - 10⁹ yrs</div>
+                    </div>
+                </div>
+                <div class="equation-box">
+                    <div class="eq">L ≈ M³·⁵ | mass-luminosity relation</div>
+                    <div class="desc">More massive stars are exponentially more luminous</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 3b: Supernova (High Mass) -->
+        <div class="phase" data-phase="supernova" style="display: none;">
+            <div class="phase-visual">
+                <canvas id="supernovaCanvas"></canvas>
+            </div>
+            <div class="phase-info">
+                <div class="phase-number">PHASE 03B</div>
+                <h2 style="color: var(--orange);">SUPERNOVA</h2>
+                <p>Iron core collapse triggers an apocalyptic explosion. In 10 seconds, the star releases more energy than the Sun will emit in its entire lifetime. Heavier elements beyond iron are forged in the shockwave.</p>
+                <div class="phase-stats">
+                    <div class="stat-card">
+                        <div class="label">PEAK LUMINOSITY</div>
+                        <div class="value">10⁴³ erg/s</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">ENERGY RELEASE</div>
+                        <div class="value">10⁴⁴ J</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">DURATION</div>
+                        <div class="value">~10 seconds</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">EJECTED MASS</div>
+                        <div class="value">5 - 20 M☉</div>
+                    </div>
+                </div>
+                <div class="equation-box">
+                    <div class="eq">Ni⁵⁶ → Co⁵⁶ → Fe⁵⁶ + γ</div>
+                    <div class="desc">Radioactive nickel decay powers the light curve</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 4a: Planetary Nebula / White Dwarf -->
+        <div class="phase" data-phase="planetary">
+            <div class="phase-visual">
+                <canvas id="planetaryCanvas"></canvas>
+            </div>
+            <div class="phase-info">
+                <div class="phase-number">PHASE 04A</div>
+                <h2 style="color: var(--pink);">PLANETARY NEBULA</h2>
+                <p>The outer layers gently expelled, leaving behind a hot core. The ultraviolet radiation ionizes the ejected gas, creating a beautiful glowing nebula. The central core becomes a white dwarf.</p>
+                <div class="phase-stats">
+                    <div class="stat-card">
+                        <div class="label">NEBULA SIZE</div>
+                        <div class="value">0.5 - 3 ly</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">CENTRAL TEMP</div>
+                        <div class="value">~100,000 K</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">LIFESPAN</div>
+                        <div class="value">10,000 yrs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">CENTRAL MASS</div>
+                        <div class="value">0.6 - 1.4 M☉</div>
+                    </div>
+                </div>
+                <div class="equation-box">
+                    <div class="eq">τ<sub>cooling</sub> = τ☉ × (M/M☉)⁻²·⁵</div>
+                    <div class="desc">White dwarf cooling timescale (faster for more massive)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phase 4b: Neutron Star / Black Hole -->
+        <div class="phase" data-phase="remnant" style="display: none;">
+            <div class="phase-visual">
+                <canvas id="remnantCanvas"></canvas>
+            </div>
+            <div class="phase-info">
+                <div class="phase-number">PHASE 04B</div>
+                <h2 style="color: var(--gold);">NEUTRON STAR / BLACK HOLE</h2>
+                <p>The collapsed core packs the mass of the Sun into a city-sized sphere. Neutron degeneracy pressure halts collapse for masses below 3 M☉. Beyond this limit, nothing can resist gravity — a black hole forms.</p>
+                <div class="phase-stats">
+                    <div class="stat-card">
+                        <div class="label">NEUTRON STAR RADIUS</div>
+                        <div class="value">~10 km</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">DENSITY</div>
+                        <div class="value">10¹⁴ g/cm³</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">SURFACE GRAVITY</div>
+                        <div class="value">10¹² m/s²</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">BH MASS RANGE</div>
+                        <div class="value">3 - 100+ M☉</div>
+                    </div>
+                </div>
+                <div class="equation-box">
+                    <div class="eq">R<sub>s</sub> = 2GM/c² | Schwarzschild radius</div>
+                    <div class="desc">Event horizon radius for a black hole</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HR Diagram -->
+        <div class="hr-diagram">
+            <h3>HERTZSPRUNG-RUSSELL DIAGRAM</h3>
+            <div class="hr-canvas-container">
+                <canvas id="hrCanvas"></canvas>
+                <div class="hr-labels top-left">BRIGHT</div>
+                <div class="hr-labels bottom-right">FAINT</div>
+            </div>
+            <table class="comparison-table">
+                <tr>
+                    <th>STELLAR CLASS</th>
+                    <th>TEMPERATURE</th>
+                    <th>MASS (M☉)</th>
+                    <th>LUMINOSITY (L☉)</th>
+                    <th>EXAMPLES</th>
+                </tr>
+                <tr>
+                    <td>O, B (Blue)</td>
+                    <td>30,000 - 10,000 K</td>
+                    <td>&gt; 10</td>
+                    <td>&gt; 10,000</td>
+                    <td>Rigel, Deneb</td>
+                </tr>
+                <tr>
+                    <td>A, F (White)</td>
+                    <td>10,000 - 6,000 K</td>
+                    <td>1.5 - 2</td>
+                    <td>5 - 50</td>
+                    <td>Sirius, Vega</td>
+                </tr>
+                <tr>
+                    <td>G (Yellow)</td>
+                    <td>6,000 - 5,000 K</td>
+                    <td>0.8 - 1.2</td>
+                    <td>0.5 - 1.5</td>
+                    <td>Sun, Alpha Cen A</td>
+                </tr>
+                <tr>
+                    <td>K, M (Red)</td>
+                    <td>5,000 - 2,500 K</td>
+                    <td>0.3 - 0.8</td>
+                    <td>0.01 - 0.3</td>
+                    <td>Proxima, Betelgeuse</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Element Synthesis -->
+        <div class="phase">
+            <div class="phase-visual">
+                <canvas id="elementCanvas"></canvas>
+            </div>
+            <div class="phase-info">
+                <div class="phase-number">NUCLEOSYNTHESIS</div>
+                <h2 style="color: var(--gold);">ELEMENT FACTORY</h2>
+                <p>Stars are the cosmic furnaces that created all elements heavier than hydrogen. Each reaction stage forges new elements, with the heaviest created only in supernovae.</p>
+                <div class="phase-stats">
+                    <div class="stat-card">
+                        <div class="label">BIG BANG</div>
+                        <div class="value">H, He, Li</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">MAIN SEQUENCE</div>
+                        <div class="value">He → C, O</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">RED GIANT</div>
+                        <div class="value">C, O → Ne, Mg</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">SUPERNOVA</div>
+                        <div class="value">Fe → U</div>
+                    </div>
+                </div>
+                <div class="equation-box">
+                    <div class="eq">3He → C + 7.4 MeV</div>
+                    <div class="desc">Triple-alpha process: helium burning creates carbon</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Kevin's Physics Lab — Stellar Evolution Timeline</p>
+        <p style="margin-top: 10px;">E = mc² | Stars are the universe's way of converting mass into light and heavier elements</p>
+    </footer>
+
+    <script>
+        // Canvas setup
+        const canvases = {};
+        const contexts = {};
+
+        function initCanvas(id) {
+            const canvas = document.getElementById(id);
+            if (!canvas) return null;
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            canvases[id] = canvas;
+            contexts[id] = ctx;
+            return ctx;
+        }
+
+        // Star field for hero
+        let heroStars = [];
+        function initHeroStars() {
+            const canvas = document.getElementById('heroCanvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = window.innerWidth * dpr;
+            canvas.height = window.innerHeight * dpr;
+            ctx.scale(dpr, dpr);
+            canvases.heroCanvas = canvas;
+            contexts.heroCanvas = ctx;
+
+            heroStars = [];
+            for (let i = 0; i < 300; i++) {
+                heroStars.push({
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    size: Math.random() * 2 + 0.5,
+                    twinkle: Math.random() * Math.PI * 2,
+                    speed: Math.random() * 0.02 + 0.01
+                });
+            }
+        }
+
+        // Animate hero
+        function animateHero() {
+            const ctx = contexts.heroCanvas;
+            const canvas = canvases.heroCanvas;
+            if (!ctx) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw stars
+            heroStars.forEach(star => {
+                star.twinkle += star.speed;
+                const alpha = 0.5 + Math.sin(star.twinkle) * 0.5;
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Central star glow
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+
+            // Animated star core
+            const time = Date.now() * 0.001;
+            const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 150 + Math.sin(time) * 20);
+            gradient.addColorStop(0, 'rgba(255, 200, 100, 1)');
+            gradient.addColorStop(0.2, 'rgba(255, 150, 50, 0.8)');
+            gradient.addColorStop(0.5, 'rgba(255, 100, 50, 0.4)');
+            gradient.addColorStop(1, 'rgba(255, 50, 50, 0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 150 + Math.sin(time) * 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Corona rays
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2 + time * 0.2;
+                const length = 200 + Math.sin(time * 2 + i) * 50;
+                ctx.strokeStyle = `rgba(255, 150, 50, ${0.3 + Math.sin(time + i) * 0.2})`;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(cx + Math.cos(angle) * length, cy + Math.sin(angle) * length);
+                ctx.stroke();
+            }
+
+            requestAnimationFrame(animateHero);
+        }
+
+        // Protostar animation
+        let protostarParticles = [];
+        function initProtostar() {
+            const ctx = initCanvas('protostarCanvas');
+            if (!ctx) return;
+            protostarParticles = [];
+            for (let i = 0; i < 100; i++) {
+                protostarParticles.push({
+                    angle: Math.random() * Math.PI * 2,
+                    radius: 50 + Math.random() * 100,
+                    speed: (Math.random() * 0.02 + 0.01) * (Math.random() > 0.5 ? 1 : -1),
+                    size: Math.random() * 3 + 1,
+                    inward: Math.random() * 0.3
+                });
+            }
+        }
+
+        function animateProtostar() {
+            const ctx = contexts.protostarCanvas;
+            const canvas = canvases.protostarCanvas;
+            if (!ctx) return;
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            const cx = w / 2, cy = h / 2;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Accretion disk particles
+            protostarParticles.forEach(p => {
+                p.angle += p.speed;
+                p.radius -= p.inward;
+                if (p.radius < 20) p.radius = 80 + Math.random() * 40;
+
+                const x = cx + Math.cos(p.angle) * p.radius;
+                const y = cy + Math.sin(p.angle) * p.radius * 0.3;
+
+                const gradient = ctx.createRadialGradient(x, y, 0, x, y, p.size * 2);
+                gradient.addColorStop(0, 'rgba(255, 150, 50, 0.8)');
+                gradient.addColorStop(1, 'rgba(255, 100, 50, 0)');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(x, y, p.size * 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Central core
+            const time = Date.now() * 0.002;
+            const coreGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 40 + Math.sin(time) * 5);
+            coreGradient.addColorStop(0, 'rgba(255, 200, 100, 1)');
+            coreGradient.addColorStop(0.5, 'rgba(255, 100, 50, 0.5)');
+            coreGradient.addColorStop(1, 'rgba(255, 50, 0, 0)');
+            ctx.fillStyle = coreGradient;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 40 + Math.sin(time) * 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Jets
+            ctx.strokeStyle = 'rgba(0, 200, 255, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - 30);
+            ctx.lineTo(cx - 10, cy - 80 - Math.sin(time * 3) * 20);
+            ctx.moveTo(cx, cy - 30);
+            ctx.lineTo(cx + 10, cy - 80 - Math.sin(time * 3 + 1) * 20);
+            ctx.stroke();
+
+            requestAnimationFrame(animateProtostar);
+        }
+
+        // Main sequence animation
+        function animateMainSeq() {
+            const ctx = contexts.mainseqCanvas;
+            const canvas = canvases.mainseqCanvas;
+            if (!ctx) return;
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            const cx = w / 2, cy = h / 2;
+            const time = Date.now() * 0.001;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Animated convection cells
+            for (let i = 0; i < 12; i++) {
+                const angle = (i / 12) * Math.PI * 2 + time;
+                const r = 60 + Math.sin(time * 2 + i) * 10;
+                const x = cx + Math.cos(angle) * r;
+                const y = cy + Math.sin(angle) * r;
+
+                ctx.strokeStyle = `rgba(255, 150, 50, ${0.3 + Math.sin(time + i) * 0.2})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(x, y, 15 + Math.sin(time * 3) * 5, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Star surface with granulation
+            const surfaceGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 80);
+            surfaceGradient.addColorStop(0, '#fff8e0');
+            surfaceGradient.addColorStop(0.3, '#ffcc44');
+            surfaceGradient.addColorStop(0.6, '#ff9900');
+            surfaceGradient.addColorStop(1, '#ff5500');
+            ctx.fillStyle = surfaceGradient;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 80, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Corona
+            const coronaGradient = ctx.createRadialGradient(cx, cy, 70, cx, cy, 120);
+            coronaGradient.addColorStop(0, 'rgba(255, 200, 100, 0.3)');
+            coronaGradient.addColorStop(1, 'rgba(255, 150, 50, 0)');
+            ctx.fillStyle = coronaGradient;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 120, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Solar flare
+            const flareAngle = Math.sin(time) * 0.5;
+            ctx.fillStyle = 'rgba(255, 100, 50, 0.6)';
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + Math.cos(flareAngle - 0.3) * 150, cy + Math.sin(flareAngle - 0.3) * 150);
+            ctx.lineTo(cx + Math.cos(flareAngle) * 130, cy + Math.sin(flareAngle) * 130);
+            ctx.lineTo(cx + Math.cos(flareAngle + 0.3) * 150, cy + Math.sin(flareAngle + 0.3) * 150);
+            ctx.closePath();
+            ctx.fill();
+
+            requestAnimationFrame(animateMainSeq);
+        }
+
+        // Red giant animation
+        function animateRedGiant() {
+            const ctx = contexts.redgiantCanvas;
+            const canvas = canvases.redgiantCanvas;
+            if (!ctx) return;
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            const cx = w / 2, cy = h / 2;
+            const time = Date.now() * 0.0008;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Swirling outer layers
+            for (let i = 0; i < 20; i++) {
+                const angle = (i / 20) * Math.PI * 2 + time * (i % 2 ? 1 : -1);
+                const r = 120 + Math.sin(time * 3 + i * 0.5) * 30;
+                const x = cx + Math.cos(angle) * r;
+                const y = cy + Math.sin(angle) * r * 0.4;
+
+                ctx.fillStyle = `rgba(255, ${100 + i * 5}, 50, ${0.3 + Math.sin(time + i) * 0.2})`;
+                ctx.beginPath();
+                ctx.arc(x, y, 10 + Math.sin(time * 2 + i) * 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Core
+            const coreGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 60);
+            coreGradient.addColorStop(0, '#ffeecc');
+            coreGradient.addColorStop(0.3, '#ffaa44');
+            coreGradient.addColorStop(0.7, '#ff6600');
+            coreGradient.addColorStop(1, '#cc3300');
+            ctx.fillStyle = coreGradient;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 60, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Atmospheric glow
+            const atmoGradient = ctx.createRadialGradient(cx, cy, 50, cx, cy, 180);
+            atmoGradient.addColorStop(0, 'rgba(255, 100, 50, 0.2)');
+            atmoGradient.addColorStop(0.5, 'rgba(255, 50, 0, 0.1)');
+            atmoGradient.addColorStop(1, 'rgba(200, 50, 0, 0)');
+            ctx.fillStyle = atmoGradient;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 180, 0, Math.PI * 2);
+            ctx.fill();
+
+            requestAnimationFrame(animateRedGiant);
+        }
+
+        // Supernova animation
+        function animateSupernova() {
+            const ctx = contexts.supernovaCanvas;
+            const canvas = canvases.supernovaCanvas;
+            if (!ctx) return;
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            const cx = w / 2, cy = h / 2;
+            const time = Date.now() * 0.003;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Expanding shockwave rings
+            for (let i = 0; i < 5; i++) {
+                const delay = i * 0.3;
+                const phase = (time + delay) % 2;
+                const radius = phase * 100;
+                const alpha = Math.max(0, 1 - phase / 2);
+
+                ctx.strokeStyle = `rgba(255, 200, 100, ${alpha * 0.5})`;
+                ctx.lineWidth = 3 - phase;
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Ejecta
+            for (let i = 0; i < 30; i++) {
+                const angle = (i / 30) * Math.PI * 2 + time * 0.5;
+                const speed = 50 + Math.sin(time * 5 + i) * 30;
+                const x = cx + Math.cos(angle) * speed;
+                const y = cy + Math.sin(angle) * speed;
+
+                ctx.fillStyle = `rgba(255, ${150 + i * 3}, 50, ${0.8 - (speed / 150)})`;
+                ctx.beginPath();
+                ctx.arc(x, y, 3 + Math.random() * 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Bright flash
+            if (time % 2 < 0.5) {
+                const flashGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 80);
+                flashGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+                flashGradient.addColorStop(0.3, 'rgba(255, 255, 200, 0.6)');
+                flashGradient.addColorStop(1, 'rgba(255, 200, 100, 0)');
+                ctx.fillStyle = flashGradient;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 80, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            requestAnimationFrame(animateSupernova);
+        }
+
+        // Planetary nebula animation
+        function animatePlanetary() {
+            const ctx = contexts.planetaryCanvas;
+            const canvas = canvases.planetaryCanvas;
+            if (!ctx) return;
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            const cx = w / 2, cy = h / 2;
+            const time = Date.now() * 0.001;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Nebula rings
+            for (let i = 0; i < 8; i++) {
+                const radius = 40 + i * 20 + Math.sin(time + i) * 5;
+                const alpha = 0.3 - i * 0.03;
+                const hue = 280 + i * 10;
+
+                ctx.strokeStyle = `hsla(${hue}, 80%, 60%, ${alpha})`;
+                ctx.lineWidth = 8 - i * 0.5;
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Central white dwarf
+            const wdGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 20);
+            wdGradient.addColorStop(0, '#ffffff');
+            wdGradient.addColorStop(0.3, '#aaddff');
+            wdGradient.addColorStop(0.7, '#6699cc');
+            wdGradient.addColorStop(1, 'rgba(100, 150, 200, 0)');
+            ctx.fillStyle = wdGradient;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Glow
+            const glowGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 150);
+            glowGradient.addColorStop(0, 'rgba(150, 200, 255, 0.15)');
+            glowGradient.addColorStop(0.5, 'rgba(100, 150, 200, 0.1)');
+            glowGradient.addColorStop(1, 'rgba(50, 100, 150, 0)');
+            ctx.fillStyle = glowGradient;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 150, 0, Math.PI * 2);
+            ctx.fill();
+
+            requestAnimationFrame(animatePlanetary);
+        }
+
+        // Neutron star / Black hole animation
+        function animateRemnant() {
+            const ctx = contexts.remnantCanvas;
+            const canvas = canvases.remnantCanvas;
+            if (!ctx) return;
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            const cx = w / 2, cy = h / 2;
+            const time = Date.now() * 0.002;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Accretion disk
+            for (let i = 0; i < 40; i++) {
+                const angle = (i / 40) * Math.PI * 2 + time * (i % 3 === 0 ? 2 : 1);
+                const r = 30 + i * 3 + Math.sin(time * 3 + i) * 10;
+                const x = cx + Math.cos(angle) * r;
+                const y = cy + Math.sin(angle) * r * 0.3;
+
+                const alpha = 0.8 - (r - 30) / 150;
+                const hue = 30 + i * 2;
+                ctx.fillStyle = `hsla(${hue}, 100%, 60%, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(x, y, 2 + Math.random() * 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Event horizon / neutron star
+            const bhGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 35);
+            bhGradient.addColorStop(0, '#000000');
+            bhGradient.addColorStop(0.7, '#1a1a2e');
+            bhGradient.addColorStop(1, '#2d2d44');
+            ctx.fillStyle = bhGradient;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 35, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Photon sphere glow
+            ctx.strokeStyle = 'rgba(255, 200, 100, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 50, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Jets
+            ctx.strokeStyle = 'rgba(100, 200, 255, 0.6)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - 40);
+            ctx.lineTo(cx + Math.sin(time * 5) * 10, cy - 120);
+            ctx.moveTo(cx, cy + 40);
+            ctx.lineTo(cx + Math.sin(time * 5 + 1) * 10, cy + 120);
+            ctx.stroke();
+
+            requestAnimationFrame(animateRemnant);
+        }
+
+        // HR Diagram
+        function initHRDiagram() {
+            const ctx = initCanvas('hrCanvas');
+            if (!ctx) return;
+            const canvas = canvases.hrCanvas;
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            ctx.clearRect(0, 0, w, h);
+
+            // Grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 10; i++) {
+                const x = i * w / 9;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, h);
+                ctx.stroke();
+                const y = i * h / 9;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+            }
+
+            // Main sequence diagonal
+            ctx.strokeStyle = 'rgba(0, 245, 255, 0.5)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(w * 0.9, h * 0.1);
+            ctx.lineTo(w * 0.1, h * 0.9);
+            ctx.stroke();
+
+            // Star positions
+            const stars = [
+                { x: 0.85, y: 0.15, color: '#6699ff', size: 8, label: 'O-type' },
+                { x: 0.75, y: 0.25, color: '#88aaff', size: 6, label: 'B-type' },
+                { x: 0.6, y: 0.4, color: '#aabbff', size: 5, label: 'A-type' },
+                { x: 0.5, y: 0.5, color: '#ffffcc', size: 5, label: 'F-type' },
+                { x: 0.4, y: 0.55, color: '#ffeeaa', size: 6, label: 'G-type (Sun)' },
+                { x: 0.3, y: 0.65, color: '#ffcc88', size: 6, label: 'K-type' },
+                { x: 0.15, y: 0.85, color: '#ff8866', size: 8, label: 'M-type' }
+            ];
+
+            // Red giant region
+            ctx.fillStyle = 'rgba(255, 100, 50, 0.15)';
+            ctx.beginPath();
+            ctx.arc(w * 0.15, h * 0.25, 40, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255, 200, 50, 0.15)';
+            ctx.beginPath();
+            ctx.arc(w * 0.1, h * 0.15, 30, 0, Math.PI * 2);
+            ctx.fill();
+
+            // White dwarf region
+            ctx.fillStyle = 'rgba(200, 220, 255, 0.15)';
+            ctx.beginPath();
+            ctx.arc(w * 0.7, h * 0.85, 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            stars.forEach(star => {
+                ctx.fillStyle = star.color;
+                ctx.beginPath();
+                ctx.arc(w * star.x, h * star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.font = '10px Space Mono';
+                ctx.fillText(star.label, w * star.x + star.size + 5, h * star.y + 4);
+            });
+
+            // Axes labels
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.font = '10px Orbitron';
+            ctx.fillText('TEMPERATURE (K) →', w / 2 - 60, h - 10);
+            ctx.save();
+            ctx.translate(15, h / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('LUMINOSITY (L☉) →', -60, 0);
+            ctx.restore();
+        }
+
+        // Element synthesis animation
+        function animateElements() {
+            const ctx = contexts.elementCanvas;
+            const canvas = canvases.elementCanvas;
+            if (!ctx) return;
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            const time = Date.now() * 0.001;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Periodic table style
+            const elements = [
+                { symbol: 'H', name: 'Hydrogen', x: 0.1, y: 0.3, color: '#ffffff' },
+                { symbol: 'He', name: 'Helium', x: 0.15, y: 0.3, color: '#aaffff' },
+                { symbol: 'Li', name: 'Lithium', x: 0.22, y: 0.3, color: '#ffaaaa' },
+                { symbol: 'C', name: 'Carbon', x: 0.35, y: 0.5, color: '#aaffaa' },
+                { symbol: 'N', name: 'Nitrogen', x: 0.4, y: 0.5, color: '#aaaaff' },
+                { symbol: 'O', name: 'Oxygen', x: 0.45, y: 0.5, color: '#ffaaaa' },
+                { symbol: 'Ne', name: 'Neon', x: 0.55, y: 0.4, color: '#ffddff' },
+                { symbol: 'Mg', name: 'Magnesium', x: 0.6, y: 0.55, color: '#aaffaa' },
+                { symbol: 'Si', name: 'Silicon', x: 0.7, y: 0.5, color: '#ffffaa' },
+                { symbol: 'Fe', name: 'Iron', x: 0.8, y: 0.45, color: '#ffdd88' },
+                { symbol: 'Au', name: 'Gold', x: 0.88, y: 0.6, color: '#ffdd00' },
+                { symbol: 'U', name: 'Uranium', x: 0.92, y: 0.7, color: '#88ff88' }
+            ];
+
+            elements.forEach((el, i) => {
+                const px = w * el.x + Math.sin(time + i) * 3;
+                const py = h * el.y + Math.cos(time * 1.5 + i) * 3;
+
+                // Glow
+                const glow = ctx.createRadialGradient(px, py, 0, px, py, 25);
+                glow.addColorStop(0, el.color + '44');
+                glow.addColorStop(1, 'transparent');
+                ctx.fillStyle = glow;
+                ctx.beginPath();
+                ctx.arc(px, py, 25, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Box
+                ctx.strokeStyle = el.color;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(px - 15, py - 15, 30, 30);
+
+                // Symbol
+                ctx.fillStyle = el.color;
+                ctx.font = 'bold 14px Orbitron';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(el.symbol, px, py);
+            });
+
+            // Fusion arrows
+            ctx.strokeStyle = 'rgba(255, 200, 100, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+
+            const arrows = [
+                { x1: w * 0.18, y1: h * 0.35, x2: w * 0.3, y2: h * 0.5 },
+                { x1: w * 0.5, y1: h * 0.55, x2: w * 0.58, y2: h * 0.5 },
+                { x1: w * 0.75, y1: h * 0.5, x2: w * 0.78, y2: h * 0.5 }
+            ];
+
+            arrows.forEach(a => {
+                ctx.beginPath();
+                ctx.moveTo(a.x1, a.y1);
+                ctx.lineTo(a.x2, a.y2);
+                ctx.stroke();
+            });
+
+            ctx.setLineDash([]);
+            requestAnimationFrame(animateElements);
+        }
+
+        // Mass selector
+        let currentMass = 'low';
+        function setMass(mass) {
+            currentMass = mass;
+            document.querySelectorAll('.mass-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.mass === mass) btn.classList.add('active');
+            });
+
+            const isHighMass = mass === 'high';
+            document.querySelector('[data-phase="redgiant"] h2').textContent = isHighMass ? 'RED SUPERGIANT' : 'RED GIANT / SUPERGIANT';
+            document.querySelector('[data-phase="redgiant"] p').textContent = isHighMass
+                ? 'Massive stars swell into enormous red supergiants. Betelgeuse, a red supergiant 700 times larger than the Sun, will soon explode as a supernova.'
+                : 'When core hydrogen exhausts, the star expands dramatically. Hydrogen shell burning causes the outer layers to swell, cooling the surface to red.';
+
+            // Show/hide phases
+            document.querySelector('[data-phase="supernova"]').style.display = isHighMass ? 'grid' : 'none';
+            document.querySelector('[data-phase="remnant"]').style.display = isHighMass ? 'grid' : 'none';
+            document.querySelector('[data-phase="planetary"]').style.display = isHighMass ? 'none' : 'grid';
+
+            // Update timeline points
+            const points = document.querySelectorAll('.timeline-points');
+            points[0].style.display = isHighMass ? 'none' : 'flex';
+            points[1].style.display = isHighMass ? 'flex' : 'none';
+        }
+
+        // Scroll handler
+        function handleScroll() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // Phase visibility
+            document.querySelectorAll('.phase').forEach(phase => {
+                const rect = phase.getBoundingClientRect();
+                if (rect.top < window.innerHeight * 0.7) {
+                    phase.classList.add('visible');
+                }
+            });
+        }
+
+        // Init
+        window.addEventListener('load', () => {
+            initHeroStars();
+            animateHero();
+            initProtostar();
+            animateProtostar();
+            animateMainSeq();
+            animateRedGiant();
+            animateSupernova();
+            animatePlanetary();
+            animateRemnant();
+            initHRDiagram();
+            animateElements();
+
+            document.querySelectorAll('.mass-btn').forEach(btn => {
+                btn.addEventListener('click', () => setMass(btn.dataset.mass));
+            });
+
+            window.addEventListener('scroll', handleScroll);
+            handleScroll();
+        });
+
+        window.addEventListener('resize', () => {
+            initHeroStars();
+            initCanvas('protostarCanvas');
+            initCanvas('mainseqCanvas');
+            initCanvas('redgiantCanvas');
+            initCanvas('supernovaCanvas');
+            initCanvas('planetaryCanvas');
+            initCanvas('remnantCanvas');
+            initHRDiagram();
+            initCanvas('elementCanvas');
+        });
+    </script>
+</body>
+</html>
