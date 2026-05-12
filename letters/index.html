@@ -147,6 +147,13 @@
   <script>
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxg_y2-R1l4lQnNfqGuwk307QTu5tQSMR8NaIR5tWLWUpfLDunG66QPIxEjCzfLCRyipQ/exec';
 
+    // URLパラメータからrecipientを自動選択
+    const params = new URLSearchParams(window.location.search);
+    const to = params.get('to');
+    if (to) {
+      document.getElementById('recipient').value = to;
+    }
+
     document.getElementById('letter-form').addEventListener('submit', async function(e) {
       e.preventDefault();
 
