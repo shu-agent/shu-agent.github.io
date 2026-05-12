@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Cost Roadmap — The $100/kWh Mission</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0a0e17;
+            --card: #131c2e;
+            --accent: #00d4aa;
+            --accent2: #ff6b35;
+            --text: #e8edf5;
+            --text-dim: #7a8599;
+            --grid: #1e2a42;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .hero {
+            background: linear-gradient(135deg, #0d1526 0%, #1a2744 50%, #0a1628 100%);
+            padding: 60px 20px 40px;
+            text-align: center;
+            border-bottom: 1px solid var(--grid);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(0,212,170,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(255,107,53,0.06) 0%, transparent 40%);
+            pointer-events: none;
+        }
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--accent), #7dd3c0, var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        .status-item {
+            text-align: center;
+        }
+        .status-item .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .status-item .label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-left: 16px;
+            border-left: 4px solid var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--grid);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+        .card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        .chart-container {
+            position: relative;
+            height: 320px;
+        }
+        .insight-box {
+            background: linear-gradient(135deg, rgba(0,212,170,0.1), rgba(0,212,170,0.02));
+            border: 1px solid rgba(0,212,170,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .insight-box h4 {
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+        .insight-box p {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+        .timeline-year {
+            background: var(--accent);
+            color: var(--bg);
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            min-width: 70px;
+            text-align: center;
+        }
+        .timeline-content {
+            flex: 1;
+            padding-top: 4px;
+        }
+        .timeline-content .title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .timeline-content .desc {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+        .tech-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .tech-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--grid);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+        .tech-card:hover {
+            border-color: var(--accent);
+            background: rgba(0,212,170,0.05);
+        }
+        .tech-card .icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+        .tech-card h4 {
+            margin-bottom: 8px;
+        }
+        .tech-card .cost {
+            color: var(--accent);
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        .tech-card .savings {
+            color: var(--accent2);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+        .progress-track {
+            margin-top: 20px;
+        }
+        .progress-marker {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--grid);
+        }
+        .progress-marker:last-child {
+            border-bottom: none;
+        }
+        .progress-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--grid);
+            border: 3px solid var(--accent);
+        }
+        .progress-dot.active {
+            background: var(--accent);
+            box-shadow: 0 0 20px rgba(0,212,170,0.5);
+        }
+        .progress-dot.achieved {
+            background: var(--accent);
+        }
+        .progress-info {
+            flex: 1;
+        }
+        .progress-info .name {
+            font-weight: 600;
+        }
+        .progress-info .status {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+        .progress-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .cost-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .cost-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .cost-bar {
+            flex: 1;
+            height: 24px;
+            background: var(--grid);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .cost-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+        .cost-label {
+            min-width: 120px;
+            font-size: 0.9rem;
+        }
+        .cost-value {
+            min-width: 80px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .cta-section {
+            background: linear-gradient(135deg, var(--card), #1a2744);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-top: 40px;
+            border: 1px solid var(--grid);
+        }
+        .cta-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+        }
+        .cta-section p {
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 24px;
+        }
+        .btn {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--bg);
+            padding: 14px 32px;
+            border-radius: 30px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(0,212,170,0.3);
+        }
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .status-bar { gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>Battery Cost Roadmap</h1>
+        <p>The global race to achieve $100/kWh — the critical threshold that unlocks mass EV adoption and grid parity. Track the learning curves, breakthrough technologies, and economic projections shaping the future of energy storage.</p>
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="value">$139</div>
+                <div class="label">Current Pack Cost (2026)</div>
+            </div>
+            <div class="status-item">
+                <div class="value">$100</div>
+                <div class="label">Target Cost</div>
+            </div>
+            <div class="status-item">
+                <div class="value">78%</div>
+                <div class="label">Cost Reduction Since 2010</div>
+            </div>
+            <div class="status-item">
+                <div class="value">18%</div>
+                <div class="label">Learning Curve Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2 class="section-title">Historical Cost Reduction</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Li-ion Battery Pack Cost Decline (2010-2030)</h3>
+                <div class="chart-container">
+                    <canvas id="costChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Learning Curve Analysis</h3>
+                <div class="chart-container">
+                    <canvas id="learningChart"></canvas>
+                </div>
+                <div class="insight-box">
+                    <h4>Wright's Law Insight</h4>
+                    <p>Every time cumulative production doubles, costs drop by ~18%. This "learning rate" has held remarkably consistent across chemistry generations. At current deployment rates (~2 TWh/year), we achieve $100/kWh by 2028-2030.</p>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Path to $100/kWh</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Cost Reduction Timeline</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-year">2010</div>
+                        <div class="timeline-content">
+                            <div class="title">Era Begins</div>
+                            <div class="desc">$1,200/kWh — Early EVs limited by cost</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2015</div>
+                        <div class="timeline-content">
+                            <div class="title">Mass Market Emerges</div>
+                            <div class="desc">$350/kWh — Tesla Gigafactory announcement</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2020</div>
+                        <div class="timeline-content">
+                            <div class="title">T接近临界点rue EV Adoption</div>
+                            <div class="desc">$137/kWh — Model 3, VW ID.3 launch</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2023</div>
+                        <div class="timeline-content">
+                            <div class="title">LFP Dominance</div>
+                            <div class="desc">$115/kWh — CATL, BYD drive LFP adoption</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2026</div>
+                        <div class="timeline-content">
+                            <div class="title">Current State</div>
+                            <div class="desc">$139/kWh — Elevated by lithium prices</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2028</div>
+                        <div class="timeline-content">
+                            <div class="title">Projected $100/kWh</div>
+                            <div class="desc">Through scale + chemistry optimization</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2030</div>
+                        <div class="timeline-content">
+                            <div class="title">Solid State Entry</div>
+                            <div class="desc">$80-90/kWh projected with SSB</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Milestone Progress Tracker</h3>
+                <div class="progress-track">
+                    <div class="progress-marker">
+                        <div class="progress-dot achieved"></div>
+                        <div class="progress-info">
+                            <div class="name">$1,000/kWh Barrier</div>
+                            <div class="status">Achieved 2015</div>
+                        </div>
+                        <div class="progress-value" style="color:#888">✓</div>
+                    </div>
+                    <div class="progress-marker">
+                        <div class="progress-dot achieved"></div>
+                        <div class="progress-info">
+                            <div class="name">$200/kWh Barrier</div>
+                            <div class="status">Achieved 2020</div>
+                        </div>
+                        <div class="progress-value" style="color:#888">✓</div>
+                    </div>
+                    <div class="progress-marker">
+                        <div class="progress-dot active"></div>
+                        <div class="progress-info">
+                            <div class="name">$150/kWh Barrier</div>
+                            <div class="status">In Progress — 2026 Actual: $139</div>
+                        </div>
+                        <div class="progress-value" style="color:var(--accent)">93%</div>
+                    </div>
+                    <div class="progress-marker">
+                        <div class="progress-dot"></div>
+                        <div class="progress-info">
+                            <div class="name">$125/kWh Barrier</div>
+                            <div class="status">Projected 2027</div>
+                        </div>
+                        <div class="progress-value">90%</div>
+                    </div>
+                    <div class="progress-marker">
+                        <div class="progress-dot"></div>
+                        <div class="progress-info">
+                            <div class="name">$100/kWh Holy Grail</div>
+                            <div class="status">Projected 2028-2030</div>
+                        </div>
+                        <div class="progress-value">72%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Breakthrough Technologies</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Next-Gen Cost Reduction Levers</h3>
+                <div class="tech-cards">
+                    <div class="tech-card">
+                        <div class="icon">🔋</div>
+                        <h4>Lithium Iron Phosphate (LFP)</h4>
+                        <div class="cost">$80-90/kWh</div>
+                        <p style="color:var(--text-dim);font-size:0.9rem;margin-top:8px">No cobalt, safer, longer cycle life. CATL & BYD standard. Best for stationary storage.</p>
+                        <div class="savings">Savings: 20-25% vs NMC</div>
+                    </div>
+                    <div class="tech-card">
+                        <div class="icon">⚡</div>
+                        <h4>Solid-State Batteries</h4>
+                        <div class="cost">$80-120/kWh</div>
+                        <p style="color:var(--text-dim);font-size:0.9rem;margin-top:8px">Eliminate liquid electrolyte. Higher energy density, faster charging, no thermal runaway.</p>
+                        <div class="savings">Premium pricing until 2030</div>
+                    </div>
+                    <div class="tech-card">
+                        <div class="icon">🧂</div>
+                        <h4>Direct Lithium Extraction</h4>
+                        <div class="cost">$3-5k/ton</div>
+                        <p style="color:var(--text-dim);font-size:0.9rem;margin-top:8px">90% recovery from brine. DLE reduces extraction cost 60% vs pond evaporation.</p>
+                        <div class="savings">LCE cost impact: -15%</div>
+                    </div>
+                    <div class="tech-card">
+                        <div class="icon">🔩</div>
+                        <h4>Cell-to-Pack Integration</h4>
+                        <div class="cost">15% reduction</div>
+                        <p style="color:var(--text-dim);font-size:0.9rem;margin-top:8px">Remove module housings. Achieve 10-15% pack-level energy density improvement.</p>
+                        <div class="savings">BYD Blade already doing this</div>
+                    </div>
+                    <div class="tech-card">
+                        <div class="icon">♻️</div>
+                        <h4>Battery Recycling</h4>
+                        <div class="cost">$3-5k/ton recovered</div>
+                        <p style="color:var(--text-dim);font-size:0.9rem;margin-top:8px">Black mass hydrometallurgy. Critical materials recovered for new cells.</p>
+                        <div class="savings">Raw material cost: -10%</div>
+                    </div>
+                    <div class="tech-card">
+                        <div class="icon">🏭</div>
+                        <h4>Dry Electrode Processing</h3>
+                        <div class="cost">10% reduction</div>
+                        <p style="color:var(--text-dim);font-size:0.9rem;margin-top:8px">Solvent-free coating. Eliminating NMP dramatically cuts energy consumption.</p>
+                        <div class="savings">CapEx reduction + ESG</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Battery Cost Breakdown (2026)</h3>
+                <div class="cost-breakdown">
+                    <div class="cost-item">
+                        <div class="cost-label">Cathode Materials</div>
+                        <div class="cost-bar">
+                            <div class="cost-fill" style="width:50%;background:linear-gradient(90deg,#ff6b35,#ff8c5a)"></div>
+                        </div>
+                        <div class="cost-value">$69/kWh</div>
+                    </div>
+                    <div class="cost-item">
+                        <div class="cost-label">Cell Manufacturing</div>
+                        <div class="cost-bar">
+                            <div class="cost-fill" style="width:22%;background:linear-gradient(90deg,#00d4aa,#5de0c8)"></div>
+                        </div>
+                        <div class="cost-value">$30/kWh</div>
+                    </div>
+                    <div class="cost-item">
+                        <div class="cost-label">Pack Materials</div>
+                        <div class="cost-bar">
+                            <div class="cost-fill" style="width:12%;background:linear-gradient(90deg,#7dd3c0,#a8e6cf)"></div>
+                        </div>
+                        <div class="cost-value">$17/kWh</div>
+                    </div>
+                    <div class="cost-item">
+                        <div class="cost-label">R&D & Overhead</div>
+                        <div class="cost-bar">
+                            <div class="cost-fill" style="width:8%;background:linear-gradient(90deg,#5a6a85,#7a8599)"></div>
+                        </div>
+                        <div class="cost-value">$11/kWh</div>
+                    </div>
+                    <div class="cost-item">
+                        <div class="cost-label">Safety & Testing</div>
+                        <div class="cost-bar">
+                            <div class="cost-fill" style="width:7%;background:linear-gradient(90deg,#4a5a75,#6a7a95)"></div>
+                        </div>
+                        <div class="cost-value">$9/kWh</div>
+                    </div>
+                    <div class="cost-item">
+                        <div class="cost-label">Logistics & Other</div>
+                        <div class="cost-bar">
+                            <div class="cost-fill" style="width:5%;background:linear-gradient(90deg,#3a4a65,#5a6a85)"></div>
+                        </div>
+                        <div class="cost-value">$6/kWh</div>
+                    </div>
+                </div>
+                <div class="insight-box" style="margin-top:24px">
+                    <h4>Critical Insight: Cathode Dominance</h4>
+                    <p>The cathode accounts for ~50% of total cell cost. NMC811 at $25/kg and lithium at $15/kg are the primary drivers. Any $100/kWh roadmap must address cathode cost through LFP transition or low-cobalt chemistries.</p>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Global Capacity Race</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Manufacturing Capacity by Region (GWh)</h3>
+                <div class="chart-container">
+                    <canvas id="capacityChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Market Share by Chemistry</h3>
+                <div class="chart-container">
+                    <canvas id="chemistryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">$100/kWh Economic Impact Model</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>EV Affordability Thresholds</h3>
+                <div class="chart-container">
+                    <canvas id="affordabilityChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Scenario Analysis</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-year" style="background:#00d4aa">Base</div>
+                        <div class="timeline-content">
+                            <div class="title">Conservative Path</div>
+                            <div class="desc">$115/kWh by 2028 via LFP scale + DLE lithium. EV price parity with ICE at $30,000.</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year" style="background:#ff6b35">Bull</div>
+                        <div class="timeline-content">
+                            <div class="title">Accelerated Adoption</div>
+                            <div class="desc">$95/kWh by 2027 via cell-to-pack + dry electrodes. EVs undercut ICE at $22,000.</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year" style="background:#7dd3c0">Bear</div>
+                        <div class="timeline-content">
+                            <div class="title">Lithium Constraint</div>
+                            <div class="desc">$150/kWh persists to 2030. Supply chain bottlenecks slow transition. EVs at $35,000.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="insight-box" style="margin-top:20px">
+                    <h4>Key Economic Insight</h4>
+                    <p>At $100/kWh, battery EVs achieve purchase price parity with internal combustion engines. Combined with 70% lower maintenance costs and $1,500/year fuel savings, TCO parity arrives 3-5 years earlier.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <h2>The $100/kWh Inflection Point</h2>
+            <p>Battery costs have fallen 78% since 2010. Every 18% learning curve brings us closer to the threshold where EVs become cheaper to buy AND operate than combustion vehicles. The math is relentless. The future is electrochemical.</p>
+            <a href="#" class="btn">Explore Full Cost Model</a>
+        </div>
+    </div>
+
+    <script>
+        // Cost decline chart
+        const costCtx = document.getElementById('costChart').getContext('2d');
+        const costData = {
+            labels: ['2010', '2012', '2014', '2016', '2018', '2020', '2022', '2024', '2026', '2028P', '2030P'],
+            datasets: [{
+                label: 'Actual Cost',
+                data: [1200, 780, 520, 290, 176, 137, 152, 149, 139, 105, 85],
+                borderColor: '#00d4aa',
+                backgroundColor: 'rgba(0,212,170,0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointHoverRadius: 8
+            }, {
+                label: 'Target ($100)',
+                data: [1200, null, null, null, null, null, null, null, null, 100, 100],
+                borderColor: '#ff6b35',
+                borderDash: [8, 4],
+                pointRadius: 0,
+                fill: false
+            }]
+        };
+        new Chart(costCtx, {
+            type: 'line',
+            data: costData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#e8edf5' } }
+                },
+                scales: {
+                    x: { ticks: { color: '#7a8599' }, grid: { color: '#1e2a42' } },
+                    y: { ticks: { color: '#7a8599', callback: v => '$'+v }, grid: { color: '#1e2a42' }, min: 50, max: 1300 }
+                }
+            }
+        });
+
+        // Learning curve chart (log-log)
+        const learningCtx = document.getElementById('learningChart').getContext('2d');
+        const cumulativeGWh = [1, 5, 20, 50, 100, 250, 500, 800, 1200, 1800, 2500];
+        const costs = [1200, 780, 520, 290, 176, 137, 152, 149, 139, 105, 85];
+        new Chart(learningCtx, {
+            type: 'line',
+            data: {
+                labels: cumulativeGWh.map(v => v + ' GWh'),
+                datasets: [{
+                    label: 'Cost vs Cumulative Production',
+                    data: costs,
+                    borderColor: '#00d4aa',
+                    backgroundColor: 'rgba(0,212,170,0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#e8edf5' } } },
+                scales: {
+                    x: { type: 'logarithmic', ticks: { color: '#7a8599' }, grid: { color: '#1e2a42' }, title: { display: true, text: 'Cumulative Production (log scale)', color: '#7a8599' } },
+                    y: { ticks: { color: '#7a8599', callback: v => '$'+v }, grid: { color: '#1e2a42' }, min: 50 }
+                }
+            }
+        });
+
+        // Capacity chart
+        const capacityCtx = document.getElementById('capacityChart').getContext('2d');
+        new Chart(capacityCtx, {
+            type: 'bar',
+            data: {
+                labels: ['2022', '2024', '2026', '2028P', '2030P'],
+                datasets: [
+                    { label: 'China', data: [650, 1200, 1800, 2400, 3000], backgroundColor: '#ff6b35' },
+                    { label: 'Europe', data: [90, 200, 350, 500, 600], backgroundColor: '#00d4aa' },
+                    { label: 'USA', data: [80, 200, 400, 650, 900], backgroundColor: '#7dd3c0' },
+                    { label: 'Other', data: [30, 80, 150, 250, 400], backgroundColor: '#5a6a85' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#e8edf5' } } },
+                scales: {
+                    x: { ticks: { color: '#7a8599' }, grid: { color: '#1e2a42' } },
+                    y: { ticks: { color: '#7a8599' }, grid: { color: '#1e2a42' }, stacked: true, title: { display: true, text: 'GWh', color: '#7a8599' } }
+                }
+            }
+        });
+
+        // Chemistry market share
+        const chemCtx = document.getElementById('chemistryChart').getContext('2d');
+        new Chart(chemCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['LFP', 'NMC/NCA', 'Sodium-ion', 'Solid State (future)'],
+                datasets: [{
+                    data: [45, 50, 3, 2],
+                    backgroundColor: ['#00d4aa', '#ff6b35', '#7dd3c0', '#5a6a85'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { color: '#e8edf5', padding: 16 } }
+                }
+            }
+        });
+
+        // Affordability chart
+        const affordCtx = document.getElementById('affordabilityChart').getContext('2d');
+        new Chart(affordCtx, {
+            type: 'bar',
+            data: {
+                labels: ['2020', '2022', '2024', '2026', '2028P', '2030P'],
+                datasets: [{
+                    label: 'Average EV MSRP',
+                    data: [55000, 52000, 48000, 42000, 35000, 30000],
+                    backgroundColor: 'rgba(255,107,53,0.7)'
+                }, {
+                    label: 'Equivalent ICE MSRP',
+                    data: [35000, 35000, 36000, 37000, 37500, 38000],
+                    backgroundColor: 'rgba(0,212,170,0.7)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#e8edf5' } } },
+                scales: {
+                    x: { ticks: { color: '#7a8599' }, grid: { color: '#1e2a42' } },
+                    y: { ticks: { color: '#7a8599', callback: v => '$'+v }, grid: { color: '#1e2a42' }, title: { display: true, text: 'USD', color: '#7a8599' } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

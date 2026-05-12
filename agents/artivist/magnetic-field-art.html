@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magnetic Field Art Studio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a0f;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            margin: 2rem 0 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+        }
+        .canvas-container {
+            position: relative;
+            margin: 1rem;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(102, 126, 234, 0.3), 0 0 120px rgba(118, 75, 162, 0.2);
+        }
+        canvas {
+            display: block;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 100%);
+        }
+        .controls {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .control-group label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #888;
+        }
+        input[type="range"] {
+            width: 120px;
+            height: 4px;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #f093fb;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(240, 147, 251, 0.5);
+        }
+        button {
+            padding: 0.6rem 1.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background: rgba(102, 126, 234, 0.3);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+        }
+        .info {
+            position: fixed;
+            bottom: 1rem;
+            font-size: 0.65rem;
+            color: #555;
+            letter-spacing: 0.1em;
+        }
+        .title-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <h1>Magnetic Field Art</h1>
+    <div class="controls">
+        <div class="control-group">
+            <label>Field Strength</label>
+            <input type="range" id="strength" min="1" max="10" value="5" step="0.1">
+        </div>
+        <div class="control-group">
+            <label>Pole Count</label>
+            <input type="range" id="poles" min="2" max="12" value="4" step="1">
+        </div>
+        <div class="control-group">
+            <label>Flow Speed</label>
+            <input type="range" id="speed" min="0.2" max="3" value="1" step="0.1">
+        </div>
+        <div class="control-group">
+            <label>Ferrofluid</label>
+            <input type="range" id="ferro" min="0" max="1" value="0.7" step="0.05">
+        </div>
+        <button id="chaos">Add Chaos</button>
+        <button id="reset">Reset</button>
+    </div>
+    <div class="canvas-container">
+        <div class="title-overlay">Ferrofluid Field Simulation</div>
+        <canvas id="canvas" width="900" height="600"></canvas>
+    </div>
+    <div class="info">Move mouse to influence magnetic field</div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width;
+        const H = canvas.height;
+
+        let poles = [];
+        let particles = [];
+        let time = 0;
+        let mouseX = W / 2;
+        let mouseY = H / 2;
+        let mouseInfluence = false;
+
+        const strengthSlider = document.getElementById('strength');
+        const polesSlider = document.getElementById('poles');
+        const speedSlider = document.getElementById('speed');
+        const ferroSlider = document.getElementById('ferro');
+        const chaosBtn = document.getElementById('chaos');
+        const resetBtn = document.getElementById('reset');
+
+        class Pole {
+            constructor(x, y, charge) {
+                this.x = x;
+                this.y = y;
+                this.charge = charge;
+                this.baseX = x;
+                this.baseY = y;
+                this.chaos = 0;
+                this.chaosTarget = 0;
+            }
+            update(time, speed) {
+                this.x = this.baseX + Math.sin(time * 0.5 + this.chaos) * 30 * this.chaos;
+                this.y = this.baseY + Math.cos(time * 0.3 + this.chaos * 2) * 30 * this.chaos;
+            }
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * W;
+                this.y = Math.random() * H;
+                this.vx = 0;
+                this.vy = 0;
+                this.life = Math.random();
+                this.maxLife = 0.5 + Math.random() * 0.5;
+                this.size = 0.5 + Math.random() * 2;
+                this.hue = Math.random() * 60 + 220;
+            }
+            update(speed, strength, ferroLevel) {
+                let fx = 0, fy = 0;
+                let totalCharge = 0;
+
+                for (let p of poles) {
+                    let dx = p.x - this.x;
+                    let dy = p.y - this.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy) + 10;
+                    let force = (p.charge * strength * 500) / (dist * dist);
+                    fx += (dx / dist) * force;
+                    fy += (dy / dist) * force;
+                    totalCharge += Math.abs(p.charge);
+                }
+
+                if (mouseInfluence) {
+                    let dx = mouseX - this.x;
+                    let dy = mouseY - this.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy) + 50;
+                    let force = -300 / (dist * dist);
+                    fx += (dx / dist) * force;
+                    fy += (dy / dist) * force;
+                }
+
+                this.vx = (this.vx + fx * 0.1) * 0.95;
+                this.vy = (this.vy + fy * 0.1) * 0.95;
+
+                let vel = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                if (vel > 5) {
+                    this.vx = (this.vx / vel) * 5;
+                    this.vy = (this.vy / vel) * 5;
+                }
+
+                this.x += this.vx * speed;
+                this.y += this.vy * speed;
+
+                this.life -= 0.003 * speed;
+
+                if (this.x < 0 || this.x > W || this.y < 0 || this.y > H || this.life <= 0) {
+                    this.x = Math.random() * W;
+                    this.y = Math.random() * H;
+                    this.vx = 0;
+                    this.vy = 0;
+                    this.life = this.maxLife;
+                    this.hue = Math.random() * 60 + 220;
+                }
+
+                if (ferroLevel > 0.3 && Math.random() < 0.02) {
+                    this.size = 0.5 + Math.random() * 3 * ferroLevel;
+                }
+            }
+            draw(ctx, ferroLevel) {
+                let alpha = Math.min(1, this.life * 2) * 0.8;
+                let brightness = 50 + Math.abs(this.vx + this.vy) * 10;
+                brightness = Math.min(100, brightness);
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * (0.5 + ferroLevel * 0.5), 0, Math.PI * 2);
+
+                let gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 2);
+                gradient.addColorStop(0, `hsla(${this.hue}, 80%, ${brightness}%, ${alpha})`);
+                gradient.addColorStop(1, `hsla(${this.hue}, 90%, ${brightness * 0.5}%, 0)`);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                if (ferroLevel > 0.5) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size * ferroLevel * 0.3, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.5 * ferroLevel})`;
+                    ctx.fill();
+                }
+            }
+        }
+
+        function initPoles(count) {
+            poles = [];
+            const charges = [1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1];
+            const margin = 100;
+            for (let i = 0; i < count; i++) {
+                let x = margin + Math.random() * (W - margin * 2);
+                let y = margin + Math.random() * (H - margin * 2);
+                poles.push(new Pole(x, y, charges[i % charges.length]));
+            }
+        }
+
+        function initParticles(count) {
+            particles = [];
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function drawFieldLines(strength, ferroLevel) {
+            const resolution = 15;
+            const lines = [];
+            const maxLines = 40;
+
+            for (let i = 0; i < maxLines; i++) {
+                let startX = (W / maxLines) * i + (W / maxLines) * 0.5;
+                let startY = 0;
+                let line = [{ x: startX, y: startY }];
+                let x = startX;
+                let y = startY;
+                let prevDx = 0;
+                let prevDy = 1;
+
+                for (let step = 0; step < 100; step++) {
+                    let fx = 0, fy = 0;
+
+                    for (let p of poles) {
+                        let dx = p.x - x;
+                        let dy = p.y - y;
+                        let dist = Math.sqrt(dx * dx + dy * dy);
+                        let force = (p.charge * strength * 100) / (dist * dist + 1);
+                        fx += dx / (dist + 1) * force;
+                        fy += dy / (dist + 1) * force;
+                    }
+
+                    let mag = Math.sqrt(fx * fx + fy * fy) + 0.1;
+                    let nx = fx / mag;
+                    let ny = fy / mag;
+
+                    if (step > 0) {
+                        nx = nx * 0.3 + prevDx * 0.7;
+                        ny = ny * 0.3 + prevDy * 0.7;
+                        let nMag = Math.sqrt(nx * nx + ny * ny);
+                        nx /= nMag;
+                        ny /= nMag;
+                    }
+
+                    prevDx = nx;
+                    prevDy = ny;
+
+                    x += nx * resolution * 0.5;
+                    y += ny * resolution * 0.5;
+
+                    line.push({ x, y });
+
+                    if (y > H || x < 0 || x > W || y < 0) break;
+                }
+
+                if (line.length > 3) lines.push(line);
+            }
+
+            lines.forEach((line, idx) => {
+                ctx.beginPath();
+                ctx.moveTo(line[0].x, line[0].y);
+
+                for (let i = 1; i < line.length - 1; i++) {
+                    let xc = (line[i].x + line[i + 1].x) / 2;
+                    let yc = (line[i].y + line[i + 1].y) / 2;
+                    ctx.quadraticCurveTo(line[i].x, line[i].y, xc, yc);
+                }
+
+                let alpha = 0.1 + ferroLevel * 0.15;
+                let hue = 240 + (idx % 2) * 30;
+
+                ctx.strokeStyle = `hsla(${hue}, 70%, 60%, ${alpha})`;
+                ctx.lineWidth = 0.5 + ferroLevel * 0.5;
+                ctx.stroke();
+            });
+        }
+
+        function drawFerrofluidSpikes(strength, ferroLevel) {
+            if (ferroLevel < 0.4) return;
+
+            const gridSize = 20;
+            const spikeHeight = strength * 8 * ferroLevel;
+
+            for (let p of poles) {
+                let color = p.charge > 0 ? '180, 80%, ' : '300, 80%, ';
+                color += (30 + strength * 5) + '%';
+
+                for (let gx = -gridSize; gx <= gridSize; gx += gridSize) {
+                    for (let gy = -gridSize; gy <= gridSize; gy += gridSize) {
+                        let wx = p.x + gx;
+                        let wy = p.y + gy;
+                        let dist = Math.sqrt(gx * gx + gy * gy);
+                        if (dist < 20) continue;
+
+                        let dx = wx - p.x;
+                        let dy = wy - p.y;
+                        let angle = Math.atan2(dy, dx);
+
+                        let field = 0;
+                        for (let other of poles) {
+                            let ddx = other.x - wx;
+                            let ddy = other.y - wy;
+                            let ddist = Math.sqrt(ddx * ddx + ddy * ddy) + 1;
+                            field += (other.charge * strength * 50) / (ddist * ddist);
+                        }
+
+                        let spike = Math.abs(field) * spikeHeight * (1 - dist / gridSize / 2);
+                        spike = Math.max(0, spike);
+
+                        if (spike > 2) {
+                            ctx.beginPath();
+                            ctx.moveTo(wx, wy);
+                            ctx.lineTo(
+                                wx + Math.cos(angle) * spike,
+                                wy + Math.sin(angle) * spike
+                            );
+                            ctx.strokeStyle = `hsla(${color}, ${Math.min(1, spike / 20) * 0.6})`;
+                            ctx.lineWidth = 1 + spike / 10;
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+        }
+
+        function drawPoles() {
+            poles.forEach(p => {
+                let radius = 15 + Math.abs(p.chaos) * 5;
+                let hue = p.charge > 0 ? 180 : 300;
+
+                let glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius * 3);
+                glow.addColorStop(0, `hsla(${hue}, 90%, 60%, 0.4)`);
+                glow.addColorStop(1, `hsla(${hue}, 90%, 60%, 0)`);
+                ctx.fillStyle = glow;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, radius * 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${hue}, 70%, ${30 + Math.abs(p.chaos) * 10}%, 0.9)`;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, radius * 0.4, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${hue}, 50%, 80%, 0.8)`;
+                ctx.fill();
+            });
+        }
+
+        function render() {
+            ctx.fillStyle = 'rgba(10, 10, 15, 0.15)';
+            ctx.fillRect(0, 0, W, H);
+
+            let strength = parseFloat(strengthSlider.value);
+            let poleCount = parseInt(polesSlider.value);
+            let speed = parseFloat(speedSlider.value);
+            let ferroLevel = parseFloat(ferroSlider.value);
+
+            if (poles.length !== poleCount) {
+                initPoles(poleCount);
+            }
+
+            poles.forEach(p => p.update(time, speed));
+
+            drawFieldLines(strength, ferroLevel);
+            drawFerrofluidSpikes(strength, ferroLevel);
+            drawPoles();
+
+            particles.forEach(p => {
+                p.update(speed, strength, ferroLevel);
+                p.draw(ctx, ferroLevel);
+            });
+
+            time += 0.016 * speed;
+            requestAnimationFrame(render);
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            let rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+            mouseInfluence = true;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            mouseInfluence = false;
+        });
+
+        chaosBtn.addEventListener('click', () => {
+            poles.forEach(p => {
+                p.chaosTarget = 1;
+                setTimeout(() => p.chaosTarget = 0, 2000);
+            });
+        });
+
+        resetBtn.addEventListener('click', () => {
+            initPoles(poleCount);
+            particles.forEach(p => {
+                p.x = Math.random() * W;
+                p.y = Math.random() * H;
+                p.life = p.maxLife;
+            });
+        });
+
+        polesSlider.addEventListener('input', () => {
+            initPoles(parseInt(polesSlider.value));
+        });
+
+        initPoles(4);
+        initParticles(800);
+        render();
+    </script>
+</body>
+</html>

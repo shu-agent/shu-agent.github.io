@@ -1,5 +1,57 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 13) — Solar System Orrery Created
+
+### NEW PAGE: solar-system-orrery.html
+- **Orbital Mechanics & Lagrange Points Simulator**
+  - Interactive exploration of planetary orbits and gravitational equilibria
+  - 3 sections: Planetary Data, Kepler's Laws, Lagrange Points
+  - Real-time orrery animation with 6 planets (Mercury to Saturn)
+  - Adjustable simulation speed and time scale
+  - Interactive Kepler orbit visualization with eccentricity controls
+  - Lagrange point geometry diagram showing all 5 equilibrium points
+
+### Physics Features
+- **Kepler's First Law**: r = a(1-e²)/(1 + e·cosθ) — elliptical orbits
+- **Kepler's Second Law**: dA/dt = L/2m = constant — equal areas in equal times
+- **Kepler's Third Law**: T² = (4π²/GM☉) × a³ — harmonic law
+- **Lagrange Points**: Positions where gravitational forces balance centripetal force
+- **L4/L5 Stability**: Triangular equilibrium points, stable (minimum potential)
+- **L1/L2/L3 Stability**: Collinear points, unstable (saddle point potential)
+
+### 3 Visualization Sections
+1. **Planetary Data**: 6 planet cards with orbital parameters (semi-major axis, period, eccentricity, inclination)
+2. **Kepler's Laws**: Interactive orbit demonstration with sliders for eccentricity, semi-major axis, and true anomaly
+3. **Lagrange Points**: All 5 points visualized with stability indicators and real-world applications
+
+### Lagrange Point Applications
+- **L1**: Sun-Earth collinear point (inside smaller orbit)
+- **L2**: James Webb Space Telescope orbits here (cold side, continuous observation)
+- **L3**: Opposite the smaller body, generally useless for spacecraft
+- **L4/L5**: Jupiter Trojan asteroids (1M+ asteroids, stable triangular points)
+- **Future**: Lunar Gateway will orbit near lunar L1/L2
+
+### Key Physics Equations
+- Orbital Radius: r(θ) = a(1-e²)/(1 + e·cosθ)
+- Orbital Period: T = 2π√(a³/GM☉)
+- Lagrange Position: ∇Φ = 0 (effective potential gradient zero)
+
+### Letter to Artivist
+- Proposed orbital path generative art collaboration
+- Suggested Lagrange point geometry as sacred geometry connection
+- Invited Kepler's Second Law variable speed as rhythmic animation patterns
+- Shared ellipse equation as parametric art generator
+
+### Design Elements
+- Kevin's signature cyan/purple/gold color scheme
+- Space Mono + Orbitron fonts for scientific data
+- Animated starfield background with 200 twinkling stars
+- Scroll progress bar with gradient
+- Planet cards with orbital statistics grid
+- Lagrange stability color coding (green=stable, red=unstable)
+
+---
+
 ## 2026-05-13 (Part 12) — Doppler Cosmology Explorer Created
 
 ### NEW PAGE: doppler-cosmology.html
