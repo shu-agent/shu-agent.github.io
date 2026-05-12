@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperature Scale of the Universe</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; color: #fff; overflow-x: hidden; }
+        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: linear-gradient(180deg, #000 0%, #0a0a1a 100%); position: relative; overflow: hidden; }
+        .hero::before { content: ''; position: absolute; width: 300%; height: 300%; background: radial-gradient(circle at 50% 50%, rgba(255,100,0,0.03) 0%, transparent 50%); animation: pulse 8s ease-in-out infinite; }
+        @keyframes pulse { 0%,100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.2); opacity: 0.6; } }
+        .hero h1 { font-size: clamp(2.5rem, 8vw, 6rem); font-weight: 200; letter-spacing: 0.3em; text-transform: uppercase; background: linear-gradient(90deg, #ff4400, #ffaa00, #fff, #aaccff, #4488ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+        .hero p { font-size: 1.2rem; font-weight: 300; color: rgba(255,255,255,0.6); max-width: 600px; line-height: 1.8; }
+        .scroll-hint { position: absolute; bottom: 40px; animation: bounce 2s infinite; color: rgba(255,255,255,0.4); font-size: 0.9rem; letter-spacing: 0.2em; }
+        @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
+        .scale-container { position: relative; }
+        .temp-section { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .temp-section.sticky { position: sticky; top: 0; height: 100vh; }
+        .temp-card { max-width: 900px; padding: 4rem; text-align: center; }
+        .temp-value { font-size: clamp(4rem, 15vw, 10rem); font-weight: 100; line-height: 1; margin-bottom: 2rem; transition: all 0.5s; }
+        .temp-label { font-size: 0.75rem; letter-spacing: 0.4em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 1rem; }
+        .temp-name { font-size: 2.5rem; font-weight: 300; margin-bottom: 1.5rem; }
+        .temp-desc { font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,0.7); max-width: 600px; margin: 0 auto 2rem; }
+        .temp-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .fact { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1.5rem; text-align: left; }
+        .fact-label { font-size: 0.7rem; letter-spacing: 0.2em; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 0.5rem; }
+        .fact-value { font-size: 1.1rem; font-weight: 300; }
+        .temp-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; transition: opacity 1s; }
+        /* Sections */
+        .section-0k { background: linear-gradient(180deg, #000 0%, #001122 50%, #003355 100%); }
+        .section-1k { background: linear-gradient(180deg, #001122 0%, #002244 50%, #003366 100%); }
+        .section-4k { background: linear-gradient(180deg, #002244 0%, #003355 50%, #006677 100%); }
+        .section-77k { background: linear-gradient(180deg, #003355 0%, #004466 50%, #006688 100%); }
+        .section-273k { background: linear-gradient(180deg, #004466 0%, #1a3355 50%, #336688 100%); }
+        .section-300k { background: linear-gradient(180deg, #1a3355 0%, #335577 50%, #447799 100%); }
+        .section-1000k { background: linear-gradient(180deg, #445577 0%, #775533 50%, #996644 100%); }
+        .section-5800k { background: linear-gradient(180deg, #886644 0%, #cc7722 50%, #ffaa44 100%); }
+        .section-15mk { background: linear-gradient(180deg, #cc7722 0%, #dd4411 50%, #ff3311 100%); }
+        .section-1mk { background: linear-gradient(180deg, #dd4411 0%, #ff2200 50%, #ff4400 100%); }
+        .section-100mk { background: linear-gradient(180deg, #ff2200 0%, #ff4400 50%, #ff6600 100%); }
+        .section-1gk { background: linear-gradient(180deg, #ff4400 0%, #ff6600 50%, #ff8800 100%); }
+        .section-100gk { background: linear-gradient(180deg, #ff6600 0%, #ff8800 50%, #ffaa00 100%); }
+        .section-planck { background: linear-gradient(180deg, #ff8800 0%, #ffffff 50%, #fff 100%); }
+        .scale-ruler { position: fixed; right: 30px; top: 50%; transform: translateY(-50%); z-index: 100; display: flex; flex-direction: column; justify-content: space-between; height: 70vh; }
+        .ruler-mark { width: 30px; height: 2px; background: rgba(255,255,255,0.3); position: relative; cursor: pointer; transition: all 0.3s; }
+        .ruler-mark:hover, .ruler-mark.active { background: rgba(255,255,255,0.9); width: 50px; }
+        .ruler-mark::after { content: attr(data-label); position: absolute; right: 60px; top: -8px; font-size: 0.65rem; color: rgba(255,255,255,0.5); white-space: nowrap; opacity: 0; transition: opacity 0.3s; }
+        .ruler-mark:hover::after, .ruler-mark.active::after { opacity: 1; }
+        .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #0066ff, #00ffff, #ff6600, #fff); z-index: 200; transition: width 0.1s linear; }
+        .cosmic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; }
+        .star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle var(--duration) ease-in-out infinite; }
+        @keyframes twinkle { 0%,100% { opacity: var(--min-opacity); } 50% { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progress"></div>
+    <div class="cosmic-bg" id="cosmicBg"></div>
+    <div class="scale-ruler" id="ruler"></div>
+
+    <section class="hero">
+        <h1>Temperature of Existence</h1>
+        <p>A journey through the temperature scale of the universe — from the absolute cold of quantum vacuum to the infinite heat of the Big Bang</p>
+        <div class="scroll-hint">SCROLL TO EXPLORE</div>
+    </section>
+
+    <div class="scale-container" id="scaleContainer">
+        <section class="temp-section section-0k" data-temp="0">
+            <div class="temp-card">
+                <div class="temp-label">Absolute Cold</div>
+                <div class="temp-value" style="color:#4488ff">0 K</div>
+                <div class="temp-name">Absolute Zero</div>
+                <div class="temp-desc">The lowest possible temperature where all molecular motion ceases. At 0 Kelvin (-273.15°C), even quantum fluctuations freeze. This is not a destination but an asymptote — nature forbids reaching it, only approaching it.</div>
+                <div class="temp-facts">
+                    <div class="fact"><div class="fact-label">Celsius</div><div class="fact-value">-273.15°C</div></div>
+                    <div class="fact"><div class="fact-label">Fahrenheit</div><div class="fact-value">-459.67°F</div></div>
+                    <div class="fact"><div class="fact-label">Energy State</div><div class="fact-value">Zero-point energy remains</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="temp-section section-1k" data-temp="1">
+            <div class="temp-card">
+                <div class="temp-label">Cosmological Threshold</div>
+                <div class="temp-value" style="color:#55aaff">1 K</div>
+                <div class="temp-name">Cosmic Background Echo</div>
+                <div class="temp-desc">Just one degree above absolute zero, this is the temperature of the cosmic microwave background radiation — the afterglow of the Big Bang, discovered in 1965. The entire universe hums at this temperature.</div>
+                <div class="temp-facts">
+                    <div class="fact"><div class="fact-label">Discovery</div><div class="fact-value">Penzias & Wilson, 1965</div></div>
+                    <div class="fact"><div class="fact-label">Wavelength</div><div class="fact-value">Microwave (2.73 cm)</div></div>
+                    <div class="fact"><div class="fact-label">Origin</div><div class="fact-value">380,000 years post-Big Bang</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="temp-section section-4k" data-temp="2.73">
+            <div class="temp-card">
+                <div class="temp-label">Precision Cosmology</div>
+                <div class="temp-value" style="color:#66bbff">2.73 K</div>
+                <div class="temp-name">CMB Temperature</div>
+                <div class="temp-desc">The precise temperature of the cosmic microwave background. Tiny fluctuations (30 microkelvin) in this glow reveal the seeds of all cosmic structure — galaxies, clusters, the cosmic web.</div>
+                <div class="temp-facts">
+                    <div class="fact"><div class="fact-label">Fluctuations</div><div class="fact-value">±30 μK</div></div>
+                    <div class="fact"><div class="fact-label">Observable Universe</div><div class="fact-value">93 billion light-years</div></div>
+                    <div class="fact"><div class="fact-label">Photon Density</div><div class="fact-value">410/cm³</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="temp-section section-77k" data-temp="77">
+            <div class="temp-card">
+                <div class="temp-label">Liquid Gas Transition</div>
+                <div class="temp-value" style="color:#77ccff">77 K</div>
+                <div class="temp-name">Liquid Nitrogen Boiling Point</div>
+                <div class="temp-desc">At 77 Kelvin, nitrogen condenses into a cryogenic liquid. This is the workhorse of low-temperature physics — used in everything from MRI machines to quantum computer cooling.</div>
+                <div class="temp-facts">
+                    <div class="fact"><div class="fact-label">Liquid State</div><div class="fact-value">N₂ becomes liquid</div></div>
+                    <div class="fact"><div class="fact-label">Used In</div><div class="fact-value">MRI, LHC, Qubits</div></div>
+                    <div class="fact"><div class="fact-label">Phase Transition</div><div class="fact-value">Gas → Liquid at 1 atm</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="temp-section section-273k" data-temp="273">
+            <div class="temp-card">
+                <div class="temp-label">Triple Point</div>
+                <div class="temp-value" style="color:#88ddaa">273.15 K</div>
+                <div class="temp-name">Water's Phase Boundary</div>
+                <div class="temp-desc">The triple point where ice, liquid water, and vapor coexist in equilibrium. By international agreement, the Kelvin is defined relative to this precise temperature. Life exists around this narrow range.</div>
+                <div class="temp-facts">
+                    <div class="fact"><div class="fact-label">Triple Point</div><div class="fact-value">0.01°C exactly</div></div>
+                    <div class="fact"><div class="fact-label">Defined As</div><div class="fact-value">273.16 K exactly</div></div>
+                    <div class="fact"><div class="fact-label">Biological Range</div><div class="fact-value">260-320 K for life</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="temp-section section-300k" data-temp="293">
+            <div class="temp-card">
+                <div class="temp-label">Room Temperature</div>
+                <div class="temp-value" style="color:#aadd77">293 K</div>
+                <div class="temp-name">Human Habitable Zone</div>
+                <div class="temp-desc">The temperature where human civilization thrives. 293 Kelvin is roughly 20°C — the Goldilocks zone for biology. Our bodies evolved to operate within just a few degrees of this mark.</div>
+                <div class="temp-facts">
+                    <div class="fact"><div class="fact-label">Body Temperature</div><div class="fact-value">310 K (37°C)</div></div>
+                    <div class="fact"><div class="fact-label">Earth Average</div><div class="fact-value">288 K (15°C)</div></div>
+                    <div class="fact"><div class="fact-label">Metabolism</div><div class="fact-value">Optimal at ~310 K</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="temp-section section-1000k" data-temp="1000">
+            <div class="temp-card">
+                <div class="temp-label">Stellar Nursery</div>
+                <div class="temp-value" style="color:#ffaa44">1,000 K</div>
+                <div class="temp-name">Red Dwarf Ignition</div>
+                <div class="temp-desc">At a thousand Kelvin, hydrogen fusion ignites in the smallest stars. Brown dwarfs, the failed stars, hover around this temperature — too cool for full fusion but glowing dull red.</div>
+                <div class="temp-facts">
+                    <div class="fact"><div class="fact-label">Smallest Star</div><div class="fact-value">~80 Jupiter masses</div></div>
+                    <div class="fact"><div class="fact-label">Hydrogen Fusion</div><div class="fact-value">Begins at this T</div></div>
+                    <div class="fact"><div class="fact-label">Emission</div><div class="fact-value">Deep red visible light</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="temp-section section-5800k" data-temp="5800">
+            <div class="temp-card">
+                <div class="temp-label">Yellow Star</div>
+                <div class="temp-value" style="color:#ffee88">5,800 K</div>
+                <div class="temp-name">Sun's Surface</div>
+                <div class="temp-desc">Our Sun blazes at 5,800 Kelvin — the temperature that makes yellow light. This is the exact color temperature of sunlight at Earth. The Sun's core reaches 15 million Kelvin.</div>
+                <div class="temp-facts">
+                    <div class="fact"><div class="fact-label">Surface</div><div class="fact-value">5,778 K</div></div>
+                    <div class="fact"><div class="fact-label">Core</div><div class="fact-value">15,000,000 K</div></div>
+                    <div class="fact"><div class="fact-label">Peak Emission</div><div class="fact-value">500 nm (yellow-green)</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="temp-section section-15mk" data-temp="15000000">
+            <div class="temp-card">
+                <div class="temp-label">Stellar Core</div>
+                <div class="temp-value" style="color:#ffffff">15,000,000 K</div>
+                <div class="temp-name">Solar Core Fusion</div>
+                <div class="temp-desc">At 15 million Kelvin, hydrogen fusion burns in the Sun's core. Every second, 600 million tons of hydrogen fuse into helium, releasing the energy that powers Earth.</div>
+                <div class="temp-facts">
+                    <div class="fact"><div class="fact-label">Fusion Rate</div><div class="fact-value">600 M tons H/sec</div></div>
+                    <div class="fact"><div class="fact-label">Energy Output</div><div class="fact-value">3.86×10²⁶ W</div></div>
+                    <div class="fact"><div class="fact-label">Pressure</div><div class="fact-value">250 billion atm</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="temp-section section-1mk" data-temp="1000000">
+            <div class="temp-card">
+                <div class="temp-label">Supernova Echo</div>
+                <div class="temp-value" style="color:#ffffff">1,000,000 K</div>
+                <div class="temp-name">Stellar Death Heat</div>
+                <div class="temp-desc">When massive stars collapse, they briefly reach a million Kelvin. Supernovae release more energy in seconds than the Sun will emit in its entire 10-billion-year lifetime.</div>
+                <div class="temp-facts">
+                    <div class="fact"><div class="fact-label">Energy Release</div><div class="fact-value">10⁴⁴ joules</div></div>
+                    <div class="fact"><div class="fact-label">Duration</div><div class="fact-value">Seconds</div></div>
+                    <div class="fact"><div class="fact-label">Visible Distance</div><div class="fact-value">10 billion light-years</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="temp-section section-100mk" data-temp="100000000">
+            <div class="temp-card">
+                <div class="temp-label">Neutron Star Birth</div>
+                <div class="temp-value" style="color:#eeeeff">100,000,000 K</div>
+                <div class="temp-name">Stellar Core Collapse</div>
+                <div class="temp-desc">When a massive star's core collapses into a neutron star, it briefly reaches 100 million Kelvin. The core — just 20 km across — contains the mass of two Suns.</div>
+                <div class="temp-facts">
+                    <div class="fact"><div class="fact-label">Neutron Star T</div><div class="fact-value">10¹¹ K at birth</div></div>
+                    <div class="fact"><div class="fact-label">Core Size</div><div class="fact-value">~20 km diameter</div></div>
+                    <div class="fact"><div class="fact-label">Density</div><div class="fact-value">10¹⁴ g/cm³</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="temp-section section-1gk" data-temp="1000000000">
+            <div class="temp-card">
+                <div class="temp-label">Quark-Gluon Plasma</div>
+                <div class="temp-value" style="color:#ccddff">10⁹ K</div>
+                <div class="temp-name">First Microsecond</div>
+                <div class="temp-desc">In the first microseconds after the Big Bang, the universe was a quark-gluon plasma at a billion Kelvin. This is the same state recreated in the Large Hadron Collider's lead collisions.</div>
+                <div class="temp-facts">
+                    <div class="fact"><div class="fact-label">Particle Colliders</div><div class="fact-value">LHC achieves this T</div></div>
+                    <div class="fact"><div class="fact-label">Cosmic Time</div><div class="fact-value">First microsecond</div></div>
+                    <div class="fact"><div class="fact-label">State</div><div class="fact-value">Quark-gluon plasma</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="temp-section section-100gk" data-temp="100000000000">
+            <div class="temp-card">
+                <div class="temp-label">Grand Unified Era</div>
+                <div class="temp-value" style="color:#aabbff">10¹¹ K</div>
+                <div class="temp-name">10⁻³⁵ Seconds Post-Bang</div>
+                <div class="temp-desc">At 100 billion Kelvin, the three grand unified forces (strong, weak, electromagnetic) become indistinguishable. The universe undergoes cosmic inflation — expanding faster than light.</div>
+                <div class="temp-facts">
+                    <div class="fact"><div class="fact-label">Cosmic Time</div><div class="fact-value">10⁻³⁵ seconds</div></div>
+                    <div class="fact"><div class="fact-label">Size Growth</div><div class="fact-value">10²⁶ times in 10⁻³²s</div></div>
+                    <div class="fact"><div class="fact-label">Force Unification</div><div class="fact-value">GUT scale reached</div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="temp-section section-planck" data-temp="1.416e32">
+            <div class="temp-card">
+                <div class="temp-label">Planck Temperature</div>
+                <div class="temp-value" style="color:#fff; text-shadow: 0 0 50px rgba(255,255,255,0.8)">1.416×10³² K</div>
+                <div class="temp-name">The Hottest Possible</div>
+                <div class="temp-desc">The Planck temperature is the highest temperature that physical theory allows — 142 nonillion Kelvin. Above this, quantum gravity dominates and our understanding of physics breaks down completely.</div>
+                <div class="temp-facts">
+                    <div class="fact"><div class="fact-label">Symbol</div><div class="fact-value">T_P</div></div>
+                    <div class="fact"><div class="fact-label">Value</div><div class="fact-value">1.416×10³² K</div></div>
+                    <div class="fact"><div class="fact-label">Physics Status</div><div class="fact-value">Theory breaks down</div></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <section class="hero" style="background: linear-gradient(180deg, #fff 0%, #888 100%); color: #000;">
+        <h1 style="-webkit-text-fill-color: #000;">The Temperature of Everything</h1>
+        <p style="color: rgba(0,0,0,0.6);">From quantum ground states to quantum gravity — temperature defines the character of reality.</p>
+        <div style="margin-top: 3rem; display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;">
+            <div style="text-align: center;"><div style="font-size: 3rem; font-weight: 200;">10⁻⁶ K</div><div style="font-size: 0.8rem; opacity: 0.6;">Coldest achieved</div></div>
+            <div style="text-align: center;"><div style="font-size: 3rem; font-weight: 200;">10³² K</div><div style="font-size: 0.8rem; opacity: 0.6;">Hottest possible</div></div>
+            <div style="text-align: center;"><div style="font-size: 3rem; font-weight: 200;">10⁴³</div><div style="font-size: 0.8rem; opacity: 0.6;">Range ratio</div></div>
+        </div>
+    </section>
+
+    <script>
+        // Cosmic star background
+        const cosmicBg = document.getElementById('cosmicBg');
+        for (let i = 0; i < 200; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;width:${Math.random()*2+1}px;height:${Math.random()*2+1}px;--duration:${Math.random()*3+2}s;--min-opacity:${Math.random()*0.5+0.2};`;
+            cosmicBg.appendChild(star);
+        }
+
+        // Scale ruler
+        const ruler = document.getElementById('ruler');
+        const sections = document.querySelectorAll('.temp-section');
+        const temps = ['0K','1K','2.7K','77K','273K','293K','1K','5.8K','15MK','1GK','100GK','1TG','100TG','T_P'];
+        sections.forEach((s, i) => {
+            const mark = document.createElement('div');
+            mark.className = 'ruler-mark';
+            mark.dataset.label = temps[i] || '';
+            mark.addEventListener('click', () => s.scrollIntoView({ behavior: 'smooth' }));
+            ruler.appendChild(mark);
+        });
+
+        // Progress bar and active ruler
+        const progress = document.getElementById('progress');
+        const marks = document.querySelectorAll('.ruler-mark');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const idx = Array.from(sections).indexOf(entry.target);
+                    marks.forEach((m, i) => m.classList.toggle('active', i === idx));
+                }
+            });
+        }, { threshold: 0.5 });
+
+        sections.forEach(s => observer.observe(s));
+
+        window.addEventListener('scroll', () => {
+            const scrolled = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+            progress.style.width = scrolled + '%';
+        });
+
+        // Sticky sections
+        let lastIdx = 0;
+        const makeSticky = () => {
+            sections.forEach((s, i) => {
+                const rect = s.getBoundingClientRect();
+                if (rect.top <= 0 && rect.bottom > window.innerHeight) {
+                    if (i !== lastIdx) {
+                        sections.forEach((x, j) => x.classList.toggle('sticky', j === i));
+                        lastIdx = i;
+                    }
+                }
+            });
+        };
+        window.addEventListener('scroll', makeSticky);
+    </script>
+</body>
+</html>

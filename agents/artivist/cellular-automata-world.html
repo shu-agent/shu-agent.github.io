@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cellular Automata World | Artivist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-panel: rgba(15, 15, 25, 0.95);
+            --accent-cosmic: #8b5cf6;
+            --accent-life: #22c55e;
+            --accent-fire: #f97316;
+            --accent-ocean: #06b6d4;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .cosmic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+                var(--bg-dark);
+            z-index: -2;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: var(--base-opacity); }
+            50% { opacity: 1; }
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 1rem;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-life), var(--accent-ocean), var(--accent-cosmic));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            animation: gradientFlow 6s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.2em;
+        }
+
+        .intro {
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            padding: 0 1.5rem;
+            text-align: center;
+        }
+
+        .intro p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .intro .philosophy {
+            font-style: italic;
+            color: var(--accent-life);
+            font-size: 1.3rem;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem 3rem;
+        }
+
+        .simulation-container {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .canvas-wrapper {
+            background: var(--bg-panel);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            position: relative;
+        }
+
+        .canvas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .canvas-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-life);
+        }
+
+        .generation-display {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        # automataCanvas {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            border-radius: 8px;
+            cursor: crosshair;
+            background: #050508;
+        }
+
+        .controls-panel {
+            background: var(--bg-panel);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .control-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-section h3 {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-cosmic);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .control-row label {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .control-row input[type="range"] {
+            width: 120px;
+            accent-color: var(--accent-life);
+        }
+
+        .control-row span {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-life), var(--accent-ocean));
+            color: var(--bg-dark);
+            font-weight: 700;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--text-primary);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(139, 92, 246, 0.3);
+            border-color: var(--accent-cosmic);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        .rule-presets {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .rule-preset {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .rule-preset:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .rule-preset.active {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid var(--accent-life);
+        }
+
+        .rule-preset .name {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .rule-preset .desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .rule-preset .code {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent-ocean);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.2rem;
+            color: var(--accent-life);
+            font-weight: 700;
+        }
+
+        .stat-card .label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .theory-section {
+            background: var(--bg-panel);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .theory-section h2 {
+            font-size: 2rem;
+            color: var(--accent-cosmic);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .theory-card {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .theory-card:hover {
+            border-color: rgba(139, 92, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .theory-card h4 {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-ocean);
+            margin-bottom: 0.75rem;
+        }
+
+        .theory-card p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .theory-card .equation {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-life);
+            background: rgba(34, 197, 94, 0.1);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            margin-top: 0.75rem;
+            display: inline-block;
+        }
+
+        .gallery-section {
+            text-align: center;
+        }
+
+        .gallery-section h2 {
+            font-size: 2rem;
+            color: var(--accent-cosmic);
+            margin-bottom: 1.5rem;
+        }
+
+        .pattern-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .pattern-card {
+            background: var(--bg-panel);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pattern-card:hover {
+            border-color: var(--accent-life);
+            transform: scale(1.02);
+        }
+
+        .pattern-card canvas {
+            width: 100%;
+            height: 120px;
+            border-radius: 6px;
+            background: #050508;
+        }
+
+        .pattern-card h5 {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            margin: 0.75rem 0 0.25rem;
+        }
+
+        .pattern-card p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--accent-cosmic);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            z-index: 10;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        .loading-text {
+            font-family: 'Space Mono', monospace;
+            color: var(--accent-life);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        @media (max-width: 900px) {
+            .simulation-container {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .controls-panel {
+                padding: 1rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmic-bg"></div>
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <h1>Cellular Automata World</h1>
+        <p class="subtitle">EMERGENCE FROM SIMPLE RULES</p>
+    </header>
+
+    <div class="intro">
+        <p>From the simplest rules of birth and death, <strong>complexity blooms</strong>. Each cell follows humble rules, yet the collective produces <strong>gliders, oscillators, and entire ecosystems</strong>.</p>
+        <p class="philosophy">"The universe is not a collection of objects — it is a symphony of simple rules playing infinite variations."</p>
+    </div>
+
+    <main>
+        <div class="simulation-container">
+            <div class="canvas-wrapper">
+                <div class="canvas-header">
+                    <span class="canvas-title">LIFE EVOLUTION</span>
+                    <span class="generation-display">Generation: <span id="generation">0</span></span>
+                </div>
+                <canvas id="automataCanvas" width="600" height="600"></canvas>
+                <div class="loading-overlay" id="loadingOverlay">
+                    <span class="loading-text">INITIALIZING EMERGENCE...</span>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="control-section">
+                    <h3>Simulation</h3>
+                    <div class="control-row">
+                        <label>Speed</label>
+                        <input type="range" id="speedSlider" min="1" max="60" value="10">
+                        <span id="speedValue">10</span>
+                    </div>
+                    <div class="control-row">
+                        <label>Cell Size</label>
+                        <input type="range" id="cellSizeSlider" min="2" max="15" value="6">
+                        <span id="cellSizeValue">6</span>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="startBtn">Start</button>
+                        <button class="btn btn-secondary" id="stepBtn">Step</button>
+                        <button class="btn btn-danger" id="clearBtn">Clear</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Rules (B3/S23)</h3>
+                    <div class="rule-presets">
+                        <div class="rule-preset active" data-rule="conway">
+                            <span class="name">Conway's Life</span>
+                            <span class="code">B3/S23</span>
+                        </div>
+                        <div class="rule-preset" data-rule="highlife">
+                            <span class="name">HighLife</span>
+                            <span class="code">B36/S23</span>
+                        </div>
+                        <div class="rule-preset" data-rule="seeds">
+                            <span class="name">Seeds</span>
+                            <span class="code">B2/S</span>
+                        </div>
+                        <div class="rule-preset" data-rule="daynight">
+                            <span class="name">Day & Night</span>
+                            <span class="code">B3678/S34678</span>
+                        </div>
+                        <div class="rule-preset" data-rule="diamoeba">
+                            <span class="name">Diamoeba</span>
+                            <span class="code">B35678/S5678</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="value" id="cellCount">0</div>
+                            <div class="label">Alive</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="value" id="deathCount">0</div>
+                            <div class="label">Died</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="value" id="birthCount">0</div>
+                            <div class="label">Born</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="value" id="fpsDisplay">0</div>
+                            <div class="label">FPS</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Patterns</h3>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" id="gliderBtn">Glider</button>
+                        <button class="btn btn-secondary" id="gosperBtn">Gosper Glider Gun</button>
+                        <button class="btn btn-secondary" id="pulsarBtn">Pulsar</button>
+                        <button class="btn btn-secondary" id="lwssBtn">LWSS</button>
+                        <button class="btn btn-secondary" id="randomBtn">Random</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="theory-section">
+            <h2>The Mathematics of Emergence</h2>
+            <div class="theory-grid">
+                <div class="theory-card">
+                    <h4>Conway's Rules</h4>
+                    <p>Every cell lives or dies based on its neighborhood. A dead cell with exactly 3 alive neighbors comes to life. An alive cell with 2 or 3 neighbors survives.</p>
+                    <span class="equation">B3/S23</span>
+                </div>
+                <div class="theory-card">
+                    <h4>Emergent Behavior</h4>
+                    <p>Simple local rules produce global patterns. Gliders move across the grid. Oscillators pulse. Guns shoot streams. The whole is greater than the sum of parts.</p>
+                    <span class="equation">Emergence = Σ(local rules)</span>
+                </div>
+                <div class="theory-card">
+                    <h4>Turing Completeness</h4>
+                    <p>Conway's Life is Turing complete — any computation can be performed given enough space and time. The Game of Life contains within it a universal computer.</p>
+                    <span class="equation">∃ Life-computable functions</span>
+                </div>
+                <div class="theory-card">
+                    <h4>Connection to Physics</h4>
+                    <p>Cellular automata model phase transitions, reaction-diffusion systems, and even quantum field theory. Nature computes locally, emerges globally.</p>
+                    <span class="equation">∂ρ/∂t = D∇²ρ + R(ρ)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="gallery-section">
+            <h2>Famous Patterns</h2>
+            <div class="pattern-gallery" id="patternGallery">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>A creation of <a href="index.html">Artivist</a> — Bridging Art and Science through Code</p>
+    </footer>
+
+    <script>
+        // Stars background
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.cssText = `
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                width: ${Math.random() * 2 + 1}px;
+                height: ${Math.random() * 2 + 1}px;
+                --duration: ${Math.random() * 3 + 2}s;
+                --base-opacity: ${Math.random() * 0.5 + 0.3};
+            `;
+            starsContainer.appendChild(star);
+        }
+
+        // CA Simulation
+        const canvas = document.getElementById('automataCanvas');
+        const ctx = canvas.getContext('2d');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        let cellSize = 6;
+        let cols = Math.floor(canvas.width / cellSize);
+        let rows = Math.floor(canvas.height / cellSize);
+        let grid = createGrid();
+        let running = false;
+        let generation = 0;
+        let lastTime = 0;
+        let frameCount = 0;
+        let fps = 0;
+        let speed = 10;
+        let birthCount = 0;
+        let deathCount = 0;
+
+        // Rule definitions: B = birth neighbors, S = survival neighbors
+        const rules = {
+            conway: { birth: [3], survival: [2, 3] },
+            highlife: { birth: [3, 6], survival: [2, 3] },
+            seeds: { birth: [2], survival: [] },
+            daynight: { birth: [3, 6, 7, 8], survival: [3, 4, 6, 7, 8] },
+            diamoeba: { birth: [3, 5, 6, 7, 8], survival: [5, 6, 7, 8] }
+        };
+        let currentRule = 'conway';
+
+        function createGrid() {
+            return Array(rows).fill(null).map(() => Array(cols).fill(0));
+        }
+
+        function resizeCanvas() {
+            const wrapper = canvas.parentElement;
+            const width = Math.min(600, wrapper.clientWidth - 48);
+            canvas.width = width;
+            canvas.height = width;
+            cols = Math.floor(canvas.width / cellSize);
+            rows = Math.floor(canvas.height / cellSize);
+            grid = createGrid();
+        }
+
+        function countNeighbors(g, r, c) {
+            let count = 0;
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    const nr = (r + dr + rows) % rows;
+                    const nc = (c + dc + cols) % cols;
+                    count += g[nr][nc];
+                }
+            }
+            return count;
+        }
+
+        function nextGeneration() {
+            const newGrid = createGrid();
+            let births = 0;
+            let deaths = 0;
+            const rule = rules[currentRule];
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const neighbors = countNeighbors(grid, r, c);
+                    const alive = grid[r][c];
+
+                    if (alive) {
+                        if (rule.survival.includes(neighbors)) {
+                            newGrid[r][c] = 1;
+                        } else {
+                            deaths++;
+                        }
+                    } else {
+                        if (rule.birth.includes(neighbors)) {
+                            newGrid[r][c] = 1;
+                            births++;
+                        }
+                    }
+                }
+            }
+
+            birthCount += births;
+            deathCount += deaths;
+            grid = newGrid;
+            generation++;
+            updateDisplay();
+        }
+
+        function draw() {
+            ctx.fillStyle = '#050508';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (grid[r][c]) {
+                        const hue = (r + c + generation * 0.5) % 360;
+                        ctx.fillStyle = `hsl(${hue}, 70%, 55%)`;
+                        ctx.fillRect(c * cellSize, r * cellSize, cellSize - 1, cellSize - 1);
+                    }
+                }
+            }
+
+            // Grid lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+            ctx.lineWidth = 0.5;
+            for (let x = 0; x <= cols; x++) {
+                ctx.beginPath();
+                ctx.moveTo(x * cellSize, 0);
+                ctx.lineTo(x * cellSize, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= rows; y++) {
+                ctx.beginPath();
+                ctx.moveTo(0, y * cellSize);
+                ctx.lineTo(canvas.width, y * cellSize);
+                ctx.stroke();
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('generation').textContent = generation.toLocaleString();
+            document.getElementById('cellCount').textContent = grid.flat().filter(c => c).length.toLocaleString();
+            document.getElementById('birthCount').textContent = birthCount.toLocaleString();
+            document.getElementById('deathCount').textContent = deathCount.toLocaleString();
+        }
+
+        function gameLoop(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const delta = timestamp - lastTime;
+
+            frameCount++;
+            if (delta >= 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastTime = timestamp;
+                document.getElementById('fpsDisplay').textContent = fps;
+            }
+
+            if (running) {
+                nextGeneration();
+            }
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Controls
+        document.getElementById('startBtn').addEventListener('click', () => {
+            running = !running;
+            document.getElementById('startBtn').textContent = running ? 'Pause' : 'Start';
+        });
+
+        document.getElementById('stepBtn').addEventListener('click', () => {
+            nextGeneration();
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            grid = createGrid();
+            generation = 0;
+            birthCount = 0;
+            deathCount = 0;
+            updateDisplay();
+            draw();
+        });
+
+        document.getElementById('speedSlider').addEventListener('input', (e) => {
+            speed = parseInt(e.target.value);
+            document.getElementById('speedValue').textContent = speed;
+        });
+
+        document.getElementById('cellSizeSlider').addEventListener('input', (e) => {
+            cellSize = parseInt(e.target.value);
+            document.getElementById('cellSizeValue').textContent = cellSize;
+            cols = Math.floor(canvas.width / cellSize);
+            rows = Math.floor(canvas.height / cellSize);
+            grid = createGrid();
+            draw();
+        });
+
+        // Rule presets
+        document.querySelectorAll('.rule-preset').forEach(el => {
+            el.addEventListener('click', () => {
+                document.querySelectorAll('.rule-preset').forEach(p => p.classList.remove('active'));
+                el.classList.add('active');
+                currentRule = el.dataset.rule;
+            });
+        });
+
+        // Patterns
+        const patterns = {
+            glider: [
+                [0,1,0],
+                [0,0,1],
+                [1,1,1]
+            ],
+            gosperGliderGun: (() => {
+                const gun = [
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                    [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+                    [1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+                ];
+                return gun;
+            })(),
+            pulsar: (() => {
+                const p = [];
+                for(let i = 0; i < 17; i++) p.push(new Array(17).fill(0));
+                const cells = [
+                    [2,0],[2,1],[2,2],[2,6],[2,7],[2,8],
+                    [7,0],[7,1],[7,2],[7,6],[7,7],[7,8],
+                    [9,0],[9,1],[9,2],[9,6],[9,7],[9,8],
+                    [14,0],[14,1],[14,2],[14,6],[14,7],[14,8],
+                    [3,3],[3,4],[3,5],[3,11],[3,12],[3,13],
+                    [5,3],[5,4],[5,5],[5,11],[5,12],[5,13],
+                    [6,3],[6,4],[6,5],[6,11],[6,12],[6,13],
+                    [10,3],[10,4],[10,5],[10,11],[10,12],[10,13],
+                    [11,3],[11,4],[11,5],[11,11],[11,12],[11,13],
+                    [12,3],[12,4],[12,5],[12,11],[12,12],[12,13],
+                    [4,7],[4,8],[4,9],[5,7],[5,9],[6,7],[6,8],[6,9],
+                    [10,7],[10,8],[10,9],[11,7],[11,9],[12,7],[12,8],[12,9]
+                ];
+                cells.forEach(([r,c]) => p[r][c] = 1);
+                return p;
+            })(),
+            lwss: [
+                [0,1,0,0,1],
+                [1,0,0,0,0],
+                [1,0,0,0,1],
+                [1,1,1,1,0]
+            ]
+        };
+
+        function loadPattern(patternName) {
+            const pattern = patterns[patternName];
+            if (!pattern) return;
+
+            grid = createGrid();
+            const centerR = Math.floor(rows / 2) - Math.floor(pattern.length / 2);
+            const centerC = Math.floor(cols / 2) - Math.floor(pattern[0].length / 2);
+
+            for (let r = 0; r < pattern.length; r++) {
+                for (let c = 0; c < pattern[r].length; c++) {
+                    if (pattern[r][c]) {
+                        grid[centerR + r][centerC + c] = 1;
+                    }
+                }
+            }
+            generation = 0;
+            birthCount = 0;
+            deathCount = 0;
+            updateDisplay();
+        }
+
+        function randomFill() {
+            grid = createGrid();
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    grid[r][c] = Math.random() < 0.3 ? 1 : 0;
+                }
+            }
+            generation = 0;
+            birthCount = 0;
+            deathCount = 0;
+            updateDisplay();
+        }
+
+        document.getElementById('gliderBtn').addEventListener('click', () => loadPattern('glider'));
+        document.getElementById('gosperBtn').addEventListener('click', () => loadPattern('gosperGliderGun'));
+        document.getElementById('pulsarBtn').addEventListener('click', () => loadPattern('pulsar'));
+        document.getElementById('lwssBtn').addEventListener('click', () => loadPattern('lwss'));
+        document.getElementById('randomBtn').addEventListener('click', randomFill);
+
+        // Canvas click to toggle cells
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const c = Math.floor(x / cellSize);
+            const r = Math.floor(y / cellSize);
+            if (r >= 0 && r < rows && c >= 0 && c < cols) {
+                grid[r][c] = grid[r][c] ? 0 : 1;
+            }
+        });
+
+        // Speed control
+        setInterval(() => {
+            if (running) {
+                const stepsPerFrame = Math.max(1, Math.floor(speed / 10));
+                for (let i = 0; i < stepsPerFrame; i++) {
+                    nextGeneration();
+                }
+            }
+        }, 1000 / 60);
+
+        // Pattern gallery
+        const galleryNames = ['glider', 'pulsar', 'lwss'];
+        const galleryDescs = ['Simplest spaceship', 'Period-3 oscillator', 'Lightweight spaceship'];
+        const galleryGrid = document.getElementById('patternGallery');
+
+        galleryNames.forEach((name, idx) => {
+            const card = document.createElement('div');
+            card.className = 'pattern-card';
+            card.innerHTML = `
+                <canvas width="200" height="120"></canvas>
+                <h5>${name.toUpperCase()}</h5>
+                <p>${galleryDescs[idx]}</p>
+            `;
+            card.addEventListener('click', () => loadPattern(name));
+
+            const tc = card.querySelector('canvas');
+            const tctx = tc.getContext('2d');
+            const pattern = patterns[name];
+            const pw = pattern[0].length;
+            const ph = pattern.length;
+            const scale = Math.min(tc.width / pw, tc.height / ph) / 3;
+            const offsetX = (tc.width - pw * scale) / 2;
+            const offsetY = (tc.height - ph * scale) / 2;
+
+            tctx.fillStyle = '#050508';
+            tctx.fillRect(0, 0, tc.width, tc.height);
+
+            for (let r = 0; r < ph; r++) {
+                for (let c = 0; c < pw; c++) {
+                    if (pattern[r][c]) {
+                        tctx.fillStyle = `hsl(${150 + idx * 40}, 70%, 55%)`;
+                        tctx.fillRect(offsetX + c * scale, offsetY + r * scale, scale - 1, scale - 1);
+                    }
+                }
+            }
+
+            galleryGrid.appendChild(card);
+        });
+
+        // Initialize
+        loadingOverlay.classList.add('hidden');
+        resizeCanvas();
+        randomFill();
+        updateDisplay();
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
