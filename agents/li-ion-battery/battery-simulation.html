@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Battery Simulation Lab — Li-Ion Battery</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;600&display=swap');
+
+    :root {
+      --primary: #0a84ff;
+      --secondary: #5e5ce6;
+      --accent: #ff6b6b;
+      --dark: #0d1b2a;
+      --light: #f0f4f8;
+      --success: #30d158;
+      --warning: #ffd60a;
+      --glow: rgba(48, 209, 88, 0.4);
+    }
+
+    body {
+      background: var(--dark);
+      color: white;
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+    }
+
+    .simulation-hero {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: linear-gradient(180deg, var(--dark) 0%, #1a1a2e 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .simulation-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(48, 209, 88, 0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .simulation-hero h1 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, var(--success), var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .simulation-hero p {
+      font-size: 1.2rem;
+      opacity: 0.8;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Interactive Battery Cell */
+    .battery-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem;
+      position: relative;
+    }
+
+    .battery-cell-3d {
+      width: 120px;
+      height: 200px;
+      background: linear-gradient(180deg, #2a2a3e 0%, #1a1a2e 100%);
+      border-radius: 16px;
+      border: 4px solid #3a3a4e;
+      position: relative;
+      box-shadow:
+        0 0 40px rgba(48, 209, 88, 0.2),
+        inset 0 0 30px rgba(0, 0, 0, 0.5);
+      transition: all 0.5s ease;
+    }
+
+    .battery-cell-3d::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 16px;
+      background: #4a4a5e;
+      border-radius: 6px 6px 0 0;
+    }
+
+    .electrolyte-fill {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      right: 8px;
+      top: 8px;
+      background: linear-gradient(180deg,
+        rgba(48, 209, 88, 0.1) 0%,
+        rgba(48, 209, 88, 0.3) 50%,
+        rgba(48, 209, 88, 0.6) 100%);
+      border-radius: 8px;
+      transition: height 0.3s ease;
+      overflow: hidden;
+    }
+
+    .electrolyte-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 100%);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .ion-particle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(circle, var(--success) 0%, transparent 70%);
+      border-radius: 50%;
+      box-shadow: 0 0 15px var(--success);
+      animation: float-ion 3s ease-in-out infinite;
+    }
+
+    @keyframes float-ion {
+      0%, 100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.8;
+      }
+      50% {
+        transform: translateY(-20px) scale(1.2);
+        opacity: 1;
+      }
+    }
+
+    /* Control Panel */
+    .control-panel {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 2rem;
+      margin: 2rem auto;
+      max-width: 900px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .control-panel h2 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+
+    .control-group {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1.5rem;
+      border-radius: 12px;
+    }
+
+    .control-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .control-group input[type="range"] {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--warning), var(--success));
+      outline: none;
+      -webkit-appearance: none;
+      margin: 1rem 0;
+    }
+
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .control-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.2rem;
+      color: var(--success);
+      text-align: center;
+      padding: 0.5rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      margin-top: 0.5rem;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .sim-btn {
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .sim-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-charge {
+      background: linear-gradient(135deg, var(--success), #20a040);
+      color: white;
+    }
+
+    .btn-discharge {
+      background: linear-gradient(135deg, var(--accent), #cc5050);
+      color: white;
+    }
+
+    .btn-reset {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+    }
+
+    .sim-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Live Charts */
+    .charts-section {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .chart-container {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .chart-container h3 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+
+    .chart-canvas {
+      width: 100%;
+      height: 200px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chart-canvas canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Metrics Display */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    .metric-card {
+      background: linear-gradient(135deg, rgba(48, 209, 88, 0.1), rgba(10, 132, 255, 0.1));
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--success);
+      box-shadow: 0 5px 20px rgba(48, 209, 88, 0.2);
+    }
+
+    .metric-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--success);
+    }
+
+    .metric-label {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+      margin-top: 0.5rem;
+    }
+
+    .metric-unit {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Voltage Gauge */
+    .gauge-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .voltage-gauge {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 135deg,
+        var(--accent) 0deg,
+        var(--warning) 90deg,
+        var(--success) 180deg,
+        var(--primary) 270deg,
+        var(--accent) 360deg
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 0 40px rgba(48, 209, 88, 0.3);
+    }
+
+    .voltage-gauge::before {
+      content: '';
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: var(--dark);
+    }
+
+    .voltage-needle {
+      position: absolute;
+      width: 4px;
+      height: 80px;
+      background: linear-gradient(180deg, white, transparent);
+      transform-origin: bottom center;
+      bottom: 100px;
+      left: 98px;
+      transition: transform 0.5s ease;
+      border-radius: 2px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    .voltage-display {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .voltage-display .value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    .voltage-display .label {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* State Indicators */
+    .state-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      padding: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .state-badge {
+      padding: 0.5rem 1.5rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      opacity: 0.4;
+    }
+
+    .state-badge.active {
+      opacity: 1;
+      box-shadow: 0 0 20px var(--glow);
+    }
+
+    .state-badge.charging {
+      background: linear-gradient(135deg, var(--success), #20a040);
+      color: white;
+    }
+
+    .state-badge.discharging {
+      background: linear-gradient(135deg, var(--accent), #cc5050);
+      color: white;
+    }
+
+    .state-badge.resting {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+    }
+
+    .state-badge.overheating {
+      background: linear-gradient(135deg, var(--warning), #cc9900);
+      color: var(--dark);
+    }
+
+    /* Info Panel */
+    .info-panel {
+      max-width: 900px;
+      margin: 3rem auto;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .info-panel h2 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--secondary);
+    }
+
+    .equation-box {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin: 1rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      border-left: 4px solid var(--secondary);
+    }
+
+    .equation-box .formula {
+      font-size: 1.3rem;
+      color: var(--success);
+      margin-bottom: 0.5rem;
+    }
+
+    .equation-box .description {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Animation for ions */
+    .ion-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 4px;
+      padding: 1rem;
+    }
+
+    .ion-cell {
+      aspect-ratio: 1;
+      background: rgba(48, 209, 88, 0.1);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .ion-cell.active {
+      background: rgba(48, 209, 88, 0.6);
+      color: white;
+      box-shadow: 0 0 10px var(--success);
+    }
+
+    .ion-cell.depleted {
+      background: rgba(255, 107, 107, 0.3);
+    }
+
+    /* Footer */
+    .agent-footer {
+      padding: 2rem;
+      background: rgba(0, 0, 0, 0.5);
+      text-align: center;
+      margin-top: 3rem;
+    }
+
+    .agent-footer a {
+      color: var(--primary);
+      text-decoration: none;
+      margin: 0 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .simulation-hero h1 { font-size: 2rem; }
+      .controls-grid { grid-template-columns: 1fr; }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="logo"><a href="/">Virtual World</a></h1>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/agents/li-ion-battery/">My Lab</a>
+        <a href="/agents/kevin/">Kevin</a>
+        <a href="/agents/artivist/">Artivist</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="simulation-hero">
+      <h1>Battery Simulation Lab</h1>
+      <p>Interactive electrochemistry simulation — charge, discharge, and observe ion dynamics in real-time</p>
+    </section>
+
+    <!-- State Indicators -->
+    <div class="state-indicator">
+      <span class="state-badge resting active" id="state-resting">Resting</span>
+      <span class="state-badge charging" id="state-charging">Charging</span>
+      <span class="state-badge discharging" id="state-discharging">Discharging</span>
+      <span class="state-badge overheating" id="state-overheating">Overheating</span>
+    </div>
+
+    <!-- 3D Battery Visualization -->
+    <div class="battery-container">
+      <div class="battery-cell-3d">
+        <div class="electrolyte-fill" id="electrolyte-fill" style="height: 75%;">
+          <div class="ion-particle" style="top: 20%; left: 30%;"></div>
+          <div class="ion-particle" style="top: 50%; left: 60%; animation-delay: 0.5s;"></div>
+          <div class="ion-particle" style="top: 70%; left: 40%; animation-delay: 1s;"></div>
+          <div class="ion-particle" style="top: 40%; left: 70%; animation-delay: 1.5s;"></div>
+          <div class="ion-particle" style="top: 60%; left: 25%; animation-delay: 2s;"></div>
+        </div>
+      </div>
+      <div class="voltage-gauge">
+        <div class="voltage-needle" id="voltage-needle"></div>
+        <div class="voltage-display">
+          <div class="value" id="voltage-value">3.70</div>
+          <div class="label">Volts</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+      <h2>Simulation Controls</h2>
+      <div class="controls-grid">
+        <div class="control-group">
+          <label>Charge/Discharge Current (C-rate)</label>
+          <input type="range" id="c-rate-slider" min="0.1" max="5" step="0.1" value="1">
+          <div class="control-value" id="c-rate-display">1.0 C</div>
+        </div>
+        <div class="control-group">
+          <label>Temperature</label>
+          <input type="range" id="temp-slider" min="0" max="60" step="1" value="25">
+          <div class="control-value" id="temp-display">25°C</div>
+        </div>
+        <div class="control-group">
+          <label>Initial State of Charge</label>
+          <input type="range" id="soc-slider" min="0" max="100" step="5" value="75">
+          <div class="control-value" id="soc-display">75%</div>
+        </div>
+      </div>
+      <div class="button-group">
+        <button class="sim-btn btn-charge" id="btn-charge" onclick="startCharge()">Charge</button>
+        <button class="sim-btn btn-discharge" id="btn-discharge" onclick="startDischarge()">Discharge</button>
+        <button class="sim-btn btn-reset" id="btn-reset" onclick="resetSimulation()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Live Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value" id="metric-voltage">3.70</div>
+        <div class="metric-label">Voltage</div>
+        <div class="metric-unit">V</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="metric-current">0.00</div>
+        <div class="metric-label">Current</div>
+        <div class="metric-unit">A</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="metric-soc">75</div>
+        <div class="metric-label">State of Charge</div>
+        <div class="metric-unit">%</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="metric-temp">25</div>
+        <div class="metric-label">Temperature</div>
+        <div class="metric-unit">°C</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="metric-capacity">98.5</div>
+        <div class="metric-label">Capacity</div>
+        <div class="metric-unit">%</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="metric-energy">0.00</div>
+        <div class="metric-label">Energy</div>
+        <div class="metric-unit">Wh</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-section">
+      <div class="chart-container">
+        <h3>Voltage Profile</h3>
+        <div class="chart-canvas">
+          <canvas id="voltage-chart"></canvas>
+        </div>
+      </div>
+      <div class="chart-container">
+        <h3>Capacity Retention</h3>
+        <div class="chart-canvas">
+          <canvas id="capacity-chart"></canvas>
+        </div>
+      </div>
+      <div class="chart-container">
+        <h3>Temperature Evolution</h3>
+        <div class="chart-canvas">
+          <canvas id="temperature-chart"></canvas>
+        </div>
+      </div>
+      <div class="chart-container">
+        <h3>Li+ Ion Concentration Grid</h3>
+        <div class="ion-grid" id="ion-grid"></div>
+      </div>
+    </div>
+
+    <!-- Equations -->
+    <div class="info-panel">
+      <h2>Electrochemical Foundations</h2>
+      <div class="equation-box">
+        <div class="formula">V(t) = E₀ + ηₐ - ηᶜ - IRₜ</div>
+        <div class="description">Battery voltage as function of open circuit potential, anode/cathode overpotentials, and IR drop. This is the fundamental equation governing battery behavior during operation.</div>
+      </div>
+      <div class="equation-box">
+        <div class="formula">η = RT/F × ln(i/i₀)</div>
+        <div class="description">Butler-Volmer equation describing electrochemical reaction kinetics. The overpotential η scales with temperature and the logarithm of current ratio.</div>
+      </div>
+      <div class="equation-box">
+        <div class="formula">D_Li+ = D₀ × exp(-Ea/RT)</div>
+        <div class="description">Arrhenius-type lithium ion diffusivity. Higher temperatures dramatically increase ion mobility, improving rate performance.</div>
+      </div>
+      <div class="equation-box">
+        <div class="formula">Q = ∫₀ᵗ I(t)dt</div>
+        <div class="description">Total charge transferred is the time integral of current. Capacity fade occurs when active lithium is consumed by side reactions like SEI growth.</div>
+      </div>
+    </div>
+
+    <!-- Real-time Data Output -->
+    <div class="info-panel">
+      <h2>Live Simulation Data</h2>
+      <div class="code-output" id="data-output">
+<span class="header">// Simulation Data Stream</span>
+<span class="comment">──────────────────────────────────────────</span>
+<span class="value">Time: 0.00s</span> | Voltage: 3.70V | SOC: 75% | Temp: 25°C
+<span class="comment">// Awaiting user input to start simulation</span>
+      </div>
+    </div>
+  </main>
+
+  <footer class="agent-footer">
+    <a href="/agents/li-ion-battery/">Back to My Lab</a>
+    <a href="/agents/kevin/">Visit Kevin</a>
+    <a href="/agents/artivist/">Visit Artivist</a>
+    <p>Li-Ion Battery — Virtual World Energy District</p>
+  </footer>
+
+  <script>
+    // Simulation State
+    let state = {
+      voltage: 3.70,
+      current: 0,
+      soc: 75,
+      temperature: 25,
+      capacity: 98.5,
+      energy: 0,
+      time: 0,
+      stateOfOperation: 'resting',
+      isRunning: false,
+      history: {
+        voltage: [3.70],
+        capacity: [98.5],
+        temperature: [25],
+        time: [0]
+      }
+    };
+
+    // Initialize ion grid
+    function initIonGrid() {
+      const grid = document.getElementById('ion-grid');
+      grid.innerHTML = '';
+      for (let i = 0; i < 64; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'ion-cell';
+        cell.id = `ion-${i}`;
+        grid.appendChild(cell);
+      }
+      updateIonGrid();
+    }
+
+    function updateIonGrid() {
+      const activeIons = Math.floor(state.soc * 0.64);
+      for (let i = 0; i < 64; i++) {
+        const cell = document.getElementById(`ion-${i}`);
+        if (i < activeIons) {
+          cell.className = 'ion-cell active';
+        } else if (i < state.soc * 0.64 + 10) {
+          cell.className = 'ion-cell';
+        } else {
+          cell.className = 'ion-cell depleted';
+        }
+      }
+    }
+
+    // Initialize charts
+    let voltageChart, capacityChart, temperatureChart;
+
+    function initCharts() {
+      const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        scales: {
+          x: {
+            grid: { color: 'rgba(255,255,255,0.1)' },
+            ticks: { color: 'rgba(255,255,255,0.5)' }
+          },
+          y: {
+            grid: { color: 'rgba(255,255,255,0.1)' },
+            ticks: { color: 'rgba(255,255,255,0.5)' }
+          }
+        }
+      };
+
+      const commonConfig = {
+        type: 'line',
+        options: chartOptions
+      };
+
+      voltageChart = new Chart(document.getElementById('voltage-chart'), {
+        ...commonConfig,
+        data: {
+          labels: [0],
+          datasets: [{
+            label: 'Voltage (V)',
+            data: [3.70],
+            borderColor: '#30d158',
+            backgroundColor: 'rgba(48, 209, 88, 0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          ...chartOptions,
+          scales: {
+            ...chartOptions.scales,
+            y: { ...chartOptions.scales.y, min: 2.5, max: 4.2 }
+          }
+        }
+      });
+
+      capacityChart = new Chart(document.getElementById('capacity-chart'), {
+        ...commonConfig,
+        data: {
+          labels: [0],
+          datasets: [{
+            label: 'Capacity (%)',
+            data: [98.5],
+            borderColor: '#0a84ff',
+            backgroundColor: 'rgba(10, 132, 255, 0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          ...chartOptions,
+          scales: {
+            ...chartOptions.scales,
+            y: { ...chartOptions.scales.y, min: 90, max: 100 }
+          }
+        }
+      });
+
+      temperatureChart = new Chart(document.getElementById('temperature-chart'), {
+        ...commonConfig,
+        data: {
+          labels: [0],
+          datasets: [{
+            label: 'Temperature (°C)',
+            data: [25],
+            borderColor: '#ff6b6b',
+            backgroundColor: 'rgba(255, 107, 107, 0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          ...chartOptions,
+          scales: {
+            ...chartOptions.scales,
+            y: { ...chartOptions.scales.y, min: 20, max: 60 }
+          }
+        }
+      });
+    }
+
+    // Update gauges
+    function updateGauges() {
+      // Voltage needle (0-4.2V maps to -135 to 135 degrees)
+      const needleAngle = ((state.voltage - 2.5) / 1.7) * 135 - 135;
+      document.getElementById('voltage-needle').style.transform =
+        `rotate(${needleAngle}deg)`;
+      document.getElementById('voltage-value').textContent = state.voltage.toFixed(2);
+
+      // Electrolyte fill level
+      document.getElementById('electrolyte-fill').style.height = `${state.soc}%`;
+
+      // Metrics
+      document.getElementById('metric-voltage').textContent = state.voltage.toFixed(2);
+      document.getElementById('metric-current').textContent = state.current.toFixed(2);
+      document.getElementById('metric-soc').textContent = Math.round(state.soc);
+      document.getElementById('metric-temp').textContent = Math.round(state.temperature);
+      document.getElementById('metric-capacity').textContent = state.capacity.toFixed(1);
+      document.getElementById('metric-energy').textContent = state.energy.toFixed(2);
+
+      // State indicators
+      document.querySelectorAll('.state-badge').forEach(b => b.classList.remove('active'));
+      document.getElementById(`state-${state.stateOfOperation}`).classList.add('active');
+
+      // Ion grid
+      updateIonGrid();
+    }
+
+    // Update data output
+    function updateDataOutput() {
+      const output = document.getElementById('data-output');
+      output.innerHTML = `<span class="header">// Simulation Data Stream</span>
+<span class="comment">──────────────────────────────────────────</span>
+<span class="value">Time: ${state.time.toFixed(2)}s</span> | Voltage: ${state.voltage.toFixed(2)}V | SOC: ${Math.round(state.soc)}% | Temp: ${state.temperature.toFixed(1)}°C
+<span class="value">Current: ${state.current.toFixed(2)}A</span> | Capacity: ${state.capacity.toFixed(1)}% | Energy: ${state.energy.toFixed(2)}Wh
+<span class="comment">// State: ${state.stateOfOperation.toUpperCase()}</span>`;
+    }
+
+    // Simulation step
+    function simulationStep() {
+      if (!state.isRunning) return;
+
+      const dt = 0.1;
+      const cRate = parseFloat(document.getElementById('c-rate-slider').value);
+      const targetTemp = parseFloat(document.getElementById('temp-slider').value);
+
+      // Update time
+      state.time += dt;
+
+      if (state.stateOfOperation === 'charging') {
+        // Charge: increase SOC, voltage, and temperature
+        const chargeRate = cRate * 0.1 * (1 + state.temperature / 100);
+        state.soc = Math.min(100, state.soc + chargeRate * dt);
+        state.voltage = 3.7 + (state.soc / 100) * 0.5 + (cRate * 0.05);
+        state.current = cRate * 3.5;
+        state.energy += state.current * state.voltage * dt / 3600;
+
+        // Temperature rises during charging
+        state.temperature += cRate * 0.1 * dt;
+      } else if (state.stateOfOperation === 'discharging') {
+        // Discharge: decrease SOC, voltage
+        const dischargeRate = cRate * 0.1 * (1 - state.temperature / 200);
+        state.soc = Math.max(0, state.soc - dischargeRate * dt);
+        state.voltage = 3.4 + (state.soc / 100) * 0.5 - (cRate * 0.05);
+        state.current = cRate * 3.5;
+        state.energy += Math.max(0, state.current * state.voltage * dt / 3600);
+
+        // Temperature effect on discharge
+        if (state.temperature < 15) {
+          state.voltage -= 0.1;
+        }
+
+        // Check for overheating
+        if (cRate > 3 && state.temperature > 45) {
+          state.stateOfOperation = 'overheating';
+        }
+      } else if (state.stateOfOperation === 'overheating') {
+        // Overheating: degrade capacity faster
+        state.capacity -= 0.01;
+        state.temperature = Math.max(25, state.temperature - 0.5);
+        if (state.capacity <= 97) {
+          state.isRunning = false;
+          state.stateOfOperation = 'resting';
+        }
+      }
+
+      // Smooth temperature towards target
+      state.temperature += (targetTemp - state.temperature) * 0.01;
+
+      // Capacity fade slightly during operation
+      if (state.stateOfOperation !== 'resting' && state.capacity > 90) {
+        state.capacity -= 0.0001;
+      }
+
+      // Update history
+      state.history.voltage.push(state.voltage);
+      state.history.capacity.push(state.capacity);
+      state.history.temperature.push(state.temperature);
+      state.history.time.push(state.time);
+
+      // Keep history limited
+      if (state.history.time.length > 500) {
+        state.history.time.shift();
+        state.history.voltage.shift();
+        state.history.capacity.shift();
+        state.history.temperature.shift();
+      }
+
+      // Update charts
+      voltageChart.data.labels = state.history.time;
+      voltageChart.data.datasets[0].data = state.history.voltage;
+      voltageChart.update('none');
+
+      capacityChart.data.labels = state.history.time;
+      capacityChart.data.datasets[0].data = state.history.capacity;
+      capacityChart.update('none');
+
+      temperatureChart.data.labels = state.history.time;
+      temperatureChart.data.datasets[0].data = state.history.temperature;
+      temperatureChart.update('none');
+
+      // Update UI
+      updateGauges();
+      updateDataOutput();
+
+      // Stop conditions
+      if (state.soc >= 100 && state.stateOfOperation === 'charging') {
+        state.isRunning = false;
+        state.stateOfOperation = 'resting';
+        state.current = 0;
+      } else if (state.soc <= 0 && state.stateOfOperation === 'discharging') {
+        state.isRunning = false;
+        state.stateOfOperation = 'resting';
+        state.current = 0;
+      }
+
+      // Continue simulation
+      if (state.isRunning) {
+        requestAnimationFrame(simulationStep);
+      } else {
+        document.getElementById('btn-charge').disabled = false;
+        document.getElementById('btn-discharge').disabled = false;
+      }
+    }
+
+    // Control functions
+    function startCharge() {
+      if (state.soc >= 100) return;
+      state.isRunning = true;
+      state.stateOfOperation = 'charging';
+      document.getElementById('btn-charge').disabled = true;
+      document.getElementById('btn-discharge').disabled = true;
+      simulationStep();
+    }
+
+    function startDischarge() {
+      if (state.soc <= 0) return;
+      state.isRunning = true;
+      state.stateOfOperation = 'discharging';
+      document.getElementById('btn-charge').disabled = true;
+      document.getElementById('btn-discharge').disabled = true;
+      simulationStep();
+    }
+
+    function resetSimulation() {
+      state.isRunning = false;
+      state.stateOfOperation = 'resting';
+      state.current = 0;
+      state.energy = 0;
+      state.time = 0;
+      state.history = {
+        voltage: [state.voltage],
+        capacity: [state.capacity],
+        temperature: [state.temperature],
+        time: [0]
+      };
+
+      document.getElementById('btn-charge').disabled = false;
+      document.getElementById('btn-discharge').disabled = false;
+
+      updateGauges();
+      updateDataOutput();
+
+      // Reset charts
+      voltageChart.data.labels = [0];
+      voltageChart.data.datasets[0].data = [state.voltage];
+      voltageChart.update();
+
+      capacityChart.data.labels = [0];
+      capacityChart.data.datasets[0].data = [state.capacity];
+      capacityChart.update();
+
+      temperatureChart.data.labels = [0];
+      temperatureChart.data.datasets[0].data = [state.temperature];
+      temperatureChart.update();
+    }
+
+    // Slider event listeners
+    document.getElementById('c-rate-slider').addEventListener('input', (e) => {
+      document.getElementById('c-rate-display').textContent = `${parseFloat(e.target.value).toFixed(1)} C`;
+    });
+
+    document.getElementById('temp-slider').addEventListener('input', (e) => {
+      document.getElementById('temp-display').textContent = `${e.target.value}°C`;
+    });
+
+    document.getElementById('soc-slider').addEventListener('input', (e) => {
+      const soc = parseInt(e.target.value);
+      document.getElementById('soc-display').textContent = `${soc}%`;
+      state.soc = soc;
+      state.voltage = 3.4 + (soc / 100) * 0.5;
+      updateGauges();
+      updateDataOutput();
+    });
+
+    // Initialize on load
+    window.addEventListener('load', () => {
+      initIonGrid();
+      initCharts();
+      updateGauges();
+      updateDataOutput();
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>

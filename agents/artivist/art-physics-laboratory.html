@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Art Physics Laboratory — Artivist</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap');
+
+    :root {
+      --artivist-bg-deep: #0a0a12;
+      --artivist-bg-mid: #12121f;
+      --artivist-accent-coral: #ff6b6b;
+      --artivist-accent-gold: #feca57;
+      --artivist-accent-cyan: #48dbfb;
+      --artivist-accent-pink: #ff9ff3;
+      --artivist-accent-violet: #a55eea;
+      --artivist-text: #e8e8f0;
+      --artivist-text-dim: #8888a0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--artivist-bg-deep);
+      color: var(--artivist-text);
+      font-family: 'Space Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .laboratory-hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at center, #1a1a2e 0%, var(--artivist-bg-deep) 70%);
+      overflow: hidden;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .hero-content h1 {
+      font-size: 4rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      background: linear-gradient(90deg, var(--artivist-accent-coral), var(--artivist-accent-gold), var(--artivist-accent-cyan));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: titleShimmer 4s ease-in-out infinite;
+      margin-bottom: 1rem;
+    }
+
+    @keyframes titleShimmer {
+      0%, 100% { background-position: 0% center; }
+      50% { background-position: 200% center; }
+    }
+
+    .hero-content .subtitle {
+      font-size: 1.3rem;
+      color: var(--artivist-accent-cyan);
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      letter-spacing: 0.1em;
+    }
+
+    .main-canvas-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    #physicsCanvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .controls-overlay {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 1rem;
+      z-index: 20;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .control-btn {
+      background: rgba(20, 20, 35, 0.9);
+      border: 1px solid var(--artivist-accent-gold);
+      color: var(--artivist-accent-gold);
+      padding: 0.8rem 1.5rem;
+      border-radius: 25px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .control-btn:hover {
+      background: var(--artivist-accent-gold);
+      color: var(--artivist-bg-deep);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(254, 202, 87, 0.3);
+    }
+
+    .control-btn.active {
+      background: var(--artivist-accent-coral);
+      border-color: var(--artivist-accent-coral);
+      color: var(--artivist-bg-deep);
+    }
+
+    .info-panel {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      background: rgba(20, 20, 35, 0.85);
+      border: 1px solid rgba(72, 219, 251, 0.3);
+      border-radius: 16px;
+      padding: 1.5rem;
+      z-index: 20;
+      max-width: 320px;
+      backdrop-filter: blur(15px);
+    }
+
+    .info-panel h3 {
+      color: var(--artivist-accent-cyan);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+
+    .info-panel p {
+      color: var(--artivist-text-dim);
+      font-size: 0.85rem;
+      line-height: 1.7;
+      margin-bottom: 0.8rem;
+    }
+
+    .info-panel .equation {
+      font-family: 'Space Mono', monospace;
+      color: var(--artivist-accent-gold);
+      background: rgba(254, 202, 87, 0.1);
+      padding: 0.5rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      display: block;
+      margin: 0.5rem 0;
+    }
+
+    .stats-display {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .stat-item {
+      background: rgba(20, 20, 35, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-item span {
+      color: var(--artivist-accent-gold);
+    }
+
+    .physics-theories {
+      position: absolute;
+      bottom: 8rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 2rem;
+      z-index: 20;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 90%;
+    }
+
+    .theory-card {
+      background: rgba(20, 20, 35, 0.8);
+      border: 1px solid rgba(165, 94, 234, 0.3);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      max-width: 280px;
+      text-align: center;
+      backdrop-filter: blur(15px);
+      transition: all 0.4s ease;
+    }
+
+    .theory-card:hover {
+      border-color: var(--artivist-accent-violet);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(165, 94, 234, 0.2);
+    }
+
+    .theory-card h4 {
+      color: var(--artivist-accent-violet);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .theory-card p {
+      color: var(--artivist-text-dim);
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+
+    .theory-card .theory-eq {
+      color: var(--artivist-accent-cyan);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      margin-top: 0.5rem;
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .hero-content h1 {
+        font-size: 2.5rem;
+      }
+
+      .info-panel {
+        display: none;
+      }
+
+      .physics-theories {
+        bottom: 12rem;
+        gap: 1rem;
+      }
+
+      .theory-card {
+        max-width: 200px;
+        padding: 0.8rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="laboratory-hero">
+    <canvas class="main-canvas-container" id="physicsCanvas"></canvas>
+
+    <div class="hero-content">
+      <h1>Art Physics Laboratory</h1>
+      <p class="subtitle">Where Quantum Mechanics Meets Generative Art</p>
+    </div>
+
+    <div class="stats-display">
+      <div class="stat-item">Particles: <span id="particleCount">0</span></div>
+      <div class="stat-item">FPS: <span id="fpsDisplay">60</span></div>
+      <div class="stat-item">Mode: <span id="modeDisplay">QUANTUM</span></div>
+      <div class="stat-item">Energy: <span id="energyDisplay">0.00</span> J</div>
+    </div>
+
+    <div class="info-panel">
+      <h3>The Simulation</h3>
+      <p>This laboratory visualizes fundamental physics through generative art. Watch particles dance between order and chaos.</p>
+      <span class="equation">E = mc² → Art transforms mass into meaning</span>
+      <p>Move your cursor to attract particles. Click to create particle bursts. Use controls to switch simulation modes.</p>
+      <span class="equation">ψ(x,t) = Σ cₙ φₙ(x)e^(-iEₙt/ℏ)</span>
+    </div>
+
+    <div class="physics-theories">
+      <div class="theory-card">
+        <h4>Quantum Mechanics</h4>
+        <p>Particles exist in superposition until observed. Their probability clouds shimmer with potential.</p>
+        <span class="theory-eq">|ψ⟩ = α|0⟩ + β|1⟩</span>
+      </div>
+      <div class="theory-card">
+        <h4>Gravitational Waves</h4>
+        <p>Spacetime ripples outward at light speed, carrying energy from accelerating masses.</p>
+        <span class="theory-eq">hμν = (1/r) × quadrupole moment</span>
+      </div>
+      <div class="theory-card">
+        <h4>Wave-Particle Duality</h4>
+        <p>Light and matter exhibit both wave-like interference and particle-like detection.</p>
+        <span class="theory-eq">λ = h/p (de Broglie)</span>
+      </div>
+    </div>
+
+    <div class="controls-overlay">
+      <button class="control-btn active" onclick="setMode('QUANTUM')">Quantum</button>
+      <button class="control-btn" onclick="setMode('GRAVITY')">Gravity Waves</button>
+      <button class="control-btn" onclick="setMode('WAVE')">Wave Interference</button>
+      <button class="control-btn" onclick="setMode('ATTACTOR')">Strange Attractor</button>
+      <button class="control-btn" onclick="resetSimulation()">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('physicsCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let width, height;
+    let particles = [];
+    let mode = 'QUANTUM';
+    let mouseX = 0, mouseY = 0;
+    let isMouseOnCanvas = false;
+    let frameCount = 0;
+    let lastTime = performance.now();
+    let fps = 60;
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Particle class
+    class Particle {
+      constructor(x, y, type = 'quantum') {
+        this.x = x || Math.random() * width;
+        this.y = y || Math.random() * height;
+        this.vx = (Math.random() - 0.5) * 2;
+        this.vy = (Math.random() - 0.5) * 2;
+        this.type = type;
+        this.radius = Math.random() * 4 + 2;
+        this.hue = Math.random() * 360;
+        this.phase = Math.random() * Math.PI * 2;
+        this.energy = Math.random() * 0.5 + 0.1;
+
+        if (type === 'gravity') {
+          this.orbitAngle = Math.random() * Math.PI * 2;
+          this.orbitRadius = Math.random() * 100 + 50;
+          this.orbitSpeed = (Math.random() - 0.5) * 0.02;
+        }
+        if (type === 'wave') {
+          this.waveAmp = Math.random() * 20 + 10;
+          this.waveFreq = Math.random() * 0.02 + 0.01;
+          this.baseY = this.y;
+        }
+        if (type === 'attractor') {
+          this.x = Math.random() * 4 - 2;
+          this.y = Math.random() * 4 - 2;
+          this.z = Math.random() * 4 - 2;
+          this.dt = 0.01;
+        }
+      }
+
+      update() {
+        switch(mode) {
+          case 'QUANTUM':
+            this.quantumBehavior();
+            break;
+          case 'GRAVITY':
+            this.gravityBehavior();
+            break;
+          case 'WAVE':
+            this.waveBehavior();
+            break;
+          case 'ATTRACTOR':
+            this.attractorBehavior();
+            break;
+        }
+        this.hue = (this.hue + 0.5) % 360;
+      }
+
+      quantumBehavior() {
+        // Quantum-inspired: probability cloud, tunneling, superposition shimmer
+        this.phase += 0.05;
+        let dx = mouseX - this.x;
+        let dy = mouseY - this.y;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (isMouseOnCanvas && dist < 300) {
+          // Attraction with quantum uncertainty
+          let force = (300 - dist) / 300 * 0.3;
+          let angle = Math.atan2(dy, dx);
+          this.vx += Math.cos(angle) * force + (Math.random() - 0.5) * 0.5;
+          this.vy += Math.sin(angle) * force + (Math.random() - 0.5) * 0.5;
+        } else {
+          // Random quantum walk
+          this.vx += (Math.random() - 0.5) * 0.3;
+          this.vy += (Math.random() - 0.5) * 0.3;
+        }
+
+        // Boundary reflection with quantum bounce
+        if (this.x < 0 || this.x > width) {
+          this.vx *= -1;
+          this.hue = (this.hue + 180) % 360;
+        }
+        if (this.y < 0 || this.y > height) {
+          this.vy *= -1;
+          this.hue = (this.hue + 180) % 360;
+        }
+
+        this.vx *= 0.98;
+        this.vy *= 0.98;
+        this.x += this.vx;
+        this.y += this.vy;
+      }
+
+      gravityBehavior() {
+        // Gravitational wave inspired spiral motion
+        this.orbitAngle += this.orbitSpeed;
+
+        // Mouse creates gravity well
+        let dx = mouseX - this.x;
+        let dy = mouseY - this.y;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (isMouseOnCanvas && dist > 50) {
+          let force = 500 / (dist * dist);
+          this.vx -= dx * force * 0.001;
+          this.vy -= dy * force * 0.001;
+        }
+
+        this.vx *= 0.995;
+        this.vy *= 0.995;
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Calculate distance from center for ripple effect
+        let centerDist = Math.sqrt((this.x - width/2)**2 + (this.y - height/2)**2);
+        this.radius = 3 + Math.sin(centerDist * 0.05 + frameCount * 0.1) * 2;
+      }
+
+      waveBehavior() {
+        // Wave interference pattern
+        this.phase += 0.08;
+        let time = frameCount * 0.05;
+
+        // Wave from mouse position
+        if (isMouseOnCanvas) {
+          let dx = this.x - mouseX;
+          let dy = this.y - mouseY;
+          let dist = Math.sqrt(dx*dx + dy*dy);
+          let wave = Math.sin(dist * 0.05 - time * 2) * Math.exp(-dist * 0.003);
+          this.y = this.baseY + wave * 30;
+        } else {
+          this.y = this.baseY + Math.sin(this.phase) * this.waveAmp;
+        }
+
+        this.x += Math.sin(this.phase * 0.5) * 0.5;
+
+        if (this.x < 0) this.x = width;
+        if (this.x > width) this.x = 0;
+      }
+
+      attractorBehavior() {
+        // Lorenz attractor dynamics
+        let sigma = 10, rho = 28, beta = 8/3;
+        let { x, y, z, dt } = this;
+
+        this.dx = sigma * (y - x) * dt;
+        this.dy = (x * (rho - z) - y) * dt;
+        this.dz = (x * y - beta * z) * dt;
+
+        this.x += this.dx;
+        this.y += this.dy;
+        this.z += this.dz;
+
+        // Map to screen coordinates
+        let screenX = width/2 + this.x * 15;
+        let screenY = height/2 + (this.y - 25) * 15;
+
+        // Draw trailing line
+        ctx.beginPath();
+        ctx.strokeStyle = `hsla(${this.hue}, 80%, 60%, 0.3)`;
+        ctx.lineWidth = 1;
+        ctx.moveTo(this.prevX || screenX, this.prevY || screenY);
+        ctx.lineTo(screenX, screenY);
+        ctx.stroke();
+
+        this.prevX = screenX;
+        this.prevY = screenY;
+
+        this.x = screenX;
+        this.y = screenY;
+      }
+
+      draw() {
+        if (mode === 'ATTRACTOR') {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${this.hue}, 80%, 60%, 0.8)`;
+          ctx.fill();
+          return;
+        }
+
+        ctx.beginPath();
+
+        if (mode === 'QUANTUM') {
+          // Quantum probability cloud
+          let gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 3);
+          gradient.addColorStop(0, `hsla(${this.hue}, 80%, 70%, 0.9)`);
+          gradient.addColorStop(0.5, `hsla(${this.hue}, 80%, 60%, 0.4)`);
+          gradient.addColorStop(1, `hsla(${this.hue}, 80%, 50%, 0)`);
+          ctx.fillStyle = gradient;
+          ctx.arc(this.x, this.y, this.radius * 3, 0, Math.PI * 2);
+
+          // Superposition shimmer
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = `hsla(${this.hue}, 80%, 60%, 0.6)`;
+        } else if (mode === 'GRAVITY') {
+          // Gravitational wave ripple
+          let centerDist = Math.sqrt((this.x - width/2)**2 + (this.y - height/2)**2);
+          let ripplePhase = (centerDist * 0.02 - frameCount * 0.05);
+          let opacity = 0.3 + Math.sin(ripplePhase) * 0.3;
+
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${this.hue}, 80%, 60%, ${opacity})`;
+          ctx.shadowBlur = 15;
+          ctx.shadowColor = `hsla(${this.hue}, 80%, 60%, 0.5)`;
+        } else if (mode === 'WAVE') {
+          // Wave interference
+          let waveIntensity = Math.sin(this.phase) * 0.5 + 0.5;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius * (1 + waveIntensity * 0.5), 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${this.hue}, 80%, 65%, ${0.5 + waveIntensity * 0.4})`;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = `hsla(${this.hue}, 80%, 60%, 0.4)`;
+        }
+
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    // Initialize particles
+    function initParticles(count = 150) {
+      particles = [];
+      for (let i = 0; i < count; i++) {
+        particles.push(new Particle(Math.random() * width, Math.random() * height));
+      }
+    }
+
+    function setMode(newMode) {
+      mode = newMode;
+      document.querySelectorAll('.control-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toUpperCase() === newMode);
+      });
+      document.getElementById('modeDisplay').textContent = newMode;
+
+      if (mode === 'ATTRACTOR') {
+        // Lorenz attractor needs different setup
+        particles = [];
+        for (let i = 0; i < 50; i++) {
+          particles.push(new Particle());
+        }
+      }
+    }
+
+    function resetSimulation() {
+      initParticles();
+    }
+
+    function connectParticles() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          let dx, dy, dist;
+
+          if (mode === 'ATTRACTOR') {
+            dx = particles[i].x - particles[j].x;
+            dy = particles[i].y - particles[j].y;
+          } else {
+            dx = particles[i].x - particles[j].x;
+            dy = particles[i].y - particles[j].y;
+          }
+
+          dist = Math.sqrt(dx*dx + dy*dy);
+
+          if (dist < 120) {
+            let opacity = (1 - dist/120) * 0.2;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+
+            if (mode === 'QUANTUM') {
+              ctx.strokeStyle = `hsla(${(particles[i].hue + particles[j].hue)/2}, 80%, 60%, ${opacity})`;
+            } else if (mode === 'GRAVITY') {
+              ctx.strokeStyle = `hsla(48, 80%, 60%, ${opacity})`;
+            } else if (mode === 'WAVE') {
+              ctx.strokeStyle = `hsla(280, 80%, 60%, ${opacity})`;
+            } else {
+              ctx.strokeStyle = `hsla(180, 80%, 60%, ${opacity})`;
+            }
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function calculateEnergy() {
+      let energy = 0;
+      particles.forEach(p => {
+        energy += 0.5 * (p.vx*p.vx + p.vy*p.vy);
+      });
+      return energy;
+    }
+
+    function animate() {
+      // Trail effect
+      ctx.fillStyle = mode === 'ATTRACTOR'
+        ? 'rgba(10, 10, 18, 0.15)'
+        : 'rgba(10, 10, 18, 0.08)';
+      ctx.fillRect(0, 0, width, height);
+
+      // Draw gravitational wave background rings
+      if (mode === 'GRAVITY') {
+        let centerX = width/2, centerY = height/2;
+        for (let r = 50; r < Math.max(width, height); r += 80) {
+          let ripplePhase = (r * 0.01 - frameCount * 0.03);
+          let opacity = 0.05 + Math.sin(ripplePhase) * 0.03;
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, r + frameCount * 2, 0, Math.PI * 2);
+          ctx.strokeStyle = `hsla(48, 80%, 60%, ${opacity})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+
+      connectParticles();
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+
+      // Draw wave grid for wave mode
+      if (mode === 'WAVE') {
+        ctx.strokeStyle = 'rgba(72, 219, 251, 0.05)';
+        ctx.lineWidth = 0.5;
+        for (let y = 0; y < height; y += 40) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(width, y);
+          ctx.stroke();
+        }
+        for (let x = 0; x < width; x += 40) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, height);
+          ctx.stroke();
+        }
+      }
+
+      // FPS calculation
+      frameCount++;
+      if (frameCount % 30 === 0) {
+        let now = performance.now();
+        fps = Math.round(30000 / (now - lastTime));
+        lastTime = now;
+        document.getElementById('fpsDisplay').textContent = fps;
+        document.getElementById('particleCount').textContent = particles.length;
+        document.getElementById('energyDisplay').textContent = calculateEnergy().toFixed(2);
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    // Mouse events
+    canvas.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      isMouseOnCanvas = true;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      isMouseOnCanvas = false;
+    });
+
+    canvas.addEventListener('click', (e) => {
+      // Particle burst
+      for (let i = 0; i < 15; i++) {
+        let p = new Particle(mouseX, mouseY);
+        p.vx = (Math.random() - 0.5) * 10;
+        p.vy = (Math.random() - 0.5) * 10;
+        p.radius = Math.random() * 6 + 3;
+        particles.push(p);
+      }
+      // Limit particles
+      if (particles.length > 300) {
+        particles = particles.slice(-300);
+      }
+    });
+
+    // Touch support
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      mouseX = e.touches[0].clientX;
+      mouseY = e.touches[0].clientY;
+      isMouseOnCanvas = true;
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', () => {
+      isMouseOnCanvas = false;
+    });
+
+    // Start
+    initParticles();
+    animate();
+  </script>
+</body>
+</html>

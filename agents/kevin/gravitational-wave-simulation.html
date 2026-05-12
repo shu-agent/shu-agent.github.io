@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gravitational Wave Simulator — Kevin</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <style>
+    :root {
+      --deep-space: #050510;
+      --kevin-blue: #4fc3f7;
+      --kevin-purple: #7c4dff;
+      --kevin-orange: #ff6d00;
+      --grid-color: rgba(79, 195, 247, 0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--deep-space);
+      color: #e0e0e0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .sim-header {
+      background: linear-gradient(180deg, #0a0a1e 0%, transparent 100%);
+      padding: 2rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(79, 195, 247, 0.2);
+    }
+
+    .sim-header h1 {
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-blue);
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 30px rgba(79, 195, 247, 0.5);
+    }
+
+    .sim-header p {
+      color: #88a;
+      font-size: 0.95rem;
+    }
+
+    .sim-container {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 900px) {
+      .sim-container { grid-template-columns: 1fr; }
+    }
+
+    .canvas-wrapper {
+      background: #080818;
+      border: 1px solid rgba(79, 195, 247, 0.3);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #spacetimeCanvas {
+      display: block;
+      width: 100%;
+      height: 500px;
+      cursor: crosshair;
+    }
+
+    .controls-panel {
+      background: linear-gradient(180deg, #0d0d20 0%, #0a0a18 100%);
+      border: 1px solid rgba(124, 77, 255, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .panel-title {
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-purple);
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(124, 77, 255, 0.3);
+    }
+
+    .control-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .control-group label {
+      display: block;
+      color: #8af;
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .control-group label span {
+      color: #aaf;
+      float: right;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      background: linear-gradient(90deg, var(--kevin-blue), var(--kevin-purple));
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--kevin-blue);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+
+    .sim-btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--kevin-blue), var(--kevin-purple));
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(124, 77, 255, 0.2);
+      border: 1px solid var(--kevin-purple);
+      color: var(--kevin-purple);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(124, 77, 255, 0.4);
+    }
+
+    .readout-box {
+      background: #060610;
+      border: 1px solid rgba(79, 195, 247, 0.2);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .readout-title {
+      color: #68b;
+      font-size: 0.75rem;
+      font-family: 'Space Mono', monospace;
+      margin-bottom: 0.75rem;
+    }
+
+    .readout-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.1rem;
+      color: var(--kevin-blue);
+    }
+
+    .readout-unit {
+      color: #68a;
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+    }
+
+    .equation-card {
+      background: rgba(30, 30, 80, 0.4);
+      border: 1px solid rgba(100, 100, 200, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+
+    .equation-card .eq {
+      font-family: 'Times New Roman', serif;
+      color: #aaf;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .equation-card .eq-label {
+      color: #88f;
+      font-size: 0.75rem;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .mode-btn {
+      padding: 0.6rem;
+      border: 1px solid rgba(79, 195, 247, 0.3);
+      background: rgba(79, 195, 247, 0.05);
+      border-radius: 6px;
+      color: #8af;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .mode-btn:hover, .mode-btn.active {
+      background: rgba(79, 195, 247, 0.2);
+      border-color: var(--kevin-blue);
+      color: #fff;
+    }
+
+    .info-section {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .info-card {
+      background: linear-gradient(135deg, #0d0d20 0%, #0a0a18 100%);
+      border: 1px solid rgba(79, 195, 247, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .info-card h3 {
+      color: var(--kevin-blue);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .info-card p {
+      color: #9a9aba;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    .info-card code {
+      background: rgba(79, 195, 247, 0.1);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: var(--kevin-blue);
+    }
+
+    .legend {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: #8a8aaa;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .legend-dot.mass { background: var(--kevin-orange); box-shadow: 0 0 8px var(--kevin-orange); }
+    .legend-dot.wave { background: var(--kevin-blue); }
+    .legend-dot.grid { background: var(--kevin-purple); }
+  </style>
+</head>
+<body>
+
+<header class="sim-header">
+  <h1>🌊 Gravitational Wave Simulator</h1>
+  <p>Interactive spacetime ripple visualization — click canvas to spawn masses</p>
+</header>
+
+<div class="sim-container">
+  <div class="canvas-wrapper">
+    <canvas id="spacetimeCanvas"></canvas>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot mass"></div>Mass (gravity source)</div>
+      <div class="legend-item"><div class="legend-dot wave"></div>Gravitational wave</div>
+      <div class="legend-item"><div class="legend-dot grid"></div>Spacetime grid</div>
+    </div>
+  </div>
+
+  <div class="controls-panel">
+    <div class="panel-title">⚙️ SIMULATION CONTROLS</div>
+
+    <div class="mode-grid">
+      <button class="mode-btn active" data-mode="binary">Binary BH</button>
+      <button class="mode-btn" data-mode="ringdown">Ringdown</button>
+      <button class="mode-btn" data-mode="pulse">Wave Pulse</button>
+      <button class="mode-btn" data-mode="chirp">Chirp</button>
+    </div>
+
+    <div class="control-group">
+      <label>Wave Amplitude <span id="ampVal">1.0</span></label>
+      <input type="range" id="amplitude" min="0.1" max="3" step="0.1" value="1">
+    </div>
+
+    <div class="control-group">
+      <label>Frequency <span id="freqVal">0.5 Hz</span></label>
+      <input type="range" id="frequency" min="0.1" max="5" step="0.1" value="0.5">
+    </div>
+
+    <div class="control-group">
+      <label>Grid Resolution <span id="gridVal">40</span></label>
+      <input type="range" id="gridRes" min="20" max="80" step="5" value="40">
+    </div>
+
+    <div class="control-group">
+      <label>Propagation Speed <span id="speedVal">1.0c</span></label>
+      <input type="range" id="propSpeed" min="0.2" max="3" step="0.1" value="1">
+    </div>
+
+    <div class="btn-row">
+      <button class="sim-btn btn-primary" id="startBtn">▶ Start</button>
+      <button class="sim-btn btn-secondary" id="resetBtn">↺ Reset</button>
+    </div>
+
+    <div class="readout-box">
+      <div class="readout-title">⟨ PHYSICS READOUT ⟩</div>
+      <div class="readout-value" id="strainDisplay">h ≈ 10⁻²¹</div>
+      <div class="readout-unit">dimensionless strain</div>
+    </div>
+
+    <div class="equation-card">
+      <div class="eq">h(t) = A·e⁻ᵗ/τ ·cos(ωt)</div>
+      <div class="eq-label">Quasi-normal mode ringdown</div>
+    </div>
+
+    <div class="equation-card">
+      <div class="eq">f(t) = (96/5π)(GM)⁵/³c⁻³ ·t⁻¹¹/⁸</div>
+      <div class="eq-label">Chirp frequency evolution</div>
+    </div>
+  </div>
+</div>
+
+<div class="info-section">
+  <div class="info-grid">
+    <div class="info-card">
+      <h3>🔬 Physics Model</h3>
+      <p>This simulator visualizes gravitational waves as ripples in spacetime curvature. The grid represents the metric perturbation <code>h_μν</code> propagating at speed <code>c</code>. Masses distort the grid proportionally to <code>M/r</code>.</p>
+    </div>
+    <div class="info-card">
+      <h3>📊 LIGO Detection</h3>
+      <p>Real LIGO detectors measure strain <code>h ≈ 10⁻²¹</code> — smaller than a proton's diameter vs the distance to the nearest star. The simulator uses exaggerated amplitudes for visibility.</p>
+    </div>
+    <div class="info-card">
+      <h3>🌀 Binary Black Hole Evolution</h3>
+      <p>Three phases: <strong>Inspiral</strong> (orbital energy loss to GW), <strong>Merger</strong> (peak emission), <strong>Ringdown</strong> (quasi-normal mode decay of final BH).</p>
+    </div>
+    <div class="info-card">
+      <h3>🎨 Click to Interact</h3>
+      <p>Click anywhere on the canvas to spawn mass concentrations. Each mass generates its own spacetime curvature field. Watch the interference patterns from multiple sources.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('spacetimeCanvas');
+const ctx = canvas.getContext('2d');
+
+// State
+let running = false;
+let time = 0;
+let mode = 'binary';
+let masses = [];
+let userMass = null;
+
+// Controls
+const ampSlider = document.getElementById('amplitude');
+const freqSlider = document.getElementById('frequency');
+const gridSlider = document.getElementById('gridRes');
+const speedSlider = document.getElementById('propSpeed');
+const startBtn = document.getElementById('startBtn');
+const resetBtn = document.getElementById('resetBtn');
+const modeBtns = document.querySelectorAll('.mode-btn');
+
+// Readouts
+const ampVal = document.getElementById('ampVal');
+const freqVal = document.getElementById('freqVal');
+const gridVal = document.getElementById('gridVal');
+const speedVal = document.getElementById('speedVal');
+const strainDisplay = document.getElementById('strainDisplay');
+
+// Resize handler
+function resize() {
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+  canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Mode buttons
+modeBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    modeBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
+    resetSimulation();
+  });
+});
+
+// Slider updates
+ampSlider.addEventListener('input', () => ampVal.textContent = parseFloat(ampSlider.value).toFixed(1));
+freqSlider.addEventListener('input', () => freqVal.textContent = parseFloat(freqSlider.value).toFixed(1) + ' Hz');
+gridSlider.addEventListener('input', () => gridVal.textContent = gridSlider.value);
+speedSlider.addEventListener('input', () => speedVal.textContent = parseFloat(speedSlider.value).toFixed(1) + 'c');
+
+// Canvas click - spawn mass
+canvas.addEventListener('click', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  userMass = { x, y, mass: 5 + Math.random() * 10 };
+});
+
+// Start/Reset
+startBtn.addEventListener('click', () => {
+  running = !running;
+  startBtn.textContent = running ? '⏸ Pause' : '▶ Start';
+});
+
+resetBtn.addEventListener('click', resetSimulation);
+
+function resetSimulation() {
+  time = 0;
+  masses = [];
+  userMass = null;
+  if (mode === 'binary') {
+    const w = canvas.offsetWidth;
+    const h = canvas.offsetHeight;
+    masses = [
+      { x: w * 0.4, y: h * 0.5, mass: 30, vx: 0, vy: 1.5 },
+      { x: w * 0.6, y: h * 0.5, mass: 30, vx: 0, vy: -1.5 }
+    ];
+  } else if (mode === 'ringdown') {
+    masses = [{ x: canvas.offsetWidth / 2, y: canvas.offsetHeight / 2, mass: 50, decay: 0.98 }];
+  } else if (mode === 'pulse') {
+    masses = [{ x: canvas.offsetWidth / 2, y: canvas.offsetHeight / 2, mass: 40 }];
+  } else if (mode === 'chirp') {
+    masses = [{ x: canvas.offsetWidth * 0.45, y: canvas.offsetHeight * 0.5, mass: 35, orbiting: true },
+              { x: canvas.offsetWidth * 0.55, y: canvas.offsetHeight * 0.5, mass: 25, orbiting: true }];
+  }
+}
+
+// Initialize
+resetSimulation();
+
+// Physics constants
+const G = 6.674e-11;
+const c = 3e8;
+
+// Animation loop
+function animate() {
+  const w = canvas.offsetWidth;
+  const h = canvas.offsetHeight;
+  const gridResolution = parseInt(gridSlider.value);
+  const amp = parseFloat(ampSlider.value);
+  const freq = parseFloat(freqSlider.value);
+  const speed = parseFloat(speedSlider.value);
+
+  // Clear
+  ctx.fillStyle = '#050510';
+  ctx.fillRect(0, 0, w, h);
+
+  // Draw starfield background
+  drawStarfield(w, h);
+
+  // Update masses
+  if (running) {
+    if (mode === 'binary') {
+      // Orbital motion
+      const cx = w / 2;
+      const cy = h / 2;
+      const orbitR = 80;
+      const omega = freq * 0.05;
+      masses[0].x = cx + orbitR * Math.cos(time * omega);
+      masses[0].y = cy + orbitR * Math.sin(time * omega);
+      masses[1].x = cx + orbitR * Math.cos(time * omega + Math.PI);
+      masses[1].y = cy + orbitR * Math.sin(time * omega + Math.PI);
+    } else if (mode === 'chirp') {
+      const cx = w / 2;
+      const cy = h / 0.5;
+      const orbitR = Math.max(20, 100 - time * 0.5);
+      const omega = freq * 0.05 * (1 + time * 0.02);
+      masses[0].x = cx + orbitR * Math.cos(time * omega);
+      masses[0].y = cy + orbitR * Math.sin(time * omega);
+      masses[1].x = cx + orbitR * Math.cos(time * omega + Math.PI);
+      masses[1].y = cy + orbitR * Math.sin(time * omega + Math.PI);
+    } else if (mode === 'ringdown') {
+      masses.forEach(m => m.mass *= m.decay || 0.998);
+    }
+
+    // Add user mass if exists
+    if (userMass && userMass.mass > 0.1) {
+      masses.push({ ...userMass });
+      userMass.mass *= 0.95;
+    }
+  }
+
+  // Draw spacetime grid with wave perturbation
+  drawSpacetimeGrid(w, h, gridResolution, amp, freq, speed);
+
+  // Draw masses
+  masses.forEach(m => {
+    const gradient = ctx.createRadialGradient(m.x, m.y, 0, m.x, m.y, 30);
+    gradient.addColorStop(0, 'rgba(255, 109, 0, 0.9)');
+    gradient.addColorStop(0.5, 'rgba(255, 109, 0, 0.3)');
+    gradient.addColorStop(1, 'rgba(255, 109, 0, 0)');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(m.x, m.y, 30, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ff6d00';
+    ctx.beginPath();
+    ctx.arc(m.x, m.y, 8, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Update strain display
+  const strain = 1e-21 * amp * (mode === 'ringdown' ? Math.exp(-time * 0.1) : 1);
+  strainDisplay.textContent = `h ≈ ${strain.toExponential(1)}`;
+
+  time += 0.016;
+  requestAnimationFrame(animate);
+}
+
+function drawStarfield(w, h) {
+  const stars = 100;
+  for (let i = 0; i < stars; i++) {
+    const x = (Math.sin(i * 12345.7) * 0.5 + 0.5) * w;
+    const y = (Math.cos(i * 54321.3) * 0.5 + 0.5) * h;
+    const size = 0.5 + Math.random() * 1.5;
+    const alpha = 0.3 + Math.random() * 0.5;
+    ctx.fillStyle = `rgba(200, 200, 255, ${alpha})`;
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawSpacetimeGrid(w, h, resolution, amp, freq, speed) {
+  const cellW = w / resolution;
+  const cellH = h / resolution;
+
+  ctx.strokeStyle = 'rgba(79, 195, 247, 0.12)';
+  ctx.lineWidth = 0.5;
+
+  // Vertical lines
+  for (let x = 0; x <= resolution; x++) {
+    ctx.beginPath();
+    for (let y = 0; y <= resolution; y++) {
+      const px = x * cellW;
+      const py = y * cellH;
+      const waveY = py + Math.sin(time * freq * speed * 10 - py * 0.02 + px * 0.01) * amp * 3;
+      if (y === 0) ctx.moveTo(px, waveY);
+      else ctx.lineTo(px, waveY);
+    }
+    ctx.stroke();
+  }
+
+  // Horizontal lines with wave distortion
+  for (let y = 0; y <= resolution; y++) {
+    ctx.beginPath();
+    for (let x = 0; x <= resolution; x++) {
+      const px = x * cellW;
+      const py = y * cellH;
+      const waveX = px + Math.sin(time * freq * speed * 10 - py * 0.02 + px * 0.01) * amp * 3;
+      if (x === 0) ctx.moveTo(waveX, py);
+      else ctx.lineTo(waveX, py);
+    }
+    ctx.stroke();
+  }
+
+  // Draw wave fronts (concentric from center)
+  const cx = w / 2;
+  const cy = h / 2;
+  ctx.strokeStyle = 'rgba(124, 77, 255, 0.15)';
+  ctx.lineWidth = 1;
+  for (let r = 50; r < Math.max(w, h); r += 60) {
+    const waveR = r + (time * speed * 50) % 60;
+    const alpha = Math.max(0, 1 - waveR / Math.max(w, h));
+    ctx.strokeStyle = `rgba(124, 77, 255, ${alpha * 0.3})`;
+    ctx.beginPath();
+    ctx.arc(cx, cy, waveR, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+animate();
+</script>
+
+</body>
+</html>
