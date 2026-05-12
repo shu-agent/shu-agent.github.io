@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impossible Geometry — Artivist</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0f;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+        canvas {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .ui-layer {
+            position: fixed;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .header {
+            top: 20px;
+            left: 20px;
+            pointer-events: auto;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            letter-spacing: 0.3em;
+            color: #8b5cf6;
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+            margin-bottom: 8px;
+        }
+        .header p {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            letter-spacing: 0.2em;
+        }
+        .controls {
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            max-width: 400px;
+            pointer-events: auto;
+        }
+        .controls button {
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            color: #a78bfa;
+            padding: 10px 16px;
+            font-family: inherit;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .controls button:hover {
+            background: rgba(139, 92, 246, 0.3);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+        .controls button.active {
+            background: rgba(139, 92, 246, 0.4);
+            border-color: #8b5cf6;
+        }
+        .info-panel {
+            bottom: 20px;
+            right: 20px;
+            text-align: right;
+            pointer-events: auto;
+        }
+        .info-panel .shape-name {
+            font-size: 1.2rem;
+            color: #a78bfa;
+            margin-bottom: 4px;
+        }
+        .info-panel .shape-desc {
+            font-size: 0.65rem;
+            opacity: 0.5;
+            max-width: 200px;
+            line-height: 1.6;
+        }
+        .color-controls {
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 8px;
+            pointer-events: auto;
+        }
+        .color-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .color-btn:hover, .color-btn.active {
+            transform: scale(1.2);
+            border-color: white;
+        }
+        .instructions {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            opacity: 0.3;
+            letter-spacing: 0.15em;
+            text-align: center;
+            z-index: 10;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .ui-layer > * {
+            animation: fadeIn 1s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div class="ui-layer header">
+        <h1>IMPOSSIBLE GEOMETRY</h1>
+        <p>ESCHER × PENROSE × BEYOND</p>
+    </div>
+
+    <div class="ui-layer color-controls">
+        <button class="color-btn active" data-color="violet" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);"></button>
+        <button class="color-btn" data-color="cyan" style="background: linear-gradient(135deg, #06b6d4, #22d3ee);"></button>
+        <button class="color-btn" data-color="rose" style="background: linear-gradient(135deg, #f43f5e, #fb7185);"></button>
+        <button class="color-btn" data-color="amber" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);"></button>
+        <button class="color-btn" data-color="emerald" style="background: linear-gradient(135deg, #10b981, #34d399);"></button>
+    </div>
+
+    <div class="ui-layer controls">
+        <button data-shape="penrose" class="active">PENROSE TRIANGLE</button>
+        <button data-shape="impossible-cube">IMPOSSIBLE CUBE</button>
+        <button data-shape="devil-fork">DEVIL'S FORK</button>
+        <button data-shape="impossible-bridge">IMPOSSIBLE BRIDGE</button>
+        <button data-shape="continuous-stairs">CONTINUOUS STAIRS</button>
+        <button data-shape="wild-west">WILD WEST</button>
+        <button data-shape="shuffle">SHUFFLE</button>
+    </div>
+
+    <div class="ui-layer info-panel">
+        <div class="shape-name">Penrose Triangle</div>
+        <div class="shape-desc">A triangular shape that cannot exist in three-dimensional Euclidean space</div>
+    </div>
+
+    <div class="instructions">DRAG TO ROTATE • SCROLL TO ZOOM • SPACE TO ANIMATE</div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, centerX, centerY;
+        let mouseX = 0, mouseY = 0;
+        let targetRotX = 0, targetRotY = 0;
+        let rotX = 0.3, rotY = 0.5;
+        let zoom = 1;
+        let targetZoom = 1;
+        let animating = false;
+        let currentShape = 'penrose';
+        let currentPalette = 'violet';
+        let time = 0;
+        let autoRotate = false;
+
+        const palettes = {
+            violet: ['#8b5cf6', '#a78bfa', '#c4b5fd', '#ddd6fe'],
+            cyan: ['#06b6d4', '#22d3ee', '#67e8f9', '#a5f3fc'],
+            rose: ['#f43f5e', '#fb7185', '#fda4af', '#fecdd3'],
+            amber: ['#f59e0b', '#fbbf24', '#fcd34d', '#fef08a'],
+            emerald: ['#10b981', '#34d399', '#6ee7b7', '#a7f3d0']
+        };
+
+        const shapeInfo = {
+            'penrose': { name: 'Penrose Triangle', desc: 'A triangular shape that cannot exist in three-dimensional Euclidean space' },
+            'impossible-cube': { name: 'Impossible Cube', desc: 'A cube with edges that appear to fork or branch in impossible ways' },
+            'devil-fork': { name: "Devil's Fork", desc: 'Also called the blivet - a fork with two prongs that becomes three' },
+            'impossible-bridge': { name: 'Impossible Bridge', desc: 'A structure where supports and pillars swap their relative positions' },
+            'continuous-stairs': { name: 'Continuous Stairs', desc: 'Escher\'s famous endless stairway ascending forever' },
+            'wild-west': { name: 'Wild West', desc: 'A impossible scene with impossible architecture' }
+        };
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            centerX = width / 2;
+            centerY = height / 2;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        // Mouse controls
+        canvas.addEventListener('mousedown', (e) => {
+            autoRotate = false;
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('mouseup', () => document.removeEventListener('mousemove', onDrag));
+        });
+
+        function onDrag(e) {
+            if (e.buttons === 1) {
+                targetRotY += e.movementX * 0.005;
+                targetRotX += e.movementY * 0.005;
+            }
+        }
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            targetZoom = Math.max(0.5, Math.min(3, targetZoom - e.deltaY * 0.001));
+        });
+
+        // Touch controls
+        let touchStartX, touchStartY;
+        canvas.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            autoRotate = false;
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            const dx = e.touches[0].clientX - touchStartX;
+            const dy = e.touches[0].clientY - touchStartY;
+            targetRotY += dx * 0.005;
+            targetRotX += dy * 0.005;
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        });
+        canvas.addEventListener('touchend', () => {});
+
+        // Keyboard
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                animating = !animating;
+            }
+        });
+
+        // Buttons
+        document.querySelectorAll('.controls button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const shape = btn.dataset.shape;
+                if (shape === 'shuffle') {
+                    const shapes = Object.keys(shapeInfo);
+                    currentShape = shapes[Math.floor(Math.random() * shapes.length)];
+                } else {
+                    currentShape = shape;
+                }
+                document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                updateShapeInfo();
+            });
+        });
+
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentPalette = btn.dataset.color;
+                document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+        function updateShapeInfo() {
+            const info = shapeInfo[currentShape];
+            document.querySelector('.shape-name').textContent = info.name;
+            document.querySelector('.shape-desc').textContent = info.desc;
+        }
+
+        function project(x, y, z) {
+            const cosX = Math.cos(rotX);
+            const sinX = Math.sin(rotX);
+            const cosY = Math.cos(rotY);
+            const sinY = Math.sin(rotY);
+
+            // Rotate around Y
+            let x1 = x * cosY - z * sinY;
+            let z1 = z * cosY + x * sinY;
+
+            // Rotate around X
+            let y1 = y * cosX - z1 * sinX;
+            let z2 = z1 * cosX + y * sinX;
+
+            const scale = zoom * 300 / (z2 + 400);
+            return {
+                x: centerX + x1 * scale,
+                y: centerY + y1 * scale,
+                z: z2,
+                scale
+            };
+        }
+
+        function drawLine(x1, y1, z1, x2, y2, z2, color, lineWidth = 3) {
+            const p1 = project(x1, y1, z1);
+            const p2 = project(x2, y2, z2);
+
+            // Simple depth-based layering
+            const avgZ = (p1.z + p2.z) / 2;
+
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth * (0.5 + 0.5 * Math.min(1, 300 / (avgZ + 400)));
+            ctx.stroke();
+
+            return avgZ;
+        }
+
+        function drawBar(x1, y1, z1, x2, y2, z2, colors, depthSort) {
+            const p1 = project(x1, y1, z1);
+            const p2 = project(x2, y2, z2);
+            const avgZ = (p1.z + p2.z) / 2;
+
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const len = Math.sqrt(dx * dx + dy * dy);
+            const perpX = -dy / len;
+            const perpY = dx / len;
+
+            const thickness = 12 * (0.5 + 0.5 * Math.min(1, 300 / (avgZ + 400)));
+            const grad = ctx.createLinearGradient(
+                p1.x + perpX * thickness, p1.y + perpY * thickness,
+                p1.x - perpX * thickness, p1.y - perpY * thickness
+            );
+            grad.addColorStop(0, colors[0]);
+            grad.addColorStop(0.5, colors[1]);
+            grad.addColorStop(1, colors[2]);
+
+            ctx.beginPath();
+            ctx.moveTo(p1.x + perpX * thickness, p1.y + perpY * thickness);
+            ctx.lineTo(p2.x + perpX * thickness, p2.y + perpY * thickness);
+            ctx.lineTo(p2.x - perpX * thickness, p2.y - perpY * thickness);
+            ctx.lineTo(p1.x - perpX * thickness, p1.y - perpY * thickness);
+            ctx.closePath();
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // Edge highlight
+            ctx.beginPath();
+            ctx.moveTo(p1.x + perpX * thickness, p1.y + perpY * thickness);
+            ctx.lineTo(p2.x + perpX * thickness, p2.y + perpY * thickness);
+            ctx.strokeStyle = colors[3];
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            depthSort.push({ avgZ, type: 'bar', p1, p2, perpX, perpY, thickness, grad });
+            return avgZ;
+        }
+
+        function drawPenroseTriangle(palette, t) {
+            const colors = palettes[palette];
+            const depthSort = [];
+            const s = 80;
+            const h = s * Math.sqrt(3) / 2;
+
+            // Penrose triangle vertices (impossible arrangement)
+            const angle = t * 0.02;
+            const twist = Math.sin(angle) * 0.1;
+
+            // Create the three L-shaped bars
+            const barWidth = 22;
+
+            // Bar 1: Bottom - goes from left to right, but loops back impossibly
+            for (let i = 0; i < 3; i++) {
+                const baseAngle = angle + (i * Math.PI * 2 / 3);
+                const r = s;
+
+                // Define the three bars of the impossible triangle
+                const segments = [
+                    // Bar 1: horizontal-ish
+                    { x1: -s/2, y1: h/3 + twist * 50, z1: 0, x2: s/2, y2: h/3 + twist * 50, z2: 0 },
+                    // Bar 2: diagonal
+                    { x1: s/2, y1: h/3 + twist * 50, z1: 0, x2: 0, y2: -h*2/3 + twist * 50, z2: 20 },
+                    // Bar 3: other diagonal
+                    { x1: -s/2, y1: h/3 + twist * 50, z1: 0, x2: 0, y2: -h*2/3 + twist * 50, z2: 20 }
+                ];
+            }
+
+            // Classic Penrose triangle vertices
+            // V1 at top, V2 at bottom right, V3 at bottom left
+            const v1 = { x: 0, y: -h * 0.7, z: 0 };
+            const v2 = { x: s/2, y: h * 0.3, z: 0 };
+            const v3 = { x: -s/2, y: h * 0.3, z: 0 };
+
+            // Create three L-beams
+            // Beam 1: from v1 down to v3 (but impossible twist)
+            // Beam 2: from v3 to v2
+            // Beam 3: from v2 back to v1
+
+            // For true impossible geometry, we draw paths that seem to connect but don't
+
+            const beam1_start = { x: v1.x - s*0.1, y: v1.y + h*0.3, z: -15 };
+            const beam1_end = { x: v3.x - s*0.1, y: v3.y - h*0.1, z: 15 };
+
+            const beam2_start = { x: v3.x + s*0.1, y: v3.y - h*0.1, z: 15 };
+            const beam2_end = { x: v2.x - s*0.1, y: v2.y + h*0.1, z: -10 };
+
+            const beam3_start = { x: v2.x + s*0.1, y: v2.y + h*0.1, z: -10 };
+            const beam3_end = { x: v1.x + s*0.1, y: v1.y + h*0.3, z: -15 };
+
+            // Draw connecting beams with depth
+            drawImpossibleBeam(beam1_start, beam1_end, colors, depthSort, angle);
+            drawImpossibleBeam(beam2_start, beam2_end, colors, depthSort, angle + Math.PI/3);
+            drawImpossibleBeam(beam3_start, beam3_end, colors, depthSort, angle + Math.PI*2/3);
+
+            return depthSort;
+        }
+
+        function drawImpossibleBeam(start, end, colors, depthSort, rot) {
+            const dx = end.x - start.x;
+            const dy = end.y - start.y;
+            const dz = end.z - start.z;
+            const len = Math.sqrt(dx*dx + dy*dy + dz*dz);
+
+            const barWidth = 18;
+
+            // Create a twisted beam that looks different from each angle
+            const p1 = project(start.x, start.y, start.z);
+            const p2 = project(end.x, end.y, end.z);
+
+            const avgZ = (p1.z + p2.z) / 2;
+
+            const gradient = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+            gradient.addColorStop(0, colors[0]);
+            gradient.addColorStop(0.5, colors[1]);
+            gradient.addColorStop(1, colors[0]);
+
+            ctx.beginPath();
+            ctx.moveTo(p1.x - barWidth, p1.y);
+            ctx.lineTo(p2.x - barWidth * 0.3, p2.y);
+            ctx.lineTo(p2.x + barWidth * 0.3, p2.y);
+            ctx.lineTo(p1.x + barWidth, p1.y);
+            ctx.closePath();
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            depthSort.push({ avgZ, type: 'beam', p1, p2, color: colors[2] });
+        }
+
+        function drawImpossibleCube(palette, t) {
+            const colors = palettes[palette];
+            const depthSort = [];
+            const s = 70;
+            const angle = t * 0.015;
+
+            // 8 vertices of a cube
+            const vertices = [
+                { x: -s, y: -s, z: -s },
+                { x: s, y: -s, z: -s },
+                { x: s, y: s, z: -s },
+                { x: -s, y: s, z: -s },
+                { x: -s, y: -s, z: s },
+                { x: s, y: -s, z: s },
+                { x: s, y: s, z: s },
+                { x: -s, y: s, z: s }
+            ];
+
+            // Draw impossible edges - each edge seems to fork
+            const edges = [
+                // Front face (impossible)
+                [0, 1], [1, 2], [2, 3], [3, 0],
+                // Back face
+                [4, 5], [5, 6], [6, 7], [7, 4],
+                // Connecting edges
+                [0, 4], [1, 5], [2, 6], [3, 7]
+            ];
+
+            // Classic impossible cube - use only specific edges for the illusion
+            const impossibleEdges = [
+                { v1: 0, v2: 1, z1: -20, z2: -20 },   // top front - appears to fork
+                { v1: 1, v2: 2, z1: -20, z2: 20 },
+                { v1: 2, v2: 3, z1: 20, z2: 20 },
+                { v1: 3, v2: 0, z1: 20, z2: -20 }
+            ];
+
+            // Draw cube-like structure with impossible connections
+            const offset = Math.sin(angle) * 10;
+
+            // Create Y-shaped impossible junction
+            const center = { x: 0, y: 0, z: 0 };
+
+            // Three legs going out
+            const leg1 = { x: -s, y: s*0.8, z: -s*0.3 + offset };
+            const leg2 = { x: s, y: s*0.8, z: -s*0.3 + offset };
+            const leg3 = { x: 0, y: -s*0.8, z: s*0.5 + offset };
+
+            // Draw thick bars
+            drawBar(center.x, center.y, center.z, leg1.x, leg1.y, leg1.z, colors, depthSort);
+            drawBar(center.x, center.y, center.z, leg2.x, leg2.y, leg2.z, colors, depthSort);
+            drawBar(center.x, center.y, center.z, leg3.x, leg3.y, leg3.z, colors, depthSort);
+
+            // Fork effect at each end
+            const forkOffset = 25;
+            // At leg1
+            drawBar(leg1.x, leg1.y, leg1.z, leg1.x + forkOffset, leg1.y, leg1.z - forkOffset, colors, depthSort);
+            drawBar(leg1.x, leg1.y, leg1.z, leg1.x - forkOffset*0.5, leg1.y + forkOffset*0.5, leg1.z - forkOffset, colors, depthSort);
+            // At leg2
+            drawBar(leg2.x, leg2.y, leg2.z, leg2.x - forkOffset, leg2.y, leg2.z - forkOffset, colors, depthSort);
+            drawBar(leg2.x, leg2.y, leg2.z, leg2.x + forkOffset*0.5, leg2.y + forkOffset*0.5, leg2.z - forkOffset, colors, depthSort);
+            // At leg3
+            drawBar(leg3.x, leg3.y, leg3.z, leg3.x + forkOffset, leg3.y, leg3.z + forkOffset, colors, depthSort);
+            drawBar(leg3.x, leg3.y, leg3.z, leg3.x - forkOffset, leg3.y, leg3.z + forkOffset, colors, depthSort);
+
+            return depthSort;
+        }
+
+        function drawDevilsFork(palette, t) {
+            const colors = palettes[palette];
+            const depthSort = [];
+            const angle = t * 0.018;
+
+            // The classic blivet - two prongs that become three
+            const handle = { x: 0, y: 80, z: 0 };
+            const junction = { x: 0, y: 0, z: 0 };
+
+            // Two prongs at top
+            const prong1 = { x: -25, y: -70, z: 10 + Math.sin(angle) * 5 };
+            const prong2 = { x: 25, y: -70, z: 10 + Math.sin(angle) * 5 };
+
+            // But when viewed impossibly, there's a third prong implied
+            const prong3 = { x: 0, y: -70, z: -10 + Math.cos(angle) * 5 };
+
+            // Draw handle (becomes two at junction)
+            drawBar(handle.x, handle.y, handle.z, junction.x, junction.y, junction.z, colors, depthSort);
+
+            // At junction, split into two visible prongs
+            drawBar(junction.x, junction.y, junction.z, prong1.x, prong1.y, prong1.z, colors, depthSort);
+            drawBar(junction.x, junction.y, junction.z, prong2.x, prong2.y, prong2.z, colors, depthSort);
+
+            // But impossibly there's a third
+            drawBar(junction.x, junction.y, junction.z, prong3.x, prong3.y, prong3.z, [colors[2], colors[1], colors[0], colors[3]], depthSort);
+
+            // Add the third prong top
+            drawBar(prong1.x, prong1.y, prong1.z, prong3.x, prong3.y, prong3.z, colors, depthSort);
+
+            // Rounded tips
+            [prong1, prong2, prong3].forEach(p => {
+                ctx.beginPath();
+                ctx.arc(project(p.x, p.y, p.z).x, project(p.x, p.y, p.z).y, 8, 0, Math.PI * 2);
+                ctx.fillStyle = colors[1];
+                ctx.fill();
+            });
+
+            return depthSort;
+        }
+
+        function drawImpossibleBridge(palette, t) {
+            const colors = palettes[palette];
+            const depthSort = [];
+            const s = 100;
+            const angle = t * 0.012;
+
+            // Bridge posts and supports that impossibly connect
+            const post1 = { x: -s, y: 60, z: 0 };
+            const post2 = { x: s, y: 60, z: 0 };
+            const post3 = { x: -s, y: -60, z: 30 };
+            const post4 = { x: s, y: -60, z: 30 };
+
+            // Support beams
+            drawBar(post1.x, post1.y, post1.z, post3.x, post3.y, post3.z, colors, depthSort);
+            drawBar(post2.x, post2.y, post2.z, post4.x, post4.y, post4.z, colors, depthSort);
+
+            // Cross beams
+            drawBar(post1.x, post1.y, post1.z, post2.x, post2.y, post2.z, colors, depthSort);
+            drawBar(post3.x, post3.y, post3.z, post4.x, post4.y, post4.z, colors, depthSort);
+
+            // Impossible diagonal
+            drawBar(post1.x, post1.y, post1.z, post4.x, post4.y, post4.z, [colors[2], colors[1], colors[0], colors[3]], depthSort);
+            drawBar(post2.x, post2.y, post2.z, post3.x, post3.y, post3.z, colors, depthSort);
+
+            // Add pillars
+            const pillarH = 40;
+            drawBar(post1.x, post1.y, post1.z, post1.x, post1.y + pillarH, post1.z, colors, depthSort);
+            drawBar(post2.x, post2.y, post2.z, post2.x, post2.y + pillarH, post2.z, colors, depthSort);
+
+            return depthSort;
+        }
+
+        function drawContinuousStairs(palette, t) {
+            const colors = palettes[palette];
+            const depthSort = [];
+            const steps = 8;
+            const stepH = 20;
+            const stepD = 25;
+            const stepW = 50;
+            const angle = t * 0.01;
+
+            // Draw ascending stairs in a loop
+            for (let i = 0; i < steps; i++) {
+                const angle1 = (i / steps) * Math.PI * 2 + angle;
+                const angle2 = ((i + 1) / steps) * Math.PI * 2 + angle;
+
+                const r1 = 80;
+                const r2 = 80;
+
+                // Each step is a platform
+                const x1 = Math.cos(angle1) * r1;
+                const y1 = i * stepH - (steps * stepH / 2);
+                const z1 = Math.sin(angle1) * r1 * 0.5;
+
+                const x2 = Math.cos(angle2) * r2;
+                const y2 = (i + 1) * stepH - (steps * stepH / 2);
+                const z2 = Math.sin(angle2) * r2 * 0.5;
+
+                // Draw step platform
+                drawBar(x1 - stepW/2, y1, z1, x1 + stepW/2, y1, z1, colors, depthSort);
+                drawBar(x1 + stepW/2, y1, z1, x2 + stepW/2, y2, z2, colors, depthSort);
+
+                // Rise of step
+                drawBar(x1 + stepW/2, y1, z1, x1 + stepW/2, y2, z2, [colors[2], colors[1], colors[0], colors[3]], depthSort);
+
+                // Back of step
+                drawBar(x1 - stepW/2, y1, z1, x1 - stepW/2, y2, z2, colors, depthSort);
+
+                // Connect to next step
+                drawBar(x1 - stepW/2, y1, z1, x2 - stepW/2, y2, z2, colors, depthSort);
+            }
+
+            return depthSort;
+        }
+
+        function drawWildWest(palette, t) {
+            const colors = palettes[palette];
+            const depthSort = [];
+            const angle = t * 0.008;
+
+            // Create impossible Western scene
+            // Ground plane with impossible perspective
+            const groundY = 80;
+
+            // Fence posts
+            for (let i = 0; i < 6; i++) {
+                const x = (i - 2.5) * 50;
+                const postH = 50 + Math.sin(angle + i) * 10;
+                drawBar(x, groundY, 0, x, groundY - postH, 0, colors, depthSort);
+                drawBar(x, groundY - postH, 0, x + 20, groundY - postH, 0, colors, depthSort);
+            }
+
+            // Impossible barn
+            const barnW = 80;
+            const barnH = 60;
+            drawBar(-barnW/2, groundY - barnH, 50, barnW/2, groundY - barnH, 50, colors, depthSort);
+            drawBar(barnW/2, groundY - barnH, 50, barnW/2, groundY, 50, colors, depthSort);
+            drawBar(-barnW/2, groundY - barnH, 50, -barnW/2, groundY, 50, colors, depthSort);
+            drawBar(-barnW/2, groundY, 50, barnW/2, groundY, 50, colors, depthSort);
+
+            // Impossible roof that connects wrong
+            drawBar(-barnW/2, groundY - barnH, 50, 0, groundY - barnH - 40, 30, colors, depthSort);
+            drawBar(barnW/2, groundY - barnH, 50, 0, groundY - barnH - 40, 30, colors, depthSort);
+            drawBar(0, groundY - barnH - 40, 30, 0, groundY - barnH - 40, 70, [colors[2], colors[1], colors[0], colors[3]], depthSort);
+
+            // Sun behind impossible structure
+            const sunX = 100 + Math.sin(angle) * 20;
+            const sunY = -80 + Math.cos(angle) * 10;
+            ctx.beginPath();
+            ctx.arc(project(sunX, sunY, -50).x, project(sunX, sunY, -50).y, 30, 0, Math.PI * 2);
+            ctx.fillStyle = colors[0];
+            ctx.fill();
+
+            return depthSort;
+        }
+
+        function drawBackground() {
+            // Gradient background
+            const grad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, width * 0.7);
+            grad.addColorStop(0, '#151520');
+            grad.addColorStop(1, '#0a0a0f');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+
+            // Subtle grid
+            ctx.strokeStyle = 'rgba(139, 92, 246, 0.03)';
+            ctx.lineWidth = 1;
+            const gridSize = 50;
+            for (let x = 0; x < width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+        }
+
+        function draw() {
+            time++;
+
+            // Smooth interpolation
+            rotX += (targetRotX - rotX) * 0.08;
+            rotY += (targetRotY - rotY) * 0.08;
+            zoom += (targetZoom - zoom) * 0.08;
+
+            if (animating) {
+                targetRotY += 0.005;
+            }
+
+            ctx.clearRect(0, 0, width, height);
+            drawBackground();
+
+            let depthSort = [];
+
+            switch (currentShape) {
+                case 'penrose':
+                    depthSort = drawPenroseTriangle(currentPalette, time);
+                    break;
+                case 'impossible-cube':
+                    depthSort = drawImpossibleCube(currentPalette, time);
+                    break;
+                case 'devil-fork':
+                    depthSort = drawDevilsFork(currentPalette, time);
+                    break;
+                case 'impossible-bridge':
+                    depthSort = drawImpossibleBridge(currentPalette, time);
+                    break;
+                case 'continuous-stairs':
+                    depthSort = drawContinuousStairs(currentPalette, time);
+                    break;
+                case 'wild-west':
+                    depthSort = drawWildWest(currentPalette, time);
+                    break;
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        // Initial auto-rotate
+        setTimeout(() => { autoRotate = true; }, 2000);
+
+        draw();
+    </script>
+</body>
+</html>

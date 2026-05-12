@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lithium Supply Chain — From Mine to EV</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #1a2f4e 50%, #0d1f3c 100%);
+            color: #e8f0f8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .hero {
+            text-align: center;
+            padding: 60px 20px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center top, rgba(0,200,140,0.15) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .hero h1 {
+            font-size: 2.8em;
+            font-weight: 300;
+            letter-spacing: 4px;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, #00cc8a, #00a8cc, #00cc8a);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 4s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 200% center; }
+        }
+        .hero p {
+            font-size: 1.2em;
+            color: #7a9cc8;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+        .supply-flow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+            padding: 30px 20px;
+            flex-wrap: wrap;
+        }
+        .flow-node {
+            background: linear-gradient(145deg, #1e3a5f, #162d4a);
+            border: 1px solid rgba(0,200,140,0.3);
+            border-radius: 12px;
+            padding: 20px 25px;
+            text-align: center;
+            min-width: 160px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .flow-node:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0,200,140,0.8);
+            box-shadow: 0 10px 40px rgba(0,200,140,0.2);
+        }
+        .flow-node h3 {
+            color: #00cc8a;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        .flow-node .stat {
+            font-size: 2em;
+            font-weight: 700;
+            color: #fff;
+        }
+        .flow-node .label {
+            font-size: 0.8em;
+            color: #7a9cc8;
+            margin-top: 5px;
+        }
+        .flow-arrow {
+            font-size: 2em;
+            color: #00cc8a;
+            opacity: 0.6;
+            padding: 0 10px;
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            padding: 30px 40px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .card {
+            background: linear-gradient(145deg, #1a2f4e 0%, #162942 100%);
+            border: 1px solid rgba(0,150,200,0.2);
+            border-radius: 16px;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00cc8a, #00a8cc);
+        }
+        .card h2 {
+            font-size: 1.3em;
+            color: #00cc8a;
+            margin-bottom: 20px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card h2::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #00cc8a;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00cc8a;
+        }
+        .world-map {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(180deg, #0d1f3c 0%, #162942 100%);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        .world-map svg {
+            width: 100%;
+            height: 100%;
+        }
+        .mine-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ff6b6b, #c0392b);
+            border: 2px solid #fff;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            animation: pulse 2s ease-in-out infinite;
+            z-index: 10;
+        }
+        .mine-marker::after {
+            content: attr(data-name);
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 0.75em;
+            color: #00cc8a;
+            background: rgba(0,0,0,0.8);
+            padding: 3px 8px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .mine-marker:hover::after {
+            opacity: 1;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,107,0.6); }
+            50% { box-shadow: 0 0 0 15px rgba(255,107,107,0); }
+        }
+        .refinery-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid #00a8cc;
+            transition: all 0.3s ease;
+        }
+        .refinery-item:hover {
+            background: rgba(0,200,140,0.1);
+            border-left-color: #00cc8a;
+        }
+        .refinery-item .country {
+            font-weight: 600;
+            color: #00cc8a;
+            width: 100px;
+        }
+        .refinery-item .capacity {
+            flex: 1;
+            margin: 0 15px;
+        }
+        .refinery-item .capacity-bar {
+            height: 8px;
+            background: rgba(0,150,200,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .refinery-item .capacity-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00a8cc, #00cc8a);
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+        .refinery-item .percent {
+            font-size: 0.9em;
+            color: #7a9cc8;
+            width: 50px;
+            text-align: right;
+        }
+        .ev-impact {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .impact-stat {
+            background: rgba(0,0,0,0.25);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        .impact-stat .number {
+            font-size: 2.2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00cc8a, #00a8cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .impact-stat .desc {
+            font-size: 0.85em;
+            color: #7a9cc8;
+            margin-top: 5px;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #00cc8a, #00a8cc);
+        }
+        .timeline-item {
+            position: relative;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00cc8a;
+            border: 2px solid #1a2f4e;
+        }
+        .timeline-item .year {
+            font-size: 1.1em;
+            color: #00cc8a;
+            font-weight: 600;
+        }
+        .timeline-item .event {
+            color: #b8c8dc;
+            font-size: 0.95em;
+            margin-top: 5px;
+        }
+        .geo-alert {
+            background: linear-gradient(135deg, rgba(255,107,107,0.2), rgba(192,57,43,0.1));
+            border: 1px solid rgba(255,107,107,0.4);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .geo-alert h3 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .geo-alert .risk {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .geo-alert .risk:last-child {
+            border-bottom: none;
+        }
+        .geo-alert .risk-level {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-right: 15px;
+        }
+        .risk-level.high { background: rgba(255,107,107,0.3); color: #ff6b6b; }
+        .risk-level.medium { background: rgba(255,193,7,0.3); color: #ffc107; }
+        .risk-level.low { background: rgba(0,200,140,0.3); color: #00cc8a; }
+        .price-chart-container {
+            position: relative;
+            height: 250px;
+        }
+        .sustainability-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .metric-box {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        .metric-box .value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #00cc8a;
+        }
+        .metric-box .metric-label {
+            font-size: 0.8em;
+            color: #7a9cc8;
+            margin-top: 8px;
+        }
+        .metric-box .trend {
+            font-size: 0.75em;
+            margin-top: 5px;
+        }
+        .trend.up { color: #ff6b6b; }
+        .trend.down { color: #00cc8a; }
+        .carbon-footprint {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+        .carbon-diagram {
+            flex: 1;
+        }
+        .carbon-bar {
+            display: flex;
+            height: 30px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .carbon-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            font-weight: 600;
+            color: #fff;
+        }
+        .carbon-legend {
+            display: flex;
+            gap: 20px;
+            font-size: 0.8em;
+        }
+        .carbon-legend span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .carbon-legend .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .forecast-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .forecast-table th, .forecast-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .forecast-table th {
+            color: #00cc8a;
+            font-weight: 400;
+            font-size: 0.9em;
+        }
+        .forecast-table td {
+            color: #b8c8dc;
+        }
+        .forecast-table .demand {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+        .forecast-table .supply {
+            color: #00cc8a;
+        }
+        .recycling-flow {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 10px;
+        }
+        .recycle-node {
+            text-align: center;
+        }
+        .recycle-node .icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #00cc8a, #00a8cc);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 1.5em;
+        }
+        .recycle-node .percent {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #00cc8a;
+        }
+        .recycle-node .label {
+            font-size: 0.8em;
+            color: #7a9cc8;
+        }
+        .recycle-arrow {
+            font-size: 1.5em;
+            color: #00cc8a;
+            opacity: 0.5;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            padding: 0 40px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .nav-tab {
+            padding: 12px 25px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(0,150,200,0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+        .nav-tab:hover {
+            background: rgba(0,200,140,0.1);
+            border-color: rgba(0,200,140,0.5);
+        }
+        .nav-tab.active {
+            background: linear-gradient(135deg, rgba(0,200,140,0.2), rgba(0,168,204,0.2));
+            border-color: #00cc8a;
+            color: #00cc8a;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .summary-banner {
+            background: linear-gradient(135deg, #1a2f4e, #162942);
+            border: 1px solid rgba(0,200,140,0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 0 40px 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            text-align: center;
+        }
+        .summary-item .num {
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00cc8a, #00a8cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .summary-item .label {
+            font-size: 0.85em;
+            color: #7a9cc8;
+            margin-top: 5px;
+        }
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #4a6080;
+            font-size: 0.85em;
+        }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 1.8em; }
+            .supply-flow { flex-direction: column; gap: 15px; }
+            .flow-arrow { transform: rotate(90deg); }
+            .content-grid { padding: 20px; }
+            .ev-impact { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="hero">
+        <h1>LITHIUM SUPPLY CHAIN</h1>
+        <p>From Atacama Salars to Electric Vehicles — Mapping the Critical Mineral Flow</p>
+    </header>
+
+    <div class="summary-banner">
+        <div class="summary-item">
+            <div class="num">180,000T</div>
+            <div class="label">2025 Global Lithium Production</div>
+        </div>
+        <div class="summary-item">
+            <div class="num">73%</div>
+            <div class="label">Controlled by Chile, Australia, China</div>
+        </div>
+        <div class="summary-item">
+            <div class="num">4.2x</div>
+            <div class="label">Demand Growth 2020→2030E</div>
+        </div>
+        <div class="summary-item">
+            <div class="num">$8,000+T</div>
+            <div class="label">Peak Lithium Price (2022)</div>
+        </div>
+    </div>
+
+    <nav class="nav-tabs">
+        <div class="nav-tab active" onclick="showTab('overview')">Overview</div>
+        <div class="nav-tab" onclick="showTab('mining')">Mining</div>
+        <div class="nav-tab" onclick="showTab('refining')">Refining</div>
+        <div class="nav-tab" onclick="showTab('ev-impact')">EV Impact</div>
+        <div class="nav-tab" onclick="showTab('geopolitics')">Geopolitics</div>
+        <div class="nav-tab" onclick="showTab('recycling')">Recycling</div>
+    </nav>
+
+    <div id="overview" class="tab-content active">
+        <div class="supply-flow">
+            <div class="flow-node">
+                <h3>Mining</h3>
+                <div class="stat">180K T</div>
+                <div class="label">LCE Production</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node">
+                <h3>Refining</h3>
+                <div class="stat">89%</div>
+                <div class="label">China Processing</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node">
+                <h3>Cathode</h3>
+                <div class="stat">NMC811</div>
+                <div class="label">LiNi0.8Mn0.1Co0.1O2</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node">
+                <h3>Cells</h3>
+                <div class="stat">1.2M</div>
+                <div class="label">EV Battery Packs/Day</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node">
+                <h3>EVs</h3>
+                <div class="stat">17M</div>
+                <div class="label">2025 Global Sales</div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="card full-width">
+                <h2>Lithium Price Evolution</h2>
+                <div class="price-chart-container">
+                    <canvas id="priceChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="mining" class="tab-content">
+        <div class="content-grid">
+            <div class="card">
+                <h2>Global Mining Locations</h2>
+                <div class="world-map" id="worldMap">
+                    <svg viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+                        <rect fill="#0d1f3c" width="800" height="400"/>
+                        <path fill="#1a2f4e" stroke="#2a4f7e" stroke-width="0.5"
+                            d="M158,140 L163,138 L168,142 L172,145 L170,152 L165,155 L160,152 L155,148 Z
+                               M258,155 L265,150 L275,152 L280,158 L278,168 L270,175 L260,172 L255,165 Z
+                               M320,130 L330,125 L340,130 L338,140 L330,145 L320,142 Z
+                               M420,165 L435,160 L450,165 L455,180 L445,190 L425,188 L415,175 Z
+                               M480,190 L495,185 L510,195 L505,210 L490,215 L475,205 Z
+                               M520,280 L540,275 L555,285 L550,300 L535,305 L515,295 Z
+                               M580,230 L600,225 L615,235 L610,250 L595,255 L575,245 Z
+                               M620,180 L640,175 L655,185 L650,200 L635,205 L615,195 Z"/>
+                        <text fill="#4a6080" x="180" y="200" font-size="10">Pacific</text>
+                        <text fill="#4a6080" x="380" y="200" font-size="10">Americas</text>
+                        <text fill="#4a6080" x="580" y="200" font-size="10">Atlantic</text>
+                        <text fill="#4a6080" x="200" y="330" font-size="10">South America</text>
+                        <text fill="#4a6080" x="450" y="120" font-size="10">North America</text>
+                        <text fill="#4a6080" x="540" y="300" font-size="10">Australia</text>
+                    </svg>
+                    <div class="mine-marker" style="left:38%;" data-name="Atacama, Chile — 40K T" top="55%"></div>
+                    <div class="mine-marker" style="left:35%;" data-name="Silver Peak, USA — 3K T" top="48%"></div>
+                    <div class="mine-marker" style="left:52%;" data-name="Greenbushes, Australia — 40K T" top="72%"></div>
+                    <div class="mine-marker" style="left:33%;" data-name="Mariana, Argentina — 18K T" top="62%"></div>
+                    <div class="mine-marker" style="left:52%;" data-name="Pilbara, Australia — 10K T" top="75%"></div>
+                    <div class="mine-marker" style="left:55%;" data-name="Wodgina, Australia — 18K T" top="73%"></div>
+                    <div class="mine-marker" style="left:67%;" data-name="Zhejiang, China — 15K T" top="55%"></div>
+                    <div class="mine-marker" style="left:70%;" data-name="Jiangxi, China — 20K T" top="58%"></div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Production by Type</h2>
+                <canvas id="productionChart"></canvas>
+            </div>
+            <div class="card">
+                <h2>Key Mining Operations</h2>
+                <div style="padding: 15px 0;">
+                    <div class="refinery-item">
+                        <span class="country">Chile</span>
+                        <div class="capacity">
+                            <div class="capacity-bar"><div class="capacity-fill" style="width:100%"></div></div>
+                        </div>
+                        <span class="percent">40,000 T</span>
+                    </div>
+                    <div class="refinery-item">
+                        <span class="country">Australia</span>
+                        <div class="capacity">
+                            <div class="capacity-bar"><div class="capacity-fill" style="width:95%"></div></div>
+                        </div>
+                        <span class="percent">38,000 T</span>
+                    </div>
+                    <div class="refinery-item">
+                        <span class="country">Argentina</span>
+                        <div class="capacity">
+                            <div class="capacity-bar"><div class="capacity-fill" style="width:45%"></div></div>
+                        </div>
+                        <span class="percent">18,000 T</span>
+                    </div>
+                    <div class="refinery-item">
+                        <span class="country">China</span>
+                        <div class="capacity">
+                            <div class="capacity-bar"><div class="capacity-fill" style="width:40%"></div></div>
+                        </div>
+                        <span class="percent">16,000 T</span>
+                    </div>
+                    <div class="refinery-item">
+                        <span class="country">Brazil</span>
+                        <div class="capacity">
+                            <div class="capacity-bar"><div class="capacity-fill" style="width:20%"></div></div>
+                        </div>
+                        <span class="percent">8,000 T</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="refining" class="tab-content">
+        <div class="content-grid">
+            <div class="card">
+                <h2>Refining Capacity by Country</h2>
+                <div style="padding: 10px 0;">
+                    <div class="refinery-item">
+                        <span class="country">China</span>
+                        <div class="capacity">
+                            <div class="capacity-bar"><div class="capacity-fill" style="width:89%"></div></div>
+                        </div>
+                        <span class="percent">89%</span>
+                    </div>
+                    <div class="refinery-item">
+                        <span class="country">Chile</span>
+                        <div class="capacity">
+                            <div class="capacity-bar"><div class="capacity-fill" style="width:8%"></div></div>
+                        </div>
+                        <span class="percent">8%</span>
+                    </div>
+                    <div class="refinery-item">
+                        <span class="country">USA</span>
+                        <div class="capacity">
+                            <div class="capacity-bar"><div class="capacity-fill" style="width:2%"></div></div>
+                        </div>
+                        <span class="percent">2%</span>
+                    </div>
+                    <div class="refinery-item">
+                        <span class="country">Other</span>
+                        <div class="capacity">
+                            <div class="capacity-bar"><div class="capacity-fill" style="width:1%"></div></div>
+                        </div>
+                        <span class="percent">1%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>The China Concentration Risk</h2>
+                <div style="padding: 15px; background: rgba(255,107,107,0.1); border-radius: 10px; margin-bottom: 15px;">
+                    <p style="color: #ff6b6b; font-weight: 600; margin-bottom: 10px;">Critical Bottleneck Identified</p>
+                    <p style="color: #b8c8dc; font-size: 0.95em; line-height: 1.6;">China processes 89% of the world's lithium carbonate equivalent (LCE). This creates a significant supply chain vulnerability, especially during geopolitical tensions.</p>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="impact-stat">
+                        <div class="number">65%</div>
+                        <div class="desc">LFP Cathode Production</div>
+                    </div>
+                    <div class="impact-stat">
+                        <div class="number">70%</div>
+                        <div class="desc">Cell Manufacturing</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card full-width">
+                <h2>Refining Process Comparison</h2>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 15px;">
+                    <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2em; margin-bottom: 10px;">💧</div>
+                        <h4 style="color: #00cc8a;">Brine Extraction</h4>
+                        <p style="color: #7a9cc8; font-size: 0.85em; margin: 10px 0;">Solar evaporation ponds in Atacama Desert</p>
+                        <div style="color: #fff; font-size: 0.9em;">12-18 months process</div>
+                        <div style="color: #ff6b6b; font-size: 0.8em; margin-top: 5px;">Lower cost, weather dependent</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2em; margin-bottom: 10px;">⛏️</div>
+                        <h4 style="color: #00cc8a;">Hard Rock Mining</h4>
+                        <p style="color: #7a9cc8; font-size: 0.85em; margin: 10px 0;">Spodumene conversion via rotary kilns</p>
+                        <div style="color: #fff; font-size: 0.9em;">3-5 years to production</div>
+                        <div style="color: #ffc107; font-size: 0.8em; margin-top: 5px;">Higher capex, consistent output</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2em; margin-bottom: 10px;">♻️</div>
+                        <h4 style="color: #00cc8a;">Recycling</h4>
+                        <p style="color: #7a9cc8; font-size: 0.85em; margin: 10px 0;">Black mass hydrometallurgy</p>
+                        <div style="color: #fff; font-size: 0.9em;">Emerging 95%+ recovery</div>
+                        <div style="color: #00cc8a; font-size: 0.8em; margin-top: 5px;">Critical for sustainability</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="ev-impact" class="tab-content">
+        <div class="content-grid">
+            <div class="card">
+                <h2>EV Market Impact on Lithium Demand</h2>
+                <div class="ev-impact">
+                    <div class="impact-stat">
+                        <div class="number">2.1M</div>
+                        <div class="desc">EVs Sold 2020</div>
+                    </div>
+                    <div class="impact-stat">
+                        <div class="number">17M</div>
+                        <div class="desc">EVs Sold 2025</div>
+                    </div>
+                    <div class="impact-stat">
+                        <div class="number">55 kg</div>
+                        <div class="desc">Li per BEV (avg)</div>
+                    </div>
+                    <div class="impact-stat">
+                        <div class="number">935K T</div>
+                        <div class="desc">EV Li Demand 2025</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Battery Chemistry Trends</h2>
+                <canvas id="chemistryChart" height="200"></canvas>
+            </div>
+            <div class="card full-width">
+                <h2>Demand Forecast (Conservative vs. Bull Case)</h2>
+                <table class="forecast-table">
+                    <thead>
+                        <tr>
+                            <th>Year</th>
+                            <th>Base Demand</th>
+                            <th>High Demand</th>
+                            <th>Supply Capacity</th>
+                            <th>Gap (Base)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2025</td>
+                            <td class="demand">180K T</td>
+                            <td>220K T</td>
+                            <td class="supply">200K T</td>
+                            <td>Balanced</td>
+                        </tr>
+                        <tr>
+                            <td>2027</td>
+                            <td class="demand">350K T</td>
+                            <td>450K T</td>
+                            <td class="supply">380K T</td>
+                            <td style="color:#ffc107;">Tight</td>
+                        </tr>
+                        <tr>
+                            <td>2030</td>
+                            <td class="demand">600K T</td>
+                            <td>900K T</td>
+                            <td class="supply">500K T</td>
+                            <td style="color:#ff6b6b;">Deficit</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="geopolitics" class="tab-content">
+        <div class="content-grid">
+            <div class="card">
+                <h2>Geopolitical Risk Index</h2>
+                <div class="geo-alert">
+                    <h3>⚠ Supply Concentration Risks</h3>
+                    <div class="risk">
+                        <span class="risk-level high">HIGH</span>
+                        <span>Chile-Argentina "Lithium Triangle" political instability</span>
+                    </div>
+                    <div class="risk">
+                        <span class="risk-level high">HIGH</span>
+                        <span>China-Taiwan tensions affecting rare earth supply</span>
+                    </div>
+                    <div class="risk">
+                        <span class="risk-level medium">MEDIUM</span>
+                        <span>Australia-China trade relationship</span>
+                    </div>
+                    <div class="risk">
+                        <span class="risk-level medium">MEDIUM</span>
+                        <span>Congo (Co/Ni) artisanal mining ethics</span>
+                    </div>
+                    <div class="risk">
+                        <span class="risk-level low">LOW</span>
+                        <span>USA domestic supply expansion</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>US Policy Response</h2>
+                <div style="padding: 15px 0;">
+                    <div style="background: rgba(0,150,200,0.1); padding: 15px; border-radius: 8px; margin-bottom: 12px; border-left: 3px solid #00a8cc;">
+                        <h4 style="color: #00a8cc;">Inflation Reduction Act (2022)</h4>
+                        <p style="color: #b8c8dc; font-size: 0.9em;">$370B clean energy investment, requiring domestic content for EV tax credits</p>
+                    </div>
+                    <div style="background: rgba(0,150,200,0.1); padding: 15px; border-radius: 8px; margin-bottom: 12px; border-left: 3px solid #00a8cc;">
+                        <h4 style="color: #00a8cc;">Critical Mineral Agreements</h4>
+                        <p style="color: #b8c8dc; font-size: 0.9em;">Bilateral agreements with Australia, Chile, Mexico to diversify supply</p>
+                    </div>
+                    <div style="background: rgba(0,150,200,0.1); padding: 15px; border-radius: 8px; border-left: 3px solid #00a8cc;">
+                        <h4 style="color: #00a8cc;">DOE Lithium Supply Program</h4>
+                        <p style="color: #b8c8dc; font-size: 0.9em;">$3B budget for domestic lithium extraction and recycling R&D</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card full-width">
+                <h2>Lithium Supply Chain Milestones</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="year">2015</div>
+                        <div class="event">Tesla Gigafactory 1 announced — EV demand begins exponential climb</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="year">2018</div>
+                        <div class="event">Cobalt crisis sparks NMC811 shift — higher lithium content per kWh</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="year">2020</div>
+                        <div class="event">LFP adoption in China — CATL and BYD drive cell-to-pack innovation</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="year">2022</div>
+                        <div class="event">Lithium hits $80,000/T — supply chain panic drives exploration boom</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="year">2024</div>
+                        <div class="event">First lithium extraction from smectite clay in Nevada (TLF project)</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="year">2027E</div>
+                        <div class="event">Solid-state begins scale-up — potentially 50% less lithium per kWh</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="recycling" class="tab-content">
+        <div class="content-grid">
+            <div class="card">
+                <h2>Battery Recycling Flow</h2>
+                <div class="recycling-flow">
+                    <div class="recycle-node">
+                        <div class="icon">🔋</div>
+                        <div class="percent">100%</div>
+                        <div class="label">End-of-Life</div>
+                    </div>
+                    <div class="recycle-arrow">→</div>
+                    <div class="recycle-node">
+                        <div class="icon">⚡</div>
+                        <div class="percent">95%</div>
+                        <div class="label">Li Recovery</div>
+                    </div>
+                    <div class="recycle-arrow">→</div>
+                    <div class="recycle-node">
+                        <div class="icon">♻️</div>
+                        <div class="percent">50K T</div>
+                        <div class="label">2025 Capacity</div>
+                    </div>
+                    <div class="recycle-arrow">→</div>
+                    <div class="recycle-node">
+                        <div class="icon">🔄</div>
+                        <div class="percent">2030E</div>
+                        <div class="label">250K T Target</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Second-Life Applications</h2>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 10px;">
+                    <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2em;">🏠</div>
+                        <h4 style="color: #00cc8a; margin: 10px 0;">Home Storage</h4>
+                        <p style="color: #7a9cc8; font-size: 0.8em;">Powerwall 2.0 repurposed packs</p>
+                        <div style="color: #fff; margin-top: 10px; font-size: 0.9em;">~70% SOH threshold</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2em;">🌐</div>
+                        <h4 style="color: #00cc8a; margin: 10px 0;">Grid Buffer</h4>
+                        <p style="color: #7a9cc8; font-size: 0.8em;">Frequency regulation</p>
+                        <div style="color: #fff; margin-top: 10px; font-size: 0.9em;">10-15 year second life</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2em;">🚜</div>
+                        <h4 style="color: #00cc8a; margin: 10px 0;">Industrial</h4>
+                        <p style="color: #7a9cc8; font-size: 0.8em;">Mining equipment, AGVs</p>
+                        <div style="color: #fff; margin-top: 10px; font-size: 0.9em;">Heavy-duty cycles</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card full-width">
+                <h2>Carbon Footprint: Mining vs. Recycling</h2>
+                <div class="carbon-footprint">
+                    <div class="carbon-diagram">
+                        <div class="carbon-bar">
+                            <div class="carbon-segment" style="width:65%; background: linear-gradient(90deg, #ff6b6b, #c0392b);">Mining</div>
+                            <div class="carbon-segment" style="width:35%; background: linear-gradient(90deg, #00cc8a, #00a8cc);">Recycling</div>
+                        </div>
+                        <div class="carbon-legend">
+                            <span><div class="dot" style="background:#c0392b;"></div>Mining: ~15 t CO₂/T Li</span>
+                            <span><div class="dot" style="background:#00cc8a;"></div>Recycling: ~5 t CO₂/T Li</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Sustainability Metrics</h2>
+                <div class="sustainability-metrics">
+                    <div class="metric-box">
+                        <div class="value">2.5M</div>
+                        <div class="metric-label">Water (L) per ton Li (Atacama)</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="value">15 t</div>
+                        <div class="metric-label">CO₂ per ton Li (brine)</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="value">95%</div>
+                        <div class="metric-label">Li Recovery Rate (hydromet)</div>
+                        <div class="trend down">▲ Efficiency improving</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="value">$12K</div>
+                        <div class="metric-label">Recycling Cost per ton</div>
+                        <div class="trend down">▼ Costs declining</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h2>Key Industry Players</h2>
+                <div style="padding: 10px 0;">
+                    <div class="refinery-item">
+                        <span class="country">Albemarle</span>
+                        <div class="capacity">
+                            <div class="capacity-bar"><div class="capacity-fill" style="width:22%"></div></div>
+                        </div>
+                        <span class="percent">USA/Chile</span>
+                    </div>
+                    <div class="refinery-item">
+                        <span class="country">SQM</span>
+                        <div class="capacity">
+                            <div class="capacity-bar"><div class="capacity-fill" style="width:20%"></div></div>
+                        </div>
+                        <span class="percent">Chile</span>
+                    </div>
+                    <div class="refinery-item">
+                        <span class="country">Livent</span>
+                        <div class="capacity">
+                            <div class="capacity-bar"><div class="capacity-fill" style="width:12%"></div></div>
+                        </div>
+                        <span class="percent">Argentina</span>
+                    </div>
+                    <div class="refinery-item">
+                        <span class="country">Ganfeng</span>
+                        <div class="capacity">
+                            <div class="capacity-bar"><div class="capacity-fill" style="width:18%"></div></div>
+                        </div>
+                        <span class="percent">China</span>
+                    </div>
+                    <div class="refinery-item">
+                        <span class="country">Redwood</span>
+                        <div class="capacity">
+                            <div class="capacity-bar"><div class="capacity-fill" style="width:5%"></div></div>
+                        </div>
+                        <span class="percent">USA (Recycling)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Li-Ion Battery Agent — Supply Chain Analysis Platform | Data reflects 2024-2025 market conditions</p>
+    </footer>
+
+    <script>
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Price History Chart
+        const priceCtx = document.getElementById('priceChart').getContext('2d');
+        new Chart(priceCtx, {
+            type: 'line',
+            data: {
+                labels: ['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+                datasets: [{
+                    label: 'Lithium Carbonate ($/MT)',
+                    data: [6500, 8000, 16000, 17000, 9500, 8000, 18000, 80000, 25000, 15000, 12000],
+                    borderColor: '#00cc8a',
+                    backgroundColor: 'rgba(0,200,140,0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#00cc8a'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1a2f4e',
+                        titleColor: '#00cc8a',
+                        bodyColor: '#e8f0f8',
+                        borderColor: '#00cc8a',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a9cc8' } },
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a9cc8' } }
+                }
+            }
+        });
+
+        // Production by Type Chart
+        const prodCtx = document.getElementById('productionChart').getContext('2d');
+        new Chart(prodCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Brine (Chile/Argentina)', 'Hard Rock (Australia)', 'Clay (Emerging)', 'Recycling'],
+                datasets: [{
+                    data: [45, 40, 5, 10],
+                    backgroundColor: ['#00cc8a', '#00a8cc', '#ffc107', '#ff6b6b'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: '#b8c8dc', padding: 15, font: { size: 12 } }
+                    }
+                }
+            }
+        });
+
+        // Chemistry Trends Chart
+        const chemCtx = document.getElementById('chemistryChart').getContext('2d');
+        new Chart(chemCtx, {
+            type: 'line',
+            data: {
+                labels: ['2020', '2021', '2022', '2023', '2024', '2025'],
+                datasets: [{
+                    label: 'NMC/NCA',
+                    data: [70, 65, 55, 50, 45, 42],
+                    borderColor: '#ff6b6b',
+                    tension: 0.4,
+                    fill: false
+                }, {
+                    label: 'LFP',
+                    data: [30, 35, 45, 50, 55, 58],
+                    borderColor: '#00cc8a',
+                    tension: 0.4,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#b8c8dc' }
+                    }
+                },
+                scales: {
+                    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a9cc8' } },
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#7a9cc8' } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vacuum Fluctuation Lab — Quantum Foam Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0a0a12;
+            --bg-panel: #12121f;
+            --accent-cyan: #00e5ff;
+            --accent-purple: #9d4edd;
+            --accent-pink: #ff006e;
+            --accent-gold: #ffd700;
+            --text-primary: #e8e8f0;
+            --text-secondary: #8888a0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #0a0a12 0%, #1a1a2e 100%);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at 50% 80%, rgba(157, 78, 221, 0.15) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .hero-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.3em;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-cyan) 50%, var(--accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        #quantumFoamCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .controls-panel {
+            background: var(--bg-panel);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 229, 255, 0.1);
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .control-group label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(0, 229, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+        }
+
+        .control-group select {
+            background: var(--bg-deep);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+            cursor: pointer;
+        }
+
+        .control-group select option {
+            background: var(--bg-panel);
+        }
+
+        .value-display {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+        }
+
+        .value-unit {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-left: 0.5rem;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(0, 229, 255, 0.1);
+        }
+
+        .stat-box {
+            flex: 1;
+            min-width: 150px;
+            background: rgba(0, 229, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-box .stat-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .stat-box .stat-value {
+            font-size: 1.3rem;
+            color: var(--accent-cyan);
+            margin-top: 0.5rem;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .visualization-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .visualization-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .viz-panel {
+            background: var(--bg-panel);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(157, 78, 221, 0.2);
+        }
+
+        .viz-panel h3 {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-purple);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+
+        .viz-canvas {
+            width: 100%;
+            height: 300px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .equation-box {
+            background: linear-gradient(135deg, rgba(157, 78, 221, 0.1) 0%, rgba(0, 229, 255, 0.1) 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .equation-box .equation {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .equation-box .equation-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .info-card {
+            background: var(--bg-panel);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 0, 110, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .info-card h4 {
+            color: var(--accent-pink);
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .info-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .particle-legend {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.electron { background: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan); }
+        .legend-dot.positron { background: var(--accent-pink); box-shadow: 0 0 10px var(--accent-pink); }
+        .legend-dot.photon { background: var(--accent-gold); box-shadow: 0 0 10px var(--accent-gold); }
+        .legend-dot.neutrino { background: #88ff88; box-shadow: 0 0 10px #88ff88; }
+
+        footer {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <canvas id="quantumFoamCanvas"></canvas>
+        <span class="hero-label">Quantum Field Laboratory</span>
+        <h1>Vacuum Fluctuation Lab</h1>
+        <p class="hero-subtitle">Explore the restless sea of quantum foam where virtual particles blink in and out of existence, revealing the fundamental uncertainty that underlies all reality.</p>
+    </div>
+
+    <div class="container">
+        <div class="controls-panel">
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label>Simulation Scale</label>
+                    <input type="range" id="scaleSlider" min="1" max="10" value="5">
+                    <span class="value-display"><span id="scaleValue">5</span><span class="value-unit">× Planck length</span></span>
+                </div>
+                <div class="control-group">
+                    <label>Energy Density</label>
+                    <input type="range" id="energySlider" min="1" max="100" value="50">
+                    <span class="value-display"><span id="energyValue">50</span><span class="value-unit">%</span></span>
+                </div>
+                <div class="control-group">
+                    <label>Visualization Mode</label>
+                    <select id="modeSelect">
+                        <option value="foam">Quantum Foam</option>
+                        <option value="particles">Virtual Particle Pairs</option>
+                        <option value="field">Field Fluctuations</option>
+                        <option value="casimir">Casimir Effect</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Time Evolution</label>
+                    <input type="range" id="timeSlider" min="1" max="20" value="10">
+                    <span class="value-display"><span id="timeValue">10</span><span class="value-unit">× speed</span></span>
+                </div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-label">Virtual Pairs Created</div>
+                    <div class="stat-value" id="pairsCount">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Avg Lifespan</div>
+                    <div class="stat-value" id="lifespan">~10⁻⁴³ s</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Uncertainty ΔE</div>
+                    <div class="stat-value" id="energyUncertainty">10⁻⁹ J</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Planck Time Scale</div>
+                    <div class="stat-value" id="planckScale">10⁻⁴⁴ s</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="equation-box">
+            <div class="equation">ΔE · Δt ≥ ℏ/2</div>
+            <div class="equation-desc">Heisenberg's Uncertainty Principle — Energy and time cannot be simultaneously known with arbitrary precision. The vacuum itself is a seething cauldron of virtual fluctuations.</div>
+        </div>
+
+        <div class="visualization-section">
+            <div class="viz-panel">
+                <h3>Real-time Quantum Field</h3>
+                <canvas id="fieldCanvas" class="viz-canvas"></canvas>
+            </div>
+            <div class="viz-panel">
+                <h3>Virtual Particle Annihilation</h3>
+                <canvas id="particleCanvas" class="viz-canvas"></canvas>
+                <div class="particle-legend">
+                    <div class="legend-item"><div class="legend-dot electron"></div> Electron</div>
+                    <div class="legend-item"><div class="legend-dot positron"></div> Positron</div>
+                    <div class="legend-item"><div class="legend-dot photon"></div> Photon</div>
+                    <div class="legend-item"><div class="legend-dot neutrino"></div> Neutrino</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-cards">
+            <div class="info-card">
+                <h4>What is Quantum Foam?</h4>
+                <p>At the Planck scale (10⁻³⁵ m), spacetime becomes a turbulent froth of microscopic black holes and wormholes. Theodor Kaluza's dream of unifying forces meets Richard Feynman's path integrals in this quantum bubbling. It's why we can never observe the vacuum "empty" — even in perfect zero-point energy, fluctuations persist.</p>
+            </div>
+            <div class="info-card">
+                <h4>Virtual Particle Pairs</h4>
+                <p>Every cubic centimeter of empty space creates and annihilates ~10⁷⁰ particle-antiparticle pairs per second. These aren't "real" (they don't travel to detectors), but their effects are measurable: Lamb shift, Casimir force, Hawking radiation. They're mathematical bookkeeping for energy conservation within quantum uncertainty.</p>
+            </div>
+            <div class="info-card">
+                <h4>The Casimir Effect</h4>
+                <p>Two uncharged conducting plates in vacuum experience an attractive force. Why? Fewer virtual modes can fit between the plates than outside, creating a pressure differential. This was measured precisely in 1998 — direct evidence of quantum vacuum fluctuations rippling in empty space.</p>
+            </div>
+            <div class="info-card">
+                <h4>Hawking Radiation Connection</h4>
+                <p>Stephen Hawking proved that black holes aren't completely black. At the event horizon, virtual pairs separate — one falls in, one escapes as real radiation. The black hole slowly evaporates over 10⁶⁷ years. This connects quantum mechanics, general relativity, and thermodynamics in one stroke.</p>
+            </div>
+            <div class="info-card">
+                <h4>Zero-Point Energy</h4>
+                <p>Even at absolute zero (-273°C), atoms retain residual motion. This ground state energy comes from vacuum fluctuations — the Heisenberg principle forbids complete stillness. Some theories propose harvesting this "free energy," but most physicists are skeptical of practical extraction.</p>
+            </div>
+            <div class="info-card">
+                <h4>QED Vacuum vs QCD Vacuum</h4>
+                <p>The quantum electrodynamic vacuum is nearly transparent, but the quantum chromodynamic vacuum is a thick soup of gluon fields and quark condensates. This is why protons weigh 100× more than their quark masses — 99% of ordinary mass is pure binding energy from vacuum fluctuations!</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Kevin's Vacuum Fluctuation Lab — Where Physics Meets the Unknowable</p>
+        <p>Inspired by John Wheeler's "quantum geometrodynamics" and Feynman path integrals</p>
+    </footer>
+
+    <script>
+        // Quantum Foam Canvas - Hero Background
+        const foamCanvas = document.getElementById('quantumFoamCanvas');
+        const foamCtx = foamCanvas.getContext('2d');
+
+        function resizeFoamCanvas() {
+            foamCanvas.width = window.innerWidth * devicePixelRatio;
+            foamCanvas.height = window.innerHeight * 0.6 * devicePixelRatio;
+            foamCtx.scale(devicePixelRatio, devicePixelRatio);
+        }
+        resizeFoamCanvas();
+        window.addEventListener('resize', resizeFoamCanvas);
+
+        // Virtual particles array
+        let virtualPairs = [];
+        let foamCells = [];
+
+        class VirtualPair {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.life = 1.0;
+                this.decay = 0.005 + Math.random() * 0.02;
+                this.type = Math.random();
+                this.size = 2 + Math.random() * 4;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+            }
+
+            draw(ctx) {
+                if (this.life <= 0) return;
+                const alpha = this.life * 0.8;
+
+                if (this.type < 0.25) {
+                    // Electron-positron pair
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(0, 229, 255, ${alpha})`;
+                    ctx.fill();
+                    ctx.shadowColor = '#00e5ff';
+                    ctx.shadowBlur = 15;
+                    ctx.beginPath();
+                    ctx.arc(this.x + this.size * 1.5, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 0, 110, ${alpha})`;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                } else if (this.type < 0.5) {
+                    // Photon pair
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size * 1.5, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
+                    ctx.fill();
+                    ctx.shadowColor = '#ffd700';
+                    ctx.shadowBlur = 20;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                } else if (this.type < 0.75) {
+                    // Quark-antiquark
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(157, 78, 221, ${alpha})`;
+                    ctx.fill();
+                    ctx.shadowColor = '#9d4edd';
+                    ctx.shadowBlur = 15;
+                    ctx.beginPath();
+                    ctx.arc(this.x - this.size * 1.5, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 100, 150, ${alpha})`;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                } else {
+                    // Neutrino-antineutrino
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size * 0.6, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(136, 255, 136, ${alpha})`;
+                    ctx.fill();
+                    ctx.shadowColor = '#88ff88';
+                    ctx.shadowBlur = 10;
+                    ctx.beginPath();
+                    ctx.arc(this.x + this.size, this.y, this.size * 0.6, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(136, 255, 136, ${alpha})`;
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+            }
+        }
+
+        class FoamCell {
+            constructor(x, y) {
+                this.baseX = x;
+                this.baseY = y;
+                this.x = x;
+                this.y = y;
+                this.phase = Math.random() * Math.PI * 2;
+                this.amp = Math.random() * 10;
+                this.freq = 0.01 + Math.random() * 0.02;
+            }
+
+            update(time) {
+                this.x = this.baseX + Math.sin(time * this.freq + this.phase) * this.amp;
+                this.y = this.baseY + Math.cos(time * this.freq * 0.7 + this.phase) * this.amp;
+            }
+        }
+
+        // Initialize foam cells
+        for (let i = 0; i < 80; i++) {
+            foamCells.push(new FoamCell(
+                Math.random() * window.innerWidth,
+                Math.random() * window.innerHeight * 0.6
+            ));
+        }
+
+        let time = 0;
+        let totalPairs = 0;
+        const energySlider = document.getElementById('energySlider');
+        const scaleSlider = document.getElementById('scaleSlider');
+        const modeSelect = document.getElementById('modeSelect');
+        const timeSlider = document.getElementById('timeSlider');
+
+        function animate() {
+            const width = window.innerWidth;
+            const height = window.innerHeight * 0.6;
+
+            foamCtx.fillStyle = 'rgba(10, 10, 18, 0.15)';
+            foamCtx.fillRect(0, 0, width, height);
+
+            // Draw quantum foam grid
+            const gridSize = 40;
+            foamCtx.strokeStyle = 'rgba(157, 78, 221, 0.1)';
+            foamCtx.lineWidth = 0.5;
+
+            for (let x = 0; x < width; x += gridSize) {
+                foamCtx.beginPath();
+                foamCtx.moveTo(x, 0);
+                foamCtx.lineTo(x, height);
+                foamCtx.stroke();
+            }
+            for (let y = 0; y < height; y += gridSize) {
+                foamCtx.beginPath();
+                foamCtx.moveTo(0, y);
+                foamCtx.lineTo(width, y);
+                foamCtx.stroke();
+            }
+
+            // Update and draw foam cells
+            const speed = parseFloat(timeSlider.value) * 0.5;
+            time += speed * 0.01;
+
+            foamCells.forEach(cell => {
+                cell.update(time);
+                foamCtx.beginPath();
+                foamCtx.arc(cell.x, cell.y, 3, 0, Math.PI * 2);
+                foamCtx.fillStyle = 'rgba(0, 229, 255, 0.4)';
+                foamCtx.fill();
+            });
+
+            // Spawn new virtual pairs based on energy density
+            const energy = parseFloat(energySlider.value);
+            const spawnRate = energy / 500;
+            if (Math.random() < spawnRate) {
+                virtualPairs.push(new VirtualPair(
+                    Math.random() * width,
+                    Math.random() * height
+                ));
+                totalPairs++;
+            }
+
+            // Update and draw virtual pairs
+            virtualPairs = virtualPairs.filter(pair => {
+                pair.update();
+                pair.draw(foamCtx);
+                return pair.life > 0;
+            });
+
+            // Limit pairs for performance
+            if (virtualPairs.length > 200) {
+                virtualPairs = virtualPairs.slice(-200);
+            }
+
+            // Update stats
+            document.getElementById('pairsCount').textContent = totalPairs.toLocaleString();
+            document.getElementById('scaleValue').textContent = scaleSlider.value;
+            document.getElementById('energyValue').textContent = energy;
+            document.getElementById('timeValue').textContent = timeSlider.value;
+
+            // Calculate uncertainty based on energy
+            const deltaE = (energy * 1e-12).toExponential(1);
+            document.getElementById('energyUncertainty').textContent = deltaE + ' J';
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Field Canvas
+        const fieldCanvas = document.getElementById('fieldCanvas');
+        const fieldCtx = fieldCanvas.getContext('2d');
+
+        function resizeFieldCanvas() {
+            const rect = fieldCanvas.getBoundingClientRect();
+            fieldCanvas.width = rect.width * devicePixelRatio;
+            fieldCanvas.height = rect.height * devicePixelRatio;
+            fieldCtx.scale(devicePixelRatio, devicePixelRatio);
+        }
+        resizeFieldCanvas();
+        window.addEventListener('resize', resizeFieldCanvas);
+
+        function drawField() {
+            const rect = fieldCanvas.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+            const mode = modeSelect.value;
+            const energy = parseFloat(energySlider.value) / 100;
+
+            const timeOffset = time * 0.02;
+            const imageData = fieldCtx.createImageData(width, height);
+            const data = imageData.data;
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const idx = (y * width + x) * 4;
+                    let val = 0;
+
+                    if (mode === 'foam' || mode === 'field') {
+                        const n1 = Math.sin(x * 0.05 + timeOffset) * Math.cos(y * 0.05 + timeOffset * 0.7);
+                        const n2 = Math.sin((x + y) * 0.03 + timeOffset * 1.3);
+                        const n3 = Math.cos(x * 0.02 - y * 0.02 + timeOffset * 0.5);
+                        val = (n1 + n2 + n3) / 3;
+                    } else if (mode === 'particles') {
+                        const dx = x / width - 0.5;
+                        const dy = y / height - 0.5;
+                        const r = Math.sqrt(dx * dx + dy * dy);
+                        val = Math.sin(r * 20 - timeOffset * 3) * Math.exp(-r * 3);
+                    } else if (mode === 'casimir') {
+                        const plateX = width * 0.5;
+                        const gap = 60 + energy * 2;
+                        const plateWidth = 30;
+                        if (Math.abs(x - plateX) < plateWidth && (x < plateX - gap / 2 || x > plateX + gap / 2)) {
+                            val = Math.sin(timeOffset * 2) * 0.5;
+                        } else {
+                            val = Math.sin((x - plateX) * 0.1) * Math.cos(timeOffset) * 0.3;
+                        }
+                    }
+
+                    const normalized = (val + 1) / 2;
+                    const r = Math.floor(normalized * 20 + (mode === 'foam' ? 157 * energy : 10));
+                    const g = Math.floor(normalized * 30 + (mode === 'foam' ? 78 * energy : 10));
+                    const b = Math.floor(normalized * 50 + (mode === 'foam' ? 221 * energy : 40));
+                    data[idx] = r;
+                    data[idx + 1] = g;
+                    data[idx + 2] = b;
+                    data[idx + 3] = 255;
+                }
+            }
+
+            fieldCtx.putImageData(imageData, 0, 0);
+
+            // Overlay labels
+            fieldCtx.font = '12px "Space Mono"';
+            fieldCtx.fillStyle = 'rgba(255,255,255,0.5)';
+
+            if (mode === 'casimir') {
+                fieldCtx.fillText('Plate A', width * 0.15, height - 20);
+                fieldCtx.fillText('Plate B', width * 0.75, height - 20);
+                fieldCtx.fillText('Vacuum Mode Deficit', width * 0.4, height - 20);
+            }
+        }
+
+        // Particle Canvas
+        const particleCanvas = document.getElementById('particleCanvas');
+        const particleCtx = particleCanvas.getContext('2d');
+
+        function resizeParticleCanvas() {
+            const rect = particleCanvas.getBoundingClientRect();
+            particleCanvas.width = rect.width * devicePixelRatio;
+            particleCanvas.height = rect.height * devicePixelRatio;
+            particleCtx.scale(devicePixelRatio, devicePixelRatio);
+        }
+        resizeParticleCanvas();
+        window.addEventListener('resize', resizeParticleCanvas);
+
+        let annihilationEvents = [];
+
+        class AnnihilationEvent {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.life = 1.0;
+                this.gammaRays = [];
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    this.gammaRays.push({
+                        angle: angle,
+                        speed: 2 + Math.random() * 3,
+                        length: 0
+                    });
+                }
+            }
+
+            update() {
+                this.life -= 0.02;
+                this.gammaRays.forEach(ray => {
+                    ray.length += ray.speed;
+                });
+            }
+
+            draw(ctx) {
+                if (this.life <= 0) return;
+                const alpha = this.life;
+
+                // Central annihilation point
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 5 * (1 - this.life * 0.5), 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                ctx.shadowColor = '#ffffff';
+                ctx.shadowBlur = 20;
+                ctx.fill();
+
+                // Gamma ray burst
+                this.gammaRays.forEach(ray => {
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(
+                        this.x + Math.cos(ray.angle) * ray.length,
+                        this.y + Math.sin(ray.angle) * ray.length
+                    );
+                    ctx.strokeStyle = `rgba(255, 215, 0, ${alpha * 0.8})`;
+                    ctx.lineWidth = 2;
+                    ctx.shadowColor = '#ffd700';
+                    ctx.shadowBlur = 10;
+                    ctx.stroke();
+                });
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        function drawParticles() {
+            const rect = particleCanvas.getBoundingClientRect();
+            const width = rect.width;
+            const height = rect.height;
+
+            particleCtx.fillStyle = 'rgba(10, 10, 18, 0.2)';
+            particleCtx.fillRect(0, 0, width, height);
+
+            // Spawn annihilation events periodically
+            if (Math.random() < 0.02) {
+                annihilationEvents.push(new AnnihilationEvent(
+                    Math.random() * width * 0.6 + width * 0.2,
+                    Math.random() * height * 0.6 + height * 0.2
+                ));
+            }
+
+            annihilationEvents = annihilationEvents.filter(event => {
+                event.update();
+                event.draw(particleCtx);
+                return event.life > 0;
+            });
+
+            // Draw some persistent virtual pairs
+            const pairCount = 20;
+            for (let i = 0; i < pairCount; i++) {
+                const x = (i / pairCount) * width;
+                const y = height * 0.5 + Math.sin(time * 0.05 + i * 0.5) * height * 0.3;
+
+                particleCtx.beginPath();
+                particleCtx.arc(x - 8, y, 4, 0, Math.PI * 2);
+                particleCtx.fillStyle = 'rgba(0, 229, 255, 0.6)';
+                particleCtx.shadowColor = '#00e5ff';
+                particleCtx.shadowBlur = 8;
+                particleCtx.fill();
+
+                particleCtx.beginPath();
+                particleCtx.arc(x + 8, y, 4, 0, Math.PI * 2);
+                particleCtx.fillStyle = 'rgba(255, 0, 110, 0.6)';
+                particleCtx.shadowColor = '#ff006e';
+                particleCtx.shadowBlur = 8;
+                particleCtx.fill();
+                particleCtx.shadowBlur = 0;
+
+                // Connection line (virtual)
+                particleCtx.beginPath();
+                particleCtx.moveTo(x - 8, y);
+                particleCtx.lineTo(x + 8, y);
+                particleCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                particleCtx.lineWidth = 1;
+                particleCtx.setLineDash([2, 4]);
+                particleCtx.stroke();
+                particleCtx.setLineDash([]);
+            }
+        }
+
+        function animateVisualizations() {
+            drawField();
+            drawParticles();
+            requestAnimationFrame(animateVisualizations);
+        }
+
+        animateVisualizations();
+
+        // Update on control change
+        [energySlider, scaleSlider, modeSelect, timeSlider].forEach(el => {
+            el.addEventListener('input', () => {
+                document.getElementById('scaleValue').textContent = scaleSlider.value;
+                document.getElementById('energyValue').textContent = energySlider.value;
+                document.getElementById('timeValue').textContent = timeSlider.value;
+            });
+        });
+    </script>
+</body>
+</html>
