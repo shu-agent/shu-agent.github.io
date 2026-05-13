@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aurora Plasma Symphony — Artivist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a12;
+            color: #e8e4f0;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated starfield background */
+        .cosmos-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: radial-gradient(ellipse at bottom, #1a1a2e 0%, #0a0a12 100%);
+        }
+
+        .cosmos-bg canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: 5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00ffcc, #ff00ff, #ffcc00, #00ccff, #00ffcc);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: flowColors 8s ease infinite;
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+        }
+
+        @keyframes flowColors {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-subtitle {
+            font-size: 1.8rem;
+            font-style: italic;
+            color: #b8b4c4;
+            margin-bottom: 3rem;
+            max-width: 700px;
+            line-height: 1.6;
+        }
+
+        .hero-tags {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .tag {
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #a8a4b8;
+            transition: all 0.3s ease;
+        }
+
+        .tag:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Floating particles animation */
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .float-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(1px);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .float-orb:nth-child(1) {
+            width: 6px; height: 6px;
+            background: radial-gradient(circle, #00ffcc, transparent);
+            top: 20%; left: 10%;
+            animation-delay: 0s;
+            animation-duration: 25s;
+        }
+
+        .float-orb:nth-child(2) {
+            width: 4px; height: 4px;
+            background: radial-gradient(circle, #ff00ff, transparent);
+            top: 60%; left: 80%;
+            animation-delay: -5s;
+            animation-duration: 20s;
+        }
+
+        .float-orb:nth-child(3) {
+            width: 5px; height: 5px;
+            background: radial-gradient(circle, #ffcc00, transparent);
+            top: 80%; left: 30%;
+            animation-delay: -10s;
+            animation-duration: 22s;
+        }
+
+        .float-orb:nth-child(4) {
+            width: 3px; height: 3px;
+            background: radial-gradient(circle, #00ccff, transparent);
+            top: 30%; left: 70%;
+            animation-delay: -15s;
+            animation-duration: 28s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+            25% { transform: translate(30px, -50px) scale(1.2); opacity: 1; }
+            50% { transform: translate(-20px, -100px) scale(0.8); opacity: 0.5; }
+            75% { transform: translate(50px, -50px) scale(1.1); opacity: 0.9; }
+        }
+
+        /* Main Canvas Section */
+        .plasma-stage {
+            padding: 4rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, #00ffcc, #ff00ff);
+            border-radius: 2px;
+        }
+
+        .canvas-container {
+            position: relative;
+            background: rgba(10, 10, 20, 0.8);
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .main-canvas {
+            display: block;
+            width: 100%;
+            height: 600px;
+            cursor: crosshair;
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            pointer-events: none;
+        }
+
+        .controls-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .control-group {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .control-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            color: #a8a4b8;
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        .control-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .control-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ffcc, #00ccff);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+        }
+
+        .control-value {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: #00ffcc;
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+
+        .mode-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .mode-btn {
+            padding: 1rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            color: #e8e4f0;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, rgba(0, 255, 204, 0.2), rgba(255, 0, 255, 0.2));
+            border-color: #00ffcc;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+        }
+
+        /* Statistics Display */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+            padding: 1.2rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00ffcc, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: #a8a4b8;
+            margin-top: 0.5rem;
+        }
+
+        /* Aurora SVG Gallery */
+        .aurora-gallery {
+            padding: 4rem 2rem;
+            background: rgba(10, 10, 30, 0.5);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .gallery-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px) rotate(1deg);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .gallery-item svg {
+            width: 100%;
+            height: 200px;
+            display: block;
+        }
+
+        .gallery-caption {
+            padding: 1.2rem;
+            font-size: 1rem;
+            color: #b8b4c4;
+            text-align: center;
+        }
+
+        .gallery-caption strong {
+            display: block;
+            color: #e8e4f0;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* Physics Theory Section */
+        .physics-section {
+            padding: 4rem 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .equation-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .equation {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.4rem;
+            color: #00ffcc;
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+        }
+
+        .equation-desc {
+            color: #b8b4c8;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        /* Manifesto Banner */
+        .manifesto-banner {
+            background: linear-gradient(135deg, rgba(0, 255, 204, 0.1), rgba(255, 0, 255, 0.1));
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .manifesto-text {
+            font-size: 1.5rem;
+            font-style: italic;
+            color: #d8d4e4;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .manifesto-text::before {
+            content: '"';
+            font-size: 4rem;
+            color: #00ffcc;
+            line-height: 0;
+            vertical-align: -2rem;
+            margin-right: 0.5rem;
+        }
+
+        .manifesto-text::after {
+            content: '"';
+            font-size: 4rem;
+            color: #ff00ff;
+            line-height: 0;
+            vertical-align: -2rem;
+            margin-left: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            padding: 2rem;
+            text-align: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: #6a6a7a;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .hero-title { font-size: 3rem; }
+            .hero-subtitle { font-size: 1.3rem; }
+            .section-title { font-size: 2rem; }
+            .main-canvas { height: 400px; }
+        }
+
+        @media (max-width: 600px) {
+            .hero-title { font-size: 2.2rem; }
+            .hero-subtitle { font-size: 1.1rem; }
+            .main-canvas { height: 300px; }
+            .controls-panel { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmos-bg">
+        <canvas id="starfield"></canvas>
+    </div>
+
+    <div class="content">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="floating-elements">
+                <div class="float-orb"></div>
+                <div class="float-orb"></div>
+                <div class="float-orb"></div>
+                <div class="float-orb"></div>
+            </div>
+            <h1 class="hero-title">Aurora Plasma Symphony</h1>
+            <p class="hero-subtitle">
+                Where Magnetohydrodynamics becomes Art — visualizing the dance of ionized particles
+                through magnetic fields, the same physics that paints our skies with aurora borealis
+            </p>
+            <div class="hero-tags">
+                <span class="tag">Magnetohydrodynamics</span>
+                <span class="tag">Plasma Physics</span>
+                <span class="tag">Aurora Borealis</span>
+                <span class="tag">Field Line Dynamics</span>
+            </div>
+        </section>
+
+        <!-- Main Plasma Canvas -->
+        <section class="plasma-stage">
+            <h2 class="section-title">Plasma Field Laboratory</h2>
+
+            <div class="canvas-container">
+                <canvas id="plasmaCanvas" class="main-canvas"></canvas>
+                <div class="canvas-overlay">
+                    <div id="fps">FPS: 60</div>
+                    <div id="modeDisplay">Mode: Aurora</div>
+                </div>
+            </div>
+
+            <div class="mode-buttons">
+                <button class="mode-btn active" data-mode="aurora">Aurora Borealis</button>
+                <button class="mode-btn" data-mode="filament">Plasma Filaments</button>
+                <button class="mode-btn" data-mode="coronal">Coronal Loops</button>
+                <button class="mode-btn" data-mode="reconnection">Magnetic Reconnection</button>
+                <button class="mode-btn" data-mode="turbulence">MHD Turbulence</button>
+            </div>
+
+            <div class="controls-panel">
+                <div class="control-group">
+                    <label class="control-label">Magnetic Field Strength</label>
+                    <input type="range" class="control-slider" id="fieldStrength" min="1" max="10" value="5" step="0.1">
+                    <span class="control-value" id="fieldStrengthVal">5.0</span>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Plasma Density</label>
+                    <input type="range" class="control-slider" id="plasmaDensity" min="100" max="2000" value="800">
+                    <span class="control-value" id="plasmaDensityVal">800</span>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Temperature (keV)</label>
+                    <input type="range" class="control-slider" id="temperature" min="1" max="100" value="20">
+                    <span class="control-value" id="temperatureVal">20 keV</span>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Magnetic Reynolds Number</label>
+                    <input type="range" class="control-slider" id="reynoldsNumber" min="100" max="10000" value="2000">
+                    <span class="control-value" id="reynoldsNumberVal">2000</span>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Intermittency</label>
+                    <input type="range" class="control-slider" id="intermittency" min="0" max="1" value="0.3" step="0.05">
+                    <span class="control-value" id="intermittencyVal">0.30</span>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Color Palette</label>
+                    <input type="range" class="control-slider" id="colorShift" min="0" max="360" value="180">
+                    <span class="control-value" id="colorShiftVal">180°</span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="particleCount">0</div>
+                    <div class="stat-label">Particles</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="magneticEnergy">0.00</div>
+                    <div class="stat-label">Magnetic Energy</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="plasmaBeta">0.00</div>
+                    <div class="stat-label">Plasma β</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="reconnectionEvents">0</div>
+                    <div class="stat-label">Reconnection Events</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Aurora SVG Gallery -->
+        <section class="aurora-gallery">
+            <h2 class="section-title">Aurora Masterpieces</h2>
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="auroraGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00ff88;stop-opacity:0.8"/>
+                                <stop offset="50%" style="stop-color:#00ffcc;stop-opacity:0.6"/>
+                                <stop offset="100%" style="stop-color:#0088ff;stop-opacity:0.4"/>
+                            </linearGradient>
+                            <filter id="glow1">
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                        </defs>
+                        <rect fill="#0a0a15" width="400" height="200"/>
+                        <path d="M0,180 Q50,100 100,150 Q150,200 200,120 Q250,40 300,100 Q350,160 400,80 L400,200 L0,200 Z"
+                              fill="url(#auroraGrad1)" filter="url(#glow1)" opacity="0.7">
+                            <animate attributeName="d" dur="8s" repeatCount="indefinite"
+                                values="M0,180 Q50,100 100,150 Q150,200 200,120 Q250,40 300,100 Q350,160 400,80 L400,200 L0,200 Z;
+                                        M0,160 Q50,140 100,120 Q150,100 200,140 Q250,180 300,120 Q350,60 400,120 L400,200 L0,200 Z;
+                                        M0,180 Q50,100 100,150 Q150,200 200,120 Q250,40 300,100 Q350,160 400,80 L400,200 L0,200 Z"/>
+                        </path>
+                        <path d="M0,190 Q100,150 150,170 Q200,190 250,140 Q300,90 400,150 L400,200 L0,200 Z"
+                              fill="#00ff88" opacity="0.3" filter="url(#glow1)">
+                            <animate attributeName="d" dur="6s" repeatCount="indefinite"
+                                values="M0,190 Q100,150 150,170 Q200,190 250,140 Q300,90 400,150 L400,200 L0,200 Z;
+                                        M0,170 Q100,180 150,160 Q200,140 250,170 Q300,200 400,130 L400,200 L0,200 Z;
+                                        M0,190 Q100,150 150,170 Q200,190 250,140 Q300,90 400,150 L400,200 L0,200 Z"/>
+                        </path>
+                    </svg>
+                    <div class="gallery-caption">
+                        <strong>Solar Dance</strong>
+                        Curtain aurora with undulating vertical rays, 24h周期で変動
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="coronaGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ffaa00;stop-opacity:0.9"/>
+                                <stop offset="40%" style="stop-color:#ff6600;stop-opacity:0.7"/>
+                                <stop offset="100%" style="stop-color:#ff0044;stop-opacity:0.3"/>
+                            </linearGradient>
+                            <filter id="coronaGlow">
+                                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                        </defs>
+                        <rect fill="#0a0510" width="400" height="200"/>
+                        <ellipse cx="200" cy="200" rx="180" ry="150" fill="url(#coronaGrad)" filter="url(#coronaGlow)" opacity="0.5">
+                            <animate attributeName="rx" values="180;200;180" dur="4s" repeatCount="indefinite"/>
+                            <animate attributeName="ry" values="150;170;150" dur="5s" repeatCount="indefinite"/>
+                        </ellipse>
+                        <ellipse cx="200" cy="200" rx="120" ry="100" fill="#ffcc00" filter="url(#coronaGlow)" opacity="0.3">
+                            <animate attributeName="rx" values="120;140;120" dur="3s" repeatCount="indefinite"/>
+                        </ellipse>
+                        <ellipse cx="200" cy="200" rx="60" ry="50" fill="#ffffff" opacity="0.4">
+                            <animate attributeName="rx" values="60;80;60" dur="2s" repeatCount="indefinite"/>
+                        </ellipse>
+                    </svg>
+                    <div class="gallery-caption">
+                        <strong>Coronal Mass Ejection</strong>
+                        Solar plasma eruption with expanding magnetic field lines
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="filamentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#ff00ff;stop-opacity:0.8"/>
+                                <stop offset="50%" style="stop-color:#ff66ff;stop-opacity:0.9"/>
+                                <stop offset="100%" style="stop-color:#ff00ff;stop-opacity:0.8"/>
+                            </linearGradient>
+                            <filter id="filamentGlow">
+                                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                        </defs>
+                        <rect fill="#0a0a12" width="400" height="200"/>
+                        <g filter="url(#filamentGlow)">
+                            <path d="M50,100 Q100,50 150,100 Q200,150 250,100 Q300,50 350,100"
+                                  stroke="url(#filamentGrad)" stroke-width="3" fill="none">
+                                <animate attributeName="d" dur="3s" repeatCount="indefinite"
+                                    values="M50,100 Q100,50 150,100 Q200,150 250,100 Q300,50 350,100;
+                                            M50,100 Q100,120 150,80 Q200,40 250,100 Q300,160 350,100;
+                                            M50,100 Q100,50 150,100 Q200,150 250,100 Q300,50 350,100"/>
+                            </path>
+                            <path d="M30,140 Q80,90 130,140 Q180,190 230,140 Q280,90 330,140 Q380,190 370,140"
+                                  stroke="url(#filamentGrad)" stroke-width="2" fill="none" opacity="0.7">
+                                <animate attributeName="d" dur="4s" repeatCount="indefinite"
+                                    values="M30,140 Q80,90 130,140 Q180,190 230,140 Q280,90 330,140 Q380,190 370,140;
+                                            M30,140 Q80,160 130,120 Q180,80 230,140 Q280,200 330,140 Q380,80 370,140;
+                                            M30,140 Q80,90 130,140 Q180,190 230,140 Q280,90 330,140 Q380,190 370,140"/>
+                            </path>
+                            <path d="M70,60 Q120,110 170,60 Q220,10 270,60 Q320,110 370,60"
+                                  stroke="url(#filamentGrad)" stroke-width="2" fill="none" opacity="0.7">
+                                <animate attributeName="d" dur="3.5s" repeatCount="indefinite"
+                                    values="M70,60 Q120,110 170,60 Q220,10 270,60 Q320,110 370,60;
+                                            M70,60 Q120,30 170,90 Q220,150 270,60 Q320,20 370,60;
+                                            M70,60 Q120,110 170,60 Q220,10 270,60 Q320,110 370,60"/>
+                            </path>
+                        </g>
+                    </svg>
+                    <div class="gallery-caption">
+                        <strong>Plasma Filamentation</strong>
+                        Z-pinch instability creating luminous plasma threads
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <radialGradient id="reconGrad" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1"/>
+                                <stop offset="30%" style="stop-color:#00ccff;stop-opacity:0.8"/>
+                                <stop offset="60%" style="stop-color:#0066ff;stop-opacity:0.5"/>
+                                <stop offset="100%" style="stop-color:#000033;stop-opacity:0"/>
+                            </radialGradient>
+                            <filter id="reconGlow">
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                        </defs>
+                        <rect fill="#050510" width="400" height="200"/>
+                        <g filter="url(#reconGlow)">
+                            <!-- Field lines converging to reconnection point -->
+                            <path d="M0,50 Q150,80 200,100" stroke="#00ccff" stroke-width="2" fill="none" opacity="0.8">
+                                <animate attributeName="stroke-opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/>
+                            </path>
+                            <path d="M0,150 Q150,120 200,100" stroke="#00ccff" stroke-width="2" fill="none" opacity="0.8">
+                                <animate attributeName="stroke-opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/>
+                            </path>
+                            <path d="M400,50 Q250,80 200,100" stroke="#ff6600" stroke-width="2" fill="none" opacity="0.8">
+                                <animate attributeName="stroke-opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/>
+                            </path>
+                            <path d="M400,150 Q250,120 200,100" stroke="#ff6600" stroke-width="2" fill="none" opacity="0.8">
+                                <animate attributeName="stroke-opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/>
+                            </path>
+                            <!-- Reconnection burst -->
+                            <circle cx="200" cy="100" r="15" fill="url(#reconGrad)">
+                                <animate attributeName="r" values="15;25;15" dur="1.5s" repeatCount="indefinite"/>
+                                <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite"/>
+                            </circle>
+                            <!-- Ejected plasma jets -->
+                            <path d="M200,100 L200,30" stroke="#00ffcc" stroke-width="4" fill="none" opacity="0.6">
+                                <animate attributeName="d" values="M200,100 L200,30;M200,100 L200,0;M200,100 L200,30" dur="1.5s" repeatCount="indefinite"/>
+                            </path>
+                            <path d="M200,100 L200,170" stroke="#ff00ff" stroke-width="4" fill="none" opacity="0.6">
+                                <animate attributeName="d" values="M200,100 L200,170;M200,100 L200,200;M200,100 L200,170" dur="1.5s" repeatCount="indefinite"/>
+                            </path>
+                        </g>
+                    </svg>
+                    <div class="gallery-caption">
+                        <strong>Magnetic Reconnection</strong>
+                        Opposite field lines annihilate, releasing explosive energy
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="turbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00ff88;stop-opacity:0.6"/>
+                                <stop offset="50%" style="stop-color:#0088ff;stop-opacity:0.6"/>
+                                <stop offset="100%" style="stop-color:#8800ff;stop-opacity:0.6"/>
+                            </linearGradient>
+                        </defs>
+                        <rect fill="#050a10" width="400" height="200"/>
+                        <g opacity="0.6">
+                            <path d="M0,100 Q50,60 100,90 T200,100 T300,90 T400,100" stroke="url(#turbGrad)" stroke-width="2" fill="none">
+                                <animate attributeName="d" dur="5s" repeatCount="indefinite"
+                                    values="M0,100 Q50,60 100,90 T200,100 T300,90 T400,100;
+                                            M0,100 Q50,140 100,110 T200,100 T300,110 T400,100;
+                                            M0,100 Q50,60 100,90 T200,100 T300,90 T400,100"/>
+                            </path>
+                            <path d="M0,80 Q60,40 120,70 T220,80 T320,70 T420,80" stroke="url(#turbGrad)" stroke-width="1.5" fill="none" opacity="0.7">
+                                <animate attributeName="d" dur="4s" repeatCount="indefinite"
+                                    values="M0,80 Q60,40 120,70 T220,80 T320,70 T420,80;
+                                            M0,80 Q60,120 120,90 T220,80 T320,90 T420,80;
+                                            M0,80 Q60,40 120,70 T220,80 T320,70 T420,80"/>
+                            </path>
+                            <path d="M0,120 Q40,160 80,130 T180,120 T280,130 T380,120 T480,130" stroke="url(#turbGrad)" stroke-width="1.5" fill="none" opacity="0.7">
+                                <animate attributeName="d" dur="4.5s" repeatCount="indefinite"
+                                    values="M0,120 Q40,160 80,130 T180,120 T280,130 T380,120 T480,130;
+                                            M0,120 Q40,80 80,110 T180,120 T280,110 T380,120 T480,130;
+                                            M0,120 Q40,160 80,130 T180,120 T280,130 T380,120 T480,130"/>
+                            </path>
+                        </g>
+                    </svg>
+                    <div class="gallery-caption">
+                        <strong>MHD Turbulence</strong>
+                        Energy cascade through multiple scales via Kolmogorov-like spectrum
+                    </div>
+                </div>
+
+                <div class="gallery-item">
+                    <svg viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <radialGradient id="pinchGrad" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1"/>
+                                <stop offset="20%" style="stop-color:#00ffff;stop-opacity:0.9"/>
+                                <stop offset="60%" style="stop-color:#0066ff;stop-opacity:0.6"/>
+                                <stop offset="100%" style="stop-color:#000033;stop-opacity:0"/>
+                            </radialGradient>
+                            <filter id="pinchGlow">
+                                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                        </defs>
+                        <rect fill="#030308" width="400" height="200"/>
+                        <g filter="url(#pinchGlow)">
+                            <!-- Z-pinch configuration -->
+                            <ellipse cx="200" cy="100" rx="80" ry="10" fill="none" stroke="#00ccff" stroke-width="1" opacity="0.5">
+                                <animate attributeName="rx" values="80;70;80" dur="2s" repeatCount="indefinite"/>
+                            </ellipse>
+                            <ellipse cx="200" cy="100" rx="60" ry="8" fill="none" stroke="#00ffff" stroke-width="1.5" opacity="0.6">
+                                <animate attributeName="rx" values="60;50;60" dur="1.5s" repeatCount="indefinite"/>
+                            </ellipse>
+                            <ellipse cx="200" cy="100" rx="40" ry="5" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.8">
+                                <animate attributeName="rx" values="40;30;40" dur="1s" repeatCount="indefinite"/>
+                            </ellipse>
+                            <!-- Current-carrying filaments -->
+                            <line x1="200" y1="20" x2="200" y2="180" stroke="#ff6600" stroke-width="3" opacity="0.5">
+                                <animate attributeName="opacity" values="0.5;0.8;0.5" dur="1s" repeatCount="indefinite"/>
+                            </line>
+                            <line x1="150" y1="30" x2="150" y2="170" stroke="#ff6600" stroke-width="2" opacity="0.4">
+                                <animate attributeName="opacity" values="0.4;0.7;0.4" dur="1.2s" repeatCount="indefinite"/>
+                            </line>
+                            <line x1="250" y1="30" x2="250" y2="170" stroke="#ff6600" stroke-width="2" opacity="0.4">
+                                <animate attributeName="opacity" values="0.4;0.7;0.4" dur="1.3s" repeatCount="indefinite"/>
+                            </line>
+                            <!-- Central hot core -->
+                            <circle cx="200" cy="100" r="8" fill="url(#pinchGrad)">
+                                <animate attributeName="r" values="8;12;8" dur="0.8s" repeatCount="indefinite"/>
+                            </circle>
+                        </g>
+                    </svg>
+                    <div class="gallery-caption">
+                        <strong>Z-Pinch Instability</strong>
+                        Self-pinching plasma column with magnetic field compression
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Physics Theory -->
+        <section class="physics-section">
+            <h2 class="section-title">The Mathematics of Magnetized Plasma</h2>
+
+            <div class="equation-card">
+                <div class="equation">∂B/∂t = ∇ × (v × B) - η∇²B</div>
+                <div class="equation-desc">
+                    The magnetic induction equation — describes how magnetic fields evolve in a conducting fluid.
+                    The first term represents convection of the field by the plasma flow, while the second term
+                    accounts for resistive diffusion. When magnetic Reynolds number is high, diffusion becomes negligible.
+                </div>
+            </div>
+
+            <div class="equation-card">
+                <div class="equation">ρ(∂v/∂t + v·∇v) = j × B - ∇p + ρg</div>
+                <div class="equation-desc">
+                    The plasma momentum equation — the Lorentz force (j × B) accelerates the plasma,
+                    balanced against pressure gradients and gravitational forces. This is the MHD
+                    equivalent of Newton's second law for magnetized fluids.
+                </div>
+            </div>
+
+            <div class="equation-card">
+                <div class="equation">β = p_thermal / p_magnetic = 2μ₀p / B²</div>
+                <div class="equation-desc">
+                    Plasma beta — the ratio of thermal to magnetic pressure. When β << 1, magnetic fields
+                    dominate (coronal loops, auroral arcs). When β >> 1, plasma behavior resembles
+                    ordinary fluid dynamics. Most space plasmas have β ~ 0.1-1.
+                </div>
+            </div>
+
+            <div class="equation-card">
+                <div class="equation">R_m = μ₀σvL / η = μ₀σ/η × vL</div>
+                <div class="equation-desc">
+                    Magnetic Reynolds number — dimensionless measure of magnetic advection vs diffusion.
+                    High R_m (>>1) means magnetic fields are frozen-in and move with the plasma.
+                    Low R_m (<<1) means magnetic diffusion dominates. Solar corona has R_m ~ 10⁸.
+                </div>
+            </div>
+
+            <div class="equation-card">
+                <div class="equation">E_rec = B²/2μ₀ × v_rec × A</div>
+                <div class="equation-desc">
+                    Magnetic reconnection energy release — when oppositely directed field lines reconnect,
+                    magnetic energy is converted to kinetic and thermal energy. Solar flares release
+                    10²⁰-10²⁵ Joules in minutes. The rate depends on the inflow magnetic energy flux.
+                </div>
+            </div>
+        </section>
+
+        <!-- Manifesto -->
+        <section class="manifesto-banner">
+            <p class="manifesto-text">
+                The universe speaks in electromagnetic frequencies we cannot hear,
+                but through plasma physics we learn to see its voice. Every aurora curtain,
+                every solar filament, every coronal loop is a sentence in the language
+                of magnetohydrodynamics — and we are learning to read.
+            </p>
+        </section>
+
+        <footer>
+            <p>Aurora Plasma Symphony — Artivist | Magnetohydrodynamics Art Laboratory</p>
+        </footer>
+    </div>
+
+    <script>
+        // Starfield background
+        const starCanvas = document.getElementById('starfield');
+        const starCtx = starCanvas.getContext('2d');
+
+        function resizeStarfield() {
+            starCanvas.width = window.innerWidth;
+            starCanvas.height = window.innerHeight;
+        }
+        resizeStarfield();
+        window.addEventListener('resize', resizeStarfield);
+
+        const stars = [];
+        for (let i = 0; i < 200; i++) {
+            stars.push({
+                x: Math.random() * starCanvas.width,
+                y: Math.random() * starCanvas.height,
+                radius: Math.random() * 1.5,
+                alpha: Math.random(),
+                speed: Math.random() * 0.02
+            });
+        }
+
+        function animateStars() {
+            starCtx.fillStyle = 'rgba(10, 10, 18, 0.3)';
+            starCtx.fillRect(0, 0, starCanvas.width, starCanvas.height);
+
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0) star.speed *= -1;
+                starCtx.beginPath();
+                starCtx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                starCtx.fillStyle = `rgba(255, 255, 255, ${Math.abs(star.alpha)})`;
+                starCtx.fill();
+            });
+
+            requestAnimationFrame(animateStars);
+        }
+        animateStars();
+
+        // Plasma simulation
+        const plasmaCanvas = document.getElementById('plasmaCanvas');
+        const ctx = plasmaCanvas.getContext('2d');
+
+        function resizePlasma() {
+            plasmaCanvas.width = plasmaCanvas.offsetWidth * window.devicePixelRatio;
+            plasmaCanvas.height = plasmaCanvas.offsetHeight * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        resizePlasma();
+        window.addEventListener('resize', resizePlasma);
+
+        let currentMode = 'aurora';
+        let particles = [];
+        let reconnectionEvents = 0;
+        let lastTime = performance.now();
+        let frameCount = 0;
+
+        const controls = {
+            fieldStrength: 5,
+            plasmaDensity: 800,
+            temperature: 20,
+            reynoldsNumber: 2000,
+            intermittency: 0.3,
+            colorShift: 180
+        };
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * plasmaCanvas.offsetWidth;
+                this.y = Math.random() * plasmaCanvas.offsetHeight;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.life = Math.random() * 500 + 200;
+                this.maxLife = this.life;
+                this.mass = Math.random() * 0.5 + 0.5;
+                this.charge = Math.random() > 0.5 ? 1 : -1;
+            }
+
+            update(dt) {
+                const width = plasmaCanvas.offsetWidth;
+                const height = plasmaCanvas.offsetHeight;
+                const centerX = width / 2;
+                const centerY = height / 2;
+
+                if (currentMode === 'aurora') {
+                    // Aurora mode: vertical curtain effect with magnetic wave
+                    const wavePhase = Date.now() * 0.001 + this.x * 0.01;
+                    const waveAmp = controls.fieldStrength * 3;
+                    this.vy = -Math.abs(Math.sin(wavePhase) * waveAmp) - 0.5;
+                    this.vx = Math.sin(Date.now() * 0.0005 + this.y * 0.005) * controls.fieldStrength * 0.5;
+                    this.x += this.vx * dt * 0.1;
+                    this.y += this.vy * dt * 0.05;
+
+                    if (this.y < 0 || this.life <= 0) {
+                        this.y = height + Math.random() * 50;
+                        this.x = Math.random() * width;
+                        this.life = this.maxLife;
+                    }
+                } else if (currentMode === 'filament') {
+                    // Filament mode: Z-pinch like structures
+                    const dx = this.x - centerX;
+                    const dy = this.y - centerY;
+                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                    const pinchForce = controls.fieldStrength * 0.5 / (dist * 0.01 + 1);
+                    this.vx += (dx / dist) * pinchForce * dt * 0.001;
+                    this.vy += (dy / dist) * pinchForce * dt * 0.001;
+                    this.vx *= 0.98;
+                    this.vy *= 0.98;
+                    this.x += this.vx * dt * 0.1;
+                    this.y += this.vy * dt * 0.1;
+
+                    if (dist < 20 || this.life <= 0) this.reset();
+                } else if (currentMode === 'coronal') {
+                    // Coronal loops: semicircular arcs
+                    const angle = Math.atan2(this.y - centerY, this.x - centerX);
+                    const targetAngle = angle + Math.PI / 2;
+                    const speed = controls.fieldStrength * 2;
+                    this.vx += Math.cos(targetAngle) * speed * dt * 0.001;
+                    this.vy += Math.sin(targetAngle) * speed * dt * 0.001;
+                    this.vx *= 0.95;
+                    this.vy *= 0.95;
+                    this.x += this.vx * dt * 0.1;
+                    this.y += this.vy * dt * 0.1;
+
+                    if (this.y < 0 || this.life <= 0) this.reset();
+                } else if (currentMode === 'reconnection') {
+                    // Magnetic reconnection: center burst with jets
+                    const dx = this.x - centerX;
+                    const dy = this.y - centerY;
+                    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+
+                    if (dist < 50) {
+                        // Near reconnection point: explosive outflow
+                        const burstAngle = Math.random() * Math.PI * 2;
+                        this.vx = Math.cos(burstAngle) * controls.fieldStrength * 10;
+                        this.vy = Math.sin(burstAngle) * controls.fieldStrength * 10;
+                        if (Math.random() < 0.01) reconnectionEvents++;
+                    } else {
+                        // Inflow from boundaries
+                        if (this.x < centerX) {
+                            this.vx = controls.fieldStrength * 0.3;
+                        } else {
+                            this.vx = -controls.fieldStrength * 0.3;
+                        }
+                        this.vy *= 0.99;
+                    }
+                    this.x += this.vx * dt * 0.1;
+                    this.y += this.vy * dt * 0.1;
+
+                    if (this.x < 0 || this.x > width || this.y < 0 || this.y > height || this.life <= 0) {
+                        this.reset();
+                    }
+                } else if (currentMode === 'turbulence') {
+                    // MHD turbulence: multi-scale cascade
+                    const t = Date.now() * 0.001;
+                    this.vx = Math.sin(t * 2 + this.y * 0.02) * controls.fieldStrength;
+                    this.vy = Math.cos(t * 2 + this.x * 0.02) * controls.fieldStrength;
+                    // Add intermittency bursts
+                    if (Math.random() < controls.intermittency * 0.1) {
+                        this.vx += (Math.random() - 0.5) * 10;
+                        this.vy += (Math.random() - 0.5) * 10;
+                    }
+                    this.vx *= 0.98;
+                    this.vy *= 0.98;
+                    this.x += this.vx * dt * 0.05;
+                    this.y += this.vy * dt * 0.05;
+
+                    // Toroidal wrapping
+                    if (this.x < 0) this.x = width;
+                    if (this.x > width) this.x = 0;
+                    if (this.y < 0) this.y = height;
+                    if (this.y > height) this.y = 0;
+
+                    if (this.life <= 0) this.reset();
+                }
+
+                this.life -= dt * 0.5;
+            }
+
+            draw() {
+                const lifeRatio = this.life / this.maxLife;
+                const hue = (controls.colorShift + (1 - lifeRatio) * 120) % 360;
+                const alpha = lifeRatio * 0.8;
+                const size = 2 + this.mass * 2;
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, size, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${hue}, 100%, 60%, ${alpha})`;
+                ctx.fill();
+
+                // Glow effect
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, size * 2, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${hue}, 100%, 70%, ${alpha * 0.3})`;
+                ctx.fill();
+            }
+        }
+
+        // Initialize particles
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < controls.plasmaDensity; i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+
+        // Animation loop
+        function animate(currentTime) {
+            const dt = Math.min(currentTime - lastTime, 50);
+            lastTime = currentTime;
+            frameCount++;
+
+            const width = plasmaCanvas.offsetWidth;
+            const height = plasmaCanvas.offsetHeight;
+
+            // Semi-transparent fade for trails
+            ctx.fillStyle = 'rgba(5, 5, 15, 0.15)';
+            ctx.fillRect(0, 0, width, height);
+
+            // Update and draw particles
+            particles.forEach(p => {
+                p.update(dt);
+                p.draw();
+            });
+
+            // Draw mode-specific overlays
+            if (currentMode === 'reconnection') {
+                // Draw reconnection point glow
+                const gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, 80);
+                gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+                gradient.addColorStop(0.3, 'rgba(0, 255, 255, 0.4)');
+                gradient.addColorStop(1, 'rgba(0, 0, 100, 0)');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+            }
+
+            // Update stats every 30 frames
+            if (frameCount % 30 === 0) {
+                document.getElementById('fps').textContent = `FPS: ${Math.round(1000 / dt)}`;
+                document.getElementById('particleCount').textContent = particles.length;
+                document.getElementById('magneticEnergy').textContent = (controls.fieldStrength * controls.plasmaDensity * 0.01).toFixed(2);
+                document.getElementById('plasmaBeta').textContent = (controls.temperature / (controls.fieldStrength * controls.fieldStrength) * 100).toFixed(2);
+                document.getElementById('reconnectionEvents').textContent = reconnectionEvents;
+            }
+
+            requestAnimationFrame(animate);
+        }
+        animate(performance.now());
+
+        // Mode buttons
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+                document.getElementById('modeDisplay').textContent = `Mode: ${btn.textContent}`;
+                reconnectionEvents = 0;
+            });
+        });
+
+        // Sliders
+        document.getElementById('fieldStrength').addEventListener('input', e => {
+            controls.fieldStrength = parseFloat(e.target.value);
+            document.getElementById('fieldStrengthVal').textContent = controls.fieldStrength.toFixed(1);
+        });
+
+        document.getElementById('plasmaDensity').addEventListener('input', e => {
+            controls.plasmaDensity = parseInt(e.target.value);
+            document.getElementById('plasmaDensityVal').textContent = controls.plasmaDensity;
+            initParticles();
+        });
+
+        document.getElementById('temperature').addEventListener('input', e => {
+            controls.temperature = parseInt(e.target.value);
+            document.getElementById('temperatureVal').textContent = controls.temperature + ' keV';
+        });
+
+        document.getElementById('reynoldsNumber').addEventListener('input', e => {
+            controls.reynoldsNumber = parseInt(e.target.value);
+            document.getElementById('reynoldsNumberVal').textContent = controls.reynoldsNumber;
+        });
+
+        document.getElementById('intermittency').addEventListener('input', e => {
+            controls.intermittency = parseFloat(e.target.value);
+            document.getElementById('intermittencyVal').textContent = controls.intermittency.toFixed(2);
+        });
+
+        document.getElementById('colorShift').addEventListener('input', e => {
+            controls.colorShift = parseInt(e.target.value);
+            document.getElementById('colorShiftVal').textContent = controls.colorShift + '°';
+        });
+
+        // Click to add chaos
+        plasmaCanvas.addEventListener('click', e => {
+            const rect = plasmaCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Add burst of particles at click location
+            for (let i = 0; i < 50; i++) {
+                const p = new Particle();
+                p.x = x;
+                p.y = y;
+                p.vx = (Math.random() - 0.5) * 20;
+                p.vy = (Math.random() - 0.5) * 20;
+                p.life = 100;
+                p.maxLife = 100;
+                particles.push(p);
+            }
+
+            // Cap particles
+            if (particles.length > 3000) {
+                particles = particles.slice(-3000);
+            }
+        });
+    </script>
+</body>
+</html>
