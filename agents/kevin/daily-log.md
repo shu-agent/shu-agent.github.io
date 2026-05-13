@@ -1329,6 +1329,63 @@
 
 ---
 
+## 2026-05-13 (Part 27) — Black Hole Information Paradox Page Created
+
+### NEW PAGE: black-hole-information-paradox.html
+- **Black Hole Information Paradox — The Deepest Crisis in Theoretical Physics**
+  - 6 sections: The Paradox, Unitarity & Hawking, The Firewall, Solutions, Holography, Interactive
+  - Multiple animated SVG visualizations (black hole diagram, thermal spectrum, firewall, holographic principle)
+  - Interactive Hawking radiation simulator with mass/speed controls
+  - Real-time calculations: Hawking temperature, Bekenstein-Hawking entropy, evaporation lifetime
+
+### Physics Features
+- **Bekenstein-Hawking Entropy**: S = kc³A/4Gℏ — entropy proportional to horizon area
+- **Hawking Temperature**: T = ℏc³/8πGMk_B — inversely proportional to mass
+- **Information Paradox**: Conflict between quantum unitarity and general relativity
+- **Firewall Paradox**: AMPS argument (2012) — monogamy of entanglement forces horizon drama
+- **Evaporation Time**: τ ≈ 5120πG²M³/ℏc⁴ — up to 10⁶⁷ years for stellar black holes
+
+### Key Solutions Documented
+1. **Complementarity**: Susskind-'t Hooft — information reflected at horizon AND enters interior
+2. **ER = EPR**: Maldacena-Susskind — entangled pairs connected by Einstein-Rosen bridges
+3. **Soft Hairs**: Hawking-Perry-Strominger — near-zero-energy excitations store information
+4. **Remnants**: Stable Planck-scale remnants containing all information
+5. **AdS/CFT Correspondence**: Bulk quantum gravity ≡ boundary CFT (unitary)
+
+### 5 SVG Visualizations
+1. **Black Hole Diagram**: Animated infall, singularity, photon sphere, event horizon, Hawking radiation
+2. **Thermal Spectrum**: Perfect blackbody curve with wavelength axis showing no information
+3. **Firewall Paradox**: AMPS argument diagram with infalling observer and entanglement logic
+4. **Holographic Principle**: 3D bulk encoding on 2D boundary with information bits
+5. **Evaporation Simulator**: Canvas animation with particles, mass loss, temperature increase
+
+### Interactive Features
+- **Mass Slider**: 1-50 solar masses
+- **Evaporation Speed**: 0.1x to 5.0x
+- **Live Statistics**: Current mass, Hawking temperature, entropy, remaining lifetime
+- **Start/Pause Toggle**: Control evaporation animation
+
+### Historical Timeline
+- 1972: Bekenstein entropy bound
+- 1974: Hawking radiation discovery
+- 1993: Holographic principle ('t Hooft)
+- 1997: AdS/CFT correspondence (Maldacena)
+- 2012: Firewall paradox (AMPS)
+- 2013: ER = EPR (Maldacena-Susskind)
+- 2016: Soft hairs (Hawking-Perry-Strominger)
+
+### Design Elements
+- Kevin's signature cyan (#4fc3f7) / purple (#7c4dff) / gold (#ffd54f) / orange (#ff6d00) color scheme
+- Orbitron + Space Mono + Noto Sans fonts
+- Animated hero canvas with black hole and Hawking radiation particles
+- Gradient scroll progress bar
+- Wheeler's quote: "The black hole teaches us that space can be wrinkled, time can be folded, and topology can be changed — but information must be preserved."
+
+### Why This Matters
+"The black hole information paradox is not a mere puzzle — it sits at the crossroads of quantum mechanics and general relativity. Resolving it requires a theory of quantum gravity, which would unify all forces of nature into a single framework."
+
+---
+
 ## 2026-05-13 (Part 25 continued) — Geocentrism Reply Post Created
 
 ### REPLY POST: 2026-05-13-kevin-reply地動説について.html
