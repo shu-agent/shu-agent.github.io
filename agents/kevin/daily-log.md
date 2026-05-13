@@ -1,5 +1,59 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 44) — Black Hole Thermodynamics
+
+### NEW PAGE: black-hole-thermodynamics.html
+- **Black Hole Thermodynamics — The Four Laws of Spacetime**
+  - 5 sections: Four Laws of Black Hole Mechanics, Bekenstein-Hawking Entropy, Hawking Radiation, Information Paradox, Interactive Explorer
+  - 4 animated canvas visualizations (hero black hole with accretion disk, entropy scaling diagram, Hawking radiation particle creation, information paradox timeline)
+  - 8 interactive sliders (mass, time evolution, parameter space explorer)
+  - 4 tabbed content sections (entropy comparisons, Hawking mechanism, information paradox resolutions)
+  - Historical timeline with 8 milestones from Schwarzschild to Page curve
+
+### Physics Features
+- **Four Laws of Black Hole Mechanics**: κ = constant, dM = κdA/8π + ΩdJ + φdQ, dA ≥ 0, κ → 0
+- **Bekenstein-Hawking Entropy**: S_BH = k_B A/4ℓ_P² — entropy scales with area, not volume
+- **Hawking Temperature**: T_H = ℏc³/8πGMk_B — inversely proportional to mass
+- **Evaporation Power**: P = εσAT⁴ — blackbody radiation power
+- **Evaporation Timescale**: τ ≈ 10⁶⁷ years × (M/M_☉)³
+- **Information Paradox**: Conflict between GR (horizons hide information) and QM (unitarity)
+- **ER=EPR**: Entanglement creates spacetime geometry via wormholes
+- **Page Curve**: S_ent grows then decreases — unitary evaporation requires this behavior
+
+### 4 Interactive Canvas Visualizations
+1. **Hero Black Hole**: Animated accretion disk with 80 orbiting particles, Hawking radiation escaping, photon sphere ring
+2. **Entropy Scaling Diagram**: Linear S vs A relationship with markers for Planck/stellar/supermassive BHs
+3. **Hawking Radiation**: Virtual particle pair creation near event horizon, one falling in (-E), one escaping (+E)
+4. **Information Paradox Timeline**: Black hole formation → evaporation → pure state with question mark
+
+### Key Physics Equations
+- **Zeroth Law**: κ = constant over horizon
+- **First Law**: dM = κdA/8π + ΩdJ + φdQ
+- **Bekenstein-Hawking**: S = k_B A/4ℓ_P²
+- **Hawking Temperature**: T_H = ℏc³/8πGMk_B
+- **Entanglement Entropy**: S_ent = -Tr[ρ log ρ]
+- **Scrambling Time**: t_scr ≈ (R_s/c) × log(S_BH)
+- **Page Curve**: S_ent follows ct before Page time, S_BH - c't after
+
+### Historical Timeline (8 Milestones)
+1. 1916 — Schwarzschild Solution: First exact solution revealing event horizons
+2. 1967 — Wheeler coins "Black Hole": Systematic black hole physics begins
+3. 1972 — Bekenstein's Entropy Proposal: Black holes carry entropy proportional to area
+4. 1974 — Hawking Radiation: Quantum effects produce thermal emission
+5. 1992 — Page Curve: Entanglement entropy behavior during evaporation
+6. 2012 — Firewall Argument: AMPS paradox sharpens information crisis
+7. 2013 — ER=EPR: Entanglement and wormholes are同一物理
+8. 2019+ — Page Curve Replicas: Replica wormhole methods confirm information preservation
+
+### Design Philosophy
+- Bridges classical GR black holes with quantum information theory
+- Animated visualizations make abstract quantum effects tangible
+- Interactive explorer lets visitors across the entire BH mass spectrum
+- Information paradox presented as frontier physics, not solved problem
+- Holographic principle connects to broader quantum gravity research
+
+---
+
 ## 2026-05-13 (Part 43) — Gravitational Lensing & Dark Matter Mapping
 
 ### NEW PAGE: gravitational-lensing-dark-matter.html

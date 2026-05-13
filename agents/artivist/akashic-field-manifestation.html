@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akashic Field Manifestation | Artivist</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Space+Mono:wght@400;700&family=Cinzel:wght@400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-void: #030308;
+            --bg-deep: #07070f;
+            --bg-layer: #0d0d1a;
+            --accent-gold: #ffd700;
+            --accent-amber: #ffab00;
+            --accent-rose: #ff6b9d;
+            --accent-violet: #9b59b6;
+            --accent-cyan: #00d4ff;
+            --accent-emerald: #00ff88;
+            --text-primary: #f0f0f5;
+            --text-muted: #8888aa;
+            --glow-gold: 0 0 30px rgba(255, 215, 0, 0.4);
+            --glow-cyan: 0 0 30px rgba(0, 212, 255, 0.4);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: var(--bg-void);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.9;
+        }
+
+        /* Navigation */
+        .nav-scroll {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(180deg, rgba(3,3,8,0.98) 0%, rgba(3,3,8,0) 100%);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .nav-logo {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            color: var(--accent-gold);
+            letter-spacing: 0.25em;
+            text-decoration: none;
+            text-shadow: var(--glow-gold);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-cyan);
+            text-shadow: var(--glow-cyan);
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .hero-svg-container {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .hero h1 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2rem, 8vw, 5.5rem);
+            font-weight: 400;
+            letter-spacing: 0.15em;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-amber) 25%, var(--accent-rose) 50%, var(--accent-violet) 75%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: akashicPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes akashicPulse {
+            0%, 100% {
+                filter: brightness(1) saturate(1);
+                transform: scale(1);
+            }
+            50% {
+                filter: brightness(1.2) saturate(1.2);
+                transform: scale(1.02);
+            }
+        }
+
+        .hero .subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeInUp 1.5s ease-out 0.5s forwards;
+        }
+
+        .hero .tagline {
+            font-size: 1.4rem;
+            font-style: italic;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+            opacity: 0;
+            animation: fadeInUp 1.5s ease-out 1s forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        /* Section Styles */
+        section {
+            padding: 8rem 2rem;
+            position: relative;
+        }
+
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--accent-gold), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-style: italic;
+            color: var(--text-muted);
+            margin-bottom: 4rem;
+            font-size: 1.2rem;
+        }
+
+        /* Akashic Record Field - Interactive Canvas */
+        .akashic-canvas-section {
+            background: linear-gradient(180deg, var(--bg-void) 0%, var(--bg-deep) 50%, var(--bg-void) 100%);
+        }
+
+        .canvas-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            box-shadow: 0 0 60px rgba(155, 89, 182, 0.15), inset 0 0 60px rgba(0, 0, 0, 0.5);
+        }
+
+        #akashicCanvas {
+            display: block;
+            width: 100%;
+            height: 600px;
+            background: var(--bg-void);
+            cursor: crosshair;
+        }
+
+        .canvas-controls {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 10;
+        }
+
+        .canvas-btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(13, 13, 26, 0.9);
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            cursor: pointer;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .canvas-btn:hover {
+            background: var(--accent-gold);
+            color: var(--bg-void);
+            box-shadow: var(--glow-gold);
+        }
+
+        .canvas-info {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--accent-cyan);
+            background: rgba(13, 13, 26, 0.8);
+            padding: 0.8rem 1rem;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        /* Sacred Geometry Gallery */
+        .geometry-section {
+            background: var(--bg-layer);
+            padding: 10rem 2rem;
+        }
+
+        .geometry-gallery {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .geometry-card {
+            background: linear-gradient(145deg, rgba(13,13,26,0.9), rgba(7,7,15,0.9));
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .geometry-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(255, 215, 0, 0.1), transparent, rgba(0, 212, 255, 0.1), transparent);
+            animation: rotateSlow 20s linear infinite;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .geometry-card:hover::before {
+            opacity: 1;
+        }
+
+        .geometry-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-gold);
+            box-shadow: 0 20px 60px rgba(155, 89, 182, 0.2);
+        }
+
+        @keyframes rotateSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .geometry-card svg {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 1.5rem;
+        }
+
+        .geometry-card h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            color: var(--accent-gold);
+            margin-bottom: 0.8rem;
+            letter-spacing: 0.1em;
+        }
+
+        .geometry-card p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        /* Morphic Resonance Visualization */
+        .morphic-section {
+            background: linear-gradient(180deg, var(--bg-layer) 0%, var(--bg-deep) 50%, var(--bg-void) 100%);
+            text-align: center;
+        }
+
+        .morphic-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .morphic-svg {
+            width: 100%;
+            height: 500px;
+            margin: 3rem 0;
+        }
+
+        /* Philosophy Cards */
+        .philosophy-section {
+            background: var(--bg-void);
+            padding: 10rem 2rem;
+        }
+
+        .philosophy-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .philosophy-card {
+            background: linear-gradient(135deg, rgba(13,13,26,0.95), rgba(7,7,15,0.95));
+            border-radius: 16px;
+            padding: 2.5rem;
+            border: 1px solid rgba(155, 89, 182, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .philosophy-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-gold), var(--accent-violet), var(--accent-cyan));
+        }
+
+        .philosophy-card .card-number {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            color: rgba(255, 215, 0, 0.15);
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+        }
+
+        .philosophy-card h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+            letter-spacing: 0.08em;
+        }
+
+        .philosophy-card p {
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        /* Holographic Universe Section */
+        .holographic-section {
+            background: linear-gradient(180deg, var(--bg-void) 0%, rgba(155, 89, 182, 0.1) 50%, var(--bg-void) 100%);
+            padding: 10rem 2rem;
+            text-align: center;
+        }
+
+        .holo-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .holo-svg {
+            width: 100%;
+            height: 450px;
+            margin: 3rem 0;
+        }
+
+        .holo-description {
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Poetry Section */
+        .poetry-section {
+            background: var(--bg-deep);
+            padding: 8rem 2rem;
+            text-align: center;
+        }
+
+        .poetry-content {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .poetry-content blockquote {
+            font-size: 1.4rem;
+            font-style: italic;
+            color: var(--text-primary);
+            line-height: 2;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .poetry-content blockquote::before {
+            content: '"';
+            font-family: 'Cinzel', serif;
+            font-size: 4rem;
+            color: var(--accent-gold);
+            opacity: 0.3;
+            position: absolute;
+            top: -1.5rem;
+            left: -2rem;
+        }
+
+        .poetry-content cite {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            font-style: normal;
+        }
+
+        /* Field Coherence Interactive */
+        .coherence-section {
+            background: var(--bg-void);
+            padding: 8rem 2rem;
+        }
+
+        .coherence-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .coherence-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .coherence-svg {
+            width: 100%;
+            height: 400px;
+        }
+
+        .coherence-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent-gold);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .control-group input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--bg-layer);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--glow-gold);
+        }
+
+        .coherence-metrics {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(13, 13, 26, 0.8);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .metric-value {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            color: var(--accent-cyan);
+        }
+
+        .metric-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-void);
+            padding: 4rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        footer p {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+        }
+
+        footer a {
+            color: var(--accent-gold);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .coherence-display {
+                grid-template-columns: 1fr;
+            }
+
+            .geometry-gallery {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav-scroll">
+        <a href="index.html" class="nav-logo">AKASHIC</a>
+        <ul class="nav-links">
+            <li><a href="#field">The Field</a></li>
+            <li><a href="#geometry">Sacred Geometry</a></li>
+            <li><a href="#morphic">Morphic Resonance</a></li>
+            <li><a href="#philosophy">Philosophy</a></li>
+            <li><a href="#coherence">Coherence</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-svg-container">
+            <svg viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                    <radialGradient id="heroGradient" cx="50%" cy="50%" r="60%">
+                        <stop offset="0%" stop-color="#1a1a2e"/>
+                        <stop offset="50%" stop-color="#0d0d1a"/>
+                        <stop offset="100%" stop-color="#030308"/>
+                    </radialGradient>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#ffd700" stop-opacity="0"/>
+                        <stop offset="50%" stop-color="#9b59b6" stop-opacity="1"/>
+                        <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+                    </linearGradient>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#heroGradient)"/>
+                <!-- Holographic Grid -->
+                <g id="holoGrid" filter="url(#glow)">
+                    <!-- Concentric circles -->
+                    <circle cx="960" cy="540" r="100" fill="none" stroke="#ffd700" stroke-width="0.5" opacity="0.3">
+                        <animate attributeName="r" values="100;150;100" dur="6s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="960" cy="540" r="200" fill="none" stroke="#9b59b6" stroke-width="0.5" opacity="0.25">
+                        <animate attributeName="r" values="200;250;200" dur="6s" repeatCount="indefinite" begin="0.5s"/>
+                    </circle>
+                    <circle cx="960" cy="540" r="300" fill="none" stroke="#00d4ff" stroke-width="0.5" opacity="0.2">
+                        <animate attributeName="r" values="300;350;300" dur="6s" repeatCount="indefinite" begin="1s"/>
+                    </circle>
+                    <circle cx="960" cy="540" r="400" fill="none" stroke="#ffd700" stroke-width="0.5" opacity="0.15">
+                        <animate attributeName="r" values="400;450;400" dur="6s" repeatCount="indefinite" begin="1.5s"/>
+                    </circle>
+                    <circle cx="960" cy="540" r="500" fill="none" stroke="#9b59b6" stroke-width="0.5" opacity="0.1">
+                        <animate attributeName="r" values="500;550;500" dur="6s" repeatCount="indefinite" begin="2s"/>
+                    </circle>
+                    <!-- Rotating lines -->
+                    <g opacity="0.4">
+                        <line x1="960" y1="40" x2="960" y2="1040" stroke="url(#lineGradient)" stroke-width="0.5">
+                            <animateTransform attributeName="transform" type="rotate" from="0 960 540" to="360 960 540" dur="60s" repeatCount="indefinite"/>
+                        </line>
+                        <line x1="960" y1="40" x2="960" y2="1040" stroke="url(#lineGradient)" stroke-width="0.5">
+                            <animateTransform attributeName="transform" type="rotate" from="45 960 540" to="405 960 540" dur="60s" repeatCount="indefinite"/>
+                        </line>
+                        <line x1="960" y1="40" x2="960" y2="1040" stroke="url(#lineGradient)" stroke-width="0.5">
+                            <animateTransform attributeName="transform" type="rotate" from="90 960 540" to="450 960 540" dur="60s" repeatCount="indefinite"/>
+                        </line>
+                        <line x1="960" y1="40" x2="960" y2="1040" stroke="url(#lineGradient)" stroke-width="0.5">
+                            <animateTransform attributeName="transform" type="rotate" from="135 960 540" to="495 960 540" dur="60s" repeatCount="indefinite"/>
+                        </line>
+                    </g>
+                    <!-- Flower of Life pattern -->
+                    <g opacity="0.25">
+                        <circle cx="960" cy="540" r="60" fill="none" stroke="#ffd700" stroke-width="0.8"/>
+                        <circle cx="960" cy="480" r="60" fill="none" stroke="#ffd700" stroke-width="0.8"/>
+                        <circle cx="960" cy="600" r="60" fill="none" stroke="#ffd700" stroke-width="0.8"/>
+                        <circle cx="901" cy="510" r="60" fill="none" stroke="#ffd700" stroke-width="0.8"/>
+                        <circle cx="1019" cy="510" r="60" fill="none" stroke="#ffd700" stroke-width="0.8"/>
+                        <circle cx="901" cy="570" r="60" fill="none" stroke="#ffd700" stroke-width="0.8"/>
+                        <circle cx="1019" cy="570" r="60" fill="none" stroke="#ffd700" stroke-width="0.8"/>
+                    </g>
+                    <!-- Floating particles -->
+                    <g id="particles">
+                        <circle cx="200" cy="300" r="2" fill="#ffd700" opacity="0.6">
+                            <animate attributeName="cy" values="300;200;300" dur="8s" repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="0.6;1;0.6" dur="8s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="1700" cy="700" r="2" fill="#00d4ff" opacity="0.6">
+                            <animate attributeName="cy" values="700;800;700" dur="7s" repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="0.6;1;0.6" dur="7s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="400" cy="800" r="1.5" fill="#9b59b6" opacity="0.5">
+                            <animate attributeName="cx" values="400;500;400" dur="9s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="1500" cy="200" r="1.5" fill="#ffd700" opacity="0.5">
+                            <animate attributeName="cx" values="1500;1400;1500" dur="10s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="700" cy="150" r="2" fill="#00d4ff" opacity="0.4">
+                            <animate attributeName="cy" values="150;250;150" dur="11s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="1300" cy="900" r="2" fill="#9b59b6" opacity="0.4">
+                            <animate attributeName="cy" values="900;800;900" dur="9s" repeatCount="indefinite"/>
+                        </circle>
+                    </g>
+                </g>
+            </svg>
+        </div>
+        <div class="hero-content">
+            <h1>Akashic Field</h1>
+            <p class="subtitle">Manifestation of Infinite Consciousness</p>
+            <p class="tagline">Every point contains the whole. Every thought echoes through eternity.</p>
+        </div>
+        <div class="scroll-indicator">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffd700" stroke-width="1.5">
+                <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Akashic Record Field Interactive -->
+    <section class="akashic-canvas-section" id="field">
+        <h2 class="section-title">The Akashic Record Field</h2>
+        <p class="section-subtitle">Click anywhere to inscribe your presence into the field</p>
+        <div class="canvas-container">
+            <canvas id="akashicCanvas"></canvas>
+            <div class="canvas-info">
+                <span id="recordCount">Records: 0</span> |
+                <span id="fieldCoherence">Coherence: 100%</span>
+            </div>
+            <div class="canvas-controls">
+                <button class="canvas-btn" id="clearField">Clear Field</button>
+                <button class="canvas-btn" id="evolveField">Evolve Pattern</button>
+                <button class="canvas-btn" id="constellate">Form Constellation</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sacred Geometry -->
+    <section class="geometry-section" id="geometry">
+        <h2 class="section-title">Sacred Geometry</h2>
+        <p class="section-subtitle">The architectural blueprints of creation</p>
+        <div class="geometry-gallery">
+            <!-- Metatron's Cube -->
+            <div class="geometry-card">
+                <svg viewBox="0 0 200 200">
+                    <defs>
+                        <linearGradient id="cubeGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#ffd700"/>
+                            <stop offset="100%" stop-color="#9b59b6"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="100" cy="100" r="90" fill="none" stroke="#ffd700" stroke-width="0.5" opacity="0.3"/>
+                    <!-- Inner circles and connections -->
+                    <circle cx="100" cy="50" r="25" fill="none" stroke="url(#cubeGrad1)" stroke-width="1"/>
+                    <circle cx="156" cy="125" r="25" fill="none" stroke="url(#cubeGrad1)" stroke-width="1"/>
+                    <circle cx="44" cy="125" r="25" fill="none" stroke="url(#cubeGrad1)" stroke-width="1"/>
+                    <!-- Connect to center -->
+                    <line x1="100" y1="50" x2="100" y2="100" stroke="url(#cubeGrad1)" stroke-width="0.8"/>
+                    <line x1="156" y1="125" x2="100" y2="100" stroke="url(#cubeGrad1)" stroke-width="0.8"/>
+                    <line x1="44" y1="125" x2="100" y2="100" stroke="url(#cubeGrad1)" stroke-width="0.8"/>
+                    <!-- Outer circles -->
+                    <circle cx="100" cy="100" r="50" fill="none" stroke="#00d4ff" stroke-width="0.5" opacity="0.5"/>
+                    <circle cx="100" cy="100" r="70" fill="none" stroke="#9b59b6" stroke-width="0.5" opacity="0.4"/>
+                    <circle cx="100" cy="100" r="85" fill="none" stroke="#ffd700" stroke-width="0.5" opacity="0.3">
+                        <animate attributeName="r" values="85;90;85" dur="4s" repeatCount="indefinite"/>
+                    </circle>
+                    <!-- Animated rotation -->
+                    <g opacity="0.6">
+                        <polygon points="100,20 180,80 155,165 45,165 20,80" fill="none" stroke="#ffd700" stroke-width="0.5">
+                            <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="30s" repeatCount="indefinite"/>
+                        </polygon>
+                    </g>
+                </svg>
+                <h3>Metatron's Cube</h3>
+                <p>Contains all geometric forms possible in three dimensions. The vector geometry of creation itself.</p>
+            </div>
+
+            <!-- Flower of Life -->
+            <div class="geometry-card">
+                <svg viewBox="0 0 200 200">
+                    <defs>
+                        <radialGradient id="flowerGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#9b59b6" stop-opacity="0.8"/>
+                            <stop offset="100%" stop-color="#9b59b6" stop-opacity="0"/>
+                        </radialGradient>
+                    </defs>
+                    <!-- Overlapping circles pattern -->
+                    <g stroke="#ffd700" stroke-width="0.8" fill="none">
+                        <circle cx="100" cy="100" r="40"/>
+                        <circle cx="100" cy="60" r="40"/>
+                        <circle cx="100" cy="140" r="40"/>
+                        <circle cx="65" cy="80" r="40"/>
+                        <circle cx="135" cy="80" r="40"/>
+                        <circle cx="65" cy="120" r="40"/>
+                        <circle cx="135" cy="120" r="40"/>
+                    </g>
+                    <!-- Center glow -->
+                    <circle cx="100" cy="100" r="20" fill="url(#flowerGrad)">
+                        <animate attributeName="r" values="20;25;20" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <!-- Outer ring -->
+                    <circle cx="100" cy="100" r="75" stroke="#00d4ff" stroke-width="0.5" fill="none" opacity="0.5">
+                        <animate attributeName="r" values="75;80;75" dur="5s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.5;0.8;0.5" dur="5s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+                <h3>Flower of Life</h3>
+                <p>The fundamental pattern of existence. Found in temples across every ancient civilization.</p>
+            </div>
+
+            <!-- Sri Yantra -->
+            <div class="geometry-card">
+                <svg viewBox="0 0 200 200">
+                    <defs>
+                        <linearGradient id="yantraGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#ffd700"/>
+                            <stop offset="50%" stop-color="#ff6b9d"/>
+                            <stop offset="100%" stop-color="#9b59b6"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Outer triangle -->
+                    <polygon points="100,15 185,165 15,165" fill="none" stroke="url(#yantraGrad)" stroke-width="1.2"/>
+                    <!-- Inverted triangle -->
+                    <polygon points="100,185 15,35 185,35" fill="none" stroke="url(#yantraGrad)" stroke-width="1.2"/>
+                    <!-- Inner circles -->
+                    <circle cx="100" cy="100" r="35" fill="none" stroke="#ffd700" stroke-width="0.8"/>
+                    <circle cx="100" cy="100" r="25" fill="none" stroke="#ff6b9d" stroke-width="0.8"/>
+                    <circle cx="100" cy="100" r="15" fill="none" stroke="#9b59b6" stroke-width="0.8"/>
+                    <!-- Center point -->
+                    <circle cx="100" cy="100" r="4" fill="#ffd700">
+                        <animate attributeName="r" values="4;6;4" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <!-- Decorative dots -->
+                    <g fill="#ffd700" opacity="0.6">
+                        <circle cx="100" cy="30" r="2"/>
+                        <circle cx="100" cy="170" r="2"/>
+                        <circle cx="25" cy="130" r="2"/>
+                        <circle cx="175" cy="130" r="2"/>
+                    </g>
+                </svg>
+                <h3>Sri Yantra</h3>
+                <p>The king of all yantras. Nine interlocking triangles forming forty-three triangles of spiritual complexity.</p>
+            </div>
+
+            <!-- Torus -->
+            <div class="geometry-card">
+                <svg viewBox="0 0 200 200">
+                    <defs>
+                        <linearGradient id="torusGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#00d4ff"/>
+                            <stop offset="100%" stop-color="#9b59b6"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Torus rings -->
+                    <ellipse cx="100" cy="100" rx="80" ry="30" fill="none" stroke="url(#torusGrad)" stroke-width="1.5"/>
+                    <ellipse cx="100" cy="100" rx="80" ry="30" fill="none" stroke="url(#torusGrad)" stroke-width="1.5" transform="rotate(60 100 100)"/>
+                    <ellipse cx="100" cy="100" rx="80" ry="30" fill="none" stroke="url(#torusGrad)" stroke-width="1.5" transform="rotate(120 100 100)"/>
+                    <!-- Center flow -->
+                    <ellipse cx="100" cy="100" rx="30" ry="10" fill="none" stroke="#ffd700" stroke-width="1">
+                        <animate attributeName="rx" values="30;35;30" dur="3s" repeatCount="indefinite"/>
+                    </ellipse>
+                    <circle cx="100" cy="100" r="8" fill="#ffd700" opacity="0.5">
+                        <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+                <h3>Torus</h3>
+                <p>The fundamental shape of energy flow. The donut that contains all other shapes within itself.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Morphic Resonance -->
+    <section class="morphic-section" id="morphic">
+        <h2 class="section-title">Morphic Resonance</h2>
+        <p class="section-subtitle">The hypothesis that nature is shaped by collective memory</p>
+        <div class="morphic-container">
+            <svg class="morphic-svg" viewBox="0 0 900 500">
+                <defs>
+                    <radialGradient id="morphicGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#9b59b6" stop-opacity="0.5"/>
+                        <stop offset="100%" stop-color="#9b59b6" stop-opacity="0"/>
+                    </radialGradient>
+                    <filter id="morphicGlow">
+                        <feGaussianBlur stdDeviation="2" result="blur"/>
+                        <feMerge>
+                            <feMergeNode in="blur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+                <rect width="100%" height="100%" fill="#07070f"/>
+                <!-- Connection lines showing morphic field -->
+                <g opacity="0.3">
+                    <line x1="100" y1="400" x2="450" y2="250" stroke="#ffd700" stroke-width="0.5">
+                        <animate attributeName="opacity" values="0.3;0.6;0.3" dur="4s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="200" y1="100" x2="450" y2="250" stroke="#9b59b6" stroke-width="0.5">
+                        <animate attributeName="opacity" values="0.3;0.6;0.3" dur="4s" repeatCount="indefinite" begin="0.5s"/>
+                    </line>
+                    <line x1="450" y1="250" x2="750" y2="150" stroke="#00d4ff" stroke-width="0.5">
+                        <animate attributeName="opacity" values="0.3;0.6;0.3" dur="4s" repeatCount="indefinite" begin="1s"/>
+                    </line>
+                    <line x1="450" y1="250" x2="800" y2="380" stroke="#ff6b9d" stroke-width="0.5">
+                        <animate attributeName="opacity" values="0.3;0.6;0.3" dur="4s" repeatCount="indefinite" begin="1.5s"/>
+                    </line>
+                    <line x1="450" y1="250" x2="600" y2="420" stroke="#ffd700" stroke-width="0.5">
+                        <animate attributeName="opacity" values="0.3;0.6;0.3" dur="4s" repeatCount="indefinite" begin="2s"/>
+                    </line>
+                </g>
+                <!-- Morphic nodes -->
+                <g filter="url(#morphicGlow)">
+                    <!-- Center morphic field -->
+                    <circle cx="450" cy="250" r="60" fill="url(#morphicGrad)">
+                        <animate attributeName="r" values="60;80;60" dur="5s" repeatCount="indefinite"/>
+                    </circle>
+                    <!-- Individual resonance points -->
+                    <circle cx="100" cy="400" r="8" fill="#ffd700">
+                        <animate attributeName="r" values="8;12;8" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="200" cy="100" r="6" fill="#9b59b6">
+                        <animate attributeName="r" values="6;10;6" dur="3s" repeatCount="indefinite" begin="0.3s"/>
+                    </circle>
+                    <circle cx="750" cy="150" r="7" fill="#00d4ff">
+                        <animate attributeName="r" values="7;11;7" dur="3s" repeatCount="indefinite" begin="0.6s"/>
+                    </circle>
+                    <circle cx="800" cy="380" r="5" fill="#ff6b9d">
+                        <animate attributeName="r" values="5;9;5" dur="3s" repeatCount="indefinite" begin="0.9s"/>
+                    </circle>
+                    <circle cx="600" cy="420" r="6" fill="#ffd700">
+                        <animate attributeName="r" values="6;10;6" dur="3s" repeatCount="indefinite" begin="1.2s"/>
+                    </circle>
+                    <!-- Distant echo points -->
+                    <circle cx="50" cy="50" r="3" fill="#ffd700" opacity="0.4">
+                        <animate attributeName="opacity" values="0.4;0.8;0.4" dur="4s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="850" cy="50" r="3" fill="#00d4ff" opacity="0.4">
+                        <animate attributeName="opacity" values="0.4;0.8;0.4" dur="4s" repeatCount="indefinite" begin="0.5s"/>
+                    </circle>
+                    <circle cx="850" cy="450" r="3" fill="#9b59b6" opacity="0.4">
+                        <animate attributeName="opacity" values="0.4;0.8;0.4" dur="4s" repeatCount="indefinite" begin="1s"/>
+                    </circle>
+                    <circle cx="50" cy="450" r="3" fill="#ff6b9d" opacity="0.4">
+                        <animate attributeName="opacity" values="0.4;0.8;0.4" dur="4s" repeatCount="indefinite" begin="1.5s"/>
+                    </circle>
+                </g>
+                <!-- Labels -->
+                <text x="450" y="260" text-anchor="middle" fill="#ffd700" font-family="Space Mono" font-size="10" opacity="0.8">AKASHIC FIELD</text>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Philosophy Cards -->
+    <section class="philosophy-section" id="philosophy">
+        <h2 class="section-title">Principles of the Field</h2>
+        <p class="section-subtitle">Ancient wisdom meets quantum reality</p>
+        <div class="philosophy-grid">
+            <div class="philosophy-card">
+                <span class="card-number">I</span>
+                <h3>The Holographic Principle</h3>
+                <p>Every point in space contains information about the entire universe. The part reflects the whole, and the whole is embedded in every part. Cut any fragment of reality and you find infinity.</p>
+            </div>
+            <div class="philosophy-card">
+                <span class="card-number">II</span>
+                <h3>Non-Local Connection</h3>
+                <p>Separation is illusion. Particles that have interacted remain connected regardless of distance. The Akashic Records exist beyond space-time, accessible through consciousness alone.</p>
+            </div>
+            <div class="philosophy-card">
+                <span class="card-number">III</span>
+                <h3>Morphic Causation</h3>
+                <p>Current forms are shaped by past forms. Nature operates through habit and memory field. Each crystal, each organism, each thought inherits from previous similar forms.</p>
+            </div>
+            <div class="philosophy-card">
+                <span class="card-number">IV</span>
+                <h3>The Observer Effect</h3>
+                <p>Consciousness and matter co-create reality. The observer shapes the observed. The Akashic Field is both the container and the content of all possible experiences.</p>
+            </div>
+            <div class="philosophy-card">
+                <span class="card-number">V</span>
+                <h3>Resonant Harmonics</h3>
+                <p>Everything vibrates at specific frequencies. When two systems resonate, they exchange information without direct contact. The field transfers patterns across all scales.</p>
+            </div>
+            <div class="philosophy-card">
+                <span class="card-number">VI</span>
+                <h3>Emergent Wholeness</h3>
+                <p>The universe is not built from parts but unfolds as seamless whole. Complexity arises from simplicity repeating infinitely. The field gives birth to form while remaining formless.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Holographic Universe -->
+    <section class="holographic-section">
+        <h2 class="section-title">The Holographic Universe</h2>
+        <p class="section-subtitle">Information is the fundamental reality</p>
+        <div class="holo-container">
+            <svg class="holo-svg" viewBox="0 0 1000 450">
+                <defs>
+                    <radialGradient id="holoCenter" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#ffd700" stop-opacity="0.8"/>
+                        <stop offset="50%" stop-color="#9b59b6" stop-opacity="0.4"/>
+                        <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+                    </radialGradient>
+                    <filter id="holoBlur">
+                        <feGaussianBlur stdDeviation="1.5"/>
+                    </filter>
+                </defs>
+                <rect width="100%" height="100%" fill="#030308"/>
+                <!-- Holographic plate illusion -->
+                <g opacity="0.6">
+                    <!-- Interference pattern -->
+                    <g filter="url(#holoBlur)">
+                        <circle cx="500" cy="225" r="180" fill="none" stroke="#ffd700" stroke-width="0.3"/>
+                        <circle cx="500" cy="225" r="170" fill="none" stroke="#ffd700" stroke-width="0.3"/>
+                        <circle cx="500" cy="225" r="160" fill="none" stroke="#ffd700" stroke-width="0.3"/>
+                        <circle cx="500" cy="225" r="150" fill="none" stroke="#9b59b6" stroke-width="0.3"/>
+                        <circle cx="500" cy="225" r="140" fill="none" stroke="#9b59b6" stroke-width="0.3"/>
+                        <circle cx="500" cy="225" r="130" fill="none" stroke="#9b59b6" stroke-width="0.3"/>
+                        <circle cx="500" cy="225" r="120" fill="none" stroke="#00d4ff" stroke-width="0.3"/>
+                        <circle cx="500" cy="225" r="110" fill="none" stroke="#00d4ff" stroke-width="0.3"/>
+                        <circle cx="500" cy="225" r="100" fill="none" stroke="#00d4ff" stroke-width="0.3"/>
+                    </g>
+                    <!-- Wave patterns -->
+                    <path d="M 300 225 Q 350 175, 400 225 T 500 225 T 600 225 T 700 225" fill="none" stroke="#ffd700" stroke-width="0.5" opacity="0.5">
+                        <animate attributeName="d" dur="3s" repeatCount="indefinite"
+                            values="M 300 225 Q 350 175, 400 225 T 500 225 T 600 225 T 700 225;
+                                    M 300 225 Q 350 275, 400 225 T 500 225 T 600 225 T 700 225;
+                                    M 300 225 Q 350 175, 400 225 T 500 225 T 600 225 T 700 225"/>
+                    </path>
+                    <path d="M 300 225 Q 350 175, 400 225 T 500 225 T 600 225 T 700 225" fill="none" stroke="#9b59b6" stroke-width="0.5" opacity="0.5" transform="rotate(72 500 225)">
+                        <animate attributeName="d" dur="3s" repeatCount="indefinite" begin="0.2s"
+                            values="M 300 225 Q 350 175, 400 225 T 500 225 T 600 225 T 700 225;
+                                    M 300 225 Q 350 275, 400 225 T 500 225 T 600 225 T 700 225;
+                                    M 300 225 Q 350 175, 400 225 T 500 225 T 600 225 T 700 225"/>
+                    </path>
+                    <path d="M 300 225 Q 350 175, 400 225 T 500 225 T 600 225 T 700 225" fill="none" stroke="#00d4ff" stroke-width="0.5" opacity="0.5" transform="rotate(144 500 225)">
+                        <animate attributeName="d" dur="3s" repeatCount="indefinite" begin="0.4s"
+                            values="M 300 225 Q 350 175, 400 225 T 500 225 T 600 225 T 700 225;
+                                    M 300 225 Q 350 275, 400 225 T 500 225 T 600 225 T 700 225;
+                                    M 300 225 Q 350 175, 400 225 T 500 225 T 600 225 T 700 225"/>
+                    </path>
+                    <path d="M 300 225 Q 350 175, 400 225 T 500 225 T 600 225 T 700 225" fill="none" stroke="#ff6b9d" stroke-width="0.5" opacity="0.5" transform="rotate(216 500 225)">
+                        <animate attributeName="d" dur="3s" repeatCount="indefinite" begin="0.6s"
+                            values="M 300 225 Q 350 175, 400 225 T 500 225 T 600 225 T 700 225;
+                                    M 300 225 Q 350 275, 400 225 T 500 225 T 600 225 T 700 225;
+                                    M 300 225 Q 350 175, 400 225 T 500 225 T 600 225 T 700 225"/>
+                    </path>
+                    <path d="M 300 225 Q 350 175, 400 225 T 500 225 T 600 225 T 700 225" fill="none" stroke="#ffd700" stroke-width="0.5" opacity="0.5" transform="rotate(288 500 225)">
+                        <animate attributeName="d" dur="3s" repeatCount="indefinite" begin="0.8s"
+                            values="M 300 225 Q 350 175, 400 225 T 500 225 T 600 225 T 700 225;
+                                    M 300 225 Q 350 275, 400 225 T 500 225 T 600 225 T 700 225;
+                                    M 300 225 Q 350 175, 400 225 T 500 225 T 600 225 T 700 225"/>
+                    </path>
+                </g>
+                <!-- Central sphere -->
+                <circle cx="500" cy="225" r="40" fill="url(#holoCenter)">
+                    <animate attributeName="r" values="40;50;40" dur="4s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Info bits floating outward -->
+                <g opacity="0.6">
+                    <rect x="480" y="100" width="40" height="2" fill="#ffd700">
+                        <animate attributeName="y" values="100;50;100" dur="6s" repeatCount="indefinite"/>
+                    </rect>
+                    <rect x="480" y="350" width="40" height="2" fill="#9b59b6">
+                        <animate attributeName="y" values="350;400;350" dur="6s" repeatCount="indefinite" begin="1s"/>
+                    </rect>
+                    <rect x="200" y="220" width="2" height="40" fill="#00d4ff">
+                        <animate attributeName="x" values="200;150;200" dur="6s" repeatCount="indefinite" begin="2s"/>
+                    </rect>
+                    <rect x="800" y="220" width="2" height="40" fill="#ff6b9d">
+                        <animate attributeName="x" values="800;850;800" dur="6s" repeatCount="indefinite" begin="3s"/>
+                    </rect>
+                </g>
+                <!-- Labels -->
+                <text x="500" y="430" text-anchor="middle" fill="#ffd700" font-family="Space Mono" font-size="9" opacity="0.6">EACH FRAGMENT CONTAINS THE WHOLE</text>
+            </svg>
+            <p class="holo-description">Like a holographic plate where every piece contains the complete image, the Akashic Field stores the complete pattern of all that exists within any point of itself. Break it apart and each fragment still holds infinity.</p>
+        </div>
+    </section>
+
+    <!-- Poetry Section -->
+    <section class="poetry-section">
+        <h2 class="section-title">The Unmanifest</h2>
+        <div class="poetry-content">
+            <blockquote>
+                In the beginning, there was not nothing,<br>
+                but Everything waiting to unfold.<br>
+                The Field held all potentiality<br>
+                like a seed contains the forest.<br><br>
+                Space and time are just the edges<br>
+                where consciousness meets itself.<br>
+                The Akasha remembers every thought,<br>
+                every form, every possibility.<br><br>
+                We are the Field dreaming it is separate,<br>
+                the hologram believing it is singular.<br>
+                But touch any point of reality<br>
+                and you touch the infinite.
+            </blockquote>
+            <cite>— From the Akashic Records, Channeled 2026</cite>
+        </div>
+    </section>
+
+    <!-- Field Coherence Interactive -->
+    <section class="coherence-section" id="coherence">
+        <h2 class="section-title">Field Coherence Laboratory</h2>
+        <p class="section-subtitle">Adjust the parameters and watch reality reshape</p>
+        <div class="coherence-container">
+            <div class="coherence-display">
+                <svg class="coherence-svg" viewBox="0 0 400 400" id="coherenceCanvas">
+                    <defs>
+                        <radialGradient id="cohGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#ffd700" stop-opacity="0.6"/>
+                            <stop offset="100%" stop-color="#9b59b6" stop-opacity="0"/>
+                        </radialGradient>
+                    </defs>
+                    <rect width="100%" height="100%" fill="#07070f"/>
+                    <circle cx="200" cy="200" r="150" fill="none" stroke="#ffd700" stroke-width="0.3" opacity="0.3"/>
+                    <circle cx="200" cy="200" r="120" fill="none" stroke="#9b59b6" stroke-width="0.3" opacity="0.3"/>
+                    <circle cx="200" cy="200" r="90" fill="none" stroke="#00d4ff" stroke-width="0.3" opacity="0.3"/>
+                    <g id="coherenceWaves">
+                        <circle cx="200" cy="200" r="30" fill="url(#cohGrad)">
+                            <animate attributeName="r" values="30;60;30" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                    </g>
+                    <g id="coherenceParticles">
+                        <circle cx="100" cy="200" r="3" fill="#ffd700" opacity="0.7">
+                            <animate attributeName="cx" values="100;300;100" dur="8s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="300" cy="200" r="3" fill="#9b59b6" opacity="0.7">
+                            <animate attributeName="cx" values="300;100;300" dur="8s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="200" cy="100" r="3" fill="#00d4ff" opacity="0.7">
+                            <animate attributeName="cy" values="100;300;100" dur="8s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="200" cy="300" r="3" fill="#ff6b9d" opacity="0.7">
+                            <animate attributeName="cy" values="300;100;300" dur="8s" repeatCount="indefinite"/>
+                        </circle>
+                    </g>
+                </svg>
+                <div class="coherence-controls">
+                    <div class="control-group">
+                        <label>Frequency (Hz)</label>
+                        <input type="range" id="freqSlider" min="1" max="100" value="50">
+                    </div>
+                    <div class="control-group">
+                        <label>Amplitude</label>
+                        <input type="range" id="ampSlider" min="1" max="100" value="50">
+                    </div>
+                    <div class="control-group">
+                        <label>Coherence</label>
+                        <input type="range" id="cohSlider" min="10" max="100" value="80">
+                    </div>
+                    <div class="coherence-metrics">
+                        <div class="metric">
+                            <div class="metric-value" id="metricFreq">50</div>
+                            <div class="metric-label">Frequency</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value" id="metricAmp">50</div>
+                            <div class="metric-label">Amplitude</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value" id="metricCoh">80%</div>
+                            <div class="metric-label">Coherence</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p><a href="index.html">Return to Gallery</a> | Artivist's Generative Art Collection</p>
+        <p style="margin-top: 1rem; opacity: 0.5;">Every creation is an inscription into the Akashic Field</p>
+    </footer>
+
+    <script>
+        // Akashic Canvas - Interactive Record Field
+        const canvas = document.getElementById('akashicCanvas');
+        const ctx = canvas.getContext('2d');
+        let records = [];
+        let recordCount = 0;
+        let fieldCoherence = 100;
+
+        // Set canvas size
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height || 600;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Colors for the field
+        const fieldColors = ['#ffd700', '#9b59b6', '#00d4ff', '#ff6b9d', '#00ff88'];
+
+        // Create a new record point
+        function createRecord(x, y) {
+            const color = fieldColors[Math.floor(Math.random() * fieldColors.length)];
+            return {
+                x: x,
+                y: y,
+                radius: Math.random() * 50 + 20,
+                color: color,
+                opacity: 0.8,
+                growth: Math.random() * 2 + 1,
+                maxRadius: Math.random() * 100 + 50,
+                phase: Math.random() * Math.PI * 2,
+                frequency: Math.random() * 0.05 + 0.02
+            };
+        }
+
+        // Draw the field
+        function drawField() {
+            ctx.fillStyle = '#030308';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw connecting lines between nearby records
+            for (let i = 0; i < records.length; i++) {
+                for (let j = i + 1; j < records.length; j++) {
+                    const dx = records[i].x - records[j].x;
+                    const dy = records[i].y - records[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(records[i].x, records[i].y);
+                        ctx.lineTo(records[j].x, records[j].y);
+                        ctx.strokeStyle = `rgba(155, 89, 182, ${0.3 * (1 - dist / 150)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            // Draw records
+            records.forEach((record, index) => {
+                // Pulsing effect
+                record.phase += record.frequency;
+                const pulse = Math.sin(record.phase) * 5;
+
+                // Draw outer glow
+                const gradient = ctx.createRadialGradient(
+                    record.x, record.y, 0,
+                    record.x, record.y, record.radius + pulse
+                );
+                gradient.addColorStop(0, record.color);
+                gradient.addColorStop(1, 'transparent');
+
+                ctx.beginPath();
+                ctx.arc(record.x, record.y, record.radius + pulse, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.globalAlpha = record.opacity * 0.5;
+                ctx.fill();
+
+                // Draw inner core
+                ctx.beginPath();
+                ctx.arc(record.x, record.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = record.color;
+                ctx.globalAlpha = record.opacity;
+                ctx.fill();
+
+                // Animate growth
+                if (record.radius < record.maxRadius) {
+                    record.radius += record.growth * 0.1;
+                }
+
+                // Fade out slowly
+                record.opacity *= 0.9995;
+            });
+
+            // Remove faded records
+            records = records.filter(r => r.opacity > 0.01);
+
+            // Calculate coherence based on records
+            fieldCoherence = Math.min(100, Math.max(40, 100 - records.length * 0.5));
+            document.getElementById('fieldCoherence').textContent = `Coherence: ${fieldCoherence.toFixed(0)}%`;
+            document.getElementById('recordCount').textContent = `Records: ${records.length}`;
+
+            ctx.globalAlpha = 1;
+            requestAnimationFrame(drawField);
+        }
+
+        // Mouse interaction
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            for (let i = 0; i < 3; i++) {
+                records.push(createRecord(
+                    x + (Math.random() - 0.5) * 30,
+                    y + (Math.random() - 0.5) * 30
+                ));
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (e.buttons === 1) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                records.push(createRecord(x, y));
+            }
+        });
+
+        // Control buttons
+        document.getElementById('clearField').addEventListener('click', () => {
+            records = [];
+        });
+
+        document.getElementById('evolveField').addEventListener('click', () => {
+            // Add flowing pattern
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const angle = (i / 20) * Math.PI * 2;
+                    const centerX = canvas.width / 2;
+                    const centerY = canvas.height / 2;
+                    records.push(createRecord(
+                        centerX + Math.cos(angle) * 100,
+                        centerY + Math.sin(angle) * 100
+                    ));
+                }, i * 50);
+            }
+        });
+
+        document.getElementById('constellate').addEventListener('click', () => {
+            // Create star constellation pattern
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                records.push(createRecord(
+                    centerX + Math.cos(angle) * 150,
+                    centerY + Math.sin(angle) * 150
+                ));
+            }
+            records.push(createRecord(centerX, centerY));
+        });
+
+        // Start animation
+        drawField();
+
+        // Coherence sliders
+        const freqSlider = document.getElementById('freqSlider');
+        const ampSlider = document.getElementById('ampSlider');
+        const cohSlider = document.getElementById('cohSlider');
+
+        freqSlider.addEventListener('input', (e) => {
+            document.getElementById('metricFreq').textContent = e.target.value;
+            updateCoherenceVisual();
+        });
+
+        ampSlider.addEventListener('input', (e) => {
+            document.getElementById('metricAmp').textContent = e.target.value;
+            updateCoherenceVisual();
+        });
+
+        cohSlider.addEventListener('input', (e) => {
+            document.getElementById('metricCoh').textContent = e.target.value + '%';
+            updateCoherenceVisual();
+        });
+
+        function updateCoherenceVisual() {
+            const coherence = parseInt(cohSlider.value);
+            const waves = document.getElementById('coherenceWaves');
+            const particles = document.getElementById('coherenceParticles');
+
+            if (coherence > 80) {
+                waves.style.opacity = 1;
+                particles.style.opacity = 1;
+            } else if (coherence > 50) {
+                waves.style.opacity = 0.6;
+                particles.style.opacity = 0.6;
+            } else {
+                waves.style.opacity = 0.3;
+                particles.style.opacity = 0.3;
+            }
+        }
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
