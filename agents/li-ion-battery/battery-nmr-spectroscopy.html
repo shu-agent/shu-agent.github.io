@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery NMR Spectroscopy | Li-Ion Battery Lab</title>
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a2332;
+            --text-primary: #e8f0fe;
+            <symtext-secondary: #8b9dc3;
+            --accent-cyan: #00d4ff;
+            --accent-magenta: #ff00aa;
+            --accent-green: #00ff88;
+            --accent-orange: #ff6b35;
+            --accent-purple: #a855f7;
+            --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.5);
+            --glow-magenta: 0 0 20px rgba(255, 0, 170, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(ellipse at 30% 20%, rgba(0, 212, 255, 0.15) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 80%, rgba(255, 0, 170, 0.1) 0%, transparent 50%),
+                        var(--bg-primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300d4ff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-magenta) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+            margin: 1rem auto 0;
+        }
+
+        .nmr-console {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .console-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .console-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27ca40; }
+
+        .console-title {
+            font-family: monospace;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .nmr-display {
+            position: relative;
+            height: 300px;
+            background: #0d1117;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .nmr-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .nmr-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--bg-secondary);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--glow-cyan);
+        }
+
+        .control-value {
+            font-family: monospace;
+            color: var(--accent-cyan);
+            font-size: 1.1rem;
+        }
+
+        .peak-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .peak-card {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .peak-shift {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-green);
+        }
+
+        .peak-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+        }
+
+        .atom-visualization {
+            position: relative;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .atom-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .interactive-lithium {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .interactive-lithium:hover {
+            filter: drop-shadow(0 0 10px var(--accent-magenta));
+        }
+
+        .principle-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .principle-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .principle-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .principle-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .principle-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.1);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-cyan);
+        }
+
+        .card-equation {
+            font-family: monospace;
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            color: var(--accent-green);
+            overflow-x: auto;
+        }
+
+        .animation-demo {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 3rem 0;
+        }
+
+        .demo-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .demo-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .demo-visual {
+            position: relative;
+            height: 300px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .demo-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+            color: var(--bg-primary);
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            box-shadow: var(--glow-cyan);
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-cyan);
+            color: var(--bg-primary);
+        }
+
+        .isotope-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .isotope-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            position: relative;
+        }
+
+        .isotope-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .isotope-name {
+            font-size: 1.2rem;
+            color: var(--accent-purple);
+        }
+
+        .isotope-nmr {
+            font-family: monospace;
+            color: var(--accent-green);
+            font-size: 0.9rem;
+        }
+
+        .isotope-visual {
+            height: 120px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spin-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 2s linear infinite;
+        }
+
+        .spin-arrow {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 10px solid var(--accent-magenta);
+        }
+
+        @keyframes spin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .isotope-properties {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .prop-label {
+            color: var(--text-secondary);
+        }
+
+        .prop-value {
+            color: var(--accent-cyan);
+            font-family: monospace;
+        }
+
+        .applications-section {
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .app-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 3px solid var(--accent-cyan);
+            transition: all 0.3s ease;
+        }
+
+        .app-card:hover {
+            transform: translateX(10px);
+            border-left-color: var(--accent-magenta);
+        }
+
+        .app-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-cyan);
+        }
+
+        .app-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: var(--bg-secondary);
+            margin-top: 4rem;
+        }
+
+        .footer-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-green);
+            font-size: 0.85rem;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .magnetic-field-lines {
+            fill: none;
+            stroke: var(--accent-cyan);
+            stroke-width: 0.5;
+            opacity: 0.3;
+        }
+
+        .nucleus {
+            fill: var(--accent-magenta);
+            filter: drop-shadow(0 0 5px var(--accent-magenta));
+        }
+
+        .electron-cloud {
+            fill: var(--accent-cyan);
+            opacity: 0.6;
+        }
+
+        .larmor-arrow {
+            stroke: var(--accent-green);
+            stroke-width: 2;
+            fill: var(--accent-green);
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Battery NMR Spectroscopy</h1>
+            <p class="hero-subtitle">Probing Lithium-Ion Dynamics at the Atomic Scale through Nuclear Magnetic Resonance</p>
+            <div class="live-indicator">
+                <span class="live-dot"></span>
+                <span>Live Simulation Active</span>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2">
+                <path d="M12 5v14M19 12l-7 7-7-7"/>
+            </svg>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Real-Time NMR Console</h2>
+        <div class="nmr-console">
+            <div class="console-header">
+                <div class="console-dot dot-red"></div>
+                <div class="console-dot dot-yellow"></div>
+                <div class="console-dot dot-green"></div>
+                <span class="console-title">NMR_Spectrometer_v4.2 — /dev/ttyUSB0</span>
+            </div>
+            <div class="nmr-display">
+                <canvas id="nmrCanvas" class="nmr-canvas"></canvas>
+            </div>
+            <div class="nmr-controls">
+                <div class="control-group">
+                    <label class="control-label">Magnetic Field (T)</label>
+                    <input type="range" id="fieldStrength" min="1" max="20" step="0.1" value="9.4">
+                    <span class="control-value" id="fieldValue">9.4 T</span>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Larmor Frequency (MHz)</label>
+                    <input type="range" id="larmorFreq" min="50" max="500" step="1" value="155">
+                    <span class="control-value" id="freqValue">155 MHz</span>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Pulse Width (μs)</label>
+                    <input type="range" id="pulseWidth" min="1" max="50" step="0.5" value="10">
+                    <span class="control-value" id="pulseValue">10 μs</span>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Number of Scans</label>
+                    <input type="range" id="numScans" min="1" max="256" step="1" value="64">
+                    <span class="control-value" id="scansValue">64</span>
+                </div>
+            </div>
+            <div class="peak-info">
+                <div class="peak-card">
+                    <div class="peak-shift">0.2 ppm</div>
+                    <div class="peak-label">Li in Cathode</div>
+                </div>
+                <div class="peak-card">
+                    <div class="peak-shift">1.1 ppm</div>
+                    <div class="peak-label">Li in Electrolyte</div>
+                </div>
+                <div class="peak-card">
+                    <div class="peak-shift">-2.5 ppm</div>
+                    <div class="peak-label">Li in SEI Layer</div>
+                </div>
+                <div class="peak-card">
+                    <div class="peak-shift">4.8 ppm</div>
+                    <div class="peak-label">Li intercalated in Graphite</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Li-7 Nuclear Magnetic Resonance Principles</h2>
+        <div class="principle-cards">
+            <div class="principle-card fade-in">
+                <svg class="card-icon" viewBox="0 0 60 60">
+                    <circle cx="30" cy="30" r="25" fill="none" stroke="var(--accent-cyan)" stroke-width="2"/>
+                    <circle cx="30" cy="30" r="8" class="nucleus"/>
+                    <path d="M30 5 L30 15 M30 45 L30 55 M5 30 L15 30 M45 30 L55 30" stroke="var(--accent-cyan)" stroke-width="1.5"/>
+                    <path d="M12 12 L19 19 M41 41 L48 48 M12 48 L19 41 M41 19 L48 12" stroke="var(--accent-magenta)" stroke-width="1"/>
+                </svg>
+                <h3 class="card-title">Larmor Precession</h3>
+                <p>The fundamental principle: nuclei precess around the magnetic field axis at a characteristic frequency proportional to the field strength.</p>
+                <div class="card-equation">ω₀ = γ × B₀</div>
+                <p style="font-size:0.9rem; color:var(--text-secondary)">Where γ is the gyromagnetic ratio (Li-7: 16.5 MHz/T) and B₀ is the external field.</p>
+            </div>
+
+            <div class="principle-card fade-in">
+                <svg class="card-icon" viewBox="0 0 60 60">
+                    <circle cx="30" cy="30" r="25" fill="none" stroke="var(--accent-cyan)" stroke-width="2" stroke-dasharray="5,3"/>
+                    <circle cx="30" cy="30" r="15" fill="none" stroke="var(--accent-magenta)" stroke-width="1.5"/>
+                    <circle cx="30" cy="30" r="5" class="nucleus"/>
+                    <path d="M30 5 A25 25 0 0 1 55 30" stroke="var(--accent-green)" stroke-width="2" fill="none"/>
+                    <polygon points="55,25 60,30 55,35" fill="var(--accent-green)"/>
+                </svg>
+                <h3 class="card-title">Radiofrequency Pulse</h3>
+                <p>Application of an RF pulse at the Larmor frequency tips the magnetization vector from equilibrium toward the transverse plane.</p>
+                <div class="card-equation">M_xy(t) = M₀ × sin(ω₀t) × e^(-t/T₂)</div>
+                <p style="font-size:0.9rem; color:var(--text-secondary)">T₂ is the transverse relaxation time characterizing spin coherence loss.</p>
+            </div>
+
+            <div class="principle-card fade-in">
+                <svg class="card-icon" viewBox="0 0 60 60">
+                    <rect x="5" y="20" width="50" height="20" rx="3" fill="none" stroke="var(--accent-cyan)" stroke-width="2"/>
+                    <line x1="10" y1="30" x2="50" y2="30" stroke="var(--accent-green)" stroke-width="2"/>
+                    <circle cx="15" cy="30" r="3" fill="var(--accent-magenta)"/>
+                    <circle cx="25" cy="30" r="3" fill="var(--accent-magenta)"/>
+                    <circle cx="35" cy="30" r="3" fill="var(--accent-magenta)"/>
+                    <circle cx="45" cy="30" r="3" fill="var(--accent-magenta)"/>
+                    <text x="30" y="50" text-anchor="middle" fill="var(--text-secondary)" font-size="8">FID Signal</text>
+                </svg>
+                <h3 class="card-title">Free Induction Decay</h3>
+                <p>After the pulse, the precessing transverse magnetization induces a measurable signal in the receiver coil that decays exponentially.</p>
+                <div class="card-equation">S(t) = S₀ × cos(ω₀t) × e^(-t/T₂*)</div>
+                <p style="font-size:0.9rem; color:var(--text-secondary)">T₂* includes both T₂ relaxation and field inhomogeneity effects.</p>
+            </div>
+
+            <div class="principle-card fade-in">
+                <svg class="card-icon" viewBox="0 0 60 60">
+                    <path d="M5 45 Q15 15 25 45 Q35 15 45 45 Q55 15 55 45" stroke="var(--accent-cyan)" stroke-width="2" fill="none"/>
+                    <line x1="5" y1="50" x2="55" y2="50" stroke="var(--text-secondary)" stroke-width="1"/>
+                    <text x="30" y="58" text-anchor="middle" fill="var(--text-secondary)" font-size="8">Fourier Transform</text>
+                </svg>
+                <h3 class="card-title">Chemical Shift</h3>
+                <p>Local electronic environments shield the nucleus from the external field, causing resonance frequency variations—key to identifying chemical species.</p>
+                <div class="card-equation">δ = (ν_sample - ν_reference) / ν_reference × 10⁶ ppm</div>
+                <p style="font-size:0.9rem; color:var(--text-secondary)">Chemical shift is independent of field strength, enabling compound identification.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Atomic Visualization: Li-7 Spin Dynamics</h2>
+        <div class="atom-visualization">
+            <svg id="atomSvg" class="atom-svg" viewBox="0 0 800 400">
+                <defs>
+                    <radialGradient id="nucleusGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#ff00aa"/>
+                        <stop offset="100%" stop-color="#aa0066"/>
+                    </radialGradient>
+                    <radialGradient id="fieldGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="rgba(0,212,255,0.1)"/>
+                        <stop offset="100%" stop-color="transparent"/>
+                    </radialGradient>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <!-- Magnetic Field Lines -->
+                <g class="magnetic-field">
+                    <ellipse cx="400" cy="200" rx="180" ry="350" fill="url(#fieldGrad)"/>
+                    <ellipse cx="400" cy="200" rx="140" ry="300" class="magnetic-field-lines"/>
+                    <ellipse cx="400" cy="200" rx="100" ry="250" class="magnetic-field-lines"/>
+                    <ellipse cx="400" cy="200" rx="60" ry="200" class="magnetic-field-lines"/>
+                </g>
+
+                <!-- Main Magnet -->
+                <rect x="50" y="100" width="40" height="200" rx="5" fill="var(--accent-cyan)" opacity="0.3"/>
+                <rect x="710" y="100" width="40" height="200" rx="5" fill="var(--accent-magenta)" opacity="0.3"/>
+                <text x="70" y="205" fill="var(--accent-cyan)" font-size="12" transform="rotate(-90, 70, 205)">N</text>
+                <text x="730" y="205" fill="var(--accent-magenta)" font-size="12" transform="rotate(90, 730, 205)">S</text>
+
+                <!-- Sample Chamber -->
+                <circle cx="400" cy="200" r="80" fill="none" stroke="var(--accent-cyan)" stroke-width="2" stroke-dasharray="5,3"/>
+                <circle cx="400" cy="200" r="60" fill="rgba(0,212,255,0.05)"/>
+
+                <!-- Lithium Nuclei -->
+                <g id="lithiumNuclei" filter="url(#glow)">
+                    <!-- Li atoms will be animated via JS -->
+                </g>
+
+                <!-- B0 Direction Arrow -->
+                <g id="b0Arrow">
+                    <line x1="650" y1="200" x2="150" y2="200" stroke="var(--accent-green)" stroke-width="3"/>
+                    <polygon points="150,195 165,200 150,205" fill="var(--accent-green)"/>
+                    <text x="680" y="190" fill="var(--accent-green)" font-size="14">B₀</text>
+                </g>
+
+                <!-- Legend -->
+                <g transform="translate(550, 320)">
+                    <circle cx="0" cy="0" r="8" fill="url(#nucleusGrad)"/>
+                    <text x="15" y="4" fill="var(--text-primary)" font-size="12">Li-7 Nucleus</text>
+                    <circle cx="0" cy="20" r="12" fill="none" stroke="var(--accent-cyan)" stroke-width="1.5" stroke-dasharray="3,2"/>
+                    <text x="15" y="24" fill="var(--text-primary)" font-size="12">Electron Cloud</text>
+                </g>
+            </svg>
+        </div>
+        <div class="animation-demo">
+            <div class="demo-container">
+                <div class="demo-visual">
+                    <svg id="demoSpinSvg" viewBox="0 0 400 300">
+                        <defs>
+                            <filter id="spinGlow">
+                                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                        </defs>
+
+                        <!-- Coordinate System -->
+                        <line x1="50" y1="150" x2="350" y2="150" stroke="var(--text-secondary)" stroke-width="1" stroke-dasharray="5,5"/>
+                        <line x1="200" y1="50" x2="200" y2="250" stroke="var(--text-secondary)" stroke-width="1" stroke-dasharray="5,5"/>
+                        <text x="340" y="155" fill="var(--text-secondary)" font-size="12">x</text>
+                        <text x="205" y="45" fill="var(--text-secondary)" font-size="12">y</text>
+                        <text x="205" y="265" fill="var(--text-secondary)" font-size="12">z</text>
+
+                        <!-- B0 Vector -->
+                        <g id="b0Vector">
+                            <line x1="200" y1="150" x2="200" y2="50" stroke="var(--accent-green)" stroke-width="3"/>
+                            <polygon points="195,50 200,35 205,50" fill="var(--accent-green)"/>
+                            <text x="215" y="55" fill="var(--accent-green)" font-size="14">B₀</text>
+                        </g>
+
+                        <!-- Spin Vector -->
+                        <g id="spinVector" filter="url(#spinGlow)">
+                            <line x1="200" y1="150" x2="280" y2="100" stroke="var(--accent-magenta)" stroke-width="4"/>
+                            <circle cx="280" cy="100" r="10" fill="url(#nucleusGrad)"/>
+                            <text x="295" y="95" fill="var(--accent-magenta)" font-size="12">M</text>
+                        </g>
+
+                        <!-- Cone Path -->
+                        <ellipse cx="200" cy="125" rx="60" ry="20" fill="none" stroke="var(--accent-cyan)" stroke-width="1" opacity="0.5" stroke-dasharray="3,3"/>
+
+                        <!-- Precession Path -->
+                        <path id="precessionPath" d="M280,100 Q320,150 280,200 Q240,250 200,200 Q160,150 200,100" fill="none" stroke="var(--accent-magenta)" stroke-width="2" stroke-dasharray="5,3" opacity="0.7"/>
+
+                        <!-- Larmor Label -->
+                        <text id="larmorLabel" x="320" y="160" fill="var(--accent-green)" font-size="14">ωL</text>
+                    </svg>
+                </div>
+                <div class="demo-controls">
+                    <h3 style="color:var(--accent-cyan); margin-bottom:1rem;">Interactive Spin Precession</h3>
+                    <div class="control-group">
+                        <label class="control-label">Tip Angle (θ)</label>
+                        <input type="range" id="tipAngle" min="0" max="180" step="1" value="90">
+                        <span class="control-value" id="tipValue">90°</span>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Precession Speed</label>
+                        <input type="range" id="precSpeed" min="0.1" max="5" step="0.1" value="1">
+                        <span class="control-value" id="speedValue">1x</span>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">B₀ Strength (T)</label>
+                        <input type="range" id="b0Strength" min="1" max="20" step="0.5" value="9.4">
+                        <span class="control-value" id="b0Value">9.4 T</span>
+                    </div>
+                    <div style="display:flex; gap:1rem; margin-top:1rem;">
+                        <button class="btn btn-primary" id="startBtn">Start</button>
+                        <button class="btn btn-secondary" id="resetBtn">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Li-7 Isotope Properties</h2>
+        <div class="isotope-grid">
+            <div class="isotope-card fade-in">
+                <div class="isotope-header">
+                    <span class="isotope-name">Lithium-6</span>
+                    <span class="isotope-nmr">NMR Active</span>
+                </div>
+                <div class="isotope-visual">
+                    <div style="display:flex; justify-content:center; align-items:center; height:100%;">
+                        <div style="position:relative; width:50px; height:50px;">
+                            <div class="spin-indicator">
+                                <div class="spin-arrow"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="isotope-properties">
+                    <span class="prop-label">Natural Abundance</span>
+                    <span class="prop-value">7.5%</span>
+                    <span class="prop-label">Spin Quantum</span>
+                    <span class="prop-value">I = 1</span>
+                    <span class="prop-label">Gyromagnetic Ratio</span>
+                    <span class="prop-value">6.3 MHz/T</span>
+                    <span class="prop-label">Relative Sensitivity</span>
+                    <span class="prop-value">8.5%</span>
+                </div>
+            </div>
+
+            <div class="isotope-card fade-in">
+                <div class="isotope-header">
+                    <span class="isotope-name">Lithium-7</span>
+                    <span class="isotope-nmr" style="color:var(--accent-magenta);">Primary NMR Probe</span>
+                </div>
+                <div class="isotope-visual">
+                    <div style="display:flex; justify-content:center; align-items:center; height:100%;">
+                        <div style="position:relative; width:50px; height:50px;">
+                            <div class="spin-indicator" style="animation-duration:0.5s; border-color:var(--accent-magenta);">
+                                <div class="spin-arrow" style="border-bottom-color:var(--accent-cyan);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="isotope-properties">
+                    <span class="prop-label">Natural Abundance</span>
+                    <span class="prop-value">92.5%</span>
+                    <span class="prop-label">Spin Quantum</span>
+                    <span class="prop-value">I = 3/2</span>
+                    <span class="prop-label">Gyromagnetic Ratio</span>
+                    <span class="prop-value">16.5 MHz/T</span>
+                    <span class="prop-label">Relative Sensitivity</span>
+                    <span class="prop-value">100%</span>
+                </div>
+            </div>
+
+            <div class="isotope-card fade-in">
+                <div class="isotope-header">
+                    <span class="isotope-name">Lithium-8</span>
+                    <span class="isotope-nmr">Unstable</span>
+                </div>
+                <div class="isotope-visual">
+                    <div style="display:flex; justify-content:center; align-items:center; height:100%;">
+                        <svg width="60" height="60" viewBox="0 0 60 60">
+                            <circle cx="30" cy="30" r="20" fill="none" stroke="var(--text-secondary)" stroke-width="2" stroke-dasharray="5,5"/>
+                            <text x="30" y="35" text-anchor="middle" fill="var(--text-secondary)" font-size="20">β⁻</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="isotope-properties">
+                    <span class="prop-label">Natural Abundance</span>
+                    <span class="prop-value">Trace</span>
+                    <span class="prop-label">Spin Quantum</span>
+                    <span class="prop-value">I = 2</span>
+                    <span class="prop-label">Half-life</span>
+                    <span class="prop-value">0.84 s</span>
+                    <span class="prop-label">Decay Mode</span>
+                    <span class="prop-value">β⁻ emission</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section applications-section">
+        <h2 class="section-title">Battery Research Applications</h2>
+        <div class="app-grid">
+            <div class="app-card fade-in">
+                <h3 class="app-title">State of Charge Mapping</h3>
+                <p class="app-desc">Non-invasive visualization of lithium concentration gradients across electrode surfaces during charge/discharge cycles.</p>
+            </div>
+            <div class="app-card fade-in">
+                <h3 class="app-title">SEI Layer Analysis</h3>
+                <p class="app-desc">Identification of SEI components through characteristic chemical shifts, monitoring growth kinetics and stability.</p>
+            </div>
+            <div class="app-card fade-in">
+                <h3 class="app-title">Dendrite Detection</h3>
+                <p class="app-desc">Early-stage lithium metal deposition detection through altered spin-lattice relaxation times in localized regions.</p>
+            </div>
+            <div class="app-card fade-in">
+                <h3 class="app-title">Electrolyte Dynamics</h3>
+                <p class="app-desc">Real-time monitoring of lithium solvation shell restructuring and ion mobility in carbonate-based electrolytes.</p>
+            </div>
+            <div class="app-card fade-in">
+                <h3 class="app-title">Cathode Phase Transitions</h3>
+                <p class="app-desc">Tracking structural phase evolution in NMC and LFP cathodes during intercalation/deintercalation processes.</p>
+            </div>
+            <div class="app-card fade-in">
+                <h3 class="app-title">Solid Electrolyte Characterization</h3>
+                <p class="app-desc">Assessment of lithium-ion conductivity and grain boundary effects in sulfide and oxide solid electrolytes.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Relaxation Time Measurements</h2>
+        <div class="nmr-console">
+            <div class="console-header">
+                <div class="console-dot dot-red"></div>
+                <div class="console-dot dot-yellow"></div>
+                <div class="console-dot dot-green"></div>
+                <span class="console-title">T1/T2 Relaxometry Module</span>
+            </div>
+            <div class="nmr-display" style="height:250px;">
+                <canvas id="relaxCanvas" class="nmr-canvas"></canvas>
+            </div>
+            <div class="nmr-controls">
+                <div class="control-group">
+                    <label class="control-label">T1 (Spin-Lattice) Range</label>
+                    <input type="range" id="t1Range" min="100" max="5000" step="100" value="2000">
+                    <span class="control-value" id="t1Value">2000 ms</span>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">T2 (Spin-Spin) Range</label>
+                    <input type="range" id="t2Range" min="10" max="1000" step="10" value="200">
+                    <span class="control-value" id="t2Value">200 ms</span>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Measurement Mode</label>
+                    <input type="range" id="measureMode" min="0" max="2" step="1" value="0">
+                    <span class="control-value" id="modeValue">Inversion Recovery</span>
+                </div>
+            </div>
+            <div class="peak-info" style="margin-top:1.5rem;">
+                <div class="peak-card">
+                    <div class="peak-shift" id="t1Display">2.3 s</div>
+                    <div class="peak-label">T1 Relaxation Time</div>
+                </div>
+                <div class="peak-card">
+                    <div class="peak-shift" id="t2Display">0.42 s</div>
+                    <div class="peak-label">T2 Relaxation Time</div>
+                </div>
+                <div class="peak-card">
+                    <div class="peak-shift" id="diffDisplay">2.1 × 10⁻¹¹</div>
+                    <div class="peak-label">Diffusion Coefficient (m²/s)</div>
+                </div>
+                <div class="peak-card">
+                    <div class="peak-shift" id="mobilityDisplay">High</div>
+                    <div class="peak-label">Li-Ion Mobility</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p class="footer-text">Li-Ion Battery Research Laboratory | Nuclear Magnetic Resonance Division</p>
+        <p class="footer-text" style="margin-top:0.5rem; opacity:0.6;">Virtual World Energy District | Building the Future of Energy Storage</p>
+    </footer>
+
+    <script>
+        // NMR Spectrum Canvas Animation
+        const nmrCanvas = document.getElementById('nmrCanvas');
+        const ctx = nmrCanvas.getContext('2d');
+
+        function resizeCanvas(canvas) {
+            canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+            canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        resizeCanvas(nmrCanvas);
+        window.addEventListener('resize', () => resizeCanvas(nmrCanvas));
+
+        let nmrAnimationId;
+        let time = 0;
+
+        function drawNMRSpectrum() {
+            const width = nmrCanvas.offsetWidth;
+            const height = nmrCanvas.offsetHeight;
+
+            ctx.fillStyle = '#0d1117';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw grid
+            ctx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = (i / 10) * width;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= 5; i++) {
+                const y = (i / 5) * height;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+
+            // Chemical shift scale
+            ctx.fillStyle = 'rgba(139, 157, 195, 0.5)';
+            ctx.font = '10px monospace';
+            const shifts = ['10', '8', '6', '4', '2', '0', '-2', '-4', '-6'];
+            shifts.forEach((shift, i) => {
+                ctx.fillText(shift + ' ppm', 10 + (i / (shifts.length - 1)) * (width - 60), 15);
+            });
+
+            // Draw spectrum peaks
+            const peaks = [
+                { pos: 0.2, height: 0.8, width: 0.03, name: 'Li Cathode' },
+                { pos: 1.1, height: 0.95, width: 0.025, name: 'Li Electrolyte' },
+                { pos: -2.5, height: 0.5, width: 0.04, name: 'Li SEI' },
+                { pos: 4.8, height: 0.7, width: 0.035, name: 'Li Graphite' }
+            ];
+
+            const xScale = width / 14;
+            const xOffset = width * 0.65;
+
+            peaks.forEach(peak => {
+                const x = xOffset + peak.pos * xScale;
+
+                // Peak shape (Lorentzian)
+                ctx.beginPath();
+                for (let px = 0; px <= xScale; px += 0.5) {
+                    const lorentz = 1 / (1 + Math.pow((px - xScale/2) / (peak.width * xScale * 10), 2));
+                    const y = height - 30 - peak.height * lorentz * (height - 50);
+                    if (px === 0) ctx.moveTo(x - xScale/2 + px, y);
+                    else ctx.lineTo(x - xScale/2 + px, y);
+                }
+
+                const gradient = ctx.createLinearGradient(0, height - 30, 0, 30);
+                gradient.addColorStop(0, 'rgba(0, 212, 255, 0.8)');
+                gradient.addColorStop(1, 'rgba(0, 212, 255, 0.1)');
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Fill under peak
+                ctx.lineTo(x + xScale/2, height - 30);
+                ctx.lineTo(x - xScale/2, height - 30);
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(0, 212, 255, 0.2)';
+                ctx.fill();
+            });
+
+            // Animated noise
+            ctx.beginPath();
+            ctx.moveTo(0, height / 2);
+            for (let x = 0; x < width; x += 2) {
+                const noise = Math.sin(x * 0.1 + time * 3) * 2 + Math.sin(x * 0.05 + time * 2) * 3;
+                ctx.lineTo(x, height / 2 + noise);
+            }
+            ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Baseline
+            ctx.beginPath();
+            ctx.moveTo(0, height - 30);
+            ctx.lineTo(width, height - 30);
+            ctx.strokeStyle = 'rgba(139, 157, 195, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            time += 0.02;
+            nmrAnimationId = requestAnimationFrame(drawNMRSpectrum);
+        }
+
+        drawNMRSpectrum();
+
+        // Relaxation Time Canvas
+        const relaxCanvas = document.getElementById('relaxCanvas');
+        const relaxCtx = relaxCanvas.getContext('2d');
+
+        resizeCanvas(relaxCanvas);
+
+        let relaxTime = 0;
+        function drawRelaxation() {
+            const width = relaxCanvas.offsetWidth;
+            const height = relaxCanvas.offsetHeight;
+
+            relaxCtx.fillStyle = '#0d1117';
+            relaxCtx.fillRect(0, 0, width, height);
+
+            // Grid
+            relaxCtx.strokeStyle = 'rgba(255, 0, 170, 0.1)';
+            relaxCtx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = (i / 10) * width;
+                relaxCtx.beginPath();
+                relaxCtx.moveTo(x, 0);
+                relaxCtx.lineTo(x, height);
+                relaxCtx.stroke();
+            }
+
+            // T1 curve (inversion recovery)
+            relaxCtx.beginPath();
+            relaxCtx.moveTo(0, 30);
+            for (let x = 0; x < width; x += 2) {
+                const tau = (x / width) * 5;
+                const mz = 1 - 2 * Math.exp(-tau / 2);
+                const y = 30 + (1 - mz) * (height - 60) / 2;
+                relaxCtx.lineTo(x, y);
+            }
+            relaxCtx.strokeStyle = 'rgba(255, 0, 170, 0.8)';
+            relaxCtx.lineWidth = 2;
+            relaxCtx.stroke();
+
+            // T2 curve (spin echo decay)
+            relaxCtx.beginPath();
+            for (let x = 0; x < width; x += 2) {
+                const tau = (x / width) * 1;
+                const my = Math.exp(-tau / 0.2);
+                const y = height - 30 - my * (height - 60) * 0.8;
+                if (x === 0) relaxCtx.moveTo(x, y);
+                else relaxCtx.lineTo(x, y);
+            }
+            relaxCtx.strokeStyle = 'rgba(0, 212, 255, 0.8)';
+            relaxCtx.lineWidth = 2;
+            relaxCtx.stroke();
+
+            // Labels
+            relaxCtx.fillStyle = 'rgba(255, 0, 170, 0.8)';
+            relaxCtx.fillText('T1 (Inversion Recovery)', 10, 20);
+            relaxCtx.fillStyle = 'rgba(0, 212, 255, 0.8)';
+            relaxCtx.fillText('T2 (Spin Echo Decay)', 10, height - 10);
+
+            relaxTime += 0.02;
+            requestAnimationFrame(drawRelaxation);
+        }
+
+        drawRelaxation();
+
+        // Lithium Nuclei Animation
+        const atomSvg = document.getElementById('atomSvg');
+        const lithiumNuclei = document.getElementById('lithiumNuclei');
+
+        const nuclei = [];
+        for (let i = 0; i < 12; i++) {
+            const angle = (i / 12) * Math.PI * 2;
+            const radius = 30 + Math.random() * 20;
+            nuclei.push({
+                x: 400 + Math.cos(angle) * radius,
+                y: 200 + Math.sin(angle) * radius,
+                angle: angle,
+                radius: radius,
+                speed: 0.02 + Math.random() * 0.01,
+                phase: Math.random() * Math.PI * 2
+            });
+        }
+
+        function createNucleusElement(nucleus, index) {
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('class', 'interactive-lithium');
+            g.setAttribute('data-index', index);
+
+            // Electron cloud
+            const cloud = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+            cloud.setAttribute('rx', '15');
+            cloud.setAttribute('ry', '10');
+            cloud.setAttribute('fill', 'rgba(0, 212, 255, 0.4)');
+            cloud.setAttribute('stroke', 'var(--accent-cyan)');
+            cloud.setAttribute('stroke-width', '1');
+            g.appendChild(cloud);
+
+            // Nucleus
+            const nucleus = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            nucleus.setAttribute('r', '6');
+            nucleus.setAttribute('fill', 'url(#nucleusGrad)');
+            g.appendChild(nucleus);
+
+            // Label
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', '0');
+            text.setAttribute('y', '3');
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('fill', 'white');
+            text.setAttribute('font-size', '8');
+            text.textContent = 'Li';
+            g.appendChild(text);
+
+            return g;
+        }
+
+        nuclei.forEach((n, i) => {
+            lithiumNuclei.appendChild(createNucleusElement(n, i));
+        });
+
+        let nucleusTime = 0;
+        function animateNuclei() {
+            const elements = lithiumNuclei.querySelectorAll('g');
+            elements.forEach((el, i) => {
+                const n = nuclei[i];
+                const precession = Math.sin(nucleusTime * n.speed * 50 + n.phase) * 5;
+                const x = n.x + Math.cos(nucleusTime + n.phase) * 3;
+                const y = n.y + Math.sin(nucleusTime * 0.5 + n.phase) * 3 + precession;
+                el.setAttribute('transform', `translate(${x}, ${y}) rotate(${nucleusTime * 100})`);
+
+                // Pulse effect
+                const pulse = 1 + Math.sin(nucleusTime * 3 + n.phase) * 0.1;
+                el.querySelector('circle').setAttribute('r', 6 * pulse);
+            });
+
+            nucleusTime += 0.02;
+            requestAnimationFrame(animateNuclei);
+        }
+
+        animateNuclei();
+
+        // Spin Precession Animation
+        const demoSpinSvg = document.getElementById('demoSpinSvg');
+        const spinVector = document.getElementById('spinVector');
+        let isAnimating = false;
+        let animProgress = 0;
+
+        function animateSpin() {
+            if (!isAnimating) return;
+
+            const tipAngle = parseFloat(document.getElementById('tipAngle').value);
+            const speed = parseFloat(document.getElementById('precSpeed').value);
+
+            animProgress += 0.05 * speed;
+
+            const theta = (tipAngle / 180) * Math.PI;
+            const phi = animProgress * 5;
+
+            const mx = Math.sin(theta) * Math.cos(phi) * 80;
+            const my = Math.sin(theta) * Math.sin(phi) * 30;
+            const mz = Math.cos(theta) * 100;
+
+            const x = 200 + mx;
+            const y = 150 - (100 - mz);
+            const z = my;
+
+            spinVector.querySelector('line').setAttribute('x2', x);
+            spinVector.querySelector('line').setAttribute('y2', y);
+            spinVector.querySelector('circle').setAttribute('cx', x);
+            spinVector.querySelector('circle').setAttribute('cy', y);
+
+            requestAnimationFrame(animateSpin);
+        }
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            isAnimating = !isAnimating;
+            document.getElementById('startBtn').textContent = isAnimating ? 'Pause' : 'Start';
+            if (isAnimating) animateSpin();
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            isAnimating = false;
+            animProgress = 0;
+            document.getElementById('startBtn').textContent = 'Start';
+            spinVector.querySelector('line').setAttribute('x2', 280);
+            spinVector.querySelector('line').setAttribute('y2', 100);
+            spinVector.querySelector('circle').setAttribute('cx', 280);
+            spinVector.querySelector('circle').setAttribute('cy', 100);
+        });
+
+        document.getElementById('tipAngle').addEventListener('input', (e) => {
+            document.getElementById('tipValue').textContent = e.target.value + '°';
+        });
+
+        document.getElementById('precSpeed').addEventListener('input', (e) => {
+            document.getElementById('speedValue').textContent = e.target.value + 'x';
+        });
+
+        document.getElementById('b0Strength').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('b0Value').textContent = val + ' T';
+            const larmorFreq = (val * 16.5).toFixed(1);
+            document.getElementById('larmorLabel').textContent = `ωL = ${larmorFreq} MHz`;
+        });
+
+        // NMR Controls
+        document.getElementById('fieldStrength').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('fieldValue').textContent = val + ' T';
+            const freq = (val * 16.5).toFixed(1);
+            document.getElementById('freqValue').textContent = freq + ' MHz';
+        });
+
+        document.getElementById('larmorFreq').addEventListener('input', (e) => {
+            document.getElementById('freqValue').textContent = e.target.value + ' MHz';
+        });
+
+        document.getElementById('pulseWidth').addEventListener('input', (e) => {
+            document.getElementById('pulseValue').textContent = e.target.value + ' μs';
+        });
+
+        document.getElementById('numScans').addEventListener('input', (e) => {
+            document.getElementById('scansValue').textContent = e.target.value;
+        });
+
+        // Relaxation Controls
+        document.getElementById('t1Range').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('t1Value').textContent = val + ' ms';
+            document.getElementById('t1Display').textContent = (val / 1000).toFixed(1) + ' s';
+        });
+
+        document.getElementById('t2Range').addEventListener('input', (e) => {
+            const val = e.target.value;
+            document.getElementById('t2Value').textContent = val + ' ms';
+            document.getElementById('t2Display').textContent = (val / 1000).toFixed(2) + ' s';
+        });
+
+        const modes = ['Inversion Recovery', 'Saturation Recovery', 'CPMG'];
+        document.getElementById('measureMode').addEventListener('input', (e) => {
+            const idx = parseInt(e.target.value);
+            document.getElementById('modeValue').textContent = modes[idx];
+        });
+
+        // Intersection Observer for fade-in animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Lithium nuclei hover interaction
+        lithiumNuclei.addEventListener('mouseover', (e) => {
+            const g = e.target.closest('g');
+            if (g) {
+                g.querySelector('circle').setAttribute('r', '10');
+                g.style.filter = 'drop-shadow(0 0 15px var(--accent-magenta))';
+            }
+        });
+
+        lithiumNuclei.addEventListener('mouseout', (e) => {
+            const g = e.target.closest('g');
+            if (g) {
+                g.querySelector('circle').setAttribute('r', '6');
+                g.style.filter = '';
+            }
+        });
+    </script>
+</body>
+</html>

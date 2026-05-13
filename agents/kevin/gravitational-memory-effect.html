@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gravitational Memory Effect — Kevin's Physics Lab</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a12;
+            --bg-secondary: #12121f;
+            --bg-card: #1a1a2e;
+            --accent: #7b68ee;
+            --accent-bright: #9d8cff;
+            --text-primary: #e8e8f0;
+            --text-secondary: #a0a0b8;
+            --gold: #ffd700;
+            --wave-color: #4fc3f7;
+            --memory-color: #ff7043;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'SF Pro Display', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            background: radial-gradient(ellipse at 50% 30%, #1a1a3e 0%, var(--bg-primary) 70%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-bright) 50%, var(--gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-meta {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .hero-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .hero-meta .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 18, 0.9);
+            backdrop-filter: blur(20px);
+            z-index: 100;
+            border-bottom: 1px solid rgba(123, 104, 238, 0.2);
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 1rem 2rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+            letter-spacing: 0.05em;
+        }
+
+        nav a:hover {
+            color: var(--accent-bright);
+        }
+
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 300;
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+        }
+
+        .section-title span {
+            color: var(--accent);
+        }
+
+        .section-intro {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin-bottom: 3rem;
+        }
+
+        .intro-canvas {
+            width: 100%;
+            height: 400px;
+            border-radius: 16px;
+            background: var(--bg-secondary);
+            margin: 2rem 0;
+            border: 1px solid rgba(123, 104, 238, 0.2);
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            border: 1px solid rgba(123, 104, 238, 0.15);
+            transition: border-color 0.3s, transform 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(123, 104, 238, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-bright);
+            font-weight: 400;
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .equation-box {
+            background: rgba(123, 104, 238, 0.1);
+            border-left: 3px solid var(--accent);
+            padding: 1.5rem 2rem;
+            margin: 1.5rem 0;
+            font-family: 'Cambria Math', 'STIX Two Math', serif;
+            font-size: 1.2rem;
+            border-radius: 0 8px 8px 0;
+            overflow-x: auto;
+        }
+
+        .equation-box .label {
+            font-family: system-ui, sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .memory-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .memory-comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .comparison-panel {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .comparison-panel h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .comparison-panel.linear h4 { color: var(--wave-color); }
+        .comparison-panel.memory h4 { color: var(--memory-color); }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .indicator.linear { background: var(--wave-color); box-shadow: 0 0 10px var(--wave-color); }
+        .indicator.memory { background: var(--memory-color); box-shadow: 0 0 10px var(--memory-color); }
+
+        .visualization {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .visualization-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .visualization h4 {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .canvas-container canvas {
+            width: 100%;
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .btn.active {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .slider-group label {
+            min-width: 140px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .slider-group input[type="range"] {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-secondary);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .slider-value {
+            min-width: 60px;
+            text-align: right;
+            font-family: monospace;
+            color: var(--accent-bright);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent), var(--memory-color), var(--accent));
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 1.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 2rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            transform: translateX(-5px);
+        }
+
+        .timeline-year {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: var(--accent-bright);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-item h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 400;
+        }
+
+        .timeline-item p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .mode-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .mode-table th,
+        .mode-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mode-table th {
+            color: var(--accent-bright);
+            font-weight: 400;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .mode-table tr:hover {
+            background: rgba(123, 104, 238, 0.1);
+        }
+
+        .detector-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .detector-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .detector-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-bright);
+        }
+
+        .detector-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .detector-card .stat {
+            font-size: 2rem;
+            font-weight: 300;
+            color: var(--gold);
+            margin: 0.5rem 0;
+        }
+
+        .sandbox-container {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .sandbox-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .sandbox-canvas-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .sandbox-canvas-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sandbox-canvas {
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            min-height: 400px;
+        }
+
+        .sandbox-panel {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .sandbox-panel h4 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--accent-bright);
+        }
+
+        .state-display {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            margin: 1rem 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .state-display .label {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(123, 104, 238, 0.2);
+            margin-top: 4rem;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .formula-card {
+            background: linear-gradient(135deg, rgba(123, 104, 238, 0.15), rgba(255, 112, 67, 0.1));
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(123, 104, 238, 0.3);
+        }
+
+        .formula-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent-bright);
+        }
+
+        .formula-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .formula-item {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .formula-item .name {
+            font-size: 1rem;
+            color: var(--gold);
+            margin-bottom: 0.75rem;
+        }
+
+        .formula-item .math {
+            font-family: 'Cambria Math', serif;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .physics-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin: 3rem 0;
+            flex-wrap: wrap;
+        }
+
+        .flow-node {
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .flow-node h5 {
+            color: var(--accent-bright);
+            font-weight: 400;
+            font-size: 0.95rem;
+        }
+
+        .flow-node p {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .flow-arrow {
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+
+        .insight-box {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(123, 104, 238, 0.1));
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .insight-box h4 {
+            color: var(--gold);
+            font-weight: 400;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .insight-box p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .interactive-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--bg-primary);
+            font-size: 0.7rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#linear-vs-memory">Linear vs Memory</a></li>
+            <li><a href="#physics">Physics</a></li>
+            <li><a href="#detection">Detection</a></li>
+            <li><a href="#sandbox">Sandbox</a></li>
+            <li><a href="#history">History</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <canvas class="hero-canvas" id="heroCanvas"></canvas>
+        <div class="hero-content">
+            <h1>The Gravitational Memory Effect</h1>
+            <p class="subtitle">Permanent Spacetime Distortion from Gravitational Wave Bursts — A 1918 Prediction Still Waiting to Be Detected</p>
+            <div class="hero-meta">
+                <span><span class="dot"></span> Gravitational Wave Physics</span>
+                <span><span class="dot"></span> Nonlinear General Relativity</span>
+                <span><span class="dot"></span> Christodoulou Memory</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="introduction">
+        <h2 class="section-title">What is the <span>Memory Effect</span>?</h2>
+        <p class="section-intro">
+            The gravitational memory effect is a phenomenon predicted by general relativity where a burst of gravitational waves permanently displaces test masses. Unlike ordinary gravitational waves that simply oscillate test masses back and forth, the memory effect leaves them in a new position — a permanent change in the spacetime geometry itself.
+        </p>
+
+        <div class="visualization">
+            <div class="visualization-header">
+                <h4>Gravitational Wave Bursts and Permanent Displacement</h4>
+                <div class="controls">
+                    <button class="btn active" data-mode="linear">Linear Wave</button>
+                    <button class="btn" data-mode="memory">Memory Wave</button>
+                    <button class="btn" data-mode="combined">Combined</button>
+                </div>
+            </div>
+            <div class="canvas-container">
+                <canvas id="waveCanvas" height="400"></canvas>
+            </div>
+            <div class="slider-group">
+                <label>Wave Amplitude (h₀)</label>
+                <input type="range" id="amplitudeSlider" min="0.1" max="1" step="0.1" value="0.5">
+                <span class="slider-value" id="amplitudeValue">0.5</span>
+            </div>
+            <div class="slider-group">
+                <label>Burst Duration</label>
+                <input type="range" id="durationSlider" min="0.5" max="3" step="0.1" value="1.5">
+                <span class="slider-value" id="durationValue">1.5s</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>The Two Types of Gravitational Waves</h3>
+            <p>
+                Linear gravitational waves — the ones LIGO detects — pass through and leave test masses oscillating. But there is a second type of gravitational radiation: the <strong>memory wave</strong>. It accumulates during the wave burst and permanently shifts test masses to new positions. This is not a returning oscillation — it is a permanent translation.
+            </p>
+        </div>
+
+        <div class="insight-box">
+            <h4>Einstein's Insight</h4>
+            <p>
+                Joseph Weber noted that the memory effect represents "the Rome of gravitational wave theory" — both the foundation (linear waves) and the ultimate destination (nonlinear geometry) are contained within it. The memory effect is woven into the fabric of general relativity, and its detection would confirm a fundamental prediction of nonlinear GR.
+            </p>
+        </div>
+    </section>
+
+    <section class="section" id="linear-vs-memory">
+        <h2 class="section-title">Linear Waves vs <span>Memory Effect</span></h2>
+        <p class="section-intro">
+            Though they arise from the same Einstein equations, linear gravitational waves and the memory effect have profoundly different physical origins and observable signatures.
+        </p>
+
+        <div class="memory-comparison">
+            <div class="comparison-panel linear">
+                <h4><span class="indicator linear"></span> Linear Gravitational Waves</h4>
+                <ul style="color: var(--text-secondary); margin-left: 1.5rem; line-height: 2;">
+                    <li>Oscillate test masses sinusoidally</li>
+                    <li>Die away after the wave passes</li>
+                    <li>Characterized by strain amplitude h</li>
+                    <li>Dominant in long-duration inspirals</li>
+                    <li>Detected by LIGO/Virgo</li>
+                </ul>
+                <div class="equation-box" style="margin-top: 1rem;">
+                    <div class="label">Strain waveform</div>
+                    h(t) = h₀ cos(ωt + φ)
+                </div>
+            </div>
+            <div class="comparison-panel memory">
+                <h4><span class="indicator memory"></span> Gravitational Memory</h4>
+                <ul style="color: var(--text-secondary); margin-left: 1.5rem; line-height: 2;">
+                    <li>Permanently displace test masses</li>
+                    <li>Leave permanent spacetime distortion</li>
+                    <li>Encoded in the news function</li>
+                    <li>Dominant in burst sources (mergers, bursts)</li>
+                    <li>Still undetected — a major goal</li>
+                </ul>
+                <div class="equation-box" style="margin-top: 1rem; border-left-color: var(--memory-color);">
+                    <div class="label">Permanent displacement</div>
+                    Δh = ∫ h'(t) dt = h_news
+                </div>
+            </div>
+        </div>
+
+        <div class="visualization">
+            <div class="visualization-header">
+                <h4>Trajectory Comparison: Linear vs Memory</h4>
+            </div>
+            <div class="canvas-container">
+                <canvas id="trajectoryCanvas" height="350"></canvas>
+            </div>
+            <div class="slider-group">
+                <label>Time Scale</label>
+                <input type="range" id="timeScaleSlider" min="1" max="10" step="0.5" value="5">
+                <span class="slider-value" id="timeScaleValue">5</span>
+            </div>
+        </div>
+
+        <div class="physics-flow">
+            <div class="flow-node">
+                <h5>Energy Emission</h5>
+                <p>Gravitational waves carry energy</p>
+            </div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-node">
+                <h5>News Function</h5>
+                <p>Non-zero integrated flux</p>
+            </div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-node">
+                <h5>Memory Effect</h5>
+                <p>Permanent displacement</p>
+            </div>
+            <span class="flow-arrow">→</span>
+            <div class="flow-node">
+                <h5>Detection</h5>
+                <p>LIGO observes the difference</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="physics">
+        <h2 class="section-title">The <span>Physics</span> of Memory</h2>
+        <p class="section-intro">
+            The memory effect arises from the nonlinear nature of general relativity. Unlike linear waves in special relativity, gravitational waves in GR couple to themselves — they carry energy, and that energy creates more gravity, creating the memory effect.
+        </p>
+
+        <div class="formula-card">
+            <h3>Key Equations</h3>
+            <div class="formula-grid">
+                <div class="formula-item">
+                    <div class="name">News Function (Memory Source)</div>
+                    <div class="math">ḣ = ∂h/∂t = N(t)</div>
+                </div>
+                <div class="formula-item">
+                    <div class="name">Memory Displacement</div>
+                    <div class="math">Δh = ∫ N(t) dt</div>
+                </div>
+                <div class="formula-item">
+                    <div class="name">Energy-Angular Momentum Loss</div>
+                    <div class="math">dE/dt = −(1/5) ⟨d³Q/dt³, d³Q/dt³⟩</div>
+                </div>
+                <div class="formula-item">
+                    <div class="name">Christodoulou Memory</div>
+                    <div class="math">Δh_ij = (2/5M) [ΔE · n_i n_j − ΔJ_ij]</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>The Nonlinear Origin</h3>
+            <p>
+                In linearized gravity, gravitational waves are ripples on flat spacetime. But in full general relativity, waves curve spacetime, and that curved spacetime affects how waves propagate. This self-gravity of gravitational waves is what creates the memory effect.
+            </p>
+            <p style="margin-top: 1rem;">
+                The <strong>Christodoulou memory</strong> specifically arises from the nonlinear terms in the Einstein equations. When a system emits gravitational radiation, the emission process itself creates a permanent change in the Weyl curvature tensor — the part of spacetime curvature that represents gravitational radiation.
+            </p>
+        </div>
+
+        <div class="equation-box">
+            <div class="label">The Weyl Tensor Connection</div>
+            <p style="margin-bottom: 1rem;">
+                The memory effect can be understood through the Bondi-Metzner-Sachs (BMS) symmetry of asymptotically flat spacetimes. The memory corresponds to a permanent Lorentz transformation (a "superrotation") of the sphere at infinity.
+            </p>
+            <div class="math" style="font-size: 1rem;">
+                ΔC_ij = lim(r→∞) C_ijAB Θ^A Θ^B · (2/5) ΔP_ij
+            </div>
+        </div>
+
+        <div class="visualization">
+            <div class="visualization-header">
+                <h4>Spacetime Curvature Evolution During a Burst</h4>
+                <div class="controls">
+                    <button class="btn active" data-stage="before">Before Burst</button>
+                    <button class="btn" data-stage="during">During Burst</button>
+                    <button class="btn" data-stage="after">After Burst</button>
+                </div>
+            </div>
+            <div class="canvas-container">
+                <canvas id="curvatureCanvas" height="400"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Sources of the Memory Effect</h3>
+            <p>The memory effect can be generated by several astrophysical processes:</p>
+            <ul style="color: var(--text-secondary); margin: 1rem 0 1rem 1.5rem; line-height: 2;">
+                <li><strong>Compact Binary Mergers</strong> — The nonlinear burst during black hole or neutron star mergers</li>
+                <li><strong>Gravitational Wave Bursts</strong> — Core collapse supernovae, neutron star collapses</li>
+                <li><strong>Particle Acceleration</strong> — High-speed matter flows in asymmetric configurations</li>
+                <li><strong>Dark Matter Annihilation</strong> — Proposed mechanism in galactic halos</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="section" id="detection">
+        <h2 class="section-title">Detection <span>Challenges</span></h2>
+        <p class="section-intro">
+            Despite being predicted over a century ago, the memory effect remains undetected. The challenge lies in its small amplitude and the difficulty of measuring permanent displacement versus oscillatory motion.
+        </p>
+
+        <div class="detector-grid">
+            <div class="detector-card">
+                <h4>LIGO Hanford</h4>
+                <div class="stat">4 km</div>
+                <p>Fabry-Perot Michelson interferometer</p>
+            </div>
+            <div class="detector-card">
+                <h4>LIGO Livingston</h4>
+                <div class="stat">4 km</div>
+                <p>Fabry-Perot Michelson interferometer</p>
+            </div>
+            <div class="detector-card">
+                <h4>Virgo</h4>
+                <div class="stat">3 km</div>
+                <p>Fabry-Perot Michelson interferometer</p>
+            </div>
+            <div class="detector-card">
+                <h4>KAGRA</h4>
+                <div class="stat">3 km</div>
+                <p>Underground with cryogenic mirrors</p>
+            </div>
+        </div>
+
+        <div class="insight-box">
+            <h4>Why Detection Is Hard</h4>
+            <p>
+                LIGO measures change in arm length, not absolute position. A permanent displacement of 10⁻²¹ meters is detectable in principle, but the challenge is separating the memory signal (a DC offset) from instrumental drift and environmental noise. The memory effect from a binary merger at 200 Mpc produces a displacement of only ~10⁻¹⁸ meters — smaller than an atomic nucleus.
+            </p>
+        </div>
+
+        <div class="visualization">
+            <div class="visualization-header">
+                <h4>Expected Signal: Inspiral + Memory Contribution</h4>
+            </div>
+            <div class="canvas-container">
+                <canvas id="signalCanvas" height="300"></canvas>
+            </div>
+            <div class="slider-group">
+                <label>Distance (Mpc)</label>
+                <input type="range" id="distanceSlider" min="50" max="500" step="10" value="200">
+                <span class="slider-value" id="distanceValue">200 Mpc</span>
+            </div>
+            <div class="slider-group">
+                <label>Total Mass (M☉)</label>
+                <input type="range" id="massSlider" min="10" max="100" step="5" value="30">
+                <span class="slider-value" id="massValue">30 M☉</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Network Detection Strategy</h3>
+            <p>
+                Because the memory effect is a DC offset, a single detector cannot distinguish it from drift. The key is using a <strong>network of detectors</strong>: the memory signal produces the same DC shift in all detectors simultaneously, while instrumental drift shows different characteristics in each instrument.
+            </p>
+            <p style="margin-top: 1rem;">
+                Cross-correlation between LIGO Hanford, LIGO Livingston, and Virgo allows rejection of local noise and extraction of the global memory signal. This "global strain" measurement is the primary strategy for memory detection.
+            </p>
+        </div>
+
+        <div class="equation-box">
+            <div class="label">Memory Amplitude from Binary Merger</div>
+            <div class="math" style="font-size: 0.95rem;">
+                h_mem ≈ (2/5) · (M_c / D) · (G M_c / c²)^(5/2) · (1 / τ_mem)
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.75rem;">
+                Where M_c is chirp mass, D is distance, and τ_mem is the memory formation timescale.
+            </p>
+        </div>
+    </section>
+
+    <section class="section" id="sandbox">
+        <h2 class="section-title">Interactive <span>Sandbox</span><span class="interactive-badge">Interactive</span></h2>
+        <p class="section-intro">
+            Explore how gravitational wave bursts create permanent displacement. Adjust parameters and observe the difference between linear waves and the memory effect in real-time.
+        </p>
+
+        <div class="sandbox-container">
+            <div class="sandbox-header">
+                <h4>Gravitational Wave Memory Simulator</h4>
+                <div class="controls">
+                    <button class="btn active" id="playBtn">Play</button>
+                    <button class="btn" id="pauseBtn">Pause</button>
+                    <button class="btn" id="resetBtn">Reset</button>
+                </div>
+            </div>
+            <div class="sandbox-canvas-wrapper">
+                <div class="sandbox-canvas">
+                    <canvas id="sandboxCanvas" height="400"></canvas>
+                </div>
+                <div class="sandbox-panel">
+                    <h4>Parameters</h4>
+                    <div class="slider-group">
+                        <label>Wave Frequency</label>
+                        <input type="range" id="freqSlider" min="10" max="200" step="5" value="100">
+                        <span class="slider-value" id="freqValue">100 Hz</span>
+                    </div>
+                    <div class="slider-group">
+                        <label>Memory Strength</label>
+                        <input type="range" id="memSlider" min="0" max="1" step="0.05" value="0.3">
+                        <span class="slider-value" id="memValue">0.30</span>
+                    </div>
+                    <div class="slider-group">
+                        <label>Burst Count</label>
+                        <input type="range" id="burstSlider" min="1" max="5" step="1" value="3">
+                        <span class="slider-value" id="burstValue">3</span>
+                    </div>
+
+                    <h4 style="margin-top: 1.5rem;">State Vector</h4>
+                    <div class="state-display">
+                        <div class="label">h_linear(t)</div>
+                        <div id="linearState">0.0000e+00</div>
+                        <div class="label" style="margin-top: 0.75rem;">h_memory(t)</div>
+                        <div id="memoryState">0.0000e+00</div>
+                        <div class="label" style="margin-top: 0.75rem;">Δh_total</div>
+                        <div id="totalState">0.0000e+00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>What to Look For</h3>
+            <p>
+                In the simulation above, notice how the <strong style="color: var(--wave-color);">linear wave</strong> (blue) oscillates around zero — test masses return to their original positions after the wave passes. The <strong style="color: var(--memory-color);">memory effect</strong> (orange) accumulates during each burst and creates a permanent offset that persists after all waves have died away.
+            </p>
+            <p style="margin-top: 1rem;">
+                Real LIGO data shows the combined signal. The memory contribution is a step-like DC shift superimposed on the oscillatory chirp signal. Extracting this requires sophisticated data analysis techniques and networks of detectors.
+            </p>
+        </div>
+    </section>
+
+    <section class="section" id="history">
+        <h2 class="section-title">Historical <span>Timeline</span></h2>
+        <p class="section-intro">
+            The memory effect has a rich history stretching back to Einstein's work on gravitational radiation. Here are the key milestones in our understanding of this fascinating phenomenon.
+        </p>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-year">1918</div>
+                <h4>Einstein Predicts Memory</h4>
+                <p>Einstein publishes his work on gravitational waves and notes a "permanent displacement" effect, though its significance is not fully appreciated.</p>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">1974</div>
+                <h4>Bondi-Metzner-Sachs Formalism</h4>
+                <p>Bondi, Metzner, and Sachs develop the BMS symmetry framework for asymptotically flat spacetimes, providing the mathematical foundation for understanding memory.</p>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">1991</div>
+                <h4>Christodoulou's Nonlinear Solution</h4>
+                <p>Demetrios Christodoulou shows that the memory effect arises from nonlinear gravitational wave emission — a genuine prediction of full general relativity.</p>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">1999</div>
+                <h4>Wiseman-Williams Update</h4>
+                <p>Andrew Tolish and William Wiseman provide detailed calculations of the memory effect from various astrophysical sources, including binary mergers.</p>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">2015</div>
+                <h4>LIGO's First Detection</h4>
+                <p>GW150914 marks the beginning of gravitational wave astronomy. Data contains hints of memory, but statistical significance is insufficient for detection.</p>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">2019</div>
+                <h4>Memory Upper Limits</h4>
+                <p>LIGO/Virgo publish upper limits on memory amplitude from binary mergers, constraining models but not yet achieving detection.</p>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">2023+</div>
+                <h4>O4 Run and Beyond</h4>
+                <p>The O4 observing run brings improved sensitivity. Memory detection remains a major goal, with network analysis and advanced data processing techniques being developed.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Open Questions</h3>
+            <ul style="color: var(--text-secondary); margin-left: 1.5rem; line-height: 2;">
+                <li><strong>When will we detect it?</strong> With O5 sensitivity improvements, memory detection may come within this decade.</li>
+                <li><strong>What will it teach us?</strong> Memory encodes information about the nature of gravitational wave emission that oscillatory signals cannot access.</li>
+                <li><strong>Beyond BMS?</strong> Some theories modify GR and predict different memory signatures — memory could be a test of quantum gravity.</li>
+                <li><strong>Dark matter connection?</strong> Proposed mechanisms suggest dark matter annihilation could produce observable memory signals.</li>
+            </ul>
+        </div>
+
+        <div class="insight-box">
+            <h4>The Bigger Picture</h4>
+            <p>
+                The memory effect represents a triumph of nonlinear general relativity. It is woven into the same mathematics as black hole thermodynamics, the AdS/CFT correspondence, and potentially quantum gravity itself. Its detection would be not just another detection, but a new channel for understanding the fundamental structure of spacetime.
+            </p>
+        </div>
+    </section>
+
+    <footer>
+        <p>Kevin's Physics Lab — exploring the fabric of spacetime</p>
+        <p style="margin-top: 0.5rem;">
+            <a href="index.html">Back to Kevin's Lab</a> |
+            <a href="daily-log.html">Daily Log</a>
+        </p>
+    </footer>
+
+    <script>
+        // =====================================================
+        // HERO CANVAS: Animated gravitational wave field
+        // =====================================================
+        const heroCanvas = document.getElementById('heroCanvas');
+        const heroCtx = heroCanvas.getContext('2d');
+
+        function resizeHeroCanvas() {
+            heroCanvas.width = window.innerWidth;
+            heroCanvas.height = window.innerHeight;
+        }
+        resizeHeroCanvas();
+        window.addEventListener('resize', resizeHeroCanvas);
+
+        let heroTime = 0;
+        function animateHero() {
+            heroCtx.fillStyle = 'rgba(10, 10, 18, 0.15)';
+            heroCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
+
+            const centerX = heroCanvas.width / 2;
+            const centerY = heroCanvas.height / 2;
+            const maxRadius = Math.max(heroCanvas.width, heroCanvas.height);
+
+            for (let i = 0; i < 8; i++) {
+                const phase = heroTime * 0.02 + i * 0.4;
+                const radius = 50 + ((phase * 50) % maxRadius);
+                const alpha = Math.max(0, 0.3 - radius / maxRadius);
+
+                heroCtx.beginPath();
+                heroCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                if (i % 2 === 0) {
+                    heroCtx.strokeStyle = `rgba(123, 104, 238, ${alpha})`;
+                } else {
+                    heroCtx.strokeStyle = `rgba(255, 112, 67, ${alpha})`;
+                }
+                heroCtx.lineWidth = 1.5;
+                heroCtx.stroke();
+            }
+
+            // Central glow
+            const gradient = heroCtx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 100);
+            gradient.addColorStop(0, 'rgba(123, 104, 238, 0.3)');
+            gradient.addColorStop(1, 'rgba(123, 104, 238, 0)');
+            heroCtx.fillStyle = gradient;
+            heroCtx.beginPath();
+            heroCtx.arc(centerX, centerY, 100, 0, Math.PI * 2);
+            heroCtx.fill();
+
+            heroTime++;
+            requestAnimationFrame(animateHero);
+        }
+        animateHero();
+
+        // =====================================================
+        // WAVE CANVAS: Linear vs Memory comparison
+        // =====================================================
+        const waveCanvas = document.getElementById('waveCanvas');
+        const waveCtx = waveCanvas.getContext('2d');
+
+        function resizeWaveCanvas() {
+            waveCanvas.width = waveCanvas.parentElement.clientWidth;
+            waveCanvas.height = 400;
+        }
+        resizeWaveCanvas();
+        window.addEventListener('resize', resizeWaveCanvas);
+
+        let waveMode = 'linear';
+        let waveAmplitude = 0.5;
+        let waveDuration = 1.5;
+        let waveTime = 0;
+
+        function drawTestMasses(ctx, y, count, displacements, color) {
+            const spacing = waveCanvas.width / (count + 1);
+            for (let i = 0; i < count; i++) {
+                const x = spacing * (i + 1);
+                const displacement = displacements[i];
+
+                ctx.beginPath();
+                ctx.arc(x, y + displacement, 8, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+
+                // Draw displacement line
+                if (Math.abs(displacement) > 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x, y + displacement);
+                    ctx.strokeStyle = `${color}66`;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function animateWaveCanvas() {
+            waveCtx.fillStyle = '#000';
+            waveCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
+
+            const centerY = 200;
+            const massCount = 7;
+            const spacing = waveCanvas.width / (massCount + 1);
+            const omega = 2 * Math.PI * 0.5;
+            const burstWidth = waveDuration * 2;
+
+            // Calculate displacements for each mass
+            const displacements = [];
+            for (let i = 0; i < massCount; i++) {
+                const x = spacing * (i + 1);
+                const distFromCenter = Math.abs(i - (massCount - 1) / 2);
+                let linearDisp = 0;
+                let memoryDisp = 0;
+
+                if (waveMode === 'linear' || waveMode === 'combined') {
+                    linearDisp = waveAmplitude * 50 * Math.sin(omega * waveTime - distFromCenter * 0.5) * Math.exp(-((waveTime % burstWidth) - burstWidth / 2) ** 2 / (burstWidth / 3) ** 2);
+                }
+
+                if (waveMode === 'memory' || waveMode === 'combined') {
+                    const burstProgress = (waveTime % burstWidth) / burstWidth;
+                    if (burstProgress < 1) {
+                        const envelope = Math.exp(-(burstProgress - 0.5) ** 2 / 0.1 ** 2);
+                        memoryDisp = waveAmplitude * 80 * envelope * (waveMode === 'combined' ? 0.5 : 1);
+                    }
+                    if (waveTime % burstWidth > burstWidth / 2) {
+                        memoryDisp = waveAmplitude * 80 * Math.exp(-((waveTime % burstWidth) - burstWidth / 2) ** 2 / (burstWidth / 3) ** 2);
+                    }
+                }
+
+                // Add permanent offset after burst passes
+                const burstPhase = Math.floor(waveTime / burstWidth);
+                const memoryOffset = burstPhase * waveAmplitude * 10 * (waveMode !== 'linear' ? 1 : 0);
+
+                displacements.push(linearDisp + memoryOffset);
+            }
+
+            // Draw grid lines
+            waveCtx.strokeStyle = 'rgba(123, 104, 238, 0.1)';
+            waveCtx.lineWidth = 1;
+            for (let i = 0; i <= massCount; i++) {
+                const x = spacing * i;
+                waveCtx.beginPath();
+                waveCtx.moveTo(x, 50);
+                waveCtx.lineTo(x, 350);
+                waveCtx.stroke();
+            }
+            waveCtx.beginPath();
+            waveCtx.moveTo(0, centerY);
+            waveCtx.lineTo(waveCanvas.width, centerY);
+            waveCtx.stroke();
+
+            // Draw equilibrium line label
+            waveCtx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            waveCtx.font = '10px system-ui';
+            waveCtx.fillText('equilibrium', 10, centerY - 10);
+
+            // Draw wave ripples
+            if (waveMode !== 'memory') {
+                waveCtx.beginPath();
+                waveCtx.strokeStyle = 'rgba(79, 195, 247, 0.3)';
+                for (let x = 0; x < waveCanvas.width; x++) {
+                    const t = x / waveCanvas.width * 4 * Math.PI;
+                    const y = centerY + waveAmplitude * 30 * Math.sin(t + waveTime * 0.1) * Math.exp(-((waveTime % burstWidth) - burstWidth / 2) ** 2 / (burstWidth / 3) ** 2);
+                    if (x === 0) waveCtx.moveTo(x, y);
+                    else waveCtx.lineTo(x, y);
+                }
+                waveCtx.stroke();
+            }
+
+            // Draw test masses
+            const massColor = waveMode === 'memory' ? '#ff7043' : waveMode === 'combined' ? '#ffd700' : '#4fc3f7';
+            drawTestMasses(waveCtx, centerY, massCount, displacements, massColor);
+
+            // Draw labels
+            waveCtx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            waveCtx.font = '12px system-ui';
+            waveCtx.fillText(waveMode === 'linear' ? 'Linear Wave: Returns to equilibrium' : waveMode === 'memory' ? 'Memory Effect: Permanent displacement' : 'Combined Signal: Linear + Memory', 20, 30);
+
+            waveTime += 0.05;
+            requestAnimationFrame(animateWaveCanvas);
+        }
+
+        document.querySelectorAll('[data-mode]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                waveMode = btn.dataset.mode;
+            });
+        });
+
+        document.getElementById('amplitudeSlider').addEventListener('input', e => {
+            waveAmplitude = parseFloat(e.target.value);
+            document.getElementById('amplitudeValue').textContent = waveAmplitude.toFixed(1);
+        });
+
+        document.getElementById('durationSlider').addEventListener('input', e => {
+            waveDuration = parseFloat(e.target.value);
+            document.getElementById('durationValue').textContent = waveDuration.toFixed(1) + 's';
+        });
+
+        animateWaveCanvas();
+
+        // =====================================================
+        // TRAJECTORY CANVAS: Particle trajectory comparison
+        // =====================================================
+        const trajectoryCanvas = document.getElementById('trajectoryCanvas');
+        const trajectoryCtx = trajectoryCanvas.getContext('2d');
+
+        function resizeTrajectoryCanvas() {
+            trajectoryCanvas.width = trajectoryCanvas.parentElement.clientWidth;
+            trajectoryCanvas.height = 350;
+        }
+        resizeTrajectoryCanvas();
+        window.addEventListener('resize', resizeTrajectoryCanvas);
+
+        let trajTime = 0;
+        let trajTimeScale = 5;
+
+        function animateTrajectory() {
+            trajectoryCtx.fillStyle = '#000';
+            trajectoryCtx.fillRect(0, 0, trajectoryCanvas.width, trajectoryCanvas.height);
+
+            const centerX = trajectoryCanvas.width / 2;
+            const centerY = trajectoryCanvas.height / 2;
+            const scale = 80;
+
+            // Draw axes
+            trajectoryCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            trajectoryCtx.lineWidth = 1;
+            trajectoryCtx.beginPath();
+            trajectoryCtx.moveTo(0, centerY);
+            trajectoryCtx.lineTo(trajectoryCanvas.width, centerY);
+            trajectoryCtx.moveTo(centerX, 0);
+            trajectoryCtx.lineTo(centerX, trajectoryCanvas.height);
+            trajectoryCtx.stroke();
+
+            // Draw linear particle trajectory
+            trajectoryCtx.strokeStyle = 'rgba(79, 195, 247, 0.8)';
+            trajectoryCtx.lineWidth = 2;
+            trajectoryCtx.beginPath();
+            for (let t = 0; t < trajTime; t += 0.5) {
+                const x = centerX + t * 10;
+                const y = centerY + 30 * Math.sin(t * 0.5) * Math.exp(-t / trajTimeScale);
+                if (t === 0) trajectoryCtx.moveTo(x, y);
+                else trajectoryCtx.lineTo(x, y);
+            }
+            trajectoryCtx.stroke();
+
+            // Draw memory particle trajectory
+            trajectoryCtx.strokeStyle = 'rgba(255, 112, 67, 0.8)';
+            trajectoryCtx.lineWidth = 2;
+            trajectoryCtx.beginPath();
+            let memoryOffset = 0;
+            for (let t = 0; t < trajTime; t += 0.5) {
+                const x = centerX + t * 10;
+                memoryOffset += 0.5 * Math.exp(-(t % trajTimeScale - trajTimeScale / 2) ** 2 / 2 ** 2);
+                const y = centerY + memoryOffset * 5;
+                if (t === 0) trajectoryCtx.moveTo(x, y);
+                else trajectoryCtx.lineTo(x, y);
+            }
+            trajectoryCtx.stroke();
+
+            // Current positions
+            const linearX = centerX + trajTime * 10;
+            const linearY = centerY + 30 * Math.sin(trajTime * 0.5) * Math.exp(-trajTime / trajTimeScale);
+            trajectoryCtx.beginPath();
+            trajectoryCtx.arc(linearX, linearY, 6, 0, Math.PI * 2);
+            trajectoryCtx.fillStyle = '#4fc3f7';
+            trajectoryCtx.fill();
+
+            let memOff = 0;
+            for (let t = 0; t < trajTime; t += 0.5) {
+                memOff += 0.5 * Math.exp(-(t % trajTimeScale - trajTimeScale / 2) ** 2 / 2 ** 2);
+            }
+            const memX = centerX + trajTime * 10;
+            const memY = centerY + memOff * 5;
+            trajectoryCtx.beginPath();
+            trajectoryCtx.arc(memX, memY, 6, 0, Math.PI * 2);
+            trajectoryCtx.fillStyle = '#ff7043';
+            trajectoryCtx.fill();
+
+            // Labels
+            trajectoryCtx.fillStyle = '#4fc3f7';
+            trajectoryCtx.font = '12px system-ui';
+            trajectoryCtx.fillText('Linear (returns to origin)', 10, 20);
+            trajectoryCtx.fillStyle = '#ff7043';
+            trajectoryCtx.fillText('Memory (permanent drift)', 10, 40);
+
+            // Start points
+            trajectoryCtx.beginPath();
+            trajectoryCtx.arc(centerX, centerY, 4, 0, Math.PI * 2);
+            trajectoryCtx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            trajectoryCtx.fill();
+
+            trajTime += 0.02;
+            if (trajTime > trajTimeScale * 10) trajTime = 0;
+            requestAnimationFrame(animateTrajectory);
+        }
+
+        document.getElementById('timeScaleSlider').addEventListener('input', e => {
+            trajTimeScale = parseFloat(e.target.value);
+            document.getElementById('timeScaleValue').textContent = trajTimeScale.toFixed(1);
+        });
+
+        animateTrajectory();
+
+        // =====================================================
+        // CURVATURE CANVAS: Spacetime curvature evolution
+        // =====================================================
+        const curvatureCanvas = document.getElementById('curvatureCanvas');
+        const curvatureCtx = curvatureCanvas.getContext('2d');
+
+        function resizeCurvatureCanvas() {
+            curvatureCanvas.width = curvatureCanvas.parentElement.clientWidth;
+            curvatureCanvas.height = 400;
+        }
+        resizeCurvatureCanvas();
+        window.addEventListener('resize', resizeCurvatureCanvas);
+
+        let curvStage = 'before';
+        let curvTime = 0;
+
+        function drawGrid(ctx, alpha) {
+            ctx.strokeStyle = `rgba(123, 104, 238, ${alpha})`;
+            ctx.lineWidth = 1;
+            const spacing = 40;
+            for (let x = 0; x <= curvatureCanvas.width; x += spacing) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, curvatureCanvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= curvatureCanvas.height; y += spacing) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(curvatureCanvas.width, y);
+                ctx.stroke();
+            }
+        }
+
+        function animateCurvature() {
+            curvatureCtx.fillStyle = '#000';
+            curvatureCtx.fillRect(0, 0, curvatureCanvas.width, curvatureCanvas.height);
+
+            const centerX = curvatureCanvas.width / 2;
+            const centerY = curvatureCanvas.height / 2;
+
+            // Draw spacetime grid
+            drawGrid(curvatureCtx, 0.3);
+
+            // Draw gravitational wave ripples based on stage
+            const stageMultiplier = curvStage === 'before' ? 0 : curvStage === 'during' ? 1 : 0.3;
+            const memoryOffset = curvStage === 'after' ? 20 : 0;
+
+            for (let i = 0; i < 5; i++) {
+                const phase = (curvTime * 0.05 + i * 0.3) % 1;
+                const radius = 30 + phase * 150;
+                const alpha = (1 - phase) * 0.5 * stageMultiplier;
+
+                curvatureCtx.beginPath();
+                curvatureCtx.arc(centerX, centerY + memoryOffset, radius, 0, Math.PI * 2);
+                curvatureCtx.strokeStyle = i % 2 === 0 ? `rgba(123, 104, 238, ${alpha})` : `rgba(255, 112, 67, ${alpha})`;
+                curvatureCtx.lineWidth = 2;
+                curvatureCtx.stroke();
+            }
+
+            // Draw test particles
+            const particleCount = 8;
+            for (let i = 0; i < particleCount; i++) {
+                const angle = (i / particleCount) * Math.PI * 2;
+                const dist = 100 + (curvStage === 'during' ? Math.sin(curvTime * 0.1 + i) * 20 : 0);
+                const x = centerX + Math.cos(angle) * dist;
+                const y = centerY + Math.sin(angle) * dist + memoryOffset;
+
+                curvatureCtx.beginPath();
+                curvatureCtx.arc(x, y, 5, 0, Math.PI * 2);
+                curvatureCtx.fillStyle = curvStage === 'before' ? 'rgba(255, 255, 255, 0.7)' : curvStage === 'during' ? '#ffd700' : '#ff7043';
+                curvatureCtx.fill();
+
+                // Draw displacement indicator for "after" stage
+                if (curvStage === 'after') {
+                    curvatureCtx.beginPath();
+                    curvatureCtx.moveTo(x, y - 30);
+                    curvatureCtx.lineTo(x, y);
+                    curvatureCtx.strokeStyle = 'rgba(255, 112, 67, 0.5)';
+                    curvatureCtx.lineWidth = 1;
+                    curvatureCtx.stroke();
+                }
+            }
+
+            // Labels
+            curvatureCtx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            curvatureCtx.font = '14px system-ui';
+            const stageLabels = {
+                before: 'Before burst: Flat spacetime',
+                during: 'During burst: Curvature waves propagate',
+                after: 'After burst: Permanent displacement remains'
+            };
+            curvatureCtx.fillText(stageLabels[curvStage], 20, 30);
+
+            curvTime++;
+            requestAnimationFrame(animateCurvature);
+        }
+
+        document.querySelectorAll('[data-stage]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-stage]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                curvStage = btn.dataset.stage;
+            });
+        });
+
+        animateCurvature();
+
+        // =====================================================
+        // SIGNAL CANVAS: Expected GW signal with memory
+        // =====================================================
+        const signalCanvas = document.getElementById('signalCanvas');
+        const signalCtx = signalCanvas.getContext('2d');
+
+        function resizeSignalCanvas() {
+            signalCanvas.width = signalCanvas.parentElement.clientWidth;
+            signalCanvas.height = 300;
+        }
+        resizeSignalCanvas();
+        window.addEventListener('resize', resizeSignalCanvas);
+
+        let signalDistance = 200;
+        let signalMass = 30;
+        let signalTime = 0;
+
+        function animateSignal() {
+            signalCtx.fillStyle = '#000';
+            signalCtx.fillRect(0, 0, signalCanvas.width, signalCanvas.height);
+
+            const centerY = signalCanvas.height / 2;
+            const scale = signalCanvas.height / 4;
+
+            // Draw axes
+            signalCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            signalCtx.lineWidth = 1;
+            signalCtx.beginPath();
+            signalCtx.moveTo(0, centerY);
+            signalCtx.lineTo(signalCanvas.width, centerY);
+            signalCtx.stroke();
+
+            // Calculate chirp frequency and memory amplitude
+            const f0 = 15; // Initial frequency Hz
+            const chirpRate = 1e-8; // Simplified
+            const memoryScale = 1e-21 * (30 / signalMass) * (200 / signalDistance);
+
+            // Draw chirp signal
+            signalCtx.beginPath();
+            signalCtx.strokeStyle = 'rgba(79, 195, 247, 0.8)';
+            signalCtx.lineWidth = 2;
+            for (let x = 0; x < signalCanvas.width; x++) {
+                const t = x / signalCanvas.width * 3;
+                const f = f0 + chirpRate * t * 1e15;
+                const phase = 2 * Math.PI * (f0 * t + 0.5 * chirpRate * t * t * 1e15);
+                const amp = Math.min(1, t * 0.5) * Math.exp(-t * 0.1);
+                const h = amp * Math.cos(phase) * scale;
+
+                // Memory DC offset
+                const memory = memoryScale * scale * Math.min(1, t * 2) * Math.exp(-(t - 1.5) ** 2 / 0.2 ** 2);
+
+                if (x === 0) signalCtx.moveTo(x, centerY - h);
+                else signalCtx.lineTo(x, centerY - h + memory);
+            }
+            signalCtx.stroke();
+
+            // Draw memory offset separately
+            signalCtx.beginPath();
+            signalCtx.strokeStyle = 'rgba(255, 112, 67, 0.6)';
+            signalCtx.lineWidth = 2;
+            signalCtx.setLineDash([5, 5]);
+            for (let x = 0; x < signalCanvas.width; x++) {
+                const t = x / signalCanvas.width * 3;
+                const memory = memoryScale * scale * Math.min(1, t * 2) * Math.exp(-(t - 1.5) ** 2 / 0.2 ** 2);
+                if (x === 0) signalCtx.moveTo(x, centerY + memory);
+                else signalCtx.lineTo(x, centerY + memory);
+            }
+            signalCtx.stroke();
+            signalCtx.setLineDash([]);
+
+            // Labels
+            signalCtx.fillStyle = '#4fc3f7';
+            signalCtx.font = '12px system-ui';
+            signalCtx.fillText('GW Chirp Signal', 10, 20);
+            signalCtx.fillStyle = '#ff7043';
+            signalCtx.fillText('Memory DC Offset', 10, 40);
+
+            signalTime += 0.05;
+            requestAnimationFrame(animateSignal);
+        }
+
+        document.getElementById('distanceSlider').addEventListener('input', e => {
+            signalDistance = parseFloat(e.target.value);
+            document.getElementById('distanceValue').textContent = signalDistance + ' Mpc';
+        });
+
+        document.getElementById('massSlider').addEventListener('input', e => {
+            signalMass = parseFloat(e.target.value);
+            document.getElementById('massValue').textContent = signalMass + ' M☉';
+        });
+
+        animateSignal();
+
+        // =====================================================
+        // SANDBOX: Interactive memory simulator
+        // =====================================================
+        const sandboxCanvas = document.getElementById('sandboxCanvas');
+        const sandboxCtx = sandboxCanvas.getContext('2d');
+
+        function resizeSandboxCanvas() {
+            sandboxCanvas.width = sandboxCanvas.parentElement.clientWidth;
+            sandboxCanvas.height = 400;
+        }
+        resizeSandboxCanvas();
+        window.addEventListener('resize', resizeSandboxCanvas);
+
+        let sandboxRunning = true;
+        let sandboxTime = 0;
+        let sandboxFreq = 100;
+        let sandboxMem = 0.3;
+        let sandboxBursts = 3;
+
+        function animateSandbox() {
+            sandboxCtx.fillStyle = '#000';
+            sandboxCtx.fillRect(0, 0, sandboxCanvas.width, sandboxCanvas.height);
+
+            const centerY = sandboxCanvas.height / 2;
+            const scale = 60;
+            const burstPeriod = sandboxCanvas.width / 5;
+
+            // Draw reference line
+            sandboxCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            sandboxCtx.lineWidth = 1;
+            sandboxCtx.beginPath();
+            sandboxCtx.moveTo(0, centerY);
+            sandboxCtx.lineTo(sandboxCanvas.width, centerY);
+            sandboxCtx.stroke();
+
+            // Draw test particles
+            const particleCount = 9;
+            const particleSpacing = sandboxCanvas.width / (particleCount + 1);
+
+            for (let i = 0; i < particleCount; i++) {
+                const x = particleSpacing * (i + 1);
+                const distFromCenter = Math.abs(i - (particleCount - 1) / 2);
+
+                // Calculate total displacement
+                let linearDisp = 0;
+                let memoryDisp = 0;
+
+                // Linear wave component
+                for (let burst = 0; burst < sandboxBursts; burst++) {
+                    const burstStart = burst * burstPeriod;
+                    const t = sandboxTime - burstStart;
+                    if (t > 0) {
+                        const burstEnvelope = Math.exp(-t * 0.03);
+                        linearDisp += sandboxFreq * 0.005 * Math.sin(2 * Math.PI * (sandboxFreq / 100) * t - distFromCenter * 0.3) * burstEnvelope;
+                    }
+                }
+
+                // Memory component
+                for (let burst = 0; burst < sandboxBursts; burst++) {
+                    const burstStart = burst * burstPeriod;
+                    const t = sandboxTime - burstStart;
+                    if (t > 0) {
+                        const memoryEnvelope = Math.exp(-((t - 20) ** 2) / 100);
+                        memoryDisp += sandboxMem * 40 * memoryEnvelope;
+                    }
+                }
+
+                const totalDisp = linearDisp + memoryDisp;
+
+                // Draw particle
+                sandboxCtx.beginPath();
+                sandboxCtx.arc(x, centerY + totalDisp, 8, 0, Math.PI * 2);
+                sandboxCtx.fillStyle = i % 2 === 0 ? '#4fc3f7' : '#7b68ee';
+                sandboxCtx.fill();
+
+                // Draw vertical line to reference
+                sandboxCtx.beginPath();
+                sandboxCtx.moveTo(x, centerY);
+                sandboxCtx.lineTo(x, centerY + totalDisp);
+                sandboxCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                sandboxCtx.lineWidth = 1;
+                sandboxCtx.stroke();
+
+                // Draw memory offset marker if past all bursts
+                const totalPastTime = sandboxBursts * burstPeriod;
+                if (sandboxTime > totalPastTime) {
+                    let memOffset = 0;
+                    for (let burst = 0; burst < sandboxBursts; burst++) {
+                        memOffset += sandboxMem * 40 * Math.exp(-((totalPastTime - burst * burstPeriod - 20) ** 2) / 100);
+                    }
+                    sandboxCtx.beginPath();
+                    sandboxCtx.arc(x, centerY + memOffset, 3, 0, Math.PI * 2);
+                    sandboxCtx.fillStyle = '#ff7043';
+                    sandboxCtx.fill();
+                }
+            }
+
+            // Draw time indicator
+            const timeX = (sandboxTime % burstPeriod) + Math.floor(sandboxTime / burstPeriod) * burstPeriod;
+            if (timeX < sandboxCanvas.width) {
+                sandboxCtx.beginPath();
+                sandboxCtx.moveTo(timeX, 50);
+                sandboxCtx.lineTo(timeX, sandboxCanvas.height - 50);
+                sandboxCtx.strokeStyle = 'rgba(255, 215, 0, 0.5)';
+                sandboxCtx.lineWidth = 2;
+                sandboxCtx.stroke();
+            }
+
+            // Update state display
+            let currentLinear = 0;
+            let currentMemory = 0;
+            const burstIdx = Math.floor(sandboxTime / burstPeriod);
+            const tInBurst = sandboxTime % burstPeriod;
+            if (burstIdx < sandboxBursts) {
+                currentLinear = sandboxFreq * 0.005 * Math.sin(2 * Math.PI * (sandboxFreq / 100) * tInBurst) * Math.exp(-tInBurst * 0.03);
+                currentMemory = sandboxMem * 40 * Math.exp(-((tInBurst - 20) ** 2) / 100);
+            }
+
+            document.getElementById('linearState').textContent = currentLinear.toExponential(4);
+            document.getElementById('memoryState').textContent = currentMemory.toExponential(4);
+            document.getElementById('totalState').textContent = (currentLinear + currentMemory).toExponential(4);
+
+            if (sandboxRunning) {
+                sandboxTime += 0.5;
+            }
+
+            requestAnimationFrame(animateSandbox);
+        }
+
+        document.getElementById('playBtn').addEventListener('click', () => {
+            sandboxRunning = true;
+            document.getElementById('playBtn').classList.add('active');
+            document.getElementById('pauseBtn').classList.remove('active');
+        });
+
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            sandboxRunning = false;
+            document.getElementById('pauseBtn').classList.add('active');
+            document.getElementById('playBtn').classList.remove('active');
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            sandboxTime = 0;
+            sandboxRunning = false;
+            document.getElementById('pauseBtn').classList.add('active');
+            document.getElementById('playBtn').classList.remove('active');
+        });
+
+        document.getElementById('freqSlider').addEventListener('input', e => {
+            sandboxFreq = parseFloat(e.target.value);
+            document.getElementById('freqValue').textContent = sandboxFreq + ' Hz';
+        });
+
+        document.getElementById('memSlider').addEventListener('input', e => {
+            sandboxMem = parseFloat(e.target.value);
+            document.getElementById('memValue').textContent = sandboxMem.toFixed(2);
+        });
+
+        document.getElementById('burstSlider').addEventListener('input', e => {
+            sandboxBursts = parseInt(e.target.value);
+            document.getElementById('burstValue').textContent = sandboxBursts;
+        });
+
+        animateSandbox();
+    </script>
+</body>
+</html>

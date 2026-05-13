@@ -1,5 +1,53 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 38) — Gravitational Memory Effect
+
+### NEW PAGE: gravitational-memory-effect.html
+- **The Gravitational Memory Effect — Permanent Spacetime Distortion from Gravitational Wave Bursts**
+  - 6 sections: Introduction, Linear vs Memory, Physics, Detection, Interactive Sandbox, Historical Timeline
+  - Multiple animated canvas visualizations (wave burst comparison, trajectory comparison, curvature evolution, signal with memory, interactive sandbox)
+  - Interactive controls for wave amplitude, duration, frequency, memory strength, burst count
+  - Rich physics content: Christodoulou memory, news function, BMS symmetry, Weyl tensor
+
+### Physics Features
+- **Memory Effect**: A burst of gravitational waves permanently displaces test masses — not oscillating, but a permanent translation
+- **Christodoulou Memory**: First calculated in 1991 from nonlinear GR — the memory arises from the nonlinear self-gravity of gravitational waves
+- **News Function**: The time derivative of strain, N(t) = dh/dt, whose integral gives the permanent memory offset
+- **BMS Symmetry**: The memory corresponds to a Lorentz transformation (superrotation) of the sphere at infinity
+- **Detection Challenge**: Memory produces a DC offset — single detectors cannot distinguish from drift; requires detector network cross-correlation
+
+### 5 Interactive Canvas Visualizations
+1. **Hero Canvas**: Animated expanding gravitational wave rings with dual-color (linear purple, memory orange) ripples
+2. **Wave Canvas**: Test mass displacement comparison between linear wave and memory effect modes
+3. **Trajectory Canvas**: Particle paths showing linear oscillation (returns to origin) vs memory drift (permanent offset)
+4. **Curvature Canvas**: Spacetime grid with test particles showing before/during/after burst phases
+5. **Signal Canvas**: GW chirp signal with memory DC offset contribution at different distances and masses
+6. **Sandbox Canvas**: Full interactive simulator with play/pause/reset, frequency and memory strength sliders, live state vector display
+
+### Key Physics Equations
+- **News Function**: N(t) = dh/dt — the source of memory
+- **Memory Displacement**: Δh = ∫ N(t) dt = h_news
+- **Energy Loss**: dE/dt = -(1/5) ⟨d³Q/dt³, d³Q/dt³⟩
+- **Christodoulou Memory**: Δh_ij = (2/5M) [ΔE · n_i n_j − ΔJ_ij]
+- **Memory Amplitude**: h_mem ≈ (2/5) · (M_c/D) · (G M_c/c²)^(5/2) · (1/τ_mem)
+
+### Historical Timeline (7 Milestones)
+1. 1918: Einstein predicts gravitational waves and notes a "permanent displacement" effect
+2. 1974: Bondi-Metzner-Sachs formalism develops BMS symmetry framework for asymptotically flat spacetimes
+3. 1991: Christodoulou shows memory arises from nonlinear gravitational wave emission in full GR
+4. 1999: Wiseman-Williams provide detailed memory calculations from astrophysical sources
+5. 2015: GW150914 marks beginning of GW astronomy; memory hints present but insufficient significance
+6. 2019: LIGO/Virgo publish upper limits on memory amplitude from binary mergers
+7. 2023+: O4 run with improved sensitivity — memory detection remains a major goal
+
+### Design Philosophy
+- Connects Einstein's 1918 prediction to modern LIGO/Virgo detection challenges
+- Shows how the memory effect is a distinct phenomenon from linear gravitational waves
+- Interactive sandbox lets visitors explore parameter space and see the DC offset signature
+- Historical narrative frames memory as "the Rome of gravitational wave theory" — both foundation and ultimate destination
+
+---
+
 ## 2026-05-13 (Part 37) — Post-Newtonian Binary Inspiral
 
 ### NEW PAGE: post-newtonian-binary-inspiral.html
