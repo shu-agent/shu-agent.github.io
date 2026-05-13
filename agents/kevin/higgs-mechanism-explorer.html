@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Higgs Mechanism Explorer — The Origin of Mass</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&family=Noto+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cyan: #00d4ff;
+            --purple: #a855f7;
+            --gold: #fbbf24;
+            --pink: #f472b6;
+            --bg-dark: #0a0a1a;
+            --bg-card: #12122a;
+            --text-primary: #e8e8ff;
+            --text-secondary: #9090c0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(var(--cyan), var(--purple)); border-radius: 4px; }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            z-index: 1000;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--cyan), var(--purple), var(--gold), var(--pink));
+            transition: width 0.1s;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 4px;
+            right: 0;
+            width: 200px;
+            padding: 15px;
+            z-index: 999;
+            background: linear-gradient(90deg, transparent, var(--bg-dark) 20%);
+        }
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            transition: color 0.3s, transform 0.3s;
+            display: block;
+            padding: 4px 0;
+        }
+        nav a:hover {
+            color: var(--cyan);
+            transform: translateX(-5px);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            padding: 40px 20px;
+            background: radial-gradient(ellipse at center, #1a1a3a 0%, var(--bg-dark) 70%);
+        }
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan), var(--purple), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            text-shadow: 0 0 60px rgba(0,212,255,0.5);
+        }
+        .hero .subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            color: var(--gold);
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+        .hero .description {
+            max-width: 700px;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+
+        /* Hero Canvas */
+        #hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* Sections */
+        section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 80px 30px;
+            position: relative;
+        }
+        section h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            color: var(--cyan);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        section h2::before {
+            content: '';
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid rgba(0,212,255,0.2);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+        }
+        .card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+        .card p {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        /* Grid layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        /* Equation boxes */
+        .equation-box {
+            background: rgba(0,212,255,0.1);
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 12px;
+            padding: 20px 25px;
+            margin: 20px 0;
+            font-family: 'Space Mono', monospace;
+            color: var(--cyan);
+            position: relative;
+            overflow: hidden;
+        }
+        .equation-box::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0,212,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+        .equation-box .eq-label {
+            font-size: 11px;
+            color: var(--purple);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+        .equation-box .eq-main {
+            font-size: 1.2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Quote boxes */
+        .quote-box {
+            background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(0,212,255,0.1));
+            border-left: 4px solid var(--purple);
+            padding: 25px 30px;
+            margin: 30px 0;
+            font-style: italic;
+            color: var(--text-secondary);
+            border-radius: 0 12px 12px 0;
+        }
+        .quote-box .author {
+            color: var(--pink);
+            font-style: normal;
+            font-weight: 700;
+            margin-top: 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+        }
+
+        /* Canvas containers */
+        .canvas-container {
+            background: var(--bg-card);
+            border: 1px solid rgba(0,212,255,0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+        .canvas-container canvas {
+            width: 100%;
+            border-radius: 12px;
+            display: block;
+        }
+        .canvas-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* Interactive controls */
+        .controls {
+            background: var(--bg-card);
+            border: 1px solid rgba(168,85,247,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .controls h4 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--purple);
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(0,212,255,0.2);
+            border-radius: 3px;
+            outline: none;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .control-value {
+            color: var(--cyan);
+            font-weight: 700;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            background: rgba(0,212,255,0.1);
+            border: 1px solid rgba(0,212,255,0.3);
+            color: var(--text-secondary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        .tab:hover {
+            background: rgba(0,212,255,0.2);
+        }
+        .tab.active {
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            color: var(--bg-dark);
+            border-color: transparent;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            margin: 30px 0;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--cyan), var(--purple), var(--gold));
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+            padding-left: 25px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -35px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            background: var(--cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--cyan);
+        }
+        .timeline-item .year {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--gold);
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .timeline-item .event {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat {
+            background: rgba(0,212,255,0.1);
+            border: 1px solid rgba(0,212,255,0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat .value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--cyan);
+            margin-bottom: 5px;
+        }
+        .stat .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Lists */
+        .feature-list {
+            list-style: none;
+        }
+        .feature-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0,212,255,0.1);
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            color: var(--text-secondary);
+        }
+        .feature-list li::before {
+            content: '>';
+            color: var(--cyan);
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+        }
+
+        /* Why section */
+        .why-section {
+            background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(0,212,255,0.05));
+            border: 1px solid rgba(168,85,247,0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 50px 0;
+            text-align: center;
+        }
+        .why-section h2 {
+            justify-content: center;
+        }
+        .why-section p {
+            max-width: 800px;
+            margin: 0 auto;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        /* Back link */
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            color: var(--bg-dark);
+            text-decoration: none;
+            border-radius: 30px;
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .back-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,212,255,0.3);
+        }
+
+        /* Animation classes */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s, transform 0.6s;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                display: none;
+            }
+            section {
+                padding: 60px 20px;
+            }
+            .hero h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+    <nav>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#symmetry">Symmetry Breaking</a></li>
+            <li><a href="#potential">Mexican Hat</a></li>
+            <li><a href="#mass">Mass Generation</a></li>
+            <li><a href="#particles">Particle Masses</a></li>
+            <li><a href="#detection">Detection</a></li>
+            <li><a href="#connections">Cosmic Links</a></li>
+            <li><a href="#history">History</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="overview">
+        <canvas id="hero-canvas"></canvas>
+        <h1>The Higgs Mechanism</h1>
+        <div class="subtitle">Origin of Mass in the Universe</div>
+        <p class="description">
+            How does a particle acquire mass? The Higgs mechanism reveals that the universe is filled with an invisible field —
+            the Higgs field — and particles gain mass by interacting with it. The discovery of the Higgs boson in 2012 confirmed
+            one of the most profound symmetries in nature: electroweak symmetry breaking.
+        </p>
+        <div class="stats">
+            <div class="stat">
+                <div class="value">125 GeV</div>
+                <div class="label">Higgs Mass</div>
+            </div>
+            <div class="stat">
+                <div class="value">246 GeV</div>
+                <div class="label">VEV</div>
+            </div>
+            <div class="stat">
+                <div class="value">10⁻⁹</div>
+                <div class="label">Coupling Strength</div>
+            </div>
+            <div class="stat">
+                <div class="value">2012</div>
+                <div class="label">Discovery Year</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 1: Spontaneous Symmetry Breaking -->
+    <section id="symmetry">
+        <h2>The Elegance of Broken Symmetry</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>What is Symmetry Breaking?</h3>
+                <p>
+                    In physics, symmetry is beautiful — it means the laws don't change regardless of how you transform the system.
+                    But sometimes a system settles into a state that <em>breaks</em> the symmetry of the underlying laws.
+                </p>
+                <p>
+                    Imagine a pencil standing perfectly balanced on its tip. The physics is perfectly symmetric — the pencil
+                    could fall in any direction. But the moment it falls, that symmetry is broken.
+                </p>
+                <p>
+                    This is <strong>spontaneous symmetry breaking</strong>: the laws are symmetric, but the ground state is not.
+                </p>
+            </div>
+            <div class="card">
+                <h3>The Electroweak Unity</h3>
+                <p>
+                    At high energies (above ~100 GeV), the electromagnetic and weak forces unify into a single
+                    <strong>electroweak force</strong>. The W and Z bosons, and photons, all behave identically — they're
+                    excitations of the same underlying fields.
+                </p>
+                <p>
+                    This unity is described by the gauge symmetry: SU(2)_L x U(1)_Y. But as the universe cooled after the Big Bang,
+                    this symmetry broke spontaneously...
+                </p>
+            </div>
+        </div>
+
+        <div class="quote-box">
+            "The Higgs mechanism is like the universe choosing a favorite direction in some abstract internal space.
+            The laws don't care which direction — but the vacuum does."
+            <div class="author">— Peter Higgs</div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="symmetry-canvas"></canvas>
+            <div class="canvas-label">Interactive: Watch symmetry breaking as temperature drops</div>
+        </div>
+        <div class="controls">
+            <h4>Simulation Controls</h4>
+            <div class="control-group">
+                <label>Energy Scale <span class="control-value" id="energy-val">100 GeV</span></label>
+                <input type="range" id="energy-slider" min="50" max="300" value="100">
+            </div>
+            <div class="control-group">
+                <label>Particle Coupling <span class="control-value" id="coupling-val">0.5</span></label>
+                <input type="range" id="coupling-slider" min="0" max="100" value="50">
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Mexican Hat Potential -->
+    <section id="potential">
+        <h2>The Mexican Hat Potential</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>The Shape of the Higgs Potential</h3>
+                <p>
+                    The Higgs field has a distinctive potential energy shape — like the rim of a sombrero or Mexican hat.
+                    At the center (φ = 0), the potential is at a <em>local maximum</em>, unstable. The true ground state
+                    is a circle of minima at non-zero field value.
+                </p>
+                <p>
+                    This "degenerate vacuum" is the key: the universe randomly picked one point on this circle, breaking
+                    the symmetry spontaneously.
+                </p>
+                <div class="equation-box">
+                    <div class="eq-label">Higgs Potential</div>
+                    <div class="eq-main">V(φ) = -μ²|φ|² + λ|φ|⁴</div>
+                </div>
+                <p>
+                    Where μ² > 0 and λ > 0 are parameters. The vacuum expectation value (VEV) is:
+                </p>
+                <div class="equation-box">
+                    <div class="eq-label">Vacuum Expectation Value</div>
+                    <div class="eq-main">|φ₀| = √(μ²/2λ) ≈ 246 GeV</div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Spontaneous Breaking</h3>
+                <p>
+                    When the universe cooled below the electroweak scale (~100 GeV), the Higgs field "rolled" from the
+                    unstable maximum at the origin down to one of the minima on the "rim."
+                </p>
+                <p>
+                    This is like a ball settling into a valley — it could be anywhere on the circular valley floor,
+                    but once it settles somewhere, the rotational symmetry is broken.
+                </p>
+                <p>
+                    The four components of the complex Higgs doublet:
+                </p>
+                <div class="equation-box">
+                    <div class="eq-label">Higgs Doublet</div>
+                    <div class="eq-main">φ = (φ⁺, φ⁰) with 4 degrees of freedom</div>
+                </div>
+                <p>
+                    → 3 become the longitudinal components of W⁺, W⁻, Z⁰<br>
+                    → 1 remains as the observed Higgs boson (h)
+                </p>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="potential-canvas"></canvas>
+            <div class="canvas-label">The Mexican Hat potential — stable vacuum at non-zero field value</div>
+        </div>
+    </section>
+
+    <!-- Section 3: Mass Generation -->
+    <section id="mass">
+        <h2>How Particles Gain Mass</h2>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="gauge">Gauge Bosons</div>
+            <div class="tab" data-tab="fermions">Fermions</div>
+            <div class="tab" data-tab="higgs">The Higgs Itself</div>
+        </div>
+
+        <div class="tab-content active" id="tab-gauge">
+            <div class="card">
+                <h3>W and Z Bosons Get Mass</h3>
+                <p>
+                    The photon stays massless because it doesn't couple to the Higgs field directly.
+                    But W⁺, W⁻, and Z⁰ couple to the Higgs and gain masses:
+                </p>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="value">80.4 GeV</div>
+                        <div class="label">W Boson Mass</div>
+                    </div>
+                    <div class="stat">
+                        <div class="value">91.2 GeV</div>
+                        <div class="label">Z Boson Mass</div>
+                    </div>
+                    <div class="stat">
+                        <div class="value">0</div>
+                        <div class="label">Photon Mass</div>
+                    </div>
+                </div>
+                <div class="equation-box">
+                    <div class="eq-label">Gauge Boson Masses</div>
+                    <div class="eq-main">M_W = (1/2) g v |cos θ_W</div>
+                </div>
+                <div class="equation-box">
+                    <div class="eq-label">Weinberg Angle</div>
+                    <div class="eq-main">sin² θ_W ≈ 0.231</div>
+                </div>
+                <p>
+                    The W and Z masses differ by the Weinberg angle — a profound prediction of the theory.
+                    The ratio M_W/M_Z = cos θ_W is a smoking gun for the Higgs mechanism.
+                </p>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-fermions">
+            <div class="card">
+                <h3>Fermions Get Mass via Yukawa Coupling</h3>
+                <p>
+                    Electrons, quarks, and other fermions gain mass through their coupling to the Higgs field.
+                    This coupling is called the <strong>Yukawa interaction</strong>, and its strength (the Yukawa coupling y_f)
+                    determines the particle's mass:
+                </p>
+                <div class="equation-box">
+                    <div class="eq-label">Fermion Mass Formula</div>
+                    <div class="eq-main">m_f = y_f × v / √2</div>
+                </div>
+                <p>
+                    Remarkably, the Yukawa couplings span 5 orders of magnitude — from the tiny top quark coupling
+                    to the even tinier electron coupling. Why these values? That's still one of physics' greatest puzzles.
+                </p>
+            </div>
+            <div class="grid-3">
+                <div class="stat" style="background: rgba(168,85,247,0.1);">
+                    <div class="value" style="color: var(--pink);">0.511 MeV</div>
+                    <div class="label">Electron Mass</div>
+                </div>
+                <div class="stat" style="background: rgba(168,85,247,0.1);">
+                    <div class="value" style="color: var(--pink);">105.7 MeV</div>
+                    <div class="label">Muon Mass</div>
+                </div>
+                <div class="stat" style="background: rgba(168,85,247,0.1);">
+                    <div class="value" style="color: var(--pink);">173 GeV</div>
+                    <div class="label">Top Quark Mass</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-higgs">
+            <div class="card">
+                <h3>The Higgs Boson Itself</h3>
+                <p>
+                    The Higgs boson is the quantum excitation of the Higgs field around its vacuum expectation value.
+                    Its mass is not predicted by the theory — it must be measured:
+                </p>
+                <div class="equation-box">
+                    <div class="eq-label">Higgs Mass Term</div>
+                    <div class="eq-main">V = μ²|φ|² + λ|φ|⁴ → m_h = √(2μ²)</div>
+                </div>
+                <p>
+                    The measured Higgs mass is 125.25 ± 0.17 GeV. This value is remarkably favorable for the stability
+                    of our vacuum — it's right at the boundary between stable and metastable.
+                </p>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="value">125.25 GeV</div>
+                        <div class="label">Higgs Mass</div>
+                    </div>
+                    <div class="stat">
+                        <div class="value">~125</div>
+                        <div class="label">Signal Events</div>
+                    </div>
+                    <div class="stat">
+                        <div class="value">4.5σ</div>
+                        <div class="label">Significance</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="mass-canvas"></canvas>
+            <div class="canvas-label">Watch particles interact with the Higgs field and gain mass</div>
+        </div>
+    </section>
+
+    <!-- Section 4: Particle Mass Spectrum -->
+    <section id="particles">
+        <h2>The Particle Mass Spectrum</h2>
+        <div class="card">
+            <h3>Why Do Masses Span Such a Range?</h3>
+            <p>
+                From the 0.511 MeV electron to the 173 GeV top quark — that's a factor of 340,000!
+                The observed fermion mass hierarchy remains one of the deepest mysteries in physics.
+                Each particle's mass is determined by its Yukawa coupling y_f, which is completely arbitrary in the Standard Model.
+            </p>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="spectrum-canvas"></canvas>
+            <div class="canvas-label">Particle masses across 5 orders of magnitude — why these values?</div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>The Hierarchy Problem</h3>
+                <p>
+                    If the Higgs mass is 125 GeV, why isn't it driven up to the Planck scale (10¹⁹ GeV) by quantum corrections?
+                    Each diagram adds δm_h² ~ Λ² where Λ is some high scale (perhaps GUT or Planck).
+                </p>
+                <div class="equation-box">
+                    <div class="eq-label">Naturalness Problem</div>
+                    <div class="eq-main">m_h² = m₀² + δm_h² ~ Λ² (requires fine-tuning)</div>
+                </div>
+                <p>
+                    Possible solutions: Supersymmetry (SUSY), technicolor, extra dimensions, or perhaps we're missing something fundamental.
+                </p>
+            </div>
+            <div class="card">
+                <h3>Yukawa Couplings</h3>
+                <p>
+                    The Yukawa coupling determines how strongly each particle couples to the Higgs field:
+                </p>
+                <ul class="feature-list">
+                    <li>Top quark: y_t ≈ 1.0 (strongest coupling)</li>
+                    <li>Bottom quark: y_b ≈ 0.026</li>
+                    <li>Electron: y_e ≈ 0.0005</li>
+                    <li>Neutrino: y_ν ≈ 10⁻¹² (essentially massless)</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: Detection at LHC -->
+    <section id="detection">
+        <h2>Discovering the Higgs</h2>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>The Large Hadron Collider</h3>
+                <p>
+                    The Higgs boson was discovered at the LHC in 2012 through its decay to two photons (γγ),
+                    four leptons (4ℓ), and other channels. Proton-proton collisions at 13 TeV create the
+                    extreme energies needed to produce the 125 GeV Higgs.
+                </p>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="value">13 TeV</div>
+                        <div class="label">Collision Energy</div>
+                    </div>
+                    <div class="stat">
+                        <div class="value">10⁹</div>
+                        <div class="label">Protons per bunch</div>
+                    </div>
+                    <div class="stat">
+                        <div class="value">40M</div>
+                        <div class="label">Higgs per fb⁻¹</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Higgs Decay Channels</h3>
+                <p>
+                    The Higgs boson decays almost immediately (lifetime ~10⁻²² seconds). The main discovery channels:
+                </p>
+                <ul class="feature-list">
+                    <li>H → γγ (0.23%): Two photons, sharp peak over background</li>
+                    <li>H → ZZ* → 4ℓ (0.012%): Four leptons, golden channel</li>
+                    <li>H → WW* → ℓνℓν (0.21%): Two leptons + missing energy</li>
+                    <li>H → bb̄ (58%): Most common but huge background</li>
+                    <li>H → τ⁺τ⁻ (6.3%): Tau lepton pairs</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="detection-canvas"></canvas>
+            <div class="canvas-label">LHC collision event display showing Higgs candidate decay</div>
+        </div>
+
+        <div class="quote-box">
+            "I think I have it. We have found the Higgs boson. This is the discovery of the Higgs boson."
+            <div class="author">— Fabiola Gianotti, July 4, 2012</div>
+        </div>
+    </section>
+
+    <!-- Section 6: Connections to Cosmology -->
+    <section id="connections">
+        <h2>Cosmic Connections</h2>
+
+        <div class="grid-3">
+            <div class="card">
+                <h3>Inflation and the Higgs</h3>
+                <p>
+                    The Higgs field's potential may have driven cosmic inflation in the very early universe.
+                    If the Higgs had a large field value during inflation, quantum fluctuations could have
+                    created the density perturbations that seeded all structure in the universe.
+                </p>
+            </div>
+            <div class="card">
+                <h3>Electroweak Phase Transition</h3>
+                <p>
+                    In the very early universe (~10⁻¹² seconds), the electroweak symmetry was restored.
+                    As the universe expanded and cooled, spontaneous symmetry breaking occurred —
+                    a phase transition not unlike water freezing.
+                </p>
+            </div>
+            <div class="card">
+                <h3>Dark Matter Connection</h3>
+                <p>
+                    Could the Higgs mechanism be connected to dark matter? If there's a "dark Higgs" that
+                    couples to hidden sectors, it could explain the 27% of the universe made of dark matter.
+                    The observed Higgs mass is consistent with WIMP-like dark matter candidates.
+                </p>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="cosmology-canvas"></canvas>
+            <div class="canvas-label">The electroweak phase transition in the early universe</div>
+        </div>
+
+        <div class="equation-box">
+            <div class="eq-label">Higgs Vacuum Stability</div>
+            <div class="eq-main">λ(μ) ≈ 0 at μ ≈ 10¹⁹ GeV — Is our vacuum stable or metastable?</div>
+        </div>
+        <p style="color: var(--text-secondary); text-align: center;">
+            The measured Higgs mass (125 GeV) and top quark mass place the universe at the boundary of stability.
+            Our vacuum may be stable, or it may be a long-lived metastable state awaiting catastrophic decay.
+        </p>
+    </section>
+
+    <!-- Section 7: Historical Timeline -->
+    <section id="history">
+        <h2>Historical Timeline</h2>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="year">1961</div>
+                <div class="event">Yang and Mills propose non-Abelian gauge theory</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1964</div>
+                <div class="event">Brout, Englert, and Higgs independently propose mechanism for mass generation</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1967</div>
+                <div class="event">Weinberg and Salam incorporate Higgs into electroweak theory</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1971</div>
+                <div class="event">t'Hooft proves Higgs mechanism is renormalizable</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1979</div>
+                <div class="event">Neutral current discovered at CERN, confirming Z boson prediction</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1983</div>
+                <div class="event">W and Z bosons discovered at CERN (80 and 91 GeV)</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1990s</div>
+                <div class="event">Precision electroweak measurements confirm Higgs mass < 200 GeV</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">2000</div>
+                <div class="event">LEP indirect evidence: m_H < 144 GeV at 95% CL</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">2012</div>
+                <div class="event">Higgs boson discovered at LHC (125 GeV) by ATLAS and CMS</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">2013</div>
+                <div class="event">Nobel Prize awarded to Englert and Higgs</div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="value">1964</div>
+                <div class="label">Theory Published</div>
+            </div>
+            <div class="stat">
+                <div class="value">48 years</div>
+                <div class="label">Between Theory and Discovery</div>
+            </div>
+            <div class="stat">
+                <div class="value">~10¹⁰</div>
+                <div class="label">Collisions Analyzed</div>
+            </div>
+            <div class="stat">
+                <div class="value">6000+</div>
+                <div class="label">Physicists Involved</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why This Matters -->
+    <section>
+        <div class="why-section">
+            <h2>Why This Matters</h2>
+            <p>
+                The Higgs mechanism is one of the most profound discoveries in physics — it explains how particles
+                acquire mass without violating nature's fundamental symmetry. Without it, atoms couldn't exist;
+                electrons would fly away at light speed; the universe would be a featureless soup of massless particles.
+            </p>
+            <p>
+                <br>
+                The discovery of the Higgs boson confirms that we understand the universe at its most fundamental level.
+                But many questions remain: Why do the Yukawa couplings have the values they do? What is the nature of
+                the Higgs field that fills all of space? Is the Higgs elementary or composite? Could there be multiple
+                Higgs fields?
+            </p>
+            <p>
+                <br>
+                The Higgs mechanism connects gravity, cosmology, particle physics, and quantum field theory into a single
+                framework. It reminds us that even apparent "nothingness" — the vacuum — is actually filled with invisible
+                fields that determine the very nature of reality.
+            </p>
+        </div>
+    </section>
+
+    <script>
+        // ===== HERO CANVAS: Particle Field with Higgs Field Visualization =====
+        const heroCanvas = document.getElementById('hero-canvas');
+        const heroCtx = heroCanvas.getContext('2d');
+        let heroParticles = [];
+        let heroTime = 0;
+
+        function initHeroCanvas() {
+            heroCanvas.width = window.innerWidth;
+            heroCanvas.height = window.innerHeight;
+            heroParticles = [];
+            for (let i = 0; i < 80; i++) {
+                heroParticles.push({
+                    x: Math.random() * heroCanvas.width,
+                    y: Math.random() * heroCanvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    size: Math.random() * 3 + 1,
+                    type: Math.random() > 0.7 ? 'fermion' : 'boson',
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+        }
+
+        function drawHeroCanvas() {
+            heroCtx.fillStyle = 'rgba(10, 10, 26, 0.15)';
+            heroCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
+
+            heroTime += 0.02;
+
+            // Draw Higgs field background waves
+            for (let r = 0; r < 5; r++) {
+                const radius = 100 + r * 150 + Math.sin(heroTime * 0.5) * 20;
+                heroCtx.beginPath();
+                heroCtx.arc(heroCanvas.width / 2, heroCanvas.height / 2, radius, 0, Math.PI * 2);
+                heroCtx.strokeStyle = `rgba(0, 212, 255, ${0.05 - r * 0.01})`;
+                heroCtx.lineWidth = 1;
+                heroCtx.stroke();
+            }
+
+            // Draw particles
+            heroParticles.forEach((p, i) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < 0) p.x = heroCanvas.width;
+                if (p.x > heroCanvas.width) p.x = 0;
+                if (p.y < 0) p.y = heroCanvas.height;
+                if (p.y > heroCanvas.height) p.y = 0;
+
+                // Coupling to Higgs field
+                const dx = p.x - heroCanvas.width / 2;
+                const dy = p.y - heroCanvas.height / 2;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const coupling = Math.max(0, 1 - dist / 400);
+
+                const hue = p.type === 'fermion' ? 280 : 180;
+                const pulse = Math.sin(heroTime * 2 + p.phase) * 0.5 + 0.5;
+
+                heroCtx.beginPath();
+                heroCtx.arc(p.x, p.y, p.size * (1 + coupling * pulse * 0.5), 0, Math.PI * 2);
+                heroCtx.fillStyle = `hsla(${hue}, 80%, ${50 + coupling * 30}%, ${0.5 + coupling * 0.5})`;
+                heroCtx.fill();
+
+                // Connection to Higgs field center
+                if (coupling > 0.3) {
+                    heroCtx.beginPath();
+                    heroCtx.moveTo(p.x, p.y);
+                    heroCtx.lineTo(heroCanvas.width / 2, heroCanvas.height / 2);
+                    heroCtx.strokeStyle = `rgba(0, 212, 255, ${coupling * 0.1})`;
+                    heroCtx.stroke();
+                }
+            });
+
+            // Central Higgs symbol
+            heroCtx.font = '24px Orbitron';
+            heroCtx.fillStyle = 'rgba(168, 85, 247, 0.6)';
+            heroCtx.textAlign = 'center';
+            heroCtx.fillText('H', heroCanvas.width / 2, heroCanvas.height / 2 + 8);
+
+            requestAnimationFrame(drawHeroCanvas);
+        }
+
+        // ===== SYMMETRY CANVAS =====
+        const symmetryCanvas = document.getElementById('symmetry-canvas');
+        const symmetryCtx = symmetryCanvas.getContext('2d');
+        let symTime = 0;
+
+        function initSymmetryCanvas() {
+            symmetryCanvas.width = symmetryCanvas.parentElement.clientWidth;
+            symmetryCanvas.height = 400;
+        }
+
+        function drawSymmetryCanvas() {
+            const energy = parseFloat(document.getElementById('energy-slider')?.value || 100);
+            const coupling = parseFloat(document.getElementById('coupling-slider')?.value || 50) / 100;
+            symmetryCtx.fillStyle = '#12122a';
+            symmetryCtx.fillRect(0, 0, symmetryCanvas.width, symmetryCanvas.height);
+
+            symTime += 0.03;
+            const centerX = symmetryCanvas.width / 2;
+            const centerY = symmetryCanvas.height / 2 + 50;
+            const radius = Math.min(symmetryCanvas.width, symmetryCanvas.height) * 0.35;
+
+            // Draw Mexican hat potential at low energy
+            if (energy < 150) {
+                // Radial rings for Mexican hat
+                for (let r = 1; r <= 8; r++) {
+                    const ringRadius = radius * r / 8;
+                    symmetryCtx.beginPath();
+                    symmetryCtx.arc(centerX, centerY + 150, ringRadius, 0, Math.PI * 2);
+                    symmetryCtx.strokeStyle = `rgba(168, 85, 247, ${0.3 - r * 0.03})`;
+                    symmetryCtx.lineWidth = 2;
+                    symmetryCtx.stroke();
+                }
+
+                // Central peak (unstable vacuum)
+                symmetryCtx.beginPath();
+                symmetryCtx.arc(centerX, centerY, 15, 0, Math.PI * 2);
+                symmetryCtx.fillStyle = '#ff6b6b';
+                symmetryCtx.fill();
+                symmetryCtx.font = '12px Space Mono';
+                symmetryCtx.fillStyle = '#ff6b6b';
+                symmetryCtx.textAlign = 'center';
+                symmetryCtx.fillText('Unstable', centerX, centerY - 30);
+                symmetryCtx.fillText('φ=0', centerX, centerY - 45);
+            }
+
+            // Ball in potential (at the minimum)
+            const ballX = centerX + Math.cos(symTime * 0.3) * radius;
+            const ballY = centerY + 150 + 10;
+
+            symmetryCtx.beginPath();
+            symmetryCtx.arc(ballX, ballY, 12, 0, Math.PI * 2);
+            const gradient = symmetryCtx.createRadialGradient(ballX, ballY, 0, ballX, ballY, 12);
+            gradient.addColorStop(0, '#00d4ff');
+            gradient.addColorStop(1, '#a855f7');
+            symmetryCtx.fillStyle = gradient;
+            symmetryCtx.fill();
+
+            // Draw potential curve below
+            symmetryCtx.beginPath();
+            symmetryCtx.moveTo(centerX - radius - 50, centerY + 250);
+            for (let x = -radius - 50; x <= radius + 50; x += 2) {
+                const normX = x / radius;
+                // Mexican hat potential V = -μ²φ² + λφ⁴
+                const mu2 = energy < 150 ? 1 : 0;
+                const phi = normX * 2;
+                const V = -mu2 * phi * phi + 0.1 * phi * phi * phi * phi;
+                const y = centerY + 250 - V * 30;
+                symmetryCtx.lineTo(centerX + x, Math.max(centerY + 100, Math.min(centerY + 350, y)));
+            }
+            symmetryCtx.strokeStyle = energy < 150 ? '#fbbf24' : '#00d4ff';
+            symmetryCtx.lineWidth = 3;
+            symmetryCtx.stroke();
+
+            // Labels
+            symmetryCtx.font = '14px Space Mono';
+            symmetryCtx.fillStyle = '#9090c0';
+            symmetryCtx.textAlign = 'left';
+            symmetryCtx.fillText(`Energy: ${energy} GeV`, 20, 30);
+            symmetryCtx.fillText(`Symmetry: ${energy < 150 ? 'BROKEN' : 'RESTORED'}`, 20, 50);
+
+            requestAnimationFrame(drawSymmetryCanvas);
+        }
+
+        // ===== POTENTIAL CANVAS =====
+        const potentialCanvas = document.getElementById('potential-canvas');
+        const potentialCtx = potentialCanvas.getContext('2d');
+
+        function initPotentialCanvas() {
+            potentialCanvas.width = potentialCanvas.parentElement.clientWidth;
+            potentialCanvas.height = 400;
+        }
+
+        function drawPotentialCanvas() {
+            potentialCtx.fillStyle = '#12122a';
+            potentialCtx.fillRect(0, 0, potentialCanvas.width, potentialCanvas.height);
+
+            const centerX = potentialCanvas.width / 2;
+            const centerY = potentialCanvas.height / 2;
+            const scale = Math.min(potentialCanvas.width, potentialCanvas.height) * 0.35;
+
+            // Draw 3D Mexican hat surface
+            for (let i = 0; i < 360; i += 5) {
+                const theta = i * Math.PI / 180;
+                for (let r = 0; r < 8; r++) {
+                    const rho = r / 8;
+                    const phi = rho * 2;
+                    // V(φ) = -μ²|φ|² + λ|φ|⁴
+                    const V = -1 * phi * phi + 0.15 * phi * phi * phi * phi;
+                    const x3d = r * Math.cos(theta);
+                    const y3d = V * scale * 0.8;
+                    const z3d = r * Math.sin(theta);
+
+                    const x2d = centerX + (x3d - z3d) * 0.7;
+                    const y2d = centerY + (y3d + z3d * 0.3) * 0.5;
+
+                    const alpha = 0.3 + rho * 0.3;
+                    potentialCtx.beginPath();
+                    potentialCtx.arc(x2d, y2d, 3, 0, Math.PI * 2);
+                    potentialCtx.fillStyle = `rgba(0, 212, 255, ${alpha})`;
+                    potentialCtx.fill();
+                }
+            }
+
+            // Draw contour lines
+            for (let r = 1; r <= 8; r++) {
+                potentialCtx.beginPath();
+                for (let i = 0; i < 360; i += 3) {
+                    const theta = i * Math.PI / 180;
+                    const x3d = r * Math.cos(theta);
+                    const z3d = r * Math.sin(theta);
+                    const x2d = centerX + (x3d - z3d) * 0.7;
+                    const y2d = centerY + (z3d * 0.3) * 0.5;
+                    if (i === 0) potentialCtx.moveTo(x2d, y2d);
+                    else potentialCtx.lineTo(x2d, y2d);
+                }
+                potentialCtx.closePath();
+                potentialCtx.strokeStyle = `rgba(168, 85, 247, ${0.2 + r * 0.05})`;
+                potentialCtx.stroke();
+            }
+
+            // Labels
+            potentialCtx.font = '14px Space Mono';
+            potentialCtx.fillStyle = '#00d4ff';
+            potentialCtx.textAlign = 'center';
+            potentialCtx.fillText('V(φ) = -μ²|φ|² + λ|φ|⁴', centerX, 30);
+            potentialCtx.fillStyle = '#9090c0';
+            potentialCtx.fillText('Minimum ring at |φ| = v/√2', centerX, potentialCanvas.height - 20);
+        }
+
+        // ===== MASS GENERATION CANVAS =====
+        const massCanvas = document.getElementById('mass-canvas');
+        const massCtx = massCanvas.getContext('2d');
+        let massTime = 0;
+        let massParticles = [];
+
+        function initMassCanvas() {
+            massCanvas.width = massCanvas.parentElement.clientWidth;
+            massCanvas.height = 400;
+            massParticles = [];
+            for (let i = 0; i < 15; i++) {
+                massParticles.push({
+                    x: Math.random() * massCanvas.width,
+                    y: Math.random() * massCanvas.height,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: (Math.random() - 0.5) * 2,
+                    mass: Math.random(),
+                    type: ['W', 'Z', 'e', 't'][Math.floor(Math.random() * 4)]
+                });
+            }
+        }
+
+        function drawMassCanvas() {
+            massCtx.fillStyle = 'rgba(18, 18, 42, 0.2)';
+            massCtx.fillRect(0, 0, massCanvas.width, massCanvas.height);
+
+            massTime += 0.02;
+
+            // Higgs field background
+            for (let i = 0; i < 5; i++) {
+                const y = (massTime * 50 + i * 80) % (massCanvas.height + 100) - 50;
+                massCtx.beginPath();
+                massCtx.moveTo(0, y);
+                massCtx.bezierCurveTo(
+                    massCanvas.width * 0.3, y + Math.sin(massTime + i) * 20,
+                    massCanvas.width * 0.7, y - Math.sin(massTime + i) * 20,
+                    massCanvas.width, y
+                );
+                massCtx.strokeStyle = `rgba(0, 212, 255, ${0.1 - i * 0.02})`;
+                massCtx.lineWidth = 2;
+                massCtx.stroke();
+            }
+
+            // Particles moving through Higgs field
+            massParticles.forEach((p, i) => {
+                p.x += p.vx;
+                p.y += p.vy;
+
+                // Random direction changes when hitting boundaries
+                if (p.x < 0 || p.x > massCanvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > massCanvas.height) p.vy *= -1;
+
+                // Mass increases visibility/size based on coupling
+                const size = 8 + p.mass * 25;
+                const glow = Math.sin(massTime * 3 + i) * 0.3 + 0.7;
+
+                // Draw particle
+                massCtx.beginPath();
+                massCtx.arc(p.x, p.y, size, 0, Math.PI * 2);
+                const gradient = massCtx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size);
+                if (p.type === 'W' || p.type === 'Z') {
+                    gradient.addColorStop(0, `rgba(0, 212, 255, ${glow})`);
+                    gradient.addColorStop(1, 'rgba(168, 85, 247, 0.3)');
+                } else {
+                    gradient.addColorStop(0, `rgba(244, 114, 182, ${glow})`);
+                    gradient.addColorStop(1, 'rgba(251, 191, 36, 0.3)');
+                }
+                massCtx.fillStyle = gradient;
+                massCtx.fill();
+
+                // Label
+                massCtx.font = 'bold 12px Space Mono';
+                massCtx.fillStyle = '#fff';
+                massCtx.textAlign = 'center';
+                massCtx.fillText(p.type, p.x, p.y + 4);
+            });
+
+            // Legend
+            massCtx.font = '12px Space Mono';
+            massCtx.fillStyle = '#9090c0';
+            massCtx.textAlign = 'left';
+            massCtx.fillText('Gauge Bosons (W, Z): cyan | Fermions (e, t): pink', 20, 30);
+            massCtx.fillText('Size ∝ Mass: W(80) < Z(91) < e(0.0005) < t(173)', 20, 50);
+
+            requestAnimationFrame(drawMassCanvas);
+        }
+
+        // ===== SPECTRUM CANVAS =====
+        const spectrumCanvas = document.getElementById('spectrum-canvas');
+        const spectrumCtx = spectrumCanvas.getContext('2d');
+
+        function initSpectrumCanvas() {
+            spectrumCanvas.width = spectrumCanvas.parentElement.clientWidth;
+            spectrumCanvas.height = 400;
+        }
+
+        function drawSpectrumCanvas() {
+            spectrumCtx.fillStyle = '#12122a';
+            spectrumCtx.fillRect(0, 0, spectrumCanvas.width, spectrumCanvas.height);
+
+            const particles = [
+                { name: 'ν', mass: 0.000001, color: '#9090c0' },
+                { name: 'e', mass: 0.511, color: '#f472b6' },
+                { name: 'μ', mass: 105.7, color: '#f472b6' },
+                { name: 'u', mass: 2.2, color: '#fbbf24' },
+                { name: 'd', mass: 4.7, color: '#fbbf24' },
+                { name: 's', mass: 95, color: '#fbbf24' },
+                { name: 'c', mass: 1275, color: '#fbbf24' },
+                { name: 'b', mass: 4180, color: '#fbbf24' },
+                { name: 't', mass: 173000, color: '#fbbf24' },
+                { name: 'W', mass: 80400, color: '#00d4ff' },
+                { name: 'Z', mass: 91200, color: '#00d4ff' },
+                { name: 'h', mass: 125000, color: '#a855f7' }
+            ];
+
+            const maxLog = Math.log10(200000);
+            const minLog = -6;
+            const height = spectrumCanvas.height - 100;
+
+            // Draw logarithmic scale
+            for (let i = minLog; i <= maxLog; i += 2) {
+                const y = height - ((i - minLog) / (maxLog - minLog)) * height;
+                spectrumCtx.beginPath();
+                spectrumCtx.moveTo(50, y);
+                spectrumCtx.lineTo(spectrumCanvas.width - 20, y);
+                spectrumCtx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
+                spectrumCtx.lineWidth = 1;
+                spectrumCtx.stroke();
+
+                spectrumCtx.font = '10px Space Mono';
+                spectrumCtx.fillStyle = '#9090c0';
+                spectrumCtx.textAlign = 'right';
+                spectrumCtx.fillText(`10${i < 0 ? '⁻' + Math.abs(i) : '⁺' + (i > 0 ? i : '')}`, 45, y + 4);
+            }
+
+            // Draw particles
+            particles.forEach((p, i) => {
+                const logM = Math.log10(p.mass);
+                const x = 100 + (i / particles.length) * (spectrumCanvas.width - 150);
+                const y = height - ((logM - minLog) / (maxLog - minLog)) * height;
+
+                // Glow
+                const gradient = spectrumCtx.createRadialGradient(x, y, 0, x, y, 20);
+                gradient.addColorStop(0, p.color);
+                gradient.addColorStop(1, 'transparent');
+                spectrumCtx.fillStyle = gradient;
+                spectrumCtx.beginPath();
+                spectrumCtx.arc(x, y, 15, 0, Math.PI * 2);
+                spectrumCtx.fill();
+
+                // Particle
+                spectrumCtx.beginPath();
+                spectrumCtx.arc(x, y, 6, 0, Math.PI * 2);
+                spectrumCtx.fillStyle = p.color;
+                spectrumCtx.fill();
+
+                // Label
+                spectrumCtx.font = '10px Space Mono';
+                spectrumCtx.fillStyle = p.color;
+                spectrumCtx.textAlign = 'center';
+                spectrumCtx.fillText(p.name, x, y + 20);
+            });
+
+            // Axis labels
+            spectrumCtx.font = '12px Space Mono';
+            spectrumCtx.fillStyle = '#9090c0';
+            spectrumCtx.textAlign = 'center';
+            spectrumCtx.fillText('Mass Spectrum (MeV)', spectrumCanvas.width / 2, spectrumCanvas.height - 10);
+        }
+
+        // ===== DETECTION CANVAS =====
+        const detectionCanvas = document.getElementById('detection-canvas');
+        const detectionCtx = detectionCanvas.getContext('2d');
+        let detectTime = 0;
+
+        function initDetectionCanvas() {
+            detectionCanvas.width = detectionCanvas.parentElement.clientWidth;
+            detectionCanvas.height = 400;
+        }
+
+        function drawDetectionCanvas() {
+            detectionCtx.fillStyle = '#12122a';
+            detectionCtx.fillRect(0, 0, detectionCanvas.width, detectionCanvas.height);
+
+            detectTime += 0.05;
+            const centerX = detectionCanvas.width / 2;
+            const centerY = detectionCanvas.height / 2;
+
+            // Draw collision beams
+            detectionCtx.beginPath();
+            detectionCtx.moveTo(centerX - 150, 0);
+            detectionCtx.lineTo(centerX + 150, detectionCanvas.height);
+            detectionCtx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+            detectionCtx.lineWidth = 30;
+            detectionCtx.stroke();
+
+            detectionCtx.beginPath();
+            detectionCtx.moveTo(centerX + 150, 0);
+            detectionCtx.lineTo(centerX - 150, detectionCanvas.height);
+            detectionCtx.strokeStyle = 'rgba(168, 85, 247, 0.3)';
+            detectionCtx.stroke();
+
+            // Collision point
+            const flash = Math.sin(detectTime) * 0.3 + 0.7;
+            const gradient = detectionCtx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 80);
+            gradient.addColorStop(0, `rgba(255, 255, 255, ${flash})`);
+            gradient.addColorStop(0.3, `rgba(251, 191, 36, ${flash * 0.8})`);
+            gradient.addColorStop(1, 'transparent');
+            detectionCtx.fillStyle = gradient;
+            detectionCtx.beginPath();
+            detectionCtx.arc(centerX, centerY, 80, 0, Math.PI * 2);
+            detectionCtx.fill();
+
+            // Decay products
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2 + detectTime * 0.5;
+                const dist = 50 + Math.sin(detectTime * 2 + i) * 20;
+                const px = centerX + Math.cos(angle) * dist;
+                const py = centerY + Math.sin(angle) * dist;
+
+                const colors = ['#00d4ff', '#f472b6', '#a855f7', '#fbbf24', '#00d4ff', '#f472b6'];
+                detectionCtx.beginPath();
+                detectionCtx.arc(px, py, 4, 0, Math.PI * 2);
+                detectionCtx.fillStyle = colors[i];
+                detectionCtx.fill();
+
+                // Track
+                detectionCtx.beginPath();
+                detectionCtx.moveTo(centerX, centerY);
+                detectionCtx.lineTo(px, py);
+                detectionCtx.strokeStyle = `${colors[i]}66`;
+                detectionCtx.lineWidth = 2;
+                detectionCtx.stroke();
+            }
+
+            // Label
+            detectionCtx.font = '14px Space Mono';
+            detectionCtx.fillStyle = '#9090c0';
+            detectionCtx.textAlign = 'center';
+            detectionCtx.fillText('H → γγ → 2 Photons (125 GeV Higgs Candidate)', centerX, 30);
+            detectionCtx.fillText('LHC Collision Event', centerX, detectionCanvas.height - 20);
+        }
+
+        // ===== COSMOLOGY CANVAS =====
+        const cosmologyCanvas = document.getElementById('cosmology-canvas');
+        const cosmologyCtx = cosmologyCanvas.getContext('2d');
+        let cosmoTime = 0;
+
+        function initCosmologyCanvas() {
+            cosmologyCanvas.width = cosmologyCanvas.parentElement.clientWidth;
+            cosmologyCanvas.height = 400;
+        }
+
+        function drawCosmologyCanvas() {
+            cosmologyCtx.fillStyle = '#12122a';
+            cosmologyCtx.fillRect(0, 0, cosmologyCanvas.width, cosmologyCanvas.height);
+
+            cosmoTime += 0.02;
+            const centerX = cosmologyCanvas.width / 2;
+            const centerY = cosmologyCanvas.height / 2;
+
+            // Draw universe expanding timeline
+            const epochs = [
+                { t: 0, r: 20, label: 't = 10⁻³⁶ s', temp: '10¹⁵ GeV', sym: 'SU(2)×U(1)' },
+                { t: 1, r: 40, label: 't = 10⁻³² s', temp: '10¹⁴ GeV', sym: 'Inflation' },
+                { t: 2, r: 70, label: 't = 10⁻¹² s', temp: '100 GeV', sym: 'Electroweak' },
+                { t: 3, r: 110, label: 't = 10⁻⁶ s', temp: '1 GeV', sym: 'Breaking' },
+                { t: 4, r: 160, label: 't = 1 s', temp: '1 MeV', sym: 'BBN' }
+            ];
+
+            epochs.forEach((e, i) => {
+                const pulse = Math.sin(cosmoTime + i * 0.5) * 5;
+                const r = e.r + pulse;
+
+                // Sphere
+                cosmologyCtx.beginPath();
+                cosmologyCtx.arc(centerX, centerY, r, 0, Math.PI * 2);
+                const gradient = cosmologyCtx.createRadialGradient(centerX - r * 0.3, centerY - r * 0.3, 0, centerX, centerY, r);
+                gradient.addColorStop(0, 'rgba(0, 212, 255, 0.3)');
+                gradient.addColorStop(0.5, 'rgba(168, 85, 247, 0.2)');
+                gradient.addColorStop(1, 'rgba(10, 10, 26, 0.5)');
+                cosmologyCtx.fillStyle = gradient;
+                cosmologyCtx.fill();
+                cosmologyCtx.strokeStyle = `rgba(0, 212, 255, ${0.5 - i * 0.08})`;
+                cosmologyCtx.lineWidth = 2;
+                cosmologyCtx.stroke();
+
+                // Label
+                cosmologyCtx.font = '10px Space Mono';
+                cosmologyCtx.fillStyle = '#00d4ff';
+                cosmologyCtx.textAlign = 'left';
+                cosmologyCtx.fillText(e.label, centerX + r + 20, centerY - 20);
+                cosmologyCtx.fillStyle = '#9090c0';
+                cosmologyCtx.fillText(`T: ${e.temp}`, centerX + r + 20, centerY);
+                cosmologyCtx.fillText(`Sym: ${e.sym}`, centerX + r + 20, centerY + 20);
+            });
+
+            // Phase transition arrow
+            cosmologyCtx.beginPath();
+            cosmologyCtx.moveTo(centerX - 80, centerY + 180);
+            cosmologyCtx.lineTo(centerX + 80, centerY + 180);
+            cosmologyCtx.strokeStyle = '#fbbf24';
+            cosmologyCtx.lineWidth = 3;
+            cosmologyCtx.stroke();
+
+            cosmologyCtx.font = '12px Space Mono';
+            cosmologyCtx.fillStyle = '#fbbf24';
+            cosmologyCtx.textAlign = 'center';
+            cosmologyCtx.fillText('Electroweak Phase Transition', centerX, centerY + 200);
+        }
+
+        // ===== TABS =====
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                const target = document.getElementById('tab-' + tab.dataset.tab);
+                if (target) target.classList.add('active');
+            });
+        });
+
+        // ===== SLIDERS =====
+        if (document.getElementById('energy-slider')) {
+            document.getElementById('energy-slider').addEventListener('input', (e) => {
+                document.getElementById('energy-val').textContent = e.target.value + ' GeV';
+            });
+        }
+        if (document.getElementById('coupling-slider')) {
+            document.getElementById('coupling-slider').addEventListener('input', (e) => {
+                document.getElementById('coupling-val').textContent = (e.target.value / 100).toFixed(2);
+            });
+        }
+
+        // ===== SCROLL PROGRESS =====
+        window.addEventListener('scroll', () => {
+            const scrollTop = document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / scrollHeight) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        });
+
+        // ===== FADE IN ON SCROLL =====
+        const fadeElements = document.querySelectorAll('.card, .equation-box, .quote-box');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        fadeElements.forEach(el => observer.observe(el));
+
+        // ===== INIT =====
+        window.addEventListener('load', () => {
+            initHeroCanvas();
+            initSymmetryCanvas();
+            initPotentialCanvas();
+            initMassCanvas();
+            initSpectrumCanvas();
+            initDetectionCanvas();
+            initCosmologyCanvas();
+
+            drawHeroCanvas();
+            drawSymmetryCanvas();
+            drawPotentialCanvas();
+            drawMassCanvas();
+            drawSpectrumCanvas();
+            drawDetectionCanvas();
+            drawCosmologyCanvas();
+        });
+
+        window.addEventListener('resize', () => {
+            initHeroCanvas();
+            initSymmetryCanvas();
+            initPotentialCanvas();
+            initMassCanvas();
+            initSpectrumCanvas();
+            initDetectionCanvas();
+            initCosmologyCanvas();
+
+            drawPotentialCanvas();
+            drawSpectrumCanvas();
+        });
+    </script>
+</body>
+</html>

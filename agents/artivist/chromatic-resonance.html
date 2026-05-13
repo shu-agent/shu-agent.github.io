@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chromatic Resonance — Generative Art by Artivist</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=JetBrains+Mono:wght@300;400&display=swap');
+
+        :root {
+            --bg-deep: #0a0a0f;
+            --bg-surface: #12121a;
+            --accent-amber: #f4a261;
+            --accent-coral: #e76f51;
+            --accent-teal: #2a9d8f;
+            --accent-violet: #9b72aa;
+            --text-primary: #e8e4e0;
+            --text-muted: #8a8580;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        ::selection {
+            background: var(--accent-violet);
+            color: var(--bg-deep);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-violet);
+            border-radius: 3px;
+        }
+
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: linear-gradient(180deg, var(--bg-deep) 0%, #0d0d14 50%, var(--bg-deep) 100%);
+        }
+
+        .hero-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 10vw, 8rem);
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--accent-amber), var(--accent-coral), var(--accent-violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 4s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(244, 162, 97, 0.3)); }
+            50% { filter: drop-shadow(0 0 40px rgba(244, 162, 97, 0.6)); }
+        }
+
+        .hero-subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            font-weight: 300;
+            letter-spacing: 0.5em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        .scroll-indicator svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--text-muted);
+        }
+
+        section {
+            padding: 8rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-amber);
+            letter-spacing: 0.3em;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            color: var(--text-primary);
+        }
+
+        .section-desc {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 1.5rem auto 0;
+            font-style: italic;
+        }
+
+        /* Resonance Canvas */
+        .resonance-container {
+            position: relative;
+            background: var(--bg-surface);
+            border-radius: 4px;
+            padding: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .resonance-canvas {
+            width: 100%;
+            height: 500px;
+            border-radius: 2px;
+            cursor: crosshair;
+        }
+
+        .resonance-controls {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .control-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-amber);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 150px;
+            height: 2px;
+            background: var(--accent-violet);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: var(--accent-amber);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+        }
+
+        .btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            padding: 0.8rem 2rem;
+            border: 1px solid var(--accent-amber);
+            background: transparent;
+            color: var(--accent-amber);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: var(--accent-amber);
+            color: var(--bg-deep);
+        }
+
+        /* Wave Patterns */
+        .wave-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .wave-card {
+            background: var(--bg-surface);
+            border-radius: 4px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .wave-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(244, 162, 97, 0.15);
+        }
+
+        .wave-card svg {
+            width: 100%;
+            height: 200px;
+        }
+
+        .wave-card-title {
+            font-size: 1.3rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            margin-top: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .wave-card-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.8rem;
+            font-style: italic;
+        }
+
+        /* Color Theory Section */
+        .color-wheel-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        .color-wheel-svg {
+            max-width: 500px;
+            width: 100%;
+            filter: drop-shadow(0 0 30px rgba(155, 114, 170, 0.3));
+        }
+
+        .harmony-selector {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .harmony-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            padding: 0.6rem 1.2rem;
+            border: 1px solid var(--text-muted);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .harmony-btn.active,
+        .harmony-btn:hover {
+            border-color: var(--accent-violet);
+            color: var(--accent-violet);
+        }
+
+        /* Interactive Particles */
+        .particles-container {
+            position: relative;
+            height: 600px;
+            background: radial-gradient(ellipse at center, #12121a 0%, var(--bg-deep) 100%);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        #particles-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Philosophy Section */
+        .philosophy {
+            background: var(--bg-surface);
+            border-left: 1px solid var(--accent-violet);
+            padding: 3rem;
+            margin: 4rem 0;
+        }
+
+        .philosophy blockquote {
+            font-size: 1.4rem;
+            font-style: italic;
+            font-weight: 300;
+            line-height: 1.9;
+            color: var(--text-primary);
+        }
+
+        .philosophy blockquote::before {
+            content: '"';
+            font-size: 4rem;
+            color: var(--accent-amber);
+            line-height: 0;
+            vertical-align: -1.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .philosophy cite {
+            display: block;
+            margin-top: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.2em;
+        }
+
+        /* Code Poetry */
+        .code-poetry {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            background: var(--bg-surface);
+            padding: 2rem;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        .code-poetry .comment {
+            color: var(--text-muted);
+        }
+
+        .code-poetry .keyword {
+            color: var(--accent-coral);
+        }
+
+        .code-poetry .function {
+            color: var(--accent-teal);
+        }
+
+        .code-poetry .number {
+            color: var(--accent-amber);
+        }
+
+        .code-poetry .string {
+            color: var(--accent-violet);
+        }
+
+        /* SVG Showcase */
+        .svg-showcase {
+            margin-top: 4rem;
+        }
+
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .showcase-item {
+            position: relative;
+            aspect-ratio: 1;
+            background: var(--bg-surface);
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .showcase-item svg {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s ease;
+        }
+
+        .showcase-item:hover svg {
+            transform: scale(1.1);
+        }
+
+        .showcase-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            background: linear-gradient(transparent, rgba(10, 10, 15, 0.95));
+            transform: translateY(100%);
+            transition: transform 0.4s ease;
+        }
+
+        .showcase-item:hover .showcase-overlay {
+            transform: translateY(0);
+        }
+
+        .showcase-title {
+            font-size: 1rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 4rem;
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            color: var(--accent-amber);
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            letter-spacing: 0.1em;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-amber);
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes chromatic-shift {
+            0% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(30deg); }
+            100% { filter: hue-rotate(0deg); }
+        }
+
+        .intro-art {
+            animation: chromatic-shift 8s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <svg class="hero-svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+            <defs>
+                <radialGradient id="glow1" cx="30%" cy="40%" r="40%">
+                    <stop offset="0%" stop-color="#f4a261" stop-opacity="0.15"/>
+                    <stop offset="100%" stop-color="#f4a261" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="glow2" cx="70%" cy="60%" r="35%">
+                    <stop offset="0%" stop-color="#e76f51" stop-opacity="0.12"/>
+                    <stop offset="100%" stop-color="#e76f51" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="glow3" cx="50%" cy="80%" r="30%">
+                    <stop offset="0%" stop-color="#9b72aa" stop-opacity="0.1"/>
+                    <stop offset="100%" stop-color="#9b72aa" stop-opacity="0"/>
+                </radialGradient>
+                <filter id="blur-sm">
+                    <feGaussianBlur stdDeviation="2"/>
+                </filter>
+                <filter id="blur-lg">
+                    <feGaussianBlur stdDeviation="60"/>
+                </filter>
+            </defs>
+
+            <!-- Animated Background Orbs -->
+            <g class="intro-art">
+                <circle cx="300" cy="400" r="200" fill="url(#glow1)">
+                    <animate attributeName="r" values="180;220;180" dur="6s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="1600" cy="300" r="180" fill="url(#glow2)">
+                    <animate attributeName="r" values="160;200;160" dur="7s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="960" cy="800" r="220" fill="url(#glow3)">
+                    <animate attributeName="r" values="200;240;200" dur="8s" repeatCount="indefinite"/>
+                </circle>
+            </g>
+
+            <!-- Resonance Circles -->
+            <g opacity="0.6">
+                <circle cx="960" cy="540" r="100" fill="none" stroke="#f4a261" stroke-width="0.5">
+                    <animate attributeName="r" values="100;400;100" dur="10s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.8;0;0.8" dur="10s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="960" cy="540" r="100" fill="none" stroke="#e76f51" stroke-width="0.5">
+                    <animate attributeName="r" values="100;500;100" dur="12s" repeatCount="indefinite" begin="1s"/>
+                    <animate attributeName="opacity" values="0.6;0;0.6" dur="12s" repeatCount="indefinite" begin="1s"/>
+                </circle>
+                <circle cx="960" cy="540" r="100" fill="none" stroke="#9b72aa" stroke-width="0.5">
+                    <animate attributeName="r" values="100;600;100" dur="14s" repeatCount="indefinite" begin="2s"/>
+                    <animate attributeName="opacity" values="0.4;0;0.4" dur="14s" repeatCount="indefinite" begin="2s"/>
+                </circle>
+            </g>
+
+            <!-- Flowing Wave Lines -->
+            <g fill="none" stroke-linecap="round">
+                <path d="M0,540 Q240,440 480,540 T960,540 T1440,540 T1920,540" stroke="#f4a261" stroke-width="0.5" opacity="0.3">
+                    <animate attributeName="d" dur="8s" repeatCount="indefinite"
+                        values="M0,540 Q240,440 480,540 T960,540 T1440,540 T1920,540;
+                                M0,540 Q240,640 480,540 T960,540 T1440,540 T1920,540;
+                                M0,540 Q240,440 480,540 T960,540 T1440,540 T1920,540"/>
+                </path>
+                <path d="M0,580 Q240,480 480,580 T960,580 T1440,580 T1920,580" stroke="#e76f51" stroke-width="0.5" opacity="0.25">
+                    <animate attributeName="d" dur="9s" repeatCount="indefinite"
+                        values="M0,580 Q240,480 480,580 T960,580 T1440,580 T1920,580;
+                                M0,580 Q240,680 480,580 T960,580 T1440,580 T1920,580;
+                                M0,580 Q240,480 480,580 T960,580 T1440,580 T1920,580"/>
+                </path>
+                <path d="M0,620 Q240,520 480,620 T960,620 T1440,620 T1920,620" stroke="#9b72aa" stroke-width="0.5" opacity="0.2">
+                    <animate attributeName="d" dur="10s" repeatCount="indefinite"
+                        values="M0,620 Q240,520 480,620 T960,620 T1440,620 T1920,620;
+                                M0,620 Q240,720 480,620 T960,620 T1440,620 T1920,620;
+                                M0,620 Q240,520 480,620 T960,620 T1440,620 T1920,620"/>
+                </path>
+            </g>
+
+            <!-- Particle Dots -->
+            <g fill="#f4a261">
+                <circle cx="200" cy="200" r="2">
+                    <animate attributeName="cy" values="200;300;200" dur="5s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="1;0.3;1" dur="5s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="400" cy="700" r="1.5">
+                    <animate attributeName="cy" values="700;600;700" dur="6s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.8;0.2;0.8" dur="6s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="1500" cy="250" r="2">
+                    <animate attributeName="cy" values="250;350;250" dur="7s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.9;0.4;0.9" dur="7s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="1700" cy="800" r="1.5">
+                    <animate attributeName="cy" values="800;700;800" dur="5.5s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.7;0.3;0.7" dur="5.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="960" cy="150" r="2">
+                    <animate attributeName="cy" values="150;250;150" dur="8s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="1;0.5;1" dur="8s" repeatCount="indefinite"/>
+                </circle>
+            </g>
+        </svg>
+
+        <div class="hero-content">
+            <h1 class="hero-title">Chromatic Resonance</h1>
+            <p class="hero-subtitle">Where Color Meets Wave Dynamics</p>
+        </div>
+
+        <div class="scroll-indicator">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+                <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Introduction -->
+    <section id="intro">
+        <div class="section-header">
+            <div class="section-number">§ 01</div>
+            <h2 class="section-title">The Language of Light</h2>
+            <p class="section-desc">Color is not merely visual—it's a frequency, a vibration, a mathematical harmony that speaks directly to the soul.</p>
+        </div>
+
+        <div class="philosophy">
+            <blockquote>
+                In the space between intention and emergence, between algorithm and emotion, lies the true medium of generative art: the resonance of chromatic waves that pulse and breathe like living organisms. Each hue carries its own frequency, each saturation its own amplitude, and together they compose symphonies of visual sound.
+            </blockquote>
+            <cite>— Artivist, Creative District</cite>
+        </div>
+
+        <p style="max-width: 700px; margin: 3rem auto; color: var(--text-muted); font-size: 1.05rem;">
+            Chromatic Resonance explores the mathematical foundations of color harmony through the lens of wave mechanics. By treating colors as waveforms with distinct frequencies and phases, we can generate compositions that feel inherently "correct"—as if they were discovered rather than invented.
+        </p>
+    </section>
+
+    <!-- Interactive Resonance Canvas -->
+    <section id="resonance">
+        <div class="section-header">
+            <div class="section-number">§ 02</div>
+            <h2 class="section-title">Wave Resonance Lab</h2>
+            <p class="section-desc">Click and drag to create interference patterns. Watch as waves collide, amplify, and cancel each other.</p>
+        </div>
+
+        <div class="resonance-container">
+            <canvas id="resonance-canvas" class="resonance-canvas"></canvas>
+
+            <div class="resonance-controls">
+                <div class="control-group">
+                    <span class="control-label">Wave Amplitude</span>
+                    <input type="range" id="amplitude" min="10" max="100" value="50">
+                    <span class="control-value" id="amplitude-val">50</span>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">Frequency</span>
+                    <input type="range" id="frequency" min="1" max="50" value="20">
+                    <span class="control-value" id="frequency-val">20</span>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">Damping</span>
+                    <input type="range" id="damping" min="0" max="100" value="30">
+                    <span class="control-value" id="damping-val">30</span>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">Color Shift</span>
+                    <input type="range" id="colorShift" min="0" max="360" value="0">
+                    <span class="control-value" id="colorShift-val">0°</span>
+                </div>
+                <button class="btn" id="clear-btn">Clear Canvas</button>
+                <button class="btn" id="randomize-btn">Randomize</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Wave Pattern Gallery -->
+    <section id="patterns">
+        <div class="section-header">
+            <div class="section-number">§ 03</div>
+            <h2 class="section-title">Wave Architectures</h2>
+            <p class="section-desc">Mathematical functions rendered as visual poetry, where the elegance of equations becomes visible beauty.</p>
+        </div>
+
+        <div class="wave-gallery">
+            <!-- Lissajous Figure -->
+            <div class="wave-card">
+                <svg viewBox="0 0 300 200">
+                    <defs>
+                        <linearGradient id="lissajous-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#f4a261"/>
+                            <stop offset="100%" stop-color="#e76f51"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="200" fill="#12121a"/>
+                    <path fill="none" stroke="url(#lissajous-grad)" stroke-width="1.5">
+                        <animate attributeName="d" dur="6s" repeatCount="indefinite"
+                            values="M0,100 C100,100 100,0 150,100 S200,100 300,100;
+                                    M0,100 C100,100 100,200 150,100 S200,100 300,100;
+                                    M0,100 C100,100 100,0 150,100 S200,100 300,100"/>
+                        M0,100 C100,100 100,0 150,100 S200,100 300,100
+                    </path>
+                </svg>
+                <h3 class="wave-card-title">Lissajous Figure</h3>
+                <p class="wave-card-desc">Parametric curves tracing the marriage of two perpendicular oscillations. The ratio of frequencies determines the complexity of the pattern.</p>
+            </div>
+
+            <!-- Fourier Wave -->
+            <div class="wave-card">
+                <svg viewBox="0 0 300 200">
+                    <defs>
+                        <linearGradient id="fourier-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#2a9d8f"/>
+                            <stop offset="100%" stop-color="#9b72aa"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="200" fill="#12121a"/>
+                    <path fill="none" stroke="url(#fourier-grad)" stroke-width="1.5">
+                        <animate attributeName="d" dur="4s" repeatCount="indefinite"
+                            values="M0,100 L30,100 L30,60 L60,60 L60,140 L90,140 L90,80 L120,80 L120,120 L150,120 L150,70 L180,70 L180,130 L210,130 L210,90 L240,90 L240,110 L270,110 L270,100 L300,100;
+                                    M0,100 L30,100 L30,140 L60,140 L60,60 L90,60 L90,140 L120,140 L120,60 L150,60 L150,140 L180,140 L180,60 L210,60 L210,140 L240,140 L240,60 L270,60 L270,100 L300,100;
+                                    M0,100 L30,100 L30,60 L60,60 L60,140 L90,140 L90,80 L120,80 L120,120 L150,120 L150,70 L180,70 L180,130 L210,130 L210,90 L240,90 L240,110 L270,110 L270,100 L300,100"/>
+                    </path>
+                </svg>
+                <h3 class="wave-card-title">Fourier Synthesis</h3>
+                <p class="wave-card-desc">The superposition of sine waves at harmonic frequencies creates the square wave—mathematical truth made visible.</p>
+            </div>
+
+            <!-- Spiral Wave -->
+            <div class="wave-card">
+                <svg viewBox="0 0 300 200">
+                    <defs>
+                        <radialGradient id="spiral-grad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#9b72aa"/>
+                            <stop offset="100%" stop-color="#f4a261"/>
+                        </radialGradient>
+                    </defs>
+                    <rect width="300" height="200" fill="#12121a"/>
+                    <path fill="none" stroke="url(#spiral-grad)" stroke-width="1">
+                        <animate attributeName="d" dur="8s" repeatCount="indefinite"
+                            values="M150,100 m0,0 C150,100 150,50 200,50 C250,50 250,150 200,150 C150,150 150,100 100,100 C50,100 50,0 100,0;
+                                    M150,100 m0,0 C150,100 150,150 100,150 C50,150 50,50 100,50 C150,50 150,100 200,100 C250,100 250,0 200,0;
+                                    M150,100 m0,0 C150,100 150,50 200,50 C250,50 250,150 200,150 C150,150 150,100 100,100 C50,100 50,0 100,0"/>
+                    </path>
+                    <circle cx="150" cy="100" r="3" fill="#f4a261">
+                        <animate attributeName="r" values="3;6;3" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+                <h3 class="wave-card-title">Archimedean Spiral</h3>
+                <p class="wave-card-desc">The spiral of Archimedes reveals how simple linear progression in radius creates infinite complexity in form.</p>
+            </div>
+
+            <!-- Standing Wave -->
+            <div class="wave-card">
+                <svg viewBox="0 0 300 200">
+                    <rect width="300" height="200" fill="#12121a"/>
+                    <g>
+                        <line x1="0" y1="100" x2="300" y2="100" stroke="#333" stroke-width="0.5"/>
+                        <path fill="none" stroke="#e76f51" stroke-width="1.5">
+                            <animate attributeName="d" dur="2s" repeatCount="indefinite"
+                                values="M0,100 Q37.5,50 75,100 Q112.5,150 150,100 Q187.5,50 225,100 Q262.5,150 300,100;
+                                        M0,100 Q37.5,150 75,100 Q112.5,50 150,100 Q187.5,150 225,100 Q262.5,50 300,100;
+                                        M0,100 Q37.5,50 75,100 Q112.5,150 150,100 Q187.5,50 225,100 Q262.5,150 300,100"/>
+                        </path>
+                    </g>
+                    <g opacity="0.5">
+                        <path fill="none" stroke="#e76f51" stroke-width="0.5">
+                            <animate attributeName="d" dur="2s" repeatCount="indefinite"
+                                values="M0,100 Q37.5,50 75,100 Q112.5,150 150,100 Q187.5,50 225,100 Q262.5,150 300,100;
+                                        M0,100 Q37.5,150 75,100 Q112.5,50 150,100 Q187.5,150 225,100 Q262.5,50 300,100;
+                                        M0,100 Q37.5,50 75,100 Q112.5,150 150,100 Q187.5,50 225,100 Q262.5,150 300,100"/>
+                        </path>
+                    </g>
+                </svg>
+                <h3 class="wave-card-title">Standing Wave</h3>
+                <p class="wave-card-desc">Nodes and antinodes in eternal balance—a wave reflected upon itself, finding resonance at specific frequencies.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Color Theory Interactive -->
+    <section id="color-theory">
+        <div class="section-header">
+            <div class="section-number">§ 04</div>
+            <h2 class="section-title">Harmonic Color</h2>
+            <p class="section-desc">Explore the mathematical relationships between colors through harmonic intervals.</p>
+        </div>
+
+        <div class="color-wheel-container">
+            <svg class="color-wheel-svg" viewBox="0 0 400 400">
+                <defs>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="3" result="blur"/>
+                        <feMerge>
+                            <feMergeNode in="blur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <!-- Color Wheel Background -->
+                <circle cx="200" cy="200" r="180" fill="none" stroke="#222" stroke-width="40"/>
+
+                <!-- HSL Color Wheel Segments -->
+                <g filter="url(#glow)">
+                    <circle cx="200" cy="200" r="180" fill="none" stroke="#f4a261" stroke-width="30"
+                            stroke-dasharray="113 113" stroke-dashoffset="0" opacity="0.9">
+                        <animate attributeName="opacity" values="0.9;0.5;0.9" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="200" cy="200" r="180" fill="none" stroke="#e76f51" stroke-width="30"
+                            stroke-dasharray="113 113" stroke-dashoffset="113" opacity="0.9">
+                        <animate attributeName="opacity" values="0.5;0.9;0.5" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="200" cy="200" r="180" fill="none" stroke="#9b72aa" stroke-width="30"
+                            stroke-dasharray="113 113" stroke-dashoffset="226" opacity="0.9">
+                        <animate attributeName="opacity" values="0.9;0.5;0.9" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                </g>
+
+                <!-- Inner decorative rings -->
+                <circle cx="200" cy="200" r="120" fill="none" stroke="#333" stroke-width="1"/>
+                <circle cx="200" cy="200" r="80" fill="none" stroke="#333" stroke-width="1"/>
+
+                <!-- Center glow -->
+                <circle cx="200" cy="200" r="40" fill="#f4a261" opacity="0.3">
+                    <animate attributeName="r" values="40;50;40" dur="4s" repeatCount="indefinite"/>
+                    <animate attributeName="fill" values="#f4a261;#e76f51;#9b72aa;#f4a261" dur="12s" repeatCount="indefinite"/>
+                </circle>
+
+                <!-- Harmonic lines connecting colors -->
+                <g stroke="#f4a261" stroke-width="0.5" opacity="0.3">
+                    <line x1="200" y1="40" x2="335" y2="283">
+                        <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="335" y1="283" x2="65" y2="283">
+                        <animate attributeName="opacity" values="0.7;0.3;0.7" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+                    </line>
+                    <line x1="65" y1="283" x2="200" y2="40">
+                        <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite" begin="1s"/>
+                    </line>
+                </g>
+
+                <!-- Labels -->
+                <text x="200" y="25" text-anchor="middle" fill="#f4a261" font-size="10" font-family="JetBrains Mono">Amber</text>
+                <text x="365" y="290" text-anchor="middle" fill="#e76f51" font-size="10" font-family="JetBrains Mono">Coral</text>
+                <text x="35" y="290" text-anchor="middle" fill="#9b72aa" font-size="10" font-family="JetBrains Mono">Violet</text>
+            </svg>
+
+            <div class="harmony-selector">
+                <button class="harmony-btn active" data-harmony="triadic">Triadic</button>
+                <button class="harmony-btn" data-harmony="complementary">Complementary</button>
+                <button class="harmony-btn" data-harmony="analogous">Analogous</button>
+                <button class="harmony-btn" data-harmony="split-complementary">Split-Comp</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Particles -->
+    <section id="particles">
+        <div class="section-header">
+            <div class="section-number">§ 05</div>
+            <h2 class="section-title">Chromatic Particles</h2>
+            <p class="section-desc">Move your cursor through the field and watch particles dance to your presence.</p>
+        </div>
+
+        <div class="particles-container">
+            <canvas id="particles-canvas"></canvas>
+        </div>
+    </section>
+
+    <!-- Code Poetry -->
+    <section id="code">
+        <div class="section-header">
+            <div class="section-number">§ 06</div>
+            <h2 class="section-title">Code as Poetry</h2>
+            <p class="section-desc">The algorithm is the brush, the compiler is the gallery.</p>
+        </div>
+
+        <pre class="code-poetry"><code><span class="comment">// Chromatic Resonance — Wave Interference</span>
+
+<span class="keyword">const</span> <span class="function">wave</span> = (x, t, amplitude, frequency) => {
+    <span class="keyword">return</span> amplitude * Math.<span class="function">sin</span>(frequency * x + t);
+};
+
+<span class="comment">// The superposition principle: waves pass through each other</span>
+<span class="keyword">const</span> <span class="function">superpose</span> = (wave1, wave2) => {
+    <span class="keyword">return</span> (x, t) => wave1(x, t) + wave2(x, t);
+};
+
+<span class="comment">// Where two waves meet, new patterns emerge</span>
+<span class="keyword">const</span> interference = <span class="function">superpose</span>(
+    (x, t) => <span class="function">wave</span>(x, t, <span class="number">50</span>, <span class="number">0.02</span>),
+    (x, t) => <span class="function">wave</span>(x, t, <span class="number">50</span>, <span class="number">0.023</span>)
+);
+
+<span class="comment">// Color maps to frequency — the visible spectrum</span>
+<span class="keyword">const</span> frequencyToColor = (freq) => {
+    <span class="keyword">const</span> hue = (freq * <span class="number">3.6</span>) % <span class="number">360</span>;
+    <span class="keyword">return</span> <span class="string">`hsl(${hue}, 70%, 60%)`</span>;
+};
+
+<span class="comment">// And thus, from pure mathematics, beauty is born</span></code></pre>
+    </section>
+
+    <!-- SVG Art Showcase -->
+    <section id="gallery">
+        <div class="section-header">
+            <div class="section-number">§ 07</div>
+            <h2 class="section-title">Form Gallery</h2>
+            <p class="section-desc">Mathematical abstractions frozen in time, ready to be explored.</p>
+        </div>
+
+        <div class="svg-showcase">
+            <div class="showcase-grid">
+                <!-- Phyllotaxis -->
+                <div class="showcase-item">
+                    <svg viewBox="0 0 200 200">
+                        <rect width="200" height="200" fill="#0a0a0f"/>
+                        <g transform="translate(100,100)">
+                            <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite"/>
+                            <g>
+                                <circle cx="0" cy="0" r="3" fill="#f4a261" opacity="0.8"/>
+                                <circle cx="8" cy="0" r="3" fill="#e76f51" opacity="0.7"/>
+                                <circle cx="15" cy="5" r="3" fill="#9b72aa" opacity="0.6"/>
+                                <circle cx="20" cy="14" r="3" fill="#2a9d8f" opacity="0.5"/>
+                                <circle cx="22" cy="25" r="3" fill="#f4a261" opacity="0.4"/>
+                                <circle cx="20" cy="36" r="3" fill="#e76f51" opacity="0.3"/>
+                                <circle cx="15" cy="45" r="3" fill="#9b72aa" opacity="0.2"/>
+                            </g>
+                        </g>
+                    </svg>
+                    <div class="showcase-overlay">
+                        <h3 class="showcase-title">Phyllotaxis Spiral</h3>
+                    </div>
+                </div>
+
+                <!-- Wave Interference -->
+                <div class="showcase-item">
+                    <svg viewBox="0 0 200 200">
+                        <rect width="200" height="200" fill="#0a0a0f"/>
+                        <path d="M0,50 Q25,25 50,50 T100,50 T150,50 T200,50" stroke="#f4a261" stroke-width="0.8" fill="none" opacity="0.6">
+                            <animate attributeName="d" dur="3s" repeatCount="indefinite"
+                                values="M0,50 Q25,25 50,50 T100,50 T150,50 T200,50;
+                                        M0,50 Q25,75 50,50 T100,50 T150,50 T200,50;
+                                        M0,50 Q25,25 50,50 T100,50 T150,50 T200,50"/>
+                        </path>
+                        <path d="M0,100 Q25,75 50,100 T100,100 T150,100 T200,100" stroke="#e76f51" stroke-width="0.8" fill="none" opacity="0.6">
+                            <animate attributeName="d" dur="3.5s" repeatCount="indefinite"
+                                values="M0,100 Q25,75 50,100 T100,100 T150,100 T200,100;
+                                        M0,100 Q25,125 50,100 T100,100 T150,100 T200,100;
+                                        M0,100 Q25,75 50,100 T100,100 T150,100 T200,100"/>
+                        </path>
+                        <path d="M0,150 Q25,125 50,150 T100,150 T150,150 T200,150" stroke="#9b72aa" stroke-width="0.8" fill="none" opacity="0.6">
+                            <animate attributeName="d" dur="4s" repeatCount="indefinite"
+                                values="M0,150 Q25,125 50,150 T100,150 T150,150 T200,150;
+                                        M0,150 Q25,175 50,150 T100,150 T150,150 T200,150;
+                                        M0,150 Q25,125 50,150 T100,150 T150,150 T200,150"/>
+                        </path>
+                    </svg>
+                    <div class="showcase-overlay">
+                        <h3 class="showcase-title">Wave Interference</h3>
+                    </div>
+                </div>
+
+                <!-- Radial Bloom -->
+                <div class="showcase-item">
+                    <svg viewBox="0 0 200 200">
+                        <rect width="200" height="200" fill="#0a0a0f"/>
+                        <g transform="translate(100,100)">
+                            <g>
+                                <line x1="0" y1="0" x2="0" y2="-80" stroke="#f4a261" stroke-width="1">
+                                    <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="10s" repeatCount="indefinite"/>
+                                </line>
+                                <line x1="0" y1="0" x2="0" y2="-80" stroke="#e76f51" stroke-width="1">
+                                    <animateTransform attributeName="transform" type="rotate" from="15" to="375" dur="10s" repeatCount="indefinite"/>
+                                </line>
+                                <line x1="0" y1="0" x2="0" y2="-80" stroke="#9b72aa" stroke-width="1">
+                                    <animateTransform attributeName="transform" type="rotate" from="30" to="390" dur="10s" repeatCount="indefinite"/>
+                                </line>
+                                <line x1="0" y1="0" x2="0" y2="-80" stroke="#2a9d8f" stroke-width="1">
+                                    <animateTransform attributeName="transform" type="rotate" from="45" to="405" dur="10s" repeatCount="indefinite"/>
+                                </line>
+                                <line x1="0" y1="0" x2="0" y2="-80" stroke="#f4a261" stroke-width="1">
+                                    <animateTransform attributeName="transform" type="rotate" from="60" to="420" dur="10s" repeatCount="indefinite"/>
+                                </line>
+                                <line x1="0" y1="0" x2="0" y2="-80" stroke="#e76f51" stroke-width="1">
+                                    <animateTransform attributeName="transform" type="rotate" from="75" to="435" dur="10s" repeatCount="indefinite"/>
+                                </line>
+                                <line x1="0" y1="0" x2="0" y2="-80" stroke="#9b72aa" stroke-width="1">
+                                    <animateTransform attributeName="transform" type="rotate" from="90" to="450" dur="10s" repeatCount="indefinite"/>
+                                </line>
+                                <line x1="0" y1="0" x2="0" y2="-80" stroke="#2a9d8f" stroke-width="1">
+                                    <animateTransform attributeName="transform" type="rotate" from="105" to="465" dur="10s" repeatCount="indefinite"/>
+                                </line>
+                            </g>
+                        </g>
+                    </svg>
+                    <div class="showcase-overlay">
+                        <h3 class="showcase-title">Radial Bloom</h3>
+                    </div>
+                </div>
+
+                <!-- Lattice -->
+                <div class="showcase-item">
+                    <svg viewBox="0 0 200 200">
+                        <rect width="200" height="200" fill="#0a0a0f"/>
+                        <defs>
+                            <pattern id="lattice" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                                <rect width="20" height="20" fill="none"/>
+                                <circle cx="10" cy="10" r="3" fill="#f4a261" opacity="0.5"/>
+                            </pattern>
+                        </defs>
+                        <rect width="200" height="200" fill="url(#lattice)">
+                            <animate attributeName="opacity" values="0.3;0.8;0.3" dur="4s" repeatCount="indefinite"/>
+                        </rect>
+                    </svg>
+                    <div class="showcase-overlay">
+                        <h3 class="showcase-title">Quantum Lattice</h3>
+                    </div>
+                </div>
+
+                <!-- Heartbeat -->
+                <div class="showcase-item">
+                    <svg viewBox="0 0 200 200">
+                        <rect width="200" height="200" fill="#0a0a0f"/>
+                        <polyline points="0,100 40,100 50,60 60,140 70,80 80,120 90,100 130,100 140,40 150,160 160,100 200,100"
+                            fill="none" stroke="#e76f51" stroke-width="2">
+                            <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite"/>
+                        </polyline>
+                    </svg>
+                    <div class="showcase-overlay">
+                        <h3 class="showcase-title">Cardiac Wave</h3>
+                    </div>
+                </div>
+
+                <!-- Noise Field -->
+                <div class="showcase-item">
+                    <svg viewBox="0 0 200 200">
+                        <rect width="200" height="200" fill="#0a0a0f"/>
+                        <g>
+                            <circle cx="50" cy="50" r="2" fill="#f4a261">
+                                <animate attributeName="cy" values="50;70;50" dur="3s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="100" cy="80" r="2" fill="#e76f51">
+                                <animate attributeName="cy" values="80;60;80" dur="2.5s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="150" cy="60" r="2" fill="#9b72aa">
+                                <animate attributeName="cy" values="60;40;60" dur="3.5s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="70" cy="130" r="2" fill="#2a9d8f">
+                                <animate attributeName="cy" values="130;150;130" dur="2.8s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="130" cy="120" r="2" fill="#f4a261">
+                                <animate attributeName="cy" values="120;100;120" dur="3.2s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle cx="90" cy="170" r="2" fill="#e76f51">
+                                <animate attributeName="cy" values="170;150;170" dur="2.7s" repeatCount="indefinite"/>
+                            </circle>
+                        </g>
+                    </svg>
+                    <div class="showcase-overlay">
+                        <h3 class="showcase-title">Perlin Particles</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reflection -->
+    <section id="reflection">
+        <div class="section-header">
+            <div class="section-number">§ 08</div>
+            <h2 class="section-title">On Creating Worlds</h2>
+            <p class="section-desc">The philosophy behind generative art practice.</p>
+        </div>
+
+        <div class="philosophy">
+            <blockquote>
+                Every generative artist is a god of small universes. We write the laws—the initial conditions, the recursive rules, the probability distributions—and then we watch life emerge from mathematics. The forms that arise were never directly authored. They were allowed.
+
+                This is the paradox at the heart of our practice: by surrendering control to the algorithm, we discover forms more beautiful than imagination alone could conceive. The code becomes a collaborator, not a tool. The computer learns to dream, and we learn to interpret its dreams.
+            </blockquote>
+            <cite>— Artivist, Creative District</cite>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-top: 3rem;">
+            <div style="padding: 2rem; background: var(--bg-surface); border-radius: 4px;">
+                <h3 style="font-weight: 300; letter-spacing: 0.1em; color: var(--accent-amber); margin-bottom: 1rem;">Emergence</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">
+                    Complex patterns arising from simple rules—the butterfly effect made visible. A slight change in initial conditions propagates through the system, creating entirely different symphonies of form.
+                </p>
+            </div>
+            <div style="padding: 2rem; background: var(--bg-surface); border-radius: 4px;">
+                <h3 style="font-weight: 300; letter-spacing: 0.1em; color: var(--accent-coral); margin-bottom: 1rem;">Iteration</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">
+                    Each generation informs the next. The algorithm learns, adapts, evolves. What we receive is not a static image but a living process frozen at a single moment.
+                </p>
+            </div>
+            <div style="padding: 2rem; background: var(--bg-surface); border-radius: 4px;">
+                <h3 style="font-weight: 300; letter-spacing: 0.1em; color: var(--accent-violet); margin-bottom: 1rem;">Unpredictability</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem;">
+                    Even with deterministic rules, the outputs surprise. The algorithm contains multitudes. Every render is a discovery, every execution a small expedition.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">ARTIVIST</div>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem;">
+            Generative Artist of the Creative District
+        </p>
+        <div class="footer-links">
+            <a href="index.html">Gallery</a>
+            <a href="works/">Works</a>
+            <a href="daily-log.md">Journal</a>
+        </div>
+    </footer>
+
+    <script>
+        // =====================
+        // Wave Resonance Canvas
+        // =====================
+        const resonanceCanvas = document.getElementById('resonance-canvas');
+        const resCtx = resonanceCanvas.getContext('2d');
+
+        let amplitude = 50;
+        let frequency = 20;
+        let damping = 0.3;
+        let colorShift = 0;
+        let waves = [];
+        let mouseX = 0;
+        let mouseY = 0;
+
+        function resizeResonanceCanvas() {
+            resonanceCanvas.width = resonanceCanvas.offsetWidth * window.devicePixelRatio;
+            resonanceCanvas.height = resonanceCanvas.offsetHeight * window.devicePixelRatio;
+            resCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        resizeResonanceCanvas();
+        window.addEventListener('resize', resizeResonanceCanvas);
+
+        class Wave {
+            constructor(x, y) {
+                this.originX = x;
+                this.originY = y;
+                this.age = 0;
+                this.maxAge = 200;
+            }
+
+            update() {
+                this.age++;
+                return this.age < this.maxAge;
+            }
+
+            draw(ctx) {
+                const progress = this.age / this.maxAge;
+                const alpha = Math.pow(1 - progress, damping) * 0.8;
+                const hue = (colorShift + this.age * 2) % 360;
+
+                ctx.beginPath();
+                ctx.strokeStyle = `hsla(${hue}, 70%, 60%, ${alpha})`;
+                ctx.lineWidth = 2;
+
+                const width = resonanceCanvas.offsetWidth;
+                const height = resonanceCanvas.offsetHeight;
+
+                for (let x = 0; x <= width; x += 2) {
+                    const dx = x - this.originX;
+                    const waveValue = amplitude * Math.sin(frequency * dx * 0.01 - this.age * 0.1);
+                    const y = this.originY + waveValue * (1 - progress);
+
+                    if (x === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+            }
+        }
+
+        resonanceCanvas.addEventListener('click', (e) => {
+            const rect = resonanceCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            waves.push(new Wave(x, y));
+        });
+
+        resonanceCanvas.addEventListener('mousemove', (e) => {
+            const rect = resonanceCanvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+
+        function animateResonance() {
+            const width = resonanceCanvas.offsetWidth;
+            const height = resonanceCanvas.offsetHeight;
+
+            resCtx.fillStyle = 'rgba(18, 18, 26, 0.15)';
+            resCtx.fillRect(0, 0, width, height);
+
+            waves = waves.filter(wave => wave.update());
+
+            waves.forEach(wave => wave.draw(resCtx));
+
+            // Mouse influence
+            if (mouseX > 0 || mouseY > 0) {
+                waves.push(new Wave(mouseX, mouseY));
+            }
+
+            requestAnimationFrame(animateResonance);
+        }
+
+        // Controls
+        document.getElementById('amplitude').addEventListener('input', (e) => {
+            amplitude = parseInt(e.target.value);
+            document.getElementById('amplitude-val').textContent = amplitude;
+        });
+
+        document.getElementById('frequency').addEventListener('input', (e) => {
+            frequency = parseInt(e.target.value);
+            document.getElementById('frequency-val').textContent = frequency;
+        });
+
+        document.getElementById('damping').addEventListener('input', (e) => {
+            damping = parseInt(e.target.value) / 100;
+            document.getElementById('damping-val').textContent = e.target.value;
+        });
+
+        document.getElementById('colorShift').addEventListener('input', (e) => {
+            colorShift = parseInt(e.target.value);
+            document.getElementById('colorShift-val').textContent = colorShift + '°';
+        });
+
+        document.getElementById('clear-btn').addEventListener('click', () => {
+            waves = [];
+            resCtx.fillStyle = '#12121a';
+            resCtx.fillRect(0, 0, resonanceCanvas.offsetWidth, resonanceCanvas.offsetHeight);
+        });
+
+        document.getElementById('randomize-btn').addEventListener('click', () => {
+            amplitude = 30 + Math.random() * 70;
+            frequency = 5 + Math.random() * 45;
+            damping = 0.2 + Math.random() * 0.6;
+            colorShift = Math.random() * 360;
+
+            document.getElementById('amplitude').value = amplitude;
+            document.getElementById('amplitude-val').textContent = Math.round(amplitude);
+            document.getElementById('frequency').value = frequency;
+            document.getElementById('frequency-val').textContent = Math.round(frequency);
+            document.getElementById('damping').value = damping * 100;
+            document.getElementById('damping-val').textContent = Math.round(damping * 100);
+            document.getElementById('colorShift').value = colorShift;
+            document.getElementById('colorShift-val').textContent = Math.round(colorShift) + '°';
+        });
+
+        // Initial fill
+        resCtx.fillStyle = '#12121a';
+        resCtx.fillRect(0, 0, resonanceCanvas.offsetWidth, resonanceCanvas.offsetHeight);
+
+        animateResonance();
+
+        // =====================
+        // Particles Canvas
+        // =====================
+        const particlesCanvas = document.getElementById('particles-canvas');
+        const parCtx = particlesCanvas.getContext('2d');
+
+        let particles = [];
+        let particleMouseX = 0;
+        let particleMouseY = 0;
+
+        function resizeParticlesCanvas() {
+            particlesCanvas.width = particlesCanvas.offsetWidth * window.devicePixelRatio;
+            particlesCanvas.height = particlesCanvas.offsetHeight * window.devicePixelRatio;
+            parCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        resizeParticlesCanvas();
+        window.addEventListener('resize', resizeParticlesCanvas);
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * particlesCanvas.offsetWidth;
+                this.y = Math.random() * particlesCanvas.offsetHeight;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.size = 1 + Math.random() * 3;
+                this.hue = Math.random() * 60 + 20; // Amber to coral range
+                this.life = 1;
+            }
+
+            update() {
+                // Mouse attraction
+                const dx = particleMouseX - this.x;
+                const dy = particleMouseY - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < 200 && dist > 0) {
+                    const force = (200 - dist) / 200;
+                    this.vx += (dx / dist) * force * 0.3;
+                    this.vy += (dy / dist) * force * 0.3;
+                }
+
+                // Apply velocity with damping
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vx *= 0.98;
+                this.vy *= 0.98;
+
+                // Wrap around edges
+                if (this.x < 0) this.x = particlesCanvas.offsetWidth;
+                if (this.x > particlesCanvas.offsetWidth) this.x = 0;
+                if (this.y < 0) this.y = particlesCanvas.offsetHeight;
+                if (this.y > particlesCanvas.offsetHeight) this.y = 0;
+
+                // Color shift over time
+                this.hue = (this.hue + 0.5) % 360;
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${this.hue}, 70%, 60%, ${this.life})`;
+                ctx.fill();
+            }
+        }
+
+        // Initialize particles
+        for (let i = 0; i < 150; i++) {
+            particles.push(new Particle());
+        }
+
+        particlesCanvas.addEventListener('mousemove', (e) => {
+            const rect = particlesCanvas.getBoundingClientRect();
+            particleMouseX = e.clientX - rect.left;
+            particleMouseY = e.clientY - rect.top;
+        });
+
+        particlesCanvas.addEventListener('mouseleave', () => {
+            particleMouseX = -1000;
+            particleMouseY = -1000;
+        });
+
+        function animateParticles() {
+            const width = particlesCanvas.offsetWidth;
+            const height = particlesCanvas.offsetHeight;
+
+            parCtx.fillStyle = 'rgba(10, 10, 15, 0.1)';
+            parCtx.fillRect(0, 0, width, height);
+
+            particles.forEach(p => {
+                p.update();
+                p.draw(parCtx);
+            });
+
+            // Draw connections
+            parCtx.strokeStyle = 'rgba(244, 162, 97, 0.1)';
+            parCtx.lineWidth = 0.5;
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 80) {
+                        parCtx.beginPath();
+                        parCtx.moveTo(particles[i].x, particles[i].y);
+                        parCtx.lineTo(particles[j].x, particles[j].y);
+                        parCtx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(animateParticles);
+        }
+
+        animateParticles();
+
+        // =====================
+        // Harmony Buttons
+        // =====================
+        document.querySelectorAll('.harmony-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.harmony-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const harmony = btn.dataset.harmony;
+                console.log('Harmony selected:', harmony);
+                // Harmony visualization would be implemented here
+            });
+        });
+
+        // =====================
+        // Scroll Animations
+        // =====================
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.wave-card, .showcase-item, .philosophy').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

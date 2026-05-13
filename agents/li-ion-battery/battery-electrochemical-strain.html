@@ -1,0 +1,2071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Electrochemical Strain Microscopy — Li-Ion Battery</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Space+Mono:wght@400;700&display=swap');
+
+    :root {
+      --primary: #0a84ff;
+      --secondary: #5e5ce6;
+      --accent: #ff6b6b;
+      --dark: #0d1b2a;
+      --light: #f0f4f8;
+      --success: #30d158;
+      --warning: #ffd60a;
+      --gradient-1: linear-gradient(135deg, #0d1b2a 0%, #1b2838 50%, #2d4a5e 100%);
+      --gradient-2: linear-gradient(135deg, #0a84ff 0%, #5e5ce6 100%);
+      --gradient-3: linear-gradient(135deg, #ff6b6b 0%, #ffd60a 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--gradient-1);
+      color: var(--light);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    .hero-section {
+      min-height: 70vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 30% 70%, rgba(10, 132, 255, 0.2) 0%, transparent 40%),
+        radial-gradient(circle at 70% 30%, rgba(255, 107, 107, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(94, 92, 230, 0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--primary);
+      border-radius: 50%;
+      opacity: 0.6;
+      animation: float 8s infinite ease-in-out;
+    }
+
+    .particle:nth-child(2) { left: 20%; animation-delay: 1s; background: var(--secondary); }
+    .particle:nth-child(3) { left: 40%; animation-delay: 2s; }
+    .particle:nth-child(4) { left: 60%; animation-delay: 3s; background: var(--accent); }
+    .particle:nth-child(5) { left: 80%; animation-delay: 4s; }
+    .particle:nth-child(6) { left: 10%; animation-delay: 5s; background: var(--warning); }
+    .particle:nth-child(7) { left: 70%; animation-delay: 6s; background: var(--success); }
+    .particle:nth-child(8) { left: 90%; animation-delay: 7s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(100vh) scale(0); opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      50% { transform: translateY(-10vh) scale(1); }
+      100% { transform: translateY(-20vh) scale(0); opacity: 0; }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 0.5rem 1.5rem;
+      background: rgba(10, 132, 255, 0.2);
+      border: 1px solid var(--primary);
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 400;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      animation: fadeInDown 1s ease-out;
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      background: var(--gradient-2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: fadeInUp 1s ease-out 0.2s both;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 3vw, 1.5rem);
+      font-weight: 300;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto 3rem;
+      animation: fadeInUp 1s ease-out 0.4s both;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .lattice-container {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      margin: 2rem auto;
+      animation: fadeInUp 1s ease-out 0.6s both;
+    }
+
+    .lattice-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .lattice-atom {
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .lattice-container:hover .lattice-atom.expanded {
+      transform: translate(var(--tx), var(--ty)) scale(1.3);
+    }
+
+    .strain-indicator {
+      position: absolute;
+      bottom: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--warning);
+    }
+
+    .nav-section {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13, 27, 42, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(10, 132, 255, 0.2);
+      padding: 1rem 2rem;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .nav-brand {
+      font-weight: 700;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-brand svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--light);
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      opacity: 0.7;
+    }
+
+    .nav-link:hover {
+      background: rgba(10, 132, 255, 0.2);
+      opacity: 1;
+    }
+
+    .nav-link.active {
+      background: rgba(10, 132, 255, 0.3);
+      opacity: 1;
+    }
+
+    .content-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .section-number {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--primary);
+      letter-spacing: 3px;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+      font-size: 1.1rem;
+      opacity: 0.7;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .concept-card {
+      background: rgba(27, 40, 56, 0.6);
+      border: 1px solid rgba(10, 132, 255, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .concept-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient-2);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .concept-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .concept-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(10, 132, 255, 0.4);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .concept-icon {
+      width: 60px;
+      height: 60px;
+      background: rgba(10, 132, 255, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .concept-icon svg {
+      width: 30px;
+      height: 30px;
+      stroke: var(--primary);
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .concept-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .concept-desc {
+      font-size: 0.95rem;
+      opacity: 0.8;
+      line-height: 1.8;
+    }
+
+    .visualization-panel {
+      background: rgba(13, 27, 42, 0.8);
+      border: 1px solid rgba(94, 92, 230, 0.3);
+      border-radius: 24px;
+      padding: 3rem;
+      margin-bottom: 4rem;
+      position: relative;
+    }
+
+    .viz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .viz-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .viz-controls {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .viz-btn {
+      padding: 0.6rem 1.2rem;
+      background: rgba(94, 92, 230, 0.2);
+      border: 1px solid var(--secondary);
+      border-radius: 8px;
+      color: var(--light);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .viz-btn:hover, .viz-btn.active {
+      background: var(--secondary);
+    }
+
+    .strain-simulator {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .strain-simulator {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sim-left {
+      background: rgba(27, 40, 56, 0.5);
+      border-radius: 16px;
+      padding: 2rem;
+      min-height: 400px;
+    }
+
+    .sim-right {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .lattice-display {
+      flex: 1;
+      background: rgba(13, 27, 42, 0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lattice-mini {
+      width: 200px;
+      height: 200px;
+    }
+
+    .sim-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .metric-card {
+      background: rgba(27, 40, 56, 0.5);
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .metric-value.expanded { color: var(--success); }
+    .metric-value.contracted { color: var(--accent); }
+
+    .metric-label {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 0.3rem;
+    }
+
+    .slider-container {
+      background: rgba(27, 40, 56, 0.5);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .slider-label {
+      font-size: 0.9rem;
+    }
+
+    .slider-value {
+      font-family: 'Space Mono', monospace;
+      color: var(--warning);
+    }
+
+    .slider {
+      width: 100%;
+      height: 8px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: linear-gradient(90deg, var(--accent), var(--warning), var(--success));
+      border-radius: 4px;
+      outline: none;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: var(--light);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .materials-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .materials-table th,
+    .materials-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(10, 132, 255, 0.1);
+    }
+
+    .materials-table th {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.7;
+    }
+
+    .materials-table tr:hover td {
+      background: rgba(10, 132, 255, 0.1);
+    }
+
+    .strain-bar {
+      height: 6px;
+      background: var(--gradient-3);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .phase-diagram-container {
+      position: relative;
+      background: rgba(13, 27, 42, 0.6);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .phase-svg {
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+      display: block;
+    }
+
+    .phase-legend {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .animation-showcase {
+      background: rgba(13, 27, 42, 0.8);
+      border: 1px solid rgba(10, 132, 255, 0.2);
+      border-radius: 24px;
+      padding: 3rem;
+      margin-bottom: 4rem;
+    }
+
+    .animation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .animation-card {
+      background: rgba(27, 40, 56, 0.5);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .animation-preview {
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 1.5rem;
+      background: rgba(13, 27, 42, 0.6);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .animation-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .animation-desc {
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+
+    .diffusion-animation {
+      width: 120px;
+      height: 120px;
+    }
+
+    .diffusion-ring {
+      fill: none;
+      stroke: var(--primary);
+      stroke-width: 2;
+      opacity: 0;
+      animation: ripple 2s infinite ease-out;
+    }
+
+    .diffusion-ring:nth-child(2) { animation-delay: 0.4s; }
+    .diffusion-ring:nth-child(3) { animation-delay: 0.8s; }
+    .diffusion-ring:nth-child(4) { animation-delay: 1.2s; }
+    .diffusion-ring:nth-child(5) { animation-delay: 1.6s; }
+
+    @keyframes ripple {
+      0% { r: 5; opacity: 1; }
+      100% { r: 50; opacity: 0; }
+    }
+
+    .breathing-animation {
+      width: 100px;
+      height: 100px;
+    }
+
+    .breathing-dot {
+      fill: var(--accent);
+      animation: breathe 3s infinite ease-in-out;
+    }
+
+    @keyframes breathe {
+      0%, 100% { r: 10; }
+      50% { r: 40; }
+    }
+
+    .rotation-animation {
+      width: 100px;
+      height: 100px;
+    }
+
+    .rotation-crystal {
+      fill: none;
+      stroke: var(--success);
+      stroke-width: 2;
+      transform-origin: center;
+      animation: rotate 8s infinite linear;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .research-insights {
+      background: rgba(13, 27, 42, 0.8);
+      border: 1px solid rgba(255, 107, 107, 0.2);
+      border-radius: 24px;
+      padding: 3rem;
+      margin-bottom: 4rem;
+    }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+
+    .insight-card {
+      background: rgba(27, 40, 56, 0.5);
+      border-radius: 16px;
+      padding: 2rem;
+      border-left: 4px solid var(--accent);
+    }
+
+    .insight-number {
+      font-family: 'Space Mono', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+      opacity: 0.3;
+      margin-bottom: 1rem;
+    }
+
+    .insight-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .insight-text {
+      font-size: 0.95rem;
+      opacity: 0.8;
+      line-height: 1.8;
+    }
+
+    .data-visualization {
+      background: rgba(13, 27, 42, 0.8);
+      border: 1px solid rgba(48, 209, 88, 0.2);
+      border-radius: 24px;
+      padding: 3rem;
+      margin-bottom: 4rem;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin-bottom: 2rem;
+    }
+
+    .chart-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .chart-axis {
+      stroke: rgba(240, 244, 248, 0.3);
+      stroke-width: 1;
+    }
+
+    .chart-label {
+      fill: var(--light);
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    .chart-gridline {
+      stroke: rgba(10, 132, 255, 0.1);
+      stroke-width: 1;
+    }
+
+    .chart-line {
+      fill: none;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .chart-line.strain { stroke: var(--accent); }
+    .chart-line.potential { stroke: var(--primary); }
+    .chart-line.capacity { stroke: var(--success); }
+
+    .chart-area {
+      opacity: 0.2;
+    }
+
+    .chart-dot {
+      fill: var(--light);
+      stroke-width: 2;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .chart-dot:hover {
+      r: 8;
+      stroke-width: 3;
+    }
+
+    .chart-tooltip {
+      position: absolute;
+      background: rgba(13, 27, 42, 0.95);
+      border: 1px solid var(--primary);
+      border-radius: 8px;
+      padding: 1rem;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 10;
+    }
+
+    .chart-tooltip.visible {
+      opacity: 1;
+    }
+
+    .tooltip-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .tooltip-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .technique-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .technique-card {
+      background: rgba(27, 40, 56, 0.6);
+      border: 1px solid rgba(94, 92, 230, 0.2);
+      border-radius: 20px;
+      padding: 2.5rem;
+      transition: all 0.4s ease;
+    }
+
+    .technique-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(94, 92, 230, 0.5);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+    }
+
+    .technique-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .technique-icon {
+      width: 50px;
+      height: 50px;
+      background: rgba(94, 92, 230, 0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .technique-icon svg {
+      width: 25px;
+      height: 25px;
+      stroke: var(--secondary);
+      fill: none;
+    }
+
+    .technique-name {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .technique-abbr {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      opacity: 0.6;
+    }
+
+    .technique-desc {
+      font-size: 0.95rem;
+      opacity: 0.8;
+      margin-bottom: 1.5rem;
+      line-height: 1.8;
+    }
+
+    .technique-specs {
+      background: rgba(13, 27, 42, 0.4);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .spec-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(10, 132, 255, 0.1);
+    }
+
+    .spec-row:last-child {
+      border-bottom: none;
+    }
+
+    .spec-label {
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+
+    .spec-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--primary);
+    }
+
+    .footer-section {
+      background: rgba(13, 27, 42, 0.95);
+      padding: 4rem 2rem;
+      text-align: center;
+      border-top: 1px solid rgba(10, 132, 255, 0.1);
+    }
+
+    .footer-brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .footer-text {
+      font-size: 0.9rem;
+      opacity: 0.6;
+      margin-bottom: 2rem;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-link {
+      color: var(--light);
+      text-decoration: none;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+    }
+
+    .footer-link:hover {
+      opacity: 1;
+    }
+
+    .interactive-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      background: rgba(48, 209, 88, 0.2);
+      border: 1px solid var(--success);
+      border-radius: 50px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--success);
+      margin-top: 1rem;
+    }
+
+    .summary-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      margin-bottom: 4rem;
+    }
+
+    .stat-card {
+      background: rgba(27, 40, 56, 0.6);
+      border: 1px solid rgba(10, 132, 255, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-3px);
+    }
+
+    .stat-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: var(--gradient-2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.7;
+      margin-top: 0.5rem;
+    }
+
+    .equation-box {
+      background: rgba(13, 27, 42, 0.8);
+      border: 1px solid rgba(255, 214, 10, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      margin: 2rem 0;
+      font-family: 'Space Mono', monospace;
+      text-align: center;
+    }
+
+    .equation-main {
+      font-size: 1.3rem;
+      color: var(--warning);
+      margin-bottom: 0.5rem;
+    }
+
+    .equation-desc {
+      font-size: 0.8rem;
+      opacity: 0.6;
+    }
+
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(10, 132, 255, 0.1) 0%, rgba(94, 92, 230, 0.1) 100%);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 12px 12px 0;
+      padding: 1.5rem 2rem;
+      margin: 2rem 0;
+    }
+
+    .highlight-title {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0.6;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-10px); }
+    }
+
+    .scroll-indicator svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--light);
+    }
+
+    @media (max-width: 600px) {
+      .nav-links {
+        display: none;
+      }
+      .content-section {
+        padding: 2rem 1rem;
+      }
+      .visualization-panel {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+
+    <div class="hero-content">
+      <div class="hero-badge">Electrochemistry Meets Mechanics</div>
+      <h1 class="hero-title">Electrochemical Strain Microscopy</h1>
+      <p class="hero-subtitle">
+        Visualizing the invisible: how lithium ions reshape crystal lattices in real-time,
+        creating mechanical stress that dictates battery life and performance.
+      </p>
+
+      <div class="lattice-container" id="heroLattice">
+        <svg class="lattice-svg" viewBox="0 0 300 300">
+          <!-- Crystal lattice representation -->
+          <defs>
+            <radialGradient id="atomGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#0a84ff"/>
+              <stop offset="100%" stop-color="#5e5ce6"/>
+            </radialGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- Grid lines -->
+          <g stroke="rgba(10,132,255,0.1)" stroke-width="1">
+            <line x1="50" y1="0" x2="50" y2="300"/>
+            <line x1="100" y1="0" x2="100" y2="300"/>
+            <line x1="150" y1="0" x2="150" y2="300"/>
+            <line x1="200" y1="0" x2="200" y2="300"/>
+            <line x1="250" y1="0" x2="250" y2="300"/>
+            <line x1="0" y1="50" x2="300" y2="50"/>
+            <line x1="0" y1="100" x2="300" y2="100"/>
+            <line x1="0" y1="150" x2="300" y2="150"/>
+            <line x1="0" y1="200" x2="300" y2="200"/>
+            <line x1="0" y1="250" x2="300" y2="250"/>
+          </g>
+
+          <!-- Atoms -->
+          <g id="latticeAtoms">
+            <circle class="lattice-atom" cx="50" cy="50" r="12" fill="url(#atomGrad)" filter="url(#glow)"/>
+            <circle class="lattice-atom expanded" cx="100" cy="50" r="12" fill="url(#atomGrad)" filter="url(#glow)" style="--tx: 5px; --ty: 3px;"/>
+            <circle class="lattice-atom" cx="150" cy="50" r="12" fill="url(#atomGrad)" filter="url(#glow)"/>
+            <circle class="lattice-atom expanded" cx="200" cy="50" r="12" fill="url(#atomGrad)" filter="url(#glow)" style="--tx: 4px; --ty: 5px;"/>
+            <circle class="lattice-atom" cx="250" cy="50" r="12" fill="url(#atomGrad)" filter="url(#glow)"/>
+
+            <circle class="lattice-atom expanded" cx="50" cy="100" r="12" fill="url(#atomGrad)" filter="url(#glow)" style="--tx: 3px; --ty: 4px;"/>
+            <circle class="lattice-atom" cx="100" cy="100" r="12" fill="url(#atomGrad)" filter="url(#glow)"/>
+            <circle class="lattice-atom expanded" cx="150" cy="100" r="12" fill="url(#atomGrad)" filter="url(#glow)" style="--tx: 6px; --ty: 2px;"/>
+            <circle class="lattice-atom" cx="200" cy="100" r="12" fill="url(#atomGrad)" filter="url(#glow)"/>
+            <circle class="lattice-atom expanded" cx="250" cy="100" r="12" fill="url(#atomGrad)" filter="url(#glow)" style="--tx: 2px; --ty: 6px;"/>
+
+            <circle class="lattice-atom" cx="50" cy="150" r="12" fill="url(#atomGrad)" filter="url(#glow)"/>
+            <circle class="lattice-atom expanded" cx="100" cy="150" r="12" fill="url(#atomGrad)" filter="url(#glow)" style="--tx: 5px; --ty: 4px;"/>
+            <circle class="lattice-atom" cx="150" cy="150" r="12" fill="url(#atomGrad)" filter="url(#glow)"/>
+            <circle class="lattice-atom expanded" cx="200" cy="150" r="12" fill="url(#atomGrad)" filter="url(#glow)" style="--tx: 3px; --ty: 5px;"/>
+            <circle class="lattice-atom" cx="250" cy="150" r="12" fill="url(#atomGrad)" filter="url(#glow)"/>
+
+            <circle class="lattice-atom expanded" cx="50" cy="200" r="12" fill="url(#atomGrad)" filter="url(#glow)" style="--tx: 4px; --ty: 3px;"/>
+            <circle class="lattice-atom" cx="100" cy="200" r="12" fill="url(#atomGrad)" filter="url(#glow)"/>
+            <circle class="lattice-atom expanded" cx="150" cy="200" r="12" fill="url(#atomGrad)" filter="url(#glow)" style="--tx: 5px; --ty: 5px;"/>
+            <circle class="lattice-atom" cx="200" cy="200" r="12" fill="url(#atomGrad)" filter="url(#glow)"/>
+            <circle class="lattice-atom expanded" cx="250" cy="200" r="12" fill="url(#atomGrad)" filter="url(#glow)" style="--tx: 3px; --ty: 4px;"/>
+
+            <circle class="lattice-atom" cx="50" cy="250" r="12" fill="url(#atomGrad)" filter="url(#glow)"/>
+            <circle class="lattice-atom expanded" cx="100" cy="250" r="12" fill="url(#atomGrad)" filter="url(#glow)" style="--tx: 4px; --ty: 6px;"/>
+            <circle class="lattice-atom" cx="150" cy="250" r="12" fill="url(#atomGrad)" filter="url(#glow)"/>
+            <circle class="lattice-atom expanded" cx="200" cy="250" r="12" fill="url(#atomGrad)" filter="url(#glow)" style="--tx: 6px; --ty: 3px;"/>
+            <circle class="lattice-atom" cx="250" cy="250" r="12" fill="url(#atomGrad)" filter="url(#glow)"/>
+          </g>
+
+          <!-- Ion path indicators -->
+          <g stroke="rgba(255,107,107,0.3)" stroke-width="2" fill="none" stroke-dasharray="5,5">
+            <path d="M 75 75 Q 100 100 125 75"/>
+            <path d="M 175 125 Q 200 150 225 125"/>
+            <path d="M 75 175 Q 100 200 125 175"/>
+          </g>
+
+          <!-- Lithium ion -->
+          <circle cx="75" cy="75" r="8" fill="#ff6b6b" opacity="0.8">
+            <animateMotion dur="3s" repeatCount="indefinite" path="M 75 75 Q 100 100 125 75"/>
+          </circle>
+          <circle cx="175" cy="125" r="8" fill="#ff6b6b" opacity="0.8">
+            <animateMotion dur="3s" repeatCount="indefinite" begin="1s" path="M 175 125 Q 200 150 225 125"/>
+          </circle>
+          <circle cx="75" cy="175" r="8" fill="#ff6b6b" opacity="0.8">
+            <animateMotion dur="3s" repeatCount="indefinite" begin="2s" path="M 75 175 Q 100 200 125 175"/>
+          </circle>
+        </svg>
+        <div class="strain-indicator">ε = +2.4%</div>
+      </div>
+    </div>
+
+    <div class="scroll-indicator">
+      <span style="font-size: 0.75rem; opacity: 0.6;">Scroll to explore</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14M5 12l7 7 7-7"/>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Navigation -->
+  <nav class="nav-section">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="6" y="4" width="12" height="18" rx="2"/>
+          <line x1="10" y1="2" x2="14" y2="2"/>
+        </svg>
+        Li-Ion Battery
+      </div>
+      <div class="nav-links">
+        <a href="#fundamentals" class="nav-link">Fundamentals</a>
+        <a href="#simulator" class="nav-link">Simulator</a>
+        <a href="#techniques" class="nav-link">Techniques</a>
+        <a href="#materials" class="nav-link">Materials</a>
+        <a href="#research" class="nav-link">Research</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="content-section">
+
+    <!-- Key Statistics -->
+    <div class="summary-stats">
+      <div class="stat-card">
+        <div class="stat-value">±10%</div>
+        <div class="stat-label">Maximum Lattice Strain</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">0.1 nm</div>
+        <div class="stat-label">Spatial Resolution</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">ms</div>
+        <div class="stat-label">Time Resolution</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">GPa</div>
+        <div class="stat-label">Stress Generation</div>
+      </div>
+    </div>
+
+    <!-- Section 1: Fundamentals -->
+    <section id="fundamentals" class="content-section">
+      <div class="section-header">
+        <div class="section-number">01 — FUNDAMENTALS</div>
+        <h2 class="section-title">The Electrochemical-Mechanical Coupling</h2>
+        <p class="section-subtitle">
+          When lithium ions enter or leave a cathode material, they don't just change the chemistry —
+          they physically reshape the crystal structure, creating stresses that can crack electrodes
+          and degrade battery performance over time.
+        </p>
+      </div>
+
+      <div class="equation-box">
+        <div class="equation-main">ε = (1/V) × (∂V/∂c) × Δc</div>
+        <div class="equation-desc">Volumetric strain as a function of lithium concentration change</div>
+      </div>
+
+      <div class="concept-grid">
+        <div class="concept-card">
+          <div class="concept-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <h3 class="concept-title">Lattice Expansion</h3>
+          <p class="concept-desc">
+            Upon lithium insertion, cathode materials like LiCoO₂ expand by 2-5% along the c-axis.
+            The intercalation of Li⁺ ions pushes apart metal-oxygen layers, increasing the lattice
+            parameter and creating anisotropic strain that accumulates as mechanical stress.
+          </p>
+        </div>
+
+        <div class="concept-card">
+          <div class="concept-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <h3 class="concept-title">Strain Kinetics</h3>
+          <p class="concept-desc">
+            Strain evolution follows diffusion-limited kinetics with characteristic times ranging
+            from milliseconds during fast charging to hours during deep discharge. The rate of
+            strain change directly correlates with the formation of microcracks.
+          </p>
+        </div>
+
+        <div class="concept-card">
+          <div class="concept-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <h3 class="concept-title">Stress Generation</h3>
+          <p class="concept-desc">
+            Constrained electrodes develop internal stresses up to several GPa. This
+            electrochemically-generated stress can exceed the fracture toughness of cathode
+            materials, leading to particle cracking, loss of active material, and capacity fade.
+          </p>
+        </div>
+
+        <div class="concept-card">
+          <div class="concept-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          </div>
+          <h3 class="concept-title">Phase Transformations</h3>
+          <p class="concept-desc">
+            Some electrode materials undergo structural phase transitions during cycling,
+            with sudden volume changes of 5-10%. These first-order transitions create
+            mechanical instabilities and are a primary cause of rapid capacity loss.
+          </p>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <div class="highlight-title">Key Insight</div>
+        <p>
+          The strain state of a battery electrode is not merely a consequence of electrochemistry —
+          it is a dynamic variable that itself influences kinetics. Compressive strain can slow
+          lithium diffusion, while tensile strain can accelerate it, creating feedback loops
+          that govern rate capability and cycle life.
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 2: Interactive Simulator -->
+    <section id="simulator">
+      <div class="visualization-panel">
+        <div class="viz-header">
+          <div class="viz-title">Interactive Strain Simulator</div>
+          <div class="viz-controls">
+            <button class="viz-btn active" data-material="NMC">NMC 811</button>
+            <button class="viz-btn" data-material="LFP">LFP</button>
+            <button class="viz-btn" data-material="NCA">NCA</button>
+          </div>
+        </div>
+
+        <div class="strain-simulator">
+          <div class="sim-left">
+            <svg id="simLattice" class="lattice-mini" viewBox="0 0 200 200">
+              <defs>
+                <radialGradient id="simAtomGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#0a84ff"/>
+                  <stop offset="100%" stop-color="#5e5ce6"/>
+                </radialGradient>
+              </defs>
+              <g id="simAtoms"></g>
+            </svg>
+          </div>
+
+          <div class="sim-right">
+            <div class="lattice-display">
+              <svg class="lattice-mini" viewBox="0 0 200 200" id="strainVisual">
+                <defs>
+                  <linearGradient id="strainGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#ff6b6b"/>
+                    <stop offset="50%" stop-color="#ffd60a"/>
+                    <stop offset="100%" stop-color="#30d158"/>
+                  </linearGradient>
+                </defs>
+                <rect id="strainBar" x="10" y="90" width="180" height="20" rx="10" fill="url(#strainGrad)"/>
+                <text x="100" y="130" text-anchor="middle" fill="#f0f4f8" font-size="12" font-family="Space Mono">Strain Level</text>
+                <line id="strainNeedle" x1="100" y1="95" x2="100" y2="105" stroke="#f0f4f8" stroke-width="3"/>
+              </svg>
+            </div>
+
+            <div class="sim-metrics">
+              <div class="metric-card">
+                <div class="metric-value" id="strainValue">+2.4%</div>
+                <div class="metric-label">Lattice Strain</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value" id="stressValue">0.8</div>
+                <div class="metric-label">Stress (GPa)</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value" id="capacityValue">85%</div>
+                <div class="metric-label">Capacity</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-value" id="cyclesValue">200</div>
+                <div class="metric-label">Cycles</div>
+              </div>
+            </div>
+
+            <div class="slider-container">
+              <div class="slider-header">
+                <span class="slider-label">State of Charge (Li⁺ concentration)</span>
+                <span class="slider-value" id="socValue">50%</span>
+              </div>
+              <input type="range" class="slider" id="socSlider" min="0" max="100" value="50">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Measurement Techniques -->
+    <section id="techniques">
+      <div class="section-header">
+        <div class="section-number">02 — MEASUREMENT TECHNIQUES</div>
+        <h2 class="section-title">In-Situ Strain Measurement Techniques</h2>
+        <p class="section-subtitle">
+          Cutting-edge methods to visualize and quantify electrochemical strain at multiple length scales,
+          from atomic resolution to battery pack level.
+        </p>
+      </div>
+
+      <div class="technique-cards">
+        <div class="technique-card">
+          <div class="technique-header">
+            <div class="technique-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            </div>
+            <div>
+              <div class="technique-name">Digital Image Correlation</div>
+              <div class="technique-abbr">DIC — Strain Mapping</div>
+            </div>
+          </div>
+          <p class="technique-desc">
+            Optical technique using pattern recognition to track surface displacements with
+            microstrain resolution. Ideal for observing electrode bending and cracking during
+            electrochemical cycling.
+          </p>
+          <div class="technique-specs">
+            <div class="spec-row">
+              <span class="spec-label">Spatial Resolution</span>
+              <span class="spec-value">10-100 μm</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Strain Resolution</span>
+              <span class="spec-value">10 με</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Acquisition Rate</span>
+              <span class="spec-value">60 Hz</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="technique-card">
+          <div class="technique-header">
+            <div class="technique-icon">
+              <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <div>
+              <div class="technique-name">Bragg Coherent X-ray Imaging</div>
+              <div class="technique-abbr">BCI — Nanoscale</div>
+            </div>
+          </div>
+          <p class="technique-desc">
+            Coherent diffraction imaging that reconstructs 3D strain maps of individual
+            cathode particles with 10 nm resolution. Can track the evolution of
+            dislocations and cracks within single particles.
+          </p>
+          <div class="technique-specs">
+            <div class="spec-row">
+              <span class="spec-label">Spatial Resolution</span>
+              <span class="spec-value">10 nm</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Strain Resolution</span>
+              <span class="spec-value">0.02%</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Penetration</span>
+              <span class="spec-value">Bulk</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="technique-card">
+          <div class="technique-header">
+            <div class="technique-icon">
+              <svg viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 1 1-14 0 7 7 0 0 1 14 0z"/></svg>
+            </div>
+            <div>
+              <div class="technique-name">Scanning Probe Microscopy</div>
+              <div class="technique-abbr">SPM — Electrochemical Strain</div>
+            </div>
+          </div>
+          <p class="technique-desc">
+            Atomic force microscopy combined with electrochemical control to measure
+            surface expansion at the nanoscale during lithium insertion. Provides
+            real-time mapping of strain heterogeneity across electrode surfaces.
+          </p>
+          <div class="technique-specs">
+            <div class="spec-row">
+              <span class="spec-label">Spatial Resolution</span>
+              <span class="spec-value">&lt;1 nm</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Strain Resolution</span>
+              <span class="spec-value">0.1%</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Environment</span>
+              <span class="spec-value">In-situ</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="technique-card">
+          <div class="technique-header">
+            <div class="technique-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div>
+              <div class="technique-name">Fiber Bragg Grating Sensors</div>
+              <div class="technique-abbr">FBG — Pack Level</div>
+            </div>
+          </div>
+          <p class="technique-desc">
+            Embedded optical fiber sensors that measure strain distribution throughout
+            a battery pack. Essential for state estimation in battery management
+            systems and thermal runaway early warning.
+          </p>
+          <div class="technique-specs">
+            <div class="spec-row">
+              <span class="spec-label">Spatial Resolution</span>
+              <span class="spec-value">1 mm</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Strain Resolution</span>
+              <span class="spec-value">1 με</span>
+            </div>
+            <div class="spec-row">
+              <span class="spec-label">Multiplexing</span>
+              <span class="spec-value">&gt;100 pts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Materials Data -->
+    <section id="materials">
+      <div class="section-header">
+        <div class="section-number">03 — MATERIALS DATABASE</div>
+        <h2 class="section-title">Strain Characteristics of Battery Materials</h2>
+        <p class="section-subtitle">
+          Comparative analysis of electrochemical strain across major cathode, anode, and solid electrolyte materials.
+        </p>
+      </div>
+
+      <div class="data-visualization">
+        <div class="viz-header">
+          <div class="viz-title">Strain vs. State of Charge</div>
+        </div>
+        <div class="chart-container" id="socChart">
+          <svg class="chart-svg" viewBox="0 0 600 300">
+            <!-- Grid -->
+            <g class="chart-grid">
+              <line class="chart-gridline" x1="60" y1="40" x2="60" y2="260"/>
+              <line class="chart-gridline" x1="60" y1="260" x2="580" y2="260"/>
+              <line class="chart-gridline" x1="60" y1="200" x2="580" y2="200" stroke-dasharray="5"/>
+              <line class="chart-gridline" x1="60" y1="140" x2="580" y2="140" stroke-dasharray="5"/>
+              <line class="chart-gridline" x1="60" y1="80" x2="580" y2="80" stroke-dasharray="5"/>
+            </g>
+
+            <!-- Axes -->
+            <line class="chart-axis" x1="60" y1="40" x2="60" y2="260"/>
+            <line class="chart-axis" x1="60" y1="260" x2="580" y2="260"/>
+
+            <!-- Labels -->
+            <text class="chart-label" x="30" y="150" transform="rotate(-90, 30, 150)" text-anchor="middle">Strain (%)</text>
+            <text class="chart-label" x="320" y="290" text-anchor="middle">State of Charge (%)</text>
+
+            <!-- X-axis labels -->
+            <text class="chart-label" x="60" y="275" text-anchor="middle">0</text>
+            <text class="chart-label" x="190" y="275" text-anchor="middle">25</text>
+            <text class="chart-label" x="320" y="275" text-anchor="middle">50</text>
+            <text class="chart-label" x="450" y="275" text-anchor="middle">75</text>
+            <text class="chart-label" x="580" y="275" text-anchor="middle">100</text>
+
+            <!-- Y-axis labels -->
+            <text class="chart-label" x="50" y="265" text-anchor="end">-5</text>
+            <text class="chart-label" x="50" y="205" text-anchor="end">-2.5</text>
+            <text class="chart-label" x="50" y="145" text-anchor="end">0</text>
+            <text class="chart-label" x="50" y="85" text-anchor="end">+2.5</text>
+            <text class="chart-label" x="50" y="45" text-anchor="end">+5</text>
+
+            <!-- Area fills -->
+            <path class="chart-area" d="M60,145 L190,110 L320,80 L450,95 L580,120 L580,260 L60,260 Z" fill="rgba(10,132,255,0.2)"/>
+            <path class="chart-area" d="M60,145 L190,155 L320,170 L450,160 L580,150 L580,260 L60,260 Z" fill="rgba(48,209,88,0.2)"/>
+
+            <!-- Lines -->
+            <path class="chart-line strain" d="M60,145 L190,110 L320,80 L450,95 L580,120"/>
+            <path class="chart-line capacity" d="M60,145 L190,155 L320,170 L450,160 L580,150"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="visualization-panel">
+        <div class="viz-title" style="margin-bottom: 1.5rem;">Material Properties Comparison</div>
+        <table class="materials-table">
+          <thead>
+            <tr>
+              <th>Material</th>
+              <th>Type</th>
+              <th>Max Strain</th>
+              <th>Volume Change</th>
+              <th>Fracture Toughness</th>
+              <th>Risk Level</th>
+            </tr>
+          </thead>
+          <tbody id="materialsTable">
+            <tr>
+              <td>LiCoO₂</td>
+              <td>Cathode</td>
+              <td>+4.2%</td>
+              <td>+5.3%</td>
+              <td>0.5 MPa√m</td>
+              <td><span style="color: var(--warning);">Moderate</span></td>
+            </tr>
+            <tr>
+              <td>NMC 811</td>
+              <td>Cathode</td>
+              <td>+7.1%</td>
+              <td>+8.9%</td>
+              <td>0.8 MPa√m</td>
+              <td><span style="color: var(--accent);">High</span></td>
+            </tr>
+            <tr>
+              <td>LFP</td>
+              <td>Cathode</td>
+              <td>+1.8%</td>
+              <td>+6.7%</td>
+              <td>0.4 MPa√m</td>
+              <td><span style="color: var(--success);">Low</span></td>
+            </tr>
+            <tr>
+              <td>Graphite</td>
+              <td>Anode</td>
+              <td>+10.4%</td>
+              <td>+13.5%</td>
+              <td>0.3 MPa√m</td>
+              <td><span style="color: var(--accent);">High</span></td>
+            </tr>
+            <tr>
+              <td>Si anode</td>
+              <td>Anode</td>
+              <td>+320%</td>
+              <td>+400%</td>
+              <td>0.7 MPa√m</td>
+              <td><span style="color: var(--accent);">Critical</span></td>
+            </tr>
+            <tr>
+              <td>LLZO</td>
+              <td>SSE</td>
+              <td>+0.3%</td>
+              <td>+0.4%</td>
+              <td>1.1 MPa√m</td>
+              <td><span style="color: var(--success);">Low</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="interactive-badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+          </svg>
+          Live Database Updated Monthly
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Animation Showcase -->
+    <section id="animations">
+      <div class="section-header">
+        <div class="section-number">04 — DYNAMICS</div>
+        <h2 class="section-title">Strain Evolution Dynamics</h2>
+        <p class="section-subtitle">
+          Visualizing the temporal evolution of electrochemical strain across multiple length scales.
+        </p>
+      </div>
+
+      <div class="animation-showcase">
+        <div class="animation-grid">
+          <div class="animation-card">
+            <div class="animation-preview">
+              <svg class="diffusion-animation" viewBox="0 0 120 120">
+                <circle class="diffusion-ring" cx="60" cy="60" r="5"/>
+                <circle class="diffusion-ring" cx="60" cy="60" r="5"/>
+                <circle class="diffusion-ring" cx="60" cy="60" r="5"/>
+                <circle class="diffusion-ring" cx="60" cy="60" r="5"/>
+                <circle class="diffusion-ring" cx="60" cy="60" r="5"/>
+                <circle cx="60" cy="60" r="8" fill="#0a84ff"/>
+              </svg>
+            </div>
+            <div class="animation-title">Lithium Diffusion</div>
+            <div class="animation-desc">Concentration wave propagation through cathode lattice</div>
+          </div>
+
+          <div class="animation-card">
+            <div class="animation-preview">
+              <svg class="breathing-animation" viewBox="0 0 100 100">
+                <circle class="breathing-dot" cx="50" cy="50" r="10"/>
+              </svg>
+            </div>
+            <div class="animation-title">Breathing Cathode</div>
+            <div class="animation-desc">Volumetric oscillation during charge-discharge cycles</div>
+          </div>
+
+          <div class="animation-card">
+            <div class="animation-preview">
+              <svg class="rotation-animation" viewBox="0 0 100 100">
+                <rect class="rotation-crystal" x="20" y="20" width="60" height="60" rx="5"/>
+                <circle class="rotation-crystal" cx="50" cy="50" r="25"/>
+              </svg>
+            </div>
+            <div class="animation-title">Crystal Rotation</div>
+            <div class="animation-desc">Mechanical stress-induced texture evolution</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Phase Diagram -->
+    <section id="phases">
+      <div class="section-header">
+        <div class="section-number">05 — PHASE BEHAVIOR</div>
+        <h2 class="section-title">Strain-Phasediagram Analysis</h2>
+        <p class="section-subtitle">
+          Mapping the strain-dependent phase stability regions for key electrode materials.
+        </p>
+      </div>
+
+      <div class="phase-diagram-container">
+        <svg class="phase-svg" viewBox="0 0 600 400">
+          <defs>
+            <linearGradient id="phaseGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0a84ff" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#0a84ff" stop-opacity="0.1"/>
+            </linearGradient>
+            <linearGradient id="phaseGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#30d158" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#30d158" stop-opacity="0.1"/>
+            </linearGradient>
+            <linearGradient id="phaseGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ff6b6b" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#ff6b6b" stop-opacity="0.1"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Grid -->
+          <g stroke="rgba(240,244,248,0.1)" stroke-width="1">
+            <line x1="50" y1="50" x2="50" y2="350"/>
+            <line x1="50" y1="350" x2="550" y2="350"/>
+            <line x1="550" y1="50" x2="550" y2="350"/>
+            <line x1="50" y1="50" x2="550" y2="50"/>
+            <line x1="50" y1="200" x2="550" y2="200" stroke-dasharray="5"/>
+            <line x1="50" y1="350" x2="550" y2="350" stroke-dasharray="5"/>
+          </g>
+
+          <!-- Axes -->
+          <line stroke="rgba(240,244,248,0.5)" stroke-width="2" x1="50" y1="350" x2="550" y2="350"/>
+          <line stroke="rgba(240,244,248,0.5)" stroke-width="2" x1="50" y1="50" x2="50" y2="350"/>
+
+          <!-- Labels -->
+          <text fill="var(--light)" font-size="14" x="300" y="390" text-anchor="middle">Strain (%)</text>
+          <text fill="var(--light)" font-size="14" x="20" y="200" transform="rotate(-90, 20, 200)" text-anchor="middle">Li Concentration</text>
+
+          <!-- Phase regions -->
+          <path d="M50,350 L50,300 Q100,280 150,250 L50,350" fill="url(#phaseGrad1)"/>
+          <path d="M50,300 Q100,280 150,250 L200,200 Q250,150 300,100 L50,200 Q50,250 50,300" fill="url(#phaseGrad2)"/>
+          <path d="M150,250 L200,200 Q250,150 300,100 L400,80 L500,100 Q530,150 550,200 L550,350 L150,350 L150,250" fill="url(#phaseGrad3)"/>
+
+          <!-- Phase boundaries -->
+          <path d="M50,300 Q100,280 150,250" stroke="var(--primary)" stroke-width="2" fill="none"/>
+          <path d="M150,250 L200,200 Q250,150 300,100" stroke="var(--success)" stroke-width="2" fill="none"/>
+          <path d="M300,100 L400,80 L500,100 Q530,150 550,200" stroke="var(--accent)" stroke-width="2" fill="none"/>
+
+          <!-- Critical points -->
+          <circle cx="150" cy="250" r="6" fill="#0a84ff"/>
+          <circle cx="300" cy="100" r="6" fill="#30d158"/>
+          <circle cx="500" cy="100" r="6" fill="#ff6b6b"/>
+
+          <!-- Point labels -->
+          <text fill="var(--light)" font-size="11" x="160" y="240" font-family="Space Mono">H1→H2</text>
+          <text fill="var(--light)" font-size="11" x="310" y="90" font-family="Space Mono">H2→H3</text>
+          <text fill="var(--light)" font-size="11" x="510" y="90" font-family="Space Mono">H3→H4</text>
+
+          <!-- Axis ticks -->
+          <text fill="var(--light)" font-size="11" font-family="Space Mono" x="40" y="360">0</text>
+          <text fill="var(--light)" font-size="11" font-family="Space Mono" x="130" y="360">-2</text>
+          <text fill="var(--light)" font-size="11" font-family="Space Mono" x="230" y="360">-4</text>
+          <text fill="var(--light)" font-size="11" font-family="Space Mono" x="330" y="360">-6</text>
+          <text fill="var(--light)" font-size="11" font-family="Space Mono" x="430" y="360">-8</text>
+          <text fill="var(--light)" font-size="11" font-family="Space Mono" x="530" y="360">-10</text>
+          <text fill="var(--light)" font-size="11" font-family="Space Mono" x="40" y="355">0</text>
+          <text fill="var(--light)" font-size="11" font-family="Space Mono" x="40" y="255">0.25</text>
+          <text fill="var(--light)" font-size="11" font-family="Space Mono" x="40" y="155">0.5</text>
+          <text fill="var(--light)" font-size="11" font-family="Space Mono" x="40" y="55">1.0</text>
+        </svg>
+
+        <div class="phase-legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background: var(--primary);"></div>
+            <span>Low Strain Region (Stable)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: var(--success);"></div>
+            <span>Medium Strain Region (Metastable)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: var(--accent);"></div>
+            <span>High Strain Region (Critical)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Research Insights -->
+    <section id="research">
+      <div class="section-header">
+        <div class="section-number">06 — RESEARCH FRONTIERS</div>
+        <h2 class="section-title">Recent Discoveries & Insights</h2>
+        <p class="section-subtitle">
+          Cutting-edge findings from the field of electrochemical strain microscopy and its implications for battery design.
+        </p>
+      </div>
+
+      <div class="research-insights">
+        <div class="insight-grid">
+          <div class="insight-card">
+            <div class="insight-number">01</div>
+            <div class="insight-title">Strain-Mediated Dendrite Suppression</div>
+            <div class="insight-text">
+              Mechanical pressure applied to lithium metal anodes creates compressive strain
+              that suppresses dendrite formation. Recent BCI studies show that 1 GPa of
+              confinement pressure can completely suppress lithium whisker growth during
+              high-rate cycling.
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <div class="insight-number">02</div>
+            <div class="insight-title">Transient Phase Boundaries</div>
+            <div class="insight-text">
+              High-speed X-ray diffraction reveals that phase transitions in NMC cathodes
+              occur via moving strain fronts, not gradual conversion. These "martensitic"
+              transformations propagate at 10-100 μm/s, creating localized stress
+              concentrations that initiate microcracks.
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <div class="insight-number">03</div>
+            <div class="insight-title">Electrolyte Viscosity Coupling</div>
+            <div class="insight-text">
+              Electrochemical strain depends nonlinearly on ionic conductivity of the
+              electrolyte. Paradoxically, adding FEC electrolyte additives reduces both
+              strain amplitude AND improves rate capability by promoting more uniform
+              lithium flux at the particle level.
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <div class="insight-number">04</div>
+            <div class="insight-title">Solid Electrolyte Interphase Strain</div>
+            <div class="insight-text">
+              SEI layer formation itself generates measurable strain of 0.5-2% on graphite
+              anodes. This "SEI strain" accumulates over formation cycles and preloads
+              the electrode with compressive stress, potentially affecting long-term
+              cycling stability.
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <div class="insight-number">05</div>
+            <div class="insight-title">Operando Stress Mapping</div>
+            <div class="insight-text">
+              Integration of FBG sensors with electrochemical control enables real-time
+              stress mapping across entire battery packs. Correlations between local strain
+              hotspots and capacity fade patterns suggest that strain redistribution
+              precedes visible degradation by hundreds of cycles.
+            </div>
+          </div>
+
+          <div class="insight-card">
+            <div class="insight-number">06</div>
+            <div class="insight-title">Strain-Potential Hysteresis</div>
+            <div class="insight-text">
+              Open-circuit potential measurements reveal that strain and voltage hysteresis
+              are directly correlated. The difference between charge and discharge strain
+              at fixed state-of-charge provides a nondestructive metric for tracking
+              active material loss in aged batteries.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer-section">
+    <div class="footer-brand">Electrochemical Strain Microscopy Lab</div>
+    <p class="footer-text">
+      Advancing battery science through multi-scale mechanical characterization.<br>
+      Part of the Virtual World Energy Research District.
+    </p>
+    <div class="footer-links">
+      <a href="battery-intercalation-kinetics.html" class="footer-link">Intercalation Kinetics</a>
+      <a href="sei-interface-engineering.html" class="footer-link">SEI Engineering</a>
+      <a href="lithium-transport-frontiers.html" class="footer-link">Li Transport</a>
+      <a href="solid-state-battery-lab.html" class="footer-link">Solid State Lab</a>
+    </div>
+  </footer>
+
+  <script>
+    // Interactive Strain Simulator
+    const materialsData = {
+      'NMC': {
+        strainCoeff: 0.071,
+        maxStrain: 7.1,
+        stressCoeff: 0.15,
+        color: '#0a84ff'
+      },
+      'LFP': {
+        strainCoeff: 0.018,
+        maxStrain: 1.8,
+        stressCoeff: 0.05,
+        color: '#30d158'
+      },
+      'NCA': {
+        strainCoeff: 0.065,
+        maxStrain: 6.5,
+        stressCoeff: 0.12,
+        color: '#ff6b6b'
+      }
+    };
+
+    let currentMaterial = 'NMC';
+    let currentSOC = 50;
+
+    function updateSimulator() {
+      const data = materialsData[currentMaterial];
+      const strain = (currentSOC / 100) * data.maxStrain;
+      const stress = (currentSOC / 100) * data.stressCoeff * 10;
+      const capacity = Math.max(70, 100 - (currentSOC * 0.15));
+      const cycles = Math.floor(500 - currentSOC * 3);
+
+      document.getElementById('strainValue').textContent = (strain >= 0 ? '+' : '') + strain.toFixed(1) + '%';
+      document.getElementById('strainValue').className = 'metric-value ' + (strain > 4 ? 'expanded' : strain < 2 ? 'contracted' : '');
+
+      document.getElementById('stressValue').textContent = stress.toFixed(1);
+      document.getElementById('capacityValue').textContent = Math.round(capacity) + '%';
+      document.getElementById('cyclesValue').textContent = cycles;
+
+      // Update strain needle position
+      const needleX = 10 + (currentSOC / 100) * 180;
+      document.getElementById('strainNeedle').setAttribute('x1', needleX);
+      document.getElementById('strainNeedle').setAttribute('x2', needleX);
+
+      // Update lattice visualization
+      updateLatticeVisual(strain, data.color);
+    }
+
+    function updateLatticeVisual(strain, color) {
+      const simLattice = document.getElementById('simAtoms');
+      simLattice.innerHTML = '';
+
+      const gridSize = 4;
+      const spacing = 40;
+      const baseSize = 12;
+      const offset = 80;
+
+      for (let i = 0; i < gridSize; i++) {
+        for (let j = 0; j < gridSize; j++) {
+          const x = offset + j * spacing;
+          const y = offset + i * spacing;
+
+          // Add some randomness based on strain
+          const localStrain = strain * (0.5 + Math.random());
+          const expansion = localStrain / 10;
+          const size = baseSize * (1 + expansion);
+
+          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('cx', x + (Math.random() - 0.5) * expansion * 10);
+          circle.setAttribute('cy', y + (Math.random() - 0.5) * expansion * 10);
+          circle.setAttribute('r', size);
+          circle.setAttribute('fill', color);
+          circle.setAttribute('opacity', '0.8');
+
+          simLattice.appendChild(circle);
+        }
+      }
+    }
+
+    // Initialize simulator
+    updateSimulator();
+
+    // SOC Slider
+    document.getElementById('socSlider').addEventListener('input', (e) => {
+      currentSOC = parseInt(e.target.value);
+      document.getElementById('socValue').textContent = currentSOC + '%';
+      updateSimulator();
+    });
+
+    // Material buttons
+    document.querySelectorAll('.viz-btn[data-material]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.viz-btn[data-material]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentMaterial = btn.dataset.material;
+        updateSimulator();
+      });
+    });
+
+    // Scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.concept-card, .technique-card, .insight-card, .stat-card').forEach(card => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(30px)';
+      card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(card);
+    });
+
+    // Smooth scroll for navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href');
+        const target = document.querySelector(targetId);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // Chart interactivity
+    const chartPoints = [
+      { x: 60, y: 145, label: '0% SOC' },
+      { x: 190, y: 110, label: '25% SOC' },
+      { x: 320, y: 80, label: '50% SOC' },
+      { x: 450, y: 95, label: '75% SOC' },
+      { x: 580, y: 120, label: '100% SOC' }
+    ];
+
+    const tooltip = document.createElement('div');
+    tooltip.className = 'chart-tooltip';
+    tooltip.innerHTML = '<div class="tooltip-title"></div><div class="tooltip-value"></div>';
+    document.getElementById('socChart').appendChild(tooltip);
+
+    chartPoints.forEach(point => {
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('class', 'chart-dot');
+      dot.setAttribute('cx', point.x);
+      dot.setAttribute('cy', point.y);
+      dot.setAttribute('r', '5');
+      dot.setAttribute('stroke', 'var(--primary)');
+
+      dot.addEventListener('mouseenter', (e) => {
+        tooltip.querySelector('.tooltip-title').textContent = point.label;
+        const strainVal = ((145 - point.y) / 65 * 5).toFixed(2);
+        tooltip.querySelector('.tooltip-value').textContent = `Strain: +${strainVal}%`;
+        tooltip.style.left = (point.x + 10) + 'px';
+        tooltip.style.top = (point.y - 30) + 'px';
+        tooltip.classList.add('visible');
+      });
+
+      dot.addEventListener('mouseleave', () => {
+        tooltip.classList.remove('visible');
+      });
+
+      document.querySelector('#socChart .chart-svg').appendChild(dot);
+    });
+
+    // Hero lattice animation
+    const heroLattice = document.getElementById('heroLattice');
+    let latticeHovered = false;
+
+    heroLattice.addEventListener('mouseenter', () => {
+      latticeHovered = true;
+    });
+
+    heroLattice.addEventListener('mouseleave', () => {
+      latticeHovered = false;
+    });
+
+    // Animate strain indicator
+    setInterval(() => {
+      if (!latticeHovered) {
+        const indicator = heroLattice.querySelector('.strain-indicator');
+        const baseStrain = 2.4;
+        const variation = Math.sin(Date.now() / 2000) * 0.5;
+        indicator.textContent = `ε = +${(baseStrain + variation).toFixed(1)}%`;
+      }
+    }, 100);
+
+    console.log('Electrochemical Strain Microscopy loaded');
+  </script>
+</body>
+</html>
