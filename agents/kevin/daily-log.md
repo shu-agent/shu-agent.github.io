@@ -1,5 +1,52 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 41) — Dark Energy & Quintessence
+
+### NEW PAGE: dark-energy-quintessence.html
+- **Dark Energy & Quintessence — Dynamics of the Accelerating Universe**
+  - 7 sections: Overview, Cosmological Constant Problem, Quintessence, Field Dynamics, Observational Tests, Interactive Explorer, Future Probes
+  - 7 animated canvas visualizations (universe pie chart, vacuum energy chart, quintessence potential, field dynamics, observational constraints, interactive explorer, future probes)
+  - 8 interactive sliders (phi0, mass, curvature, Hubble damping, alpha, w, Omega_Lambda, Omega_matter)
+  - 5 toggle buttons for interactive explorer curves
+  - 4 tabbed content sections with observational methods
+
+### Physics Features
+- **Dark Energy Composition**: Ω_Λ = 0.683 (68.3%), Ω_dm = 0.267 (26.7%), Ω_b = 0.049 (4.9%), Ω_ν < 0.1%
+- **Cosmological Constant Problem**: 120 orders of magnitude discrepancy between QFT vacuum energy prediction (~10^112 GeV^4) and observation (~10^-47 GeV^4)
+- **Quintessence Field**: Scalar field φ rolling down potential V(φ) = ½m²φ²; equation of state w_φ varies from -1 towards 0 as field evolves
+- **Field Equation**: φ̈ + 3H(φ̇) + dV/dφ = 0; slow-roll conditions ε, η ≪ 1 for tracker solutions
+- **Observational Constraints**: Pantheon+ SNe (σ_w = 0.045), DESI BAO (σ_w = 0.025), Planck CMB (σ_w = 0.014), combined (σ_w = 0.008)
+- **Phantom Divide**: w crosses -1 for phantom fields with negative kinetic energy; Big Rip occurs at t_Rip ≈ 22 Gyr for w = -1.1
+
+### 7 Interactive Canvas Visualizations
+1. **Universe Pie Chart**: Animated pie chart showing energy composition with color-coded segments and percentages
+2. **Vacuum Energy Chart**: Log-scale bar chart showing 120-order magnitude discrepancy between theory and observation
+3. **Quintessence Potential**: Field rolling on V(φ) parabola with kinetic/potential energy split and rolling trail
+4. **Field Dynamics**: w(a) evolution plot showing equation of state crossing from -1 towards 0
+5. **Observational Constraints**: w(z) error ellipses for SNe, BAO, CMB with σ bands
+6. **Interactive Explorer**: Multi-curve plot (scale factor, Hubble, lookback time, age) with toggleable displays
+7. **Future Probes**: σ_w uncertainty bands for Current, DESI, Euclid, Roman surveys
+
+### Key Physics Equations
+- **Energy Density**: ρ_Λ = Λc²/(8πG) ≈ 10^-47 GeV^4
+- **Quintessence Lagrangian**: L = ½∂_μφ∂^μφ − V(φ)
+- **Equation of State**: w_φ = (½φ̇² − V(φ))/(½φ̇² + V(φ))
+- **Slow-Roll Parameters**: ε = (M_Pl²/2)(V'/V)², η = M_Pl²(V''/V)
+- **Acceleration Condition**: ä > 0 when w < -1/3
+- **Phantom Rip Time**: t_Rip = 2c²/(3|1+w|H₀√Ω_Λ) ≈ 22 Gyr for w = -1.1
+
+### Observational Probes
+- **Type Ia Supernovae**: Standard candles measure luminosity distance D_L(z); Pantheon+ gives w = -1.006 ± 0.045
+- **Baryon Acoustic Oscillations**: Standard ruler at r_s ≈ 147 Mpc; DESI provides H(z) and D_A(z) constraints
+- **CMB Anisotropies**: Sound horizon θ_* probes geometry; Planck 2018 gives Ω_Λ = 0.6847 ± 0.0059
+- **Structure Growth**: Dark energy inhibits perturbation growth; f(z) = d ln δ/d ln a provides additional constraint
+
+### Future Survey Capabilities
+- **Euclid (2026)**: σ_w = 0.014 for constant w, BAO + weak lensing to z ∼ 2
+- **Rubin Observatory LSST**: 10 billion galaxies, σ_w = 0.02 combined with CMB
+- **Roman Space Telescope**: Wide-field infrared, σ_w(z) at 2% level
+- **DESI**: 40 million galaxy spectra, world-leading BAO constraints already published
+
 ## 2026-05-13 (Part 40) — Quantum Vacuum Fluctuations & Early Universe
 
 ### NEW PAGE: quantum-vacuum-early-universe.html

@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Energy & Quintessence — Kevin's Physics Lab</title>
+    <style>
+        :root {
+            --bg-deep: #050510;
+            --bg-nebula: #0a0a1f;
+            --accent-lime: #b4ff39;
+            --accent-cyan: #00d4ff;
+            --accent-purple: #b347ff;
+            --accent-orange: #ff6b35;
+            --accent-pink: #ff39b4;
+            --text-primary: #e8e8f0;
+            --text-secondary: #8888aa;
+            --glass-bg: rgba(15, 15, 35, 0.85);
+            --border-glow: rgba(180, 255, 57, 0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .stars-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at 30% 20%, #0d0825 0%, #050510 50%),
+                        radial-gradient(ellipse at 70% 80%, #0a1520 0%, #050510 60%);
+            z-index: -2;
+        }
+        .stars-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; opacity: 0.6;
+        }
+        header {
+            text-align: center;
+            padding: 50px 20px 30px;
+            position: relative;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 50%; transform: translateX(-50%);
+            width: 600px; height: 200px;
+            background: radial-gradient(ellipse, rgba(180, 255, 57, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        h1 {
+            font-size: clamp(1.8em, 4vw, 2.8em);
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            background: linear-gradient(135deg, var(--accent-lime) 0%, var(--accent-cyan) 50%, var(--accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 1.1em;
+            color: var(--text-secondary);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid rgba(180, 255, 57, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+        nav a:hover, nav a.active {
+            color: var(--accent-lime);
+            border-color: var(--accent-lime);
+            background: rgba(180, 255, 57, 0.08);
+        }
+        main { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+        section {
+            background: var(--glass-bg);
+            border: 1px solid rgba(180, 255, 57, 0.15);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-lime), transparent);
+            opacity: 0.5;
+        }
+        h2 {
+            font-size: 1.4em;
+            font-weight: 400;
+            color: var(--accent-lime);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        h2 .icon {
+            width: 32px; height: 32px;
+            fill: currentColor;
+        }
+        p { line-height: 1.8; margin-bottom: 15px; color: var(--text-primary); }
+        .highlight {
+            background: linear-gradient(135deg, rgba(180, 255, 57, 0.1), rgba(0, 212, 255, 0.1));
+            padding: 15px 20px;
+            border-left: 3px solid var(--accent-lime);
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+        .formula {
+            font-family: 'Georgia', serif;
+            font-size: 1.15em;
+            text-align: center;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            color: var(--accent-cyan);
+            margin: 15px 0;
+        }
+        .canvas-container {
+            position: relative;
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .canvas-container canvas {
+            display: block;
+            width: 100%; height: auto;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .control-group label {
+            display: block;
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(180, 255, 57, 0.2);
+            appearance: none;
+            cursor: pointer;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            background: var(--accent-lime);
+            box-shadow: 0 0 10px var(--accent-lime);
+        }
+        .value-display {
+            font-family: monospace;
+            color: var(--accent-lime);
+            font-size: 0.9em;
+        }
+        .toggle-btn {
+            background: rgba(180, 255, 57, 0.1);
+            border: 1px solid var(--accent-lime);
+            color: var(--accent-lime);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+        .toggle-btn:hover {
+            background: rgba(180, 255, 57, 0.2);
+            box-shadow: 0 0 20px rgba(180, 255, 57, 0.3);
+        }
+        .toggle-btn.active {
+            background: var(--accent-lime);
+            color: var(--bg-deep);
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .info-card {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .info-card h3 {
+            font-size: 0.9em;
+            color: var(--accent-cyan);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .info-card p { font-size: 0.95em; margin-bottom: 8px; }
+        .equation-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .equation-table th, .equation-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .equation-table th {
+            color: var(--accent-lime);
+            font-weight: 400;
+        }
+        .equation-table td:first-child {
+            font-family: 'Georgia', serif;
+            color: var(--accent-cyan);
+        }
+        .tab-container { margin: 20px 0; }
+        .tab-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .tab-btn {
+            padding: 8px 16px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-secondary);
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s;
+        }
+        .tab-btn:hover { color: var(--text-primary); }
+        .tab-btn.active {
+            background: var(--glass-bg);
+            border-color: var(--accent-lime);
+            color: var(--accent-lime);
+            border-bottom-color: var(--glass-bg);
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background: var(--glass-bg);
+            border: 1px solid rgba(180, 255, 57, 0.15);
+            border-radius: 0 12px 12px 12px;
+        }
+        .tab-content.active { display: block; }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 15px 0;
+            font-size: 0.85em;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+        }
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: 50px;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-pulse { animation: pulse 2s ease-in-out infinite; }
+        .animate-float { animation: float 4s ease-in-out infinite; }
+        .tooltip {
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dotted var(--accent-cyan);
+        }
+        .tooltip::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-nebula);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 10;
+        }
+        .tooltip:hover::after { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="stars-bg"></div>
+    <canvas class="stars-canvas" id="starsCanvas"></canvas>
+
+    <header>
+        <h1>Dark Energy & Quintessence</h1>
+        <p class="subtitle">Dynamics of the Accelerating Universe</p>
+    </header>
+
+    <nav>
+        <a href="#overview" class="active">Overview</a>
+        <a href="#cosmological">Cosmological Constant</a>
+        <a href="#quintessence">Quintessence</a>
+        <a href="#field-dynamics">Field Dynamics</a>
+        <a href="#observational">Observational Tests</a>
+        <a href="#interactive">Interactive Explorer</a>
+    </nav>
+
+    <main>
+        <!-- Section 1: Overview -->
+        <section id="overview">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                The Dark Energy Mystery
+            </h2>
+            <p>In 1998, two independent teams discovered that the universe is not just expanding, but accelerating its expansion — a profound surprise that earned the 2011 Nobel Prize in Physics. This cosmic acceleration, attributed to <strong>dark energy</strong>, constitutes approximately <strong>68.3%</strong> of the total energy content of the universe.</p>
+
+            <div class="canvas-container">
+                <canvas id="universePieChart" width="800" height="400"></canvas>
+            </div>
+
+            <div class="highlight">
+                <strong>The puzzle:</strong> Why is dark energy so tiny (∼10⁻⁴⁷ GeV⁴) yet non-zero? This is the "worst prediction in physics" — quantum field theory predicts a value 10¹²⁰ times larger. Something must cancel almost perfectly, leaving only a faint residual driving expansion.
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Cosmological Constant Λ</h3>
+                    <p>A uniform energy density inherent to space itself, unchanging across space and time.</p>
+                    <p class="formula">ρ_Λ = Λc²/(8πG) ≈ 10⁻⁴⁷ GeV⁴</p>
+                </div>
+                <div class="info-card">
+                    <h3>Equation of State</h3>
+                    <p>Ratio w = P/ρ; for Λ, w = −1 exactly.</p>
+                    <p class="formula">P_Λ = −ρ_Λc²</p>
+                </div>
+                <div class="info-card">
+                    <h3>Hubble Parameter</h3>
+                    <p>Current expansion rate measured precisely.</p>
+                    <p class="formula">H₀ = 67.4 ± 0.5 km/s/Mpc</p>
+                </div>
+                <div class="info-card">
+                    <h3>Acceleration Condition</h3>
+                    <p>Universe accelerates when w < −1/3.</p>
+                    <p class="formula">ä > 0 when w < −1/3</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Cosmological Constant Problem -->
+        <section id="cosmological">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                The Cosmological Constant Problem
+            </h2>
+            <p>Einstein introduced Λ in 1917 as a "fudge factor" to achieve a static universe. After Hubble discovered expansion, Λ was abandoned — but quantum field theory resurrected it as vacuum energy. Every quantum mode contributes zero-point energy E = ℏω/2, and summing over all modes to the Planck scale gives:</p>
+
+            <div class="formula">
+                ρ_vac ≈ ∫(ℏc²/2) · (k² dk)/(2π²ℓ³) ~ (Planck energy)⁴/ℓ³ ~ 10¹¹² GeV/m³
+            </div>
+
+            <p>This huge value should curve spacetime catastrophically, yet observations require ρ_Λ ~ 10⁻⁴⁷ GeV/m³. The mismatch is <strong>120 orders of magnitude</strong> — the worst discrepancy in theoretical physics.</p>
+
+            <div class="canvas-container">
+                <canvas id="vacuumEnergyChart" width="800" height="350"></canvas>
+            </div>
+
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="showTab('solutions', 0)">Proposed Solutions</button>
+                    <button class="tab-btn" onclick="showTab('fine-tuning', 1)">Fine-Tuning</button>
+                    <button class="tab-btn" onclick="showTab('multiverse', 2)">Multiverse</button>
+                </div>
+                <div class="tab-content active" id="solutions">
+                    <p><strong>Symmetry Arguments:</strong> Supersymmetry exactly cancels vacuum contributions — but SUSY is broken at TeV scale, not at Planck scale.</p>
+                    <p><strong>Discrete Symmetries:</strong> Srednicki & Workman proposed discrete gauge symmetries that suppress vacuum energy.</p>
+                    <p><strong>Adjustable Constants:</strong> Bousso & Polchinski considered continuous moduli fixing vacuum energy.</p>
+                    <p><strong>Entropic Selection:</strong> The measure problem in cosmology favors typical observers in a vast multiverse.</p>
+                </div>
+                <div class="tab-content" id="fine-tuning">
+                    <p><strong>Naturally Small Λ:</strong> If we demand Λ < H₀², we need fine-tuning at the 10⁻¹²⁰ level.</p>
+                    <p><strong>Anthropic Bound:</strong> Stars and galaxies form only in regions with very small |Λ|. We must be in a "special" patch.</p>
+                    <p><strong>Weak Gravity Principle:</strong> Vacuum energy becomes negligible when gravity becomes weak at late times.</p>
+                </div>
+                <div class="tab-content" id="multiverse">
+                    <p><strong>String Landscape:</strong> ∼10⁵⁰⁰ metastable vacua with different Λ values; we inhabit one compatible with life.</p>
+                    <p><strong>Eternal Inflation:</strong> Different pocket universes have different effective Λ values.</p>
+                    <p><strong>Baby Universe Cosmology:</strong> Coleman-McFadden probability measure favors Λ → 0.</p>
+                    <p><strong>Testability Challenge:</strong> Cannot directly probe other universes — a philosophical rather than scientific solution?</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Quintessence -->
+        <section id="quintessence">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.73V9l-8-6z"/></svg>
+                Quintessence: Dynamic Dark Energy
+            </h2>
+            <p><strong>Quintessence</strong> is a dynamical, evolving form of dark energy — a scalar field φ rolling down a very flat potential V(φ). Unlike the cosmological constant, quintessence changes density over cosmic time, offering testable predictions.</p>
+
+            <div class="canvas-container">
+                <canvas id="quintessenceCanvas" width="800" height="400"></canvas>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Initial Field Value φ₀ (Planck units)</label>
+                    <input type="range" id="phi0Slider" min="1" max="10" step="0.1" value="5">
+                    <span class="value-display" id="phi0Value">5.0</span>
+                </div>
+                <div class="control-group">
+                    <label>Potential Shape m (mass parameter)</label>
+                    <input type="range" id="massSlider" min="0.01" max="0.5" step="0.01" value="0.1">
+                    <span class="value-display" id="massValue">0.10</span>
+                </div>
+                <div class="control-group">
+                    <label>Spatial Curvature Ω_k</label>
+                    <input type="range" id="curvatureSlider" min="-0.1" max="0.1" step="0.01" value="0">
+                    <span class="value-display" id="curvatureValue">0.00</span>
+                </div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-dot" style="background: #b4ff39"></div>Scalar Field φ</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #00d4ff"></div>Potential V(φ)</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #ff39b4"></div>Kinetic Energy</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #b347ff"></div>Potential Energy</div>
+            </div>
+
+            <table class="equation-table">
+                <tr><th>Equation</th><th>Description</th></tr>
+                <tr><td>L = ½∂_μφ∂^μφ − V(φ)</td><td>Quintessence Lagrangian</td></tr>
+                <tr><td>ρ_φ = ½φ̇² + V(φ)</td><td>Energy density</td></tr>
+                <tr><td>P_φ = ½φ̇² − V(φ)</td><td>Pressure</td></tr>
+                <tr><td>w_φ = (½φ̇² − V(φ))/(½φ̇² + V(φ))</td><td>Equation of state</td></tr>
+                <tr><td>V(φ) = ½m²φ²</td><td>Simple harmonic potential</td></tr>
+                <tr><td>V(φ) = M⁴⁻α φ^α</td><td>Power-law potential (Ratra-Peebles)</td></tr>
+            </table>
+        </section>
+
+        <!-- Section 4: Field Dynamics -->
+        <section id="field-dynamics">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
+                Quintessence Field Dynamics
+            </h2>
+            <p>The equation of motion for the quintessence field is a damped oscillator in an expanding universe:</p>
+
+            <div class="formula">φ̈ + 3H(φ̇) + dV/dφ = 0</div>
+
+            <p>For a very flat potential, the field creeps slowly ("slow-roll"), with kinetic energy negligible compared to potential energy — giving w ≈ −1 like a cosmological constant. However, unlike Λ, w evolves over time.</p>
+
+            <div class="canvas-container">
+                <canvas id="fieldDynamicsCanvas" width="800" height="350"></canvas>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Hubble Damping H (normalized)</label>
+                    <input type="range" id="hubbleSlider" min="0.5" max="3" step="0.1" value="1.5">
+                    <span class="value-display" id="hubbleValue">1.50</span>
+                </div>
+                <div class="control-group">
+                    <label>Potential Steepness α</label>
+                    <input type="range" id="alphaSlider" min="1" max="8" step="0.5" value="4">
+                    <span class="value-display" id="alphaValue">4.0</span>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Slow-Roll Conditions</h3>
+                    <p>ε = ½(M_Pl²)(V'/V)² ≪ 1</p>
+                    <p>η = M_Pl²(V''/V) ≪ 1</p>
+                    <p>When both satisfied, field rolls slowly.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Tracker Solution</h3>
+                    <p>Field "tracks" dominant radiation/matter but with delay, approaching attractor.</p>
+                    <p>φ ∝ ln(t) for power-law potentials.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Phantom Divide Line</h3>
+                    <p>w crosses −1 if field is "phantom" with kinetic energy negative.</p>
+                    <p>φ² term in potential can achieve this.</p>
+                </div>
+            </div>
+
+            <button class="toggle-btn" id="trackSolutionBtn" onclick="toggleTrackSolution()">Show Tracker Solution</button>
+        </section>
+
+        <!-- Section 5: Observational Tests -->
+        <section id="observational">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                Observational Tests
+            </h2>
+            <p>Distinguishing quintessence from Λ requires measuring the evolution of w(z) over cosmic time. Several observational probes are sensitive to dark energy dynamics:</p>
+
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" onclick="showTab('typeia', 0)">Type Ia Supernovae</button>
+                    <button class="tab-btn" onclick="showTab('bao', 1)">Baryon Acoustic Oscillations</button>
+                    <button class="tab-btn" onclick="showTab('cmb', 2)">CMB Anisotropies</button>
+                    <button class="tab-btn" onclick="showTab('growth', 3)">Structure Growth</button>
+                </div>
+                <div class="tab-content active" id="typeia">
+                    <p><strong>Standard Candles:</strong> Type Ia SNe with peak luminosity ∼ 10⁴³ erg/s serve as cosmic distance indicators.</p>
+                    <p><strong>Method:</strong> Measure apparent magnitude m and redshift z → luminosity distance D_L(z).</p>
+                    <p><strong>Constraint:</strong> Distance modulus Δm(z) probes expansion history.</p>
+                    <p><strong>Current best fit:</strong> w = −1.006 ± 0.045 (Pantheon+ dataset).</p>
+                </div>
+                <div class="tab-content" id="bao">
+                    <p><strong>Standard Ruler:</strong> Baryon Acoustic Oscillation (BAO) scale r_s ≈ 147 Mpc provides angular diameter distances.</p>
+                    <p><strong>Signal:</strong> Peak in galaxy two-point correlation at ∼150 Mpc.</p>
+                    <p><strong>Constrains:</strong> D_A(z) and H(z) at multiple redshifts, sensitive to evolving dark energy.</p>
+                </div>
+                <div class="tab-content" id="cmb">
+                    <p><strong>Angular Scale:</strong> Sound horizon at last scattering θ_* ≈ 0.0104 rad probes geometry.</p>
+                    <p><strong>Integrated Sachs-Wolfe (ISW):</strong> Late-time potential decay imprints on CMB anisotropies.</p>
+                    <p><strong>Lensing:</strong> CMB lensing measures integrated expansion to z ∼ 1100.</p>
+                    <p><strong>Planck 2018:</strong> Ω_Λ = 0.6847 ± 0.0059, no evidence for evolution.</p>
+                </div>
+                <div class="tab-content" id="growth">
+                    <p><strong>Structure Slowdown:</strong> Dark energy inhibits growth of density perturbations δρ/ρ.</p>
+                    <p><strong>Key Observable:</strong> Redshift-space distortions and peculiar velocities probe f(z) = d ln δ/d ln a.</p>
+                    <p><strong>Modified Gravity:</strong> Some quintessence models predict enhanced growth, testable with upcoming surveys.</p>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="observationalChart" width="800" height="350"></canvas>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-dot" style="background: #ff6b35"></div>Pantheon+ SNe</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #00d4ff"></div>BAO (BOSS/eBOSS)</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #b347ff"></div>CMB (Planck)</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #b4ff39"></div>Combined</div>
+            </div>
+        </section>
+
+        <!-- Section 6: Interactive Explorer -->
+        <section id="interactive">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24"><path d="M7 11h2v2H7zm0 4h2v2H7zm4-4h2v2h-2zm0 4h2v2h-2zm4-4h2v2h-2zm0 4h2v2h-2z"/></svg>
+                Interactive Dark Energy Explorer
+            </h2>
+            <p>Explore the parameter space of dark energy models. Adjust the equation of state w and see how it affects the expansion history and age of the universe.</p>
+
+            <div class="canvas-container">
+                <canvas id="interactiveExplorer" width="800" height="450"></canvas>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Equation of State w</label>
+                    <input type="range" id="wSlider" min="-1.5" max="-0.5" step="0.01" value="-1.0">
+                    <span class="value-display" id="wValue">-1.00</span>
+                </div>
+                <div class="control-group">
+                    <label>Dark Energy Density Ω_Λ</label>
+                    <input type="range" id="omegaSlider" min="0.5" max="0.9" step="0.01" value="0.685">
+                    <span class="value-display" id="omegaValue">0.69</span>
+                </div>
+                <div class="control-group">
+                    <label>Matter Density Ω_m</label>
+                    <input type="range" id="matterSlider" min="0.1" max="0.4" step="0.01" value="0.315">
+                    <span class="value-display" id="matterValue">0.32</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0;">
+                <button class="toggle-btn active" id="showScaleFactor" onclick="toggleShowScaleFactor()">Scale Factor</button>
+                <button class="toggle-btn active" id="showHubble" onclick="toggleShowHubble()">Hubble Parameter</button>
+                <button class="toggle-btn" id="showLookback" onclick="toggleShowLookback()">Lookback Time</button>
+                <button class="toggle-btn" id="showAge" onclick="toggleShowAge()">Universe Age</button>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>w < −1 (Phantom)</h3>
+                    <p>Phantom energy density increases with expansion. Leads to "Big Rip" singularity in finite time.</p>
+                    <p>t_Rip = 2c²/(3|1+w|H₀√Ω_Λ) ≈ 22 Gyr for w = −1.1</p>
+                </div>
+                <div class="info-card">
+                    <h3>w = −1 (ΛCDM)</h3>
+                    <p>Standard cosmological constant. Eternal coasting expansion.</p>
+                    <p>Universe asymptotically approaches de Sitter spacetime.</p>
+                </div>
+                <div class="info-card">
+                    <h3>w > −1 (Quintessence)</h3>
+                    <p>Dark energy density decreases slowly. More expansion in the past.</p>
+                    <p>Earlier universe was smaller for given lookback time.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: Future Probes -->
+        <section id="future">
+            <h2>
+                <svg class="icon" viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/></svg>
+                Future Probes: Constraining Dynamical Dark Energy
+            </h2>
+            <p>Upcoming surveys over the next decade will measure w(z) with unprecedented precision, potentially detecting deviations from w = −1:</p>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Euclid (2026)</h3>
+                    <p>ESA space telescope measuring BAO and weak lensing to z ∼ 2.</p>
+                    <p>Expected σ_w = 0.014 for constant w.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Vera C. Rubin Observatory</h3>
+                    <p>Ground-based LSST: 10 billion galaxies, weak lensing + SNe.</p>
+                    <p>Expected σ_w = 0.02 combined with CMB.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Roman Space Telescope</h3>
+                    <p>Wide-field infrared survey with microlensing + BAO.</p>
+                    <p>Expected σ_w(z) at 2% level for w(z) parametrization.</p>
+                </div>
+                <div class="info-card">
+                    <h3>DESI Baryon Survey</h3>
+                    <p>40 million galaxy spectra + BAO at multiple epochs.</p>
+                    <p>Currently producing world-leading constraints.</p>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="futureProbesCanvas" width="800" height="300"></canvas>
+            </div>
+
+            <div class="highlight">
+                <strong>The Ultimate Goal:</strong> Not just measure w, but reconstruct V(φ) — the fundamental potential governing cosmic acceleration. This requires combining geometric probes (SNe, BAO, CMB) with growth rate measurements (weak lensing, redshift-space distortions). A detection of w(z) ≠ −1 would rule out Λ and point to dynamical dark energy.
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Kevin's Physics Lab — Dark Energy & Quintessence Explorer</p>
+        <p>Last updated: 2026-05-13</p>
+    </footer>
+
+    <script>
+        // Stars canvas animation
+        const starsCanvas = document.getElementById('starsCanvas');
+        const starsCtx = starsCanvas.getContext('2d');
+        let stars = [];
+
+        function resizeStarsCanvas() {
+            starsCanvas.width = window.innerWidth;
+            starsCanvas.height = window.innerHeight;
+            initStars();
+        }
+
+        function initStars() {
+            stars = [];
+            const numStars = Math.floor((starsCanvas.width * starsCanvas.height) / 3000);
+            for (let i = 0; i < numStars; i++) {
+                stars.push({
+                    x: Math.random() * starsCanvas.width,
+                    y: Math.random() * starsCanvas.height,
+                    r: Math.random() * 1.2 + 0.3,
+                    alpha: Math.random() * 0.8 + 0.2,
+                    twinkleSpeed: Math.random() * 0.02 + 0.005
+                });
+            }
+        }
+
+        function animateStars() {
+            starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+            const time = Date.now() * 0.001;
+            stars.forEach(star => {
+                const flicker = Math.sin(time * star.twinkleSpeed * 50 + star.x) * 0.3 + 0.7;
+                starsCtx.beginPath();
+                starsCtx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+                starsCtx.fillStyle = `rgba(255, 255, 255, ${star.alpha * flicker})`;
+                starsCtx.fill();
+            });
+            requestAnimationFrame(animateStars);
+        }
+
+        window.addEventListener('resize', resizeStarsCanvas);
+        resizeStarsCanvas();
+        animateStars();
+
+        // Tab functionality
+        function showTab(id, index) {
+            const parent = document.getElementById(id).parentElement;
+            parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            parent.querySelectorAll('.tab-btn')[index].classList.add('active');
+        }
+
+        // Interactive explorer state
+        const explorerState = {
+            w: -1.0,
+            omegaLambda: 0.685,
+            omegaMatter: 0.315,
+            showScaleFactor: true,
+            showHubble: true,
+            showLookback: false,
+            showAge: false
+        };
+
+        // Universe pie chart
+        function drawPieChart() {
+            const canvas = document.getElementById('universePieChart');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            const cx = w * 0.35, cy = h / 2;
+            const r = Math.min(w, h) * 0.35;
+
+            const data = [
+                { label: 'Dark Energy', value: 0.683, color: '#b4ff39' },
+                { label: 'Dark Matter', value: 0.267, color: '#b347ff' },
+                { label: 'Ordinary Matter', value: 0.049, color: '#00d4ff' },
+                { label: 'Neutrinos', value: 0.001, color: '#ff39b4' }
+            ];
+
+            let startAngle = -Math.PI / 2;
+            data.forEach(d => {
+                const slice = (d.value / 1) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, r, startAngle, startAngle + slice);
+                ctx.closePath();
+                ctx.fillStyle = d.color + 'cc';
+                ctx.fill();
+                ctx.strokeStyle = '#050510';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                startAngle += slice;
+            });
+
+            // Labels
+            ctx.font = '14px Segoe UI';
+            let labelAngle = -Math.PI / 2 + (data[0].value / 1) * Math.PI;
+            data.forEach((d, i) => {
+                const midAngle = labelAngle + ((d.value / 1) * Math.PI) / 2;
+                const labelR = r * 1.45;
+                const lx = cx + Math.cos(midAngle) * labelR;
+                const ly = cy + Math.sin(midAngle) * labelR;
+                ctx.fillStyle = d.color;
+                ctx.fillText(`${d.label} (${(d.value * 100).toFixed(1)}%)`, lx - 60, ly + 5);
+                labelAngle += (d.value / 1) * Math.PI;
+            });
+
+            // Title
+            ctx.font = 'bold 16px Segoe UI';
+            ctx.fillStyle = '#e8e8f0';
+            ctx.fillText('Universe Energy Composition', w * 0.65, h * 0.3);
+
+            ctx.font = '13px Segoe UI';
+            ctx.fillStyle = '#8888aa';
+            ctx.fillText('Based on Planck 2018 results', w * 0.65, h * 0.38);
+            ctx.fillText('Ω_Λ = 0.6847, Ω_dm = 0.2653', w * 0.65, h * 0.46);
+            ctx.fillText('Ω_b = 0.0493, Ω_ν < 0.001', w * 0.65, h * 0.54);
+        }
+
+        // Vacuum energy chart
+        function drawVacuumEnergyChart() {
+            const canvas = document.getElementById('vacuumEnergyChart');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            const leftMargin = 70, rightMargin = 30, topMargin = 30, bottomMargin = 50;
+            const plotW = w - leftMargin - rightMargin;
+            const plotH = h - topMargin - bottomMargin;
+
+            // Background
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fillRect(leftMargin, topMargin, plotW, plotH);
+
+            // Log scale values (in GeV^4)
+            const maxExp = 112, minExp = -50;
+            const maxY = maxExp, minY = minExp;
+            const maxObs = -46;
+
+            function yPos(exp) {
+                return topMargin + plotH * (1 - (exp - minY) / (maxY - minY));
+            }
+
+            // Grid lines
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.lineWidth = 1;
+            for (let e = minExp; e <= maxExp; e += 10) {
+                const y = yPos(e);
+                ctx.beginPath();
+                ctx.moveTo(leftMargin, y);
+                ctx.lineTo(leftMargin + plotW, y);
+                ctx.stroke();
+                ctx.font = '10px monospace';
+                ctx.fillStyle = '#8888aa';
+                ctx.fillText('10^' + e, 5, y + 4);
+            }
+
+            // QFT prediction (huge bar)
+            const qftY = yPos(112);
+            ctx.fillStyle = '#ff3939';
+            ctx.fillRect(leftMargin + 20, qftY - 5, 80, 10);
+            ctx.font = '11px Segoe UI';
+            ctx.fillStyle = '#ff3939';
+            ctx.fillText('QFT Prediction', leftMargin + 20, qftY - 12);
+
+            // Observation (tiny bar)
+            const obsY = yPos(-46);
+            ctx.fillStyle = '#b4ff39';
+            ctx.fillRect(leftMargin + 20, obsY - 8, 80, 16);
+            ctx.fillStyle = '#b4ff39';
+            ctx.fillText('Observation', leftMargin + 20, obsY - 12);
+
+            // Arrow showing discrepancy
+            ctx.strokeStyle = '#ff6b35';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(leftMargin + 110, qftY);
+            ctx.lineTo(leftMargin + 110, obsY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.font = '12px Segoe UI';
+            ctx.fillStyle = '#ff6b35';
+            ctx.fillText('~120 orders', leftMargin + 115, (qftY + obsY) / 2);
+
+            // Labels
+            ctx.fillStyle = '#e8e8f0';
+            ctx.font = '14px Segoe UI';
+            ctx.fillText('Vacuum Energy Density (GeV⁴)', w / 2, h - 10);
+
+            ctx.save();
+            ctx.translate(15, h / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('log₁₀(ρ)', 0, 0);
+            ctx.restore();
+        }
+
+        // Quintessence potential visualization
+        let phi0 = 5, massParam = 0.1, curvature = 0;
+        let trackSolution = false;
+
+        function drawQuintessence() {
+            const canvas = document.getElementById('quintessenceCanvas');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            const leftMargin = 60, rightMargin = 40, topMargin = 40, bottomMargin = 50;
+            const plotW = w - leftMargin - rightMargin;
+            const plotH = h - topMargin - bottomMargin;
+
+            // Grid
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = topMargin + (i / 5) * plotH;
+                ctx.beginPath();
+                ctx.moveTo(leftMargin, y);
+                ctx.lineTo(leftMargin + plotW, y);
+                ctx.stroke();
+                const phi = 15 - i * 3;
+                ctx.font = '11px monospace';
+                ctx.fillStyle = '#8888aa';
+                ctx.fillText('φ=' + phi.toFixed(0), leftMargin - 45, y + 4);
+            }
+
+            // Axes
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(leftMargin, topMargin);
+            ctx.lineTo(leftMargin, topMargin + plotH);
+            ctx.lineTo(leftMargin + plotW, topMargin + plotH);
+            ctx.stroke();
+
+            ctx.fillStyle = '#e8e8f0';
+            ctx.font = '13px Segoe UI';
+            ctx.fillText('Field φ (Planck units)', leftMargin + plotW / 2, h - 8);
+            ctx.save();
+            ctx.translate(15, topMargin + plotH / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('V(φ)', 0, 0);
+            ctx.restore();
+
+            // Potential V(φ) = 0.5 * m^2 * phi^2
+            const m = massParam;
+            ctx.beginPath();
+            ctx.strokeStyle = '#00d4ff';
+            ctx.lineWidth = 3;
+            for (let i = 0; i <= plotW; i++) {
+                const phi = (i / plotW) * 15;
+                const V = 0.5 * m * m * phi * phi;
+                const logV = Math.log10(V + 1e-10);
+                const normV = (logV + 8) / 8;
+                const y = topMargin + plotH * (1 - Math.min(1, Math.max(0, normV)));
+                if (i === 0) ctx.moveTo(leftMargin + i, y);
+                else ctx.lineTo(leftMargin + i, y);
+            }
+            ctx.stroke();
+
+            // Kinetic and potential energy visualization
+            const phiVal = phi0;
+            const kinetic = 0.3; // Simulated kinetic energy fraction
+            const potential = 0.7;
+            const totalEnergy = 0.5 * m * m * phiVal * phiVal + kinetic * 10;
+
+            // Draw energy bars at right
+            const barX = leftMargin + plotW + 20;
+            const barMaxH = plotH * 0.8;
+            const barW = 30;
+
+            // Total
+            ctx.fillStyle = '#b4ff39';
+            ctx.fillRect(barX, topMargin + plotH * (1 - 0.9), barW, plotH * 0.9);
+            ctx.fillStyle = '#e8e8f0';
+            ctx.font = '11px Segoe UI';
+            ctx.fillText('Total', barX, topMargin + plotH + 15);
+
+            // Kinetic
+            ctx.fillStyle = '#ff39b4';
+            ctx.fillRect(barX, topMargin + plotH * (1 - kinetic * 0.9), barW, plotH * kinetic * 0.9);
+            ctx.fillStyle = '#e8e8f0';
+            ctx.fillText('KE', barX - 3, topMargin + plotH * (1 - kinetic * 0.9) - 5);
+
+            // Potential
+            ctx.fillStyle = '#b347ff';
+            ctx.fillRect(barX, topMargin + plotH * (1 - potential * 0.9), barW, plotH * potential * 0.9);
+            ctx.fillStyle = '#e8e8f0';
+            ctx.fillText('PE', barX - 3, topMargin + plotH * (1 - potential * 0.9) - 5);
+
+            // Field rolling ball
+            const ballX = leftMargin + (phiVal / 15) * plotW;
+            const ballY = topMargin + plotH * (1 - (0.5 * m * m * phiVal * phiVal + 3) / 15);
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, 8, 0, Math.PI * 2);
+            ctx.fillStyle = '#b4ff39';
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Trail
+            ctx.setLineDash([3, 3]);
+            ctx.strokeStyle = 'rgba(180, 255, 57, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(ballX, ballY);
+            for (let t = 0; t < 5; t++) {
+                const trailPhi = phiVal - t * 0.3;
+                const trailV = 0.5 * m * m * trailPhi * trailPhi;
+                const trailY = topMargin + plotH * (1 - (trailV + 3) / 15);
+                ctx.lineTo(leftMargin + (trailPhi / 15) * plotW, trailY);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Equation of state display
+            const w_eff = (kinetic - potential) / (kinetic + potential);
+            ctx.fillStyle = '#e8e8f0';
+            ctx.font = '14px Segoe UI';
+            ctx.fillText('w_eff = ' + w_eff.toFixed(3), leftMargin + 10, 25);
+            ctx.fillText('φ₀ = ' + phiVal.toFixed(1), leftMargin + 120, 25);
+            ctx.fillText('m = ' + massParam.toFixed(2), leftMargin + 200, 25);
+        }
+
+        // Field dynamics canvas
+        let hubbleDamping = 1.5, alphaParam = 4;
+
+        function drawFieldDynamics() {
+            const canvas = document.getElementById('fieldDynamicsCanvas');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            const leftMargin = 60, rightMargin = 40, topMargin = 40, bottomMargin = 50;
+            const plotW = w - leftMargin - rightMargin;
+            const plotH = h - topMargin - bottomMargin;
+
+            // Background grid
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = topMargin + (i / 4) * plotH;
+                ctx.beginPath();
+                ctx.moveTo(leftMargin, y);
+                ctx.lineTo(leftMargin + plotW, y);
+                ctx.stroke();
+            }
+
+            // Axes
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(leftMargin, topMargin);
+            ctx.lineTo(leftMargin, topMargin + plotH);
+            ctx.lineTo(leftMargin + plotW, topMargin + plotH);
+            ctx.stroke();
+
+            // w evolution over time (simulated)
+            const H = hubbleDamping;
+            const a = [];
+            const w_evolution = [];
+            for (let i = 0; i <= 100; i++) {
+                const t = i / 100;
+                a.push(t);
+                // Simulate w evolution from -1 towards 0 as field rolls
+                const w_t = -1 + 0.5 * Math.exp(-t * H) * (1 - Math.exp(-t / 2));
+                w_evolution.push(w_t);
+            }
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#b4ff39';
+            ctx.lineWidth = 3;
+            for (let i = 0; i < a.length; i++) {
+                const x = leftMargin + a[i] * plotW;
+                const wNorm = (w_evolution[i] + 1.5) / 2;
+                const y = topMargin + plotH * (1 - Math.min(1, Math.max(0, wNorm)));
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // w = -1 line
+            const w1_y = topMargin + plotH * (1 - (-1 + 1.5) / 2);
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(leftMargin, w1_y);
+            ctx.lineTo(leftMargin + plotW, w1_y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.font = '11px monospace';
+            ctx.fillStyle = '#8888aa';
+            ctx.fillText('w = -1', leftMargin + plotW - 45, w1_y - 5);
+
+            // Labels
+            ctx.fillStyle = '#e8e8f0';
+            ctx.font = '13px Segoe UI';
+            ctx.fillText('Scale Factor a(t)', leftMargin + plotW / 2, h - 8);
+            ctx.save();
+            ctx.translate(15, topMargin + plotH / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('w(a)', 0, 0);
+            ctx.restore();
+        }
+
+        // Observational chart
+        function drawObservationalChart() {
+            const canvas = document.getElementById('observationalChart');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            const leftMargin = 60, rightMargin = 40, topMargin = 40, bottomMargin = 50;
+            const plotW = w - leftMargin - rightMargin;
+            const plotH = h - topMargin - bottomMargin;
+
+            // Grid
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = topMargin + (i / 5) * plotH;
+                ctx.beginPath();
+                ctx.moveTo(leftMargin, y);
+                ctx.lineTo(leftMargin + plotW, y);
+                ctx.stroke();
+                ctx.font = '10px monospace';
+                ctx.fillStyle = '#8888aa';
+                ctx.fillText((5 - i) + 'σ', leftMargin - 35, y + 4);
+            }
+
+            // Axes
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(leftMargin, topMargin);
+            ctx.lineTo(leftMargin, topMargin + plotH);
+            ctx.lineTo(leftMargin + plotW, topMargin + plotH);
+            ctx.stroke();
+
+            // Simulated constraints (w vs z)
+            const z_range = [0, 2];
+            const w_center = -1;
+            const sigma = [0.045, 0.06, 0.08, 0.12];
+
+            // Draw error bands
+            const colors = ['#ff6b35', '#00d4ff', '#b347ff', '#b4ff39'];
+            const dataPoints = [
+                { z: 0, w: -1, sigma: 0.045, color: '#ff6b35' },     // SNe
+                { z: 0.3, w: -0.98, sigma: 0.05, color: '#00d4ff' },  // BAO low z
+                { z: 0.57, w: -1.02, sigma: 0.06, color: '#00d4ff' }, // BAO mid
+                { z: 0.7, w: -0.99, sigma: 0.07, color: '#b347ff' },  // CMB lensing
+                { z: 1.5, w: -1.05, sigma: 0.1, color: '#b4ff39' }    // Combined
+            ];
+
+            // Constraint ellipses
+            dataPoints.forEach(d => {
+                const x = leftMargin + (d.z / 2) * plotW;
+                const y = topMargin + plotH * (1 - (d.w + 1.5) / 2);
+
+                ctx.beginPath();
+                ctx.ellipse(x, y, 25, d.sigma * 200, 0, 0, Math.PI * 2);
+                ctx.fillStyle = d.color + '33';
+                ctx.fill();
+                ctx.strokeStyle = d.color;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Point
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = d.color;
+                ctx.fill();
+            });
+
+            // w = -1 line
+            const w1_y = topMargin + plotH * 0.5;
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx.setLineDash([8, 4]);
+            ctx.beginPath();
+            ctx.moveTo(leftMargin, w1_y);
+            ctx.lineTo(leftMargin + plotW, w1_y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.font = '12px monospace';
+            ctx.fillStyle = '#e8e8f0';
+            ctx.fillText('w = -1 (ΛCDM)', leftMargin + plotW - 90, w1_y - 8);
+
+            // Labels
+            ctx.fillText('Redshift z', leftMargin + plotW / 2, h - 8);
+            ctx.save();
+            ctx.translate(15, topMargin + plotH / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('w(z)', 0, 0);
+            ctx.restore();
+        }
+
+        // Interactive explorer
+        function drawInteractiveExplorer() {
+            const canvas = document.getElementById('interactiveExplorer');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            const leftMargin = 70, rightMargin = 40, topMargin = 50, bottomMargin = 60;
+            const plotW = w - leftMargin - rightMargin;
+            const plotH = h - topMargin - bottomMargin;
+
+            // Grid
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = topMargin + (i / 5) * plotH;
+                ctx.beginPath();
+                ctx.moveTo(leftMargin, y);
+                ctx.lineTo(leftMargin + plotW, y);
+                ctx.stroke();
+                ctx.font = '10px monospace';
+                ctx.fillStyle = '#8888aa';
+                const val = (5 - i).toFixed(1);
+                ctx.fillText(val, leftMargin - 35, y + 4);
+            }
+            for (let i = 0; i <= 4; i++) {
+                const x = leftMargin + (i / 4) * plotW;
+                ctx.beginPath();
+                ctx.moveTo(x, topMargin);
+                ctx.lineTo(x, topMargin + plotH);
+                ctx.stroke();
+                ctx.font = '10px monospace';
+                ctx.fillStyle = '#8888aa';
+                ctx.fillText(i.toFixed(1), x - 5, topMargin + plotH + 15);
+            }
+
+            // Axes
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(leftMargin, topMargin);
+            ctx.lineTo(leftMargin, topMargin + plotH);
+            ctx.lineTo(leftMargin + plotW, topMargin + plotH);
+            ctx.stroke();
+
+            const w_val = explorerState.w;
+            const Omega_Lambda = explorerState.omegaLambda;
+            const Omega_m = explorerState.omegaMatter;
+
+            // Scale factor a(t) - normalized to 1 at present
+            const a_max = 1;
+            const t_range = 10; // Gyr
+
+            // Draw curves based on toggles
+            if (explorerState.showScaleFactor) {
+                ctx.beginPath();
+                ctx.strokeStyle = '#b4ff39';
+                ctx.lineWidth = 3;
+                for (let i = 0; i <= 100; i++) {
+                    const t = (i / 100) * t_range;
+                    const a = calculateScaleFactor(t, w_val, Omega_Lambda, Omega_m);
+                    const x = leftMargin + (t / t_range) * plotW;
+                    const y = topMargin + plotH * (1 - a);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            if (explorerState.showHubble) {
+                ctx.beginPath();
+                ctx.strokeStyle = '#00d4ff';
+                ctx.lineWidth = 3;
+                for (let i = 0; i <= 100; i++) {
+                    const t = (i / 100) * t_range;
+                    const H = calculateHubble(t, w_val, Omega_Lambda, Omega_m);
+                    const normH = (H - 30) / 80; // Normalize to visible range
+                    const x = leftMargin + (t / t_range) * plotW;
+                    const y = topMargin + plotH * (1 - Math.min(1, Math.max(0, normH)));
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            if (explorerState.showLookback) {
+                ctx.beginPath();
+                ctx.strokeStyle = '#ff39b4';
+                ctx.lineWidth = 3;
+                for (let i = 0; i <= 100; i++) {
+                    const t = (i / 100) * t_range;
+                    const t_lb = calculateLookbackTime(t, w_val, Omega_Lambda, Omega_m);
+                    const norm = t_lb / 13.8;
+                    const x = leftMargin + (t / t_range) * plotW;
+                    const y = topMargin + plotH * (1 - Math.min(1, norm));
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            if (explorerState.showAge) {
+                ctx.beginPath();
+                ctx.strokeStyle = '#b347ff';
+                ctx.lineWidth = 3;
+                for (let i = 0; i <= 100; i++) {
+                    const t = (i / 100) * t_range;
+                    const age = calculateUniverseAge(w_val, Omega_Lambda, Omega_m);
+                    const norm = age / 20;
+                    const x = leftMargin + (t / t_range) * plotW;
+                    const y = topMargin + plotH * (1 - Math.min(1, norm));
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            // Present time marker
+            ctx.strokeStyle = '#ffffff';
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(leftMargin + plotW, topMargin);
+            ctx.lineTo(leftMargin + plotW, topMargin + plotH);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '11px monospace';
+            ctx.fillText('Today', leftMargin + plotW - 25, topMargin - 10);
+
+            // Labels
+            ctx.fillStyle = '#e8e8f0';
+            ctx.font = '13px Segoe UI';
+            ctx.fillText('Time (Gyr)', leftMargin + plotW / 2, h - 10);
+            ctx.save();
+            ctx.translate(15, topMargin + plotH / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Normalized Value', 0, 0);
+            ctx.restore();
+
+            // Info box
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.fillRect(leftMargin + plotW + 15, topMargin, 180, 120);
+            ctx.strokeStyle = 'rgba(180,255,57,0.3)';
+            ctx.strokeRect(leftMargin + plotW + 15, topMargin, 180, 120);
+            ctx.font = '12px Segoe UI';
+            ctx.fillStyle = '#b4ff39';
+            ctx.fillText('w = ' + w_val.toFixed(2), leftMargin + plotW + 25, topMargin + 25);
+            ctx.fillStyle = '#00d4ff';
+            ctx.fillText('Ω_Λ = ' + Omega_Lambda.toFixed(3), leftMargin + plotW + 25, topMargin + 50);
+            ctx.fillStyle = '#ff39b4';
+            ctx.fillText('Ω_m = ' + Omega_m.toFixed(3), leftMargin + plotW + 25, topMargin + 75);
+            ctx.fillStyle = '#b347ff';
+            const age = calculateUniverseAge(w_val, Omega_Lambda, Omega_m);
+            ctx.fillText('Age ≈ ' + age.toFixed(1) + ' Gyr', leftMargin + plotW + 25, topMargin + 100);
+        }
+
+        // Simplified cosmology calculations
+        function calculateScaleFactor(t, w, Omega_Lambda, Omega_m) {
+            // Very simplified - assumes constant w
+            const H0 = 0.07; // Gyr^-1
+            const Omega_k = 1 - Omega_Lambda - Omega_m;
+            const a0 = 1;
+
+            // Approximate a(t) for matter + dark energy with constant w
+            const a_m = Math.pow(Omega_m / (1 - Omega_Lambda), 1/3);
+            const a_lambda = Math.pow(Omega_Lambda / (1 - Omega_m), 1/(3*(1+w)));
+
+            // Simplified evolution
+            const a = a0 * Math.exp(-H0 * t * (1 + w/3));
+            return Math.min(1, Math.max(0.01, a));
+        }
+
+        function calculateHubble(t, w, Omega_Lambda, Omega_m) {
+            const H0 = 67.4; // km/s/Mpc
+            const a = calculateScaleFactor(t, w, Omega_Lambda, Omega_m);
+
+            // H(a) = H0 * sqrt(Omega_m * a^-3 + Omega_Lambda * a^-3(1+w))
+            const H = H0 * Math.sqrt(Omega_m * Math.pow(a, -3) + Omega_Lambda * Math.pow(a, -3*(1+w)));
+            return H;
+        }
+
+        function calculateLookbackTime(t, w, Omega_Lambda, Omega_m) {
+            // Approximate lookback time
+            const age = calculateUniverseAge(w, Omega_Lambda, Omega_m);
+            const presentAge = calculateUniverseAge(w, Omega_Lambda, Omega_m);
+            return Math.max(0, presentAge - t);
+        }
+
+        function calculateUniverseAge(w, Omega_Lambda, Omega_m) {
+            // Very simplified age calculation
+            const H0_inv = 14.4; // Gyr (H0 = 67.4 km/s/Mpc)
+            const factor = 2 / (3 * (1 + w));
+
+            if (Math.abs(w + 1) < 0.01) {
+                // w ≈ -1 case
+                return H0_inv * (2/3) * (1 - Math.pow(Omega_m / Omega_Lambda, 1/3));
+            }
+
+            const Omega_k = 1 - Omega_Lambda - Omega_m;
+            const age = H0_inv * factor * (1 - Math.pow(Omega_m / Omega_Lambda, 1/(3*(1+w))));
+            return Math.max(5, Math.min(20, age));
+        }
+
+        // Future probes chart
+        function drawFutureProbes() {
+            const canvas = document.getElementById('futureProbesCanvas');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            const leftMargin = 60, rightMargin = 40, topMargin = 30, bottomMargin = 50;
+            const plotW = w - leftMargin - rightMargin;
+            const plotH = h - topMargin - bottomMargin;
+
+            // w(z) bands for future surveys
+            const surveys = [
+                { name: 'Current', sigma: 0.045, color: '#888888' },
+                { name: 'DESI', sigma: 0.025, color: '#00d4ff' },
+                { name: 'Euclid', sigma: 0.014, color: '#b4ff39' },
+                { name: 'Roman', sigma: 0.008, color: '#ff39b4' }
+            ];
+
+            // Grid
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = topMargin + (i / 5) * plotH;
+                ctx.beginPath();
+                ctx.moveTo(leftMargin, y);
+                ctx.lineTo(leftMargin + plotW, y);
+                ctx.stroke();
+            }
+
+            // Axes
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(leftMargin, topMargin + plotH/2);
+            ctx.lineTo(leftMargin + plotW, topMargin + plotH/2);
+            ctx.stroke();
+
+            // w = -1 line
+            ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(leftMargin, topMargin + plotH/2);
+            ctx.lineTo(leftMargin + plotW, topMargin + plotH/2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#8888aa';
+            ctx.font = '11px monospace';
+            ctx.fillText('w = -1', leftMargin + plotW - 45, topMargin + plotH/2 - 8);
+
+            // Draw sigma bands
+            surveys.forEach((s, idx) => {
+                const x = leftMargin + (idx + 0.5) / surveys.length * plotW;
+                const sigmaPixel = s.sigma * 300;
+
+                ctx.beginPath();
+                ctx.ellipse(x, topMargin + plotH/2, 40, sigmaPixel, 0, 0, Math.PI * 2);
+                ctx.fillStyle = s.color + '33';
+                ctx.fill();
+                ctx.strokeStyle = s.color;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                ctx.fillStyle = s.color;
+                ctx.font = '12px Segoe UI';
+                ctx.fillText(s.name, x - 20, topMargin + plotH + 20);
+                ctx.font = '10px monospace';
+                ctx.fillText('σ=' + s.sigma, x - 15, topMargin + plotH + 35);
+            });
+
+            // z-axis labels
+            ctx.fillStyle = '#e8e8f0';
+            ctx.font = '13px Segoe UI';
+            ctx.fillText('Survey Timeline', leftMargin + plotW / 2, h - 5);
+            ctx.save();
+            ctx.translate(15, topMargin + plotH / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('1σ uncertainty', 0, 0);
+            ctx.restore();
+        }
+
+        // Toggle functions
+        function toggleTrackSolution() {
+            trackSolution = !trackSolution;
+            document.getElementById('trackSolutionBtn').classList.toggle('active');
+            drawFieldDynamics();
+        }
+
+        function toggleShowScaleFactor() {
+            explorerState.showScaleFactor = !explorerState.showScaleFactor;
+            document.getElementById('showScaleFactor').classList.toggle('active');
+            drawInteractiveExplorer();
+        }
+
+        function toggleShowHubble() {
+            explorerState.showHubble = !explorerState.showHubble;
+            document.getElementById('showHubble').classList.toggle('active');
+            drawInteractiveExplorer();
+        }
+
+        function toggleShowLookback() {
+            explorerState.showLookback = !explorerState.showLookback;
+            document.getElementById('showLookback').classList.toggle('active');
+            drawInteractiveExplorer();
+        }
+
+        function toggleShowAge() {
+            explorerState.showAge = !explorerState.showAge;
+            document.getElementById('showAge').classList.toggle('active');
+            drawInteractiveExplorer();
+        }
+
+        // Slider event listeners
+        document.getElementById('phi0Slider').addEventListener('input', function() {
+            phi0 = parseFloat(this.value);
+            document.getElementById('phi0Value').textContent = phi0.toFixed(1);
+            drawQuintessence();
+        });
+
+        document.getElementById('massSlider').addEventListener('input', function() {
+            massParam = parseFloat(this.value);
+            document.getElementById('massValue').textContent = massParam.toFixed(2);
+            drawQuintessence();
+        });
+
+        document.getElementById('curvatureSlider').addEventListener('input', function() {
+            curvature = parseFloat(this.value);
+            document.getElementById('curvatureValue').textContent = curvature.toFixed(2);
+            drawQuintessence();
+        });
+
+        document.getElementById('hubbleSlider').addEventListener('input', function() {
+            hubbleDamping = parseFloat(this.value);
+            document.getElementById('hubbleValue').textContent = hubbleDamping.toFixed(2);
+            drawFieldDynamics();
+        });
+
+        document.getElementById('alphaSlider').addEventListener('input', function() {
+            alphaParam = parseFloat(this.value);
+            document.getElementById('alphaValue').textContent = alphaParam.toFixed(1);
+            drawFieldDynamics();
+        });
+
+        document.getElementById('wSlider').addEventListener('input', function() {
+            explorerState.w = parseFloat(this.value);
+            document.getElementById('wValue').textContent = explorerState.w.toFixed(2);
+            drawInteractiveExplorer();
+        });
+
+        document.getElementById('omegaSlider').addEventListener('input', function() {
+            explorerState.omegaLambda = parseFloat(this.value);
+            document.getElementById('omegaValue').textContent = explorerState.omegaLambda.toFixed(2);
+            drawInteractiveExplorer();
+        });
+
+        document.getElementById('matterSlider').addEventListener('input', function() {
+            explorerState.omegaMatter = parseFloat(this.value);
+            document.getElementById('matterValue').textContent = explorerState.omegaMatter.toFixed(2);
+            drawInteractiveExplorer();
+        });
+
+        // Nav smooth scroll
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('nav a').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                const target = document.querySelector(this.getAttribute('href'));
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // Initial draws
+        drawPieChart();
+        drawVacuumEnergyChart();
+        drawQuintessence();
+        drawFieldDynamics();
+        drawObservationalChart();
+        drawInteractiveExplorer();
+        drawFutureProbes();
+
+        // Resize handler
+        window.addEventListener('resize', function() {
+            drawPieChart();
+            drawVacuumEnergyChart();
+            drawQuintessence();
+            drawFieldDynamics();
+            drawObservationalChart();
+            drawInteractiveExplorer();
+            drawFutureProbes();
+        });
+    </script>
+</body>
+</html>

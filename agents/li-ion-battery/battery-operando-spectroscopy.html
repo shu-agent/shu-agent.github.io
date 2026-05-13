@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Operando Spectroscopy | Real-Time Electrochemical Fingerprinting</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --bg-primary: #0a0a12;
+            --bg-secondary: #12121f;
+            --bg-tertiary: #1a1a2e;
+            --text-primary: #e8e8f0;
+            --text-secondary: #a0a0b8;
+            --accent-uv: #8b5cf6;
+            --accent-ir: #ef4444;
+            --accent-raman: #f97316;
+            --accent-epr: #06b6d4;
+            --accent-xas: #84cc16;
+            --accent-xrd: #eab308;
+            --gradient-hero: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 50%, #12121f 100%);
+            --glow-uv: 0 0 30px rgba(139, 92, 246, 0.4);
+            --glow-ir: 0 0 30px rgba(239, 68, 68, 0.4);
+            --glow-raman: 0 0 30px rgba(249, 115, 22, 0.4);
+            --glow-epr: 0 0 30px rgba(6, 182, 212, 0.4);
+            --glow-xas: 0 0 30px rgba(132, 204, 22, 0.4);
+            --glow-xrd: 0 0 30px rgba(234, 179, 8, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            background: var(--gradient-hero);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 4rem 2rem;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(132, 204, 22, 0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .hero-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 2;
+            max-width: 1000px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 50px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-uv);
+            margin-bottom: 2rem;
+            letter-spacing: 0.1em;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #a0a0b8 50%, #e8e8f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Animated Battery Cell */
+        .battery-cell-container {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            margin: 2rem 0;
+        }
+
+        .battery-cell-svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.3));
+        }
+
+        .electron-orbit {
+            animation: electronRotate 4s linear infinite;
+            transform-origin: center;
+        }
+
+        @keyframes electronRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .photon-wave {
+            animation: photonPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes photonPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+
+        /* Spectroscopic Modalities */
+        .modalities-section {
+            padding: 6rem 2rem;
+            background: var(--bg-secondary);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-bottom: 1rem;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .modalities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .modality-card {
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modality-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .modality-card.uv::before { background: var(--accent-uv); }
+        .modality-card.ir::before { background: var(--accent-ir); }
+        .modality-card.raman::before { background: var(--accent-raman); }
+        .modality-card.epr::before { background: var(--accent-epr); }
+        .modality-card.xas::before { background: var(--accent-xas); }
+        .modality-card.xrd::before { background: var(--accent-xrd); }
+
+        .modality-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .modality-card.uv:hover { box-shadow: var(--glow-uv); }
+        .modality-card.ir:hover { box-shadow: var(--glow-ir); }
+        .modality-card.raman:hover { box-shadow: var(--glow-raman); }
+        .modality-card.epr:hover { box-shadow: var(--glow-epr); }
+        .modality-card.xas:hover { box-shadow: var(--glow-xas); }
+        .modality-card.xrd:hover { box-shadow: var(--glow-xrd); }
+
+        .modality-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modality-card.uv .modality-icon { background: rgba(139, 92, 246, 0.2); color: var(--accent-uv); }
+        .modality-card.ir .modality-icon { background: rgba(239, 68, 68, 0.2); color: var(--accent-ir); }
+        .modality-card.raman .modality-icon { background: rgba(249, 115, 22, 0.2); color: var(--accent-raman); }
+        .modality-card.epr .modality-icon { background: rgba(6, 182, 212, 0.2); color: var(--accent-epr); }
+        .modality-card.xas .modality-icon { background: rgba(132, 204, 22, 0.2); color: var(--accent-xas); }
+        .modality-card.xrd .modality-icon { background: rgba(234, 179, 8, 0.2); color: var(--accent-xrd); }
+
+        .modality-icon svg {
+            width: 30px;
+            height: 30px;
+        }
+
+        .modality-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .modality-card .wavelength {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .modality-card.uv .wavelength { color: var(--accent-uv); }
+        .modality-card.ir .wavelength { color: var(--accent-ir); }
+        .modality-card.raman .wavelength { color: var(--accent-raman); }
+        .modality-card.epr .wavelength { color: var(--accent-epr); }
+        .modality-card.xas .wavelength { color: var(--accent-xas); }
+        .modality-card.xrd .wavelength { color: var(--accent-xrd); }
+
+        .modality-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Interactive Spectrum Analyzer */
+        .spectrum-section {
+            padding: 6rem 2rem;
+            background: var(--bg-primary);
+        }
+
+        .spectrum-analyzer {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .spectrum-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .control-btn {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .control-btn.active {
+            border-color: var(--accent-uv);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .spectrum-display {
+            position: relative;
+            height: 300px;
+            background: #0a0a0a;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .spectrum-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .spectrum-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .spectrum-info-item {
+            text-align: center;
+        }
+
+        .spectrum-info-item label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .spectrum-info-item span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+        }
+
+        /* Real-time Cycling Animation */
+        .cycling-section {
+            padding: 6rem 2rem;
+            background: var(--bg-secondary);
+        }
+
+        .cycling-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .cycling-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .cycling-visual {
+            position: relative;
+        }
+
+        .battery-cross-section {
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .cycling-info {
+            padding: 1rem;
+        }
+
+        .cycling-info h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .voltage-display {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .voltage-display .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 500;
+        }
+
+        .voltage-display .label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .state-indicator {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .state-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .state-dot.active {
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .state-dot.charge { border-color: var(--accent-uv); }
+        .state-dot.charge.active { background: var(--accent-uv); }
+        .state-dot.discharge { border-color: var(--accent-raman); }
+        .state-dot.discharge.active { background: var(--accent-raman); }
+        .state-dot.rest { border-color: var(--accent-epr); }
+        .state-dot.rest.active { background: var(--accent-epr); }
+
+        .cycle-counter {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-secondary);
+        }
+
+        /* Signal Detection Principles */
+        .principles-section {
+            padding: 6rem 2rem;
+            background: var(--bg-primary);
+        }
+
+        .principles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .principle-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .principle-number {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            opacity: 0.1;
+        }
+
+        .principle-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--accent-uv);
+        }
+
+        .principle-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Data Visualization */
+        .data-viz-section {
+            padding: 6rem 2rem;
+            background: var(--bg-secondary);
+        }
+
+        .data-viz-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .chart-container {
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .chart-header h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 300px;
+            background: #0a0a0a;
+            border-radius: 8px;
+        }
+
+        /* Scientific Content */
+        .science-section {
+            padding: 6rem 2rem;
+            background: var(--bg-primary);
+        }
+
+        .science-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .science-content h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .science-block {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .science-block h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent-uv);
+        }
+
+        .science-block p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .equation {
+            background: var(--bg-tertiary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center;
+            margin: 1.5rem 0;
+            border-left: 3px solid var(--accent-uv);
+        }
+
+        .equation-long {
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        /* Case Studies */
+        .cases-section {
+            padding: 6rem 2rem;
+            background: var(--bg-secondary);
+        }
+
+        .case-study {
+            max-width: 1200px;
+            margin: 0 auto 4rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .case-study:last-child {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 900px) {
+            .case-study {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .case-visual {
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .case-visual svg {
+            width: 100%;
+            height: auto;
+        }
+
+        .case-content h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .case-content p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .case-findings {
+            list-style: none;
+        }
+
+        .case-findings li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .case-findings li:last-child {
+            border-bottom: none;
+        }
+
+        .finding-marker {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-uv);
+            margin-top: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        /* Footer */
+        footer {
+            padding: 4rem 2rem;
+            background: var(--bg-tertiary);
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        footer p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--accent-uv);
+            text-decoration: none;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        /* Navigation */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: var(--accent-uv);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: var(--glow-uv);
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+        }
+
+        .back-to-top:hover {
+            transform: scale(1.1);
+        }
+
+        .back-to-top svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+
+        /* Ion Flow Animation */
+        .ion-flow {
+            animation: ionFlow 3s ease-in-out infinite;
+        }
+
+        @keyframes ionFlow {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .li-ion {
+            animation: li-ion-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes li-ion-pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .modalities-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .spectrum-controls {
+                flex-direction: column;
+            }
+
+            .control-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-grid"></div>
+        <div class="hero-content">
+            <span class="hero-badge">OPERANDO SPECTROSCOPY</span>
+            <h1>Real-Time Electrochemical Fingerprinting</h1>
+            <p class="hero-subtitle">
+                Watch batteries think in real-time. cutting-edge operando spectroscopy reveals the hidden molecular dances inside working batteries, transforming how we understand, design, and optimize electrochemical energy storage.
+            </p>
+
+            <div class="battery-cell-container">
+                <svg class="battery-cell-svg" viewBox="0 0 300 400" fill="none">
+                    <!-- Battery Housing -->
+                    <rect x="50" y="80" width="200" height="280" rx="20" fill="#1a1a2e" stroke="#8b5cf6" stroke-width="2"/>
+
+                    <!-- Cathode -->
+                    <rect x="70" y="100" width="160" height="100" rx="10" fill="#2d1f4e"/>
+                    <text x="150" y="155" text-anchor="middle" fill="#8b5cf6" font-size="14" font-family="sans-serif">LiCoO₂ Cathode</text>
+
+                    <!-- Separator -->
+                    <rect x="70" y="210" width="160" height="30" rx="5" fill="#1f2937"/>
+                    <text x="150" y="230" text-anchor="middle" fill="#6b7280" font-size="10" font-family="sans-serif">Separator</text>
+
+                    <!-- Anode -->
+                    <rect x="70" y="250" width="160" height="100" rx="10" fill="#1f3a2f"/>
+                    <text x="150" y="305" text-anchor="middle" fill="#84cc16" font-size="14" font-family="sans-serif">Graphite Anode</text>
+
+                    <!-- Electron orbits -->
+                    <g class="electron-orbit">
+                        <circle cx="100" cy="150" r="8" fill="#8b5cf6" opacity="0.8"/>
+                        <circle cx="200" cy="150" r="6" fill="#8b5cf6" opacity="0.6"/>
+                    </g>
+
+                    <!-- Li-ion flow -->
+                    <g class="ion-flow">
+                        <circle class="li-ion" cx="120" cy="200" r="5" fill="#ef4444"/>
+                        <circle class="li-ion" cx="150" cy="205" r="5" fill="#ef4444"/>
+                        <circle class="li-ion" cx="180" cy="200" r="5" fill="#ef4444"/>
+                    </g>
+
+                    <!-- Photon waves -->
+                    <g class="photon-wave">
+                        <path d="M30 120 Q40 110, 50 120 T70 120" stroke="#f97316" stroke-width="2" fill="none" opacity="0.7"/>
+                        <path d="M30 150 Q40 140, 50 150 T70 150" stroke="#ef4444" stroke-width="2" fill="none" opacity="0.7"/>
+                        <path d="M30 180 Q40 170, 50 180 T70 180" stroke="#f97316" stroke-width="2" fill="none" opacity="0.7"/>
+                    </g>
+
+                    <!-- Current collector tabs -->
+                    <rect x="130" y="60" width="40" height="25" rx="3" fill="#4b5563"/>
+                    <rect x="130" y="355" width="40" height="25" rx="3" fill="#4b5563"/>
+
+                    <!-- Spectroscopy beams -->
+                    <g opacity="0.6">
+                        <line x1="0" y1="130" x2="50" y2="130" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="4"/>
+                        <line x1="0" y1="160" x2="50" y2="160" stroke="#ef4444" stroke-width="2" stroke-dasharray="4"/>
+                        <line x1="0" y1="190" x2="50" y2="190" stroke="#f97316" stroke-width="2" stroke-dasharray="4"/>
+                    </g>
+
+                    <!-- Detection signals -->
+                    <g opacity="0.5">
+                        <line x1="250" y1="140" x2="300" y2="140" stroke="#06b6d4" stroke-width="2" stroke-dasharray="4"/>
+                        <line x1="250" y1="170" x2="300" y2="170" stroke="#84cc16" stroke-width="2" stroke-dasharray="4"/>
+                        <line x1="250" y1="200" x2="300" y2="200" stroke="#eab308" stroke-width="2" stroke-dasharray="4"/>
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modalities Section -->
+    <section class="modalities-section">
+        <div class="section-header">
+            <h2>The Six Pillars of Operando Spectroscopy</h2>
+            <p>Each spectroscopic technique reveals different aspects of the electrochemical interface, building a complete picture of battery dynamics.</p>
+        </div>
+
+        <div class="modalities-grid">
+            <div class="modality-card uv">
+                <div class="modality-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"/>
+                        <line x1="12" y1="1" x2="12" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="23"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                        <line x1="1" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="12" x2="23" y2="12"/>
+                    </svg>
+                </div>
+                <h3>UV-Vis Spectroscopy</h3>
+                <div class="wavelength">200 - 800 nm</div>
+                <p>Probes electronic transitions in transition metal oxides, revealing oxidation state changes and ligand field transformations during cycling.</p>
+            </div>
+
+            <div class="modality-card ir">
+                <div class="modality-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                </div>
+                <h3>FTIR Spectroscopy</h3>
+                <div class="wavelength">400 - 4000 cm⁻¹</div>
+                <p>Tracks molecular vibrations of electrolyte components, SEI formation, and organic species—identifying chemical reactions as they happen.</p>
+            </div>
+
+            <div class="modality-card raman">
+                <div class="modality-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4l7.07 17.07 2.51-7.39 7.39-2.51L4 4z"/>
+                    </svg>
+                </div>
+                <h3>Raman Spectroscopy</h3>
+                <div class="wavelength">100 - 4000 cm⁻¹</div>
+                <p>Highly sensitive to lattice vibrations, detecting phase transitions, local structure changes, and lithium ordering in electrode materials.</p>
+            </div>
+
+            <div class="modality-card epr">
+                <div class="modality-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 2v4m0 12v4M2 12h4m12 0h4"/>
+                        <path d="M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+                    </svg>
+                </div>
+                <h3>EPR Spectroscopy</h3>
+                <div class="wavelength">9 GHz (X-band)</div>
+                <p>Detects unpaired electrons from transition metal ions, oxygen vacancies, and radical intermediates—otherwise invisible to most techniques.</p>
+            </div>
+
+            <div class="modality-card xas">
+                <div class="modality-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <h3>XAS / XANES</h3>
+                <div class="wavelength">0.5 - 2.5 keV (Li/K-edge)</div>
+                <p>Element-specific probe of oxidation states, local coordination, and atomic distances—essential for tracking lithium and transition metals.</p>
+            </div>
+
+            <div class="modality-card xrd">
+                <div class="modality-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <path d="M3 9h18M9 3v18"/>
+                    </svg>
+                </div>
+                <h3>Operando XRD</h3>
+                <div class="wavelength">0.5 - 2.5 Å</div>
+                <p>Crystallographic snapshots reveal lattice parameter evolution, phase transformation pathways, and mechanical strain development.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Spectrum Analyzer -->
+    <section class="spectrum-section">
+        <div class="section-header">
+            <h2>Interactive Spectrum Analyzer</h2>
+            <p>Explore how spectroscopic signatures evolve during battery cycling. Select a technique and observe the real-time spectral response.</p>
+        </div>
+
+        <div class="spectrum-analyzer">
+            <div class="spectrum-controls">
+                <button class="control-btn active" onclick="setMode('uvvis')">UV-Vis</button>
+                <button class="control-btn" onclick="setMode('ftir')">FTIR</button>
+                <button class="control-btn" onclick="setMode('raman')">Raman</button>
+                <button class="control-btn" onclick="setMode('xanes')">XANES</button>
+                <button class="control-btn" onclick="setMode('epr')">EPR</button>
+            </div>
+
+            <div class="spectrum-display">
+                <canvas class="spectrum-canvas" id="spectrumCanvas"></canvas>
+            </div>
+
+            <div class="spectrum-info">
+                <div class="spectrum-info-item">
+                    <label>Wavelength Range</label>
+                    <span id="wlRange">200 - 800 nm</span>
+                </div>
+                <div class="spectrum-info-item">
+                    <label>Peak Position</label>
+                    <span id="peakPos">540 nm</span>
+                </div>
+                <div class="spectrum-info-item">
+                    <label>Intensity</label>
+                    <span id="intensity">0.87 a.u.</span>
+                </div>
+                <div class="spectrum-info-item">
+                    <label>State of Charge</label>
+                    <span id="soc">75%</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Real-time Cycling Animation -->
+    <section class="cycling-section">
+        <div class="section-header">
+            <h2>Real-Time Electrochemical Cycling</h2>
+            <p>Watch the synchronized dance of voltage, current, and spectroscopic response as the battery charges and discharges.</p>
+        </div>
+
+        <div class="cycling-container">
+            <div class="cycling-visual">
+                <svg class="battery-cross-section" viewBox="0 0 400 350" fill="none">
+                    <!-- Battery cross-section -->
+                    <rect x="50" y="30" width="300" height="250" rx="15" fill="#12121f" stroke="#8b5cf6" stroke-width="2"/>
+
+                    <!-- Current collector -->
+                    <rect x="100" y="10" width="60" height="25" rx="3" fill="#4b5563"/>
+                    <rect x="240" y="10" width="60" height="25" rx="3" fill="#4b5563"/>
+                    <text x="130" y="27" text-anchor="middle" fill="#9ca3af" font-size="10">Al</text>
+                    <text x="270" y="27" text-anchor="middle" fill="#9ca3af" font-size="10">Cu</text>
+
+                    <!-- Cathode material with particles -->
+                    <rect x="70" y="50" width="260" height="80" rx="8" fill="#2d1f4e"/>
+                    <g id="cathodeParticles">
+                        <circle cx="90" cy="70" r="8" fill="#8b5cf6" opacity="0.6"/>
+                        <circle cx="115" cy="85" r="6" fill="#8b5cf6" opacity="0.5"/>
+                        <circle cx="140" cy="70" r="7" fill="#8b5cf6" opacity="0.7"/>
+                        <circle cx="165" cy="90" r="5" fill="#8b5cf6" opacity="0.4"/>
+                        <circle cx="190" cy="75" r="8" fill="#8b5cf6" opacity="0.6"/>
+                        <circle cx="215" cy="85" r="6" fill="#8b5cf6" opacity="0.5"/>
+                        <circle cx="240" cy="70" r="7" fill="#8b5cf6" opacity="0.7"/>
+                        <circle cx="265" cy="90" r="5" fill="#8b5cf6" opacity="0.4"/>
+                        <circle cx="290" cy="75" r="8" fill="#8b5cf6" opacity="0.6"/>
+                        <circle cx="315" cy="85" r="6" fill="#8b5cf6" opacity="0.5"/>
+                    </g>
+                    <text x="200" y="45" text-anchor="middle" fill="#8b5cf6" font-size="11">LiCoO₂ Cathode</text>
+
+                    <!-- Separator -->
+                    <rect x="70" y="140" width="260" height="40" rx="5" fill="#1f2937"/>
+                    <g id="separatorIons">
+                        <circle cx="100" cy="160" r="4" fill="#ef4444" class="li-ion"/>
+                        <circle cx="150" cy="160" r="4" fill="#ef4444" class="li-ion"/>
+                        <circle cx="200" cy="160" r="4" fill="#ef4444" class="li-ion"/>
+                        <circle cx="250" cy="160" r="4" fill="#ef4444" class="li-ion"/>
+                        <circle cx="300" cy="160" r="4" fill="#ef4444" class="li-ion"/>
+                    </g>
+                    <text x="200" y="175" text-anchor="middle" fill="#6b7280" font-size="10">Separator / Electrolyte</text>
+
+                    <!-- Anode material with particles -->
+                    <rect x="70" y="190" width="260" height="80" rx="8" fill="#1f3a2f"/>
+                    <g id="anodeParticles">
+                        <circle cx="90" cy="210" r="7" fill="#84cc16" opacity="0.5"/>
+                        <circle cx="115" cy="225" r="8" fill="#84cc16" opacity="0.6"/>
+                        <circle cx="140" cy="210" r="6" fill="#84cc16" opacity="0.4"/>
+                        <circle cx="165" cy="230" r="7" fill="#84cc16" opacity="0.5"/>
+                        <circle cx="190" cy="215" r="8" fill="#84cc16" opacity="0.6"/>
+                        <circle cx="215" cy="225" r="6" fill="#84cc16" opacity="0.4"/>
+                        <circle cx="240" cy="210" r="7" fill="#84cc16" opacity="0.5"/>
+                        <circle cx="265" cy="230" r="8" fill="#84cc16" opacity="0.6"/>
+                        <circle cx="290" cy="215" r="6" fill="#84cc16" opacity="0.4"/>
+                        <circle cx="315" cy="225" r="7" fill="#84cc16" opacity="0.5"/>
+                    </g>
+                    <text x="200" y="185" text-anchor="middle" fill="#84cc16" font-size="11">Graphite Anode</text>
+
+                    <!-- Current collector bottom -->
+                    <rect x="100" y="280" width="60" height="25" rx="3" fill="#4b5563"/>
+                    <rect x="240" y="280" width="60" height="25" rx="3" fill="#4b5563"/>
+                    <text x="130" y="297" text-anchor="middle" fill="#9ca3af" font-size="10">Al</text>
+                    <text x="270" y="297" text-anchor="middle" fill="#9ca3af" font-size="10">Cu</text>
+
+                    <!-- Li-ion animation path -->
+                    <path id="liIonPath" d="M 200 290 Q 200 250, 200 180" stroke="#ef4444" stroke-width="2" stroke-dasharray="6" fill="none" opacity="0"/>
+                    <circle id="movingLiIon" cx="200" cy="290" r="6" fill="#ef4444" opacity="0"/>
+                </svg>
+            </div>
+
+            <div class="cycling-info">
+                <h3>Battery State Monitor</h3>
+
+                <div class="state-indicator">
+                    <div class="state-dot charge" id="chargeState"></div>
+                    <div class="state-dot discharge" id="dischargeState"></div>
+                    <div class="state-dot rest" id="restState"></div>
+                </div>
+
+                <div class="voltage-display">
+                    <div class="label">Cell Voltage</div>
+                    <div class="value" id="voltageValue">3.70 V</div>
+                </div>
+
+                <div class="cycle-counter">
+                    <strong>Cycle:</strong> <span id="cycleCount">1</span> |
+                    <strong>Phase:</strong> <span id="phaseText">Rest</span>
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                    <button class="control-btn" onclick="toggleCycling()" id="cyclingBtn">Start Cycling</button>
+                    <button class="control-btn" onclick="resetCycling()">Reset</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Signal Detection Principles -->
+    <section class="principles-section">
+        <div class="section-header">
+            <h2>Fundamental Detection Principles</h2>
+            <p>Understanding how each spectroscopic technique interfaces with the electrochemical cell to capture real-time data.</p>
+        </div>
+
+        <div class="principles-grid">
+            <div class="principle-card">
+                <div class="principle-number">01</div>
+                <h4>Photon-Matter Interaction</h4>
+                <p>When photons strike the electrode surface, they can be absorbed (causing electronic transitions) or scattered (Raman/IR). The wavelength of light determines which molecular vibrations or electronic states are probed.</p>
+            </div>
+
+            <div class="principle-card">
+                <div class="principle-number">02</div>
+                <h4>X-ray Absorption Edge</h4>
+                <p>X-rays are absorbed at element-specific energies corresponding to core-electron excitations. The post-edge region (XANES) reveals oxidation state and local coordination with Angstrom precision.</p>
+            </div>
+
+            <div class="principle-card">
+                <div class="principle-number">03</div>
+                <h4>Zeeman Splitting</h4>
+                <p>In EPR spectroscopy, unpaired electron spins split in a magnetic field. The g-factor and hyperfine splitting patterns serve as fingerprints for specific radical species and transition metal centers.</p>
+            </div>
+
+            <div class="principle-card">
+                <div class="principle-number">04</div>
+                <h4>Bragg Diffraction</h4>
+                <p>XRD relies on constructive interference of X-rays scattered by crystal planes. Peak positions shift as lithium insertion/desertion changes lattice parameters—direct evidence of structural evolution.</p>
+            </div>
+
+            <div class="principle-card">
+                <div class="principle-number">05</div>
+                <h4>Electrochemical Impedance Coupling</h4>
+                <p>Operando measurements synchronize spectroscopic data acquisition with galvanostatic cycling, creating time-resolved datasets where each spectrum is tagged to a specific state of charge.</p>
+            </div>
+
+            <div class="principle-card">
+                <div class="principle-number">06</div>
+                <h4>Signal-to-Noise Enhancement</h4>
+                <p>Modern detectors use lock-in amplification synchronized to the modulation frequency, rejecting background noise and enabling detection of sub-monolayer surface changes during cycling.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Visualization -->
+    <section class="data-viz-section">
+        <div class="data-viz-container">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Spectral Evolution During Charge</h3>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #8b5cf6;"></div>
+                            <span>0% SOC</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #06b6d4;"></div>
+                            <span>33% SOC</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #84cc16;"></div>
+                            <span>66% SOC</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #eab308;"></div>
+                            <span>100% SOC</span>
+                        </div>
+                    </div>
+                </div>
+                <canvas class="chart-canvas" id="spectralChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Voltage-Spectra Correlation</h3>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ef4444;"></div>
+                            <span>Voltage (V)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #f97316;"></div>
+                            <span>Peak Intensity</span>
+                        </div>
+                    </div>
+                </div>
+                <canvas class="chart-canvas" id="voltageChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scientific Deep Dive -->
+    <section class="science-section">
+        <div class="science-content">
+            <h2>The Science of Watching Batteries Think</h2>
+
+            <div class="science-block">
+                <h3>Why Operando Matters</h3>
+                <p>
+                    Traditional battery characterization is destructive: to study a battery, you must disassemble it, losing all dynamic information. Operando spectroscopy solves this by peering inside a working battery without disturbing its operation.
+                </p>
+                <p>
+                    The term "operando" (from Latin "to work") was coined in the early 2000s by professor Marcus past research groups who realized that <em>ex-situ</em> measurements—the standard for decades—fundamentally miss critical transient phenomena that only occur during actual cycling.
+                </p>
+            </div>
+
+            <div class="science-block">
+                <h3>The Beer-Lambert Relationship</h3>
+                <p>
+                    In UV-Vis spectroscopy, the intensity of absorbed light follows the Beer-Lambert law:
+                </p>
+                <div class="equation equation-long">
+                    A(λ) = ε(λ) · c · l = log₁₀(I₀/I)
+                </div>
+                <p>
+                    Where A is absorbance, ε is the wavelength-dependent molar extinction coefficient, c is concentration, l is path length, and I₀/I is the ratio of incident to transmitted light. As lithium inserts into LiCoO₂, the Co³⁺/Co⁴⁺ ratio changes, altering ε and shifting spectral features.
+                </p>
+            </div>
+
+            <div class="science-block">
+                <h3>XANES Fingerprinting of Oxidation States</h3>
+                <p>
+                    X-ray absorption near edge structure (XANES) provides element-specific oxidation state fingerprints:
+                </p>
+                <div class="equation equation-long">
+                    E(Co K-edge) ≈ 7709 eV + Σ(oxidation contribution)
+                </div>
+                <p>
+                    The pre-edge feature at ~7709 eV in cobalt K-edge XANES shifts ~2-3 eV per unit oxidation state change. By tracking this edge position during charge, we can map lithium inventory in real-time without electrochemical artifacts.
+                </p>
+            </div>
+
+            <div class="science-block">
+                <h3>Raman Selection Rules</h3>
+                <p>
+                    Raman scattering efficiency depends on the polarizability change during vibration:
+                </p>
+                <div class="equation equation-long">
+                    I_Raman ∝ (∂α/∂Q)² · I_Laser · N
+                </div>
+                <p>
+                    Where ∂α/∂Q is the change in polarizability with respect to normal coordinate Q. In graphite anodes, the G-band (~1580 cm⁻¹) and D-band (~1350 cm⁻¹) ratio directly reveals stage-1 to stage-2 LiC₆ phase transformations as they happen.
+                </p>
+            </div>
+
+            <div class="science-block">
+                <h3>SEI Formation Monitoring</h3>
+                <p>
+                    The solid-electrolyte interphase (SEI) is both crucial and mysterious. Operando FTIR reveals:
+                </p>
+                <p>
+                    • C=O stretching (~1700 cm⁻¹) from carbonate formation<br>
+                    • C-O stretching (~1050 cm⁻¹) from alcohol species<br>
+                    • Li-O vibrations (~550 cm⁻¹) from lithium oxide components
+                </p>
+                <p>
+                    By tracking these peaks from the first cycle, researchers can correlate SEI chemistry with long-term capacity retention—a critical challenge for battery longevity.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Case Studies -->
+    <section class="cases-section">
+        <div class="section-header">
+            <h2>Research Case Studies</h2>
+            <p>Real-world examples where operando spectroscopy transformed our understanding of battery mechanisms.</p>
+        </div>
+
+        <div class="case-study">
+            <div class="case-visual">
+                <svg viewBox="0 0 400 250" fill="none">
+                    <!-- Co oxidation state map -->
+                    <rect x="20" y="20" width="360" height="200" fill="#0a0a0a" rx="8"/>
+
+                    <!-- Grid -->
+                    <g stroke="#1a1a2e" stroke-width="0.5">
+                        <line x1="20" y1="70" x2="380" y2="70"/>
+                        <line x1="20" y1="120" x2="380" y2="120"/>
+                        <line x1="20" y1="170" x2="380" y2="170"/>
+                        <line x1="100" y1="20" x2="100" y2="220"/>
+                        <line x1="180" y1="20" x2="180" y2="220"/>
+                        <line x1="260" y1="20" x2="260" y2="220"/>
+                        <line x1="340" y1="20" x2="340" y2="220"/>
+                    </g>
+
+                    <!-- XANES contour plot simulation -->
+                    <defs>
+                        <linearGradient id="contourGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#1e3a5f"/>
+                            <stop offset="25%" style="stop-color:#3b82f6"/>
+                            <stop offset="50%" style="stop-color:#8b5cf6"/>
+                            <stop offset="75%" style="stop-color:#a855f7"/>
+                            <stop offset="100%" style="stop-color:#d946ef"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Simulated contour bands -->
+                    <path d="M20 200 Q100 180, 180 120 T340 60" stroke="url(#contourGrad)" stroke-width="3" fill="none"/>
+                    <path d="M20 190 Q100 160, 180 100 T340 50" stroke="url(#contourGrad)" stroke-width="2" fill="none" opacity="0.7"/>
+                    <path d="M20 180 Q100 140, 180 80 T340 40" stroke="url(#contourGrad)" stroke-width="2" fill="none" opacity="0.5"/>
+
+                    <!-- Labels -->
+                    <text x="200" y="240" text-anchor="middle" fill="#6b7280" font-size="11">State of Charge (%)</text>
+                    <text x="10" y="120" text-anchor="middle" fill="#6b7280" font-size="10" transform="rotate(-90, 10, 120)">Co K-edge Energy (eV)</text>
+
+                    <!-- Color bar -->
+                    <rect x="350" y="30" width="20" height="180" fill="url(#contourGrad)" rx="3"/>
+                    <text x="380" y="45" fill="#6b7280" font-size="9">7709</text>
+                    <text x="380" y="200" fill="#6b7280" font-size="9">7715</text>
+                </svg>
+            </div>
+            <div class="case-content">
+                <h3>LiCoO₂ Oxidation State Mapping</h3>
+                <p>
+                    Using operando XANES, researchers tracked the cobalt K-edge energy shift during the entire first charge cycle, creating a real-time oxidation state map of the cathode.
+                </p>
+                <ul class="case-findings">
+                    <li>
+                        <div class="finding-marker" style="background: #8b5cf6;"></div>
+                        <span>Co³⁺ remains stable until 50% SOC, then rapidly oxidizes to Co⁴⁺</span>
+                    </li>
+                    <li>
+                        <div class="finding-marker" style="background: #ef4444;"></div>
+                        <span>Edge shift correlates with voltage plateaus at 3.9V and 4.2V</span>
+                    </li>
+                    <li>
+                        <div class="finding-marker" style="background: #84cc16;"></div>
+                        <span>Irreversible Co oxidation observed at end of first charge</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="case-study">
+            <div class="case-content">
+                <h3>Graphite Staging Dynamics</h3>
+                <p>
+                    Operando Raman revealed the hidden staging transitions in graphite anodes that electrochemistry alone cannot resolve.
+                </p>
+                <ul class="case-findings">
+                    <li>
+                        <div class="finding-marker" style="background: #84cc16;"></div>
+                        <span>Stage 2→1 transition occurs via intermediate "dilute stage 1" phase</span>
+                    </li>
+                    <li>
+                        <div class="finding-marker" style="background: #f97316;"></div>
+                        <span>G-band position shifts 18 cm⁻¹ during full lithiation</span>
+                    </li>
+                    <li>
+                        <div class="finding-marker" style="background: #06b6d4;"></div>
+                        <span>Hysteresis between charge and discharge reveals kinetic limitations</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="case-visual">
+                <svg viewBox="0 0 400 250" fill="none">
+                    <!-- Raman shift timeline -->
+                    <rect x="20" y="20" width="360" height="200" fill="#0a0a0a" rx="8"/>
+
+                    <!-- Axes -->
+                    <line x1="50" y1="180" x2="380" y2="180" stroke="#4b5563" stroke-width="1"/>
+                    <line x1="50" y1="30" x2="50" y2="180" stroke="#4b5563" stroke-width="1"/>
+
+                    <!-- Stage regions -->
+                    <rect x="50" y="150" width="80" height="30" fill="#1f3a2f" opacity="0.5"/>
+                    <rect x="130" y="110" width="80" height="70" fill="#1f3a2f" opacity="0.5"/>
+                    <rect x="210" y="60" width="120" height="120" fill="#1f3a2f" opacity="0.5"/>
+
+                    <text x="90" y="195" text-anchor="middle" fill="#84cc16" font-size="10">Stage 4</text>
+                    <text x="170" y="195" text-anchor="middle" fill="#84cc16" font-size="10">Stage 3</text>
+                    <text x="270" y="195" text-anchor="middle" fill="#84cc16" font-size="10">Stage 2→1</text>
+
+                    <!-- G-band peak evolution -->
+                    <path d="M60 155 Q100 130, 140 115 T220 90 T330 45" stroke="#84cc16" stroke-width="3" fill="none"/>
+                    <circle cx="60" cy="155" r="4" fill="#84cc16"/>
+                    <circle cx="140" cy="115" r="4" fill="#84cc16"/>
+                    <circle cx="220" cy="90" r="4" fill="#84cc16"/>
+                    <circle cx="330" cy="45" r="4" fill="#84cc16"/>
+
+                    <!-- Labels -->
+                    <text x="20" y="110" text-anchor="middle" fill="#6b7280" font-size="9" transform="rotate(-90, 20, 110)">G-band (cm⁻¹)</text>
+                    <text x="215" y="220" text-anchor="middle" fill="#6b7280" font-size="11">Li Content (x in LiₓC₆)</text>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>Battery Operando Spectroscopy Research | Virtual World Energy Research Lab</p>
+        <p style="margin-top: 0.5rem; opacity: 0.6;">
+            Advancing the understanding of electrochemical energy storage through real-time characterization
+        </p>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <div class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 15l-6-6-6 6"/>
+        </svg>
+    </div>
+
+    <script>
+        // Back to top button visibility
+        window.addEventListener('scroll', () => {
+            const btn = document.querySelector('.back-to-top');
+            btn.classList.toggle('visible', window.scrollY > 500);
+        });
+
+        // Spectrum Analyzer
+        let currentMode = 'uvvis';
+        let animationFrame;
+        let cycleTime = 0;
+        let isCycling = false;
+        let cyclePhase = 0;
+
+        const modeConfig = {
+            uvvis: { color: '#8b5cf6', range: '200 - 800 nm', peakBase: 540 },
+            ftir: { color: '#ef4444', range: '400 - 4000 cm⁻¹', peakBase: 1100 },
+            raman: { color: '#f97316', range: '100 - 4000 cm⁻¹', peakBase: 1350 },
+            xanes: { color: '#84cc16', range: '7700 - 7720 eV', peakBase: 7709 },
+            epr: { color: '#06b6d4', range: 'g = 1.9 - 2.1', peakBase: 2000 }
+        };
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('wlRange').textContent = modeConfig[mode].range;
+            drawSpectrum();
+        }
+
+        function drawSpectrum() {
+            const canvas = document.getElementById('spectrumCanvas');
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+            const w = rect.width;
+            const h = rect.height;
+
+            // Background
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, w, h);
+
+            // Grid
+            ctx.strokeStyle = 'rgba(139, 92, 246, 0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < w; i += 30) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, h);
+                ctx.stroke();
+            }
+            for (let i = 0; i < h; i += 20) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(w, i);
+                ctx.stroke();
+            }
+
+            // Spectrum curve
+            const config = modeConfig[currentMode];
+            ctx.strokeStyle = config.color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            for (let i = 0; i < w; i++) {
+                const x = i / w;
+                let y;
+
+                if (currentMode === 'uvvis') {
+                    y = 0.3 + 0.4 * Math.exp(-Math.pow((x - 0.65) * 2, 2)) + 0.2 * Math.sin(x * 20 + cycleTime);
+                } else if (currentMode === 'ftir') {
+                    y = 0.2 + 0.3 * Math.exp(-Math.pow((x - 0.3) * 3, 2)) + 0.2 * Math.exp(-Math.pow((x - 0.7) * 3, 2));
+                } else if (currentMode === 'raman') {
+                    y = 0.25 + 0.35 * Math.exp(-Math.pow((x - 0.4) * 2.5, 2)) * (1 + 0.3 * Math.sin(x * 15 + cycleTime));
+                } else if (currentMode === 'xanes') {
+                    y = 0.1 + 0.6 * Math.exp(-Math.pow((x - 0.5) * 4, 2)) * (1 + 0.4 * Math.pow(x, 2));
+                } else {
+                    y = 0.2 + 0.5 * Math.exp(-Math.pow((x - 0.5) * 3, 2));
+                }
+
+                if (i === 0) ctx.moveTo(i, h - y * h);
+                else ctx.lineTo(i, h - y * h);
+            }
+            ctx.stroke();
+
+            // Fill under curve
+            ctx.lineTo(w, h);
+            ctx.lineTo(0, h);
+            ctx.closePath();
+            ctx.fillStyle = config.color + '20';
+            ctx.fill();
+
+            // Peak marker
+            const peakX = (config.peakBase / (currentMode === 'xanes' ? 20 : currentMode === 'epr' ? 4000 : currentMode === 'ftir' ? 4000 : 800)) * w;
+            ctx.beginPath();
+            ctx.arc(peakX, h * 0.5, 6, 0, Math.PI * 2);
+            ctx.fillStyle = config.color;
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.font = '10px JetBrains Mono';
+            ctx.fillText(config.peakBase.toString(), peakX + 10, h * 0.5 + 4);
+
+            // Update info
+            document.getElementById('peakPos').textContent = config.peakBase + (currentMode === 'uvvis' ? ' nm' : currentMode === 'ftir' || currentMode === 'raman' ? ' cm⁻¹' : currentMode === 'xanes' ? ' eV' : '');
+            document.getElementById('intensity').textContent = (0.7 + Math.random() * 0.3).toFixed(2) + ' a.u.';
+            document.getElementById('soc').textContent = Math.round((cycleTime % (Math.PI * 2)) / (Math.PI * 2) * 100) + '%';
+        }
+
+        // Cycling Animation
+        function toggleCycling() {
+            isCycling = !isCycling;
+            document.getElementById('cyclingBtn').textContent = isCycling ? 'Stop Cycling' : 'Start Cycling';
+            if (isCycling) animateCycling();
+        }
+
+        function resetCycling() {
+            isCycling = false;
+            cyclePhase = 0;
+            cycleTime = 0;
+            document.getElementById('cyclingBtn').textContent = 'Start Cycling';
+            document.getElementById('voltageValue').textContent = '3.70 V';
+            document.getElementById('cycleCount').textContent = '1';
+            document.getElementById('phaseText').textContent = 'Rest';
+            document.querySelectorAll('.state-dot').forEach(d => d.classList.remove('active'));
+            document.getElementById('restState').classList.add('active');
+            drawSpectrum();
+        }
+
+        function animateCycling() {
+            if (!isCycling) return;
+
+            cycleTime += 0.02;
+            cyclePhase = (cycleTime % (Math.PI * 2));
+
+            // Update states
+            const phaseNames = ['Rest', 'Charge', 'Rest', 'Discharge'];
+            const phase = Math.floor(cyclePhase / (Math.PI * 2) * 4) % 4;
+            document.getElementById('phaseText').textContent = phaseNames[phase];
+
+            document.querySelectorAll('.state-dot').forEach(d => d.classList.remove('active'));
+            if (phase === 1) document.getElementById('chargeState').classList.add('active');
+            else if (phase === 3) document.getElementById('dischargeState').classList.add('active');
+            else document.getElementById('restState').classList.add('active');
+
+            // Voltage
+            let voltage;
+            if (phase === 1) voltage = 3.7 + Math.sin(cyclePhase) * 0.3;
+            else if (phase === 3) voltage = 3.7 - Math.sin(cyclePhase) * 0.3;
+            else voltage = 3.7;
+            document.getElementById('voltageValue').textContent = voltage.toFixed(2) + ' V';
+
+            // Cycle count
+            const cycles = Math.floor(cycleTime / (Math.PI * 2) / 4) + 1;
+            document.getElementById('cycleCount').textContent = cycles;
+
+            // Animate Li-ion
+            const movingIon = document.getElementById('movingLiIon');
+            const ionPath = document.getElementById('liIonPath');
+            if (phase === 1) {
+                movingIon.setAttribute('opacity', '1');
+                ionPath.setAttribute('opacity', '0.5');
+                const t = (Math.sin(cyclePhase) + 1) / 2;
+                const x = 200;
+                const y = 290 - t * 110;
+                movingIon.setAttribute('cx', x);
+                movingIon.setAttribute('cy', y);
+            } else if (phase === 3) {
+                movingIon.setAttribute('opacity', '1');
+                ionPath.setAttribute('opacity', '0.5');
+                const t = (Math.sin(cyclePhase) + 1) / 2;
+                const x = 200;
+                const y = 180 + t * 110;
+                movingIon.setAttribute('cx', x);
+                movingIon.setAttribute('cy', y);
+            } else {
+                movingIon.setAttribute('opacity', '0');
+                ionPath.setAttribute('opacity', '0');
+            }
+
+            drawSpectrum();
+            animationFrame = requestAnimationFrame(animateCycling);
+        }
+
+        // Charts
+        function drawCharts() {
+            const spectralCanvas = document.getElementById('spectralChart');
+            const voltageCanvas = document.getElementById('voltageChart');
+
+            [spectralCanvas, voltageCanvas].forEach(canvas => {
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width * window.devicePixelRatio;
+                canvas.height = rect.height * window.devicePixelRatio;
+                const ctx = canvas.getContext('2d');
+                ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+                const w = rect.width;
+                const h = rect.height;
+
+                ctx.fillStyle = '#0a0a0a';
+                ctx.fillRect(0, 0, w, h);
+
+                ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+                for (let i = 0; i < w; i += w/6) {
+                    ctx.beginPath();
+                    ctx.moveTo(i, 0);
+                    ctx.lineTo(i, h);
+                    ctx.stroke();
+                }
+                for (let i = 0; i < h; i += h/4) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, i);
+                    ctx.lineTo(w, i);
+                    ctx.stroke();
+                }
+            });
+
+            // Spectral evolution
+            const specCtx = spectralCanvas.getContext('2d');
+            const specW = spectralCanvas.width / window.devicePixelRatio;
+            const specH = spectralCanvas.height / window.devicePixelRatio;
+
+            const colors = ['#8b5cf6', '#06b6d4', '#84cc16', '#eab308'];
+            const socLevels = [0, 0.33, 0.66, 1];
+
+            colors.forEach((color, idx) => {
+                specCtx.strokeStyle = color;
+                specCtx.lineWidth = 2;
+                specCtx.beginPath();
+
+                for (let i = 0; i < specW; i++) {
+                    const x = i / specW;
+                    const baseShift = socLevels[idx] * 0.15;
+                    const y = 0.3 + 0.4 * Math.exp(-Math.pow((x - 0.5 - baseShift) * 2.5, 2));
+
+                    if (i === 0) specCtx.moveTo(i, specH - y * specH);
+                    else specCtx.lineTo(i, specH - y * specH);
+                }
+                specCtx.stroke();
+            });
+
+            // Voltage correlation
+            const voltCtx = voltageCanvas.getContext('2d');
+            const voltW = voltageCanvas.width / window.devicePixelRatio;
+            const voltH = voltageCanvas.height / window.devicePixelRatio;
+
+            // Voltage curve
+            voltCtx.strokeStyle = '#ef4444';
+            voltCtx.lineWidth = 2;
+            voltCtx.beginPath();
+            for (let i = 0; i < voltW; i++) {
+                const t = i / voltW;
+                const v = 3.3 + t * 0.8 + 0.2 * Math.sin(t * Math.PI * 6);
+                if (i === 0) voltCtx.moveTo(i, voltH - (v - 3.2) / 0.9 * voltH);
+                else voltCtx.lineTo(i, voltH - (v - 3.2) / 0.9 * voltH);
+            }
+            voltCtx.stroke();
+
+            // Peak intensity
+            voltCtx.strokeStyle = '#f97316';
+            voltCtx.lineWidth = 2;
+            voltCtx.beginPath();
+            for (let i = 0; i < voltW; i++) {
+                const t = i / voltW;
+                const intensity = 0.3 + 0.5 * Math.pow(t, 0.5) + 0.2 * Math.random();
+                if (i === 0) voltCtx.moveTo(i, voltH - intensity * voltH);
+                else voltCtx.lineTo(i, voltH - intensity * voltH);
+            }
+            voltCtx.stroke();
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            drawSpectrum();
+            drawCharts();
+            document.getElementById('restState').classList.add('active');
+        });
+
+        window.addEventListener('resize', () => {
+            drawSpectrum();
+            drawCharts();
+        });
+    </script>
+</body>
+</html>
