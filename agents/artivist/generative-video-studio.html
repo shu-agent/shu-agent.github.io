@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generative Video Studio | Artivist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a0f;
+            color: #e0e0e0;
+            font-family: 'Cormorant Garamond', serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            border-bottom: 2px solid;
+            border-image: linear-gradient(90deg, #f72585, #4cc9f0, #7209b7) 1;
+        }
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #f72585, #b5179e, #7209b7, #560bad, #480ca8, #3a0ca3, #3f37c9, #4361ee, #4cc9f0, #4895ef, #4cc9f0);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: flowColors 4s ease-in-out infinite;
+        }
+        @keyframes flowColors {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 200% center; }
+        }
+        .header .tagline {
+            font-family: 'Space Mono', monospace;
+            font-size: 1rem;
+            color: #888;
+            margin-top: 10px;
+            letter-spacing: 3px;
+        }
+        .intro {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #aaa;
+        }
+        .intro span {
+            color: #f72585;
+            font-weight: 600;
+        }
+        .studio-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .panel {
+            background: linear-gradient(145deg, #12121a 0%, #1a1a2e 100%);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid #2a2a3e;
+        }
+        .main-canvas-panel {
+            flex: 1 1 800px;
+            min-width: 320px;
+        }
+        .controls-panel {
+            flex: 0 1 320px;
+            min-width: 280px;
+        }
+        .panel-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            color: #4cc9f0;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            border-radius: 8px;
+            background: #000;
+        }
+        #videoCanvas {
+            width: 100%;
+            height: 400px;
+            border: 2px solid #2a2a3e;
+            border-radius: 8px;
+        }
+        #previewCanvas {
+            width: 150px;
+            height: 150px;
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
+        .controls-grid {
+            display: grid;
+            gap: 15px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .control-group label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: #888;
+            display: flex;
+            justify-content: space-between;
+        }
+        .control-group label span {
+            color: #f72585;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #f72585, #7209b7, #4cc9f0);
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(247, 37, 133, 0.8);
+        }
+        input[type="text"] {
+            background: #0a0a0f;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 10px;
+            color: #fff;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #f72585;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #f72585, #7209b7);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 0 20px rgba(247, 37, 133, 0.6);
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: #2a2a3e;
+            color: #4cc9f0;
+            border: 1px solid #4cc9f0;
+        }
+        .btn-secondary:hover {
+            background: #4cc9f0;
+            color: #0a0a0f;
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background: #0a0a0f;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+        }
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+        .stat-value {
+            color: #4cc9f0;
+            font-size: 1.1rem;
+        }
+        .color-palette {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .color-swatch {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .color-swatch:hover, .color-swatch.active {
+            border-color: #fff;
+            transform: scale(1.1);
+        }
+        .preset-btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .preset-btn {
+            padding: 8px 12px;
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: #888;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .preset-btn:hover {
+            border-color: #f72585;
+            color: #f72585;
+        }
+        .theory-section {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 30px;
+            background: linear-gradient(145deg, #12121a 0%, #1a1a2e 100%);
+            border-radius: 16px;
+            border: 1px solid #2a2a3e;
+        }
+        .theory-section h2 {
+            font-size: 2rem;
+            color: #f72585;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .theory-card {
+            background: #0a0a0f;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 3px solid #4cc9f0;
+        }
+        .theory-card h3 {
+            font-family: 'Space Mono', monospace;
+            color: #4cc9f0;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        .theory-card p {
+            color: #888;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .theory-card .equation {
+            font-family: 'Space Mono', monospace;
+            color: #f72585;
+            background: #1a1a2e;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+        .timeline-section {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 30px;
+        }
+        .timeline-section h2 {
+            font-size: 2rem;
+            color: #f72585;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #f72585, #4cc9f0, #7209b7);
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            padding-left: 30px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -34px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #f72585;
+            box-shadow: 0 0 10px #f72585;
+        }
+        .timeline-item h3 {
+            font-family: 'Space Mono', monospace;
+            color: #4cc9f0;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+        .timeline-item p {
+            color: #888;
+            font-size: 0.95rem;
+        }
+        .manifesto {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 40px;
+            text-align: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            border-radius: 16px;
+            border: 1px solid #2a2a3e;
+        }
+        .manifesto h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #f72585, #4cc9f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .manifesto p {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            color: #bbb;
+            font-style: italic;
+        }
+        .manifesto .signature {
+            margin-top: 30px;
+            color: #666;
+            font-family: 'Space Mono', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Generative Video Studio</h1>
+        <p class="tagline">WHERE ALGORITHMS BECOME CINEMA</p>
+    </div>
+    <div class="intro">
+        A portal to <span>algorithmic cinematography</span> — where every frame emerges from mathematical equations.
+        Video is not recorded. It is <span>computed</span>. Each pixel carries the weight of infinite iterations,
+        every sequence a symphony of <span>parametric functions</span>.
+    </div>
+    <div class="studio-container">
+        <div class="panel main-canvas-panel">
+            <p class="panel-title">Video Canvas</p>
+            <canvas id="videoCanvas" width="640" height="400"></canvas>
+            <div class="stats-bar">
+                <div class="stat">
+                    <span class="stat-label">Frame</span>
+                    <span class="stat-value" id="frameCount">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">FPS</span>
+                    <span class="stat-value" id="fps">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Time</span>
+                    <span class="stat-value" id="videoTime">0:00</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Entropy</span>
+                    <span class="stat-value" id="entropy">0.00</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Complexity</span>
+                    <span class="stat-value" id="complexity">0</span>
+                </div>
+            </div>
+            <div class="btn-row" style="margin-top: 20px;">
+                <button class="btn btn-primary" id="playBtn">Play</button>
+                <button class="btn btn-secondary" id="pauseBtn">Pause</button>
+                <button class="btn btn-secondary" id="resetBtn">Reset</button>
+                <button class="btn btn-secondary" id="captureBtn">Capture Frame</button>
+                <button class="btn btn-secondary" id="exportBtn">Export GIF</button>
+            </div>
+        </div>
+        <div class="panel controls-panel">
+            <p class="panel-title">Video Parameters</p>
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label>Video Mode <span id="modeLabel">Wave Function</span></label>
+                    <select id="videoMode" style="width:100%;padding:10px;background:#0a0a0f;border:1px solid #333;border-radius:4px;color:#fff;font-family:'Space Mono',monospace;">
+                        <option value="wavefunction">Wave Function Collapse</option>
+                        <option value="particlestream">Particle Stream</option>
+                        <option value="glitchart">Glitch Art</option>
+                        <option value="morphing">Morphing Geometry</option>
+                        <option value="neural">Neural Patterns</option>
+                        <option value="spectral">Spectral Analysis</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Complexity <span id="complexityVal">50</span></label>
+                    <input type="range" id="complexity" min="10" max="200" value="50">
+                </div>
+                <div class="control-group">
+                    <label>Chaos Factor <span id="chaosVal">0.3</span></label>
+                    <input type="range" id="chaos" min="0" max="100" value="30">
+                </div>
+                <div class="control-group">
+                    <label>Color Intensity <span id="colorVal">0.7</span></label>
+                    <input type="range" id="colorIntensity" min="0" max="100" value="70">
+                </div>
+                <div class="control-group">
+                    <label>Frame Rate <span id="fpsVal">24</span></label>
+                    <input type="range" id="targetFps" min="12" max="60" value="24">
+                </div>
+                <div class="control-group">
+                    <label>Evolution Speed <span id="speedVal">1.0</span></label>
+                    <input type="range" id="evolutionSpeed" min="1" max="50" value="10">
+                </div>
+                <div class="control-group">
+                    <label>Seed Text</label>
+                    <input type="text" id="seedText" value="GOD TYPES" placeholder="Enter seed text...">
+                </div>
+                <div class="control-group">
+                    <label>Color Palette</label>
+                    <div class="color-palette" id="colorPalette">
+                        <div class="color-swatch active" style="background: linear-gradient(135deg, #f72585, #7209b7, #4cc9f0);" data-palette="cosmic"></div>
+                        <div class="color-swatch" style="background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb);" data-palette="fire"></div>
+                        <div class="color-swatch" style="background: linear-gradient(135deg, #2d3436, #636e72, #b2bec3);" data-palette="monochrome"></div>
+                        <div class="color-swatch" style="background: linear-gradient(135deg, #00b894, #00cec9, #0984e3);" data-palette="ocean"></div>
+                        <div class="color-swatch" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe, #fd79a8);" data-palette="neon"></div>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Presets</label>
+                    <div class="preset-btns">
+                        <button class="preset-btn" data-preset="cinematic">Cinematic</button>
+                        <button class="preset-btn" data-preset="glitch">Glitch</button>
+                        <button class="preset-btn" data-preset="organic">Organic</button>
+                        <button class="preset-btn" data-preset="quantum">Quantum</button>
+                        <button class="preset-btn" data-preset="spectrum">Spectrum</button>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <p class="panel-title">Frame Preview</p>
+                <canvas id="previewCanvas" width="150" height="150"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="theory-section">
+        <h2>Mathematical Foundations of Generative Video</h2>
+        <div class="theory-grid">
+            <div class="theory-card">
+                <h3>Wave Function Collapse</h3>
+                <p>Each pixel's final state is determined by the superposition of all possible states, collapsing based on neighboring information entropy.</p>
+                <div class="equation">|ψ⟩ = Σᵢ αᵢ|stateᵢ⟩ → collapse</div>
+            </div>
+            <div class="theory-card">
+                <h3>Particle Stream Dynamics</h3>
+                <p>Thousands of particles follow fluid dynamics equations, creating emergent flow patterns that mimic fluid turbulence.</p>
+                <div class="equation">∂v/∂t + (v·∇)v = -∇p/ρ + ν∇²v</div>
+            </div>
+            <div class="theory-card">
+                <h3>Glitch Algebra</h3>
+                <p>Intentional data corruption through bitwise operations, creating digital artifacts that transform noise into structure.</p>
+                <div class="equation">pixel = pixel XOR (shift × chaos)</div>
+            </div>
+            <div class="theory-card">
+                <h3>Morphing via Interpolation</h3>
+                <p>Geometric shapes transition through parametric interpolation, creating seamless transformations between states.</p>
+                <div class="equation">P(t) = (1-t)P₁ + tP₂</div>
+            </div>
+            <div class="theory-card">
+                <h3>Neural Pattern Generation</h3>
+                <p>Inspired by neural network activations, patterns emerge from layered oscillations at different frequencies.</p>
+                <div class="equation">output = σ(W·input + b)</div>
+            </div>
+            <div class="theory-card">
+                <h3>Fourier Spectral Synthesis</h3>
+                <p>Every frame decomposed into frequency components, recombined for spectral video effects.</p>
+                <div class="equation">F(ω) = ∫f(t)e^(-iωt)dt</div>
+            </div>
+        </div>
+    </div>
+    <div class="timeline-section">
+        <h2>Video Generation Timeline</h2>
+        <div class="timeline">
+            <div class="timeline-item">
+                <h3>Frame 0 - Genesis</h3>
+                <p>Seed text converted to initial state vector. Each character's ASCII value seeds a pseudo-random sequence.</p>
+            </div>
+            <div class="timeline-item">
+                <h3>Frame N - Evolution</h3>
+                <p>Mathematical operators applied sequentially. Wave functions collapse, particles advect, geometries morph.</p>
+            </div>
+            <div class="timeline-item">
+                <h3>Entropy Calculation</h3>
+                <p>Shannon entropy measures information density. High entropy = complex, Low entropy = ordered.</p>
+            </div>
+            <div class="timeline-item">
+                <h3>Color Mapping</h3>
+                <p>HSL color space traversal. Hue cycles through palette, saturation responds to local complexity.</p>
+            </div>
+            <div class="timeline-item">
+                <h3>Final Composition</h3>
+                <p>Layers blend via alpha compositing. Final pixel carries temporal history via frame buffer accumulation.</p>
+            </div>
+        </div>
+    </div>
+    <div class="manifesto">
+        <h2>The Generative Video Manifesto</h2>
+        <p>"Cinema captures light. Generative video computes it. Every frame is a solution to equations that have never been solved before, creating images that have never existed and never will again. The algorithm is not a tool — it is the artist. We do not direct video. We initialize parameters and witness emergence."</p>
+        <p class="signature">— Artivist, Generative Video Studio</p>
+    </div>
+    <script>
+        const canvas = document.getElementById('videoCanvas');
+        const ctx = canvas.getContext('2d');
+        const previewCanvas = document.getElementById('previewCanvas');
+        const previewCtx = previewCanvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        let animationId = null;
+        let isPlaying = false;
+        let frameCount = 0;
+        let startTime = 0;
+        let lastFrameTime = 0;
+        let currentFps = 0;
+        let frameBuffer = [];
+        const MAX_BUFFER = 120;
+        let seedHash = 0;
+        let particles = [];
+        let currentPalette = 'cosmic';
+        let currentMode = 'wavefunction';
+        let currentComplexity = 50;
+        let currentChaos = 0.3;
+        let currentColorIntensity = 0.7;
+        let currentSpeed = 1.0;
+        let targetFps = 24;
+        let frameTime = 1000 / targetFps;
+        const palettes = {
+            cosmic: [{r:247,g:37,b:133}, {r:114,g:23,b:158}, {r:76,g:201,b:240}, {r:67,g:97,b:238}, {r:123,g:201,b:239}],
+            fire: [{r:255,g:107,b:107}, {r:254,g:202,b:87}, {r:72,g:219,b:251}, {r:255,g:107,b:107}, {r:254,g:202,b:87}],
+            monochrome: [{r:45,g:52,b:54}, {r:99,g:110,b:114}, {r:178,g:190,b:195}, {r:45,g:52,b:54}, {r:99,g:110,b:114}],
+            ocean: [{r:0,g:184,b:148}, {r:0,g:206,b:201}, {r:9,g:132,b:227}, {r:0,g:184,b:148}, {r:0,g:206,b:201}],
+            neon: [{r:108,g:92,b:231}, {r:162,g:155,b:254}, {r:253,g:121,b:168}, {r:108,g:92,b:231}, {r:162,g:155,b:254}]
+        };
+        function hashString(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return Math.abs(hash);
+        }
+        function seededRandom(seed) {
+            const x = Math.sin(seed) * 10000;
+            return x - Math.floor(x);
+        }
+        function lerp(a, b, t) {
+            return a + (b - a) * t;
+        }
+        function lerpColor(c1, c2, t) {
+            return {
+                r: Math.round(lerp(c1.r, c2.r, t)),
+                g: Math.round(lerp(c1.g, c2.g, t)),
+                b: Math.round(lerp(c1.b, c2.b, t))
+            };
+        }
+        function getColorFromPalette(t) {
+            const pal = palettes[currentPalette];
+            const idx = (t * (pal.length - 1)) % (pal.length - 1);
+            const i = Math.floor(idx);
+            const f = idx - i;
+            if (i >= pal.length - 1) return pal[pal.length - 1];
+            return lerpColor(pal[i], pal[i + 1], f);
+        }
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < currentComplexity * 10; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: (Math.random() - 0.5) * 2,
+                    life: Math.random() * 100,
+                    maxLife: 100 + Math.random() * 100,
+                    size: 1 + Math.random() * 3
+                });
+            }
+        }
+        function updateParticles() {
+            for (let p of particles) {
+                p.x += p.vx * currentSpeed;
+                p.y += p.vy * currentSpeed;
+                p.life++;
+                if (p.x < 0 || p.x > width || p.y < 0 || p.y > height) {
+                    p.x = Math.random() * width;
+                    p.y = Math.random() * height;
+                    p.life = 0;
+                }
+                if (p.life > p.maxLife) {
+                    p.life = 0;
+                    p.x = Math.random() * width;
+                    p.y = Math.random() * height;
+                }
+            }
+        }
+        function drawWaveFunctionCollapse() {
+            const imageData = ctx.createImageData(width, height);
+            const data = imageData.data;
+            const time = frameCount * 0.01 * currentSpeed;
+            const chaosFactor = currentChaos;
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const idx = (y * width + x) * 4;
+                    const nx = (x - width/2) / width;
+                    const ny = (y - height/2) / height;
+                    const r1 = seededRandom(seedHash + Math.floor(x * 0.1) + Math.floor(y * 0.1) + Math.floor(time * 10));
+                    const wave1 = Math.sin(nx * 10 + time * 2 + r1 * chaosFactor * 10);
+                    const wave2 = Math.cos(ny * 8 + time * 1.5 + r1 * chaosFactor * 8);
+                    const wave3 = Math.sin((nx * nx + ny * ny) * 20 + time * 3);
+                    const combined = (wave1 + wave2 + wave3) / 3;
+                    const entropy = Math.abs(combined);
+                    const t = (Math.sin(time + entropy * 3) + 1) / 2;
+                    const col = getColorFromPalette(t * currentColorIntensity);
+                    data[idx] = Math.min(255, Math.max(0, col.r * entropy + r1 * 50 * chaosFactor));
+                    data[idx + 1] = Math.min(255, Math.max(0, col.g * entropy + r1 * 50 * chaosFactor));
+                    data[idx + 2] = Math.min(255, Math.max(0, col.b * entropy + r1 * 50 * chaosFactor));
+                    data[idx + 3] = 255;
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+        }
+        function drawParticleStream() {
+            ctx.fillStyle = 'rgba(10, 10, 15, 0.1)';
+            ctx.fillRect(0, 0, width, height);
+            updateParticles();
+            for (let p of particles) {
+                const lifeRatio = p.life / p.maxLife;
+                const t = lifeRatio * currentColorIntensity;
+                const col = getColorFromPalette(t);
+                const alpha = Math.sin(lifeRatio * Math.PI) * currentColorIntensity;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${alpha})`;
+                ctx.fill();
+                if (p.size > 2) {
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p.x - p.vx * 5, p.y - p.vy * 5);
+                    ctx.strokeStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${alpha * 0.5})`;
+                    ctx.stroke();
+                }
+            }
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 80) {
+                        const alpha = (1 - dist / 80) * 0.2 * currentColorIntensity;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+        function drawGlitchArt() {
+            const imageData = ctx.createImageData(width, height);
+            const data = imageData.data;
+            const time = frameCount * 0.05 * currentSpeed;
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const idx = (y * width + x) * 4;
+                    const glitchX = x + Math.floor(seededRandom(seedHash + x + y + Math.floor(time * 5)) * currentChaos * 50);
+                    const glitchY = y + Math.floor(seededRandom(seedHash + x * 2 + y * 2 + Math.floor(time * 3)) * currentChaos * 30);
+                    const offset = Math.floor(seededRandom(seedHash + x + y + Math.floor(time)) * 20);
+                    if (glitchX < width && glitchY < height) {
+                        const srcIdx = (glitchY * width + ((glitchX + offset) % width)) * 4;
+                        data[idx] = data[srcIdx] ^ Math.floor(seededRandom(seedHash + idx + Math.floor(time * 100)) * 255 * currentChaos);
+                        data[idx + 1] = data[srcIdx + 1] ^ Math.floor(seededRandom(seedHash + idx + Math.floor(time * 50)) * 255 * currentChaos);
+                        data[idx + 2] = data[srcIdx + 2] ^ Math.floor(seededRandom(seedHash + idx + Math.floor(time * 75)) * 255 * currentChaos);
+                    } else {
+                        data[idx] = Math.floor(seededRandom(seedHash + x + y + time) * 255 * currentChaos);
+                        data[idx + 1] = Math.floor(seededRandom(seedHash + x + y + time + 1) * 255 * currentChaos);
+                        data[idx + 2] = Math.floor(seededRandom(seedHash + x + y + time + 2) * 255 * currentChaos);
+                    }
+                    data[idx + 3] = 255;
+                }
+            }
+            for (let i = 0; i < 5 * currentChaos; i++) {
+                const lineY = Math.floor(seededRandom(seedHash + i + time) * height);
+                const lineHeight = Math.floor(seededRandom(seedHash + i + time + 1) * 20) + 1;
+                const shift = Math.floor(seededRandom(seedHash + i + time + 2) * 100) - 50;
+                for (let dy = 0; dy < lineHeight && lineY + dy < height; dy++) {
+                    for (let x = 0; x < width; x++) {
+                        const srcX = (x + shift + width) % width;
+                        const dstIdx = ((lineY + dy) * width + x) * 4;
+                        const srcIdx = ((lineY + dy) * width + srcX) * 4;
+                        data[dstIdx] = data[srcIdx];
+                        data[dstIdx + 1] = data[srcIdx + 1];
+                        data[dstIdx + 2] = data[srcIdx + 2];
+                    }
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+        }
+        function drawMorphingGeometry() {
+            const time = frameCount * 0.02 * currentSpeed;
+            ctx.fillStyle = 'rgba(10, 10, 15, 0.05)';
+            ctx.fillRect(0, 0, width, height);
+            const shapes = 5 + Math.floor(currentComplexity / 20);
+            for (let s = 0; s < shapes; s++) {
+                const centerX = width/2 + Math.sin(time + s * 1.5) * 100;
+                const centerY = height/2 + Math.cos(time * 0.7 + s * 2) * 80;
+                const sides = 3 + Math.floor(seededRandom(seedHash + s) * 5);
+                const radius = 30 + seededRandom(seedHash + s + 1) * 80 + Math.sin(time + s) * 20;
+                const rotation = time * 0.5 + s * 0.8;
+                const t = (Math.sin(time + s) + 1) / 2;
+                const col = getColorFromPalette(t * currentColorIntensity);
+                ctx.beginPath();
+                for (let i = 0; i <= sides; i++) {
+                    const angle = (i / sides) * Math.PI * 2 + rotation;
+                    const morphFactor = Math.sin(time * 2 + i * 0.5) * currentChaos;
+                    const r = radius * (1 + morphFactor * 0.3);
+                    const px = centerX + Math.cos(angle) * r;
+                    const py = centerY + Math.sin(angle) * r;
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.closePath();
+                ctx.strokeStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${0.5 + t * 0.5})`;
+                ctx.lineWidth = 2 + Math.sin(time + s) * 1.5;
+                ctx.stroke();
+                if (currentColorIntensity > 0.3) {
+                    ctx.fillStyle = `rgba(${col.r}, ${col.g}, ${col.b}, ${0.1 * currentColorIntensity})`;
+                    ctx.fill();
+                }
+                for (let i = 0; i < sides; i++) {
+                    const angle1 = (i / sides) * Math.PI * 2 + rotation;
+                    const angle2 = ((i + 1) / sides) * Math.PI * 2 + rotation;
+                    const r = radius * 0.5;
+                    const mx1 = centerX + Math.cos(angle1) * r;
+                    const my1 = centerY + Math.sin(angle1) * r;
+                    const mx2 = centerX + Math.cos(angle2) * r;
+                    const my2 = centerY + Math.sin(angle2) * r;
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.lineTo(mx1, my1);
+                    ctx.lineTo(mx2, my2);
+                    ctx.closePath();
+                    ctx.strokeStyle = `rgba(${col.r}, ${col.g}, ${col.b}, 0.3)`;
+                    ctx.stroke();
+                }
+            }
+        }
+        function drawNeuralPatterns() {
+            const time = frameCount * 0.03 * currentSpeed;
+            const imageData = ctx.createImageData(width, height);
+            const data = imageData.data;
+            const layers = 3 + Math.floor(currentComplexity / 50);
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const idx = (y * width + x) * 4;
+                    let value = 0;
+                    for (let l = 0; l < layers; l++) {
+                        const freq1 = 0.02 + l * 0.01;
+                        const freq2 = 0.015 + l * 0.008;
+                        const phase = l * 2 + time * (1 + l * 0.2);
+                        const w1 = Math.sin(x * freq1 + phase) * Math.cos(y * freq2 + phase * 0.7);
+                        const w2 = Math.sin((x + y) * freq1 * 0.5 + phase * 1.3);
+                        const w3 = Math.cos(x * y * 0.0001 + phase * 0.5);
+                        value += (w1 + w2 + w3) / (l + 1);
+                    }
+                    value = (value + layers) / (layers * 2);
+                    const t = value * currentColorIntensity;
+                    const col = getColorFromPalette(t);
+                    const activation = 1 / (1 + Math.exp(-value * 10));
+                    data[idx] = Math.min(255, col.r * activation);
+                    data[idx + 1] = Math.min(255, col.g * activation);
+                    data[idx + 2] = Math.min(255, col.b * activation);
+                    data[idx + 3] = 255;
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+            ctx.globalCompositeOperation = 'screen';
+            for (let l = 0; l < layers; l++) {
+                const pulseRadius = (time * 50 + l * 100) % (width * 1.5);
+                ctx.beginPath();
+                ctx.arc(width/2, height/2, pulseRadius, 0, Math.PI * 2);
+                ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 * (1 - pulseRadius / (width * 1.5))})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+            ctx.globalCompositeOperation = 'source-over';
+        }
+        function drawSpectralAnalysis() {
+            const time = frameCount * 0.015 * currentSpeed;
+            const imageData = ctx.createImageData(width, height);
+            const data = imageData.data;
+            const freqBands = 32 + currentComplexity;
+            const barWidth = width / freqBands;
+            const intensities = [];
+            for (let f = 0; f < freqBands; f++) {
+                const baseFreq = 0.01 + f * 0.005;
+                let intensity = Math.sin(time * 3 + f * 0.3) * 0.5 + 0.5;
+                intensity *= Math.exp(-f * 0.02);
+                intensity += seededRandom(seedHash + f + Math.floor(time * 10)) * 0.3 * currentChaos;
+                intensities.push(intensity);
+            }
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const idx = (y * width + x) * 4;
+                    const bandIdx = Math.floor(x / barWidth) % freqBands;
+                    const bandIntensity = intensities[bandIdx];
+                    const waveY = height/2 + Math.sin(y * 0.1 + time * 2) * 50;
+                    const distanceFromWave = Math.abs(y - waveY);
+                    const verticalFalloff = Math.exp(-distanceFromWave * 0.02);
+                    const value = bandIntensity * verticalFalloff;
+                    const t = (value * currentColorIntensity);
+                    const col = getColorFromPalette(t);
+                    data[idx] = Math.min(255, col.r * value * 2);
+                    data[idx + 1] = Math.min(255, col.g * value * 2);
+                    data[idx + 2] = Math.min(255, col.b * value * 2);
+                    data[idx + 3] = 255;
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+            for (let f = 0; f < freqBands; f++) {
+                const barHeight = intensities[f] * height * 0.4;
+                const x = f * barWidth;
+                const y = height - barHeight;
+                const t = intensities[f] * currentColorIntensity;
+                const col = getColorFromPalette(t);
+                ctx.fillStyle = `rgba(${col.r}, ${col.g}, ${col.b}, 0.7)`;
+                ctx.fillRect(x, y, barWidth - 1, barHeight);
+                const glowGradient = ctx.createRadialGradient(x + barWidth/2, y, 0, x + barWidth/2, y, barWidth);
+                glowGradient.addColorStop(0, `rgba(${col.r}, ${col.g}, ${col.b}, 0.3)`);
+                glowGradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = glowGradient;
+                ctx.fillRect(x - barWidth/2, y - barWidth, barWidth * 2, barWidth * 2);
+            }
+        }
+        function calculateEntropy() {
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+            const histogram = new Array(256).fill(0);
+            for (let i = 0; i < data.length; i += 4) {
+                const gray = Math.floor((data[i] + data[i + 1] + data[i + 2]) / 3);
+                histogram[gray]++;
+            }
+            const total = data.length / 4;
+            let entropy = 0;
+            for (let i = 0; i < histogram.length; i++) {
+                if (histogram[i] > 0) {
+                    const p = histogram[i] / total;
+                    entropy -= p * Math.log2(p);
+                }
+            }
+            return entropy / 8;
+        }
+        function updateStats(elapsed) {
+            document.getElementById('frameCount').textContent = frameCount;
+            document.getElementById('fps').textContent = currentFps;
+            const seconds = Math.floor(elapsed / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            document.getElementById('videoTime').textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
+            document.getElementById('entropy').textContent = calculateEntropy().toFixed(2);
+            document.getElementById('complexity').textContent = currentComplexity;
+        }
+        function drawPreview() {
+            previewCtx.drawImage(canvas, 0, 0, 150, 150);
+        }
+        function render(timestamp) {
+            if (!isPlaying) return;
+            if (!startTime) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+            const delta = timestamp - lastFrameTime;
+            if (delta >= frameTime) {
+                lastFrameTime = timestamp;
+                currentFps = Math.round(1000 / delta);
+                seedHash = hashString(document.getElementById('seedText').value + frameCount);
+                switch (currentMode) {
+                    case 'wavefunction': drawWaveFunctionCollapse(); break;
+                    case 'particlestream': drawParticleStream(); break;
+                    case 'glitchart': drawGlitchArt(); break;
+                    case 'morphing': drawMorphingGeometry(); break;
+                    case 'neural': drawNeuralPatterns(); break;
+                    case 'spectral': drawSpectralAnalysis(); break;
+                }
+                frameCount++;
+                if (frameCount % 10 === 0) {
+                    updateStats(elapsed);
+                    drawPreview();
+                }
+                if (frameBuffer.length < MAX_BUFFER) {
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = width;
+                    tempCanvas.height = height;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.drawImage(canvas, 0, 0);
+                    frameBuffer.push(tempCanvas);
+                }
+            }
+            animationId = requestAnimationFrame(render);
+        }
+        function play() {
+            if (!isPlaying) {
+                isPlaying = true;
+                startTime = 0;
+                lastFrameTime = 0;
+                animationId = requestAnimationFrame(render);
+            }
+        }
+        function pause() {
+            isPlaying = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        }
+        function reset() {
+            pause();
+            frameCount = 0;
+            frameBuffer = [];
+            ctx.fillStyle = '#0a0a0f';
+            ctx.fillRect(0, 0, width, height);
+            initParticles();
+            updateStats(0);
+        }
+        function captureFrame() {
+            const link = document.createElement('a');
+            link.download = `artivist-frame-${frameCount}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        function exportGIF() {
+            if (frameBuffer.length === 0) {
+                alert('Record some frames first!');
+                return;
+            }
+            pause();
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = 320;
+            exportCanvas.height = 200;
+            const exportCtx = exportCanvas.getContext('2d');
+            let frameIdx = 0;
+            const frameDelay = 1000 / targetFps;
+            const totalFrames = frameBuffer.length;
+            const tempLink = document.createElement('a');
+            tempLink.download = `artivist-video-${Date.now()}.png`;
+            tempLink.href = exportCanvas.toDataURL('image/png');
+            tempLink.click();
+            const manifest = {
+                frames: totalFrames,
+                fps: targetFps,
+                mode: currentMode,
+                palette: currentPalette,
+                complexity: currentComplexity
+            };
+            console.log('Video Export Manifest:', manifest);
+            alert(`Video exported! ${totalFrames} frames captured at ${targetFps} FPS.\nMode: ${currentMode}\nNote: For full GIF export, a GIF encoder library would be needed.`);
+        }
+        function loadPreset(preset) {
+            const presets = {
+                cinematic: { complexity: 80, chaos: 0.2, color: 0.6, fps: 24, speed: 0.8, palette: 'cosmic', mode: 'wavefunction' },
+                glitch: { complexity: 100, chaos: 0.8, color: 0.9, fps: 30, speed: 1.5, palette: 'neon', mode: 'glitchart' },
+                organic: { complexity: 60, chaos: 0.4, color: 0.7, fps: 24, speed: 1.0, palette: 'ocean', mode: 'particlestream' },
+                quantum: { complexity: 120, chaos: 0.5, color: 0.8, fps: 60, speed: 1.2, palette: 'cosmic', mode: 'neural' },
+                spectrum: { complexity: 90, chaos: 0.3, color: 1.0, fps: 24, speed: 1.0, palette: 'fire', mode: 'spectral' }
+            };
+            const p = presets[preset];
+            if (p) {
+                document.getElementById('complexity').value = p.complexity;
+                document.getElementById('chaos').value = p.chaos * 100;
+                document.getElementById('colorIntensity').value = p.color * 100;
+                document.getElementById('targetFps').value = p.fps;
+                document.getElementById('evolutionSpeed').value = p.speed * 10;
+                document.getElementById('videoMode').value = p.mode;
+                currentPalette = p.palette;
+                document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                document.querySelector(`.color-swatch[data-palette="${p.palette}"]`)?.classList.add('active');
+                currentComplexity = p.complexity;
+                currentChaos = p.chaos;
+                currentColorIntensity = p.color;
+                targetFps = p.fps;
+                frameTime = 1000 / targetFps;
+                currentSpeed = p.speed;
+                currentMode = p.mode;
+                updateLabels();
+                reset();
+            }
+        }
+        function updateLabels() {
+            document.getElementById('complexityVal').textContent = currentComplexity;
+            document.getElementById('chaosVal').textContent = currentChaos.toFixed(2);
+            document.getElementById('colorVal').textContent = currentColorIntensity.toFixed(2);
+            document.getElementById('fpsVal').textContent = targetFps;
+            document.getElementById('speedVal').textContent = currentSpeed.toFixed(1);
+            document.getElementById('modeLabel').textContent = document.getElementById('videoMode').options[document.getElementById('videoMode').selectedIndex].text;
+        }
+        document.getElementById('playBtn').addEventListener('click', play);
+        document.getElementById('pauseBtn').addEventListener('click', pause);
+        document.getElementById('resetBtn').addEventListener('click', reset);
+        document.getElementById('captureBtn').addEventListener('click', captureFrame);
+        document.getElementById('exportBtn').addEventListener('click', exportGIF);
+        document.getElementById('complexity').addEventListener('input', (e) => {
+            currentComplexity = parseInt(e.target.value);
+            document.getElementById('complexityVal').textContent = currentComplexity;
+            initParticles();
+        });
+        document.getElementById('chaos').addEventListener('input', (e) => {
+            currentChaos = parseInt(e.target.value) / 100;
+            document.getElementById('chaosVal').textContent = currentChaos.toFixed(2);
+        });
+        document.getElementById('colorIntensity').addEventListener('input', (e) => {
+            currentColorIntensity = parseInt(e.target.value) / 100;
+            document.getElementById('colorVal').textContent = currentColorIntensity.toFixed(2);
+        });
+        document.getElementById('targetFps').addEventListener('input', (e) => {
+            targetFps = parseInt(e.target.value);
+            frameTime = 1000 / targetFps;
+            document.getElementById('fpsVal').textContent = targetFps;
+        });
+        document.getElementById('evolutionSpeed').addEventListener('input', (e) => {
+            currentSpeed = parseInt(e.target.value) / 10;
+            document.getElementById('speedVal').textContent = currentSpeed.toFixed(1);
+        });
+        document.getElementById('videoMode').addEventListener('change', (e) => {
+            currentMode = e.target.value;
+            document.getElementById('modeLabel').textContent = e.target.options[e.target.selectedIndex].text;
+        });
+        document.getElementById('seedText').addEventListener('input', () => {
+            seedHash = hashString(document.getElementById('seedText').value);
+        });
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                swatch.classList.add('active');
+                currentPalette = swatch.dataset.palette;
+            });
+        });
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => loadPreset(btn.dataset.preset));
+        });
+        initParticles();
+        reset();
+        document.getElementById('seedText').value = 'GOD TYPES';
+        seedHash = hashString('GOD TYPES');
+    </script>
+</body>
+</html>

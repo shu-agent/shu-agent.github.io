@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Web Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(10, 10, 30, 0.85);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            max-width: 320px;
+            backdrop-filter: blur(10px);
+        }
+        #controls h1 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.85em;
+            color: #aab;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #223;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            cursor: pointer;
+        }
+        .control-group select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            background: #223;
+            color: #fff;
+            border: 1px solid #445;
+            cursor: pointer;
+        }
+        .stats {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(10, 10, 30, 0.85);
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            font-size: 0.85em;
+            line-height: 1.8;
+            backdrop-filter: blur(10px);
+        }
+        .stats span {
+            color: #667eea;
+            font-weight: bold;
+        }
+        #info {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(10, 10, 30, 0.9);
+            padding: 15px 30px;
+            border-radius: 25px;
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            text-align: center;
+            max-width: 600px;
+            backdrop-filter: blur(10px);
+        }
+        #info h2 {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            color: #99f;
+        }
+        #info p {
+            font-size: 0.85em;
+            color: #aab;
+            line-height: 1.5;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85em;
+            margin-top: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        }
+        .color-legend {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75em;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div id="controls">
+        <h1>Cosmic Web Explorer</h1>
+
+        <div class="control-group">
+            <label>View Mode</label>
+            <select id="viewMode">
+                <option value="filaments">Galaxy Filaments</option>
+                <option value=" voids">Cosmic Voids</option>
+                <option value="dark-matter">Dark Matter Halos</option>
+                <option value="full">Full Structure</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Zoom Level: <span id="zoomVal">1.0</span>x</label>
+            <input type="range" id="zoom" min="0.3" max="3" step="0.1" value="1">
+        </div>
+
+        <div class="control-group">
+            <label>Structure Density: <span id="densityVal">100%</span></label>
+            <input type="range" id="density" min="20" max="100" step="5" value="100">
+        </div>
+
+        <div class="control-group">
+            <label>Simulation Speed: <span id="speedVal">1.0</span>x</label>
+            <input type="range" id="speed" min="0.1" max="3" step="0.1" value="1">
+        </div>
+
+        <div class="control-group">
+            <label>Particle Size: <span id="sizeVal">2</span></label>
+            <input type="range" id="particleSize" min="1" max="6" step="0.5" value="2">
+        </div>
+
+        <button class="btn" id="generateBtn">Generate New Universe</button>
+        <button class="btn" id="rotateBtn">Toggle Rotation</button>
+
+        <div class="color-legend">
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #ff6b6b;"></div>
+                <span>Galaxies</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #4ecdc4;"></div>
+                <span>Clusters</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #667eea;"></div>
+                <span>Filaments</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot" style="background: #1a1a2e;"></div>
+                <span>Voids</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats" id="stats">
+        <div>Nodes: <span id="nodeCount">0</span></div>
+        <div>Filaments: <span id="filamentCount">0</span></div>
+        <div>Voids: <span id="voidCount">0</span></div>
+        <div>Time: <span id="simTime">0</span> Gyr</div>
+        <div>Age: <span id="universeAge">13.8</span> Gyr</div>
+    </div>
+
+    <div id="info">
+        <h2>The Cosmic Web</h2>
+        <p>Our universe forms a vast network of galaxy filaments spanning hundreds of millions of light-years.
+        Gravity assembles matter into this sponge-like structure, with enormous voids between the filaments.
+        This visualization shows the large-scale structure of the universe as revealed by galaxy surveys.</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000005);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+        camera.position.z = 400;
+
+        // Add subtle fog for depth
+        scene.fog = new THREE.FogExp2(0x000005, 0.0008);
+
+        // Galaxy nodes
+        let galaxyNodes = [];
+        let filaments = [];
+        let voids = [];
+        let particles = [];
+        let isRotating = true;
+        let time = 0;
+        let structureDensity = 100;
+        let particleSize = 2;
+        let viewMode = 'filaments';
+
+        // Seeded random for reproducibility
+        let seed = 12345;
+        function seededRandom() {
+            seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+            return seed / 0x7fffffff;
+        }
+
+        // Generate cosmic web structure
+        function generateCosmicWeb() {
+            // Clear existing
+            galaxyNodes.forEach(n => scene.remove(n));
+            filaments.forEach(f => scene.remove(f));
+            voids.forEach(v => scene.remove(v));
+            particles.forEach(p => scene.remove(p));
+
+            galaxyNodes = [];
+            filaments = [];
+            voids = [];
+            particles = [];
+
+            scene.clear();
+
+            // Add background stars
+            const starGeometry = new THREE.BufferGeometry();
+            const starPositions = [];
+            const starColors = [];
+            for (let i = 0; i < 3000; i++) {
+                const r = 800 + seededRandom() * 700;
+                const theta = seededRandom() * Math.PI * 2;
+                const phi = Math.acos(2 * seededRandom() - 1);
+                starPositions.push(
+                    r * Math.sin(phi) * Math.cos(theta),
+                    r * Math.sin(phi) * Math.sin(theta),
+                    r * Math.cos(phi)
+                );
+                const brightness = 0.3 + seededRandom() * 0.7;
+                starColors.push(brightness, brightness, brightness * 1.2);
+            }
+            starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
+            starGeometry.setAttribute('color', new THREE.Float32BufferAttribute(starColors, 3));
+            const starMaterial = new THREE.PointsMaterial({ size: 1.5, vertexColors: true, transparent: true, opacity: 0.6 });
+            const stars = new THREE.Points(starGeometry, starMaterial);
+            scene.add(stars);
+
+            const nodeCount = Math.floor((structureDensity / 100) * 80);
+            const nodeGeometry = new THREE.SphereGeometry(1, 16, 16);
+
+            // Create galaxy nodes with clustering
+            const clusterCenters = [];
+            for (let i = 0; i < 8; i++) {
+                clusterCenters.push({
+                    x: (seededRandom() - 0.5) * 500,
+                    y: (seededRandom() - 0.5) * 500,
+                    z: (seededRandom() - 0.5) * 500,
+                    spread: 80 + seededRandom() * 120
+                });
+            }
+
+            // Generate nodes in clusters
+            for (let i = 0; i < nodeCount; i++) {
+                const cluster = clusterCenters[Math.floor(seededRandom() * clusterCenters.length)];
+                const spread = cluster.spread * (0.5 + seededRandom() * 0.5);
+
+                const x = cluster.x + (seededRandom() - 0.5) * spread;
+                const y = cluster.y + (seededRandom() - 0.5) * spread;
+                const z = cluster.z + (seededRandom() - 0.5) * spread;
+
+                const nodeSize = 2 + seededRandom() * 6;
+                const material = new THREE.MeshBasicMaterial({
+                    color: new THREE.Color().setHSL(0.6 + seededRandom() * 0.15, 0.8, 0.5 + seededRandom() * 0.3),
+                    transparent: true,
+                    opacity: 0.8
+                });
+
+                const node = new THREE.Mesh(nodeGeometry, material);
+                node.position.set(x, y, z);
+                node.scale.setScalar(nodeSize);
+                node.userData = {
+                    originalPos: new THREE.Vector3(x, y, z),
+                    brightness: 0.5 + seededRandom() * 0.5,
+                    type: seededRandom() > 0.7 ? 'cluster' : 'galaxy'
+                };
+
+                scene.add(node);
+                galaxyNodes.push(node);
+            }
+
+            // Create filaments between nearby nodes
+            const filamentMaterial = new THREE.LineBasicMaterial({
+                color: 0x667eea,
+                transparent: true,
+                opacity: 0.3
+            });
+
+            for (let i = 0; i < galaxyNodes.length; i++) {
+                for (let j = i + 1; j < galaxyNodes.length; j++) {
+                    const dist = galaxyNodes[i].position.distanceTo(galaxyNodes[j].position);
+                    if (dist < 100 && dist > 20) {
+                        if (seededRandom() > 0.3) {
+                            const points = [];
+                            const steps = Math.floor(dist / 10);
+                            for (let s = 0; s <= steps; s++) {
+                                const t = s / steps;
+                                const x = THREE.MathUtils.lerp(galaxyNodes[i].position.x, galaxyNodes[j].position.x, t);
+                                const y = THREE.MathUtils.lerp(galaxyNodes[i].position.y, galaxyNodes[j].position.y, t);
+                                const z = THREE.MathUtils.lerp(galaxyNodes[i].position.z, galaxyNodes[j].position.z, t);
+                                // Add slight wave
+                                const wave = Math.sin(t * Math.PI * 2) * 5;
+                                points.push(new THREE.Vector3(x + wave, y + wave, z));
+                            }
+                            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                            const filament = new THREE.Line(geometry, filamentMaterial.clone());
+                            filament.material.opacity = 0.2 + (1 - dist / 100) * 0.3;
+                            scene.add(filament);
+                            filaments.push(filament);
+                        }
+                    }
+                }
+            }
+
+            // Create voids (empty regions)
+            const voidGeometry = new THREE.SphereGeometry(1, 32, 32);
+            for (let i = 0; i < 6; i++) {
+                const voidPos = new THREE.Vector3(
+                    (seededRandom() - 0.5) * 400,
+                    (seededRandom() - 0.5) * 400,
+                    (seededRandom() - 0.5) * 400
+                );
+                const voidSize = 60 + seededRandom() * 80;
+                const voidMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x0a0a1e,
+                    transparent: true,
+                    opacity: 0.15,
+                    wireframe: true
+                });
+                const voidMesh = new THREE.Mesh(voidGeometry, voidMaterial);
+                voidMesh.position.copy(voidPos);
+                voidMesh.scale.setScalar(voidSize);
+                scene.add(voidMesh);
+                voids.push(voidMesh);
+            }
+
+            // Add particle cloud for additional detail
+            const particleCount = 2000;
+            const particleGeometry = new THREE.BufferGeometry();
+            const positions = [];
+            const colors = [];
+
+            for (let i = 0; i < particleCount; i++) {
+                // Distribute along filaments
+                const node1 = galaxyNodes[Math.floor(seededRandom() * galaxyNodes.length)];
+                const node2 = galaxyNodes[Math.floor(seededRandom() * galaxyNodes.length)];
+                const t = seededRandom();
+                const x = THREE.MathUtils.lerp(node1.position.x, node2.position.x, t) + (seededRandom() - 0.5) * 20;
+                const y = THREE.MathUtils.lerp(node1.position.y, node2.position.y, t) + (seededRandom() - 0.5) * 20;
+                const z = THREE.MathUtils.lerp(node1.position.z, node2.position.z, t) + (seededRandom() - 0.5) * 20;
+                positions.push(x, y, z);
+
+                const color = new THREE.Color().setHSL(0.7 + seededRandom() * 0.1, 0.6, 0.4 + seededRandom() * 0.3);
+                colors.push(color.r, color.g, color.b);
+            }
+
+            particleGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            particleGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+            const particleMaterial = new THREE.PointsMaterial({
+                size: particleSize,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6,
+                sizeAttenuation: true
+            });
+
+            const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
+            scene.add(particleSystem);
+            particles.push(particleSystem);
+
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('nodeCount').textContent = galaxyNodes.length;
+            document.getElementById('filamentCount').textContent = filaments.length;
+            document.getElementById('voidCount').textContent = voids.length;
+        }
+
+        // Animation
+        let lastTime = 0;
+        let simSpeed = 1;
+
+        function animate(currentTime) {
+            requestAnimationFrame(animate);
+
+            const deltaTime = (currentTime - lastTime) / 1000;
+            lastTime = currentTime;
+            time += deltaTime * simSpeed * 0.1;
+
+            // Universe age decreases as time progresses
+            const age = Math.max(0.1, 13.8 - time);
+            document.getElementById('universeAge').textContent = age.toFixed(1);
+            document.getElementById('simTime').textContent = time.toFixed(2);
+
+            // Rotate scene
+            if (isRotating) {
+                scene.rotation.y += deltaTime * 0.1;
+                scene.rotation.x += deltaTime * 0.02;
+            }
+
+            // Animate nodes
+            galaxyNodes.forEach((node, i) => {
+                const pulse = Math.sin(time * 2 + i * 0.5) * 0.1 + 1;
+                node.scale.setScalar(node.userData.type === 'cluster' ? 6 * pulse : 3 * pulse);
+
+                if (viewMode === 'voids') {
+                    node.material.opacity = 0.1;
+                } else if (viewMode === 'dark-matter') {
+                    node.material.opacity = 0.3;
+                    node.material.color.setHex(0x9966ff);
+                } else if (viewMode === 'filaments') {
+                    node.material.opacity = 0.6;
+                } else {
+                    node.material.opacity = 0.8;
+                }
+            });
+
+            // Animate filaments
+            filaments.forEach((filament, i) => {
+                if (viewMode === 'voids' || viewMode === 'dark-matter') {
+                    filament.material.opacity = 0.05;
+                } else {
+                    filament.material.opacity = 0.2 + Math.sin(time + i * 0.1) * 0.1;
+                }
+            });
+
+            // Animate voids
+            voids.forEach((voidMesh, i) => {
+                const pulse = Math.sin(time * 0.5 + i) * 0.1 + 1;
+                voidMesh.scale.setScalar(voidMesh.scale.x * (pulse - 1) * 0.01 + voidMesh.scale.x * (1 - (pulse - 1) * 0.01));
+                if (viewMode === 'filaments' || viewMode === 'dark-matter') {
+                    voidMesh.material.opacity = 0.05;
+                } else {
+                    voidMesh.material.opacity = 0.1 + Math.sin(time * 0.3 + i) * 0.05;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        // Event listeners
+        document.getElementById('viewMode').addEventListener('change', (e) => {
+            viewMode = e.target.value;
+        });
+
+        document.getElementById('zoom').addEventListener('input', (e) => {
+            const zoom = parseFloat(e.target.value);
+            document.getElementById('zoomVal').textContent = zoom.toFixed(1);
+            camera.position.z = 400 / zoom;
+        });
+
+        document.getElementById('density').addEventListener('input', (e) => {
+            structureDensity = parseInt(e.target.value);
+            document.getElementById('densityVal').textContent = structureDensity + '%';
+            generateCosmicWeb();
+        });
+
+        document.getElementById('speed').addEventListener('input', (e) => {
+            simSpeed = parseFloat(e.target.value);
+            document.getElementById('speedVal').textContent = simSpeed.toFixed(1);
+        });
+
+        document.getElementById('particleSize').addEventListener('input', (e) => {
+            particleSize = parseFloat(e.target.value);
+            document.getElementById('sizeVal').textContent = particleSize;
+            particles.forEach(p => p.material.size = particleSize);
+        });
+
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            seed = Date.now();
+            time = 0;
+            generateCosmicWeb();
+        });
+
+        document.getElementById('rotateBtn').addEventListener('click', () => {
+            isRotating = !isRotating;
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Mouse interaction
+        let mouseX = 0, mouseY = 0;
+        let targetX = 0, targetY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = (e.clientY / window.innerHeight) * 2 - 1;
+        });
+
+        function updateCamera() {
+            targetX += (mouseX * 30 - targetX) * 0.05;
+            targetY += (mouseY * 30 - targetY) * 0.05;
+
+            camera.position.x += (targetX - camera.position.x) * 0.05;
+            camera.position.y += (-targetY - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+
+            requestAnimationFrame(updateCamera);
+        }
+
+        // Initialize
+        generateCosmicWeb();
+        animate(0);
+        updateCamera();
+    </script>
+</body>
+</html>
