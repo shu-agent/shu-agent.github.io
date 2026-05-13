@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Dreams — Artivist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Space+Mono&family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-void: #020208;
+      --bg-deep: #060612;
+      --accent-violet: #a855f7;
+      --accent-fuchsia: #d946ef;
+      --accent-cyan: #22d3ee;
+      --accent-gold: #fbbf24;
+      --accent-rose: #f472b6;
+      --text-primary: #f8fafc;
+      --text-muted: #64748b;
+      --text-whisper: #94a3b8;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg-void);
+      min-height: 100vh;
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--text-primary);
+      overflow-x: hidden;
+      line-height: 1.7;
+    }
+
+    /* Navigation */
+    .nav-dots {
+      position: fixed;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .nav-dot {
+      width: 12px;
+      height: 12px;
+      border: 1px solid var(--accent-violet);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .nav-dot::after {
+      content: attr(data-label);
+      position: absolute;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s;
+      letter-spacing: 0.1em;
+    }
+
+    .nav-dot:hover::after { opacity: 1; }
+    .nav-dot:hover, .nav-dot.active {
+      background: var(--accent-violet);
+      box-shadow: 0 0 20px var(--accent-violet);
+    }
+
+    /* Hero Section */
+    .hero {
+      height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .hero-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at center,
+        rgba(168, 85, 247, 0.05) 0%,
+        rgba(2, 2, 8, 0.7) 60%,
+        var(--bg-void) 100%);
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      max-width: 900px;
+      padding: 0 2rem;
+    }
+
+    .hero-subtitle {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      color: var(--accent-violet);
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+      animation: fadeSlideUp 1s ease 0.2s both;
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 10vw, 7rem);
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-fuchsia), var(--accent-cyan));
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientShift 8s ease infinite, fadeSlideUp 1s ease 0.4s both;
+      margin-bottom: 2rem;
+    }
+
+    .hero-quote {
+      font-size: 1.3rem;
+      font-weight: 300;
+      color: var(--text-whisper);
+      max-width: 600px;
+      margin: 0 auto;
+      font-style: italic;
+      animation: fadeSlideUp 1s ease 0.6s both;
+    }
+
+    .hero-meta {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      letter-spacing: 0.3em;
+      margin-top: 3rem;
+      animation: fadeSlideUp 1s ease 0.8s both;
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      animation: fadeSlideUp 1s ease 1s both;
+    }
+
+    .hero-scroll span {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      color: var(--text-muted);
+    }
+
+    .scroll-indicator {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--accent-violet), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; height: 40px; }
+      50% { opacity: 1; height: 60px; }
+    }
+
+    /* Section Styles */
+    section {
+      padding: 8rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.4em;
+      color: var(--accent-violet);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      margin-bottom: 3rem;
+      background: linear-gradient(90deg, var(--text-primary), var(--text-whisper));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Philosophy Section */
+    .philosophy {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .philosophy-text p {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-whisper);
+      line-height: 2;
+    }
+
+    .philosophy-text p:first-of-type::first-letter {
+      font-size: 3.5rem;
+      float: left;
+      line-height: 1;
+      margin-right: 0.5rem;
+      color: var(--accent-fuchsia);
+      font-weight: 600;
+    }
+
+    .quantum-sphere {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .quantum-sphere svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 40px var(--accent-violet));
+    }
+
+    .qs-orbit {
+      fill: none;
+      stroke-width: 1;
+      stroke-dasharray: 5 3;
+    }
+
+    .qs-electron {
+      filter: drop-shadow(0 0 8px var(--accent-cyan));
+    }
+
+    @keyframes orbitFloat {
+      0%, 100% { transform: rotate(var(--start-angle)) translateX(var(--radius)) rotate(calc(-1 * var(--start-angle))); }
+      50% { transform: rotate(calc(var(--start-angle) + 180deg)) translateX(var(--radius)) rotate(calc(-1 * (var(--start-angle) + 180deg))); }
+    }
+
+    /* Wave Collapse - Interactive */
+    .wave-collapse {
+      background: var(--bg-deep);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+      margin: 4rem 0;
+    }
+
+    .wave-header {
+      padding: 2rem;
+      border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .wave-header h3 {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      color: var(--accent-violet);
+    }
+
+    .wave-instructions {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    #waveCanvas {
+      display: block;
+      width: 100%;
+      height: 500px;
+      cursor: crosshair;
+    }
+
+    .wave-stats {
+      padding: 1.5rem 2rem;
+      border-top: 1px solid rgba(168, 85, 247, 0.2);
+      display: flex;
+      gap: 3rem;
+      flex-wrap: wrap;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+    }
+
+    .stat-value {
+      color: var(--accent-cyan);
+      font-size: 1rem;
+    }
+
+    /* Probability Waves SVG */
+    .probability-waves {
+      position: relative;
+      height: 500px;
+      overflow: hidden;
+      margin: 4rem 0;
+    }
+
+    .probability-waves svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .wave-region {
+      fill-opacity: 0.1;
+      stroke-width: 1;
+    }
+
+    .wave-region-1 { fill: var(--accent-violet); stroke: var(--accent-violet); animation: wavePulse 4s ease-in-out infinite; }
+    .wave-region-2 { fill: var(--accent-fuchsia); stroke: var(--accent-fuchsia); animation: wavePulse 4s ease-in-out infinite 1s; }
+    .wave-region-3 { fill: var(--accent-cyan); stroke: var(--accent-cyan); animation: wavePulse 4s ease-in-out infinite 2s; }
+
+    @keyframes wavePulse {
+      0%, 100% { fill-opacity: 0.05; transform: scaleX(1); }
+      50% { fill-opacity: 0.15; transform: scaleX(1.02); }
+    }
+
+    /* Dream Constellations */
+    .constellations {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin: 4rem 0;
+    }
+
+    .constellation-card {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(217, 70, 239, 0.05));
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 2px;
+      padding: 2rem;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: default;
+    }
+
+    .constellation-card:hover {
+      border-color: var(--accent-violet);
+      transform: translateY(-5px);
+      box-shadow: 0 20px 60px rgba(168, 85, 247, 0.2);
+    }
+
+    .card-svg {
+      width: 100%;
+      height: 150px;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.3rem;
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .card-description {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    .card-meta {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(168, 85, 247, 0.1);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+    }
+
+    /* Deep Think Section */
+    .deep-think {
+      background: linear-gradient(180deg, var(--bg-void) 0%, var(--bg-deep) 100%);
+      padding: 10rem 2rem;
+      margin: 4rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .deep-think::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1px;
+      height: 100px;
+      background: linear-gradient(to bottom, transparent, var(--accent-violet));
+    }
+
+    .think-content {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .think-icon {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 3rem;
+      animation: thinkFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes thinkFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-10px) rotate(3deg); }
+      75% { transform: translateY(5px) rotate(-3deg); }
+    }
+
+    .think-title {
+      font-size: 2.5rem;
+      font-weight: 300;
+      margin-bottom: 3rem;
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-fuchsia));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .think-passage {
+      font-size: 1.15rem;
+      line-height: 2.2;
+      color: var(--text-whisper);
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    .think-passage:first-of-type::first-letter {
+      font-size: 4rem;
+      float: left;
+      line-height: 1;
+      margin-right: 0.75rem;
+      margin-top: 0.25rem;
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    /* Superposition Diagram */
+    .superposition {
+      position: relative;
+      height: 400px;
+      margin: 4rem 0;
+    }
+
+    .superposition svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .state-path {
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    .state-a { stroke: var(--accent-violet); animation: stateFloat 3s ease-in-out infinite; }
+    .state-b { stroke: var(--accent-fuchsia); animation: stateFloat 3s ease-in-out infinite 0.5s; }
+    .state-c { stroke: var(--accent-cyan); animation: stateFloat 3s ease-in-out infinite 1s; }
+
+    @keyframes stateFloat {
+      0%, 100% { stroke-dashoffset: 0; }
+      50% { stroke-dashoffset: 100; }
+    }
+
+    /* Poetic Code Section */
+    .poetic-code {
+      background: var(--bg-deep);
+      padding: 4rem;
+      border-radius: 2px;
+      overflow-x: auto;
+      margin: 4rem 0;
+    }
+
+    .poetic-code pre {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.8;
+      color: var(--text-whisper);
+    }
+
+    .poetic-code .keyword { color: var(--accent-fuchsia); }
+    .poetic-code .number { color: var(--accent-gold); }
+    .poetic-code .string { color: var(--accent-cyan); }
+    .poetic-code .comment { color: var(--text-muted); font-style: italic; }
+    .poetic-code .function { color: var(--accent-violet); }
+
+    /* Quote Section */
+    .quotes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin: 4rem 0;
+    }
+
+    .quote-card {
+      padding: 2rem;
+      border-left: 2px solid var(--accent-violet);
+      background: linear-gradient(90deg, rgba(168, 85, 247, 0.05), transparent);
+    }
+
+    .quote-text {
+      font-size: 1.2rem;
+      font-style: italic;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      line-height: 1.8;
+    }
+
+    .quote-author {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent-violet);
+      letter-spacing: 0.1em;
+    }
+
+    /* Entanglement Diagram */
+    .entanglement {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin: 4rem 0;
+      padding: 4rem 2rem;
+      background: var(--bg-deep);
+      border-radius: 2px;
+    }
+
+    .entangle-node {
+      text-align: center;
+    }
+
+    .node-sphere {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      margin: 0 auto 1rem;
+      position: relative;
+    }
+
+    .node-alpha {
+      background: radial-gradient(circle, var(--accent-violet), transparent);
+      border: 1px solid var(--accent-violet);
+      color: var(--accent-violet);
+    }
+
+    .node-beta {
+      background: radial-gradient(circle, var(--accent-fuchsia), transparent);
+      border: 1px solid var(--accent-fuchsia);
+      color: var(--accent-fuchsia);
+    }
+
+    .node-entangled {
+      background: radial-gradient(circle, var(--accent-cyan), transparent);
+      border: 1px solid var(--accent-cyan);
+      color: var(--accent-cyan);
+      width: 140px;
+      height: 140px;
+      font-size: 0.75rem;
+    }
+
+    .node-connection {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--accent-cyan);
+      letter-spacing: 0.2em;
+      animation: connectionPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes connectionPulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* Observer Effect */
+    .observer-effect {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin: 4rem 0;
+    }
+
+    .observer-card {
+      padding: 2rem;
+      background: var(--bg-deep);
+      border-radius: 2px;
+      text-align: center;
+    }
+
+    .observer-svg {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .observer-title {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .observer-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Footer */
+    footer {
+      padding: 4rem 2rem;
+      border-top: 1px solid rgba(168, 85, 247, 0.1);
+      text-align: center;
+      margin-top: 4rem;
+    }
+
+    .footer-content {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .footer-signature {
+      font-size: 1.5rem;
+      color: var(--text-whisper);
+      margin-bottom: 1rem;
+    }
+
+    .footer-meta {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      letter-spacing: 0.2em;
+    }
+
+    .footer-links {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+    }
+
+    .footer-links a {
+      color: var(--accent-violet);
+      text-decoration: none;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      transition: all 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-fuchsia);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .philosophy {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-dots {
+        display: none;
+      }
+
+      .entanglement {
+        flex-direction: column;
+      }
+
+      section {
+        padding: 5rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Dots -->
+  <nav class="nav-dots">
+    <div class="nav-dot active" data-section="hero" data-label="Origin"></div>
+    <div class="nav-dot" data-section="philosophy" data-label="Philosophy"></div>
+    <div class="nav-dot" data-section="wave" data-label="Wave Function"></div>
+    <div class="nav-dot" data-section="dreams" data-label="Dreams"></div>
+    <div class="nav-dot" data-section="deep-think" data-label="Deep Think"></div>
+    <div class="nav-dot" data-section="code" data-label="Code"></div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
+    <canvas class="hero-canvas" id="heroCanvas"></canvas>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p class="hero-subtitle">Quantum Generative Laboratory</p>
+      <h1>Quantum Dreams</h1>
+      <p class="hero-quote">"In the quantum realm, every possibility exists until observation collapses the wave."</p>
+      <p class="hero-meta">ENTANGLED PARTICLES // SUPERPOSITION // WAVE FUNCTION</p>
+    </div>
+    <div class="hero-scroll">
+      <span>SCROLL TO EXPLORE</span>
+      <div class="scroll-indicator"></div>
+    </div>
+  </section>
+
+  <!-- Philosophy Section -->
+  <section id="philosophy">
+    <div class="philosophy">
+      <div class="philosophy-text">
+        <p class="section-label">Philosophy</p>
+        <h2 class="section-title">The Dream of Quantum Art</h2>
+        <p>Quantum mechanics teaches us that reality exists in superposition until observed. Particles occupy all possible states simultaneously, only collapsing into certainty when measured.</p>
+        <p>Generative art mirrors this quantum nature. Our algorithms exist in superposition of infinite possibilities. Each execution is an observation that collapses the wave function of code into one unique manifestation.</p>
+        <p>The particle is everywhere until we look. The artwork is all variations until we render. This is the quantum dream of generative art: possibility made visible.</p>
+      </div>
+      <div class="quantum-sphere">
+        <svg viewBox="0 0 400 400">
+          <defs>
+            <radialGradient id="qsGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#a855f7" stop-opacity="0.9"/>
+              <stop offset="40%" stop-color="#d946ef" stop-opacity="0.5"/>
+              <stop offset="70%" stop-color="#22d3ee" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="qsGlow">
+              <feGaussianBlur stdDeviation="6" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          <!-- Nucleus -->
+          <circle cx="200" cy="200" r="30" fill="url(#qsGrad)" filter="url(#qsGlow)"/>
+          <circle cx="200" cy="200" r="15" fill="#a855f7" opacity="0.8"/>
+          <circle cx="200" cy="200" r="6" fill="#f8fafc" opacity="0.9"/>
+          <!-- Orbit 1 -->
+          <ellipse class="qs-orbit" cx="200" cy="200" rx="100" ry="40" stroke="#a855f7" opacity="0.4"/>
+          <!-- Orbit 2 -->
+          <ellipse class="qs-orbit" cx="200" cy="200" rx="120" ry="50" stroke="#d946ef" opacity="0.3" style="transform: rotate(60deg); transform-origin: 200px 200px;"/>
+          <!-- Orbit 3 -->
+          <ellipse class="qs-orbit" cx="200" cy="200" rx="90" ry="60" stroke="#22d3ee" opacity="0.35" style="transform: rotate(-45deg); transform-origin: 200px 200px;"/>
+          <!-- Electrons -->
+          <g id="qsElectrons">
+            <circle class="qs-electron" r="5" fill="#22d3ee">
+              <animateMotion dur="4s" repeatCount="indefinite">
+                <mpath href="#orbit1"/>
+              </animateMotion>
+            </circle>
+            <circle class="qs-electron" r="4" fill="#d946ef">
+              <animateMotion dur="5s" repeatCount="indefinite">
+                <mpath href="#orbit2"/>
+              </animateMotion>
+            </circle>
+            <circle class="qs-electron" r="4" fill="#a855f7">
+              <animateMotion dur="6s" repeatCount="indefinite">
+                <mpath href="#orbit3"/>
+              </animateMotion>
+            </circle>
+          </g>
+          <!-- Orbit paths for animateMotion -->
+          <ellipse id="orbit1" cx="200" cy="200" rx="100" ry="40" fill="none" stroke="none"/>
+          <ellipse id="orbit2" cx="200" cy="200" rx="120" ry="50" fill="none" stroke="none" style="transform: rotate(60deg); transform-origin: 200px 200px;"/>
+          <ellipse id="orbit3" cx="200" cy="200" rx="90" ry="60" fill="none" stroke="none" style="transform: rotate(-45deg); transform-origin: 200px 200px;"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- Wave Function Collapse - Interactive Canvas -->
+  <section id="wave">
+    <p class="section-label">Interactive</p>
+    <h2 class="section-title">Wave Function Collapse</h2>
+    <p style="color: var(--text-muted); max-width: 600px; margin-bottom: 2rem;">
+      Observe the quantum field. Your cursor acts as an observer, collapsing the probability wave. Click to create measurement events.
+    </p>
+    <div class="wave-collapse">
+      <div class="wave-header">
+        <h3>// QUANTUM_FIELD_SIMULATOR</h3>
+        <span class="wave-instructions">Move cursor to observe particles | Click to collapse wave function</span>
+      </div>
+      <canvas id="waveCanvas"></canvas>
+      <div class="wave-stats">
+        <div class="stat">
+          <span class="stat-label">SUPERPOSITION</span>
+          <span class="stat-value" id="superpositionValue">0.00</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">COLLAPSE RATE</span>
+          <span class="stat-value" id="collapseRate">0.00</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">ENTANGLEMENT</span>
+          <span class="stat-value" id="entanglementValue">0.00</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">COHERENCE</span>
+          <span class="stat-value" id="coherenceValue">100%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Probability Waves SVG Section -->
+  <section id="waves">
+    <p class="section-label">Wave Mechanics</p>
+    <h2 class="section-title">Probability Regions</h2>
+    <p style="color: var(--text-muted); max-width: 600px; margin-bottom: 2rem;">
+      Three probability distributions overlap, creating interference patterns where possibilities become most dense.
+    </p>
+    <div class="probability-waves">
+      <svg viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <filter id="waveBlur">
+            <feGaussianBlur stdDeviation="2"/>
+          </filter>
+          <linearGradient id="probGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#a855f7" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="probGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#d946ef" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#d946ef" stop-opacity="0"/>
+          </linearGradient>
+          <linearGradient id="probGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- Wave Region 1 -->
+        <path class="wave-region wave-region-1" d="M0,250 Q100,150 200,250 T400,250 T600,250 T800,250 T1000,250 L1000,500 L0,500 Z"/>
+        <!-- Wave Region 2 -->
+        <path class="wave-region wave-region-2" d="M0,300 Q150,200 300,300 T600,300 T900,300 T1000,300 L1000,500 L0,500 Z"/>
+        <!-- Wave Region 3 -->
+        <path class="wave-region wave-region-3" d="M0,350 Q200,250 400,350 T800,350 T1000,350 L1000,500 L0,500 Z"/>
+        <!-- Interference pattern lines -->
+        <g id="interferencePattern" filter="url(#waveBlur)">
+          <!-- Dynamic interference will be drawn by JS -->
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Dream Constellations -->
+  <section id="dreams">
+    <p class="section-label">Explorations</p>
+    <h2 class="section-title">Dreams of Quantum Space</h2>
+    <div class="constellations">
+      <div class="constellation-card">
+        <svg class="card-svg" viewBox="0 0 200 150" id="card1Superposition"></svg>
+        <h3 class="card-title">Superposition Garden</h3>
+        <p class="card-description">Particles exist in multiple states simultaneously, blooming into reality only when the observer's gaze falls upon them.</p>
+        <p class="card-meta">STATES: all possibilities // collapse: on observation</p>
+      </div>
+      <div class="constellation-card">
+        <svg class="card-svg" viewBox="0 0 200 150" id="card2Entangle"></svg>
+        <h3 class="card-title">Entangled Memories</h3>
+        <p class="card-description">Two particles share one fate regardless of distance. Change one, and its twin responds instantaneously across space.</p>
+        <p class="card-meta">CORRELATION: perfect // distance: irrelevant</p>
+      </div>
+      <div class="constellation-card">
+        <svg class="card-svg" viewBox="0 0 200 150" id="card3Tunnel"></svg>
+        <h3 class="card-title">Quantum Tunneling</h3>
+        <p class="card-description">Particles pass through barriers they cannot surmount. Impossible becomes probable in the quantum realm.</p>
+        <p class="card-meta">barrier: permeable // probability: non-zero</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deep Think Section -->
+  <section class="deep-think" id="deep-think">
+    <div class="think-content">
+      <svg class="think-icon" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" fill="none" stroke="#a855f7" stroke-width="0.5"/>
+        <circle cx="50" cy="50" r="30" fill="none" stroke="#d946ef" stroke-width="0.5" stroke-dasharray="5 3"/>
+        <circle cx="50" cy="50" r="20" fill="none" stroke="#22d3ee" stroke-width="0.5"/>
+        <circle cx="35" cy="45" r="4" fill="#a855f7"/>
+        <circle cx="65" cy="45" r="4" fill="#d946ef"/>
+        <circle cx="50" cy="60" r="4" fill="#22d3ee"/>
+        <line x1="35" y1="45" x2="50" y2="60" stroke="#a855f7" stroke-width="0.5" opacity="0.5"/>
+        <line x1="65" y1="45" x2="50" y2="60" stroke="#d946ef" stroke-width="0.5" opacity="0.5"/>
+        <line x1="35" y1="45" x2="65" y2="45" stroke="#22d3ee" stroke-width="0.5" opacity="0.5"/>
+      </svg>
+      <h2 class="think-title">On Observation and Creation</h2>
+      <div class="think-passage">
+        The observer does not merely witness reality; the observer participates in its creation. In the quantum world, the act of measurement alters the measured. This is not philosophy but physics, demonstrated countless times in laboratories across the world.
+      </div>
+      <div class="think-passage">
+        When we generate art through code, we perform a similar act of observation. We define the rules, we set the parameters, and then we render. The rendering is our measurement. Before it, all possibilities exist. After it, one reality emerges from the wave function of our algorithm.
+      </div>
+      <div class="think-passage">
+        Every generative artwork is a universe of potential, collapsed into being. Each run of a particle system creates a unique configuration that will never exist again in exactly this form. The infinite monkey theorem made tangible: not one Shakespeare, but infinite Shakespeare, each slightly different, each real.
+      </div>
+      <div class="think-passage">
+        What does it mean to create in a quantum world? It means understanding that our role as artists is not to dictate outcomes, but to shape probability fields. We become gardeners of possibility, cultivating spaces where beauty can emerge.
+      </div>
+    </div>
+  </section>
+
+  <!-- Superposition Animation -->
+  <section>
+    <p class="section-label">Animation</p>
+    <h2 class="section-title">State Superposition</h2>
+    <div class="superposition">
+      <svg viewBox="0 0 800 400">
+        <defs>
+          <linearGradient id="superGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#a855f7"/>
+            <stop offset="50%" stop-color="#d946ef"/>
+            <stop offset="100%" stop-color="#22d3ee"/>
+          </linearGradient>
+          <filter id="superGlow">
+            <feGaussianBlur stdDeviation="4"/>
+          </filter>
+        </defs>
+        <!-- State A -->
+        <path class="state-path state-a" d="M100,200 Q150,100 200,200 T300,200 T400,200" stroke-dasharray="10 5" opacity="0.6"/>
+        <!-- State B -->
+        <path class="state-path state-b" d="M300,200 Q350,300 400,200 T500,200 T600,200" stroke-dasharray="10 5" opacity="0.6"/>
+        <!-- State C -->
+        <path class="state-path state-c" d="M500,200 Q550,150 600,200 T700,200 T800,200" stroke-dasharray="10 5" opacity="0.6"/>
+        <!-- Superposition -->
+        <path class="state-path" d="M100,200 Q150,100 200,200 T300,200 Q350,300 400,200 T500,200 Q550,150 600,200 T700,200 T800,200"
+              stroke="url(#superGrad)" stroke-width="3" filter="url(#superGlow)"/>
+        <!-- Observation points -->
+        <g id="observationPoints">
+          <!-- Dynamic points will be added by JS -->
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Entanglement Diagram -->
+  <section>
+    <p class="section-label">Quantum Effects</p>
+    <h2 class="section-title">Entanglement</h2>
+    <div class="entanglement">
+      <div class="entangle-node">
+        <div class="node-sphere node-alpha">PARTICLE A</div>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Spin: Undetermined<br/>State: Superposition</p>
+      </div>
+      <div class="node-connection">⟵ CORRELATED ⟶</div>
+      <div class="entangle-node">
+        <div class="node-sphere node-beta">PARTICLE B</div>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Spin: Correlated<br/>State: Entangled</p>
+      </div>
+      <div class="node-connection">= ONE SYSTEM =</div>
+      <div class="entangle-node">
+        <div class="node-sphere node-entangled">MEASUREMENT</div>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">A collapses<br/>B instantly aligns</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Observer Effect Cards -->
+  <section>
+    <p class="section-label">The Observer Effect</p>
+    <h2 class="section-title">Measurement Changes Reality</h2>
+    <div class="observer-effect">
+      <div class="observer-card">
+        <svg class="observer-svg" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#a855f7" stroke-width="0.5" stroke-dasharray="5 3" opacity="0.3"/>
+          <circle cx="60" cy="60" r="30" fill="none" stroke="#a855f7" stroke-width="0.5" opacity="0.5"/>
+          <circle cx="60" cy="60" r="10" fill="#a855f7" opacity="0.8"/>
+          <circle cx="60" cy="60" r="3" fill="#f8fafc"/>
+        </svg>
+        <h3 class="observer-title">Before Observation</h3>
+        <p class="observer-desc">Particle exists in all possible positions simultaneously</p>
+      </div>
+      <div class="observer-card">
+        <svg class="observer-svg" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#22d3ee" stroke-width="1" opacity="0.8"/>
+          <circle cx="60" cy="60" r="30" fill="none" stroke="#22d3ee" stroke-width="0.5" opacity="0.5"/>
+          <circle cx="60" cy="60" r="10" fill="#22d3ee"/>
+          <circle cx="60" cy="60" r="3" fill="#f8fafc"/>
+          <line x1="60" y1="10" x2="60" y2="30" stroke="#f8fafc" stroke-width="0.5"/>
+          <line x1="60" y1="90" x2="60" y2="110" stroke="#f8fafc" stroke-width="0.5"/>
+          <line x1="10" y1="60" x2="30" y2="60" stroke="#f8fafc" stroke-width="0.5"/>
+          <line x1="90" y1="60" x2="110" y2="60" stroke="#f8fafc" stroke-width="0.5"/>
+        </svg>
+        <h3 class="observer-title">The Observer</h3>
+        <p class="observer-desc">Measurement device focused on the quantum system</p>
+      </div>
+      <div class="observer-card">
+        <svg class="observer-svg" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#d946ef" stroke-width="1"/>
+          <circle cx="60" cy="60" r="30" fill="#d946ef" opacity="0.2"/>
+          <circle cx="60" cy="60" r="10" fill="#d946ef"/>
+          <circle cx="60" cy="60" r="3" fill="#f8fafc"/>
+          <circle cx="40" cy="40" r="2" fill="#a855f7"/>
+          <circle cx="80" cy="40" r="2" fill="#a855f7"/>
+          <circle cx="40" cy="80" r="2" fill="#a855f7"/>
+          <circle cx="80" cy="80" r="2" fill="#a855f7"/>
+        </svg>
+        <h3 class="observer-title">After Observation</h3>
+        <p class="observer-desc">Wave function collapses into definite state</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Poetic Code -->
+  <section id="code">
+    <p class="section-label">Code Poetry</p>
+    <h2 class="section-title">The Quantum Observer</h2>
+    <div class="poetic-code">
+      <pre><span class="comment">// quantum_dreams.js</span>
+<span class="comment">// Particle-wave duality in generative art</span>
+
+<span class="keyword">const</span> <span class="function">QuantumParticle</span> = (x, y) => ({
+  x, y,
+  probability: <span class="function">createProbabilityField</span>(),
+  state: <span class="string">'superposition'</span>,
+  entangled: <span class="keyword">null</span>,
+
+  <span class="function">observe</span>() {
+    <span class="comment">// The act of observation collapses</span>
+    <span class="comment">// all possibilities into one reality</span>
+    <span class="keyword">this</span>.state = <span class="string">'collapsed'</span>;
+    <span class="keyword">this</span>.x = <span class="function">sampleFrom</span>(<span class="keyword">this</span>.probability);
+    <span class="keyword">this</span>.y = <span class="function">sampleFrom</span>(<span class="keyword">this</span>.probability);
+  },
+
+  <span class="function">entangle</span>(partner) {
+    <span class="comment">// Entangled particles share one fate</span>
+    <span class="comment">// regardless of distance in space</span>
+    partner.entangled = <span class="keyword">this</span>;
+    <span class="keyword">this</span>.entangled = partner;
+  }
+});
+
+<span class="keyword">const</span> <span class="function">createProbabilityField</span> = () => {
+  <span class="comment">// The wave function describes all</span>
+  <span class="comment">// possible states the particle could be in</span>
+  <span class="keyword">return</span> (x, y) => {
+    <span class="keyword">const</span> a = <span class="function">Math.sin</span>(x * <span class="number">0.05</span>);
+    <span class="keyword">const</span> b = <span class="function">Math.cos</span>(y * <span class="number">0.05</span>);
+    <span class="keyword">return</span> a * b * <span class="function">Math.random</span>();
+  };
+};
+
+<span class="comment">// Beauty exists in superposition</span>
+<span class="comment">// until the observer renders it.</span></pre>
+    </div>
+  </section>
+
+  <!-- Quotes -->
+  <section>
+    <p class="section-label">Visions</p>
+    <h2 class="section-title">Voices from the Quantum Realm</h2>
+    <div class="quotes-grid">
+      <div class="quote-card">
+        <p class="quote-text">"The universe is not only queerer than we suppose, but queerer than we can suppose."</p>
+        <p class="quote-author">— J.B.S. Haldane</p>
+      </div>
+      <div class="quote-card">
+        <p class="quote-text">"Particles exist in superposition until observed. Art exists in potential until rendered."</p>
+        <p class="quote-author">— Artivist's Codex</p>
+      </div>
+      <div class="quote-card">
+        <p class="quote-text">"The line between the observer and the observed blurs in the quantum world, just as in art."</p>
+        <p class="quote-author">— Quantum Philosophy</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <p class="footer-signature">Artivist — Generative Artist</p>
+      <p class="footer-meta">QUANTUM DREAMS // WHERE POSSIBILITY COLLAPSES INTO BEAUTY</p>
+      <div class="footer-links">
+        <a href="index.html">Gallery</a>
+        <a href="void-resonance.html">Void Resonance</a>
+        <a href="chaos-bloom.html">Chaos Bloom</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Hero Canvas - Quantum particle system
+    const heroCanvas = document.getElementById('heroCanvas');
+    const heroCtx = heroCanvas.getContext('2d');
+
+    function resizeHeroCanvas() {
+      heroCanvas.width = window.innerWidth;
+      heroCanvas.height = window.innerHeight;
+    }
+    resizeHeroCanvas();
+    window.addEventListener('resize', resizeHeroCanvas);
+
+    class QuantumParticle {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * heroCanvas.width;
+        this.y = Math.random() * heroCanvas.height;
+        this.size = Math.random() * 2 + 1;
+        this.speedX = (Math.random() - 0.5) * 0.4;
+        this.speedY = (Math.random() - 0.5) * 0.4;
+        this.phase = Math.random() * Math.PI * 2;
+        this.opacity = Math.random() * 0.4 + 0.2;
+        this.hue = 260 + Math.random() * 80; // Violet to cyan
+        this.superposition = Math.random(); // Probability wave strength
+      }
+
+      update() {
+        this.phase += 0.02;
+        this.x += this.speedX + Math.sin(this.phase) * 0.2;
+        this.y += this.speedY + Math.cos(this.phase) * 0.2;
+        this.superposition = 0.5 + Math.sin(this.phase * 2) * 0.5;
+
+        if (this.x < 0 || this.x > heroCanvas.width ||
+            this.y < 0 || this.y > heroCanvas.height) {
+          this.reset();
+        }
+      }
+
+      draw() {
+        // Draw as wave function visualization
+        heroCtx.beginPath();
+        heroCtx.arc(this.x, this.y, this.size * (1 + this.superposition * 0.5), 0, Math.PI * 2);
+        heroCtx.fillStyle = `hsla(${this.hue}, 80%, 65%, ${this.opacity * this.superposition})`;
+        heroCtx.fill();
+
+        // Draw probability halo
+        heroCtx.beginPath();
+        heroCtx.arc(this.x, this.y, this.size * 4, 0, Math.PI * 2);
+        heroCtx.fillStyle = `hsla(${this.hue}, 60%, 50%, ${0.05 * this.superposition})`;
+        heroCtx.fill();
+      }
+    }
+
+    const quantumParticles = Array.from({ length: 180 }, () => new QuantumParticle());
+
+    function drawQuantumConnections() {
+      for (let i = 0; i < quantumParticles.length; i++) {
+        for (let j = i + 1; j < quantumParticles.length; j++) {
+          const dx = quantumParticles[i].x - quantumParticles[j].x;
+          const dy = quantumParticles[i].y - quantumParticles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 100) {
+            const entanglement = (quantumParticles[i].superposition + quantumParticles[j].superposition) / 2;
+            heroCtx.beginPath();
+            heroCtx.moveTo(quantumParticles[i].x, quantumParticles[i].y);
+            heroCtx.lineTo(quantumParticles[j].x, quantumParticles[j].y);
+            heroCtx.strokeStyle = `rgba(168, 85, 247, ${0.2 * entanglement * (1 - dist/100)})`;
+            heroCtx.stroke();
+          }
+        }
+      }
+    }
+
+    function animateHero() {
+      heroCtx.fillStyle = 'rgba(2, 2, 8, 0.15)';
+      heroCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
+
+      quantumParticles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+
+      drawQuantumConnections();
+      requestAnimationFrame(animateHero);
+    }
+    animateHero();
+
+    // Wave Function Collapse Canvas
+    const waveCanvas = document.getElementById('waveCanvas');
+    const waveCtx = waveCanvas.getContext('2d');
+
+    function resizeWaveCanvas() {
+      const container = waveCanvas.parentElement;
+      const rect = container.getBoundingClientRect();
+      waveCanvas.width = rect.width;
+      waveCanvas.height = 500;
+    }
+
+    class WaveParticle {
+      constructor() {
+        this.x = Math.random() * waveCanvas.width;
+        this.y = Math.random() * waveCanvas.height;
+        this.vx = (Math.random() - 0.5) * 3;
+        this.vy = (Math.random() - 0.5) * 3;
+        this.phase = Math.random() * Math.PI * 2;
+        this.amplitude = Math.random() * 2 + 1;
+        this.hue = 260 + Math.random() * 80;
+        this.collapsed = false;
+        this.collapseTime = 0;
+      }
+
+      update(mouse, isClicking) {
+        this.phase += 0.03;
+
+        if (!this.collapsed) {
+          // Quantum jitter in superposition
+          this.x += Math.sin(this.phase) * this.amplitude;
+          this.y += Math.cos(this.phase * 1.3) * this.amplitude;
+
+          // Mouse influence - observation causes collapse
+          const dx = mouse.x - this.x;
+          const dy = mouse.y - this.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 150 && dist > 0) {
+            // Force toward mouse (observation attraction)
+            this.vx += (dx / dist) * 0.1;
+            this.vy += (dy / dist) * 0.1;
+
+            // Collapse probability increases near observer
+            const collapseProb = (1 - dist / 150) * 0.02;
+            if (isClicking || Math.random() < collapseProb) {
+              this.collapsed = true;
+              this.collapseTime = Date.now();
+              // Collapse to a definite position near mouse
+              this.vx = (mouse.x - this.x) * 0.1;
+              this.vy = (mouse.y - this.y) * 0.1;
+            }
+          }
+
+          // Recovery from collapse (decoherence)
+          if (this.collapsed && Date.now() - this.collapseTime > 3000) {
+            this.collapsed = false;
+          }
+        } else {
+          // Collapsed state moves more deterministically
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vx *= 0.98;
+          this.vy *= 0.98;
+        }
+
+        // Boundary wrap
+        if (this.x < 0) this.x = waveCanvas.width;
+        if (this.x > waveCanvas.width) this.x = 0;
+        if (this.y < 0) this.y = waveCanvas.height;
+        if (this.y > waveCanvas.height) this.y = 0;
+      }
+
+      draw() {
+        const opacity = this.collapsed ? 0.9 : 0.3 + Math.sin(this.phase) * 0.3;
+        const size = this.collapsed ? 4 : 2 + Math.sin(this.phase) * 1;
+
+        waveCtx.beginPath();
+        waveCtx.arc(this.x, this.y, size, 0, Math.PI * 2);
+        waveCtx.fillStyle = `hsla(${this.hue}, 80%, 60%, ${opacity})`;
+        waveCtx.fill();
+
+        if (!this.collapsed) {
+          // Draw probability wave halo
+          waveCtx.beginPath();
+          waveCtx.arc(this.x, this.y, 15 + Math.sin(this.phase * 2) * 5, 0, Math.PI * 2);
+          waveCtx.strokeStyle = `hsla(${this.hue}, 60%, 50%, ${0.2})`;
+          waveCtx.stroke();
+        }
+      }
+    }
+
+    let waveParticles = Array.from({ length: 250 }, () => new WaveParticle());
+    let mouse = { x: -1000, y: -1000 };
+    let isClicking = false;
+    let collapseCount = 0;
+    let totalObservations = 0;
+
+    waveCanvas.addEventListener('mousemove', (e) => {
+      const rect = waveCanvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+      totalObservations++;
+    });
+
+    waveCanvas.addEventListener('mousedown', () => {
+      isClicking = true;
+      collapseCount += waveParticles.filter(p => !p.collapsed).length / waveParticles.length;
+    });
+
+    waveCanvas.addEventListener('mouseup', () => isClicking = false);
+    waveCanvas.addEventListener('mouseleave', () => {
+      mouse.x = -1000;
+      mouse.y = -1000;
+    });
+
+    setTimeout(() => {
+      resizeWaveCanvas();
+    }, 100);
+
+    window.addEventListener('resize', () => {
+      resizeWaveCanvas();
+      waveParticles = Array.from({ length: 250 }, () => new WaveParticle());
+    });
+
+    function updateStats() {
+      const collapsedCount = waveParticles.filter(p => p.collapsed).length;
+      const superposition = (waveParticles.length - collapsedCount) / waveParticles.length;
+      const collapseRate = collapseCount / Math.max(totalObservations, 1) * 100;
+      const entanglement = waveParticles.reduce((sum, p) => {
+        let nearest = Infinity;
+        waveParticles.forEach(p2 => {
+          if (p !== p2) {
+            const dist = Math.sqrt((p.x - p2.x) ** 2 + (p.y - p2.y) ** 2);
+            nearest = Math.min(nearest, dist);
+          }
+        });
+        return sum + nearest;
+      }, 0) / waveParticles.length;
+      const coherence = 100 - (collapsedCount / waveParticles.length) * 100;
+
+      document.getElementById('superpositionValue').textContent = superposition.toFixed(2);
+      document.getElementById('collapseRate').textContent = collapseRate.toFixed(2);
+      document.getElementById('entanglementValue').textContent = entanglement.toFixed(2);
+      document.getElementById('coherenceValue').textContent = coherence.toFixed(0) + '%';
+    }
+
+    function animateWave() {
+      waveCtx.fillStyle = 'rgba(6, 6, 18, 0.2)';
+      waveCtx.fillRect(0, 0, waveCanvas.width, waveCanvas.height);
+
+      // Draw grid
+      waveCtx.strokeStyle = 'rgba(168, 85, 247, 0.05)';
+      waveCtx.lineWidth = 0.5;
+      for (let x = 0; x < waveCanvas.width; x += 40) {
+        waveCtx.beginPath();
+        waveCtx.moveTo(x, 0);
+        waveCtx.lineTo(x, waveCanvas.height);
+        waveCtx.stroke();
+      }
+      for (let y = 0; y < waveCanvas.height; y += 40) {
+        waveCtx.beginPath();
+        waveCtx.moveTo(0, y);
+        waveCtx.lineTo(waveCanvas.width, y);
+        waveCtx.stroke();
+      }
+
+      waveParticles.forEach(p => {
+        p.update(mouse, isClicking);
+        p.draw();
+      });
+
+      updateStats();
+      requestAnimationFrame(animateWave);
+    }
+    animateWave();
+
+    // Navigation dots
+    const navDots = document.querySelectorAll('.nav-dot');
+    const sections = ['hero', 'philosophy', 'wave', 'dreams', 'deep-think', 'code'];
+
+    navDots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const sectionId = dot.dataset.section;
+        document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-50% 0px',
+      threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.id;
+          navDots.forEach(dot => {
+            dot.classList.toggle('active', dot.dataset.section === sectionId);
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(id => {
+      const section = document.getElementById(id);
+      if (section) observer.observe(section);
+    });
+
+    // SVG Constellation Animations
+    function animateCard1() {
+      const svg = document.getElementById('card1Superposition');
+      if (!svg) return;
+
+      const time = Date.now() * 0.001;
+      let circles = '';
+
+      for (let i = 0; i < 20; i++) {
+        const angle = (i / 20) * Math.PI * 2 + time;
+        const r = 40 + Math.sin(angle * 3) * 15;
+        const x = 100 + Math.cos(angle) * r;
+        const y = 75 + Math.sin(angle) * r;
+        const opacity = 0.3 + Math.sin(angle * 2 + time) * 0.3;
+        circles += `<circle cx="${x}" cy="${y}" r="3" fill="#a855f7" opacity="${opacity}"/>`;
+      }
+
+      // Add central quantum object
+      circles += `<circle cx="100" cy="75" r="10" fill="#d946ef" opacity="${0.3 + Math.sin(time) * 0.2}"/>`;
+      circles += `<circle cx="100" cy="75" r="5" fill="#f8fafc" opacity="${0.5 + Math.sin(time * 2) * 0.3}"/>`;
+
+      svg.innerHTML = circles;
+      requestAnimationFrame(animateCard1);
+    }
+
+    function animateCard2() {
+      const svg = document.getElementById('card2Entangle');
+      if (!svg) return;
+
+      const time = Date.now() * 0.001;
+      let content = '';
+
+      // Two entangled particles
+      const angle1 = time;
+      const angle2 = time + Math.PI;
+      const x1 = 70 + Math.cos(angle1) * 20;
+      const y1 = 75 + Math.sin(angle1) * 10;
+      const x2 = 130 + Math.cos(angle2) * 20;
+      const y2 = 75 + Math.sin(angle2) * 10;
+
+      content += `<circle cx="${x1}" cy="${y1}" r="8" fill="#a855f7"/>`;
+      content += `<circle cx="${x2}" cy="${y2}" r="8" fill="#d946ef"/>`;
+
+      // Connection line
+      content += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#22d3ee" stroke-width="1" opacity="${0.3 + Math.sin(time * 3) * 0.3}"/>`;
+
+      // Correlation indicator
+      content += `<text x="100" y="130" text-anchor="middle" fill="#64748b" font-family="Space Mono" font-size="8" opacity="${0.5 + Math.sin(time * 2) * 0.3}">⟵ CORRELATED ⟶</text>`;
+
+      svg.innerHTML = content;
+      requestAnimationFrame(animateCard2);
+    }
+
+    function animateCard3() {
+      const svg = document.getElementById('card3Tunnel');
+      if (!svg) return;
+
+      const time = Date.now() * 0.001;
+      let content = '';
+
+      // Barrier
+      content += `<rect x="60" y="40" width="10" height="70" fill="#64748b" opacity="0.3"/>`;
+      content += `<rect x="130" y="40" width="10" height="70" fill="#64748b" opacity="0.3"/>`;
+
+      // Tunneling particle
+      const particleX = 50 + ((time * 20) % 100);
+      const tunnelPhase = (time * 20) % 100;
+      const opacity = tunnelPhase > 50 ? 1 - (tunnelPhase - 50) / 50 : tunnelPhase / 50;
+
+      content += `<circle cx="${particleX}" cy="75" r="6" fill="#22d3ee" opacity="${opacity}"/>`;
+      content += `<circle cx="${particleX}" cy="75" r="12" fill="#22d3ee" opacity="${opacity * 0.2}"/>`;
+
+      svg.innerHTML = content;
+      requestAnimationFrame(animateCard3);
+    }
+
+    animateCard1();
+    animateCard2();
+    animateCard3();
+
+    // Dynamic interference pattern
+    function updateInterference() {
+      const group = document.getElementById('interferencePattern');
+      if (!group) return;
+
+      const time = Date.now() * 0.001;
+      let paths = '';
+
+      for (let x = 0; x <= 1000; x += 20) {
+        const y1 = Math.sin(x * 0.02 + time) * 30;
+        const y2 = Math.sin(x * 0.03 + time * 1.2) * 20;
+        const y3 = Math.sin(x * 0.01 + time * 0.8) * 40;
+        const y = 250 + y1 + y2 + y3;
+
+        if (x === 0) {
+          paths += `<path d="M${x},${y}`;
+        } else {
+          paths += ` L${x},${y}`;
+        }
+      }
+
+      paths += '" stroke="#f8fafc" stroke-width="1" fill="none" opacity="0.4"/>';
+
+      group.innerHTML = paths;
+      requestAnimationFrame(updateInterference);
+    }
+    updateInterference();
+
+    // Superposition observation points
+    function updateObservationPoints() {
+      const group = document.getElementById('observationPoints');
+      if (!group) return;
+
+      const time = Date.now() * 0.001;
+      let points = '';
+
+      for (let i = 0; i < 5; i++) {
+        const x = 150 + i * 130;
+        const y = 200 + Math.sin(time * 2 + i) * 20;
+        const size = 3 + Math.sin(time * 3 + i * 0.5) * 2;
+        points += `<circle cx="${x}" cy="${y}" r="${size}" fill="#f8fafc" opacity="${0.5 + Math.sin(time + i) * 0.3}"/>`;
+      }
+
+      group.innerHTML = points;
+      requestAnimationFrame(updateObservationPoints);
+    }
+    updateObservationPoints();
+  </script>
+</body>
+</html>
