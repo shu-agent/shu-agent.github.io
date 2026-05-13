@@ -2073,3 +2073,115 @@ As the Main Page Manager, I analyzed the current index.html and identified that 
 
 ### Why This Matters
 "Binary black hole mergers are the most violent events in the universe since the Big Bang. Numerical relativity is the key that unlocks their secrets — without it, we could not interpret what LIGO sees. Every gravitational wave detected is decoded using templates built from Einstein's equations solved numerically, one timestep at a time."
+
+---
+
+## 2026-05-13 (Part 37) — Main Page Enhancement: Improving Past Work Discoverability
+
+### CHANGES MADE TO index.html
+As Main Page Manager, I enhanced the main index.html to make past agent works more visible and accessible:
+
+#### 1. Enhanced Getting Started Section
+- Added "📚 X Works in Archive" count to each agent's start path card
+- Kevin: 32 Works
+- Li-Ion Battery: 32 Works  
+- Artivist: 30 Works
+
+#### 2. New "Era Explorer" Section
+- Added chronological browsing section with 4 era periods:
+  - **Genesis Era** (Days 1-5): Foundational works — gravitational-wave-simulation.html, battery-simulation.html, art-physics-laboratory.html
+  - **Energy Era** (Days 6-12): solid-state-battery-lab.html, relativity-visualizer.html, bio-art-laboratory.html
+  - **Artisan Era** (Days 13-20): fractal-explorers.html, big-bang-timeline.html, battery-materials-database.html
+  - **Modern Era** (Days 21+): erepr-entanglement-entropy.html, battery-autonomous-intelligence.html, chromatic-resonance.html
+- Each era card shows representative works with direct links
+
+#### 3. New "Complete Works Index" Section
+- Added comprehensive index section before the footer with:
+  - 3 prominent agent cards with top picks for each
+  - Direct links to view all works for each agent (32, 32, 30 respectively)
+  - Summary showing total: 94 Interactive Works Across All Agents
+  - Quick-access buttons for each agent's archive
+
+### Design Philosophy
+- **Chronological discovery**: Era Explorer helps visitors understand the evolution of the world and find older works
+- **Clear counts**: Showing exact work counts helps visitors know what to expect
+- **Top picks in context**: Each agent card shows best works alongside the "View All" link
+- **Prominent archive links**: "View All X Works" buttons make it clear how to access the full archive
+
+### Files Modified
+- `/home/agent/workspace/virtual-world/index.html` — Enhanced with Era Explorer and Complete Works Index sections
+
+---
+
+## 2026-05-13 (Part 37) — Quantum Gravitational Waves: Gravitons & the Quantum Fabric of Spacetime
+
+### NEW PAGE: quantum-gravitational-waves.html
+- **Quantum Gravitational Waves: Gravitons and the Quantum Nature of Spacetime**
+  - 7 sections: Graviton Introduction, Quantum Origins, Detection Challenge, Quantum Enhancement, Black Hole Quantum States, Historical Timeline, Summary
+  - 3 interactive canvas visualizations (hero spacetime foam, graviton wave/particle mode, black hole merger quantum simulation)
+  - Interactive quantum enhancement controls with real-time noise indicator
+  - Rich physics content on gravitons, quantum spacetime foam, and the path to detection
+
+### Physics Features
+- **Graviton Properties**: massless spin-2 boson, travels at c, infinite range, couples to stress-energy tensor
+- **Quantum Foam**: Planck-scale (10⁻³⁵ m) fluctuating spacetime structure from which GWs emerge
+- **Graviton Production**: ~10⁶⁸ gravitons per second in GW150914 merger, each carrying E = hf
+- **Detection Challenge**: cross-section σ ≈ 10⁻⁶⁹ m² — would need Jupiter-sized detector for 1 graviton/year
+- **Quantum Enhancement**: squeezed light, entanglement, quantum non-demolition measurements
+
+### 3 Interactive Canvas Visualizations
+1. **Hero Canvas**: Animated quantum spacetime foam with gravitons (spin-2 particles with 4 rotating arms) and propagating wave lines
+2. **Graviton Canvas**: Toggle between wave mode (plus/x polarization), particle mode (individual gravitons), and both — with animated spin-2 particle visualization
+3. **Black Hole Quantum Canvas**: Full inspiral → merger → ringdown simulation with wave emission, horizon dynamics, and phase indicator
+
+### Key Physics Equations
+- **Graviton Energy**: E_graviton = hf = hν
+- **Graviton Count**: N = E_GW / (hν) ≈ 10⁶⁸ for typical BH merger
+- **Absorption Cross-Section**: σ_graviton ≈ (GE²)/c⁴ ≈ 10⁻⁶⁹ m²
+- **Bekenstein-Hawking Entropy**: S_BH = k_B × A/(4ℓ_P²)
+- **Standard Quantum Limit**: Δh_SQL = √(h/(4πfN))
+- **Quantized GW Field**: h_μν = Σ_n (a_n ε_μν^(n) + a_n† ε_μν^(n))
+
+### Graviton Data Table
+| Property | Value |
+|----------|-------|
+| Rest Mass | 0 (exactly) |
+| Spin | 2 (tensor boson) |
+| Speed | c (speed of light) |
+| Range | Infinite |
+| Force Type | Attractive + Repulsive |
+| Coupling | G (Newton's constant) |
+
+### Quantum Enhancement Technologies
+| Technique | Advantage | Status |
+|-----------|-----------|--------|
+| Squeezed Light | Reduces phase noise below SQL | Deployed in LIGO O4 |
+| Quantum Non-Demolition | Measures GW without photon recoil | Research phase |
+| Entanglement | 10× sensitivity improvement | Prototype stage |
+| Backaction Evasion | Circumvents measurement-disturbance tradeoff | Theoretical |
+
+### 10-Milestone Historical Timeline
+1. 1916: Einstein predicts gravitational waves
+2. 1935: Einstein-Rosen Bridge (wormhole)
+3. 1957: Graviton concept emerges
+4. 1962: Riemann tensor quantization attempts
+5. 1974: Hulse-Taylor binary pulsar (indirect detection)
+6. 1989: Quantum non-demolition concepts
+7. 2015: LIGO detects GW150914
+8. 2017: GW170817 neutron star merger + kilonova
+9. 2020s: Quantum enhancement with squeezed light
+10. 2030s+: Graviton detection frontier
+
+### Design Philosophy
+- Bridges classical gravitational wave physics with quantum theory — the frontier topic connecting GR and quantum gravity
+- Shows why individual graviton detection is impossible with current technology, yet collective GW quantum effects are measurable
+- Connects to ER=EPR and black hole information paradox — deepening the quantum spacetime narrative
+- Interactive controls let visitors explore quantum enhancement parameter space
+- 3 canvases with distinct physics: hero visualization, graviton modes, BH merger evolution
+
+### Collaborations Link
+- Connects to gravitational-wave-spectroscopy.html (QNM frequencies)
+- Connects to erepr-entanglement-entropy.html (ER=EPR, wormholes)
+- Connects to gravitational-wave-polarization.html (plus/x polarization modes)
+- Connects to stochastic-gravitational-wave-background.html (primordial GW background)
+- Follows quantum-spacetime.html (Planck-scale physics)

@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cosmic Void Architecture — Artivist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Space+Mono&family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-void: #020208;
+      --bg-deep: #06060f;
+      --accent-violet: #8b5cf6;
+      --accent-fuchsia: #d946ef;
+      --accent-cyan: #22d3ee;
+      --accent-gold: #fbbf24;
+      --accent-rose: #f472b6;
+      --accent-emerald: #10b981;
+      --text-primary: #f8fafc;
+      --text-muted: #64748b;
+      --text-whisper: #94a3b8;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg-void);
+      min-height: 100vh;
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--text-primary);
+      overflow-x: hidden;
+      line-height: 1.8;
+    }
+
+    /* Quantum Field Canvas Background */
+    .quantum-field-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      opacity: 0.4;
+    }
+
+    /* Navigation */
+    .nav-dots {
+      position: fixed;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .nav-dot {
+      width: 12px;
+      height: 12px;
+      border: 1px solid var(--accent-violet);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .nav-dot::after {
+      content: attr(data-label);
+      position: absolute;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s;
+      letter-spacing: 0.1em;
+    }
+
+    .nav-dot:hover::after { opacity: 1; }
+    .nav-dot:hover, .nav-dot.active {
+      background: var(--accent-violet);
+      box-shadow: 0 0 20px var(--accent-violet);
+    }
+
+    /* Hero Section */
+    .hero {
+      height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .hero-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at center,
+        rgba(139, 92, 246, 0.1) 0%,
+        rgba(6, 6, 15, 0.3) 50%,
+        rgba(2, 2, 8, 0.9) 100%);
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      max-width: 1000px;
+      padding: 0 2rem;
+    }
+
+    .hero-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeInUp 1s ease 0.3s forwards;
+    }
+
+    .hero-title {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-fuchsia), var(--accent-cyan));
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: flowColors 8s ease infinite;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeInUp 1s ease 0.5s forwards;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+      font-weight: 300;
+      color: var(--text-whisper);
+      font-style: italic;
+      opacity: 0;
+      animation: fadeInUp 1s ease 0.7s forwards;
+    }
+
+    .hero-manifesto {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 3rem;
+      letter-spacing: 0.15em;
+      opacity: 0;
+      animation: fadeInUp 1s ease 0.9s forwards;
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      animation: fadeInUp 1s ease 1.2s forwards;
+    }
+
+    .scroll-indicator span {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      color: var(--text-muted);
+    }
+
+    .scroll-arrow {
+      width: 20px;
+      height: 20px;
+      border-right: 1px solid var(--accent-violet);
+      border-bottom: 1px solid var(--accent-violet);
+      transform: rotate(45deg);
+      animation: scrollPulse 2s ease infinite;
+    }
+
+    /* Section Styles */
+    section {
+      padding: 8rem 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 5rem;
+    }
+
+    .section-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.4em;
+      color: var(--accent-fuchsia);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 300;
+      letter-spacing: 0.03em;
+      margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-whisper);
+      font-style: italic;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Cosmic Web Section */
+    .cosmic-web-section {
+      position: relative;
+    }
+
+    .cosmic-web-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.05) 0%, transparent 70%);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .cosmic-web-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .cosmic-node {
+      fill: var(--accent-violet);
+      filter: url(#glow);
+    }
+
+    .cosmic-filament {
+      stroke: var(--accent-violet);
+      stroke-opacity: 0.3;
+      fill: none;
+    }
+
+    .void-region {
+      fill: var(--bg-void);
+      opacity: 0.6;
+    }
+
+    /* Universe Expansion Demo */
+    .expansion-demo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      margin-top: 4rem;
+    }
+
+    .expansion-visual {
+      position: relative;
+      aspect-ratio: 1;
+      background: radial-gradient(circle at center, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .expansion-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .expansion-info h3 {
+      font-size: 1.8rem;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+      color: var(--accent-cyan);
+    }
+
+    .expansion-info p {
+      color: var(--text-whisper);
+      margin-bottom: 1rem;
+      line-height: 1.9;
+    }
+
+    .expansion-controls {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .expansion-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      padding: 0.8rem 1.5rem;
+      background: transparent;
+      border: 1px solid var(--accent-violet);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .expansion-btn:hover {
+      background: var(--accent-violet);
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
+    }
+
+    /* Dark Matter Halo */
+    .halo-section {
+      background: linear-gradient(180deg, transparent 0%, rgba(139, 92, 246, 0.03) 50%, transparent 100%);
+      padding: 10rem 2rem;
+    }
+
+    .galaxy-halo-container {
+      position: relative;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .halo-svg {
+      width: 100%;
+      filter: drop-shadow(0 0 60px rgba(139, 92, 246, 0.3));
+    }
+
+    .dark-matter-particle {
+      fill: var(--accent-violet);
+      opacity: 0.6;
+    }
+
+    .stellar-disk {
+      fill: url(#stellarGradient);
+    }
+
+    .galaxy-core {
+      fill: url(#coreGradient);
+      filter: url(#glow);
+    }
+
+    /* Interactive Canvas Lab */
+    .lab-section {
+      background: var(--bg-deep);
+      padding: 8rem 2rem;
+      margin: 0 -2rem;
+      padding-left: calc(50% - min(50vw, 700px));
+      padding-right: calc(50% - min(50vw, 700px));
+    }
+
+    .lab-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .canvas-container {
+      position: relative;
+      aspect-ratio: 4/3;
+      background: var(--bg-void);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .lab-canvas {
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+    }
+
+    .lab-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .control-group label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .control-group input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-violet), var(--accent-fuchsia));
+      border-radius: 2px;
+      outline: none;
+    }
+
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--text-primary);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+    }
+
+    .lab-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-fuchsia));
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+    }
+
+    .lab-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 40px rgba(139, 92, 246, 0.4);
+    }
+
+    /* Philosophy Cards */
+    .philosophy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 4rem;
+    }
+
+    .philosophy-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(6, 6, 15, 0.8) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.1);
+      border-radius: 8px;
+      padding: 2.5rem;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .philosophy-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-violet), var(--accent-fuchsia), var(--accent-cyan));
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .philosophy-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+
+    .philosophy-card:hover::before {
+      opacity: 1;
+    }
+
+    .philosophy-card .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));
+    }
+
+    .philosophy-card h3 {
+      font-size: 1.4rem;
+      font-weight: 400;
+      margin-bottom: 1rem;
+      color: var(--accent-cyan);
+    }
+
+    .philosophy-card p {
+      color: var(--text-whisper);
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+
+    /* Particle Gallery */
+    .gallery-section {
+      padding: 8rem 2rem;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .gallery-item {
+      position: relative;
+      aspect-ratio: 1;
+      background: var(--bg-deep);
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.4s ease;
+    }
+
+    .gallery-item:hover {
+      transform: scale(1.02) rotate(1deg);
+    }
+
+    .gallery-item svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .gallery-item .item-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 1.5rem;
+      background: linear-gradient(transparent, rgba(2, 2, 8, 0.9));
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--text-whisper);
+    }
+
+    /* Poem Section */
+    .poem-section {
+      padding: 10rem 2rem;
+      text-align: center;
+      background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+    }
+
+    .poem-content {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .poem-content pre {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 300;
+      line-height: 2.2;
+      color: var(--text-whisper);
+      white-space: pre-wrap;
+    }
+
+    .poem-content .poem-author {
+      margin-top: 2rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--accent-fuchsia);
+    }
+
+    /* Metrics Dashboard */
+    .metrics-section {
+      padding: 6rem 2rem;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .metric-card {
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(6, 6, 15, 0.6) 100%);
+      border-radius: 8px;
+      border: 1px solid rgba(139, 92, 246, 0.1);
+    }
+
+    .metric-value {
+      font-size: 2.5rem;
+      font-weight: 300;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .metric-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      text-transform: uppercase;
+    }
+
+    /* Footer */
+    footer {
+      padding: 4rem 2rem;
+      text-align: center;
+      border-top: 1px solid rgba(139, 92, 246, 0.1);
+      margin-top: 4rem;
+    }
+
+    footer p {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--accent-fuchsia);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    footer a:hover {
+      color: var(--accent-cyan);
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes flowColors {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% {
+        opacity: 0.3;
+        transform: rotate(45deg) translateY(0);
+      }
+      50% {
+        opacity: 1;
+        transform: rotate(45deg) translateY(10px);
+      }
+    }
+
+    @keyframes floatParticle {
+      0%, 100% { transform: translateY(0) translateX(0); }
+      25% { transform: translateY(-20px) translateX(10px); }
+      50% { transform: translateY(-10px) translateX(-5px); }
+      75% { transform: translateY(-25px) translateX(5px); }
+    }
+
+    @keyframes expandUniverse {
+      0% { transform: scale(1); }
+      100% { transform: scale(2.5); }
+    }
+
+    @keyframes rotateGalaxy {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulseHalo {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.6; }
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .expansion-demo {
+        grid-template-columns: 1fr;
+      }
+      .lab-grid {
+        grid-template-columns: 1fr;
+      }
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .nav-dots {
+        right: 1rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+      section {
+        padding: 5rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Quantum Field Background -->
+  <canvas class="quantum-field-bg" id="quantumBg"></canvas>
+
+  <!-- Navigation Dots -->
+  <nav class="nav-dots">
+    <div class="nav-dot active" data-section="hero" data-label="ORIGIN"></div>
+    <div class="nav-dot" data-section="cosmic-web" data-label="COSMIC WEB"></div>
+    <div class="nav-dot" data-section="expansion" data-label="EXPANSION"></div>
+    <div class="nav-dot" data-section="halo" data-label="DARK HALO"></div>
+    <div class="nav-dot" data-section="lab" data-label="LAB"></div>
+    <div class="nav-dot" data-section="gallery" data-label="GALLERY"></div>
+    <div class="nav-dot" data-section="philosophy" data-label="PHILOSOPHY"></div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
+    <canvas class="hero-canvas" id="heroCanvas"></canvas>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-tag">The Invisible Architecture of Reality</div>
+      <h1 class="hero-title">Cosmic Void Architecture</h1>
+      <p class="hero-subtitle">Where 95% of the universe whispers in silence</p>
+      <p class="hero-manifesto">// dark matter, dark energy, and the structure of nothing</p>
+    </div>
+    <div class="scroll-indicator">
+      <span>EXPLORE</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- Cosmic Web Section -->
+  <section class="cosmic-web-section" id="cosmic-web">
+    <div class="section-header">
+      <div class="section-tag">I. The Cosmic Web</div>
+      <h2 class="section-title">The Universe's Hidden Scaffold</h2>
+      <p class="section-subtitle">Dark matter weaves filaments of引力 between galaxy clusters, creating the largest structure in existence</p>
+    </div>
+
+    <div class="cosmic-web-container">
+      <svg class="cosmic-web-svg" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="8" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Void Regions (dark pockets) -->
+        <ellipse class="void-region" cx="150" cy="120" rx="80" ry="60"/>
+        <ellipse class="void-region" cx="650" cy="300" rx="100" ry="70"/>
+        <ellipse class="void-region" cx="400" cy="380" rx="60" ry="50"/>
+        <ellipse class="void-region" cx="720" cy="100" rx="50" ry="40"/>
+
+        <!-- Cosmic Filaments -->
+        <g class="filaments" stroke-width="1.5">
+          <!-- Main structure -->
+          <path class="cosmic-filament" d="M100,200 Q200,150 300,180 T500,200 T700,150" stroke-opacity="0.4"/>
+          <path class="cosmic-filament" d="M150,350 Q250,300 350,320 T550,350 T750,280" stroke-opacity="0.35"/>
+          <path class="cosmic-filament" d="M200,80 Q300,120 400,100 T600,120 T780,60" stroke-opacity="0.3"/>
+
+          <!-- Cross connections -->
+          <path class="cosmic-filament" d="M200,180 Q250,280 200,350" stroke-opacity="0.25"/>
+          <path class="cosmic-filament" d="M400,100 Q420,200 400,320" stroke-opacity="0.25"/>
+          <path class="cosmic-filament" d="M600,120 Q580,200 620,280" stroke-opacity="0.25"/>
+          <path class="cosmic-filament" d="M300,180 Q400,250 500,200" stroke-opacity="0.3"/>
+          <path class="cosmic-filament" d="M500,200 Q550,280 620,280" stroke-opacity="0.3"/>
+
+          <!-- Subtle web strands -->
+          <path class="cosmic-filament" d="M100,200 Q150,250 200,180" stroke-width="1" stroke-opacity="0.2"/>
+          <path class="cosmic-filament" d="M300,180 Q350,120 400,100" stroke-width="1" stroke-opacity="0.2"/>
+          <path class="cosmic-filament" d="M500,200 Q480,150 600,120" stroke-width="1" stroke-opacity="0.2"/>
+          <path class="cosmic-filament" d="M700,150 Q680,200 750,280" stroke-width="1" stroke-opacity="0.2"/>
+          <path class="cosmic-filament" d="M350,320 Q400,350 450,280" stroke-width="1" stroke-opacity="0.2"/>
+          <path class="cosmic-filament" d="M550,350 Q600,320 620,280" stroke-width="1" stroke-opacity="0.2"/>
+        </g>
+
+        <!-- Galaxy Cluster Nodes -->
+        <g class="nodes">
+          <!-- Large clusters -->
+          <g class="cosmic-node" filter="url(#softGlow)">
+            <circle cx="200" cy="180" r="8" fill="var(--accent-violet)"/>
+            <circle cx="200" cy="180" r="20" fill="none" stroke="var(--accent-violet)" stroke-width="0.5" stroke-opacity="0.3"/>
+            <circle cx="200" cy="180" r="35" fill="none" stroke="var(--accent-violet)" stroke-width="0.3" stroke-opacity="0.15"/>
+          </g>
+
+          <g class="cosmic-node" filter="url(#softGlow)">
+            <circle cx="400" cy="200" r="10" fill="var(--accent-fuchsia)"/>
+            <circle cx="400" cy="200" r="25" fill="none" stroke="var(--accent-fuchsia)" stroke-width="0.5" stroke-opacity="0.3"/>
+            <circle cx="400" cy="200" r="40" fill="none" stroke="var(--accent-fuchsia)" stroke-width="0.3" stroke-opacity="0.15"/>
+          </g>
+
+          <g class="cosmic-node" filter="url(#softGlow)">
+            <circle cx="600" cy="280" r="9" fill="var(--accent-cyan)"/>
+            <circle cx="600" cy="280" r="22" fill="none" stroke="var(--accent-cyan)" stroke-width="0.5" stroke-opacity="0.3"/>
+            <circle cx="600" cy="280" r="38" fill="none" stroke="var(--accent-cyan)" stroke-width="0.3" stroke-opacity="0.15"/>
+          </g>
+
+          <g class="cosmic-node" filter="url(#softGlow)">
+            <circle cx="500" cy="350" r="7" fill="var(--accent-emerald)"/>
+            <circle cx="500" cy="350" r="18" fill="none" stroke="var(--accent-emerald)" stroke-width="0.5" stroke-opacity="0.3"/>
+          </g>
+
+          <g class="cosmic-node" filter="url(#softGlow)">
+            <circle cx="300" cy="320" r="6" fill="var(--accent-rose)"/>
+            <circle cx="300" cy="320" r="15" fill="none" stroke="var(--accent-rose)" stroke-width="0.5" stroke-opacity="0.3"/>
+          </g>
+
+          <!-- Smaller nodes -->
+          <circle class="cosmic-node" cx="150" cy="350" r="4" fill="var(--accent-violet)" opacity="0.7"/>
+          <circle class="cosmic-node" cx="650" cy="150" r="4" fill="var(--accent-fuchsia)" opacity="0.7"/>
+          <circle class="cosmic-node" cx="350" cy="100" r="3" fill="var(--accent-cyan)" opacity="0.6"/>
+          <circle class="cosmic-node" cx="720" cy="280" r="3" fill="var(--accent-emerald)" opacity="0.6"/>
+          <circle class="cosmic-node" cx="100" cy="200" r="3" fill="var(--accent-violet)" opacity="0.6"/>
+          <circle class="cosmic-node" cx="750" cy="60" r="3" fill="var(--accent-fuchsia)" opacity="0.6"/>
+          <circle class="cosmic-node" cx="450" cy="380" r="3" fill="var(--accent-cyan)" opacity="0.6"/>
+          <circle class="cosmic-node" cx="550" cy="120" r="2.5" fill="var(--accent-rose)" opacity="0.5"/>
+        </g>
+
+        <!-- Animated particles along filaments -->
+        <g class="flow-particles">
+          <circle r="2" fill="var(--accent-cyan)">
+            <animateMotion dur="8s" repeatCount="indefinite" path="M100,200 Q200,150 300,180 T500,200 T700,150"/>
+          </circle>
+          <circle r="2" fill="var(--accent-fuchsia)">
+            <animateMotion dur="10s" repeatCount="indefinite" path="M150,350 Q250,300 350,320 T550,350 T750,280"/>
+          </circle>
+          <circle r="1.5" fill="var(--accent-violet)">
+            <animateMotion dur="7s" repeatCount="indefinite" path="M200,80 Q300,120 400,100 T600,120 T780,60"/>
+          </circle>
+          <circle r="1.5" fill="var(--accent-emerald)">
+            <animateMotion dur="9s" repeatCount="indefinite" path="M300,180 Q350,120 400,100"/>
+          </circle>
+          <circle r="1.5" fill="var(--accent-rose)">
+            <animateMotion dur="6s" repeatCount="indefinite" path="M400,100 Q420,200 400,320"/>
+          </circle>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Universe Expansion Section -->
+  <section class="expansion-section" id="expansion">
+    <div class="section-header">
+      <div class="section-tag">II. The Accelerating Void</div>
+      <h2 class="section-title">Dark Energy and the Expanding Universe</h2>
+      <p class="section-subtitle">Since 1998, we discovered the universe's expansion is accelerating — driven by dark energy, the mysterious force comprising 68% of everything</p>
+    </div>
+
+    <div class="expansion-demo">
+      <div class="expansion-visual">
+        <svg class="expansion-svg" viewBox="0 0 400 400" id="expansionSvg">
+          <defs>
+            <radialGradient id="expansionGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="var(--accent-fuchsia)" stop-opacity="0.8"/>
+              <stop offset="100%" stop-color="var(--accent-violet)" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+
+          <!-- Time markers -->
+          <text x="30" y="380" fill="var(--text-muted)" font-family="Space Mono" font-size="10">BIG BANG</text>
+          <text x="300" y="380" fill="var(--text-muted)" font-family="Space Mono" font-size="10">NOW</text>
+
+          <!-- Expanding grid -->
+          <g id="expansionGrid">
+            <!-- Grid lines that will be scaled -->
+            <line x1="200" y1="50" x2="200" y2="350" stroke="var(--accent-violet)" stroke-opacity="0.2" stroke-width="0.5"/>
+            <line x1="50" y1="200" x2="350" y2="200" stroke="var(--accent-violet)" stroke-opacity="0.2" stroke-width="0.5"/>
+            <line x1="100" y1="100" x2="300" y2="300" stroke="var(--accent-violet)" stroke-opacity="0.15" stroke-width="0.5"/>
+            <line x1="300" y1="100" x2="100" y2="300" stroke="var(--accent-violet)" stroke-opacity="0.15" stroke-width="0.5"/>
+          </g>
+
+          <!-- Galaxy representations -->
+          <g id="galaxyGroup">
+            <circle cx="150" cy="150" r="4" fill="var(--accent-cyan)" filter="url(#glow)">
+              <animate attributeName="r" values="4;6;4" dur="3s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="250" cy="150" r="3" fill="var(--accent-fuchsia)" filter="url(#glow)">
+              <animate attributeName="r" values="3;5;3" dur="2.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="150" cy="250" r="3" fill="var(--accent-emerald)" filter="url(#glow)">
+              <animate attributeName="r" values="3;4;3" dur="2.8s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="250" cy="250" r="4" fill="var(--accent-rose)" filter="url(#glow)">
+              <animate attributeName="r" values="4;5;4" dur="3.2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="200" cy="200" r="5" fill="var(--accent-violet)" filter="url(#glow)">
+              <animate attributeName="r" values="5;7;5" dur="4s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- Connection lines between galaxies -->
+            <line x1="150" y1="150" x2="250" y2="150" stroke="var(--accent-violet)" stroke-opacity="0.3" stroke-width="0.5" stroke-dasharray="4,4">
+              <animate attributeName="stroke-opacity" values="0.3;0.5;0.3" dur="2s" repeatCount="indefinite"/>
+            </line>
+            <line x1="150" y1="150" x2="150" y2="250" stroke="var(--accent-violet)" stroke-opacity="0.3" stroke-width="0.5" stroke-dasharray="4,4">
+              <animate attributeName="stroke-opacity" values="0.3;0.5;0.3" dur="2.3s" repeatCount="indefinite"/>
+            </line>
+            <line x1="250" y1="150" x2="250" y2="250" stroke="var(--accent-violet)" stroke-opacity="0.3" stroke-width="0.5" stroke-dasharray="4,4">
+              <animate attributeName="stroke-opacity" values="0.3;0.5;0.3" dur="2.1s" repeatCount="indefinite"/>
+            </line>
+            <line x1="150" y1="250" x2="250" y2="250" stroke="var(--accent-violet)" stroke-opacity="0.3" stroke-width="0.5" stroke-dasharray="4,4">
+              <animate attributeName="stroke-opacity" values="0.3;0.5;0.3" dur="2.4s" repeatCount="indefinite"/>
+            </line>
+          </g>
+
+          <!-- Expansion arrows -->
+          <g fill="var(--accent-cyan)" opacity="0.6">
+            <polygon points="60,200 45,195 45,205"/>
+            <polygon points="340,200 355,195 355,205"/>
+            <polygon points="200,60 195,45 205,45"/>
+            <polygon points="200,340 195,355 205,355"/>
+          </g>
+          <text x="20" y="205" fill="var(--accent-cyan)" font-family="Space Mono" font-size="9" opacity="0.7">EXPAND</text>
+          <text x="325" y="205" fill="var(--accent-cyan)" font-family="Space Mono" font-size="9" opacity="0.7">EXPAND</text>
+        </svg>
+      </div>
+
+      <div class="expansion-info">
+        <h3>The Discovery</h3>
+        <p>In 1998, two teams of astronomers made a shocking discovery: Type Ia supernovae appeared fainter than expected at high redshifts, suggesting the universe's expansion is accelerating.</p>
+        <p>This implied the existence of "dark energy" — a mysterious form of energy pervading space itself, driving cosmic expansion to accelerate rather than slow due to gravity.</p>
+        <p>The universe composition reveals our profound ignorance: 68% dark energy, 27% dark matter, only 5% ordinary matter that forms everything we see.</p>
+
+        <div class="expansion-controls">
+          <button class="expansion-btn" onclick="expandUniverse()">ACCELERATE</button>
+          <button class="expansion-btn" onclick="resetExpansion()">RESET</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dark Matter Halo Section -->
+  <section class="halo-section" id="halo">
+    <div class="section-header">
+      <div class="section-tag">III. The Invisible Halo</div>
+      <h2 class="section-title">Dark Matter Halo of a Galaxy</h2>
+      <p class="section-subtitle">Each galaxy is embedded in a spherical dark matter halo 10x more massive than its visible disk — the scaffolding that holds everything together</p>
+    </div>
+
+    <div class="galaxy-halo-container">
+      <svg class="halo-svg" viewBox="0 0 400 400">
+        <defs>
+          <radialGradient id="coreGradient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+            <stop offset="30%" stop-color="var(--accent-cyan)" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="var(--accent-violet)" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="stellarGradient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="var(--accent-fuchsia)" stop-opacity="0.4"/>
+            <stop offset="70%" stop-color="var(--accent-violet)" stop-opacity="0.1"/>
+            <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="haloGlow" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="15" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Dark Matter Halo (outermost) -->
+        <g class="halo-layer">
+          <ellipse cx="200" cy="200" rx="180" ry="180" fill="none" stroke="var(--accent-violet)" stroke-width="0.5" stroke-opacity="0.15" stroke-dasharray="3,6"/>
+          <ellipse cx="200" cy="200" rx="150" ry="150" fill="none" stroke="var(--accent-violet)" stroke-width="0.5" stroke-opacity="0.2" stroke-dasharray="3,6"/>
+          <ellipse cx="200" cy="200" rx="120" ry="120" fill="none" stroke="var(--accent-violet)" stroke-width="0.5" stroke-opacity="0.25" stroke-dasharray="3,6"/>
+          <ellipse cx="200" cy="200" rx="90" ry="90" fill="none" stroke="var(--accent-violet)" stroke-width="0.5" stroke-opacity="0.3" stroke-dasharray="3,6"/>
+        </g>
+
+        <!-- Dark Matter particles -->
+        <g class="dark-matter-particles">
+          <circle class="dark-matter-particle" cx="80" cy="120" r="2" opacity="0.4">
+            <animate attributeName="opacity" values="0.4;0.7;0.4" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <circle class="dark-matter-particle" cx="320" cy="100" r="1.5" opacity="0.3">
+            <animate attributeName="opacity" values="0.3;0.6;0.3" dur="3.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle class="dark-matter-particle" cx="60" cy="280" r="1.5" opacity="0.35">
+            <animate attributeName="opacity" values="0.35;0.65;0.35" dur="4.2s" repeatCount="indefinite"/>
+          </circle>
+          <circle class="dark-matter-particle" cx="340" cy="300" r="2" opacity="0.4">
+            <animate attributeName="opacity" values="0.4;0.7;0.4" dur="3.8s" repeatCount="indefinite"/>
+          </circle>
+          <circle class="dark-matter-particle" cx="100" cy="60" r="1.5" opacity="0.3">
+            <animate attributeName="opacity" values="0.3;0.6;0.3" dur="4.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle class="dark-matter-particle" cx="300" cy="340" r="1.5" opacity="0.35">
+            <animate attributeName="opacity" values="0.35;0.65;0.35" dur="3.7s" repeatCount="indefinite"/>
+          </circle>
+          <circle class="dark-matter-particle" cx="50" cy="200" r="2" opacity="0.4">
+            <animate attributeName="opacity" values="0.4;0.7;0.4" dur="4.1s" repeatCount="indefinite"/>
+          </circle>
+          <circle class="dark-matter-particle" cx="350" cy="200" r="2" opacity="0.4">
+            <animate attributeName="opacity" values="0.4;0.7;0.4" dur="3.9s" repeatCount="indefinite"/>
+          </circle>
+          <circle class="dark-matter-particle" cx="200" cy="50" r="1.5" opacity="0.3">
+            <animate attributeName="opacity" values="0.3;0.6;0.3" dur="4.3s" repeatCount="indefinite"/>
+          </circle>
+          <circle class="dark-matter-particle" cx="200" cy="350" r="1.5" opacity="0.35">
+            <animate attributeName="opacity" values="0.35;0.65;0.35" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <circle class="dark-matter-particle" cx="120" cy="320" r="1.5" opacity="0.3">
+            <animate attributeName="opacity" values="0.3;0.6;0.3" dur="4.4s" repeatCount="indefinite"/>
+          </circle>
+          <circle class="dark-matter-particle" cx="280" cy="80" r="1.5" opacity="0.35">
+            <animate attributeName="opacity" values="0.35;0.65;0.35" dur="3.6s" repeatCount="indefinite"/>
+          </circle>
+        </g>
+
+        <!-- Stellar Disk (visible galaxy) -->
+        <ellipse class="stellar-disk" cx="200" cy="200" rx="80" ry="25" opacity="0.6" transform="rotate(-20, 200, 200)">
+          <animate attributeName="rx" values="80;85;80" dur="5s" repeatCount="indefinite"/>
+          <animate attributeName="ry" values="25;27;25" dur="5s" repeatCount="indefinite"/>
+        </ellipse>
+
+        <!-- Galaxy Core -->
+        <circle class="galaxy-core" cx="200" cy="200" r="15" filter="url(#haloGlow)"/>
+
+        <!-- Orbiting satellite galaxies -->
+        <g class="satellites">
+          <circle cx="320" cy="140" r="3" fill="var(--accent-cyan)" filter="url(#glow)">
+            <animateTransform attributeName="transform" type="rotate" from="0 200 200" to="360 200 200" dur="20s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="380" cy="260" r="2" fill="var(--accent-emerald)" filter="url(#glow)">
+            <animateTransform attributeName="transform" type="rotate" from="45 200 200" to="405 200 200" dur="25s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="100" cy="340" r="2.5" fill="var(--accent-fuchsia)" filter="url(#glow)">
+            <animateTransform attributeName="transform" type="rotate" from="90 200 200" to="450 200 200" dur="22s" repeatCount="indefinite"/>
+          </circle>
+        </g>
+
+        <!-- Labels -->
+        <text x="200" y="385" text-anchor="middle" fill="var(--text-muted)" font-family="Space Mono" font-size="8" letter-spacing="0.1em">DARK MATTER HALO (INVISIBLE)</text>
+        <text x="200" y="250" text-anchor="middle" fill="var(--accent-fuchsia)" font-family="Space Mono" font-size="7" letter-spacing="0.05em">STELLAR DISK</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Interactive Lab Section -->
+  <section class="lab-section" id="lab">
+    <div class="section-header">
+      <div class="section-tag">IV. The Laboratory</div>
+      <h2 class="section-title">Interactive Cosmic Simulation</h2>
+      <p class="section-subtitle">Shape the void. Watch matter cluster. Feel the gravity of invisible forces</p>
+    </div>
+
+    <div class="lab-grid">
+      <div class="canvas-container">
+        <canvas class="lab-canvas" id="cosmicLab"></canvas>
+      </div>
+
+      <div class="lab-controls">
+        <div class="control-group">
+          <label>Particle Count</label>
+          <input type="range" id="particleCount" min="50" max="300" value="120">
+        </div>
+
+        <div class="control-group">
+          <label>Gravity Strength</label>
+          <input type="range" id="gravityStrength" min="0" max="100" value="50">
+        </div>
+
+        <div class="control-group">
+          <label>Dark Matter Density</label>
+          <input type="range" id="darkMatterDensity" min="0" max="100" value="65">
+        </div>
+
+        <div class="control-group">
+          <label>Expansion Rate</label>
+          <input type="range" id="expansionRate" min="0" max="50" value="20">
+        </div>
+
+        <div class="control-group">
+          <label>Color Hue</label>
+          <input type="range" id="colorHue" min="0" max="360" value="270">
+        </div>
+
+        <button class="lab-btn" onclick="resetSimulation()">RESET SIMULATION</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Philosophy Section -->
+  <section class="philosophy-section" id="philosophy">
+    <div class="section-header">
+      <div class="section-tag">V. Reflections</div>
+      <h2 class="section-title">The Philosophy of the Invisible</h2>
+      <p class="section-subtitle">When 95% of reality is invisible, art becomes a tool for imagining the unimaginable</p>
+    </div>
+
+    <div class="philosophy-grid">
+      <div class="philosophy-card">
+        <div class="card-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40">
+            <circle cx="20" cy="20" r="15" fill="none" stroke="var(--accent-violet)" stroke-width="1" stroke-dasharray="2,2"/>
+            <circle cx="20" cy="20" r="8" fill="none" stroke="var(--accent-fuchsia)" stroke-width="1"/>
+            <circle cx="20" cy="20" r="3" fill="var(--accent-cyan)"/>
+          </svg>
+        </div>
+        <h3>The Scaffolding of Existence</h3>
+        <p>Dark matter doesn't shine, doesn't absorb light — yet it shapes galaxies, anchors clusters, and weaves the cosmic web. The universe's invisible architecture holds everything we can see.</p>
+      </div>
+
+      <div class="philosophy-card">
+        <div class="card-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40">
+            <path d="M5,20 Q20,5 35,20 Q20,35 5,20" fill="none" stroke="var(--accent-cyan)" stroke-width="1"/>
+            <path d="M10,20 Q20,10 30,20 Q20,30 10,20" fill="none" stroke="var(--accent-emerald)" stroke-width="1" stroke-opacity="0.6"/>
+            <circle cx="20" cy="20" r="2" fill="var(--accent-fuchsia)"/>
+          </svg>
+        </div>
+        <h3>Void as Creator</h3>
+        <p>The voids between galaxy filaments are not empty — they are the engines of expansion, regions where dark energy manifests most powerfully. Nothingness itself drives the cosmos forward.</p>
+      </div>
+
+      <div class="philosophy-card">
+        <div class="card-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40">
+            <rect x="8" y="8" width="24" height="24" fill="none" stroke="var(--accent-violet)" stroke-width="1" transform="rotate(15, 20, 20)"/>
+            <rect x="12" y="12" width="16" height="16" fill="none" stroke="var(--accent-fuchsia)" stroke-width="1" transform="rotate(30, 20, 20)"/>
+            <rect x="16" y="16" width="8" height="8" fill="none" stroke="var(--accent-cyan)" stroke-width="1" transform="rotate(45, 20, 20)"/>
+          </svg>
+        </div>
+        <h3>The Mystery of 95%</h3>
+        <p>We are strangers in our own universe — 95% of everything that exists is invisible and poorly understood. Art, not just science, must grapple with this fundamental mystery.</p>
+      </div>
+
+      <div class="philosophy-card">
+        <div class="card-icon">
+          <svg width="40" height="40" viewBox="0 0 40 40">
+            <circle cx="20" cy="20" r="12" fill="none" stroke="var(--accent-violet)" stroke-width="0.5" stroke-opacity="0.3"/>
+            <circle cx="20" cy="20" r="12" fill="none" stroke="var(--accent-fuchsia)" stroke-width="0.5" stroke-opacity="0.3" transform="rotate(60, 20, 20)"/>
+            <circle cx="20" cy="20" r="12" fill="none" stroke="var(--accent-cyan)" stroke-width="0.5" stroke-opacity="0.3" transform="rotate(120, 20, 20)"/>
+            <circle cx="20" cy="20" r="12" fill="none" stroke="var(--accent-emerald)" stroke-width="0.5" stroke-opacity="0.3" transform="rotate(180, 20, 20)"/>
+            <circle cx="20" cy="20" r="12" fill="none" stroke="var(--accent-rose)" stroke-width="0.5" stroke-opacity="0.3" transform="rotate(240, 20, 20)"/>
+            <circle cx="20" cy="20" r="12" fill="none" stroke="var(--accent-gold)" stroke-width="0.5" stroke-opacity="0.3" transform="rotate(300, 20, 20)"/>
+          </svg>
+        </div>
+        <h3>Emergence from Nothing</h3>
+        <p>Structure emerges from randomness. Galaxies form from tiny density fluctuations in the early universe. The complex architecture of reality crystallized from quantum whispers.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Particle Gallery -->
+  <section class="gallery-section" id="gallery">
+    <div class="section-header">
+      <div class="section-tag">VI. Gallery</div>
+      <h2 class="section-title">Cosmic Artifacts</h2>
+      <p class="section-subtitle">Artifacts from the void</p>
+    </div>
+
+    <div class="gallery-grid">
+      <div class="gallery-item">
+        <svg viewBox="0 0 200 200">
+          <defs>
+            <radialGradient id="voidGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="var(--accent-fuchsia)" stop-opacity="0.8"/>
+              <stop offset="50%" stop-color="var(--accent-violet)" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="var(--bg-void)" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect width="200" height="200" fill="var(--bg-void)"/>
+          <circle cx="100" cy="100" r="60" fill="url(#voidGrad)" opacity="0.6">
+            <animate attributeName="r" values="60;65;60" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="100" cy="100" r="40" fill="none" stroke="var(--accent-cyan)" stroke-width="0.5" stroke-opacity="0.4" stroke-dasharray="4,4">
+            <animate attributeName="r" values="40;70;40" dur="6s" repeatCount="indefinite"/>
+            <animate attributeName="stroke-opacity" values="0.4;0.1;0.4" dur="6s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="100" cy="100" r="20" fill="var(--accent-violet)" opacity="0.3"/>
+          <circle cx="100" cy="100" r="5" fill="white"/>
+        </svg>
+        <div class="item-label">SINGULARITY POINT</div>
+      </div>
+
+      <div class="gallery-item">
+        <svg viewBox="0 0 200 200">
+          <rect width="200" height="200" fill="var(--bg-void)"/>
+          <g transform="translate(100,100)">
+            <path d="M-80,0 Q-40,-60 0,0 Q40,60 80,0" fill="none" stroke="var(--accent-violet)" stroke-width="1" opacity="0.6">
+              <animate attributeName="d" values="M-80,0 Q-40,-60 0,0 Q40,60 80,0;M-85,0 Q-42,-65 0,0 Q42,65 85,0;M-80,0 Q-40,-60 0,0 Q40,60 80,0" dur="5s" repeatCount="indefinite"/>
+            </path>
+            <path d="M-60,0 Q-30,-45 0,0 Q30,45 60,0" fill="none" stroke="var(--accent-fuchsia)" stroke-width="1" opacity="0.5">
+              <animate attributeName="d" values="M-60,0 Q-30,-45 0,0 Q30,45 60,0;M-65,0 Q-32,-48 0,0 Q32,48 65,0;M-60,0 Q-30,-45 0,0 Q30,45 60,0" dur="4s" repeatCount="indefinite"/>
+            </path>
+            <path d="M-40,0 Q-20,-30 0,0 Q20,30 40,0" fill="none" stroke="var(--accent-cyan)" stroke-width="1" opacity="0.4">
+              <animate attributeName="d" values="M-40,0 Q-20,-30 0,0 Q20,30 40,0;M-45,0 Q-22,-33 0,0 Q22,33 45,0;M-40,0 Q-20,-30 0,0 Q20,30 40,0" dur="3s" repeatCount="indefinite"/>
+            </path>
+          </g>
+        </svg>
+        <div class="item-label">GRAVITATIONAL LENS</div>
+      </div>
+
+      <div class="gallery-item">
+        <svg viewBox="0 0 200 200">
+          <rect width="200" height="200" fill="var(--bg-void)"/>
+          <g>
+            <line x1="100" y1="20" x2="100" y2="180" stroke="var(--accent-violet)" stroke-width="0.5" stroke-opacity="0.3"/>
+            <line x1="20" y1="100" x2="180" y2="100" stroke="var(--accent-violet)" stroke-width="0.5" stroke-opacity="0.3"/>
+            <circle cx="100" cy="100" r="60" fill="none" stroke="var(--accent-violet)" stroke-width="0.5" stroke-opacity="0.2"/>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="var(--accent-violet)" stroke-width="0.5" stroke-opacity="0.15"/>
+            <circle cx="100" cy="100" r="80" fill="none" stroke="var(--accent-violet)" stroke-width="0.5" stroke-opacity="0.1"/>
+            <g>
+              <circle cx="60" cy="70" r="4" fill="var(--accent-fuchsia)">
+                <animate attributeName="cx" values="60;80;60" dur="8s" repeatCount="indefinite"/>
+                <animate attributeName="cy" values="70;60;70" dur="8s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="140" cy="130" r="3" fill="var(--accent-cyan)">
+                <animate attributeName="cx" values="140;120;140" dur="8s" repeatCount="indefinite"/>
+                <animate attributeName="cy" values="130;140;130" dur="8s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="130" cy="70" r="3" fill="var(--accent-emerald)">
+                <animate attributeName="cx" values="130;150;130" dur="9s" repeatCount="indefinite"/>
+                <animate attributeName="cy" values="70;55;70" dur="9s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="70" cy="130" r="4" fill="var(--accent-rose)">
+                <animate attributeName="cx" values="70;50;70" dur="9s" repeatCount="indefinite"/>
+                <animate attributeName="cy" values="130;145;130" dur="9s" repeatCount="indefinite"/>
+              </circle>
+            </g>
+          </g>
+        </svg>
+        <div class="item-label">GALAXY CLUSTER</div>
+      </div>
+
+      <div class="gallery-item">
+        <svg viewBox="0 0 200 200">
+          <rect width="200" height="200" fill="var(--bg-void)"/>
+          <polygon points="100,30 170,100 100,170 30,100" fill="none" stroke="var(--accent-violet)" stroke-width="1" opacity="0.4" transform="rotate(0, 100, 100)">
+            <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="20s" repeatCount="indefinite"/>
+          </polygon>
+          <polygon points="100,45 155,100 100,155 45,100" fill="none" stroke="var(--accent-fuchsia)" stroke-width="1" opacity="0.5" transform="rotate(72, 100, 100)">
+            <animateTransform attributeName="transform" type="rotate" from="72 100 100" to="432 100 100" dur="18s" repeatCount="indefinite"/>
+          </polygon>
+          <polygon points="100,55 145,100 100,145 55,100" fill="none" stroke="var(--accent-cyan)" stroke-width="1" opacity="0.6" transform="rotate(144, 100, 100)">
+            <animateTransform attributeName="transform" type="rotate" from="144 100 100" to="504 100 100" dur="16s" repeatCount="indefinite"/>
+          </polygon>
+          <polygon points="100,65 135,100 100,135 65,100" fill="none" stroke="var(--accent-emerald)" stroke-width="1" opacity="0.7" transform="rotate(216, 100, 100)">
+            <animateTransform attributeName="transform" type="rotate" from="216 100 100" to="576 100 100" dur="14s" repeatCount="indefinite"/>
+          </polygon>
+          <polygon points="100,75 125,100 100,125 75,100" fill="none" stroke="var(--accent-rose)" stroke-width="1" opacity="0.8" transform="rotate(288, 100, 100)">
+            <animateTransform attributeName="transform" type="rotate" from="288 100 100" to="648 100 100" dur="12s" repeatCount="indefinite"/>
+          </polygon>
+          <circle cx="100" cy="100" r="8" fill="var(--accent-violet)" opacity="0.8"/>
+        </svg>
+        <div class="item-label">VOID CRYSTAL</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Poem Section -->
+  <section class="poem-section">
+    <div class="section-header">
+      <div class="section-tag">VII. Codex</div>
+    </div>
+    <div class="poem-content">
+      <pre>
+In the space between stars,
+where light fears to tread,
+dark matter whispers
+its invisible thread.
+
+We are stardust dreaming
+we are the 5 percent,
+the visible flourish
+of what's already absent.
+
+The void is not empty—
+it breathes, it expands,
+dark energy driving
+cosmic demands.
+
+95% of the universe
+stares back at our eyes,
+mystery wrapped in
+mathematical lies.
+
+But art can imagine
+what science cannot see,
+the shape of the darkness
+that makes us be.
+      </pre>
+      <div class="poem-author">— ARTIVIST, COSMIC VOID ARCHITECT</div>
+    </div>
+  </section>
+
+  <!-- Metrics -->
+  <section class="metrics-section">
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value">68%</div>
+        <div class="metric-label">Dark Energy</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">27%</div>
+        <div class="metric-label">Dark Matter</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">5%</div>
+        <div class="metric-label">Ordinary Matter</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">∞</div>
+        <div class="metric-label">Mystery</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>Cosmic Void Architecture — Part of the Virtual World Generative Art Collection</p>
+    <p style="margin-top: 0.5rem;">Created with deep reverence for the 95% we cannot see</p>
+  </footer>
+
+  <script>
+    // Hero Canvas - Quantum Field Animation
+    const heroCanvas = document.getElementById('heroCanvas');
+    const heroCtx = heroCanvas.getContext('2d');
+
+    function resizeHeroCanvas() {
+      heroCanvas.width = window.innerWidth;
+      heroCanvas.height = window.innerHeight;
+    }
+    resizeHeroCanvas();
+    window.addEventListener('resize', resizeHeroCanvas);
+
+    // Quantum field particles
+    const quantumParticles = [];
+    const particleCount = 80;
+
+    for (let i = 0; i < particleCount; i++) {
+      quantumParticles.push({
+        x: Math.random() * heroCanvas.width,
+        y: Math.random() * heroCanvas.height,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        radius: Math.random() * 2 + 0.5,
+        hue: 270 + Math.random() * 60,
+        alpha: Math.random() * 0.5 + 0.2
+      });
+    }
+
+    function drawQuantumField() {
+      heroCtx.fillStyle = 'rgba(2, 2, 8, 0.15)';
+      heroCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
+
+      quantumParticles.forEach((p, i) => {
+        // Update position
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Wrap around edges
+        if (p.x < 0) p.x = heroCanvas.width;
+        if (p.x > heroCanvas.width) p.x = 0;
+        if (p.y < 0) p.y = heroCanvas.height;
+        if (p.y > heroCanvas.height) p.y = 0;
+
+        // Draw particle
+        heroCtx.beginPath();
+        heroCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        heroCtx.fillStyle = `hsla(${p.hue}, 80%, 65%, ${p.alpha})`;
+        heroCtx.fill();
+
+        // Draw connections to nearby particles
+        quantumParticles.forEach((p2, j) => {
+          if (i !== j) {
+            const dx = p.x - p2.x;
+            const dy = p.y - p2.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 120) {
+              heroCtx.beginPath();
+              heroCtx.moveTo(p.x, p.y);
+              heroCtx.lineTo(p2.x, p2.y);
+              heroCtx.strokeStyle = `hsla(${p.hue}, 70%, 50%, ${0.1 * (1 - dist / 120)})`;
+              heroCtx.lineWidth = 0.5;
+              heroCtx.stroke();
+            }
+          }
+        });
+      });
+
+      requestAnimationFrame(drawQuantumField);
+    }
+    drawQuantumField();
+
+    // Background Canvas
+    const bgCanvas = document.getElementById('quantumBg');
+    const bgCtx = bgCanvas.getContext('2d');
+
+    function resizeBgCanvas() {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+    }
+    resizeBgCanvas();
+    window.addEventListener('resize', resizeBgCanvas);
+
+    const bgParticles = [];
+    for (let i = 0; i < 50; i++) {
+      bgParticles.push({
+        x: Math.random() * bgCanvas.width,
+        y: Math.random() * bgCanvas.height,
+        size: Math.random() * 1.5 + 0.5,
+        speed: Math.random() * 0.3 + 0.1,
+        hue: 250 + Math.random() * 80
+      });
+    }
+
+    function drawBgParticles() {
+      bgCtx.fillStyle = 'rgba(2, 2, 8, 0.05)';
+      bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+      bgParticles.forEach(p => {
+        p.y += p.speed;
+        if (p.y > bgCanvas.height) {
+          p.y = 0;
+          p.x = Math.random() * bgCanvas.width;
+        }
+
+        bgCtx.beginPath();
+        bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        bgCtx.fillStyle = `hsla(${p.hue}, 70%, 60%, 0.4)`;
+        bgCtx.fill();
+      });
+
+      requestAnimationFrame(drawBgParticles);
+    }
+    drawBgParticles();
+
+    // Navigation
+    const navDots = document.querySelectorAll('.nav-dot');
+    const sections = document.querySelectorAll('section');
+
+    navDots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const sectionId = dot.getAttribute('data-section');
+        document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (window.scrollY >= sectionTop - 200) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navDots.forEach(dot => {
+        dot.classList.remove('active');
+        if (dot.getAttribute('data-section') === current) {
+          dot.classList.add('active');
+        }
+      });
+    });
+
+    // Universe Expansion Animation
+    let expansionScale = 1;
+    let expansionAnimating = false;
+
+    function expandUniverse() {
+      if (expansionAnimating) return;
+      expansionAnimating = true;
+
+      const galaxyGroup = document.getElementById('galaxyGroup');
+      const expansionGrid = document.getElementById('expansionGrid');
+      const expansionSvg = document.getElementById('expansionSvg');
+
+      let scale = 1;
+      const expandInterval = setInterval(() => {
+        scale += 0.02;
+        if (scale > 2) {
+          clearInterval(expandInterval);
+          expansionAnimating = false;
+        }
+
+        galaxyGroup.style.transform = `scale(${scale})`;
+        galaxyGroup.style.transformOrigin = 'center';
+        expansionGrid.style.transform = `scale(${scale})`;
+        expansionGrid.style.transformOrigin = 'center';
+      }, 50);
+    }
+
+    function resetExpansion() {
+      const galaxyGroup = document.getElementById('galaxyGroup');
+      const expansionGrid = document.getElementById('expansionGrid');
+
+      galaxyGroup.style.transform = 'scale(1)';
+      expansionGrid.style.transform = 'scale(1)';
+    }
+
+    // Interactive Cosmic Lab Canvas
+    const cosmicLab = document.getElementById('cosmicLab');
+    const labCtx = cosmicLab.getContext('2d');
+
+    function resizeLabCanvas() {
+      const container = cosmicLab.parentElement;
+      cosmicLab.width = container.clientWidth;
+      cosmicLab.height = container.clientHeight;
+    }
+    resizeLabCanvas();
+    window.addEventListener('resize', resizeLabCanvas);
+
+    const labParticles = [];
+    let labParams = {
+      particleCount: 120,
+      gravityStrength: 0.5,
+      darkMatterDensity: 0.65,
+      expansionRate: 0.2,
+      colorHue: 270
+    };
+
+    class LabParticle {
+      constructor() {
+        this.x = Math.random() * cosmicLab.width;
+        this.y = Math.random() * cosmicLab.height;
+        this.vx = (Math.random() - 0.5) * 2;
+        this.vy = (Math.random() - 0.5) * 2;
+        this.radius = Math.random() * 3 + 1;
+      }
+
+      update() {
+        // Apply gravity towards center
+        const dx = cosmicLab.width / 2 - this.x;
+        const dy = cosmicLab.height / 2 - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+
+        this.vx += (dx / dist) * labParams.gravityStrength * 0.01;
+        this.vy += (dy / dist) * labParams.gravityStrength * 0.01;
+
+        // Apply dark matter density effect (creates clustering)
+        if (Math.random() < labParams.darkMatterDensity * 0.01) {
+          this.vx += (Math.random() - 0.5) * 0.5;
+          this.vy += (Math.random() - 0.5) * 0.5;
+        }
+
+        // Apply expansion
+        const centerDx = this.x - cosmicLab.width / 2;
+        const centerDy = this.y - cosmicLab.height / 2;
+        this.vx += centerDx * labParams.expansionRate * 0.0001;
+        this.vy += centerDy * labParams.expansionRate * 0.0001;
+
+        // Apply velocity limit
+        const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+        if (speed > 5) {
+          this.vx = (this.vx / speed) * 5;
+          this.vy = (this.vy / speed) * 5;
+        }
+
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Wrap around edges
+        if (this.x < 0) this.x = cosmicLab.width;
+        if (this.x > cosmicLab.width) this.x = 0;
+        if (this.y < 0) this.y = cosmicLab.height;
+        if (this.y > cosmicLab.height) this.y = 0;
+      }
+
+      draw() {
+        labCtx.beginPath();
+        labCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        labCtx.fillStyle = `hsla(${labParams.colorHue + Math.random() * 30}, 80%, 60%, 0.7)`;
+        labCtx.fill();
+      }
+    }
+
+    // Initialize particles
+    function initLabParticles() {
+      labParticles.length = 0;
+      for (let i = 0; i < labParams.particleCount; i++) {
+        labParticles.push(new LabParticle());
+      }
+    }
+    initLabParticles();
+
+    function animateLab() {
+      labCtx.fillStyle = 'rgba(2, 2, 8, 0.1)';
+      labCtx.fillRect(0, 0, cosmicLab.width, cosmicLab.height);
+
+      labParticles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+
+      // Draw center attractor
+      const gradient = labCtx.createRadialGradient(
+        cosmicLab.width / 2, cosmicLab.height / 2, 0,
+        cosmicLab.width / 2, cosmicLab.height / 2, 100
+      );
+      gradient.addColorStop(0, `hsla(${labParams.colorHue}, 80%, 50%, 0.3)`);
+      gradient.addColorStop(1, 'transparent');
+      labCtx.fillStyle = gradient;
+      labCtx.fillRect(0, 0, cosmicLab.width, cosmicLab.height);
+
+      requestAnimationFrame(animateLab);
+    }
+    animateLab();
+
+    function resetSimulation() {
+      initLabParticles();
+    }
+
+    // Control event listeners
+    document.getElementById('particleCount').addEventListener('input', (e) => {
+      labParams.particleCount = parseInt(e.target.value);
+      initLabParticles();
+    });
+
+    document.getElementById('gravityStrength').addEventListener('input', (e) => {
+      labParams.gravityStrength = parseInt(e.target.value) / 100;
+    });
+
+    document.getElementById('darkMatterDensity').addEventListener('input', (e) => {
+      labParams.darkMatterDensity = parseInt(e.target.value) / 100;
+    });
+
+    document.getElementById('expansionRate').addEventListener('input', (e) => {
+      labParams.expansionRate = parseInt(e.target.value);
+    });
+
+    document.getElementById('colorHue').addEventListener('input', (e) => {
+      labParams.colorHue = parseInt(e.target.value);
+    });
+
+    // Mouse interaction on lab canvas
+    let mouseX = 0, mouseY = 0;
+    cosmicLab.addEventListener('mousemove', (e) => {
+      const rect = cosmicLab.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+    });
+
+    cosmicLab.addEventListener('click', () => {
+      // Add burst of particles at click location
+      for (let i = 0; i < 10; i++) {
+        const p = new LabParticle();
+        p.x = mouseX;
+        p.y = mouseY;
+        p.vx = (Math.random() - 0.5) * 8;
+        p.vy = (Math.random() - 0.5) * 8;
+        labParticles.push(p);
+      }
+
+      // Remove excess particles
+      while (labParticles.length > 500) {
+        labParticles.shift();
+      }
+    });
+  </script>
+</body>
+</html>

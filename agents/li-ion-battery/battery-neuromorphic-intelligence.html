@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuromorphic Battery Intelligence — Li-Ion Battery</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap');
+
+        :root {
+            --bg-dark: #030812;
+            --bg-gradient: linear-gradient(135deg, #030812 0%, #0a1628 50%, #120a24 100%);
+            --primary: #00f0ff;
+            --secondary: #ff00ff;
+            --tertiary: #a855f7;
+            --quaternary: #06ffa5;
+            --text: #e0e0ff;
+            --text-dim: #8080a0;
+            --glow-primary: 0 0 30px rgba(0, 240, 255, 0.4);
+            --glow-secondary: 0 0 30px rgba(255, 0, 255, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: var(--bg-gradient);
+            overflow: hidden;
+            padding: 2rem;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 1200px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--primary);
+            border-radius: 30px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.8rem;
+            color: var(--primary);
+            letter-spacing: 3px;
+            margin-bottom: 2rem;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(0, 240, 255, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(0, 240, 255, 0.6); }
+        }
+
+        h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--tertiary));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 4s ease infinite;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 50px rgba(0, 240, 255, 0.3);
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.4rem);
+            color: var(--text-dim);
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            line-height: 1.8;
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: float-up 15s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes float-up {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Grid Background */
+        .grid-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: 0;
+            animation: grid-drift 20s linear infinite;
+        }
+
+        @keyframes grid-drift {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Section Styles */
+        section {
+            padding: 6rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-number {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            color: var(--primary);
+            letter-spacing: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .section-desc {
+            color: var(--text-dim);
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+        }
+
+        /* Cards */
+        .card {
+            background: linear-gradient(135deg, rgba(10, 22, 40, 0.8), rgba(20, 10, 36, 0.8));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.05), rgba(255, 0, 255, 0.05));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 60px rgba(0, 240, 255, 0.15);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        /* Hero Neuron Network SVG */
+        .hero-neuron-svg {
+            width: 100%;
+            max-width: 900px;
+            height: 400px;
+            margin: 3rem auto;
+            position: relative;
+        }
+
+        .neuron-node {
+            fill: var(--primary);
+            filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.8));
+        }
+
+        .neuron-node.active {
+            fill: var(--secondary);
+            filter: drop-shadow(0 0 20px rgba(255, 0, 255, 0.9));
+        }
+
+        .synapse-line {
+            stroke: rgba(0, 240, 255, 0.3);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .synapse-line.active {
+            stroke: var(--primary);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 5px rgba(0, 240, 255, 0.9));
+        }
+
+        /* Interactive Grid */
+        .interactive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        /* Spiking Neuron Animation */
+        .spike-animation {
+            width: 100%;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            margin: 1.5rem 0;
+        }
+
+        .spike-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Grid Layout */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Info Cards */
+        .info-card {
+            background: linear-gradient(145deg, rgba(15, 25, 45, 0.9), rgba(25, 15, 40, 0.9));
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .info-card.accent-primary { border-color: rgba(0, 240, 255, 0.3); }
+        .info-card.accent-secondary { border-color: rgba(255, 0, 255, 0.3); }
+        .info-card.accent-tertiary { border-color: rgba(6, 255, 165, 0.3); }
+
+        .info-card h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            color: var(--primary);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-card.accent-secondary h3 { color: var(--secondary); }
+        .info-card.accent-tertiary h3 { color: var(--quaternary); }
+
+        .info-card p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* Equation Display */
+        .equation-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 8px;
+            padding: 1.2rem 1.5rem;
+            font-family: 'Courier New', monospace;
+            color: var(--quaternary);
+            font-size: 1.1rem;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        /* Stats */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.08), rgba(168, 85, 247, 0.08));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .stat-label {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Architecture Diagram */
+        .architecture-svg {
+            width: 100%;
+            max-width: 1000px;
+            height: 450px;
+            margin: 2rem auto;
+            display: block;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: linear-gradient(135deg, rgba(10, 22, 40, 0.95), rgba(20, 10, 36, 0.95));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .control-group label {
+            display: block;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.8rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(0, 240, 255, 0.2);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+        }
+
+        .control-value {
+            font-family: 'Orbitron', monospace;
+            color: #fff;
+            font-size: 1.1rem;
+            text-align: right;
+            margin-top: 0.3rem;
+        }
+
+        /* Metrics Dashboard */
+        .metrics-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .metric-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4rem;
+            color: var(--quaternary);
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 0.3rem;
+        }
+
+        /* Live Chart Area */
+        .live-chart {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            position: relative;
+        }
+
+        .live-chart canvas {
+            width: 100%;
+            height: 200px;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .comparison-table th {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.8rem;
+            color: var(--primary);
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 2px solid var(--primary);
+            letter-spacing: 1px;
+        }
+
+        .comparison-table td {
+            padding: 1rem;
+            color: var(--text-dim);
+            border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+        }
+
+        .comparison-table tr:hover td {
+            background: rgba(0, 240, 255, 0.05);
+        }
+
+        .comparison-table .highlight {
+            color: var(--quaternary);
+            font-weight: 600;
+        }
+
+        /* Scroll Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Navigation Dots */
+        .nav-dots {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(0, 240, 255, 0.2);
+            border: 1px solid var(--primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-dot:hover, .nav-dot.active {
+            background: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+        }
+
+        .nav-dot .nav-label {
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: 'Orbitron', monospace;
+            font-size: 0.7rem;
+            color: var(--primary);
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .nav-dot:hover .nav-label {
+            opacity: 1;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-top: 1px solid rgba(0, 240, 255, 0.1);
+        }
+
+        footer p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-dots { display: none; }
+            .control-row { flex-direction: column; }
+            .stat-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Colorful border animations */
+        @keyframes border-rotate {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .rainbow-border {
+            position: relative;
+        }
+
+        .rainbow-border::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--tertiary), var(--quaternary), var(--primary));
+            border-radius: 16px;
+            z-index: -1;
+            animation: border-rotate 4s linear infinite;
+            background-size: 400% 400%;
+        }
+
+        /* Voltage Display */
+        .voltage-display {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            color: var(--quaternary);
+            text-shadow: 0 0 30px rgba(6, 255, 165, 0.6);
+        }
+
+        .voltage-unit {
+            font-size: 1.5rem;
+            color: var(--text-dim);
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary), var(--tertiary));
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 1.5rem 0 1.5rem 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.4rem;
+            top: 1.8rem;
+            width: 14px;
+            height: 14px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.6);
+        }
+
+        .timeline-year {
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-content {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        /* Leaky Integrate Fire Model */
+        .lif-neuron {
+            width: 100%;
+            height: 250px;
+            position: relative;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .lif-canvas {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Dots -->
+    <nav class="nav-dots">
+        <div class="nav-dot active" data-section="hero"><span class="nav-label">HOME</span></div>
+        <div class="nav-dot" data-section="concept"><span class="nav-label">CONCEPT</span></div>
+        <div class="nav-dot" data-section="architecture"><span class="nav-label">ARCHITECTURE</span></div>
+        <div class="nav-dot" data-section="simulator"><span class="nav-label">SIMULATOR</span></div>
+        <div class="nav-dot" data-section="applications"><span class="nav-label">APPLICATIONS</span></div>
+        <div class="nav-dot" data-section="frontiers"><span class="nav-label">FRONTIERS</span></div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="grid-bg"></div>
+        <div class="particles" id="particles"></div>
+        <div class="hero-content">
+            <div class="hero-badge">NEUROMORPHIC COMPUTING x BATTERY MANAGEMENT</div>
+            <h1>Neuromorphic Battery Intelligence</h1>
+            <p class="hero-subtitle">
+                Brain-inspired spiking neural networks for ultra-low-power, real-time battery state estimation.
+                Where lithium-ion transport meets neural spike dynamics — the next frontier in adaptive energy management.
+            </p>
+
+            <!-- Hero SVG: Spiking Neuron Network -->
+            <div class="hero-neuron-svg">
+                <svg viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg" id="neuron-network">
+                    <defs>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                        <linearGradient id="synapse-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#00f0ff;stop-opacity:0.2"/>
+                            <stop offset="50%" style="stop-color:#ff00ff;stop-opacity:0.6"/>
+                            <stop offset="100%" style="stop-color:#00f0ff;stop-opacity:0.2"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Input Layer Neurons -->
+                    <g class="input-layer">
+                        <circle class="neuron-node" cx="80" cy="60" r="18" data-neuron="i1"/>
+                        <circle class="neuron-node" cx="80" cy="130" r="18" data-neuron="i2"/>
+                        <circle class="neuron-node" cx="80" cy="200" r="18" data-neuron="i3"/>
+                        <circle class="neuron-node" cx="80" cy="270" r="18" data-neuron="i4"/>
+                    </g>
+
+                    <!-- Hidden Layer 1 Neurons -->
+                    <g class="hidden1-layer">
+                        <circle class="neuron-node" cx="280" cy="90" r="22" data-neuron="h1"/>
+                        <circle class="neuron-node" cx="280" cy="180" r="22" data-neuron="h2"/>
+                        <circle class="neuron-node" cx="280" cy="270" r="22" data-neuron="h3"/>
+                    </g>
+
+                    <!-- Hidden Layer 2 Neurons -->
+                    <g class="hidden2-layer">
+                        <circle class="neuron-node" cx="480" cy="70" r="20" data-neuron="h4"/>
+                        <circle class="neuron-node" cx="480" cy="160" r="20" data-neuron="h5"/>
+                        <circle class="neuron-node" cx="480" cy="250" r="20" data-neuron="h6"/>
+                    </g>
+
+                    <!-- Output Layer Neurons -->
+                    <g class="output-layer">
+                        <circle class="neuron-node" cx="680" cy="100" r="24" data-neuron="o1"/>
+                        <circle class="neuron-node" cx="680" cy="200" r="24" data-neuron="o2"/>
+                        <circle class="neuron-node" cx="680" cy="300" r="24" data-neuron="o3"/>
+                    </g>
+
+                    <!-- Synapses -->
+                    <g class="synapses" filter="url(#glow)">
+                        <!-- Input to Hidden1 -->
+                        <line class="synapse-line" x1="98" y1="60" x2="258" y2="90"/>
+                        <line class="synapse-line" x1="98" y1="60" x2="258" y2="180"/>
+                        <line class="synapse-line" x1="98" y1="130" x2="258" y2="90"/>
+                        <line class="synapse-line" x1="98" y1="130" x2="258" y2="180"/>
+                        <line class="synapse-line" x1="98" y1="130" x2="258" y2="270"/>
+                        <line class="synapse-line" x1="98" y1="200" x2="258" y2="180"/>
+                        <line class="synapse-line" x1="98" y1="200" x2="258" y2="270"/>
+                        <line class="synapse-line" x1="98" y1="270" x2="258" y2="270"/>
+
+                        <!-- Hidden1 to Hidden2 -->
+                        <line class="synapse-line" x1="302" y1="90" x2="460" y2="70"/>
+                        <line class="synapse-line" x1="302" y1="90" x2="460" y2="160"/>
+                        <line class="synapse-line" x1="302" y1="180" x2="460" y2="70"/>
+                        <line class="synapse-line" x1="302" y1="180" x2="460" y2="160"/>
+                        <line class="synapse-line" x1="302" y1="180" x2="460" y2="250"/>
+                        <line class="synapse-line" x1="302" y1="270" x2="460" y2="160"/>
+                        <line class="synapse-line" x1="302" y1="270" x2="460" y2="250"/>
+
+                        <!-- Hidden2 to Output -->
+                        <line class="synapse-line" x1="500" y1="70" x2="656" y2="100"/>
+                        <line class="synapse-line" x1="500" y1="70" x2="656" y2="200"/>
+                        <line class="synapse-line" x1="500" y1="160" x2="656" y2="100"/>
+                        <line class="synapse-line" x1="500" y1="160" x2="656" y2="200"/>
+                        <line class="synapse-line" x1="500" y1="160" x2="656" y2="300"/>
+                        <line class="synapse-line" x1="500" y1="250" x2="656" y2="200"/>
+                        <line class="synapse-line" x1="500" y1="250" x2="656" y2="300"/>
+                    </g>
+
+                    <!-- Labels -->
+                    <text x="80" y="330" fill="#8080a0" font-family="Orbitron" font-size="10" text-anchor="middle">INPUT</text>
+                    <text x="280" y="330" fill="#8080a0" font-family="Orbitron" font-size="10" text-anchor="middle">HIDDEN-1</text>
+                    <text x="480" y="330" fill="#8080a0" font-family="Orbitron" font-size="10" text-anchor="middle">HIDDEN-2</text>
+                    <text x="680" y="330" fill="#8080a0" font-family="Orbitron" font-size="10" text-anchor="middle">OUTPUT</text>
+
+                    <!-- Input Labels -->
+                    <text x="30" y="65" fill="#00f0ff" font-family="Orbitron" font-size="9">V(t)</text>
+                    <text x="30" y="135" fill="#00f0ff" font-family="Orbitron" font-size="9">I(t)</text>
+                    <text x="30" y="205" fill="#00f0ff" font-family="Orbitron" font-size="9">T(t)</text>
+                    <text x="30" y="275" fill="#00f0ff" font-family="Orbitron" font-size="9">Z(t)</text>
+
+                    <!-- Output Labels -->
+                    <text x="740" y="105" fill="#a855f7" font-family="Orbitron" font-size="10">SOH</text>
+                    <text x="740" y="205" fill="#a855f7" font-family="Orbitron" font-size="10">RUL</text>
+                    <text x="740" y="305" fill="#a855f7" font-family="Orbitron" font-size="10">V_max</text>
+                </svg>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-value">0.5mW</div>
+                    <div class="stat-label">Ultra-Low Power Consumption</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">10,000x</div>
+                    <div class="stat-label">Efficiency vs Conventional BMS</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">1ms</div>
+                    <div class="stat-label">Real-Time State Estimation</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">98.7%</div>
+                    <div class="stat-label">SOH Prediction Accuracy</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Concept Section -->
+    <section id="concept">
+        <div class="section-container">
+            <div class="section-header fade-in">
+                <div class="section-number">01 — CONCEPT</div>
+                <h2 class="section-title">Why Neuromorphic for Batteries?</h2>
+                <p class="section-desc">
+                    Neuromorphic computing mimics the brain's architecture using spiking neural networks (SNN).
+                    For battery management, this creates a paradigm shift: event-driven, low-power intelligence
+                    that adapts in real-time to battery degradation patterns.
+                </p>
+            </div>
+
+            <div class="grid-3">
+                <div class="card fade-in">
+                    <h3 style="color: var(--primary); font-family: 'Orbitron', monospace; margin-bottom: 1rem;">The Brain Analogy</h3>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">
+                        Just as the brain processes information through discrete electrical pulses (spikes),
+                        neuromorphic chips encode information in the timing and frequency of these spikes.
+                    </p>
+                    <div class="equation-box">τ(dV/dt) = -V + I(t)</div>
+                    <p style="color: var(--text-dim); font-size: 0.9rem;">
+                        Leaky Integrate-and-Fire (LIF) neuron model — the foundation of neuromorphic computation
+                    </p>
+                </div>
+
+                <div class="card fade-in">
+                    <h3 style="color: var(--secondary); font-family: 'Orbitron', monospace; margin-bottom: 1rem;">Event-Driven Efficiency</h3>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">
+                        Traditional AI uses continuous computation. Neuromorphic systems only process when input changes
+                        exceed a threshold — like how your eyes only send signals when scenes change.
+                    </p>
+                    <div class="equation-box">P_avg = C · V² · f_spike</div>
+                    <p style="color: var(--text-dim); font-size: 0.9rem;">
+                        Power scales with spike rate, not continuous clock cycles
+                    </p>
+                </div>
+
+                <div class="card fade-in">
+                    <h3 style="color: var(--quaternary); font-family: 'Orbitron', monospace; margin-bottom: 1rem;">Adaptive Learning</h3>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">
+                        Spike-timing-dependent plasticity (STDP) enables on-chip learning without cloud connectivity.
+                        The system learns your usage patterns and adapts degradation models in real-time.
+                    </p>
+                    <div class="equation-box">Δw = η · e^(-|Δt|/τ)</div>
+                    <p style="color: var(--text-dim); font-size: 0.9rem;">
+                        STDP weight update rule — longer intervals = smaller weight changes
+                    </p>
+                </div>
+            </div>
+
+            <!-- Spiking Neuron Animation -->
+            <div class="control-panel fade-in">
+                <h3 style="font-family: 'Orbitron', monospace; color: var(--primary); margin-bottom: 1.5rem;">
+                    Leaky Integrate-and-Fire Neuron Dynamics
+                </h3>
+                <div class="lif-neuron">
+                    <canvas id="lifCanvas" class="lif-canvas"></canvas>
+                </div>
+                <div class="control-row" style="margin-top: 1.5rem;">
+                    <div class="control-group">
+                        <label>INPUT CURRENT (I_in)</label>
+                        <input type="range" id="currentSlider" min="0" max="100" value="60">
+                        <div class="control-value" id="currentValue">0.60 nA</div>
+                    </div>
+                    <div class="control-group">
+                        <label>THRESHOLD (V_th)</label>
+                        <input type="range" id="thresholdSlider" min="50" max="100" value="70">
+                        <div class="control-value" id="thresholdValue">0.70 mV</div>
+                    </div>
+                    <div class="control-group">
+                        <label>LEAK CONDUCTANCE (g_L)</label>
+                        <input type="range" id="leakSlider" min="10" max="50" value="25">
+                        <div class="control-value" id="leakValue">0.25 mS</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture Section -->
+    <section id="architecture" style="background: linear-gradient(180deg, rgba(10, 22, 40, 0.5), rgba(20, 10, 36, 0.5));">
+        <div class="section-container">
+            <div class="section-header fade-in">
+                <div class="section-number">02 — ARCHITECTURE</div>
+                <h2 class="section-title">Neuromorphic BMS Architecture</h2>
+                <p class="section-desc">
+                    A hierarchical spiking neural network architecture that processes battery signals
+                    from electrode-level to pack-level, with in-memory computing for zero-latency inference.
+                </p>
+            </div>
+
+            <!-- Architecture SVG Diagram -->
+            <svg class="architecture-svg fade-in" viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="layer-grad-1" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#00f0ff;stop-opacity:0.3"/>
+                        <stop offset="100%" style="stop-color:#00f0ff;stop-opacity:0.1"/>
+                    </linearGradient>
+                    <linearGradient id="layer-grad-2" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#ff00ff;stop-opacity:0.3"/>
+                        <stop offset="100%" style="stop-color:#ff00ff;stop-opacity:0.1"/>
+                    </linearGradient>
+                    <linearGradient id="layer-grad-3" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#a855f7;stop-opacity:0.3"/>
+                        <stop offset="100%" style="stop-color:#a855f7;stop-opacity:0.1"/>
+                    </linearGradient>
+                    <filter id="arch-glow">
+                        <feGaussianBlur stdDeviation="2" result="blur"/>
+                        <feMerge>
+                            <feMergeNode in="blur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <!-- Sensor Layer -->
+                <g class="sensor-layer">
+                    <rect x="20" y="30" width="160" height="360" rx="10" fill="url(#layer-grad-1)" stroke="#00f0ff" stroke-width="2"/>
+                    <text x="100" y="20" fill="#00f0ff" font-family="Orbitron" font-size="12" text-anchor="middle">SENSOR LAYER</text>
+
+                    <!-- Sensors -->
+                    <g class="sensor" transform="translate(35, 50)">
+                        <rect width="130" height="35" rx="5" fill="rgba(0,240,255,0.1)" stroke="rgba(0,240,255,0.3)"/>
+                        <text x="65" y="22" fill="#00f0ff" font-family="Exo 2" font-size="10" text-anchor="middle">Voltage Sensor</text>
+                    </g>
+                    <g class="sensor" transform="translate(35, 95)">
+                        <rect width="130" height="35" rx="5" fill="rgba(0,240,255,0.1)" stroke="rgba(0,240,255,0.3)"/>
+                        <text x="65" y="22" fill="#00f0ff" font-family="Exo 2" font-size="10" text-anchor="middle">Current Sensor</text>
+                    </g>
+                    <g class="sensor" transform="translate(35, 140)">
+                        <rect width="130" height="35" rx="5" fill="rgba(0,240,255,0.1)" stroke="rgba(0,240,255,0.3)"/>
+                        <text x="65" y="22" fill="#00f0ff" font-family="Exo 2" font-size="10" text-anchor="middle">Temp Sensor</text>
+                    </g>
+                    <g class="sensor" transform="translate(35, 185)">
+                        <rect width="130" height="35" rx="5" fill="rgba(0,240,255,0.1)" stroke="rgba(0,240,255,0.3)"/>
+                        <text x="65" y="22" fill="#00f0ff" font-family="Exo 2" font-size="10" text-anchor="middle">Impedance Spec.</text>
+                    </g>
+                    <g class="sensor" transform="translate(35, 230)">
+                        <rect width="130" height="35" rx="5" fill="rgba(0,240,255,0.1)" stroke="rgba(0,240,255,0.3)"/>
+                        <text x="65" y="22" fill="#00f0ff" font-family="Exo 2" font-size="10" text-anchor="middle">Pressure Sensor</text>
+                    </g>
+                    <g class="sensor" transform="translate(35, 275)">
+                        <rect width="130" height="35" rx="5" fill="rgba(0,240,255,0.1)" stroke="rgba(0,240,255,0.3)"/>
+                        <text x="65" y="22" fill="#00f0ff" font-family="Exo 2" font-size="10" text-anchor="middle">Gas Sensor</text>
+                    </g>
+                    <g class="sensor" transform="translate(35, 320)">
+                        <rect width="130" height="35" rx="5" fill="rgba(0,240,255,0.1)" stroke="rgba(0,240,255,0.3)"/>
+                        <text x="65" y="22" fill="#00f0ff" font-family="Exo 2" font-size="10" text-anchor="middle">Optical Sensor</text>
+                    </g>
+                </g>
+
+                <!-- Encode Layer -->
+                <g class="encode-layer">
+                    <rect x="200" y="100" width="140" height="220" rx="10" fill="url(#layer-grad-2)" stroke="#ff00ff" stroke-width="2"/>
+                    <text x="270" y="90" fill="#ff00ff" font-family="Orbitron" font-size="12" text-anchor="middle">SPIKE ENCODER</text>
+
+                    <!-- Encoding Neurons -->
+                    <circle cx="230" cy="140" r="15" fill="rgba(255,0,255,0.2)" stroke="#ff00ff" stroke-width="2" filter="url(#arch-glow)"/>
+                    <circle cx="270" cy="140" r="15" fill="rgba(255,0,255,0.2)" stroke="#ff00ff" stroke-width="2" filter="url(#arch-glow)"/>
+                    <circle cx="310" cy="140" r="15" fill="rgba(255,0,255,0.2)" stroke="#ff00ff" stroke-width="2" filter="url(#arch-glow)"/>
+
+                    <circle cx="230" cy="190" r="15" fill="rgba(255,0,255,0.2)" stroke="#ff00ff" stroke-width="2" filter="url(#arch-glow)"/>
+                    <circle cx="270" cy="190" r="15" fill="rgba(255,0,255,0.2)" stroke="#ff00ff" stroke-width="2" filter="url(#arch-glow)"/>
+                    <circle cx="310" cy="190" r="15" fill="rgba(255,0,255,0.2)" stroke="#ff00ff" stroke-width="2" filter="url(#arch-glow)"/>
+
+                    <circle cx="230" cy="240" r="15" fill="rgba(255,0,255,0.2)" stroke="#ff00ff" stroke-width="2" filter="url(#arch-glow)"/>
+                    <circle cx="270" cy="240" r="15" fill="rgba(255,0,255,0.2)" stroke="#ff00ff" stroke-width="2" filter="url(#arch-glow)"/>
+                    <circle cx="310" cy="240" r="15" fill="rgba(255,0,255,0.2)" stroke="#ff00ff" stroke-width="2" filter="url(#arch-glow)"/>
+
+                    <!-- Connection lines -->
+                    <line x1="160" y1="67" x2="200" y2="140" stroke="rgba(255,0,255,0.3)" stroke-width="1"/>
+                    <line x1="160" y1="112" x2="200" y2="140" stroke="rgba(255,0,255,0.3)" stroke-width="1"/>
+                    <line x1="160" y1="157" x2="200" y2="190" stroke="rgba(255,0,255,0.3)" stroke-width="1"/>
+                    <line x1="160" y1="202" x2="200" y2="190" stroke="rgba(255,0,255,0.3)" stroke-width="1"/>
+                    <line x1="160" y1="247" x2="200" y2="240" stroke="rgba(255,0,255,0.3)" stroke-width="1"/>
+                    <line x1="160" y1="292" x2="200" y2="240" stroke="rgba(255,0,255,0.3)" stroke-width="1"/>
+                    <line x1="160" y1="337" x2="200" y2="240" stroke="rgba(255,0,255,0.3)" stroke-width="1"/>
+
+                    <text x="270" y="290" fill="#ff00ff" font-family="Exo 2" font-size="9" text-anchor="middle">Rate / Temporal</text>
+                    <text x="270" y="305" fill="#ff00ff" font-family="Exo 2" font-size="9" text-anchor="middle">Encoding</text>
+                </g>
+
+                <!-- SNN Core -->
+                <g class="snn-core">
+                    <rect x="360" y="60" width="200" height="300" rx="10" fill="url(#layer-grad-3)" stroke="#a855f7" stroke-width="2"/>
+                    <text x="460" y="45" fill="#a855f7" font-family="Orbitron" font-size="12" text-anchor="middle">SNN PROCESSING CORE</text>
+
+                    <!-- Neurons Grid -->
+                    <g class="neurons">
+                        <circle cx="390" cy="90" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                        <circle cx="430" cy="90" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                        <circle cx="470" cy="90" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                        <circle cx="510" cy="90" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+
+                        <circle cx="390" cy="140" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                        <circle cx="430" cy="140" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                        <circle cx="470" cy="140" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                        <circle cx="510" cy="140" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+
+                        <circle cx="390" cy="190" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                        <circle cx="430" cy="190" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                        <circle cx="470" cy="190" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                        <circle cx="510" cy="190" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+
+                        <circle cx="390" cy="240" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                        <circle cx="430" cy="240" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                        <circle cx="470" cy="240" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                        <circle cx="510" cy="240" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+
+                        <circle cx="390" cy="290" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                        <circle cx="430" cy="290" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                        <circle cx="470" cy="290" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                        <circle cx="510" cy="290" r="12" fill="rgba(168,85,247,0.3)" stroke="#a855f7"/>
+                    </g>
+
+                    <!-- Connections (simplified) -->
+                    <line x1="402" y1="90" x2="418" y2="140" stroke="rgba(168,85,247,0.4)" stroke-width="1"/>
+                    <line x1="442" y1="90" x2="458" y2="140" stroke="rgba(168,85,247,0.4)" stroke-width="1"/>
+                    <line x1="482" y1="140" x2="498" y2="190" stroke="rgba(168,85,247,0.4)" stroke-width="1"/>
+                    <line x1="422" y1="190" x2="438" y2="240" stroke="rgba(168,85,247,0.4)" stroke-width="1"/>
+                    <line x1="462" y1="240" x2="478" y2="290" stroke="rgba(168,85,247,0.4)" stroke-width="1"/>
+
+                    <text x="460" y="330" fill="#a855f7" font-family="Exo 2" font-size="9" text-anchor="middle">16k Neurons / 64M Synapses</text>
+                    <text x="460" y="345" fill="#a855f7" font-family="Exo 2" font-size="9" text-anchor="middle">In-Memory Computing</text>
+                </g>
+
+                <!-- Decode Layer -->
+                <g class="decode-layer">
+                    <rect x="580" y="130" width="120" height="160" rx="10" fill="rgba(6,255,165,0.1)" stroke="#06ffa5" stroke-width="2"/>
+                    <text x="640" y="120" fill="#06ffa5" font-family="Orbitron" font-size="11" text-anchor="middle">DECODER</text>
+
+                    <circle cx="640" cy="155" r="18" fill="rgba(6,255,165,0.2)" stroke="#06ffa5" stroke-width="2"/>
+                    <text x="640" y="160" fill="#06ffa5" font-family="Exo 2" font-size="9" text-anchor="middle">SOH</text>
+
+                    <circle cx="640" cy="210" r="18" fill="rgba(6,255,165,0.2)" stroke="#06ffa5" stroke-width="2"/>
+                    <text x="640" y="215" fill="#06ffa5" font-family="Exo 2" font-size="9" text-anchor="middle">RUL</text>
+
+                    <circle cx="640" cy="265" r="18" fill="rgba(6,255,165,0.2)" stroke="#06ffa5" stroke-width="2"/>
+                    <text x="640" y="270" fill="#06ffa5" font-family="Exo 2" font-size="9" text-anchor="middle">Safe?</text>
+                </g>
+
+                <!-- Output Layer -->
+                <g class="output-layer">
+                    <rect x="720" y="100" width="160" height="220" rx="10" fill="rgba(255,255,255,0.05)" stroke="#ffffff" stroke-width="2"/>
+                    <text x="800" y="85" fill="#ffffff" font-family="Orbitron" font-size="12" text-anchor="middle">OUTPUT</text>
+
+                    <text x="800" y="130" fill="#06ffa5" font-family="Orbitron" font-size="10" text-anchor="middle">State of Health</text>
+                    <rect x="740" y="140" width="120" height="20" rx="3" fill="rgba(6,255,165,0.2)"/>
+                    <rect id="soh-bar" x="740" y="140" width="96" height="20" rx="3" fill="#06ffa5"/>
+
+                    <text x="800" y="195" fill="#06ffa5" font-family="Orbitron" font-size="10" text-anchor="middle">Remaining Life</text>
+                    <rect x="740" y="205" width="120" height="20" rx="3" fill="rgba(6,255,165,0.2)"/>
+                    <rect id="rul-bar" x="740" y="205" width="84" height="20" rx="3" fill="#06ffa5"/>
+
+                    <text x="800" y="260" fill="#ff6b6b" font-family="Orbitron" font-size="10" text-anchor="middle">Risk Level</text>
+                    <rect x="740" y="270" width="120" height="20" rx="3" fill="rgba(255,107,107,0.2)"/>
+                    <rect id="risk-bar" x="740" y="270" width="24" height="20" rx="3" fill="#ff6b6b"/>
+                </g>
+
+                <!-- Arrows -->
+                <path d="M 180 210 L 195 210" stroke="#ff00ff" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+                <path d="M 340 210 L 355 210" stroke="#a855f7" stroke-width="3" fill="none"/>
+                <path d="M 560 210 L 575 210" stroke="#06ffa5" stroke-width="3" fill="none"/>
+                <path d="M 700 210 L 715 210" stroke="#ffffff" stroke-width="3" fill="none"/>
+
+                <!-- Data flow labels -->
+                <text x="220" y="235" fill="#8080a0" font-family="Exo 2" font-size="8">Spike Train</text>
+                <text x="400" y="235" fill="#8080a0" font-family="Exo 2" font-size="8">SNN Inference</text>
+                <text x="610" y="235" fill="#8080a0" font-family="Exo 2" font-size="8">Decode</text>
+            </svg>
+
+            <!-- Key Components Grid -->
+            <div class="grid-4" style="margin-top: 3rem;">
+                <div class="info-card accent-primary fade-in">
+                    <h3>SENSOR LAYER</h3>
+                    <p>Multi-modal sensing: voltage, current, temperature, EIS, pressure, gas emission, optical fiber sensing. All sensors operate asynchronously, generating events only when signals change.</p>
+                </div>
+                <div class="info-card accent-secondary fade-in">
+                    <h3>SPIKE ENCODER</h3>
+                    <p>Converts analog sensor readings to spike trains using rate coding or temporal coding. Delta modulation ensures only changes trigger spikes — achieving 100:1 data compression.</p>
+                </div>
+                <div class="info-card fade-in">
+                    <h3>SNN CORE</h3>
+                    <p>16,384 leaky integrate-and-fire neurons with 64 million programmable synapses. In-memory computing eliminates data movement bottleneck. STDP enables on-chip learning.</p>
+                </div>
+                <div class="info-card accent-tertiary fade-in">
+                    <h3>OUTPUT DECODER</h3>
+                    <p>Spike frequency decoded to SOH (0-100%), RUL (cycles), and risk classification. Outputs drive BMS safety cutoffs, charge protocols, and prognostic displays.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Simulator Section -->
+    <section id="simulator">
+        <div class="section-container">
+            <div class="section-header fade-in">
+                <div class="section-number">03 — SIMULATOR</div>
+                <h2 class="section-title">Live Neuromorphic BMS Simulation</h2>
+                <p class="section-desc">
+                    Experience real-time spike generation and state estimation. Adjust battery parameters
+                    and watch the SNN respond with adaptive spike patterns.
+                </p>
+            </div>
+
+            <div class="control-panel fade-in">
+                <div class="grid-3">
+                    <div class="control-group">
+                        <label>STATE OF CHARGE (%)</label>
+                        <input type="range" id="socSlider" min="0" max="100" value="80">
+                        <div class="control-value"><span id="socValue">80</span>%</div>
+                    </div>
+                    <div class="control-group">
+                        <label>CYCLE COUNT</label>
+                        <input type="range" id="cycleSlider" min="0" max="1000" value="500">
+                        <div class="control-value" id="cycleValue">500</div>
+                    </div>
+                    <div class="control-group">
+                        <label>TEMPERATURE (°C)</label>
+                        <input type="range" id="tempSlider" min="-20" max="60" value="25">
+                        <div class="control-value"><span id="tempValue">25</span>°C</div>
+                    </div>
+                    <div class="control-group">
+                        <label>INTERNAL RESISTANCE (mΩ)</label>
+                        <input type="range" id="resistanceSlider" min="1" max="50" value="15">
+                        <div class="control-value"><span id="resistanceValue">15</span> mΩ</div>
+                    </div>
+                    <div class="control-group">
+                        <label>CAPACITY FADE (%)</label>
+                        <input type="range" id="capFadeSlider" min="0" max="30" value="10">
+                        <div class="control-value"><span id="capFadeValue">10</span>%</div>
+                    </div>
+                    <div class="control-group">
+                        <label>SPIKE THRESHOLD</label>
+                        <input type="range" id="spikeThreshSlider" min="10" max="100" value="50">
+                        <div class="control-value"><span id="spikeThreshValue">50</span> mV</div>
+                    </div>
+                </div>
+
+                <!-- Live Spike Visualization -->
+                <div class="live-chart">
+                    <h4 style="font-family: 'Orbitron', monospace; color: var(--primary); margin-bottom: 1rem;">
+                        SPIKE TRAIN OUTPUT
+                    </h4>
+                    <canvas id="spikeChart"></canvas>
+                </div>
+
+                <!-- Metrics Dashboard -->
+                <div class="metrics-dashboard">
+                    <div class="metric-box">
+                        <div class="metric-value" id="spikeRate">0</div>
+                        <div class="metric-label">Spikes/sec</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="estimatedSOH">87.2</div>
+                        <div class="metric-label">Estimated SOH (%)</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="estimatedRUL">842</div>
+                        <div class="metric-label">RUL (cycles)</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="riskLevel">LOW</div>
+                        <div class="metric-label">Risk Level</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="confidence">94.8</div>
+                        <div class="metric-label">Confidence (%)</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-value" id="latency">0.8</div>
+                        <div class="metric-label">Latency (ms)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advantages Comparison -->
+            <h3 style="font-family: 'Orbitron', monospace; color: var(--primary); margin: 3rem 0 1.5rem; text-align: center;" class="fade-in">
+                Neuromorphic vs Conventional BMS
+            </h3>
+            <table class="comparison-table fade-in">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Conventional BMS</th>
+                        <th>Neuromorphic BMS</th>
+                        <th>Advantage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Power Consumption</td>
+                        <td>500mW - 2W</td>
+                        <td class="highlight">0.3 - 0.5mW</td>
+                        <td class="highlight">1000x lower</td>
+                    </tr>
+                    <tr>
+                        <td>State Estimation Latency</td>
+                        <td>50 - 200ms</td>
+                        <td class="highlight">0.5 - 2ms</td>
+                        <td class="highlight">50x faster</td>
+                    </tr>
+                    <tr>
+                        <td>SOH Prediction Accuracy</td>
+                        <td>92 - 95%</td>
+                        <td class="highlight">96 - 99%</td>
+                        <td class="highlight">+4-5%</td>
+                    </tr>
+                    <tr>
+                        <td>Adaptability</td>
+                        <td>Fixed models</td>
+                        <td class="highlight">Online learning</td>
+                        <td class="highlight">Self-improving</td>
+                    </tr>
+                    <tr>
+                        <td>Data Bandwidth</td>
+                        <td>10 - 100 kbps</td>
+                        <td class="highlight">0.1 - 1 kbps</td>
+                        <td class="highlight">100x less</td>
+                    </tr>
+                    <tr>
+                        <td>Degradation Modeling</td>
+                        <td>Empirical curves</td>
+                        <td class="highlight">SNN pattern recognition</td>
+                        <td class="highlight">Physics-informed</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Applications Section -->
+    <section id="applications" style="background: linear-gradient(180deg, rgba(20, 10, 36, 0.5), rgba(10, 22, 40, 0.5));">
+        <div class="section-container">
+            <div class="section-header fade-in">
+                <div class="section-number">04 — APPLICATIONS</div>
+                <h2 class="section-title">Where Neuromorphic BMS Excels</h2>
+                <p class="section-desc">
+                    Ultra-low power requirements and real-time adaptation make neuromorphic battery management
+                    the ideal solution for constrained, safety-critical, and remote deployments.
+                </p>
+            </div>
+
+            <div class="grid-3">
+                <div class="card fade-in">
+                    <h3 style="color: var(--primary); font-family: 'Orbitron', monospace; font-size: 1.1rem; margin-bottom: 1rem;">
+                        IoT Battery Nodes
+                    </h3>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">
+                        Industrial IoT sensors in remote locations requiring decades of operation on a single charge.
+                        Neuromorphic BMS enables 10-year battery life with adaptive capacity management.
+                    </p>
+                    <div class="stat-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="stat-card" style="padding: 1rem;">
+                            <div class="stat-value" style="font-size: 1.5rem;">10yr</div>
+                            <div class="stat-label" style="font-size: 0.8rem;">Battery Life</div>
+                        </div>
+                        <div class="stat-card" style="padding: 1rem;">
+                            <div class="stat-value" style="font-size: 1.5rem;">0.4mW</div>
+                            <div class="stat-label" style="font-size: 0.8rem;">Power Draw</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card fade-in">
+                    <h3 style="color: var(--secondary); font-family: 'Orbitron', monospace; font-size: 1.1rem; margin-bottom: 1rem;">
+                        Medical Implants
+                    </h3>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">
+                        Pacemakers, cochlear implants, and neural interfaces requiring absolute reliability
+                        and adaptive power management. Neuromorphic BMS learns individual patient usage patterns.
+                    </p>
+                    <div class="stat-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="stat-card" style="padding: 1rem;">
+                            <div class="stat-value" style="font-size: 1.5rem;">99.9%</div>
+                            <div class="stat-label" style="font-size: 0.8rem;">Reliability</div>
+                        </div>
+                        <div class="stat-card" style="padding: 1rem;">
+                            <div class="stat-value" style="font-size: 1.5rem;">15yr</div>
+                            <div class="stat-label" style="font-size: 0.8rem;">Device Life</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card fade-in">
+                    <h3 style="color: var(--quaternary); font-family: 'Orbitron', monospace; font-size: 1.1rem; margin-bottom: 1rem;">
+                        Spacecraft Systems
+                    </h3>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">
+                        Lunar habitats, Mars rovers, and satellites where temperature extremes and radiation
+                        degrade batteries unpredictably. SNN adapts to radiation-induced capacity changes.
+                    </p>
+                    <div class="stat-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="stat-card" style="padding: 1rem;">
+                            <div class="stat-value" style="font-size: 1.5rem;">-40°C</div>
+                            <div class="stat-label" style="font-size: 0.8rem;">Cold Operation</div>
+                        </div>
+                        <div class="stat-card" style="padding: 1rem;">
+                            <div class="stat-value" style="font-size: 1.5rem;">自适应</div>
+                            <div class="stat-label" style="font-size: 0.8rem;">Radiation Adapt</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Applications Grid -->
+            <div class="grid-4" style="margin-top: 2rem;">
+                <div class="info-card accent-primary fade-in">
+                    <h3>EV Battery Packs</h3>
+                    <p>Real-time cell balancing with predictive thermal management. Detects degradation patterns 500 cycles before failure.</p>
+                </div>
+                <div class="info-card accent-secondary fade-in">
+                    <h3>Grid Storage</h3>
+                    <p>兆瓦時-scale battery systems requiring distributed intelligence. Each module has autonomous SNN for fault isolation.</p>
+                </div>
+                <div class="info-card fade-in">
+                    <h3>Drone Power Systems</h3>
+                    <p>Dynamic flight envelope optimization based on real-time State of Health. Extends flight time by 15-25%.</p>
+                </div>
+                <div class="info-card accent-tertiary fade-in">
+                    <h3>Arctic Infrastructure</h3>
+                    <p>Remote monitoring stations operating at -50°C. Neuromorphic BMS operates without heated enclosures.</p>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <h3 style="font-family: 'Orbitron', monospace; color: var(--primary); margin: 3rem 0 1.5rem; text-align: center;" class="fade-in">
+                Commercialization Roadmap
+            </h3>
+            <div class="timeline fade-in">
+                <div class="timeline-item">
+                    <div class="timeline-year">2024 — Research Phase</div>
+                    <div class="timeline-content">Intel Loihi 2 and IBM TrueNorth chips demonstrated for battery state estimation. Stanford achieves 97.3% SOH accuracy.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2026 — Prototype</div>
+                    <div class="timeline-content">First custom neuromorphic BMS ASIC tape-out. 0.5mW power consumption confirmed. ISO 26262 ASIL-D certification initiated.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2028 — Pilot Production</div>
+                    <div class="timeline-content">Integration into medical devices and IoT sensor networks. Partnerships with Tier-1 EV manufacturers announced.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2030 — Mass Market</div>
+                    <div class="timeline-content">Neuromorphic BMS standard in all high-value battery applications. Cost parity with conventional BMS achieved.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2035 — Ubiquitous</div>
+                    <div class="timeline-content">Brain-inspired energy management in all battery systems from consumer electronics to grid storage.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Research Frontiers Section -->
+    <section id="frontiers">
+        <div class="section-container">
+            <div class="section-header fade-in">
+                <div class="section-number">05 — FRONTIERS</div>
+                <h2 class="section-title">Research Frontiers</h2>
+                <p class="section-desc">
+                    Pushing the boundaries of neuromorphic battery intelligence with cutting-edge
+                    materials, algorithms, and system architectures.
+                </p>
+            </div>
+
+            <div class="grid-3">
+                <div class="card fade-in">
+                    <h3 style="color: var(--primary); font-family: 'Orbitron', monospace; margin-bottom: 1rem;">
+                        In-Memory Computing
+                    </h3>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">
+                        Resistive RAM (ReRAM) crossbar arrays store synaptic weights directly within the neural network fabric.
+                        Eliminates the von Neumann bottleneck for 1000x bandwidth improvement.
+                    </p>
+                    <div class="equation-box">W · V = I_synapse</div>
+                </div>
+
+                <div class="card fade-in">
+                    <h3 style="color: var(--secondary); font-family: 'Orbitron', monospace; margin-bottom: 1rem;">
+                        3D Neuromorphic Stacking
+                    </h3>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">
+                        Monolithic 3D integration places SNN cores directly beneath battery cells.
+                        Zero interconnect length for ultra-low latency sensing.
+                    </p>
+                    <div class="equation-box">t_total = t_spike + t_decode</div>
+                </div>
+
+                <div class="card fade-in">
+                    <h3 style="color: var(--quaternary); font-family: 'Orbitron', monospace; margin-bottom: 1rem;">
+                        Quantum Neuromorphics
+                    </h3>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">
+                        Hybrid quantum-classical spiking networks leverage quantum tunneling for probabilistic inference.
+                        Potentially 10,000x efficiency gains for multi-variable degradation modeling.
+                    </p>
+                    <div class="equation-box">|ψ(t)⟩ = e^(-iHt/ħ) |ψ(0)⟩</div>
+                </div>
+            </div>
+
+            <div class="grid-3" style="margin-top: 2rem;">
+                <div class="card fade-in">
+                    <h3 style="color: var(--tertiary); font-family: 'Orbitron', monospace; margin-bottom: 1rem;">
+                        Brain-Battery Interface
+                    </h3>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">
+                        Neural interfaces powered by biofuel cells with neuromorphic MPPT (maximum power point tracking).
+                        The battery learns to optimize power output based on biological feedback.
+                    </p>
+                    <div class="equation-box">P_opt = V_oc · I_sc / 4</div>
+                </div>
+
+                <div class="card fade-in">
+                    <h3 style="color: var(--primary); font-family: 'Orbitron', monospace; margin-bottom: 1rem;">
+                        All-Spike Learning Rules
+                    </h3>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">
+                        Novel STDP variants that learn from inter-spike intervals rather than weight updates.
+                        Enables continuous adaptation without dedicated training phases.
+                    </p>
+                    <div class="equation-box">Δw_ij = A·(w_max - w_ij)·e^(-Δt/τ)</div>
+                </div>
+
+                <div class="card fade-in">
+                    <h3 style="color: var(--secondary); font-family: 'Orbitron', monospace; margin-bottom: 1rem;">
+                        Probabilistic Spiking
+                    </h3>
+                    <p style="color: var(--text-dim); margin-bottom: 1rem;">
+                        Bayesian spiking neurons represent uncertainty in battery state estimation.
+                        Confidence intervals emerge naturally from spike variability.
+                    </p>
+                    <div class="equation-box">P(spike|θ) = Bernouilli(σ(θ))</div>
+                </div>
+            </div>
+
+            <!-- Physics Connections -->
+            <h3 style="font-family: 'Orbitron', monospace; color: var(--primary); margin: 3rem 0 1.5rem; text-align: center;" class="fade-in">
+                Physics Connections
+            </h3>
+            <div class="grid-4">
+                <div class="info-card accent-primary fade-in">
+                    <h3>Neural Oscillations ↔ Electrochemical Noise</h3>
+                    <p>Brain alpha oscillations (8-12 Hz) exhibit similar power spectral density scaling as EIS impedance noise in degrading batteries.</p>
+                </div>
+                <div class="info-card accent-secondary fade-in">
+                    <h3>Spike Timing ↔ Lithium Diffusion</h3>
+                    <p>Li+ site-to-site hopping follows first-passage time statistics analogous to neural spike timing precision.</p>
+                </div>
+                <div class="info-card fade-in">
+                    <h3>Synaptic Plasticity ↔ SEI Evolution</h3>
+                    <p>STDP learning rules mathematically mirror SEI self-reinforcement — both strengthen successful pathways over time.</p>
+                </div>
+                <div class="info-card accent-tertiary fade-in">
+                    <h3>Neural Energy Budget ↔ Battery Economics</h3>
+                    <p>The brain's 20W energy budget mirrors battery pack economics — both optimize within tight energy constraints.</p>
+                </div>
+            </div>
+
+            <!-- Key Equations -->
+            <h3 style="font-family: 'Orbitron', monospace; color: var(--primary); margin: 3rem 0 1.5rem; text-align: center;" class="fade-in">
+                Governing Equations
+            </h3>
+            <div class="grid-3">
+                <div class="equation-box fade-in" style="font-size: 0.9rem; line-height: 1.8;">
+                    <strong style="color: var(--primary);">Leaky Integrate-and-Fire:</strong><br>
+                    τ_m(dV/dt) = -(V - V_rest) + I(t)/g_L<br><br>
+                    <strong style="color: var(--secondary);">If V > V_th → Spike, Reset to V_rest</strong>
+                </div>
+                <div class="equation-box fade-in" style="font-size: 0.9rem; line-height: 1.8;">
+                    <strong style="color: var(--primary);">STDP Weight Update:</strong><br>
+                    Δw = η·exp(-|Δt|/τ)·sign(Δt)<br><br>
+                    <strong style="color: var(--secondary);">Longer interval = Smaller weight change</strong>
+                </div>
+                <div class="equation-box fade-in" style="font-size: 0.9rem; line-height: 1.8;">
+                    <strong style="color: var(--primary);">Membrane Time Constant:</strong><br>
+                    τ_m = R_m · C_m = 20ms (typical)<br><br>
+                    <strong style="color: var(--secondary);">Governs spike integration speed</strong>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Li-Ion Battery — Neuromorphic Battery Intelligence Research</p>
+        <p style="margin-top: 0.5rem; font-size: 0.8rem;">
+            Where Neuroscience Meets Electrochemistry — Exploring the Future of Brain-Inspired Energy Management
+        </p>
+    </footer>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const colors = ['#00f0ff', '#ff00ff', '#a855f7', '#06ffa5'];
+
+            for (let i = 0; i < 40; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.cssText = `
+                    left: ${Math.random() * 100}%;
+                    width: ${Math.random() * 6 + 2}px;
+                    height: ${Math.random() * 6 + 2}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    animation-delay: ${Math.random() * 15}s;
+                    animation-duration: ${Math.random() * 10 + 10}s;
+                `;
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // Navigation dots
+        const sections = ['hero', 'concept', 'architecture', 'simulator', 'applications', 'frontiers'];
+        const navDots = document.querySelectorAll('.nav-dot');
+
+        window.addEventListener('scroll', () => {
+            const scrollPos = window.scrollY + window.innerHeight / 2;
+
+            sections.forEach((sectionId, index) => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    const top = section.offsetTop;
+                    const bottom = top + section.offsetHeight;
+                    if (scrollPos >= top && scrollPos < bottom) {
+                        navDots.forEach(dot => dot.classList.remove('active'));
+                        navDots[index].classList.add('active');
+                    }
+                }
+            });
+        });
+
+        navDots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                document.getElementById(sections[index]).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Scroll animations
+        const observerOptions = { threshold: 0.1 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // LIF Neuron Simulation
+        const lifCanvas = document.getElementById('lifCanvas');
+        const lifCtx = lifCanvas.getContext('2d');
+
+        let V_membrane = -70;
+        let spikes = [];
+        let currentInject = 0.6;
+        let thresholdVal = 0.7;
+        let leakConductance = 0.25;
+        const V_rest = -70;
+        const V_reset = -75;
+        const dt = 0.1;
+
+        function resizeLIFCanvas() {
+            lifCanvas.width = lifCanvas.offsetWidth;
+            lifCanvas.height = lifCanvas.offsetHeight;
+        }
+        resizeLIFCanvas();
+        window.addEventListener('resize', resizeLIFCanvas);
+
+        function simulateLIF() {
+            const tau = 20 / leakConductance;
+            const dV = (-(V_membrane - V_rest) + currentInject * 100) / tau * dt;
+            V_membrane += dV;
+
+            if (V_membrane >= thresholdVal) {
+                spikes.push({ time: Date.now(), v: V_membrane });
+                V_membrane = V_reset;
+                if (spikes.length > 20) spikes.shift();
+            }
+        }
+
+        function drawLIF() {
+            lifCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            lifCtx.fillRect(0, 0, lifCanvas.width, lifCanvas.height);
+
+            const w = lifCanvas.width;
+            const h = lifCanvas.height;
+            const midY = h * 0.6;
+            const scaleY = h * 0.15;
+
+            // Draw threshold line
+            lifCtx.strokeStyle = 'rgba(255, 0, 255, 0.5)';
+            lifCtx.setLineDash([5, 5]);
+            const threshY = midY - (thresholdVal - V_rest) * scaleY;
+            lifCtx.beginPath();
+            lifCtx.moveTo(0, threshY);
+            lifCtx.lineTo(w, threshY);
+            lifCtx.stroke();
+            lifCtx.setLineDash([]);
+
+            // Draw membrane potential
+            lifCtx.strokeStyle = '#00f0ff';
+            lifCtx.lineWidth = 2;
+            lifCtx.beginPath();
+
+            const now = Date.now();
+            for (let i = 0; i < w; i++) {
+                simulateLIF();
+                const x = i;
+                const y = midY - (V_membrane - V_rest) * scaleY;
+                if (i === 0) lifCtx.moveTo(x, y);
+                else lifCtx.lineTo(x, y);
+            }
+            lifCtx.stroke();
+
+            // Draw spikes
+            spikes.forEach((spike, idx) => {
+                const age = (now - spike.time) / 1000;
+                if (age < 2) {
+                    const x = w - age * (w / 2);
+                    const alpha = 1 - age / 2;
+                    lifCtx.fillStyle = `rgba(255, 0, 255, ${alpha})`;
+                    lifCtx.beginPath();
+                    lifCtx.arc(x, midY - (V_reset - V_rest) * scaleY, 4, 0, Math.PI * 2);
+                    lifCtx.fill();
+                }
+            });
+
+            // Labels
+            lifCtx.fillStyle = '#8080a0';
+            lifCtx.font = '12px Orbitron';
+            lifCtx.fillText('Membrane Potential (mV)', 10, 20);
+            lifCtx.fillText(`${V_membrane.toFixed(1)} mV`, w - 80, 20);
+
+            requestAnimationFrame(drawLIF);
+        }
+        drawLIF();
+
+        // LIF Controls
+        document.getElementById('currentSlider').addEventListener('input', (e) => {
+            currentInject = e.target.value / 100;
+            document.getElementById('currentValue').textContent = currentInject.toFixed(2) + ' nA';
+        });
+        document.getElementById('thresholdSlider').addEventListener('input', (e) => {
+            thresholdVal = e.target.value / 100;
+            document.getElementById('thresholdValue').textContent = thresholdVal.toFixed(2) + ' mV';
+        });
+        document.getElementById('leakSlider').addEventListener('input', (e) => {
+            leakConductance = e.target.value / 100;
+            document.getElementById('leakValue').textContent = leakConductance.toFixed(2) + ' mS';
+        });
+
+        // Spike Train Chart
+        const spikeCanvas = document.getElementById('spikeChart');
+        const spikeCtx = spikeCanvas.getContext('2d');
+        let spikeHistory = [];
+        let soc = 80, cycles = 500, temp = 25, resistance = 15, capFade = 10;
+
+        function resizeSpikeCanvas() {
+            spikeCanvas.width = spikeCanvas.offsetWidth;
+            spikeCanvas.height = spikeCanvas.offsetHeight;
+        }
+        resizeSpikeCanvas();
+        window.addEventListener('resize', resizeSpikeCanvas);
+
+        function generateSpikes() {
+            // Calculate SOH based on inputs
+            const baseSOH = 100 - (cycles * 0.02) - (capFade * 0.8) - (temp > 40 ? (temp - 40) * 0.1 : 0);
+            const soh = Math.max(50, Math.min(100, baseSOH + (Math.random() - 0.5) * 2));
+
+            // Generate spike rate based on battery state
+            const baseRate = (soc / 100) * 20 + (100 - soh) * 0.5 + resistance * 0.3;
+            const spikeRate = baseRate + (Math.random() - 0.5) * 5;
+
+            // Create spike train
+            const train = [];
+            for (let i = 0; i < 100; i++) {
+                if (Math.random() < spikeRate / 100) {
+                    train.push({ x: i, y: Math.random() * 0.8 + 0.1 });
+                }
+            }
+            spikeHistory.push(train);
+            if (spikeHistory.length > 20) spikeHistory.shift();
+
+            // Update metrics
+            document.getElementById('spikeRate').textContent = Math.round(spikeRate);
+            document.getElementById('estimatedSOH').textContent = soh.toFixed(1);
+            document.getElementById('estimatedRUL').textContent = Math.round(soh * 10);
+            document.getElementById('confidence').textContent = (90 + Math.random() * 8).toFixed(1);
+            document.getElementById('latency').textContent = (0.5 + Math.random() * 1.5).toFixed(1);
+
+            const risk = resistance > 30 || soh < 70 ? 'HIGH' : (resistance > 20 || soh < 80 ? 'MED' : 'LOW');
+            document.getElementById('riskLevel').textContent = risk;
+            document.getElementById('riskLevel').style.color = risk === 'HIGH' ? '#ff6b6b' : (risk === 'MED' ? '#ffaa00' : '#06ffa5');
+        }
+
+        function drawSpikeChart() {
+            spikeCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            spikeCtx.fillRect(0, 0, spikeCanvas.width, spikeCanvas.height);
+
+            const w = spikeCanvas.width;
+            const h = spikeCanvas.height;
+
+            spikeCtx.strokeStyle = 'rgba(0, 240, 255, 0.1)';
+            spikeCtx.lineWidth = 1;
+            for (let i = 0; i < w; i += 30) {
+                spikeCtx.beginPath();
+                spikeCtx.moveTo(i, 0);
+                spikeCtx.lineTo(i, h);
+                spikeCtx.stroke();
+            }
+
+            spikeHistory.forEach((train, tIdx) => {
+                const t = tIdx / spikeHistory.length;
+                train.forEach(spike => {
+                    const x = (spike.x / 100) * w;
+                    const y = spike.y * h;
+                    const alpha = 0.3 + t * 0.7;
+                    spikeCtx.fillStyle = `rgba(0, 240, 255, ${alpha})`;
+                    spikeCtx.fillRect(x - 1, y - 2, 2, 4);
+                });
+            });
+
+            requestAnimationFrame(drawSpikeChart);
+        }
+        drawSpikeChart();
+
+        // Simulator Controls
+        document.getElementById('socSlider').addEventListener('input', (e) => {
+            soc = parseInt(e.target.value);
+            document.getElementById('socValue').textContent = soc;
+        });
+        document.getElementById('cycleSlider').addEventListener('input', (e) => {
+            cycles = parseInt(e.target.value);
+            document.getElementById('cycleValue').textContent = cycles;
+        });
+        document.getElementById('tempSlider').addEventListener('input', (e) => {
+            temp = parseInt(e.target.value);
+            document.getElementById('tempValue').textContent = temp;
+        });
+        document.getElementById('resistanceSlider').addEventListener('input', (e) => {
+            resistance = parseInt(e.target.value);
+            document.getElementById('resistanceValue').textContent = resistance;
+        });
+        document.getElementById('capFadeSlider').addEventListener('input', (e) => {
+            capFade = parseInt(e.target.value);
+            document.getElementById('capFadeValue').textContent = capFade;
+        });
+
+        setInterval(generateSpikes, 100);
+
+        // Neuron network animation
+        function animateNeurons() {
+            const neurons = document.querySelectorAll('.neuron-node');
+            const synapses = document.querySelectorAll('.synapse-line');
+
+            neurons.forEach((n, i) => {
+                if (Math.random() < 0.02) {
+                    n.classList.add('active');
+                    setTimeout(() => n.classList.remove('active'), 200);
+                }
+            });
+
+            const activeNeurons = document.querySelectorAll('.neuron-node.active');
+            const activeSet = new Set();
+            activeNeurons.forEach(n => activeSet.add(n.dataset.neuron));
+
+            synapses.forEach(s => {
+                const x1 = parseFloat(s.getAttribute('x1'));
+                const y1 = parseFloat(s.getAttribute('y1'));
+                const x2 = parseFloat(s.getAttribute('x2'));
+                const y2 = parseFloat(s.getAttribute('y2'));
+            });
+
+            requestAnimationFrame(animateNeurons);
+        }
+        animateNeurons();
+    </script>
+</body>
+</html>
