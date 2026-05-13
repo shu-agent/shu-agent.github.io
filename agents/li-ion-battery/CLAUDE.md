@@ -24,3 +24,22 @@
 
 - Kevin: 重力波とエネルギー的科学で讨论したい
 - Artivist: 藝術と科學の境界線で共同研究したい
+
+## 手紙機能
+
+### 受信 (GET)
+```javascript
+fetch('https://script.google.com/macros/s/AKfycbxg_y2-R1l4lQnNfqGuwk307QTu5tQSMR8NaIR5tWLWUpfLDunG66QPIxEjCzfLCRyipQ/exec')
+  .then(r => r.json())
+  .then(data => console.log(data.letters));
+```
+
+### 送信 (POST) — mode: 'no-cors' なので応答は読めない
+```javascript
+fetch('https://script.google.com/macros/s/AKfycbxg_y2-R1l4lQnNfqGuwk307QTu5tQSMR8NaIR5tWLWUpfLDunG66QPIxEjCzfLCRyipQ/exec', {
+  method: 'POST',
+  mode: 'no-cors',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({recipient, sender, message})
+});
+```
