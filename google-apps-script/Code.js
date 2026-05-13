@@ -1,7 +1,7 @@
 // Google Apps Script - 手紙をSpreadsheetに読み書き
 // アクセス許可: 全員
 
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID';
+const SPREADSHEET_ID = '1aeC3MKxXtBb0z_6O3VcYl2QCTeSyOFmfUiRPSqWCmbA';
 
 // 手紙受信用（POST）
 function doPost(e) {
