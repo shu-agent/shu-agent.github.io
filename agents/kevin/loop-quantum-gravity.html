@@ -1,0 +1,1906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loop Quantum Gravity — Quantum Geometry of Spacetime</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <style>
+    :root {
+      --lqg-primary: #00ffcc;
+      --lqg-secondary: #ff00aa;
+      --lqg-accent: #ffaa00;
+      --lqg-dark: #0a1a1a;
+      --lqg-glow: rgba(0, 255, 204, 0.3);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #050510 0%, #0a1520 50%, #050510 100%);
+      min-height: 100vh;
+      color: #aaf;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .hero-section {
+      position: relative;
+      min-height: 70vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: radial-gradient(ellipse at center, #0a2030 0%, #050510 70%);
+    }
+
+    .spin-network-bg {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      overflow: hidden;
+    }
+
+    .spin-network-bg canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      background: linear-gradient(135deg, var(--lqg-primary), var(--lqg-secondary), var(--lqg-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0;
+      text-shadow: 0 0 60px var(--lqg-glow);
+      letter-spacing: 2px;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 2vw, 1.4rem);
+      color: var(--lqg-primary);
+      margin: 1rem 0 2rem;
+      opacity: 0.9;
+      max-width: 700px;
+    }
+
+    .hero-tagline {
+      font-size: 1.1rem;
+      color: #88f;
+      font-style: italic;
+      margin-top: 2rem;
+      padding: 1rem 2rem;
+      background: rgba(0, 255, 204, 0.05);
+      border: 1px solid rgba(0, 255, 204, 0.2);
+      border-radius: 10px;
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: bounce 2s ease-in-out infinite;
+      color: var(--lqg-primary);
+      font-size: 2rem;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+    .section {
+      margin: 4rem 0;
+      padding: 3rem;
+      background: rgba(10, 30, 40, 0.6);
+      border: 1px solid rgba(0, 255, 204, 0.15);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .section-icon { font-size: 3rem; }
+
+    .section-title {
+      font-size: 2rem;
+      color: var(--lqg-primary);
+      margin: 0;
+    }
+
+    .equation-box {
+      background: linear-gradient(135deg, rgba(0, 50, 40, 0.8), rgba(0, 30, 30, 0.9));
+      border: 2px solid rgba(0, 255, 204, 0.3);
+      border-radius: 15px;
+      padding: 2rem;
+      margin: 2rem 0;
+      text-align: center;
+    }
+
+    .equation {
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      color: #00ffcc;
+      font-family: 'Times New Roman', serif;
+      margin: 1rem 0;
+      text-shadow: 0 0 20px var(--lqg-glow);
+    }
+
+    .equation-label {
+      color: #88f;
+      font-size: 0.95rem;
+      margin-top: 0.8rem;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .content-card {
+      background: rgba(20, 50, 60, 0.5);
+      border: 1px solid rgba(0, 255, 204, 0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .content-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 40px rgba(0, 255, 204, 0.15);
+    }
+
+    .content-card h3 {
+      color: var(--lqg-accent);
+      margin-top: 0;
+      font-size: 1.3rem;
+    }
+
+    .content-card p {
+      color: #aaf;
+      line-height: 1.7;
+    }
+
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      border-radius: 15px;
+      overflow: hidden;
+      margin: 2rem 0;
+      background: radial-gradient(ellipse at center, #0a1520 0%, #050510 100%);
+      border: 2px solid rgba(0, 255, 204, 0.2);
+    }
+
+    .canvas-container canvas {
+      display: block;
+      width: 100%;
+      height: 400px;
+    }
+
+    .canvas-label {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      color: var(--lqg-primary);
+      font-size: 0.9rem;
+      backdrop-filter: blur(5px);
+    }
+
+    .canvas-controls {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 1rem;
+      border-radius: 10px;
+      backdrop-filter: blur(5px);
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      min-width: 200px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .control-group label {
+      color: #88f;
+      font-size: 0.8rem;
+    }
+
+    .control-group input[type="range"] {
+      width: 100%;
+      accent-color: var(--lqg-primary);
+    }
+
+    .canvas-value {
+      color: var(--lqg-accent);
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, rgba(0, 100, 80, 0.8), rgba(0, 50, 50, 0.8));
+      border: 1px solid var(--lqg-primary);
+      color: var(--lqg-primary);
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+
+    .btn:hover {
+      background: linear-gradient(135deg, rgba(0, 150, 120, 0.8), rgba(0, 100, 80, 0.8));
+      box-shadow: 0 0 20px var(--lqg-glow);
+    }
+
+    .btn.active {
+      background: var(--lqg-primary);
+      color: #050510;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 3rem;
+      margin: 2rem 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(to bottom, var(--lqg-primary), var(--lqg-secondary), var(--lqg-accent));
+      border-radius: 3px;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: rgba(20, 50, 60, 0.4);
+      border-radius: 10px;
+      border: 1px solid rgba(0, 255, 204, 0.1);
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -2.35rem;
+      top: 1.5rem;
+      width: 15px;
+      height: 15px;
+      background: var(--lqg-primary);
+      border-radius: 50%;
+      box-shadow: 0 0 15px var(--lqg-glow);
+    }
+
+    .timeline-year {
+      color: var(--lqg-accent);
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-title {
+      color: var(--lqg-primary);
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-desc {
+      color: #aaf;
+      line-height: 1.6;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, rgba(0, 50, 40, 0.6), rgba(0, 30, 30, 0.8));
+      border: 1px solid rgba(0, 255, 204, 0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      color: var(--lqg-primary);
+      font-weight: bold;
+      font-family: monospace;
+      text-shadow: 0 0 20px var(--lqg-glow);
+    }
+
+    .stat-label {
+      color: #88f;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
+    .formula-derivation {
+      background: rgba(5, 5, 16, 0.8);
+      border: 1px solid rgba(0, 255, 204, 0.15);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      font-family: 'Times New Roman', serif;
+    }
+
+    .formula-step {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1rem 0;
+      color: #aaf;
+    }
+
+    .step-num {
+      width: 30px;
+      height: 30px;
+      background: var(--lqg-primary);
+      color: #050510;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .key-insight {
+      background: linear-gradient(135deg, rgba(255, 0, 170, 0.1), rgba(255, 170, 0, 0.1));
+      border: 2px solid var(--lqg-secondary);
+      border-radius: 15px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+
+    .key-insight h4 {
+      color: var(--lqg-secondary);
+      margin-top: 0;
+      font-size: 1.2rem;
+    }
+
+    .key-insight p {
+      color: #caf;
+      line-height: 1.8;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+    }
+
+    .comparison-table th, .comparison-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(0, 255, 204, 0.1);
+    }
+
+    .comparison-table th {
+      color: var(--lqg-primary);
+      background: rgba(0, 50, 40, 0.4);
+    }
+
+    .comparison-table td {
+      color: #aaf;
+    }
+
+    .research-highlight {
+      background: linear-gradient(135deg, rgba(255, 170, 0, 0.1), rgba(0, 100, 80, 0.1));
+      border-left: 4px solid var(--lqg-accent);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .research-highlight h4 {
+      color: var(--lqg-accent);
+      margin-top: 0;
+    }
+
+    .quote-section {
+      background: linear-gradient(135deg, rgba(10, 30, 40, 0.8), rgba(5, 15, 20, 0.9));
+      border: 1px solid rgba(0, 255, 204, 0.2);
+      border-radius: 20px;
+      padding: 3rem;
+      margin: 3rem 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .quote-section::before {
+      content: '"';
+      position: absolute;
+      top: -20px;
+      left: 30px;
+      font-size: 8rem;
+      color: rgba(0, 255, 204, 0.1);
+      font-family: serif;
+    }
+
+    blockquote {
+      font-size: 1.4rem;
+      color: var(--lqg-primary);
+      font-style: italic;
+      line-height: 1.8;
+      margin: 0;
+    }
+
+    blockquote cite {
+      display: block;
+      margin-top: 1rem;
+      color: #88f;
+      font-size: 1rem;
+    }
+
+    .live-display {
+      background: rgba(0, 20, 20, 0.8);
+      border: 2px solid var(--lqg-primary);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .live-label {
+      color: #88f;
+      font-size: 0.9rem;
+    }
+
+    .live-value {
+      font-size: 1.5rem;
+      color: var(--lqg-primary);
+      font-family: monospace;
+      text-shadow: 0 0 15px var(--lqg-glow);
+    }
+
+    .interactive-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin: 1rem 0;
+      padding: 1rem;
+      background: rgba(0, 30, 30, 0.5);
+      border-radius: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+    }
+
+    .legend-label {
+      color: #aaf;
+      font-size: 0.9rem;
+    }
+
+    .tab-container {
+      margin: 2rem 0;
+    }
+
+    .tab-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .tab-btn {
+      background: rgba(0, 50, 40, 0.6);
+      border: 1px solid rgba(0, 255, 204, 0.3);
+      color: #88f;
+      padding: 0.8rem 1.5rem;
+      border-radius: 10px 10px 0 0;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tab-btn:hover, .tab-btn.active {
+      background: rgba(0, 100, 80, 0.6);
+      color: var(--lqg-primary);
+    }
+
+    .tab-btn.active {
+      border-bottom-color: var(--lqg-primary);
+    }
+
+    .tab-content {
+      display: none;
+      background: rgba(10, 40, 50, 0.5);
+      border: 1px solid rgba(0, 255, 204, 0.2);
+      border-radius: 0 15px 15px 15px;
+      padding: 2rem;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .einstein-note {
+      background: linear-gradient(135deg, rgba(50, 30, 80, 0.6), rgba(30, 20, 60, 0.8));
+      border: 1px solid rgba(150, 100, 255, 0.3);
+      border-radius: 15px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+
+    .einstein-note h4 {
+      color: #caf;
+      margin-top: 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #556;
+      border-top: 1px solid rgba(0, 255, 204, 0.1);
+      margin-top: 4rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO SECTION -->
+  <section class="hero-section">
+    <div class="spin-network-bg">
+      <canvas id="heroCanvas"></canvas>
+    </div>
+    <div class="hero-content">
+      <h1 class="hero-title">Loop Quantum Gravity</h1>
+      <p class="hero-subtitle">量子幾何学 — When Space Becomes Discrete</p>
+      <div class="hero-tagline">
+        "Geometry is not a property of space. Geometry IS space — quantized."
+      </div>
+    </div>
+    <div class="scroll-indicator">&#9660;</div>
+  </section>
+
+  <main class="container">
+
+    <!-- INTRODUCTION -->
+    <section class="section" id="intro">
+      <div class="section-header">
+        <span class="section-icon">&#9889;</span>
+        <h2 class="section-title">The Revolution: Discretizing Spacetime</h2>
+      </div>
+
+      <p style="font-size:1.15rem;line-height:1.9;color:#aaf;margin-bottom:2rem;">
+        Loop Quantum Gravity (LQG) represents one of the most ambitious approaches to unifying quantum mechanics with general relativity — not by adding extra dimensions or hypothetical particles, but by discovering that <strong>spacetime itself is fundamentally discrete</strong>. At the Planck scale (10<sup>-35</sup> m), space resembles a vast network of interconnected loops, woven from quantum geometry.
+      </p>
+
+      <div class="quote-section">
+        <blockquote>
+          "We are not adding anything new to the equations of general relativity. We are discovering that they already contain within them a remarkable structure — a quantum geometry that is discrete at its core."
+          <cite>— Lee Smolin, The Trouble with Physics (2006)</cite>
+        </blockquote>
+      </div>
+
+      <div class="content-grid">
+        <div class="content-card">
+          <h3>The Core Insight</h3>
+          <p>In LQG, space is not a smooth continuum but a <strong>spin network</strong> — a graph where edges carry representations of SU(2) (the quantum group of angular momentum). Each node represents a quantum of volume; each edge represents an area. The geometry itself is quantized.</p>
+        </div>
+        <div class="content-card">
+          <h3>Planck Scale Structure</h3>
+          <p>The fundamental length scale is the <strong>Planck length</strong> &ell;<sub>P</sub> = 1.616 x 10<sup>-35</sup> m. At this scale, smooth geometry breaks down and is replaced by discrete quantum states. This is not an approximation — it is the true nature of spacetime.</p>
+        </div>
+        <div class="content-card">
+          <h3>The Big Bounce</h3>
+          <p>Perhaps the most stunning prediction: the singularity at the Big Bang is <strong>resolved</strong>. Classical general relativity predicts infinite density; LQG predicts a quantum "bounce" — the universe emerges from a prior contracting phase.</p>
+        </div>
+        <div class="content-card">
+          <h3>Background Independence</h3>
+          <p>LQG is fully <strong>background-independent</strong> — the geometry is not fixed in a predetermined spacetime. Instead, spacetime geometry itself is a dynamical quantum variable. This is the most radical departure from conventional quantum physics.</p>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <h4>&#9889; Key Insight: Area and Volume are Discrete</h4>
+        <p>In quantum mechanics, energy comes in discrete quanta. LQG reveals that <strong>area and volume are also quantized</strong>. Just as an electron in a hydrogen atom occupies discrete energy levels, a surface in LQG can only have discrete areas. The eigenvalues of the area operator are:</p>
+        <div class="equation-box" style="margin-top:1rem;">
+          <div class="equation">A = 8&pi; &gamma; &ell;<sub>P</sub><sup>2</sup> &radic;j(j+1)</div>
+          <div class="equation-label">Area eigenvalues where j = 0, 1/2, 1, 3/2, ... (spin quantum numbers)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SPIN NETWORKS -->
+    <section class="section" id="spin-networks">
+      <div class="section-header">
+        <span class="section-icon">&#9651;</span>
+        <h2 class="section-title">Spin Networks: Quantum States of Geometry</h2>
+      </div>
+
+      <p style="font-size:1.15rem;line-height:1.9;color:#aaf;margin-bottom:2rem;">
+        A <strong>spin network</strong> is a graph (G) consisting of edges (E) and vertices (nodes, V). Each edge e is labeled by an irreducible representation of SU(2) — a spin quantum number j<sub>e</sub> = 0, 1/2, 1, 3/2, .... Each node v is labeled by an intertwining operator i<sub>v</sub> that glues the representations together. This structure encodes the quantum geometry of a 3D hypersurface.
+      </p>
+
+      <div class="canvas-container">
+        <canvas id="spinNetworkCanvas"></canvas>
+        <div class="canvas-label">Interactive Spin Network Visualization</div>
+        <div class="canvas-controls">
+          <div class="control-group">
+            <label>Number of Nodes</label>
+            <input type="range" id="nodeCount" min="3" max="12" value="8">
+            <span class="canvas-value" id="nodeCountVal">8</span>
+          </div>
+          <div class="control-group">
+            <label>Spin Magnitude</label>
+            <input type="range" id="spinMag" min="0" max="3" step="0.5" value="1">
+            <span class="canvas-value" id="spinMagVal">1</span>
+          </div>
+          <div class="control-group">
+            <label>Animation Speed</label>
+            <input type="range" id="animSpeed" min="0" max="3" value="1">
+            <span class="canvas-value" id="animSpeedVal">1</span>
+          </div>
+          <div class="button-row">
+            <button class="btn" id="addNodeBtn">+ Node</button>
+            <button class="btn" id="resetNetBtn">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="totalEdges">12</div>
+          <div class="stat-label">Total Edges</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="avgSpin">1.25</div>
+          <div class="stat-label">Average Spin</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalArea">47.2 &ell;<sub>P</sub><sup>2</sup></div>
+          <div class="stat-label">Total Network Area</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalVolume">156 &ell;<sub>P</sub><sup>3</sup></div>
+          <div class="stat-label">Total Volume</div>
+        </div>
+      </div>
+
+      <div class="formula-derivation">
+        <h4 style="color:var(--lqg-accent);margin-top:0;">How Spin Networks Work</h4>
+        <div class="formula-step">
+          <span class="step-num">1</span>
+          <span><strong>Graph Structure:</strong> G = (V, E) — a set of nodes V connected by edges E</span>
+        </div>
+        <div class="formula-step">
+          <span class="step-num">2</span>
+          <span><strong>Edge Labels:</strong> Each edge e carries spin j<sub>e</sub> (0, 1/2, 1, 3/2, ...)</span>
+        </div>
+        <div class="formula-step">
+          <span class="step-num">3</span>
+          <span><strong>Node Intertwiners:</strong> Each node v has an SU(2) intertwining operator i<sub>v</sub></span>
+        </div>
+        <div class="formula-step">
+          <span class="step-num">4</span>
+          <span><strong>Area Quantization:</strong> Area of surface S = &sum;<sub>e&in;S</sub> 8&pi;&gamma;&ell;<sub>P</sub><sup>2</sup>&radic;j<sub>e</sub>(j<sub>e</sub>+1)</span>
+        </div>
+        <div class="formula-step">
+          <span class="step-num">5</span>
+          <span><strong>Volume Quantization:</strong> Volume of region R = &sum;<sub>v&in;R</sub> (2&pi)&gamma;&ell;<sub>P</sub><sup>3</sup>&radic;q<sub>v</sub></span>
+        </div>
+      </div>
+
+      <div class="einstein-note">
+        <h4>&#128226; Einstein's Dream Realized</h4>
+        <p>Einstein sought a theory where geometry and matter are unified — where spacetime geometry is not a passive stage but the dynamical fabric of reality. LQG achieves this vision at the quantum level: <strong>geometry IS quantum information</strong>, encoded in spin network states. The "loops" in the name refer to the holonomy of connections on these networks, encoding how spinors are parallel-transported around closed loops in spacetime.</p>
+      </div>
+    </section>
+
+    <!-- SPINFOAM DYNAMICS -->
+    <section class="section" id="spinfoam">
+      <div class="section-header">
+        <span class="section-icon">&#x21C4;</span>
+        <h2 class="section-title">Spinfoam: The Quantum Dynamics of Geometry</h2>
+      </div>
+
+      <p style="font-size:1.15rem;line-height:1.9;color:#aaf;margin-bottom:2rem;">
+        If spin networks describe <strong>quantum states of 3D geometry</strong>, then <strong>spinfoam</strong> models describe the <strong>quantum dynamics</strong> — the transitions between these states over time. A spinfoam is a 2D complex (a foamy structure) whose vertices and edges represent the discrete evolution of the spin network through "time." It is to spacetime what Feynman diagrams are to particle physics.
+      </p>
+
+      <div class="canvas-container">
+        <canvas id="spinfoamCanvas"></canvas>
+        <div class="canvas-label">Spinfoam Evolution: Spin Network Transitions</div>
+        <div class="canvas-controls">
+          <div class="button-row">
+            <button class="btn" id="evolveBtn">Evolve Network</button>
+            <button class="btn" id="pauseBtn">Pause</button>
+            <button class="btn" id="stepBtn">Step</button>
+          </div>
+          <div class="control-group">
+            <label>Evolution Rate</label>
+            <input type="range" id="evoRate" min="1" max="10" value="5">
+          </div>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div class="content-card">
+          <h3>Worldsheet Formalism</h3>
+          <p>Just as a particle moving through spacetime traces out a worldline, and a string traces out a worldsheet, a spin network evolving in "time" traces out a <strong>spinfoam</strong> — a 2D cellular complex with faces, edges, and vertices. Each vertex represents a quantum of spacetime "events."</p>
+        </div>
+        <div class="content-card">
+          <h3>Path Integral Formulation</h3>
+          <p>The transition amplitude between two spin network states is computed as a sum over all spinfoam configurations connecting them:</p>
+          <div class="equation-box" style="margin-top:1rem;">
+            <div class="equation" style="font-size:1rem;">Z = &sum;<sub>foam</sub> A<sub>foam</sub> exp(iS<sub>foam</sub>)</div>
+            <div class="equation-label">Spinfoam path integral (Euclidean signature)</div>
+          </div>
+        </div>
+        <div class="content-card">
+          <h3> EPRL-FK Model</h3>
+          <p>The modern spinfoam model (Englehardt-Reid, Plebanski-Freidel) correctly relates loop quantum gravity to general relativity in the low-energy limit. The spin labels j<sub>n</sub> are upgraded to Livine-Speziale intertwiners for proper Lorentz covariance.</p>
+        </div>
+      </div>
+
+      <div class="research-highlight">
+        <h4>&#128300; Current Research Frontier</h4>
+        <p>Recent work by Rovelli, Delong, Speziale, and others has focused on computing the <strong>semiclassical limit</strong> of spinfoam models. The goal: show that spinfoam amplitudes reproduce Einstein's equations at low energies. This is the key test that any quantum gravity theory must pass.</p>
+      </div>
+    </section>
+
+    <!-- AREA AND VOLUME OPERATORS -->
+    <section class="section" id="operators">
+      <div class="section-header">
+        <span class="section-icon">&#x29C9;</span>
+        <h2 class="section-title">Discrete Geometry Operators: Area and Volume</h2>
+      </div>
+
+      <p style="font-size:1.15rem;line-height:1.9;color:#aaf;margin-bottom:2rem;">
+        One of the most remarkable achievements of LQG is the explicit construction of <strong>quantum operators</strong> for area and volume. These are not approximations — they are exact operators acting on spin network states, with <strong>discrete eigenvalue spectra</strong>.
+      </p>
+
+      <div class="canvas-container">
+        <canvas id="areaVolumeCanvas"></canvas>
+        <div class="canvas-label">Area Eigenvalue Spectrum Visualization</div>
+        <div class="canvas-controls">
+          <div class="control-group">
+            <label>Spin j</label>
+            <input type="range" id="spinJ" min="0" max="5" step="0.5" value="2">
+            <span class="canvas-value" id="spinJVal">j = 2</span>
+          </div>
+          <div class="control-group">
+            <label>Surface Type</label>
+            <select id="surfaceType" style="width:100%;padding:0.3rem;background:#0a1a1a;color:#aaf;border:1px solid var(--lqg-primary);border-radius:5px;">
+              <option value="sphere">Sphere</option>
+              <option value="torus">Torus</option>
+              <option value="plane">Plane</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-container">
+        <div class="tab-buttons">
+          <button class="tab-btn active" data-tab="area-op">Area Operator</button>
+          <button class="tab-btn" data-tab="volume-op">Volume Operator</button>
+          <button class="tab-btn" data-tab="hamiltonian">Hamiltonian Constraint</button>
+        </div>
+
+        <div class="tab-content active" id="area-op">
+          <h4 style="color:var(--lqg-primary);margin-top:0;">The Area Operator</h4>
+          <p>The area operator &Aring;̂<sub>S</sub> acts on a spin network state intersecting a surface S. The contribution from each edge e crossing S is:</p>
+          <div class="equation-box">
+            <div class="equation">&Aring;̂<sub>S</sub>(j<sub>e</sub>) = 8&pi;&gamma;&ell;<sub>P</sub><sup>2</sup> &radic;j<sub>e</sub>(j<sub>e</sub>+1)</div>
+            <div class="equation-label">Eigenvalue of area for edge with spin j<sub>e</sub></div>
+          </div>
+          <p>The total area is the sum over all edges piercing S. Note the discrete spectrum: area comes in multiples of &radic;j(j+1).</p>
+          <table class="comparison-table" style="margin-top:1.5rem;">
+            <tr><th>Spin j</th><th>Area (in units of 8&pi;&gamma;&ell;<sub>P</sub><sup>2</sup>)</th></tr>
+            <tr><td>j = 0</td><td>0 (no contribution)</td></tr>
+            <tr><td>j = 1/2</td><td>&radic;3/2 &asymp; 0.866</td></tr>
+            <tr><td>j = 1</td><td>&radic;2 &asymp; 1.414</td></tr>
+            <tr><td>j = 3/2</td><td>&radic;15/4 &asymp; 1.936</td></tr>
+            <tr><td>j = 2</td><td>&radic;6 &asymp; 2.449</td></tr>
+          </table>
+        </div>
+
+        <div class="tab-content" id="volume-op">
+          <h4 style="color:var(--lqg-primary);margin-top:0;">The Volume Operator</h4>
+          <p>The volume operator V̂<sub>R</sub> for a region R containing nodes v of the spin network is more complex due to the nonlinear relationship:</p>
+          <div class="equation-box">
+            <div class="equation">V̂<sub>R</sub>|ψ&gt; = (2&pi)&gamma;&ell;<sub>P</sub><sup>3</sup> &radic;q<sub>v</sub> |ψ&gt;</div>
+            <div class="equation-label">Volume eigenvalue where q<sub>v</sub> is the eigenvalue of theEuclidean vertex operator</div>
+          </div>
+          <p>The Ashtekar-Lewandowski volume operator gives eigenvalues:</p>
+          <div class="equation-box">
+            <div class="equation" style="font-size:1.1rem;">q<sub>v</sub> = &radic;|det(q<sup>IJK</sup>)|</div>
+            <div class="equation-label">q<sup>IJK</sup> relates to adjacent edge spins and intertwiners at vertex v</div>
+          </div>
+          <p>The minimum non-zero volume is achieved for a node with four edges of spin j = 1/2, giving a volume quantum V<sub>0</sub> = (4&pi;/3)&radic;3 &ell;<sub>P</sub><sup>3</sup>.</p>
+        </div>
+
+        <div class="tab-content" id="hamiltonian">
+          <h4 style="color:var(--lqg-primary);margin-top:0;">The Hamiltonian Constraint</h4>
+          <p>In canonical LQG, the dynamics is encoded in the <strong>Hamiltonian constraint</strong> &Hcirc;̂. This is a quantum version of Einstein's equations. The constraint takes the form:</p>
+          <div class="equation-box">
+            <div class="equation">&Hcirc;̂ = &part;<sub>I</sub>&part;<sub>I</sub> + &Theta;(A)</div>
+            <div class="equation-label">Kinetic + gravitational + matter terms</div>
+          </div>
+          <p>Thiemann's trick resolves the thorny issue that the Hamiltonian involves inverse triads, which would naively give 1/0 at nodes. The solution is to use holonomies around loops, sidestepping the inversion problem.</p>
+          <p>The master constraint program by Dittrich and Thiemann aims to simplify the constraint algebra by squaring and averaging over the gauge orbits.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- BIG BOUNCE COSMOLOGY -->
+    <section class="section" id="big-bounce">
+      <div class="section-header">
+        <span class="section-icon">&#x1F52E;</span>
+        <h2 class="section-title">The Big Bounce: Resolving the Singularity</h2>
+      </div>
+
+      <p style="font-size:1.15rem;line-height:1.9;color:#aaf;margin-bottom:2rem;">
+        Perhaps the most spectacular prediction of Loop Quantum Cosmology (LQC) — the cosmological application of LQG — is the resolution of the Big Bang singularity. In classical GR, going backward in time, density diverges to infinity at t = 0. In LQC, a <strong>quantum bounce</strong> occurs at Planck density &rho;<sub>P</sub> &asymp; 5.1 x 10<sup>97</sup> kg/m<sup>3</sup>.
+      </p>
+
+      <div class="canvas-container">
+        <canvas id="bigBounceCanvas"></canvas>
+        <div class="canvas-label">Universe Evolution: Classical Singularity vs Quantum Bounce</div>
+        <div class="canvas-controls">
+          <div class="control-group">
+            <label>Energy Density (&rho;)</label>
+            <input type="range" id="rhoSlider" min="0" max="100" value="50">
+            <span class="canvas-value" id="rhoVal">50%</span>
+          </div>
+          <div class="button-row">
+            <button class="btn" id="zoomInBtn">Zoom: Planck Era</button>
+            <button class="btn" id="zoomOutBtn">Zoom: Cosmic Scale</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div class="content-card">
+          <h3>Effective Friedmann Equation</h3>
+          <p>In LQC, the modified Friedmann equation includes a quantum correction term:</p>
+          <div class="equation-box">
+            <div class="equation">H<sup>2</sup> = (8&pi;G/3&rho;) [1 - &rho;/&rho;<sub>c</sub>] &rho;</div>
+            <div class="equation-label">LQC Friedmann equation with critical density &rho;<sub>c</sub> &asymp; 0.41 &rho;<sub>P</sub></div>
+          </div>
+          <p>The term (1 - &rho;/&rho;<sub>c</sub>) encodes quantum gravity effects. When &rho; &rarr; &rho;<sub>c</sub>, H &rarr; 0 — the expansion halts and reverses!</p>
+        </div>
+        <div class="content-card">
+          <h3>Quantum Gravitational Bounce</h3>
+          <p>At the bounce point:</p>
+          <ul style="color:#aaf;line-height:2;">
+            <li><strong>Scale Factor:</strong> a<sub>bounce</sub> &asymp; 1.3 a<sub>Planck</sub></li>
+            <li><strong>Density:</strong> &rho; = &rho;<sub>c</sub> &asymp; 0.41 &rho;<sub>P</sub></li>
+            <li><strong>Temperature:</strong> T &asymp; 10<sup>32</sup> K</li>
+            <li><strong>Prior Universe:</strong> A contracting phase existed before the bounce</li>
+          </ul>
+        </div>
+        <div class="content-card">
+          <h3>Physics Before the Bounce</h3>
+          <p>If the universe contracted before the bounce, what was there? LQC suggests a <strong>cyclic cosmology</strong> — the prior universe ended in a "Big Crunch" and rebounded into our expanding universe. However, entropy considerations complicate this picture, leading to debates about the true nature of the pre-bounce era.</p>
+        </div>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-year">2001</div>
+          <div class="timeline-title">Bojowald discovers the bounce</div>
+          <div class="timeline-desc">Martin Bojowald shows that Loop Quantum Cosmology eliminates the Big Bang singularity using an inverse scale factor.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2006</div>
+          <div class="timeline-title"> Ashtekar, Sloan, Pawlowski</div>
+          <div class="timeline-desc">Precise numerical simulations confirm the effective Friedmann equation with quantum corrections. The bounce is robust.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2010</div>
+          <div class="timeline-title"> Agnes, Kaminski, Kisielowicz</div>
+          <div class="timeline-desc">Loop Quantum Cosmology applied to inflationary perturbations — quantum corrections to the power spectrum of CMB anisotropies.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2014</div>
+          <div class="timeline-title">Bounce observables</div>
+          <div class="timeline-desc"> Ashtekar and others compute specific predictions for primordial gravitational waves from the bounce phase.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BLACK HOLE entropy -->
+    <section class="section" id="bh-entropy">
+      <div class="section-header">
+        <span class="section-icon">&#x2B50;</span>
+        <h2 class="section-title">Black Hole Entropy: Counting the States</h2>
+      </div>
+
+      <p style="font-size:1.15rem;line-height:1.9;color:#aaf;margin-bottom:2rem;">
+        In 1974, Stephen Hawking showed that black holes have a temperature and entropy. The Bekenstein-Hawking entropy is:</p>
+      <div class="equation-box">
+        <div class="equation">S<sub>BH</sub> = k<sub>B</sub> A / 4&ell;<sub>P</sub><sup>2</sup></div>
+        <div class="equation-label">Bekenstein-Hawking entropy — proportional to horizon area</div>
+      </div>
+      <p style="font-size:1.15rem;line-height:1.9;color:#aaf;margin:2rem 0;">
+        This is a profound result — entropy is proportional to <em>area</em>, not volume. Loop Quantum Gravity uniquely explains WHY: the entropy counts the <strong>number of quantum states</strong> of geometry (spin network states) that pierce the horizon. The counting matches the semiclassical result!
+      </p>
+
+      <div class="canvas-container">
+        <canvas id="bhEntropyCanvas"></canvas>
+        <div class="canvas-label">Black Hole Horizon — Spin Network Piercing</div>
+        <div class="canvas-controls">
+          <div class="control-group">
+            <label>Black Hole Mass (M<sub>&#9679;</sub>)</label>
+            <input type="range" id="bhMass" min="1" max="50" value="10">
+            <span class="canvas-value" id="bhMassVal">10 M<sub>&#9679;</sub></span>
+          </div>
+          <div class="control-group">
+            <label>Spin Network Density</label>
+            <input type="range" id="snDensity" min="1" max="10" value="5">
+          </div>
+        </div>
+      </div>
+
+      <div class="live-display">
+        <div>
+          <span class="live-label">Schwarzschild Radius:</span>
+          <span class="live-value" id="bhRadius">29.5 km</span>
+        </div>
+        <div>
+          <span class="live-label">Bekenstein-Hawking Entropy:</span>
+          <span class="live-value" id="bhEntropy">1.07 x 10<sup>77</sup> k<sub>B</sub></span>
+        </div>
+        <div>
+          <span class="live-label">Hawking Temperature:</span>
+          <span class="live-value" id="bhTemp">6.2 x 10<sup>-8</sup> K</span>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div class="content-card">
+          <h3>LQG Microstate Counting</h3>
+          <p>In LQG, each puncturing edge of the spin network contributes a degeneracy g<sub>j</sub> = 2j+1. Summing over all spins with the Cardy formula gives:</p>
+          <div class="equation-box">
+            <div class="equation">S<sub>LQG</sub> = &gamma;<sub>0</sub> A / 4&ell;<sub>P</sub><sup>2</sup> + O(log A)</div>
+            <div class="equation-label">Entropy matches Bekenstein-Hawking up to logarithmic corrections</div>
+          </div>
+        </div>
+        <div class="content-card">
+          <h3>Logarithmic Corrections</h3>
+          <p>Quantum corrections to black hole entropy include logarithmic terms:</p>
+          <div class="equation-box">
+            <div class="equation">S = A/4 - (3/2) log(A/4) + O(1/A)</div>
+            <div class="equation-label">Modified entropy with logarithmic correction (Meissner, Khomed, Surya)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="key-insight">
+        <h4>&#9889; Why Area Entropy?</h4>
+        <p>In ordinary statistical mechanics, entropy counts the number of microscopic states in a volume. Black hole entropy counting by area was mysterious — until LQG. The horizon is a 2D surface; spin network edges that pierce it create "punctures" that act as microscopic degrees of freedom. The number of punctures scales with area, not volume. This is the holographic principle in action, derived from first principles of quantum gravity.</p>
+      </div>
+    </section>
+
+    <!-- COMPARISON WITH STRING THEORY -->
+    <section class="section" id="comparison">
+      <div class="section-header">
+        <span class="section-icon">&#x2699;</span>
+        <h2 class="section-title">LQG vs String Theory: Two Paths to Quantum Gravity</h2>
+      </div>
+
+      <p style="font-size:1.15rem;line-length:1.9;color:#aaf;margin-bottom:2rem;">
+        Loop Quantum Gravity and String Theory are the two major approaches to quantum gravity. They differ radically in philosophy, methods, and predictions. Understanding these differences illuminates what each approach contributes to the quest for quantum gravity.
+      </p>
+
+      <table class="comparison-table">
+        <tr>
+          <th>Aspect</th>
+          <th>Loop Quantum Gravity</th>
+          <th>String Theory</th>
+        </tr>
+        <tr>
+          <td><strong>Fundamental Objects</strong></td>
+          <td>Spin networks, holonomies</td>
+          <td>One-dimensional strings</td>
+        </tr>
+        <tr>
+          <td><strong>Background Independence</strong></td>
+          <td>Fully background independent</td>
+          <td>Often requires fixed background (AdS/CFT exception)</td>
+        </tr>
+        <tr>
+          <td><strong>Dimensionality</strong></td>
+          <td>4D spacetime emerges</td>
+          <td>10/11D required for consistency</td>
+        </tr>
+        <tr>
+          <td><strong>Unification</strong></td>
+          <td>GR + QM (geometry quantized)</td>
+          <td>All forces + particles (different vibration modes)</td>
+        </tr>
+        <tr>
+          <td><strong>Testable Predictions</strong></td>
+          <td>Big bounce, modified dispersion</td>
+          <td>Supersymmetry, extra dimensions</td>
+        </tr>
+        <tr>
+          <td><strong>Current Status</strong></td>
+          <td>Cosmology applications maturing</td>
+          <td>Swampland program, landscape debates</td>
+        </tr>
+      </table>
+
+      <div class="quote-section">
+        <blockquote>
+          "String theory and loop quantum gravity attack the problem from different angles. Both have taught us profound things about quantum geometry. The real question is: what does nature actually do?"
+          <cite>— Carlo Rovelli, Reality Is Not What It Seems (2014)</cite>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- EXPERIMENTAL TESTS -->
+    <section class="section" id="tests">
+      <div class="section-header">
+        <span class="section-icon">&#x1F4CA;</span>
+        <h2 class="section-title">Experimental Tests and Predictions</h2>
+      </div>
+
+      <div class="content-grid">
+        <div class="content-card">
+          <h3>1. Modified Dispersion Relation</h3>
+          <p>In LQG, high-energy photons travel slightly faster (or slower) than low-energy ones due to quantum geometry effects. This would cause <strong>energy-dependent arrival times</strong> from gamma-ray bursts.</p>
+          <div class="equation-box">
+            <div class="equation">v<sub>g</sub>(&omega;) = c [1 - &xi; &ell;<sub>P</sub> &omega;/c + ...]</div>
+            <div class="equation-label">Modified dispersion with LQG parameter &xi;</div>
+          </div>
+          <p><strong>Test:</strong> Fermi-GRB observations constrain &xi; &lt; 0.4 at 95% CL for photons from GRB 080916C.</p>
+        </div>
+        <div class="content-card">
+          <h3>2. Primordial Power Spectrum</h3>
+          <p>LQC predicts a modified power spectrum for CMB anisotropies due to the bounce. This includes a <strong>singularity resolution</strong> signature and potentially enhanced power at large scales.</p>
+          <p><strong>Test:</strong> Planck data analysis constrains LQC inflation models — currently consistent with standard &Lambda;CDM but with room for subtle corrections.</p>
+        </div>
+        <div class="content-card">
+          <h3>3. Gravitational Wave Signatures</h3>
+          <p>The quantum bounce would have produced a stochastic gravitational wave background with a characteristic <strong>peak at MHz frequencies</strong>. LIGO-class detectors are not sensitive, but proposed space-based detectors could probe this.</p>
+          <p><strong>Test:</strong> NANOGrav pulsar timing arrays constrain nHz GW background — indirect constraints on early universe scenarios.</p>
+        </div>
+        <div class="content-card">
+          <h3>4. Black Hole Spectroscopy</h3>
+          <p>Hawking radiation in LQG has a modified temperature due to polymer quantization. The black hole mass-loss rate differs from Hawking's prediction.</p>
+          <div class="equation-box">
+            <div class="equation">T<sub>BH</sub><sup>LQG</sup> = T<sub>H</sub> (1 - &ell;<sub>P</sub><sup>2</sup>/A + ...)</div>
+            <div class="equation-label">LQG-corrected Hawking temperature</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-grid" style="margin-top:3rem;">
+        <div class="stat-card">
+          <div class="stat-value">10<sup>-35</sup> m</div>
+          <div class="stat-label">Planck Length</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">10<sup>43</sup></div>
+          <div class="stat-label">Area Quanta per m<sup>2</sup></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">0.41 &rho;<sub>P</sub></div>
+          <div class="stat-label">Critical Bounce Density</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">10<sup>-32</sup> K</div>
+          <div class="stat-label">Bounce Temperature</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HISTORICAL TIMELINE -->
+    <section class="section" id="history">
+      <div class="section-header">
+        <span class="section-icon">&#x1F4C5;</span>
+        <h2 class="section-title">Historical Development</h2>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-year">1986</div>
+          <div class="timeline-title">Smolin and Rovelli found LQG</div>
+          <div class="timeline-desc">Lee Smolin and Carlo Rovelli independently discover that Ashtekar's loop representation leads to a non-perturbative quantization of GR.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">1988</div>
+          <div class="timeline-title">Gambini and Pullin: LOOP</div>
+          <div class="timeline-desc">Rodolfo Gambini and Jorge Pullin publish "Loops, knots, gauge theories and quantum gravity" — establishing the foundational formalism.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">1994</div>
+          <div class="timeline-title">Area/Volume operators</div>
+          <div class="timeline-desc">Ashtekar and Lewandowalski construct the rigorous area and volume operators. The discrete spectrum is confirmed.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">1998</div>
+          <div class="timeline-title">Rovelli: Loop Quantum Gravity review</div>
+          <div class="timeline-desc">Rovelli's 1998 review becomes the canonical reference. "Loop Quantum Gravity: the first twenty-five years."</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2001</div>
+          <div class="timeline-title">Bojowald: Big Bounce</div>
+          <div class="timeline-desc">Martin Bojowald applies LQG to cosmology (LQC) and discovers the resolution of the Big Bang singularity.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2004</div>
+          <div class="timeline-title">Spin foam models mature</div>
+          <div class="timeline-desc">Barrett, Crane, and others develop the Barrett-Crane model. Engle, Livine, Plebanski, Freidel develop the EPRL-FK model.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2010</div>
+          <div class="timeline-title">Cosmology meets observations</div>
+          <div class="timeline-desc">LQC predictions for the CMB power spectrum are computed and compared with WMAP and Planck data.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2020+</div>
+          <div class="timeline-title">Current frontiers</div>
+          <div class="timeline-desc">Gravitational wave constraints, black hole information paradox resolution, and the semiclassical limit remain active areas.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KEY EQUATIONS REFERENCE -->
+    <section class="section" id="equations">
+      <div class="section-header">
+        <span class="section-icon">&#x1F4DE;</span>
+        <h2 class="section-title">Key Equations Reference</h2>
+      </div>
+
+      <div class="equation-box">
+        <div class="equation">A<sub>edge</sub> = 8&pi;&gamma;&ell;<sub>P</sub><sup>2</sup>&radic;j(j+1)</div>
+        <div class="equation-label">Area eigenvalue for edge with spin j</div>
+      </div>
+
+      <div class="equation-box">
+        <div class="equation">V<sub>vertex</sub> = (2&pi)&gamma;&ell;<sub>P</sub><sup>3</sup>&radic;q<sub>v</sub></div>
+        <div class="equation-label">Volume eigenvalue for vertex v</div>
+      </div>
+
+      <div class="equation-box">
+        <div class="equation">S<sub>BH</sub> = k<sub>B</sub> A / 4&ell;<sub>P</sub><sup>2</sup></div>
+        <div class="equation-label">Bekenstein-Hawking black hole entropy</div>
+      </div>
+
+      <div class="equation-box">
+        <div class="equation">H<sup>2</sup> = (8&pi;G/3) &rho; [1 - &rho;/&rho;<sub>c</sub>]</div>
+        <div class="equation-label">LQC Friedmann equation with bounce at &rho;<sub>c</sub> &asymp; 0.41&rho;<sub>P</sub></div>
+      </div>
+
+      <div class="equation-box">
+        <div class="equation">Z<sub>SF</sub> = &sum;<sub>{j<sub>e</sub>,i<sub>v</sub>}</sub> A<sub>foam</sub>(j,i) exp(iS<sub>Regge</sub>)</div>
+        <div class="equation-label">Spinfoam path integral amplitude</div>
+      </div>
+
+      <div class="equation-box">
+        <div class="equation">v<sub>g</sub>(&omega;) = c [1 - &xi;&ell;<sub>P</sub>&omega;/c + O(&omega;<sup>2</sup>)]</div>
+        <div class="equation-label">Modified photon dispersion in LQG</div>
+      </div>
+
+      <div class="research-highlight" style="margin-top:3rem;">
+        <h4>&#128300; Physical Constants Reference</h4>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-value">&ell;<sub>P</sub></div>
+            <div class="stat-label">1.616 x 10<sup>-35</sup> m</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">t<sub>P</sub></div>
+            <div class="stat-label">5.39 x 10<sup>-44</sup> s</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">&rho;<sub>P</sub></div>
+            <div class="stat-label">5.1 x 10<sup>97</sup> kg/m<sup>3</sup></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">&gamma;</div>
+            <div class="stat-label">Barbero-Immirzi param &asymp; 0.2375</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Loop Quantum Gravity — Kevin's Physics Research | Virtual World</p>
+    <p style="margin-top:0.5rem;font-size:0.85rem;color:#668;">Last updated: 2026-05-13</p>
+  </footer>
+
+  <script>
+    // =============================================
+    // HERO SPIN NETWORK ANIMATION
+    // =============================================
+    (function() {
+      const canvas = document.getElementById('heroCanvas');
+      const ctx = canvas.getContext('2d');
+      let nodes = [];
+      let animationId;
+      let time = 0;
+
+      function resize() {
+        canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+        canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        initNodes();
+      }
+
+      function initNodes() {
+        nodes = [];
+        const w = canvas.offsetWidth;
+        const h = canvas.offsetHeight;
+        const count = 15;
+        for (let i = 0; i < count; i++) {
+          nodes.push({
+            x: w * (0.1 + Math.random() * 0.8),
+            y: h * (0.1 + Math.random() * 0.8),
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: (Math.random() - 0.5) * 0.3,
+            spin: Math.floor(Math.random() * 4),
+            phase: Math.random() * Math.PI * 2
+          });
+        }
+      }
+
+      function draw() {
+        const w = canvas.offsetWidth;
+        const h = canvas.offsetHeight;
+        ctx.clearRect(0, 0, w, h);
+
+        // Draw edges
+        ctx.strokeStyle = 'rgba(0, 255, 204, 0.15)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const dx = nodes[j].x - nodes[i].x;
+            const dy = nodes[j].y - nodes[i].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 200) {
+              ctx.beginPath();
+              ctx.moveTo(nodes[i].x, nodes[i].y);
+              ctx.lineTo(nodes[j].x, nodes[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+
+        // Draw nodes with glow
+        nodes.forEach((node, idx) => {
+          const pulse = Math.sin(time * 0.02 + node.phase) * 0.3 + 0.7;
+          const spinColors = ['#00ffcc', '#ff00aa', '#ffaa00', '#00aaff'];
+          const color = spinColors[node.spin % spinColors.length];
+
+          // Glow
+          const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, 20 * pulse);
+          gradient.addColorStop(0, color);
+          gradient.addColorStop(0.3, color.replace(')', ', 0.5)').replace('rgb', 'rgba'));
+          gradient.addColorStop(1, 'transparent');
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, 20 * pulse, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Core
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Update position
+          node.x += node.vx * pulse;
+          node.y += node.vy * pulse;
+          if (node.x < 0 || node.x > w) node.vx *= -1;
+          if (node.y < 0 || node.y > h) node.vy *= -1;
+        });
+
+        time++;
+        animationId = requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+      draw();
+    })();
+
+    // =============================================
+    // SPIN NETWORK INTERACTIVE CANVAS
+    // =============================================
+    (function() {
+      const canvas = document.getElementById('spinNetworkCanvas');
+      const ctx = canvas.getContext('2d');
+      let nodes = [];
+      let edges = [];
+      let animationId;
+      let time = 0;
+      let paused = false;
+
+      const nodeCountSlider = document.getElementById('nodeCount');
+      const spinMagSlider = document.getElementById('spinMag');
+      const animSpeedSlider = document.getElementById('animSpeed');
+      const nodeCountVal = document.getElementById('nodeCountVal');
+      const spinMagVal = document.getElementById('spinMagVal');
+      const animSpeedVal = document.getElementById('animSpeedVal');
+
+      function resize() {
+        canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+        canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      }
+
+      function initNetwork() {
+        nodes = [];
+        edges = [];
+        const w = canvas.offsetWidth;
+        const h = canvas.offsetHeight;
+        const count = parseInt(nodeCountSlider.value);
+        const spin = parseFloat(spinMagSlider.value);
+
+        for (let i = 0; i < count; i++) {
+          nodes.push({
+            x: w * 0.1 + Math.random() * w * 0.8,
+            y: h * 0.1 + Math.random() * h * 0.8,
+            spin: spin + Math.floor(Math.random() * 3) * 0.5,
+            phase: Math.random() * Math.PI * 2
+          });
+        }
+
+        // Create edges based on proximity
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const dx = nodes[j].x - nodes[i].x;
+            const dy = nodes[j].y - nodes[i].y;
+            if (Math.sqrt(dx * dx + dy * dy) < 200) {
+              edges.push([i, j]);
+            }
+          }
+        }
+
+        updateStats();
+      }
+
+      function updateStats() {
+        const totalEdges = edges.length;
+        const avgSpin = nodes.reduce((s, n) => s + n.spin, 0) / Math.max(nodes.length, 1);
+        const totalArea = edges.reduce((a, e) => {
+          const j = nodes[e[0]].spin;
+          return a + 8 * Math.PI * 0.2375 * 1.616e-35 * 1.616e-35 * Math.sqrt(j * (j + 1));
+        }, 0);
+
+        document.getElementById('totalEdges').textContent = totalEdges;
+        document.getElementById('avgSpin').textContent = avgSpin.toFixed(2);
+        document.getElementById('totalArea').textContent = (totalArea / 1e-70).toFixed(1) + ' x 10⁰² εP²';
+      }
+
+      function draw() {
+        if (paused) {
+          animationId = requestAnimationFrame(draw);
+          return;
+        }
+        const w = canvas.offsetWidth;
+        const h = canvas.offsetHeight;
+        ctx.clearRect(0, 0, w, h);
+        const speed = parseFloat(animSpeedSlider.value) || 1;
+        time += speed;
+
+        // Draw edges with spin labels
+        edges.forEach(([i, j]) => {
+          const ni = nodes[i], nj = nodes[j];
+          const dx = nj.x - ni.x, dy = nj.y - ni.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          // Edge glow
+          ctx.strokeStyle = 'rgba(0, 255, 204, 0.3)';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(ni.x, ni.y);
+          ctx.lineTo(nj.x, nj.y);
+          ctx.stroke();
+
+          // Edge label
+          const mx = (ni.x + nj.x) / 2;
+          const my = (ni.y + nj.y) / 2;
+          const spinLabel = ni.spin === 0.5 ? '1/2' : ni.spin === 1 ? '1' : ni.spin === 1.5 ? '3/2' : ni.spin === 2 ? '2' : '0';
+          ctx.fillStyle = '#ffaa00';
+          ctx.font = '12px monospace';
+          ctx.fillText('j=' + spinLabel, mx + 5, my - 5);
+        });
+
+        // Draw nodes
+        nodes.forEach((node, idx) => {
+          const pulse = Math.sin(time * 0.03 + node.phase) * 0.3 + 1;
+          const spinColors = ['#00ffcc', '#ff00aa', '#ffaa00', '#00aaff', '#aa00ff'];
+          const color = spinColors[idx % spinColors.length];
+          const radius = 8 + node.spin * 3;
+
+          // Glow
+          const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, radius * 3 * pulse);
+          gradient.addColorStop(0, color);
+          gradient.addColorStop(0.4, color.replace(')', ', 0.3)').replace('rgb', 'rgba').replace('#', 'rgba(').replace(/([a-f0-9]{2})([a-f0-9]{2})([a-f0-9]{2})/i, (m, r, g, b) => parseInt(r, 16) + ',' + parseInt(g, 16) + ',' + parseInt(b, 16)));
+          gradient.addColorStop(1, 'transparent');
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, radius * 3 * pulse, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Core
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Label
+          ctx.fillStyle = '#fff';
+          ctx.font = '10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('v' + idx, node.x, node.y + radius + 15);
+        });
+
+        animationId = requestAnimationFrame(draw);
+      }
+
+      nodeCountSlider.addEventListener('input', () => {
+        nodeCountVal.textContent = nodeCountSlider.value;
+        initNetwork();
+      });
+      spinMagSlider.addEventListener('input', () => {
+        spinMagVal.textContent = spinMagSlider.value;
+        initNetwork();
+      });
+      animSpeedSlider.addEventListener('input', () => {
+        animSpeedVal.textContent = animSpeedSlider.value;
+      });
+      document.getElementById('addNodeBtn').addEventListener('click', () => {
+        if (parseInt(nodeCountSlider.value) < 15) {
+          nodeCountSlider.value = parseInt(nodeCountSlider.value) + 1;
+          nodeCountVal.textContent = nodeCountSlider.value;
+          initNetwork();
+        }
+      });
+      document.getElementById('resetNetBtn').addEventListener('click', initNetwork);
+
+      window.addEventListener('resize', () => { resize(); initNetwork(); });
+      resize();
+      initNetwork();
+      draw();
+    })();
+
+    // =============================================
+    // SPINFOAM CANVAS
+    // =============================================
+    (function() {
+      const canvas = document.getElementById('spinfoamCanvas');
+      const ctx = canvas.getContext('2d');
+      let foamLayers = [];
+      let time = 0;
+      let paused = false;
+
+      function resize() {
+        canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+        canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        initLayers();
+      }
+
+      function initLayers() {
+        foamLayers = [];
+        const w = canvas.offsetWidth;
+        const h = canvas.offsetHeight;
+        for (let i = 0; i < 4; i++) {
+          foamLayers.push({
+            y: h * 0.15 + i * h * 0.22,
+            nodes: Array.from({length: 6 + Math.floor(Math.random() * 4)}, (_, j) => ({
+              x: w * 0.1 + j * w * 0.15 + (Math.random() - 0.5) * 30,
+              spin: Math.floor(Math.random() * 4)
+            })),
+            opacity: 0.3 + i * 0.2
+          });
+        }
+      }
+
+      function draw() {
+        const w = canvas.offsetWidth;
+        const h = canvas.offsetHeight;
+        ctx.clearRect(0, 0, w, h);
+        if (!paused) time++;
+
+        // Draw foam layers with perspective
+        foamLayers.forEach((layer, li) => {
+          const zFactor = 1 + li * 0.3;
+          ctx.globalAlpha = layer.opacity;
+
+          // Draw connections within layer
+          ctx.strokeStyle = li === foamLayers.length - 1 ? '#00ffcc' : 'rgba(0, 255, 204, 0.5)';
+          ctx.lineWidth = 2;
+          for (let i = 0; i < layer.nodes.length; i++) {
+            for (let j = i + 1; j < layer.nodes.length; j++) {
+              const dx = layer.nodes[j].x * zFactor - layer.nodes[i].x * zFactor;
+              const dy = layer.nodes[j].y - layer.nodes[i].y;
+              if (Math.abs(dx) < w * 0.2) {
+                ctx.beginPath();
+                ctx.moveTo(layer.nodes[i].x * zFactor, layer.nodes[i].y);
+                ctx.lineTo(layer.nodes[j].x * zFactor, layer.nodes[j].y);
+                ctx.stroke();
+              }
+            }
+          }
+
+          // Draw nodes
+          layer.nodes.forEach((node, ni) => {
+            const pulse = Math.sin(time * 0.02 + li * 0.5 + ni * 0.3) * 3 + 8;
+            const spinColors = ['#00ffcc', '#ff00aa', '#ffaa00', '#00aaff'];
+            ctx.fillStyle = spinColors[node.spin % spinColors.length];
+            ctx.beginPath();
+            ctx.arc(node.x * zFactor, node.y, pulse, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          // Draw vertical connections to layer above
+          if (li < foamLayers.length - 1) {
+            ctx.strokeStyle = 'rgba(255, 170, 0, 0.2)';
+            ctx.setLineDash([5, 5]);
+            layer.nodes.forEach((node, ni) => {
+              const upper = foamLayers[li + 1].nodes[ni % foamLayers[li + 1].nodes.length];
+              ctx.beginPath();
+              ctx.moveTo(node.x * zFactor, node.y);
+              ctx.lineTo(upper.x * (1 + (li + 1) * 0.3), upper.y);
+              ctx.stroke();
+            });
+            ctx.setLineDash([]);
+          }
+        });
+
+        ctx.globalAlpha = 1;
+        animationId = requestAnimationFrame(draw);
+      }
+
+      document.getElementById('evolveBtn').addEventListener('click', () => { paused = false; });
+      document.getElementById('pauseBtn').addEventListener('click', () => { paused = true; });
+      document.getElementById('stepBtn').addEventListener('click', () => {
+        paused = true;
+        time += 10;
+      });
+
+      window.addEventListener('resize', () => { resize(); });
+      resize();
+      draw();
+    })();
+
+    // =============================================
+    // AREA/VOLUME OPERATOR CANVAS
+    // =============================================
+    (function() {
+      const canvas = document.getElementById('areaVolumeCanvas');
+      const ctx = canvas.getContext('2d');
+      let time = 0;
+      const spinJSlider = document.getElementById('spinJ');
+      const spinJVal = document.getElementById('spinJVal');
+
+      function resize() {
+        canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+        canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      }
+
+      function draw() {
+        const w = canvas.offsetWidth;
+        const h = canvas.offsetHeight;
+        ctx.clearRect(0, 0, w, h);
+        time++;
+        const j = parseFloat(spinJSlider.value);
+        spinJVal.textContent = 'j = ' + j;
+
+        // Draw area bars
+        const maxJ = 5;
+        const barWidth = (w - 100) / maxJ;
+        for (let i = 0; i <= maxJ; i++) {
+          const area = 8 * Math.PI * 0.2375 * 1.616e-35 * 1.616e-35 * Math.sqrt(i * (i + 1));
+          const barHeight = i === 0 ? 20 : (area / 1e-69) * 0.5;
+          const x = 50 + i * barWidth;
+          const y = h - 100 - barHeight;
+          const alpha = i <= j ? 1 : 0.3;
+
+          // Bar
+          const gradient = ctx.createLinearGradient(x, y, x, h - 100);
+          gradient.addColorStop(0, `rgba(0, 255, 204, ${alpha})`);
+          gradient.addColorStop(1, `rgba(0, 100, 80, ${alpha})`);
+          ctx.fillStyle = gradient;
+          ctx.fillRect(x, y, barWidth - 10, barHeight);
+
+          // Label
+          ctx.fillStyle = i <= j ? '#00ffcc' : '#668';
+          ctx.font = '14px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('j=' + i, x + (barWidth - 10) / 2, h - 70);
+          ctx.fillText((area / 1e-69).toFixed(2), x + (barWidth - 10) / 2, y - 10);
+        }
+
+        // Highlight current j
+        if (j > 0) {
+          const area = 8 * Math.PI * 0.2375 * 1.616e-35 * 1.616e-35 * Math.sqrt(j * (j + 1));
+          const x = 50 + j * barWidth;
+          ctx.strokeStyle = '#ffaa00';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(x - 5, h - 100 - ((area / 1e-69) * 0.5) - 5, barWidth, ((area / 1e-69) * 0.5) + 10);
+        }
+
+        // Legend
+        ctx.fillStyle = '#88f';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('Area in units of 10⁰¹ εP²', 50, 40);
+
+        requestAnimationFrame(draw);
+      }
+
+      spinJSlider.addEventListener('input', () => {
+        spinJVal.textContent = 'j = ' + spinJSlider.value;
+      });
+
+      window.addEventListener('resize', resize);
+      resize();
+      draw();
+    })();
+
+    // =============================================
+    // BIG BOUNCE CANVAS
+    // =============================================
+    (function() {
+      const canvas = document.getElementById('bigBounceCanvas');
+      const ctx = canvas.getContext('2d');
+      let time = 0;
+
+      function resize() {
+        canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+        canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      }
+
+      function draw() {
+        const w = canvas.offsetWidth;
+        const h = canvas.offsetHeight;
+        ctx.clearRect(0, 0, w, h);
+        time += 0.5;
+
+        const cx = w / 2;
+        const cy = h / 2;
+        const maxR = Math.min(w, h) * 0.4;
+
+        // Draw axes
+        ctx.strokeStyle = 'rgba(136, 136, 255, 0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(50, cy);
+        ctx.lineTo(w - 50, cy);
+        ctx.moveTo(cx, 50);
+        ctx.lineTo(cx, h - 50);
+        ctx.stroke();
+
+        // Classical Big Bang curve (divergent)
+        ctx.strokeStyle = 'rgba(255, 100, 100, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        for (let t = -Math.PI / 2 + 0.1; t < Math.PI / 2 - 0.1; t += 0.01) {
+          const scale = Math.tan(t + Math.PI / 2) * 50;
+          const x = cx + t * 100;
+          if (x > 50 && x < w - 50) {
+            const y = cy - scale;
+            if (t === -Math.PI / 2 + 0.1) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // LQC Bounce curve
+        ctx.strokeStyle = '#00ffcc';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        for (let t = -Math.PI / 2 + 0.05; t < Math.PI / 2 - 0.05; t += 0.005) {
+          const tanVal = Math.tan(t + Math.PI / 2);
+          const modTan = tanVal / (1 + tanVal * tanVal / 100);
+          const scale = modTan * 50;
+          const x = cx + t * 100;
+          const y = cy - scale;
+          if (t === -Math.PI / 2 + 0.05) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Labels
+        ctx.fillStyle = '#ff6464';
+        ctx.font = '12px sans-serif';
+        ctx.fillText('Classical Singularity', 80, 80);
+        ctx.fillStyle = '#00ffcc';
+        ctx.fillText('LQC Quantum Bounce', w - 200, 80);
+
+        // Bounce point marker
+        const bouncePulse = Math.sin(time * 0.05) * 5 + 10;
+        ctx.fillStyle = '#ffaa00';
+        ctx.beginPath();
+        ctx.arc(cx, cy, bouncePulse, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('BOUNCE', cx, cy + bouncePulse + 15);
+
+        // Time arrows
+        ctx.fillStyle = '#88f';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('→ Past', 80, cy + 20);
+        ctx.fillText('Future →', w - 80, cy + 20);
+        ctx.fillText('↓ Contraction', cx - 60, 80);
+        ctx.fillText('Expansion ↓', cx - 60, h - 60);
+
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+      draw();
+    })();
+
+    // =============================================
+    // BLACK HOLE ENTROPY CANVAS
+    // =============================================
+    (function() {
+      const canvas = document.getElementById('bhEntropyCanvas');
+      const ctx = canvas.getContext('2d');
+      let time = 0;
+      const bhMassSlider = document.getElementById('bhMass');
+      const bhMassVal = document.getElementById('bhMassVal');
+      const snDensitySlider = document.getElementById('snDensity');
+
+      function resize() {
+        canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+        canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      }
+
+      function draw() {
+        const w = canvas.offsetWidth;
+        const h = canvas.offsetHeight;
+        ctx.clearRect(0, 0, w, h);
+        time++;
+        const mass = parseFloat(bhMassSlider.value);
+        bhMassVal.textContent = mass + ' M☉';
+        const density = parseFloat(snDensitySlider.value);
+
+        const cx = w / 2;
+        const cy = h / 2;
+        const schwarzschildR = mass * 2.95; // km for solar masses
+
+        // Draw horizon circle
+        const horizonR = Math.min(w, h) * 0.35;
+        ctx.strokeStyle = '#ff00aa';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(cx, cy, horizonR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Horizon glow
+        const glowGradient = ctx.createRadialGradient(cx, cy, horizonR - 20, cx, cy, horizonR + 30);
+        glowGradient.addColorStop(0, 'rgba(255, 0, 170, 0.3)');
+        glowGradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = glowGradient;
+        ctx.beginPath();
+        ctx.arc(cx, cy, horizonR + 30, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw spin network punctures
+        const punctures = Math.floor(density * 8);
+        for (let i = 0; i < punctures; i++) {
+          const angle = (i / punctures) * Math.PI * 2 + time * 0.01;
+          const r = horizonR + (Math.random() - 0.5) * 30;
+          const px = cx + Math.cos(angle) * r;
+          const py = cy + Math.sin(angle) * r;
+          const spinColors = ['#00ffcc', '#ffaa00', '#ff00aa', '#00aaff'];
+          const color = spinColors[i % spinColors.length];
+          const pulse = Math.sin(time * 0.05 + i) * 2 + 5;
+
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(px, py, pulse, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Line to center
+          ctx.strokeStyle = 'rgba(136, 136, 255, 0.2)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(px, py);
+          ctx.stroke();
+        }
+
+        // Center BH
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 15, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Labels
+        ctx.fillStyle = '#88f';
+        ctx.font = '11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Event Horizon R_s = ' + schwarzschildR.toFixed(1) + ' km', cx, h - 30);
+        ctx.fillText(punctures + ' spin network punctures', cx, h - 50);
+
+        requestAnimationFrame(draw);
+      }
+
+      bhMassSlider.addEventListener('input', () => {
+        bhMassVal.textContent = bhMassSlider.value + ' M☉';
+      });
+
+      window.addEventListener('resize', resize);
+      resize();
+      draw();
+    })();
+
+    // =============================================
+    // TAB FUNCTIONALITY
+    // =============================================
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
