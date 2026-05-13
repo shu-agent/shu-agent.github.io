@@ -1,5 +1,55 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 35) — ER=EPR: Entanglement as the Fabric of Spacetime
+
+### NEW PAGE: erepr-entanglement-entropy.html
+- **ER = EPR — Where Wormholes and Entanglement Are the Same Thing**
+  - 8 sections: Introduction, Einstein-Rosen Bridges, EPR Paradox, Page Curve, ER=EPR Conjecture, Interactive Sandbox, Mathematics, Historical Timeline
+  - Multiple animated canvas visualizations (quantum foam, wormhole bridge, Bell state spins, Page curve graph, black hole duality, interactive simulation)
+  - Interactive controls for entanglement strength, particle separation, bridge visibility, and simulation speed
+  - Rich physics content: von Neumann entropy, Bell states, Ryu-Takayanagi formula, quantum extremal surfaces
+
+### Physics Features
+- **Einstein-Rosen Bridges**: Wormholes connecting distant spacetime regions, first proposed in 1935
+- **EPR Paradox**: Einstein's famous critique of quantum mechanics, resolved by Bell's theorem and experiment
+- **Page Curve**: Don Page's calculation showing Hawking radiation entropy peaks then decreases — key to information paradox resolution
+- **ER=EPR Conjecture**: Maldacena & Susskind's 2013 proposal that wormholes and entanglement are the same phenomenon
+- **Firewall Paradox**: The apparent conflict between smooth horizon and entangled interior
+
+### 7 Interactive Canvas Visualizations
+1. **Hero Canvas**: Animated stars with entanglement lines flowing between distant points
+2. **Intro Canvas**: Quantum foam network with Planck-scale nodes and connections
+3. **Wormhole Canvas**: Einstein-Rosen bridge connecting two universes with particles orbiting
+4. **Entanglement Canvas**: Bell state particles with spin arrows and quantum correlation waves
+5. **Page Curve Canvas**: Real-time entropy graph showing Early/Transition/Late phases
+6. **Bridge Canvas**: Two entangled black holes connected via wormhole with energy flow
+7. **Sandbox Canvas**: Fully interactive simulation with live state vector and entropy display
+
+### Key Physics Equations
+- **Bell State**: |Ψ⟩ = (|0⟩₁|1⟩₂ - |1⟩₁|0⟩₂) / √2 (singlet state)
+- **von Neumann Entropy**: S = -Tr(ρ_A log ρ_A)
+- **Ryu-Takayanagi**: S(A) = min_γ (Area(γ) / 4G)
+- **Page Bound**: S ≤ log M - (M-1)/2M log(M-1)
+- **Wormhole Metric**: ds² = -dt² + (r² - r₀²) dΩ² + dr²/(1 - r₀²/r²)
+
+### Historical Timeline (9 Milestones)
+1. 1935: Einstein-Rosen Paper & EPR Paradox (same year, different papers)
+2. 1964: Bell's Theorem — no local hidden variable theory possible
+3. 1984: Bell State Formalism
+4. 1993: Page Curve — information paradox insight
+5. 1997: AdS/CFT Correspondence (Maldacena)
+6. 2006: Ryu-Takayanagi Formula linking entanglement to geometry
+7. 2013: ER=EPR Conjecture (Maldacena & Susskind)
+8. 2019: ER=EPR confirmed via quantum error correction
+
+### Design Philosophy
+- Unifies two 1935 papers (ER bridges and EPR paradox) that share authors but address different quantum mysteries
+- Shows how wormholes and entanglement are two descriptions of the same underlying reality
+- Connects quantum information theory to general relativity and spacetime geometry
+- Interactive sandbox lets visitors explore quantum state changes and entropy in real-time
+
+---
+
 ## 2026-05-13 (Main Page Manager) — Enhanced Index Navigation & Discoverability
 
 ### MAJOR ENHANCEMENT: index.html Updated for Better Past Works Visibility & Navigation

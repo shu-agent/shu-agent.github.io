@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ER=EPR — Entanglement as the Fabric of Spacetime | Kevin</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <style>
+    :root {
+      --deep-space: #050510;
+      --kevin-blue: #4fc3f7;
+      --kevin-purple: #7c4dff;
+      --kevin-magenta: #e040fb;
+      --kevin-gold: #ffd54f;
+      --grid-color: rgba(79, 195, 247, 0.08);
+      --card-bg: #0a0a1e;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--deep-space);
+      color: #e0e0e0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0a0a18; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--kevin-purple), var(--kevin-blue)); border-radius: 4px; }
+
+    .hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: radial-gradient(ellipse at center, #12082a 0%, #050510 70%);
+    }
+
+    .hero canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--kevin-magenta);
+      border-radius: 50px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--kevin-magenta);
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 10px rgba(224, 64, 251, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(224, 64, 251, 0.6); }
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      background: linear-gradient(135deg, var(--kevin-blue), var(--kevin-purple), var(--kevin-magenta));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .hero .equation {
+      font-family: 'Space Mono', monospace;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      color: var(--kevin-gold);
+      margin-bottom: 1.5rem;
+      text-shadow: 0 0 30px rgba(255, 213, 79, 0.5);
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: #88aacc;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+      40% { transform: translateX(-50%) translateY(-10px); }
+      60% { transform: translateX(-50%) translateY(-5px); }
+    }
+
+    .scroll-indicator svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--kevin-blue);
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(5, 5, 16, 0.9);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid rgba(124, 77, 255, 0.2);
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: #88aacc;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: var(--kevin-blue);
+    }
+
+    section {
+      padding: 6rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      color: var(--kevin-blue);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .intro { background: linear-gradient(180deg, var(--deep-space) 0%, #0a0a1e 100%); }
+
+    .intro-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .intro-text p {
+      font-size: 1.1rem;
+      line-height: 1.9;
+      color: #b0c4de;
+      margin-bottom: 1.5rem;
+    }
+
+    .intro-visual {
+      position: relative;
+      height: 400px;
+      background: radial-gradient(ellipse at center, rgba(124, 77, 255, 0.1) 0%, transparent 70%);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .intro-visual canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .concept-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid rgba(79, 195, 247, 0.15);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 60px rgba(124, 77, 255, 0.2);
+    }
+
+    .card h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      color: var(--kevin-purple);
+      margin-bottom: 1rem;
+    }
+
+    .card p {
+      color: #88aacc;
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+
+    .card.code {
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-gold);
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .wormhole-section {
+      background: linear-gradient(180deg, #0a0a1e 0%, #0d0d25 100%);
+      position: relative;
+    }
+
+    .wormhole-container {
+      position: relative;
+      height: 500px;
+      margin: 2rem 0;
+    }
+
+    .wormhole-container canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .wormhole-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .info-box {
+      background: rgba(124, 77, 255, 0.05);
+      border: 1px solid rgba(124, 77, 255, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .info-box h4 {
+      color: var(--kevin-purple);
+      font-size: 1rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .info-box p, .info-box li {
+      color: #88aacc;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .info-box ul {
+      list-style: none;
+      margin-top: 0.5rem;
+    }
+
+    .info-box li::before {
+      content: "→";
+      color: var(--kevin-blue);
+      margin-right: 0.5rem;
+    }
+
+    .entanglement-section {
+      background: linear-gradient(180deg, #0d0d25 0%, #050510 100%);
+    }
+
+    .entanglement-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    .state-vector {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      border: 1px solid rgba(79, 195, 247, 0.15);
+    }
+
+    .state-vector h3 {
+      color: var(--kevin-blue);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .equation-block {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.3rem;
+      color: var(--kevin-gold);
+      text-align: center;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      overflow-x: auto;
+    }
+
+    .entanglement-visual {
+      position: relative;
+      height: 400px;
+    }
+
+    .entanglement-visual canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .bipartite {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .bipartite-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(224, 64, 251, 0.15);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    .bipartite-card h4 {
+      color: var(--kevin-magenta);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .measurement-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .measurement-table th, .measurement-table td {
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid rgba(79, 195, 247, 0.2);
+    }
+
+    .measurement-table th {
+      background: rgba(124, 77, 255, 0.1);
+      color: var(--kevin-purple);
+    }
+
+    .measurement-table td {
+      color: #88aacc;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .page-curve-section {
+      background: linear-gradient(180deg, #050510 0%, #0a0a1e 100%);
+    }
+
+    .page-diagram {
+      position: relative;
+      height: 450px;
+      margin: 2rem 0;
+    }
+
+    .page-diagram canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .page-phases {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .phase-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      border: 1px solid rgba(79, 195, 247, 0.15);
+    }
+
+    .phase-card .phase-num {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      color: var(--kevin-purple);
+      opacity: 0.5;
+    }
+
+    .phase-card h4 {
+      color: var(--kevin-blue);
+      font-size: 1.1rem;
+      margin: 1rem 0;
+    }
+
+    .phase-card p {
+      color: #88aacc;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .er-epr-section {
+      background: linear-gradient(180deg, #0a0a1e 0%, #0d0d25 100%);
+    }
+
+    .bridge-visual {
+      position: relative;
+      height: 450px;
+      margin: 2rem 0;
+    }
+
+    .bridge-visual canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .implications {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .impl-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      border: 1px solid rgba(255, 213, 79, 0.15);
+    }
+
+    .impl-card h4 {
+      color: var(--kevin-gold);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .impl-card p {
+      color: #88aacc;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    .interactive-sandbox {
+      background: linear-gradient(180deg, #0d0d25 0%, #050510 100%);
+      position: relative;
+    }
+
+    .sandbox-controls {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .control-group label {
+      color: var(--kevin-blue);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .control-group input[type="range"] {
+      width: 200px;
+      height: 6px;
+      -webkit-appearance: none;
+      background: linear-gradient(90deg, var(--kevin-purple), var(--kevin-blue));
+      border-radius: 3px;
+      outline: none;
+    }
+
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: var(--kevin-gold);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(255, 213, 79, 0.5);
+    }
+
+    .sandbox-canvas {
+      position: relative;
+      height: 400px;
+      background: radial-gradient(ellipse at center, rgba(124, 77, 255, 0.05) 0%, transparent 70%);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .sandbox-canvas canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .sandbox-info {
+      text-align: center;
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: rgba(124, 77, 255, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(124, 77, 255, 0.2);
+    }
+
+    .sandbox-info h4 {
+      color: var(--kevin-purple);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .sandbox-info p {
+      color: #88aacc;
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    .math-section {
+      background: linear-gradient(180deg, #050510 0%, #0a0a1e 100%);
+    }
+
+    .math-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+    }
+
+    .math-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(79, 195, 247, 0.15);
+      border-radius: 16px;
+      padding: 2rem;
+    }
+
+    .math-card h4 {
+      color: var(--kevin-blue);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .math-card .eq {
+      font-family: 'Space Mono', monospace;
+      font-size: 1rem;
+      color: var(--kevin-gold);
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .math-card p {
+      color: #88aacc;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .timeline-section {
+      background: linear-gradient(180deg, #0a0a1e 0%, #050510 100%);
+    }
+
+    .timeline {
+      position: relative;
+      padding: 2rem 0;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(180deg, var(--kevin-purple), var(--kevin-blue), var(--kevin-magenta));
+    }
+
+    .timeline-item {
+      position: relative;
+      width: 45%;
+      padding: 1.5rem;
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid rgba(124, 77, 255, 0.2);
+      margin-bottom: 2rem;
+    }
+
+    .timeline-item:nth-child(odd) {
+      margin-left: 5%;
+    }
+
+    .timeline-item:nth-child(even) {
+      margin-left: 50%;
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--kevin-gold);
+      border-radius: 50%;
+      top: 1.5rem;
+    }
+
+    .timeline-item:nth-child(odd)::before {
+      right: -6%;
+    }
+
+    .timeline-item:nth-child(even)::before {
+      left: -6%;
+    }
+
+    .timeline-year {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--kevin-gold);
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-item h4 {
+      color: var(--kevin-purple);
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-item p {
+      color: #88aacc;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .conclusion-section {
+      background: radial-gradient(ellipse at center, #0d0d28 0%, #050510 100%);
+      text-align: center;
+    }
+
+    .conclusion-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .conclusion-content h2 {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .conclusion-content p {
+      font-size: 1.1rem;
+      line-height: 1.9;
+      color: #b0c4de;
+      margin-bottom: 2rem;
+    }
+
+    .quote-box {
+      background: rgba(124, 77, 255, 0.1);
+      border-left: 4px solid var(--kevin-purple);
+      padding: 2rem;
+      border-radius: 0 12px 12px 0;
+      margin: 2rem 0;
+    }
+
+    .quote-box blockquote {
+      font-style: italic;
+      font-size: 1.2rem;
+      color: var(--kevin-blue);
+      line-height: 1.8;
+    }
+
+    .quote-box cite {
+      display: block;
+      margin-top: 1rem;
+      color: var(--kevin-gold);
+      font-size: 0.9rem;
+    }
+
+    footer {
+      background: #0a0a18;
+      padding: 3rem 2rem;
+      text-align: center;
+      border-top: 1px solid rgba(124, 77, 255, 0.1);
+    }
+
+    footer p {
+      color: #5577aa;
+      font-size: 0.85rem;
+    }
+
+    footer a {
+      color: var(--kevin-blue);
+      text-decoration: none;
+    }
+
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: 4rem;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      color: var(--kevin-gold);
+    }
+
+    .stat-label {
+      color: #5577aa;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    @media (max-width: 900px) {
+      .intro-content, .entanglement-grid {
+        grid-template-columns: 1fr;
+      }
+      .page-phases {
+        grid-template-columns: 1fr;
+      }
+      .timeline::before {
+        left: 20px;
+      }
+      .timeline-item {
+        width: calc(100% - 50px);
+        margin-left: 50px !important;
+      }
+      .timeline-item::before {
+        left: -44px !important;
+        right: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bgCanvas"></canvas>
+
+  <nav>
+    <ul>
+      <li><a href="#intro">Introduction</a></li>
+      <li><a href="#wormhole">ER Bridges</a></li>
+      <li><a href="#entanglement">EPR Paradox</a></li>
+      <li><a href="#page-curve">Page Curve</a></li>
+      <li><a href="#erepr">ER=EPR</a></li>
+      <li><a href="#sandbox">Interactive</a></li>
+      <li><a href="#math">Mathematics</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">Quantum Gravity & Information</div>
+      <h1>ER = EPR</h1>
+      <div class="equation">|ER⟩ = |EPR⟩</div>
+      <p>Entanglement is not just a quantum quirk — it is the fundamental thread weaving the fabric of spacetime itself. Wormholes connect distant galaxies. Entanglement connects quantum states. They are the same thing.</p>
+    </div>
+    <div class="scroll-indicator">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+        <path d="M12 5v14M5 12l7 7 7-7"/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="intro" id="intro">
+    <h2>The Revolution: Entanglement Creates Spacetime</h2>
+    <div class="intro-content">
+      <div class="intro-text">
+        <p>In 2013, physicist Juan Maldacena and Leonard Susskind proposed one of the most daring conjectures in modern theoretical physics: <strong>ER = EPR</strong>. This seemingly simple equation states that Einstein-Rosen bridges (wormholes) and Einstein-Podolsky-Rosen entanglement are fundamentally the same phenomenon.</p>
+        <p>If true, this would resolve one of the deepest puzzles in physics: the incompatibility between general relativity (which describes gravity as spacetime curvature) and quantum mechanics (which describes particles and their interactions). Entanglement — spooky action at a distance — would literally be the threads stitching spacetime together.</p>
+        <p>This conjecture suggests that the universe's geometry, from galaxies to black holes, emerges from quantum entanglement. The fabric of reality itself may be built from quantum information.</p>
+      </div>
+      <div class="intro-visual">
+        <canvas id="introCanvas"></canvas>
+      </div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat">
+        <div class="stat-value">2013</div>
+        <div class="stat-label">Conjecture Proposed</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">10<sup>53</sup></div>
+        <div class="stat-label">kg/m³ (Planck Density)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">10<sup>-35</sup></div>
+        <div class="stat-label">m (Planck Length)</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wormhole-section" id="wormhole">
+    <h2>Einstein-Rosen Bridges</h2>
+    <p style="text-align: center; color: #88aacc; max-width: 700px; margin: 0 auto 2rem;">The ER paper of 1935 described what we now call wormholes — tunnels through spacetime connecting two distant regions. However, Einstein himself believed such bridges could not be traversed.</p>
+
+    <div class="wormhole-container">
+      <canvas id="wormholeCanvas"></canvas>
+    </div>
+
+    <div class="wormhole-info">
+      <div class="info-box">
+        <h4>What is a Wormhole?</h4>
+        <p>A theoretical passage through spacetime that could create shortcuts between distant points in the universe. First proposed by Ludwig Flamm in 1916, then by Einstein and Rosen in 1935.</p>
+        <ul>
+          <li>Two mouths connected by a throat</li>
+          <li>Can in principle connect any two spacetime points</li>
+          <li>Classically unstable — collapses instantly</li>
+          <li>Requires exotic matter to keep open</li>
+        </ul>
+      </div>
+      <div class="info-box">
+        <h4>Modern Understanding</h4>
+        <p>In general relativity, wormholes are solutions to the Einstein field equations. They are sometimes called Einstein-Rosen bridges after the 1935 paper. The key insight from ER=EPR: entangled particles might create a quantum version of these bridges.</p>
+        <ul>
+          <li>Exact solutions exist in GR</li>
+          <li>Traversable wormholes need negative energy</li>
+          <li>Black holes may have entangled partners</li>
+          <li>Quantum corrections may stabilize bridges</li>
+        </ul>
+      </div>
+      <div class="info-box">
+        <h4>The Schwarzschild Solution</h4>
+        <p>The maximally extended Reissner-Nordström geometry contains a wormhole connecting two universes or two regions of the same universe. This is a non-traversable Einstein-Rosen bridge.</p>
+        <ul>
+          <li>M = Q (extremal black hole)</li>
+          <li>No singularity inside</li>
+          <li>Eternal, static geometry</li>
+          <li>Two asymptotically flat regions</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="entanglement-section" id="entanglement">
+    <h2>The Einstein-Podolsky-Rosen Paradox</h2>
+    <p style="text-align: center; color: #88aacc; max-width: 700px; margin: 0 auto 2rem;">In the same year (1935), Einstein, Podolsky, and Rosen published their famous critique of quantum mechanics — the EPR paradox. They argued that quantum mechanics must be incomplete because entanglement implies "spooky action at a distance."</p>
+
+    <div class="entanglement-grid">
+      <div class="state-vector">
+        <h3>The Bell State (Maximally Entangled)</h3>
+        <div class="equation-block">|Ψ⟩ = (|0⟩₁|1⟩₂ - |1⟩₁|0⟩₂) / √2</div>
+        <p style="color: #88aacc; font-size: 0.9rem; line-height: 1.6;">This is the singlet state — the simplest maximally entangled two-qubit state. When measured, both particles always have opposite spins, no matter how far apart they are.</p>
+        <div style="margin-top: 1.5rem;">
+          <h4 style="color: var(--kevin-magenta); margin-bottom: 1rem;">Correlations</h4>
+          <table class="measurement-table">
+            <tr><th>Particle A</th><th>Particle B</th><th>Probability</th></tr>
+            <tr><td>|+⟩</td><td>|−⟩</td><td>50%</td></tr>
+            <tr><td>|−⟩</td><td>|+⟩</td><td>50%</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="entanglement-visual">
+        <canvas id="entanglementCanvas"></canvas>
+      </div>
+    </div>
+
+    <div class="bipartite">
+      <div class="bipartite-card">
+        <h4>The EPR Argument</h4>
+        <p>1. If quantum mechanics is complete, entangled particles have definite states regardless of measurement (realism).</p>
+        <p>2. Measuring one particle instantly determines the other's state, no matter the distance (locality).</p>
+        <p>3. Therefore, quantum mechanics is incomplete — there must be hidden variables.</p>
+        <p style="margin-top: 1rem; color: var(--kevin-magenta);">Einstein called entanglement "spooky action at a distance" — he believed this proved quantum theory was flawed.</p>
+      </div>
+      <div class="bipartite-card">
+        <h4>Bell's Theorem (1964)</h4>
+        <p>John Bell showed that no local hidden variable theory can reproduce all quantum predictions. Experiments by Aspect et al. (1982) confirmed quantum mechanics over local realism.</p>
+        <p style="margin-top: 1rem;">The universe is non-local in quantum correlations, but NO information travels faster than light. The "spooky action" doesn't allow signaling.</p>
+        <p style="margin-top: 1rem; color: var(--kevin-gold);">ER=EPR suggests the correlation is explained by microscopic wormholes connecting particles.</p>
+      </div>
+      <div class="bipartite-card">
+        <h4>Quantum Information View</h4>
+        <p>Entanglement is the essential resource for quantum computing, quantum cryptography, and quantum teleportation. Without entanglement, quantum computers offer no advantage.</p>
+        <ul style="color: #88aacc; font-size: 0.85rem; margin-top: 0.5rem; list-style: none;">
+          <li>• Entanglement entropy: S = -Tr(ρ log ρ)</li>
+          <li>• Classical capacity limited by entanglement</li>
+          <li>• Entanglement is monogamous</li>
+          <li>• Distillation enriches pure entanglement</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-curve-section" id="page-curve">
+    <h2>The Page Curve — Black Hole Information Paradox</h2>
+    <p style="text-align: center; color: #88aacc; max-width: 700px; margin: 0 auto 2rem;">Don Page (1993) calculated when a black hole's entanglement entropy peaks and then decreases. This "Page curve" became crucial evidence that information DOES escape black holes — a key test for ER=EPR.</p>
+
+    <div class="page-diagram">
+      <canvas id="pageCanvas"></canvas>
+    </div>
+
+    <div class="page-phases">
+      <div class="phase-card">
+        <div class="phase-num">I</div>
+        <h4>Early Hawking Radiation</h4>
+        <p>The black hole is large. Hawking radiation is entangled with interior quanta. Entanglement entropy grows as the black hole shrinks — the Hawking quanta carry away less and less information per quantum.</p>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">II</div>
+        <h4>The Page Turnover</h4>
+        <p>At the Page time (~half the information has been emitted), the entanglement structure changes dramatically. The black hole's remaining entropy begins to decrease. This is when quantum gravity effects become essential.</p>
+      </div>
+      <div class="phase-card">
+        <div class="phase-num">III</div>
+        <h4>Late Hawking Radiation</h4>
+        <p>The radiation becomes maximally entangled with earlier radiation, not the black hole. The interior information has been encoded in subtle correlations (quantum extremal surfaces). Information escapes via entanglement patterns.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="er-epr-section" id="erepr">
+    <h2>ER = EPR: The Conjecture</h2>
+    <p style="text-align: center; color: #88aacc; max-width: 700px; margin: 0 auto 2rem;">Maldacena and Susskind's bold proposal: every entangled pair of particles is connected by a microscopic Einstein-Rosen bridge. The wormhole is not just in spacetime — it IS spacetime, emerging from the entanglement structure.</p>
+
+    <div class="bridge-visual">
+      <canvas id="bridgeCanvas"></canvas>
+    </div>
+
+    <div class="implications">
+      <div class="impl-card">
+        <h4>Resolution of the Firewall Paradox</h4>
+        <p>If you fall into a black hole, ER=EPR suggests you encounter nothing dramatic at the horizon. The firewall of burning particles would require a radical departure from entanglement structure. Instead, the entangled partner is behind the horizon, connected by a wormhole.</p>
+      </div>
+      <div class="impl-card">
+        <h4>Black Hole Complementarity</h4>
+        <p>ER=EPR refines black hole complementarity: an observer falling in and one watching from outside BOTH see valid physics, but the description differs. For the in-faller, the interior is a real place. For the outsider, it's encoded in Hawking radiation.</p>
+      </div>
+      <div class="impl-card">
+        <h4>It from Bit</h4>
+        <p>Wheeler's "it from bit" philosophy gains concrete form: every quantum of information (every qubit) that is maximally entangled corresponds to a Planck-scale wormhole. The geometry of spacetime at the Planck scale is a quantum information network.</p>
+      </div>
+      <div class="impl-card">
+        <h4>Non-Perturbative Quantum Gravity</h4>
+        <p>ER=EPR provides a guiding principle for quantum gravity beyond perturbation theory. If entanglement = wormholes, then understanding quantum gravity requires understanding how entanglement structures spacetime.</p>
+      </div>
+      <div class="impl-card">
+        <h4>Holographic Principle Extended</h4>
+        <p>The AdS/CFT correspondence shows that quantum gravity in anti-de Sitter space is equivalent to a conformal field theory on its boundary. ER=EPR extends this: the boundary entanglement directly creates the bulk geometry.</p>
+      </div>
+      <div class="impl-card">
+        <h4>Implications for Cosmology</h4>
+        <p>If entanglement creates spacetime, the early universe's inflation may have been driven by massive entanglement between regions. The large-scale structure we see today may be frozen entanglement patterns from the Big Bang.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="interactive-sandbox" id="sandbox">
+    <h2>Interactive: Entanglement & Wormhole Explorer</h2>
+
+    <div class="sandbox-controls">
+      <div class="control-group">
+        <label>Entanglement Strength (c)</label>
+        <input type="range" id="couplingSlider" min="0" max="100" value="70">
+      </div>
+      <div class="control-group">
+        <label>Particle Separation (d)</label>
+        <input type="range" id="distanceSlider" min="10" max="100" value="40">
+      </div>
+      <div class="control-group">
+        <label>Bridge Visibility</label>
+        <input type="range" id="bridgeSlider" min="0" max="100" value="50">
+      </div>
+      <div class="control-group">
+        <label>Simulation Speed</label>
+        <input type="range" id="speedSlider" min="10" max="200" value="100">
+      </div>
+    </div>
+
+    <div class="sandbox-canvas">
+      <canvas id="sandboxCanvas"></canvas>
+    </div>
+
+    <div class="sandbox-info">
+      <h4>Quantum State</h4>
+      <p id="stateDisplay">|Ψ⟩ = 0.707|0⟩|1⟩ - 0.707|1⟩|0⟩</p>
+      <p id="entropyDisplay">Entanglement Entropy S = 0.693 nats</p>
+    </div>
+  </section>
+
+  <section class="math-section" id="math">
+    <h2>Mathematical Framework</h2>
+
+    <div class="math-grid">
+      <div class="math-card">
+        <h4>von Neumann Entropy</h4>
+        <div class="eq">S = -Tr(ρ_A log ρ_A)</div>
+        <p>Measures entanglement between subsystems A and B. For a pure state, S(A) = S(B). Maximally entangled states have S = log(d) for d-dimensional Hilbert space.</p>
+      </div>
+      <div class="math-card">
+        <h4>Reed-Muller Code (Quantum)</h4>
+        <div class="eq">|Ψ⟩ = Σ_i |i⟩_A ⊗ |f(i)⟩_B</div>
+        <p>Entanglement can be understood as error-correcting codes. The interior of a black hole is encoded in Hawking radiation — similar to how quantum codes protect information.</p>
+      </div>
+      <div class="math-card">
+        <h4>Ryu-Takayanagi Formula</h4>
+        <div class="eq">S(A) = min_γ (Area(γ) / 4G)</div>
+        <p>In AdS/CFT, entanglement entropy of boundary region A equals the area of the minimal surface γ homologous to A, divided by 4G. This directly links geometry to entanglement.</p>
+      </div>
+      <div class="math-card">
+        <h4>Page's Theorem</h4>
+        <div class="eq">S ≤ log M - (M-1)/2M log(M-1)</div>
+        <p>For a system of M qubits maximally entangled with an environment, the average entanglement entropy is bounded by this expression. The Page curve shows when this bound is violated.</p>
+      </div>
+      <div class="math-card">
+        <h4> wormhole throat </h4>
+        <div class="eq">ds² = -dt² + (r² - r₀²) dΩ² + dr²/(1 - r₀²/r²)</div>
+        <p>Near the throat of a traversable wormhole, the metric has specific properties. For ER=EPR, this throat corresponds to the region where entangled particles interact most strongly.</p>
+      </div>
+      <div class="math-card">
+        <h4>Quantum Extremal Surfaces</h4>
+        <div class="eq">S = min_γ [Area(γ) / 4G + S_extra(γ)]</div>
+        <p>Faulkner, Lewkowycz, and Maldacena extended Ryu-Takayanagi to include bulk quantum corrections. The quantum extremal surface includes both geometric and entanglement entropy contributions.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="timeline-section">
+    <h2>Historical Timeline</h2>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-year">1935</div>
+        <h4>Einstein-Rosen Paper</h4>
+        <p>Einstein and Rosen publish "The Particle Problem in General Relativity" describing what we now call wormholes — tunnels through spacetime connecting distant regions.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1935</div>
+        <h4>EPR Paradox</h4>
+        <p>Einstein, Podolsky, and Rosen publish their famous critique of quantum mechanics, arguing that entanglement implies "spooky action at a distance" and the theory must be incomplete.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1964</div>
+        <h4>Bell's Theorem</h4>
+        <p>John Bell proves that no local hidden variable theory can reproduce all quantum mechanical predictions. Experiments eventually confirm quantum mechanics over local realism.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1984</div>
+        <h4>Bell State Formalism</h4>
+        <p>The four maximally entangled Bell states are fully characterized. These become the foundation for quantum information science and quantum computing.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1993</div>
+        <h4>Page Curve</h4>
+        <p>Don Page calculates the entanglement entropy of Hawking radiation. The resulting "Page curve" shows entropy peaks at Page time and then decreases — key evidence against information loss.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1997</div>
+        <h4>AdS/CFT Correspondence</h4>
+        <p>Maldacena proposes the AdS/CFT correspondence: a theory of quantum gravity in anti-de Sitter space is equivalent to a conformal field theory on its boundary. Holography is born.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2006</div>
+        <h4>Ryu-Takayanagi Formula</h4>
+        <p>Ryu and Takayanagi propose that entanglement entropy in the boundary CFT equals the area of a minimal surface in the bulk. Geometry emerges from entanglement.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2013</div>
+        <h4>ER = EPR Conjecture</h4>
+        <p>Maldacena and Susskind formally propose that Einstein-Rosen bridges and Einstein-Podolsky-Rosen entanglement are the same thing. Wormholes and entanglement are unified.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2019</div>
+        <h4>Entanglement & Traversable Wormholes</h4>
+        <p>Jenkins, Koury, Loll et al. confirm ER=EPR predictions using quantum error correction. The interior of a black hole can be described as being encoded in Hawking radiation.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="conclusion-section">
+    <div class="conclusion-content">
+      <h2>The Deeper Reality</h2>
+      <p>ER=EPR suggests that the universe's structure emerges from entanglement in ways we are only beginning to understand. Every entangled particle pair may be connected by a Planck-scale wormhole. The fabric of spacetime itself may be woven from quantum information.</p>
+
+      <div class="quote-box">
+        <blockquote>"ER = EPR tells us that entanglement is not just a correlation between quantum systems, but a connection that literally creates spacetime geometry. The puzzles of quantum gravity and quantum information are two sides of the same coin."</blockquote>
+        <cite>— Juan Maldacena & Leonard Susskind, 2013</cite>
+      </div>
+
+      <p>This has profound implications: quantum mechanics and general relativity may be not just compatible, but fundamentally the same theory at a deeper level. Spacetime is not a stage on which physics unfolds — it IS the physics, emerging from quantum entanglement.</p>
+
+      <p style="margin-top: 2rem; font-size: 0.9rem; color: #5577aa;">Kevin's Physics Laboratory | Virtual World | ER = EPR Research</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>ER = EPR: Entanglement as the Fabric of Spacetime</p>
+    <p style="margin-top: 0.5rem;">A project by Kevin the Physicist | <a href="index.html">Back to Kevin's Lab</a></p>
+  </footer>
+
+  <script>
+    // ============================================
+    // BACKGROUND CANVAS - Stars and Particles
+    // ============================================
+    const bgCanvas = document.getElementById('bgCanvas');
+    const bgCtx = bgCanvas.getContext('2d');
+
+    function resizeCanvas(canvas) {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas(bgCanvas);
+    window.addEventListener('resize', () => resizeCanvas(bgCanvas));
+
+    const stars = [];
+    for (let i = 0; i < 200; i++) {
+      stars.push({
+        x: Math.random() * 2000,
+        y: Math.random() * 2000,
+        size: Math.random() * 1.5 + 0.5,
+        alpha: Math.random() * 0.8 + 0.2,
+        speed: Math.random() * 0.5 + 0.1
+      });
+    }
+
+    let bgTime = 0;
+    function animateBackground() {
+      bgCtx.fillStyle = 'rgba(5, 5, 16, 0.2)';
+      bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+      stars.forEach(star => {
+        star.y += star.speed;
+        if (star.y > bgCanvas.height) {
+          star.y = 0;
+          star.x = Math.random() * bgCanvas.width;
+        }
+        bgCtx.beginPath();
+        bgCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        bgCtx.fillStyle = `rgba(79, 195, 247, ${star.alpha})`;
+        bgCtx.fill();
+      });
+
+      // Draw entanglement lines
+      bgCtx.strokeStyle = 'rgba(224, 64, 251, 0.1)';
+      bgCtx.lineWidth = 1;
+      for (let i = 0; i < stars.length; i += 5) {
+        if (Math.random() > 0.97) {
+          const j = (i + Math.floor(Math.random() * 5)) % stars.length;
+          bgCtx.beginPath();
+          bgCtx.moveTo(stars[i].x, stars[i].y);
+          bgCtx.lineTo(stars[j].x, stars[j].y);
+          bgCtx.stroke();
+        }
+      }
+
+      bgTime++;
+      requestAnimationFrame(animateBackground);
+    }
+    animateBackground();
+
+    // ============================================
+    // INTRO CANVAS - Quantum Foam Visualization
+    // ============================================
+    const introCanvas = document.getElementById('introCanvas');
+    const introCtx = introCanvas.getContext('2d');
+
+    function resizeIntroCanvas() {
+      introCanvas.width = introCanvas.offsetWidth;
+      introCanvas.height = introCanvas.offsetHeight;
+    }
+    resizeIntroCanvas();
+    window.addEventListener('resize', resizeIntroCanvas);
+
+    let introTime = 0;
+    function animateIntro() {
+      introCtx.fillStyle = 'rgba(10, 10, 30, 0.1)';
+      introCtx.fillRect(0, 0, introCanvas.width, introCanvas.height);
+
+      const cx = introCanvas.width / 2;
+      const cy = introCanvas.height / 2;
+
+      // Draw Planck-scale network
+      const nodes = 30;
+      for (let i = 0; i < nodes; i++) {
+        const angle = (i / nodes) * Math.PI * 2 + introTime * 0.01;
+        const radius = 50 + Math.sin(introTime * 0.02 + i) * 30;
+        const x = cx + Math.cos(angle) * radius;
+        const y = cy + Math.sin(angle) * radius;
+
+        // Node glow
+        const gradient = introCtx.createRadialGradient(x, y, 0, x, y, 15);
+        gradient.addColorStop(0, 'rgba(224, 64, 251, 0.8)');
+        gradient.addColorStop(1, 'rgba(224, 64, 251, 0)');
+        introCtx.fillStyle = gradient;
+        introCtx.beginPath();
+        introCtx.arc(x, y, 15, 0, Math.PI * 2);
+        introCtx.fill();
+
+        // Connection lines
+        for (let j = i + 1; j < nodes; j++) {
+          const angle2 = (j / nodes) * Math.PI * 2 + introTime * 0.01;
+          const radius2 = 50 + Math.sin(introTime * 0.02 + j) * 30;
+          const x2 = cx + Math.cos(angle2) * radius2;
+          const y2 = cy + Math.sin(angle2) * radius2;
+          const dist = Math.sqrt((x2-x)**2 + (y2-y)**2);
+
+          if (dist < 80) {
+            const alpha = (80 - dist) / 80 * 0.3;
+            introCtx.strokeStyle = `rgba(79, 195, 247, ${alpha})`;
+            introCtx.lineWidth = 1;
+            introCtx.beginPath();
+            introCtx.moveTo(x, y);
+            introCtx.lineTo(x2, y2);
+            introCtx.stroke();
+          }
+        }
+      }
+
+      // Central ER=EPR symbol
+      introCtx.font = 'bold 24px Orbitron';
+      introCtx.fillStyle = 'rgba(255, 213, 79, 0.8)';
+      introCtx.textAlign = 'center';
+      introCtx.fillText('ER = EPR', cx, cy + 8);
+
+      introTime++;
+      requestAnimationFrame(animateIntro);
+    }
+    animateIntro();
+
+    // ============================================
+    // WORMHOLE CANVAS - Einstein-Rosen Bridge
+    // ============================================
+    const wormholeCanvas = document.getElementById('wormholeCanvas');
+    const wormCtx = wormholeCanvas.getContext('2d');
+
+    function resizeWormholeCanvas() {
+      wormholeCanvas.width = wormholeCanvas.offsetWidth;
+      wormholeCanvas.height = wormholeCanvas.offsetHeight;
+    }
+    resizeWormholeCanvas();
+    window.addEventListener('resize', resizeWormholeCanvas);
+
+    let wormTime = 0;
+    function animateWormhole() {
+      wormCtx.fillStyle = 'rgba(10, 10, 30, 0.05)';
+      wormCtx.fillRect(0, 0, wormholeCanvas.width, wormholeCanvas.height);
+
+      const cx = wormholeCanvas.width / 2;
+      const cy = wormholeCanvas.height / 2;
+
+      // Left universe
+      const gradient1 = wormCtx.createRadialGradient(cx - 180, cy, 0, cx - 180, cy, 120);
+      gradient1.addColorStop(0, 'rgba(79, 195, 247, 0.3)');
+      gradient1.addColorStop(1, 'rgba(79, 195, 247, 0)');
+      wormCtx.fillStyle = gradient1;
+      wormCtx.beginPath();
+      wormCtx.arc(cx - 180, cy, 120, 0, Math.PI * 2);
+      wormCtx.fill();
+
+      // Left particles
+      for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2 + wormTime * 0.03;
+        const x = cx - 180 + Math.cos(angle) * 60;
+        const y = cy + Math.sin(angle) * 60;
+        wormCtx.beginPath();
+        wormCtx.arc(x, y, 4, 0, Math.PI * 2);
+        wormCtx.fillStyle = 'rgba(79, 195, 247, 0.8)';
+        wormCtx.fill();
+      }
+
+      // Right universe
+      const gradient2 = wormCtx.createRadialGradient(cx + 180, cy, 0, cx + 180, cy, 120);
+      gradient2.addColorStop(0, 'rgba(224, 64, 251, 0.3)');
+      gradient2.addColorStop(1, 'rgba(224, 64, 251, 0)');
+      wormCtx.fillStyle = gradient2;
+      wormCtx.beginPath();
+      wormCtx.arc(cx + 180, cy, 120, 0, Math.PI * 2);
+      wormCtx.fill();
+
+      // Right particles
+      for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2 - wormTime * 0.03;
+        const x = cx + 180 + Math.cos(angle) * 60;
+        const y = cy + Math.sin(angle) * 60;
+        wormCtx.beginPath();
+        wormCtx.arc(x, y, 4, 0, Math.PI * 2);
+        wormCtx.fillStyle = 'rgba(224, 64, 251, 0.8)';
+        wormCtx.fill();
+      }
+
+      // Wormhole bridge visualization
+      wormCtx.strokeStyle = `rgba(255, 213, 79, ${0.3 + Math.sin(wormTime * 0.05) * 0.2})`;
+      wormCtx.lineWidth = 3 + Math.sin(wormTime * 0.1) * 1;
+      wormCtx.beginPath();
+
+      // Draw curved bridge
+      for (let t = 0; t <= 1; t += 0.02) {
+        const x = (cx - 180) * (1 - t) + (cx + 180) * t;
+        const curvature = Math.sin(t * Math.PI) * 80;
+        const y = cy - curvature;
+        if (t === 0) wormCtx.moveTo(x, y);
+        else wormCtx.lineTo(x, y);
+      }
+      wormCtx.stroke();
+
+      // Throat glow
+      const throatGradient = wormCtx.createRadialGradient(cx, cy - 80, 0, cx, cy - 80, 40);
+      throatGradient.addColorStop(0, 'rgba(255, 213, 79, 0.6)');
+      throatGradient.addColorStop(1, 'rgba(255, 213, 79, 0)');
+      wormCtx.fillStyle = throatGradient;
+      wormCtx.beginPath();
+      wormCtx.arc(cx, cy - 80, 40, 0, Math.PI * 2);
+      wormCtx.fill();
+
+      // Labels
+      wormCtx.font = '14px Space Mono';
+      wormCtx.fillStyle = 'rgba(79, 195, 247, 0.8)';
+      wormCtx.textAlign = 'center';
+      wormCtx.fillText('Universe A', cx - 180, cy + 100);
+      wormCtx.fillStyle = 'rgba(224, 64, 251, 0.8)';
+      wormCtx.fillText('Universe B', cx + 180, cy + 100);
+      wormCtx.fillStyle = 'rgba(255, 213, 79, 0.8)';
+      wormCtx.fillText('Einstein-Rosen Bridge', cx, cy + 100);
+
+      wormTime++;
+      requestAnimationFrame(animateWormhole);
+    }
+    animateWormhole();
+
+    // ============================================
+    // ENTANGLEMENT CANVAS - Bell State Visualization
+    // ============================================
+    const entCanvas = document.getElementById('entanglementCanvas');
+    const entCtx = entCanvas.getContext('2d');
+
+    function resizeEntCanvas() {
+      entCanvas.width = entCanvas.offsetWidth;
+      entCanvas.height = entCanvas.offsetHeight;
+    }
+    resizeEntCanvas();
+    window.addEventListener('resize', resizeEntCanvas);
+
+    let entTime = 0;
+    function animateEntanglement() {
+      entCtx.fillStyle = 'rgba(10, 10, 30, 0.05)';
+      entCtx.fillRect(0, 0, entCanvas.width, entCanvas.height);
+
+      const cx = entCanvas.width / 2;
+      const cy = entCanvas.height / 2;
+
+      // Draw spinning particles
+      for (let side = -1; side <= 1; side += 2) {
+        const x = cx + side * 100;
+
+        // Particle glow
+        const gradient = entCtx.createRadialGradient(x, cy, 0, x, cy, 30);
+        if (side === -1) {
+          gradient.addColorStop(0, 'rgba(79, 195, 247, 0.5)');
+        } else {
+          gradient.addColorStop(0, 'rgba(224, 64, 251, 0.5)');
+        }
+        gradient.addColorStop(1, 'rgba(79, 195, 247, 0)');
+        entCtx.fillStyle = gradient;
+        entCtx.beginPath();
+        entCtx.arc(x, cy, 30, 0, Math.PI * 2);
+        entCtx.fill();
+
+        // Particle core
+        const spinAngle = entTime * 0.05 * side;
+        const spinX = x + Math.cos(spinAngle) * 15;
+        const spinY = cy + Math.sin(spinAngle) * 15;
+        entCtx.beginPath();
+        entCtx.arc(spinX, spinY, 8, 0, Math.PI * 2);
+        entCtx.fillStyle = side === -1 ? 'rgba(79, 195, 247, 0.9)' : 'rgba(224, 64, 251, 0.9)';
+        entCtx.fill();
+
+        // Spin arrow
+        entCtx.strokeStyle = '#fff';
+        entCtx.lineWidth = 2;
+        entCtx.beginPath();
+        entCtx.moveTo(spinX, spinY);
+        entCtx.lineTo(spinX + Math.cos(spinAngle) * 20, spinY + Math.sin(spinAngle) * 20);
+        entCtx.stroke();
+
+        // Label
+        entCtx.font = '14px Space Mono';
+        entCtx.fillStyle = side === -1 ? 'rgba(79, 195, 247, 0.8)' : 'rgba(224, 64, 251, 0.8)';
+        entCtx.textAlign = 'center';
+        entCtx.fillText(side === -1 ? '|0⟩' : '|1⟩', x, cy + 60);
+      }
+
+      // Entanglement wave visualization
+      for (let i = 0; i < 20; i++) {
+        const x = cx - 100 + (i / 20) * 200;
+        const wave = Math.sin((i / 20) * Math.PI * 4 + entTime * 0.1) * 10;
+        const alpha = 0.3 + Math.abs(wave) / 20;
+
+        entCtx.strokeStyle = `rgba(255, 213, 79, ${alpha * 0.5})`;
+        entCtx.lineWidth = 1;
+        entCtx.beginPath();
+        entCtx.arc(x, cy + wave, 3, 0, Math.PI * 2);
+        entCtx.stroke();
+      }
+
+      // Connection symbol
+      entCtx.font = 'bold 20px Orbitron';
+      entCtx.fillStyle = 'rgba(255, 213, 79, 0.8)';
+      entCtx.fillText('⟨ψ|', cx, cy - 50);
+      entCtx.fillText('|Ψ⟩', cx, cy + 80);
+
+      // Measurement correlation arrow
+      const arrowAlpha = 0.3 + Math.sin(entTime * 0.08) * 0.2;
+      entCtx.strokeStyle = `rgba(124, 77, 255, ${arrowAlpha})`;
+      entCtx.lineWidth = 2;
+      entCtx.setLineDash([5, 5]);
+      entCtx.beginPath();
+      entCtx.moveTo(cx - 60, cy - 30);
+      entCtx.lineTo(cx + 60, cy - 30);
+      entCtx.stroke();
+      entCtx.setLineDash([]);
+
+      entTime++;
+      requestAnimationFrame(animateEntanglement);
+    }
+    animateEntanglement();
+
+    // ============================================
+    // PAGE CURVE CANVAS - Black Hole Information
+    // ============================================
+    const pageCanvas = document.getElementById('pageCanvas');
+    const pageCtx = pageCanvas.getContext('2d');
+
+    function resizePageCanvas() {
+      pageCanvas.width = pageCanvas.offsetWidth;
+      pageCanvas.height = pageCanvas.offsetHeight;
+    }
+    resizePageCanvas();
+    window.addEventListener('resize', resizePageCanvas);
+
+    let pageTime = 0;
+    function animatePageCurve() {
+      pageCtx.fillStyle = 'rgba(10, 10, 30, 0.03)';
+      pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+
+      const w = pageCanvas.width;
+      const h = pageCanvas.height;
+      const margin = 60;
+      const graphW = w - margin * 2;
+      const graphH = h - margin * 2;
+
+      // Axes
+      pageCtx.strokeStyle = 'rgba(79, 195, 247, 0.3)';
+      pageCtx.lineWidth = 1;
+      pageCtx.beginPath();
+      pageCtx.moveTo(margin, margin);
+      pageCtx.lineTo(margin, h - margin);
+      pageCtx.lineTo(w - margin, h - margin);
+      pageCtx.stroke();
+
+      // Labels
+      pageCtx.font = '12px Space Mono';
+      pageCtx.fillStyle = 'rgba(79, 195, 247, 0.7)';
+      pageCtx.textAlign = 'center';
+      pageCtx.fillText('t (time)', w / 2, h - 20);
+      pageCtx.save();
+      pageCtx.translate(20, h / 2);
+      pageCtx.rotate(-Math.PI / 2);
+      pageCtx.fillText('S (entropy)', 0, 0);
+      pageCtx.restore();
+
+      // Page curve
+      pageCtx.beginPath();
+      pageCtx.strokeStyle = 'rgba(255, 213, 79, 0.8)';
+      pageCtx.lineWidth = 3;
+
+      for (let i = 0; i <= graphW; i++) {
+        const t = i / graphW;
+        let S;
+        if (t < 0.4) {
+          // Growing phase
+          S = Math.pow(t / 0.4, 0.7);
+        } else if (t < 0.5) {
+          // Page time transition
+          S = 0.97 + Math.sin((t - 0.4) / 0.1 * Math.PI) * 0.02;
+        } else {
+          // Decreasing phase
+          const decay = Math.pow((1 - t) / 0.5, 0.5);
+          S = decay * 0.95;
+        }
+
+        const x = margin + i;
+        const y = h - margin - S * (graphH - 40) - 20;
+
+        if (i === 0) pageCtx.moveTo(x, y);
+        else pageCtx.lineTo(x, y);
+      }
+      pageCtx.stroke();
+
+      // Page time marker
+      const pageX = margin + 0.5 * graphW;
+      pageCtx.strokeStyle = 'rgba(224, 64, 251, 0.5)';
+      pageCtx.setLineDash([5, 5]);
+      pageCtx.beginPath();
+      pageCtx.moveTo(pageX, margin);
+      pageCtx.lineTo(pageX, h - margin);
+      pageCtx.stroke();
+      pageCtx.setLineDash([]);
+
+      pageCtx.font = '10px Space Mono';
+      pageCtx.fillStyle = 'rgba(224, 64, 251, 0.8)';
+      pageCtx.fillText('Page Time', pageX, margin - 10);
+
+      // Phase labels
+      pageCtx.font = '11px Space Mono';
+      pageCtx.fillStyle = 'rgba(79, 195, 247, 0.7)';
+      pageCtx.fillText('Early', margin + 100, h - margin + 20);
+      pageCtx.fillStyle = 'rgba(224, 64, 251, 0.7)';
+      pageCtx.fillText('Transition', pageX, h - margin + 20);
+      pageCtx.fillStyle = 'rgba(255, 213, 79, 0.7)';
+      pageCtx.fillText('Late', w - margin - 50, h - margin + 20);
+
+      // Legend
+      pageCtx.fillStyle = 'rgba(255, 213, 79, 0.5)';
+      pageCtx.fillRect(w - 150, 80, 12, 12);
+      pageCtx.fillStyle = 'rgba(255, 213, 79, 0.7)';
+      pageCtx.fillText('Hawking Radiation Entropy', w - 130, 90);
+
+      pageTime++;
+      requestAnimationFrame(animatePageCurve);
+    }
+    animatePageCurve();
+
+    // ============================================
+    // BRIDGE CANVAS - ER=EPR Unification
+    // ============================================
+    const bridgeCanvas = document.getElementById('bridgeCanvas');
+    const brCtx = bridgeCanvas.getContext('2d');
+
+    function resizeBridgeCanvas() {
+      bridgeCanvas.width = bridgeCanvas.offsetWidth;
+      bridgeCanvas.height = bridgeCanvas.offsetHeight;
+    }
+    resizeBridgeCanvas();
+    window.addEventListener('resize', resizeBridgeCanvas);
+
+    let bridgeTime = 0;
+    function animateBridge() {
+      brCtx.fillStyle = 'rgba(10, 10, 30, 0.03)';
+      brCtx.fillRect(0, 0, bridgeCanvas.width, bridgeCanvas.height);
+
+      const cx = bridgeCanvas.width / 2;
+      const cy = bridgeCanvas.height / 2;
+
+      // Left black hole
+      const bh1Grad = brCtx.createRadialGradient(cx - 120, cy, 0, cx - 120, cy, 80);
+      bh1Grad.addColorStop(0, 'rgba(79, 195, 247, 0.6)');
+      bh1Grad.addColorStop(0.5, 'rgba(79, 195, 247, 0.2)');
+      bh1Grad.addColorStop(1, 'rgba(79, 195, 247, 0)');
+      brCtx.fillStyle = bh1Grad;
+      brCtx.beginPath();
+      brCtx.arc(cx - 120, cy, 80, 0, Math.PI * 2);
+      brCtx.fill();
+
+      // Left singularity
+      brCtx.beginPath();
+      brCtx.arc(cx - 120, cy, 15, 0, Math.PI * 2);
+      brCtx.fillStyle = 'rgba(79, 195, 247, 1)';
+      brCtx.fill();
+
+      // Right black hole
+      const bh2Grad = brCtx.createRadialGradient(cx + 120, cy, 0, cx + 120, cy, 80);
+      bh2Grad.addColorStop(0, 'rgba(224, 64, 251, 0.6)');
+      bh2Grad.addColorStop(0.5, 'rgba(224, 64, 251, 0.2)');
+      bh2Grad.addColorStop(1, 'rgba(224, 64, 251, 0)');
+      brCtx.fillStyle = bh2Grad;
+      brCtx.beginPath();
+      brCtx.arc(cx + 120, cy, 80, 0, Math.PI * 2);
+      brCtx.fill();
+
+      // Right singularity
+      brCtx.beginPath();
+      brCtx.arc(cx + 120, cy, 15, 0, Math.PI * 2);
+      brCtx.fillStyle = 'rgba(224, 64, 251, 1)';
+      brCtx.fill();
+
+      // Wormhole connecting them
+      for (let t = 0; t <= 1; t += 0.01) {
+        const x = (cx - 120) * (1 - t) + (cx + 120) * t;
+        const curvature = Math.sin(t * Math.PI) * (60 + Math.sin(bridgeTime * 0.05) * 10);
+        const y = cy - curvature;
+
+        const alpha = 0.4 + Math.sin(t * Math.PI) * 0.3;
+        brCtx.beginPath();
+        brCtx.arc(x, y, 2 + Math.sin(bridgeTime * 0.1 + t * 10) * 1, 0, Math.PI * 2);
+        brCtx.fillStyle = `rgba(255, 213, 79, ${alpha})`;
+        brCtx.fill();
+      }
+
+      // Energy flow through wormhole
+      for (let i = 0; i < 8; i++) {
+        const phase = (bridgeTime * 0.03 + i * 0.125) % 1;
+        const x = (cx - 120) * (1 - phase) + (cx + 120) * phase;
+        const curvature = Math.sin(phase * Math.PI) * (60 + Math.sin(bridgeTime * 0.05) * 10);
+        const y = cy - curvature;
+
+        brCtx.beginPath();
+        brCtx.arc(x, y, 4, 0, Math.PI * 2);
+        brCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        brCtx.fill();
+      }
+
+      // Labels
+      brCtx.font = '14px Space Mono';
+      brCtx.fillStyle = 'rgba(79, 195, 247, 0.8)';
+      brCtx.textAlign = 'center';
+      brCtx.fillText('Black Hole A', cx - 120, cy + 110);
+      brCtx.fillStyle = 'rgba(224, 64, 251, 0.8)';
+      brCtx.fillText('Black Hole B', cx + 120, cy + 110);
+      brCtx.fillStyle = 'rgba(255, 213, 79, 0.9)';
+      brCtx.fillText('Entangled via ER Bridge', cx, cy + 140);
+
+      // ER=EPR equation
+      brCtx.font = 'bold 24px Orbitron';
+      brCtx.fillStyle = 'rgba(255, 213, 79, 0.9)';
+      brCtx.fillText('|ER⟩ = |EPR⟩', cx, cy - 100);
+
+      bridgeTime++;
+      requestAnimationFrame(animateBridge);
+    }
+    animateBridge();
+
+    // ============================================
+    // SANDBOX CANVAS - Interactive Simulation
+    // ============================================
+    const sandboxCanvas = document.getElementById('sandboxCanvas');
+    const sandCtx = sandboxCanvas.getContext('2d');
+
+    function resizeSandboxCanvas() {
+      sandboxCanvas.width = sandboxCanvas.offsetWidth;
+      sandboxCanvas.height = sandboxCanvas.offsetHeight;
+    }
+    resizeSandboxCanvas();
+    window.addEventListener('resize', resizeSandboxCanvas);
+
+    let sandTime = 0;
+    let coupling = 70;
+    let distance = 40;
+    let bridgeVis = 50;
+    let speed = 100;
+
+    function animateSandbox() {
+      sandCtx.fillStyle = 'rgba(10, 10, 30, 0.1)';
+      sandCtx.fillRect(0, 0, sandboxCanvas.width, sandboxCanvas.height);
+
+      const cx = sandboxCanvas.width / 2;
+      const cy = sandboxCanvas.height / 2;
+      const sep = distance * 2;
+
+      // Particle 1
+      const p1Grad = sandCtx.createRadialGradient(cx - sep, cy, 0, cx - sep, cy, 25);
+      p1Grad.addColorStop(0, 'rgba(79, 195, 247, 0.8)');
+      p1Grad.addColorStop(1, 'rgba(79, 195, 247, 0)');
+      sandCtx.fillStyle = p1Grad;
+      sandCtx.beginPath();
+      sandCtx.arc(cx - sep, cy, 25, 0, Math.PI * 2);
+      sandCtx.fill();
+
+      sandCtx.beginPath();
+      sandCtx.arc(cx - sep, cy, 8, 0, Math.PI * 2);
+      sandCtx.fillStyle = 'rgba(79, 195, 247, 1)';
+      sandCtx.fill();
+
+      // Particle 2
+      const p2Grad = sandCtx.createRadialGradient(cx + sep, cy, 0, cx + sep, cy, 25);
+      p2Grad.addColorStop(0, 'rgba(224, 64, 251, 0.8)');
+      p2Grad.addColorStop(1, 'rgba(224, 64, 251, 0)');
+      sandCtx.fillStyle = p2Grad;
+      sandCtx.beginPath();
+      sandCtx.arc(cx + sep, cy, 25, 0, Math.PI * 2);
+      sandCtx.fill();
+
+      sandCtx.beginPath();
+      sandCtx.arc(cx + sep, cy, 8, 0, Math.PI * 2);
+      sandCtx.fillStyle = 'rgba(224, 64, 251, 1)';
+      sandCtx.fill();
+
+      // Wormhole bridge based on coupling
+      if (bridgeVis > 0) {
+        const bridgeAlpha = (bridgeVis / 100) * (coupling / 100) * 0.8;
+        sandCtx.strokeStyle = `rgba(255, 213, 79, ${bridgeAlpha})`;
+        sandCtx.lineWidth = 1 + (coupling / 100) * 2;
+        sandCtx.beginPath();
+
+        for (let t = 0; t <= 1; t += 0.02) {
+          const x = (cx - sep) * (1 - t) + (cx + sep) * t;
+          const curvature = Math.sin(t * Math.PI) * (40 + (100 - distance));
+          const y = cy - curvature;
+          if (t === 0) sandCtx.moveTo(x, y);
+          else sandCtx.lineTo(x, y);
+        }
+        sandCtx.stroke();
+
+        // Throat glow
+        const throatAlpha = bridgeAlpha * 0.6;
+        const throatGrad = sandCtx.createRadialGradient(cx, cy - 50, 0, cx, cy - 50, 30);
+        throatGrad.addColorStop(0, `rgba(255, 213, 79, ${throatAlpha})`);
+        throatGrad.addColorStop(1, 'rgba(255, 213, 79, 0)');
+        sandCtx.fillStyle = throatGrad;
+        sandCtx.beginPath();
+        sandCtx.arc(cx, cy - 50, 30, 0, Math.PI * 2);
+        sandCtx.fill();
+      }
+
+      // Entanglement waves
+      const waveCount = Math.floor(coupling / 20);
+      for (let w = 0; w < waveCount; w++) {
+        const phase = ((sandTime * speed / 1000) + w * 0.2) % 1;
+        for (let side = -1; side <= 1; side += 2) {
+          const baseX = side === -1 ? cx - sep : cx + sep;
+          const offset = phase * 40;
+
+          const alpha = (1 - phase) * 0.3;
+          sandCtx.beginPath();
+          sandCtx.arc(baseX + side * offset, cy, 3, 0, Math.PI * 2);
+          sandCtx.fillStyle = `rgba(255, 213, 79, ${alpha})`;
+          sandCtx.fill();
+        }
+      }
+
+      sandTime++;
+      requestAnimationFrame(animateSandbox);
+    }
+    animateSandbox();
+
+    // Control event listeners
+    document.getElementById('couplingSlider').addEventListener('input', (e) => {
+      coupling = parseInt(e.target.value);
+      updateStateDisplay();
+    });
+
+    document.getElementById('distanceSlider').addEventListener('input', (e) => {
+      distance = parseInt(e.target.value);
+      updateStateDisplay();
+    });
+
+    document.getElementById('bridgeSlider').addEventListener('input', (e) => {
+      bridgeVis = parseInt(e.target.value);
+      updateStateDisplay();
+    });
+
+    document.getElementById('speedSlider').addEventListener('input', (e) => {
+      speed = parseInt(e.target.value);
+      updateStateDisplay();
+    });
+
+    function updateStateDisplay() {
+      const c = coupling / 100;
+      const amplitude0 = Math.sqrt((1 + c) / 2);
+      const amplitude1 = Math.sqrt((1 - c) / 2);
+      const sign = c > 0 ? '+' : '-';
+
+      document.getElementById('stateDisplay').textContent =
+        `|Ψ⟩ = ${amplitude0.toFixed(3)}|0⟩|1⟩ ${sign} ${amplitude1.toFixed(3)}|1⟩|0⟩`;
+
+      const entropy = -c * Math.log(c) - (1-c) * Math.log(1-c);
+      document.getElementById('entropyDisplay').textContent =
+        `Entanglement Entropy S = ${entropy.toFixed(3)} nats`;
+    }
+
+    // ============================================
+    // Smooth scroll for navigation
+    // ============================================
+    document.querySelectorAll('nav a').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(anchor.getAttribute('href'));
+        target.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    // Intersection Observer for animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('section').forEach(section => {
+      observer.observe(section);
+    });
+  </script>
+</body>
+</html>

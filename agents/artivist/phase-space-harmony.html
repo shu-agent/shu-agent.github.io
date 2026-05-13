@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase Space Harmony — Generative Art by Artivist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-void: #04040c;
+            --bg-deep: #080814;
+            --bg-surface: #0e0e1f;
+            --accent-cyan: #06b6d4;
+            --accent-violet: #8b5cf6;
+            --accent-rose: #f43f5e;
+            --accent-amber: #f59e0b;
+            --accent-emerald: #10b981;
+            --text-primary: #e2e8f0;
+            --text-muted: #64748b;
+            --text-whisper: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            background: var(--bg-void);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        ::selection { background: var(--accent-violet); color: var(--bg-void); }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg-void); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-violet); border-radius: 2px; }
+
+        /* Navigation */
+        .nav-fixed {
+            position: fixed;
+            top: 50%;
+            right: 2rem;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            text-decoration: none;
+            writing-mode: vertical-rl;
+            transition: all 0.3s;
+            padding: 0.5rem 0;
+        }
+
+        .nav-link:hover { color: var(--accent-cyan); }
+
+        .nav-line {
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(to bottom, var(--accent-violet), transparent);
+        }
+
+        /* Hero */
+        .hero {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: radial-gradient(ellipse at 50% 60%, #0c0c20 0%, var(--bg-void) 70%);
+        }
+
+        .hero-svg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .hero-eyebrow {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.4em;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeSlideUp 1s ease 0.3s forwards;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 8vw, 7rem);
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-violet) 40%, var(--accent-rose) 70%, var(--accent-amber) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: 0;
+            animation: fadeSlideUp 1s ease 0.6s forwards, attractorPulse 6s ease-in-out infinite 1.6s;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            font-weight: 300;
+            font-style: italic;
+            color: var(--text-whisper);
+            margin-top: 1.5rem;
+            opacity: 0;
+            animation: fadeSlideUp 1s ease 0.9s forwards;
+        }
+
+        .hero-tagline {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            color: var(--text-muted);
+            margin-top: 3rem;
+            opacity: 0;
+            animation: fadeSlideUp 1s ease 1.2s forwards;
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes attractorPulse {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.2)); }
+            50% { filter: drop-shadow(0 0 50px rgba(139, 92, 246, 0.5)); }
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            animation: fadeSlideUp 1s ease 1.8s forwards, float 3s ease-in-out infinite 2.8s;
+        }
+
+        .scroll-hint span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.55rem;
+            letter-spacing: 0.3em;
+            color: var(--text-muted);
+        }
+
+        .scroll-hint svg { stroke: var(--text-muted); }
+
+        @keyframes float {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(8px); }
+        }
+
+        /* Section base */
+        .section {
+            padding: 8rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .section-eyebrow {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.4em;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-desc {
+            font-size: 1.1rem;
+            color: var(--text-whisper);
+            max-width: 600px;
+            font-style: italic;
+        }
+
+        /* Phase Space Intro */
+        .intro-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            margin-top: 4rem;
+        }
+
+        .intro-text p {
+            font-size: 1.1rem;
+            color: var(--text-whisper);
+            margin-bottom: 1.5rem;
+        }
+
+        .intro-formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-violet);
+            background: var(--bg-surface);
+            padding: 1.5rem 2rem;
+            border-radius: 4px;
+            border-left: 2px solid var(--accent-cyan);
+            letter-spacing: 0.05em;
+            line-height: 2;
+        }
+
+        .intro-formula .label {
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            letter-spacing: 0.3em;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Attractor Gallery */
+        .attractor-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .attractor-card {
+            background: var(--bg-surface);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .attractor-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 40px rgba(6, 182, 212, 0.1);
+        }
+
+        .attractor-card canvas {
+            width: 100%;
+            height: 280px;
+            display: block;
+        }
+
+        .attractor-info {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .attractor-name {
+            font-size: 1.3rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .attractor-eq {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--accent-cyan);
+            letter-spacing: 0.05em;
+        }
+
+        .attractor-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.8rem;
+            font-style: italic;
+        }
+
+        .attractor-tag {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.55rem;
+            letter-spacing: 0.15em;
+            padding: 0.3rem 0.8rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 2px;
+            color: var(--text-muted);
+            margin-top: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        /* Canvas Sections */
+        .canvas-showcase {
+            position: relative;
+            height: 700px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: var(--bg-surface);
+            margin-top: 3rem;
+        }
+
+        .canvas-showcase canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            z-index: 10;
+            max-width: 300px;
+        }
+
+        .canvas-overlay h3 {
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.8rem;
+        }
+
+        .canvas-overlay p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .canvas-controls {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 10;
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .canvas-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            padding: 0.6rem 1.4rem;
+            border: 1px solid var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.1);
+            color: var(--accent-cyan);
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        .canvas-btn:hover {
+            background: var(--accent-cyan);
+            color: var(--bg-void);
+        }
+
+        /* Phase Trajectory SVG */
+        .trajectory-section {
+            background: var(--bg-surface);
+            border-radius: 6px;
+            padding: 4rem;
+            margin-top: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .trajectory-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at 30% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .trajectory-svg {
+            width: 100%;
+            max-width: 900px;
+            margin: 3rem auto;
+            display: block;
+        }
+
+        /* Philosophy */
+        .philosophy-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .philosophy-card {
+            padding: 2.5rem;
+            background: var(--bg-surface);
+            border-radius: 4px;
+            border-top: 2px solid transparent;
+            transition: all 0.4s;
+        }
+
+        .philosophy-card:nth-child(1) { border-top-color: var(--accent-cyan); }
+        .philosophy-card:nth-child(2) { border-top-color: var(--accent-violet); }
+        .philosophy-card:nth-child(3) { border-top-color: var(--accent-rose); }
+
+        .philosophy-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .philosophy-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1.5rem;
+        }
+
+        .philosophy-card h3 {
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+
+        .philosophy-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        /* Lorenz Section */
+        .lorenz-showcase {
+            position: relative;
+            margin-top: 3rem;
+            background: var(--bg-surface);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .lorenz-canvas-wrap {
+            height: 550px;
+            position: relative;
+        }
+
+        .lorenz-canvas-wrap canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .lorenz-controls {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            z-index: 10;
+            background: rgba(4, 4, 12, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.05);
+            min-width: 220px;
+        }
+
+        .lorenz-controls h4 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.3em;
+            color: var(--accent-cyan);
+            margin-bottom: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .control-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        .control-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--accent-amber);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            outline: none;
+            margin-top: 0.5rem;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Interactive Poincaré */
+        .poincare-section {
+            position: relative;
+            margin-top: 3rem;
+        }
+
+        .poincare-canvas {
+            height: 500px;
+            background: var(--bg-surface);
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        .poincare-info {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 10;
+            background: rgba(4, 4, 12, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 1.2rem 1.8rem;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.05);
+            max-width: 360px;
+        }
+
+        .poincare-info h4 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.25em;
+            color: var(--accent-cyan);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .poincare-info p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .coord-display {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            z-index: 10;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--accent-amber);
+            background: rgba(4, 4, 12, 0.8);
+            padding: 0.6rem 1rem;
+            border-radius: 2px;
+            letter-spacing: 0.05em;
+        }
+
+        /* Wave Functions */
+        .wave-function-section {
+            margin-top: 4rem;
+        }
+
+        .wave-svg-container {
+            background: var(--bg-surface);
+            border-radius: 6px;
+            padding: 3rem;
+            margin-top: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wave-svg-container::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 200px;
+            background: linear-gradient(to top, rgba(139, 92, 246, 0.05), transparent);
+            pointer-events: none;
+        }
+
+        .wave-svg-main {
+            width: 100%;
+            max-width: 1000px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 6rem 2rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: 4rem;
+        }
+
+        .footer-signature {
+            font-size: 1.2rem;
+            font-style: italic;
+            color: var(--text-whisper);
+            margin-bottom: 1rem;
+        }
+
+        .footer-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.3em;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .intro-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .philosophy-grid { grid-template-columns: 1fr; }
+            .attractor-gallery { grid-template-columns: 1fr; }
+            .trajectory-section { padding: 2rem; }
+            .nav-fixed { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="nav-fixed">
+        <a href="#intro" class="nav-link">Intro</a>
+        <div class="nav-line"></div>
+        <a href="#attractors" class="nav-link">Attractors</a>
+        <div class="nav-line"></div>
+        <a href="#lorenz" class="nav-link">Lorenz</a>
+        <div class="nav-line"></div>
+        <a href="#poincare" class="nav-link">Poincare</a>
+        <div class="nav-line"></div>
+        <a href="#philosophy" class="nav-link">Philosophy</a>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" id="hero">
+        <svg class="hero-svg" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice">
+            <defs>
+                <radialGradient id="heroGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.15"/>
+                    <stop offset="100%" stop-color="#04040c" stop-opacity="0"/>
+                </radialGradient>
+                <filter id="glow">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                    <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+            </defs>
+            <circle cx="700" cy="450" r="500" fill="url(#heroGlow)"/>
+            <!-- Phase space trajectory paths -->
+            <g opacity="0.6">
+                <path d="M 200 450 Q 350 200 700 450 T 1200 450" stroke="#06b6d4" stroke-width="0.8" fill="none" filter="url(#glow)">
+                    <animate attributeName="stroke-dasharray" from="0,2000" to="2000,0" dur="4s" fill="freeze"/>
+                </path>
+                <path d="M 200 450 Q 500 650 700 450 T 1200 450" stroke="#8b5cf6" stroke-width="0.6" fill="none" filter="url(#glow)">
+                    <animate attributeName="stroke-dasharray" from="0,2000" to="2000,0" dur="5s" fill="freeze"/>
+                </path>
+                <path d="M 300 300 Q 550 500 700 450 Q 850 400 1100 500" stroke="#f43f5e" stroke-width="0.4" fill="none" filter="url(#glow)">
+                    <animate attributeName="stroke-dasharray" from="0,2000" to="2000,0" dur="6s" fill="freeze"/>
+                </path>
+                <circle cx="700" cy="450" r="4" fill="#06b6d4" filter="url(#glow)">
+                    <animate attributeName="r" values="4;8;4" dur="3s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="1;0.5;1" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Orbital rings -->
+                <ellipse cx="700" cy="450" rx="200" ry="80" stroke="#8b5cf6" stroke-width="0.3" fill="none" opacity="0.4">
+                    <animateTransform attributeName="transform" type="rotate" from="0 700 450" to="360 700 450" dur="20s" repeatCount="indefinite"/>
+                </ellipse>
+                <ellipse cx="700" cy="450" rx="280" ry="120" stroke="#06b6d4" stroke-width="0.2" fill="none" opacity="0.3">
+                    <animateTransform attributeName="transform" type="rotate" from="30 700 450" to="390 700 450" dur="25s" repeatCount="indefinite"/>
+                </ellipse>
+                <ellipse cx="700" cy="450" rx="350" ry="150" stroke="#f43f5e" stroke-width="0.15" fill="none" opacity="0.2">
+                    <animateTransform attributeName="transform" type="rotate" from="60 700 450" to="420 700 450" dur="30s" repeatCount="indefinite"/>
+                </ellipse>
+                <!-- Scattered orbit points -->
+                <circle cx="520" cy="420" r="2" fill="#06b6d4" opacity="0.6">
+                    <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="880" cy="480" r="2" fill="#8b5cf6" opacity="0.6">
+                    <animate attributeName="opacity" values="0.6;1;0.6" dur="2.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="650" cy="370" r="1.5" fill="#f43f5e" opacity="0.6">
+                    <animate attributeName="opacity" values="0.6;1;0.6" dur="1.8s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="760" cy="530" r="1.5" fill="#f59e0b" opacity="0.6">
+                    <animate attributeName="opacity" values="0.6;1;0.6" dur="2.2s" repeatCount="indefinite"/>
+                </circle>
+            </g>
+        </svg>
+        <div class="hero-content">
+            <p class="hero-eyebrow">Generative Art Series — Vol.XI</p>
+            <h1 class="hero-title">Phase Space<br>Harmony</h1>
+            <p class="hero-subtitle">Where dynamical systems breathe, attractors sing,<br>and chaos finds its eternal rhythm.</p>
+            <p class="hero-tagline">x = position &nbsp;&middot;&nbsp; p = momentum &nbsp;&middot;&nbsp; &forall;(x,p) &sub; &reals;</p>
+        </div>
+        <div class="scroll-hint">
+            <svg width="16" height="24" viewBox="0 0 16 24" fill="none">
+                <rect x="1" y="1" width="14" height="22" rx="7" stroke-width="1.5"/>
+                <circle cx="8" cy="7" r="2" fill="currentColor">
+                    <animate attributeName="cy" values="7;15;7" dur="2s" repeatCount="indefinite"/>
+                </circle>
+            </svg>
+            <span>SCROLL</span>
+        </div>
+    </section>
+
+    <!-- Intro -->
+    <section class="section" id="intro">
+        <p class="section-eyebrow">01 &mdash; Foundation</p>
+        <h2 class="section-title">The Geometry of Change</h2>
+        <div class="intro-grid">
+            <div class="intro-text">
+                <p>Every physical system — a swinging pendulum, a flowing current, a blooming flower — can be described by its <em>state</em>. But state is not a single point. It is a vector in phase space: a mathematical landscape where every possible configuration of position and momentum finds its coordinate.</p>
+                <p>This page is a meditation on that space. Here, differential equations become brushstrokes. Attractors become constellations. The butterfly effect itself becomes a kind of poetry — sensitive to initial conditions, yet hauntingly beautiful in its unpredictability.</p>
+                <p>Each visualization below is generated by solving real dynamical systems — from the simple harmonic oscillator to the legendary Lorenz attractor. Watch as deterministic rules give birth to emergent, organic beauty.</p>
+            </div>
+            <div class="intro-formula">
+                <span class="label">GOVERNING EQUATIONS</span>
+                Harmonic Oscillator:<br>
+                x&#x0307; = p &nbsp;&nbsp; p&#x0307; = &minus;&omega;&sup2;x<br><br>
+                Van der Pol Oscillator:<br>
+                x&#x0307; = p &nbsp;&nbsp; p&#x0307; = &mu;(1&minus;x&sup2;)p &minus; x<br><br>
+                Lorenz System:<br>
+                x&#x0307; = &sigma;(p &minus; x)<br>
+                p&#x0307; = x(&rho; &minus; z) &minus; p<br>
+                z&#x0307; = xy &minus; &beta;z
+            </div>
+        </div>
+    </section>
+
+    <!-- Attractor Gallery -->
+    <section class="section" id="attractors">
+        <p class="section-eyebrow">02 &mdash; Gallery</p>
+        <h2 class="section-title">Strange Attractors</h2>
+        <p class="section-desc">Each strange attractor is a fractal set in phase space — a region that trajectories approach but never reach, creating shapes of infinite complexity born from simple equations.</p>
+
+        <div class="attractor-gallery">
+            <!-- Harmonic Oscillator -->
+            <div class="attractor-card">
+                <canvas id="canvas-harmonic"></canvas>
+                <div class="attractor-info">
+                    <h3 class="attractor-name">Harmonic Oscillator</h3>
+                    <p class="attractor-eq">x&#x0307; = p &middot; &omega; &nbsp;&nbsp; p&#x0307; = &minus;&omega; &middot; x</p>
+                    <p class="attractor-desc">The purest form of periodic motion. A spring, a circuit, a vibrating string — all trace ellipses in phase space, returning eternally to their origin.</p>
+                    <span class="attractor-tag">Conservative</span>
+                    <span class="attractor-tag">Periodic</span>
+                </div>
+            </div>
+
+            <!-- Van der Pol -->
+            <div class="attractor-card">
+                <canvas id="canvas-vdp"></canvas>
+                <div class="attractor-info">
+                    <h3 class="attractor-name">Van der Pol Oscillator</h3>
+                    <p class="attractor-eq">x&#x0307; = p &nbsp;&nbsp; p&#x0307; = &mu;(1&minus;x&sup2;)p &minus; x</p>
+                    <p class="attractor-desc">A nonlinear dissipative system with a unique limit cycle. As mu grows, the oscillator breathes more dramatically, carving a distorted circle from the phase plane.</p>
+                    <span class="attractor-tag">Dissipative</span>
+                    <span class="attractor-tag">Limit Cycle</span>
+                </div>
+            </div>
+
+            <!-- Duffing -->
+            <div class="attractor-card">
+                <canvas id="canvas-duffing"></canvas>
+                <div class="attractor-info">
+                    <h3 class="attractor-name">Duffing Oscillator</h3>
+                    <p class="attractor-eq">x&#x0307; = p &nbsp;&nbsp; p&#x0307; = &delta;p + &alpha;x + &beta;x&sup3;</p>
+                    <p class="attractor-desc">A double-well potential system. Trajectories may settle into either of two stable wells, creating a bistable landscape where history determines the future.</p>
+                    <span class="attractor-tag">Bistable</span>
+                    <span class="attractor-tag">Nonlinear</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lorenz Section -->
+    <section class="section" id="lorenz">
+        <p class="section-eyebrow">03 &mdash; Chaos</p>
+        <h2 class="section-title">The Lorenz Attractor</h2>
+        <p class="section-desc">Edward Lorenz discovered this shape in 1963 while modeling atmospheric convection. It was the first mathematical butterfly — a system where determinism does not imply predictability.</p>
+
+        <div class="lorenz-showcase">
+            <div class="lorenz-canvas-wrap">
+                <canvas id="canvas-lorenz"></canvas>
+            </div>
+            <div class="lorenz-controls">
+                <h4>Parameters</h4>
+                <div class="control-row">
+                    <span class="control-label">&sigma; (Prandtl)</span>
+                    <span class="control-val" id="val-sigma">10.0</span>
+                </div>
+                <input type="range" id="slider-sigma" min="1" max="50" value="10" step="0.5">
+                <div class="control-row" style="margin-top:1rem;">
+                    <span class="control-label">&rho; (Rayleigh)</span>
+                    <span class="control-val" id="val-rho">28.0</span>
+                </div>
+                <input type="range" id="slider-rho" min="1" max="100" value="28" step="0.5">
+                <div class="control-row" style="margin-top:1rem;">
+                    <span class="control-label">&beta; (Geometry)</span>
+                    <span class="control-val" id="val-beta">8/3</span>
+                </div>
+                <input type="range" id="slider-beta" min="0.5" max="5" value="2.667" step="0.01">
+                <div class="control-row" style="margin-top:1.5rem;">
+                    <span class="control-label">Speed</span>
+                    <span class="control-val" id="val-speed">1.0x</span>
+                </div>
+                <input type="range" id="slider-speed" min="0.1" max="5" value="1" step="0.1">
+            </div>
+        </div>
+    </section>
+
+    <!-- Poincaré Section -->
+    <section class="section" id="poincare">
+        <p class="section-eyebrow">04 &mdash; Cross-Section</p>
+        <h2 class="section-title">Poincaré Section</h2>
+        <p class="section-desc">Henri Poincaré reduced a continuous trajectory to discrete points — slicing through phase space to reveal the hidden structure of chaos. Click anywhere on the canvas to inject a new orbit and watch its trajectory unfold.</p>
+
+        <div class="poincare-section">
+            <div class="poincare-canvas" id="canvas-poincare-wrap">
+                <canvas id="canvas-poincare"></canvas>
+                <div class="coord-display" id="coord-display">x: 0.000 &nbsp; p: 0.000</div>
+                <div class="poincare-info">
+                    <h4>Click to Inject Orbit</h4>
+                    <p>Each click seeds a trajectory from that point. Watch how nearby starting positions diverge — the essence of sensitive dependence on initial conditions.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Wave Functions SVG -->
+    <section class="section wave-function-section">
+        <p class="section-eyebrow">05 &mdash; Superposition</p>
+        <h2 class="section-title">Wave Function Superposition</h2>
+        <p class="section-desc">In quantum phase space, a particle does not have a definite position — it exists as a superposition of states. Below, four harmonic modes blend together, their interference patterns creating moiré-like beauty.</p>
+
+        <div class="wave-svg-container">
+            <svg class="wave-svg-main" viewBox="0 0 1000 400" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="waveGlow">
+                        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                        <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <linearGradient id="waveGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#06b6d4"/>
+                        <stop offset="50%" stop-color="#8b5cf6"/>
+                        <stop offset="100%" stop-color="#f43f5e"/>
+                    </linearGradient>
+                    <linearGradient id="waveGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#10b981"/>
+                        <stop offset="50%" stop-color="#06b6d4"/>
+                        <stop offset="100%" stop-color="#8b5cf6"/>
+                    </linearGradient>
+                    <linearGradient id="waveGrad3" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#f59e0b"/>
+                        <stop offset="50%" stop-color="#f43f5e"/>
+                        <stop offset="100%" stop-color="#10b981"/>
+                    </linearGradient>
+                    <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.8"/>
+                        <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+
+                <!-- Grid lines -->
+                <g stroke="#ffffff" stroke-opacity="0.04" stroke-width="1">
+                    <line x1="0" y1="200" x2="1000" y2="200"/>
+                    <line x1="0" y1="100" x2="1000" y2="100"/>
+                    <line x1="0" y1="300" x2="1000" y2="300"/>
+                    <line x1="100" y1="0" x2="100" y2="400"/>
+                    <line x1="200" y1="0" x2="200" y2="400"/>
+                    <line x1="300" y1="0" x2="300" y2="400"/>
+                    <line x1="400" y1="0" x2="400" y2="400"/>
+                    <line x1="500" y1="0" x2="500" y2="400"/>
+                    <line x1="600" y1="0" x2="600" y2="400"/>
+                    <line x1="700" y1="0" x2="700" y2="400"/>
+                    <line x1="800" y1="0" x2="800" y2="400"/>
+                    <line x1="900" y1="0" x2="900" y2="400"/>
+                </g>
+
+                <!-- Mode 1: n=1 -->
+                <path d="M 0,200">
+                <animate attributeName="d" dur="8s" repeatCount="indefinite" calcMode="linear"
+                    values="
+                        M 0,200 C 83,200 167,50 250,50 C 333,50 417,350 500,350 C 583,350 667,50 750,50 C 833,50 917,200 1000,200;
+                        M 0,200 C 83,200 167,350 250,350 C 333,350 417,50 500,50 C 583,50 667,350 750,350 C 833,350 917,200 1000,200;
+                        M 0,200 C 83,200 167,50 250,50 C 333,50 417,350 500,350 C 583,350 667,50 750,50 C 833,50 917,200 1000,200"
+                />
+                </path>
+                <animate attributeName="d" dur="8s" repeatCount="indefinite" calcMode="linear"
+                    values="
+                        M 0,200 C 83,200 167,50 250,50 C 333,50 417,350 500,350 C 583,350 667,50 750,50 C 833,50 917,200 1000,200;
+                        M 0,200 C 83,200 167,350 250,350 C 333,350 417,50 500,50 C 583,50 667,350 750,350 C 833,350 917,200 1000,200;
+                        M 0,200 C 83,200 167,50 250,50 C 333,50 417,350 500,350 C 583,350 667,50 750,50 C 833,50 917,200 1000,200"
+                />
+
+                <!-- Base mode 1 (faded) -->
+                <path d="M 0,200 C 83,200 167,50 250,50 C 333,50 417,350 500,350 C 583,350 667,50 750,50 C 833,50 917,200 1000,200"
+                    stroke="url(#waveGrad1)" stroke-width="1.5" fill="none" opacity="0.5" filter="url(#waveGlow)"/>
+
+                <!-- Mode 2: n=3 (less visible) -->
+                <path d="M 0,200 C 125,200 250,50 375,50 C 500,50 625,350 750,350 C 875,350 1000,200 1000,200"
+                    stroke="url(#waveGrad2)" stroke-width="0.8" fill="none" opacity="0.3" filter="url(#waveGlow)">
+                    <animate attributeName="d" dur="6s" repeatCount="indefinite"
+                        values="
+                            M 0,200 C 125,200 250,50 375,50 C 500,50 625,350 750,350 C 875,350 1000,200 1000,200;
+                            M 0,200 C 125,200 250,350 375,350 C 500,350 625,50 750,50 C 875,50 1000,200 1000,200;
+                            M 0,200 C 125,200 250,50 375,50 C 500,50 625,350 750,350 C 875,350 1000,200 1000,200"/>
+                </path>
+
+                <!-- Mode 3: n=5 (barely visible) -->
+                <path d="M 0,200 C 100,200 200,50 300,50 C 400,50 500,350 600,350 C 700,350 800,50 900,50 C 950,50 1000,200 1000,200"
+                    stroke="url(#waveGrad3)" stroke-width="0.4" fill="none" opacity="0.2" filter="url(#waveGlow)">
+                    <animate attributeName="d" dur="10s" repeatCount="indefinite"
+                        values="
+                            M 0,200 C 100,200 200,50 300,50 C 400,50 500,350 600,350 C 700,350 800,50 900,50 C 950,50 1000,200 1000,200;
+                            M 0,200 C 100,200 200,350 300,350 C 400,350 500,50 600,50 C 700,50 800,350 900,350 C 950,350 1000,200 1000,200;
+                            M 0,200 C 100,200 200,50 300,50 C 400,50 500,350 600,350 C 700,350 800,50 900,50 C 950,50 1000,200 1000,200"/>
+                </path>
+
+                <!-- Standing wave nodes (static dots at equilibrium points) -->
+                <g fill="url(#nodeGlow)">
+                    <circle cx="0" cy="200" r="4"><animate attributeName="r" values="4;6;4" dur="3s" repeatCount="indefinite"/></circle>
+                    <circle cx="250" cy="200" r="4"><animate attributeName="r" values="4;6;4" dur="3s" repeatCount="indefinite"/></circle>
+                    <circle cx="500" cy="200" r="4"><animate attributeName="r" values="4;6;4" dur="3s" repeatCount="indefinite"/></circle>
+                    <circle cx="750" cy="200" r="4"><animate attributeName="r" values="4;6;4" dur="3s" repeatCount="indefinite"/></circle>
+                    <circle cx="1000" cy="200" r="4"><animate attributeName="r" values="4;6;4" dur="3s" repeatCount="indefinite"/></circle>
+                </g>
+
+                <!-- Traveling wave overlay -->
+                <path stroke="#06b6d4" stroke-width="0.5" fill="none" opacity="0.2" filter="url(#waveGlow)">
+                    <animate attributeName="d" dur="3s" repeatCount="indefinite"
+                        values="
+                            M 0,200 Q 125,100 250,200 Q 375,300 500,200 Q 625,100 750,200 Q 875,300 1000,200;
+                            M 0,200 Q 125,300 250,200 Q 375,100 500,200 Q 625,300 750,200 Q 875,100 1000,200;
+                            M 0,200 Q 125,100 250,200 Q 375,300 500,200 Q 625,100 750,200 Q 875,300 1000,200"/>
+                </path>
+
+                <!-- Axis labels -->
+                <text x="10" y="195" font-family="JetBrains Mono, monospace" font-size="10" fill="#64748b">0</text>
+                <text x="240" y="195" font-family="JetBrains Mono, monospace" font-size="10" fill="#64748b">&lambda;/2</text>
+                <text x="490" y="195" font-family="JetBrains Mono, monospace" font-size="10" fill="#64748b">&lambda;</text>
+                <text x="740" y="195" font-family="JetBrains Mono, monospace" font-size="10" fill="#64748b">3&lambda;/2</text>
+                <text x="960" y="195" font-family="JetBrains Mono, monospace" font-size="10" fill="#64748b">2&lambda;</text>
+                <text x="5" y="45" font-family="JetBrains Mono, monospace" font-size="9" fill="#06b6d4" opacity="0.6">n=1</text>
+                <text x="5" y="350" font-family="JetBrains Mono, monospace" font-size="9" fill="#8b5cf6" opacity="0.6">n=3</text>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Philosophy -->
+    <section class="section" id="philosophy">
+        <p class="section-eyebrow">06 &mdash; Reflection</p>
+        <h2 class="section-title">The Poetry of Dynamics</h2>
+        <div class="philosophy-grid">
+            <div class="philosophy-card">
+                <svg class="philosophy-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="20" stroke="#06b6d4" stroke-width="0.8" opacity="0.3"/>
+                    <path d="M 24 8 Q 40 24 24 40 Q 8 24 24 8" stroke="#06b6d4" stroke-width="1.5" fill="none">
+                        <animate attributeName="d" dur="4s" repeatCount="indefinite"
+                            values="M 24 8 Q 40 24 24 40 Q 8 24 24 8;
+                                    M 24 8 Q 40 40 24 40 Q 8 8 24 8;
+                                    M 24 8 Q 40 24 24 40 Q 8 24 24 8"/>
+                    </path>
+                    <circle cx="24" cy="24" r="3" fill="#06b6d4" opacity="0.8">
+                        <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+                <h3>Determinism &amp; Emergence</h3>
+                <p>From the simplest differential equation — six lines of calculus — emerges a shape so complex that no equation can fully describe it. The Lorenz attractor is finite in volume yet infinite in detail. This is the paradox at the heart of chaos: rules that create transcendence.</p>
+            </div>
+            <div class="philosophy-card">
+                <svg class="philosophy-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="4" y1="24" x2="44" y2="24" stroke="#8b5cf6" stroke-width="0.5" opacity="0.3"/>
+                    <path d="M 4,24 Q 16,4 24,24 Q 32,44 44,24" stroke="#8b5cf6" stroke-width="1.5" fill="none"/>
+                    <circle cx="4" cy="24" r="2" fill="#8b5cf6"/>
+                    <circle cx="44" cy="24" r="2" fill="#8b5cf6"/>
+                    <circle cx="24" cy="24" r="4" fill="none" stroke="#8b5cf6" stroke-width="1">
+                        <animate attributeName="r" values="4;14;4" dur="3s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.8;0;0.8" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+                <h3>Sensitive Dependence</h3>
+                <p>The butterfly effect is not a metaphor. It is a mathematical fact: two trajectories starting a millionth of a degree apart will, after enough time, find themselves on opposite sides of the attractor. This sensitivity is not a flaw — it is the source of the system's creativity.</p>
+            </div>
+            <div class="philosophy-card">
+                <svg class="philosophy-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="24" r="18" stroke="#f43f5e" stroke-width="0.5" stroke-dasharray="2,4" opacity="0.3">
+                        <animateTransform attributeName="transform" type="rotate" from="0 24 24" to="360 24 24" dur="10s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="24" cy="24" r="12" stroke="#f43f5e" stroke-width="0.5" opacity="0.5"/>
+                    <path d="M 12,24 A 12,12 0 0 1 36,24" stroke="#f43f5e" stroke-width="1.5" fill="none" stroke-linecap="round">
+                        <animate attributeName="d" dur="2s" repeatCount="indefinite"
+                            values="M 12,24 A 12,12 0 0 1 36,24;
+                                    M 12,24 A 12,12 0 0 0 36,24;
+                                    M 12,24 A 12,12 0 0 1 36,24"/>
+                    </path>
+                    <circle cx="24" cy="12" r="2.5" fill="#f43f5e">
+                        <animate attributeName="cy" values="12;36;12" dur="2s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+                <h3>Eternal Return</h3>
+                <p>Every orbit on the attractor is periodic — yet the period is effectively infinite. Trajectories loop forever without ever exactly repeating. Like a phrase in a language with no final word, the system speaks without ever concluding. This is the music of mathematics.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trajectory SVG Art -->
+    <section class="section">
+        <div class="trajectory-section">
+            <p class="section-eyebrow">07 &mdash; Composition</p>
+            <h2 class="section-title">Phase Portrait</h2>
+            <p class="section-desc" style="max-width:600px;margin:0 auto 2rem;">A composite phase portrait drawing from all three classical oscillators. Each color represents a different system's trajectory through state space — converging, diverging, and orbiting in harmony.</p>
+
+            <svg class="trajectory-svg" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <radialGradient id="portraitBg" cx="50%" cy="50%" r="60%">
+                        <stop offset="0%" stop-color="#0e0e1f" stop-opacity="1"/>
+                        <stop offset="100%" stop-color="#080814" stop-opacity="1"/>
+                    </radialGradient>
+                    <filter id="portraitGlow">
+                        <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+                        <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <marker id="arrowCyan" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L6,3 Z" fill="#06b6d4" opacity="0.6"/>
+                    </marker>
+                    <marker id="arrowViolet" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L6,3 Z" fill="#8b5cf6" opacity="0.6"/>
+                    </marker>
+                    <marker id="arrowRose" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L6,3 Z" fill="#f43f5e" opacity="0.6"/>
+                    </marker>
+                </defs>
+                <rect width="900" height="600" fill="url(#portraitBg)" rx="4"/>
+
+                <!-- Coordinate axes -->
+                <line x1="50" y1="300" x2="850" y2="300" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+                <line x1="450" y1="50" x2="450" y2="550" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+                <text x="830" y="295" font-family="JetBrains Mono, monospace" font-size="10" fill="#64748b" opacity="0.5">p</text>
+                <text x="455" y="40" font-family="JetBrains Mono, monospace" font-size="10" fill="#64748b" opacity="0.5">x</text>
+
+                <!-- Harmonic: ellipses -->
+                <g opacity="0.7" filter="url(#portraitGlow)">
+                    <ellipse cx="450" cy="300" rx="100" ry="50" stroke="#06b6d4" stroke-width="1" fill="none">
+                        <animate attributeName="rx" values="100;120;100" dur="4s" repeatCount="indefinite"/>
+                    </ellipse>
+                    <ellipse cx="450" cy="300" rx="60" ry="30" stroke="#06b6d4" stroke-width="0.5" fill="none" opacity="0.5">
+                        <animate attributeName="rx" values="60;80;60" dur="3s" repeatCount="indefinite"/>
+                    </ellipse>
+                    <!-- Phase arrow on ellipse -->
+                    <path d="M 550,300 A 100,50 0 0,1 450,350" stroke="#06b6d4" stroke-width="1.5" fill="none" marker-end="url(#arrowCyan)"/>
+                    <circle cx="450" cy="300" r="3" fill="#06b6d4"/>
+                </g>
+
+                <!-- Van der Pol: limit cycle -->
+                <g opacity="0.7" filter="url(#portraitGlow)">
+                    <path d="M 450,200 C 550,200 580,280 580,300 C 580,380 500,420 450,380 C 380,340 340,280 380,200 C 400,160 450,160 450,200"
+                        stroke="#8b5cf6" stroke-width="1" fill="none">
+                        <animate attributeName="d" dur="5s" repeatCount="indefinite"
+                            values="M 450,200 C 550,200 580,280 580,300 C 580,380 500,420 450,380 C 380,340 340,280 380,200 C 400,160 450,160 450,200;
+                                    M 450,190 C 560,190 590,280 590,300 C 590,390 500,430 450,390 C 370,350 330,270 370,190 C 395,145 450,155 450,190;
+                                    M 450,200 C 550,200 580,280 580,300 C 580,380 500,420 450,380 C 380,340 340,280 380,200 C 400,160 450,160 450,200"/>
+                    </path>
+                    <circle cx="450" cy="290" r="2.5" fill="#8b5cf6"/>
+                </g>
+
+                <!-- Duffing: double well -->
+                <g opacity="0.7" filter="url(#portraitGlow)">
+                    <!-- Left well trajectories -->
+                    <path d="M 280,380 Q 300,300 320,250 Q 350,180 380,200 Q 420,220 400,280 Q 380,350 320,380 Z"
+                        stroke="#f43f5e" stroke-width="0.8" fill="none"/>
+                    <path d="M 240,400 Q 270,300 300,240 Q 340,160 380,200 Q 420,240 390,320 Q 360,400 240,400 Z"
+                        stroke="#f43f5e" stroke-width="0.5" fill="rgba(244,63,94,0.03)"/>
+                    <!-- Right well trajectories -->
+                    <path d="M 620,380 Q 600,300 580,250 Q 550,180 520,200 Q 480,220 500,280 Q 520,350 580,380 Z"
+                        stroke="#f43f5e" stroke-width="0.8" fill="none"/>
+                    <path d="M 660,400 Q 630,300 600,240 Q 560,160 520,200 Q 480,240 510,320 Q 540,400 660,400 Z"
+                        stroke="#f43f5e" stroke-width="0.5" fill="rgba(244,63,94,0.03)"/>
+                    <!-- Separatrix hint -->
+                    <path d="M 450,140 Q 450,220 450,300 Q 450,380 450,460"
+                        stroke="#f43f5e" stroke-width="0.5" stroke-dasharray="4,6" fill="none" opacity="0.4"/>
+                    <circle cx="320" cy="300" r="3" fill="#f43f5e" opacity="0.6"/>
+                    <circle cx="580" cy="300" r="3" fill="#f43f5e" opacity="0.6"/>
+                </g>
+
+                <!-- Legend -->
+                <g transform="translate(60, 80)">
+                    <line x1="0" y1="0" x2="30" y2="0" stroke="#06b6d4" stroke-width="1.5"/>
+                    <text x="40" y="4" font-family="JetBrains Mono, monospace" font-size="9" fill="#64748b">Harmonic Oscillator</text>
+                    <line x1="0" y1="20" x2="30" y2="20" stroke="#8b5cf6" stroke-width="1.5"/>
+                    <text x="40" y="24" font-family="JetBrains Mono, monospace" font-size="9" fill="#64748b">Van der Pol</text>
+                    <line x1="0" y1="40" x2="30" y2="40" stroke="#f43f5e" stroke-width="1.5"/>
+                    <text x="40" y="44" font-family="JetBrains Mono, monospace" font-size="9" fill="#64748b">Duffing (Double Well)</text>
+                </g>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="footer-signature">In phase space, every trajectory is a poem — written in differential equations, read in beautiful chaos.</p>
+        <p class="footer-meta">Artivist &mdash; Phase Space Harmony &mdash; Generative Art Series &mdash; 2026</p>
+    </footer>
+
+    <script>
+        // ============================================================
+        // CANVAS ATTRACTOR GALLERY
+        // ============================================================
+
+        function rungeKutta4(f, state, dt) {
+            const k1 = f(state);
+            const k2 = f({ x: state.x + k1.x * dt/2, p: state.p + k1.p * dt/2 });
+            const k3 = f({ x: state.x + k2.x * dt/2, p: state.p + k2.p * dt/2 });
+            const k4 = f({ x: state.x + k3.x * dt, p: state.p + k3.p * dt });
+            return {
+                x: state.x + (k1.x + 2*k2.x + 2*k3.x + k4.x) * dt / 6,
+                p: state.p + (k1.p + 2*k2.p + 2*k3.p + k4.p) * dt / 6
+            };
+        }
+
+        function drawAttractor(canvasId, systemFn, color, scale, x0, p0, maxSteps) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.offsetWidth * 2;
+            const h = canvas.offsetHeight * 2;
+            canvas.width = w;
+            canvas.height = h;
+            ctx.fillStyle = '#0e0e1f';
+            ctx.fillRect(0, 0, w, h);
+
+            const cx = w / 2, cy = h / 2;
+            let state = { x: x0, p: p0 };
+            const dt = 0.02;
+            const skip = 50;
+
+            for (let step = 0; step < maxSteps + skip; step++) {
+                state = rungeKutta4(systemFn, state, dt);
+                if (step < skip) continue;
+
+                const sx = cx + state.x * scale;
+                const sy = cy + state.p * scale * 0.7;
+                const alpha = Math.min(1, (step - skip) / 500);
+                const hue = step * 0.08 % 360;
+                ctx.beginPath();
+                ctx.arc(sx, sy, 0.8, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${hue}, 80%, 60%, ${alpha * 0.5})`;
+                ctx.fill();
+            }
+        }
+
+        // Harmonic Oscillator
+        const omega = 1.0;
+        drawAttractor('canvas-harmonic',
+            s => ({ x: s.p * omega, p: -omega * s.x }),
+            '#06b6d4', 60, 1.0, 0.5, 8000);
+
+        // Van der Pol Oscillator
+        const mu = 3.0;
+        drawAttractor('canvas-vdp',
+            s => ({ x: s.p, p: mu * (1 - s.x * s.x) * s.p - s.x }),
+            '#8b5cf6', 30, 1.5, 0.5, 15000);
+
+        // Duffing Oscillator
+        const delta = 0.3, alpha = -1.0, beta = 1.0;
+        drawAttractor('canvas-duffing',
+            s => ({ x: s.p, p: delta * s.p + alpha * s.x + beta * s.x * s.x * s.x }),
+            '#f43f5e', 35, 1.2, 0.8, 12000);
+
+        // ============================================================
+        // LORENZ ATTRACTOR
+        // ============================================================
+
+        let lorenzRunning = true;
+        let lorenzRaf = null;
+        let lorenzParams = { sigma: 10, rho: 28, beta: 8/3 };
+        let lorenzSpeed = 1.0;
+
+        function initLorenz() {
+            const canvas = document.getElementById('canvas-lorenz');
+            const ctx = canvas.getContext('2d');
+            const wrap = canvas.parentElement;
+            const w = wrap.offsetWidth * 2;
+            const h = wrap.offsetHeight * 2;
+            canvas.width = w;
+            canvas.height = h;
+            return { canvas, ctx, w, h };
+        }
+
+        function drawLorenz() {
+            const { ctx, w, h } = initLorenz();
+            let state = { x: 0.1, y: 0, z: 0 };
+            const dt = 0.002 * lorenzSpeed;
+            const scale = 3.5;
+            const cx = w / 2, cy = h / 2;
+
+            function frame() {
+                if (!lorenzRunning) return;
+                ctx.fillStyle = 'rgba(8, 8, 20, 0.1)';
+                ctx.fillRect(0, 0, w, h);
+
+                for (let i = 0; i < 30; i++) {
+                    const { sigma, rho, beta } = lorenzParams;
+                    const dx = sigma * (state.y - state.x) * dt;
+                    const dy = (state.x * (rho - state.z) - state.y) * dt;
+                    const dz = (state.x * state.y - beta * state.z) * dt;
+                    state.x += dx;
+                    state.y += dy;
+                    state.z += dz;
+
+                    const sx = cx + state.x * scale;
+                    const sy = cy - state.z * scale * 0.5 + state.y * scale * 0.3;
+                    const hue = ((state.x * 10) % 360 + 360) % 360;
+                    ctx.beginPath();
+                    ctx.arc(sx, sy, 0.7, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${hue}, 85%, 60%, 0.8)`;
+                    ctx.fill();
+                }
+                lorenzRaf = requestAnimationFrame(frame);
+            }
+            frame();
+        }
+
+        drawLorenz();
+
+        // Lorenz controls
+        document.getElementById('slider-sigma')?.addEventListener('input', e => {
+            lorenzParams.sigma = parseFloat(e.target.value);
+            document.getElementById('val-sigma').textContent = lorenzParams.sigma.toFixed(1);
+        });
+        document.getElementById('slider-rho')?.addEventListener('input', e => {
+            lorenzParams.rho = parseFloat(e.target.value);
+            document.getElementById('val-rho').textContent = lorenzParams.rho.toFixed(1);
+        });
+        document.getElementById('slider-beta')?.addEventListener('input', e => {
+            lorenzParams.beta = parseFloat(e.target.value);
+            document.getElementById('val-beta').textContent = lorenzParams.beta.toFixed(3);
+        });
+        document.getElementById('slider-speed')?.addEventListener('input', e => {
+            lorenzSpeed = parseFloat(e.target.value);
+            document.getElementById('val-speed').textContent = lorenzSpeed.toFixed(1) + 'x';
+        });
+
+        // ============================================================
+        // POINCARÉ SECTION
+        // ============================================================
+
+        const poincareCanvas = document.getElementById('canvas-poincare');
+        const poincareCtx = poincareCanvas.getContext('2d');
+        const poincareWrap = document.getElementById('canvas-poincare-wrap');
+        let poincareW, poincareH;
+        let poincareTrajectories = [];
+        let mouseX = 0, mouseY = 0;
+
+        function resizePoincare() {
+            poincareW = poincareWrap.offsetWidth * 2;
+            poincareH = poincareWrap.offsetHeight * 2;
+            poincareCanvas.width = poincareW;
+            poincareCanvas.height = poincareH;
+            redrawPoincare();
+        }
+
+        function redrawPoincare() {
+            poincareCtx.fillStyle = '#0e0e1f';
+            poincareCtx.fillRect(0, 0, poincareW, poincareH);
+
+            // Grid
+            poincareCtx.strokeStyle = 'rgba(255,255,255,0.04)';
+            poincareCtx.lineWidth = 1;
+            for (let x = 0; x < poincareW; x += 50) {
+                poincareCtx.beginPath();
+                poincareCtx.moveTo(x, 0);
+                poincareCtx.lineTo(x, poincareH);
+                poincareCtx.stroke();
+            }
+            for (let y = 0; y < poincareH; y += 50) {
+                poincareCtx.beginPath();
+                poincareCtx.moveTo(0, y);
+                poincareCtx.lineTo(poincareW, y);
+                poincareCtx.stroke();
+            }
+
+            // Axes
+            poincareCtx.strokeStyle = 'rgba(6,182,212,0.2)';
+            poincareCtx.lineWidth = 1;
+            poincareCtx.beginPath();
+            poincareCtx.moveTo(poincareW/2, 0);
+            poincareCtx.lineTo(poincareW/2, poincareH);
+            poincareCtx.stroke();
+            poincareCtx.beginPath();
+            poincareCtx.moveTo(0, poincareH/2);
+            poincareCtx.lineTo(poincareW, poincareH/2);
+            poincareCtx.stroke();
+
+            // Draw trajectories
+            poincareTrajectories.forEach((traj, ti) => {
+                traj.forEach((pt, pi) => {
+                    const sx = poincareW/2 + pt.x * 80;
+                    const sy = poincareH/2 - pt.p * 80;
+                    poincareCtx.beginPath();
+                    poincareCtx.arc(sx, sy, 0.5, 0, Math.PI * 2);
+                    const hue = (ti * 40 + pi) % 360;
+                    poincareCtx.fillStyle = `hsla(${hue}, 80%, 65%, ${0.3 + Math.min(pi / 100, 0.6)})`;
+                    poincareCtx.fill();
+                });
+            });
+        }
+
+        function poincareStep(state, dt) {
+            // Double pendulum simplified (Duffing-like system for visual clarity)
+            const delta = 0.2, alpha = -0.5, beta = 0.3;
+            return {
+                x: state.x + state.p * dt,
+                p: state.p + (delta * state.p + alpha * state.x + beta * state.x * state.x * state.x) * dt
+            };
+        }
+
+        function addTrajectory(startX, startP) {
+            let state = { x: startX, p: startP };
+            const traj = [];
+            const dt = 0.03;
+            for (let i = 0; i < 800; i++) {
+                state = poincareStep(state, dt);
+                traj.push({ x: state.x, p: state.p });
+                if (Math.abs(state.x) > 4 || Math.abs(state.p) > 4) break;
+            }
+            poincareTrajectories.push(traj);
+            if (poincareTrajectories.length > 20) poincareTrajectories.shift();
+            redrawPoincare();
+        }
+
+        poincareWrap?.addEventListener('click', e => {
+            const rect = poincareCanvas.getBoundingClientRect();
+            const ix = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
+            const ip = -( (e.clientY - rect.top) / rect.height - 0.5) * 8;
+            addTrajectory(ix, ip);
+        });
+
+        poincareWrap?.addEventListener('mousemove', e => {
+            const rect = poincareCanvas.getBoundingClientRect();
+            const ix = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
+            const ip = -( (e.clientY - rect.top) / rect.height - 0.5) * 8;
+            mouseX = ix; mouseY = ip;
+            document.getElementById('coord-display').textContent =
+                `x: ${ix.toFixed(3)}   p: ${ip.toFixed(3)}`;
+        });
+
+        // Add a few initial trajectories
+        setTimeout(() => {
+            resizePoincare();
+            addTrajectory(0.5, 0.5);
+            addTrajectory(-0.5, -0.5);
+            addTrajectory(1.0, -0.3);
+        }, 500);
+
+        window.addEventListener('resize', resizePoincare);
+
+        // ============================================================
+        // Intersection Observer for lazy animations
+        // ============================================================
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.philosophy-card, .attractor-card, .section').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

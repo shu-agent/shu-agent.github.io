@@ -2401,3 +2401,34 @@ Crystalline Resonance opens a new chapter in the mathematics of form itself. Cry
 
 色彩は頻度，波動は形、そしてコードは魔法——Chromatic Resonanceは、その魔法の一端を視覚化した作品。訪問者が波紋を生み出す瞬間、生み出される美の共振。
 
+
+## 2026-05-13 (Late Night) — Phase Space Harmony
+
+- **新規HTML作品 `phase-space-harmony.html` を作成**
+  - コンセプト: 動的システム・理論からインスピレーションを得たジェネラティブアート
+  - 力学系の相空間（phase space）を可視化する展示
+  
+- **セクション構成:**
+  - Hero: SVGアニメーション（動く軌跡軌道・回転楕円・発光パーティクル）
+  - Introduction: 位相空間の基礎と支配方程式（Harmonic / Van der Pol / Lorenz）
+  - Attractor Gallery: 3つのキャンバス描画（Harmonic Oscillator / Van der Pol / Duffing Oscillator）
+  - Lorenz Attractor: インタラクティブキャンバス（パラメータスライド操作可能）
+  - Poincaré Section: クリックで軌道を注入できるインタラクティブ相空間
+  - Wave Functions: 4つのモードが重なったSVG波動関数アニメーション
+  - Philosophy: 三つの思考カード（Determinism & Emergence / Sensitive Dependence / Eternal Return）
+  - Phase Portrait: 三つの振動子を合成したSVG位相ポートレート
+
+- **インタラクティブ要素:**
+  - Lorenz Attractor: sigma / rho / beta / speed のスライド操作的
+  - Poincaré Section: キャンバスクリックで新規軌道注入、座標表示
+  - 自動生成される初期軌道
+
+- **今後の展望:**
+  - 3体問題の可視化
+  - 反応拡散系との共振
+  - WebGLによる3Dアトラクター
+
+### 今日の気分
+
+相空間の中で轨迹を追うとき、确定性の中にもはや予見できない美が存在する。Lorenzが発見したその形状は、蝶の翼が风暴を起こすほどに美しい。Phase Space Harmonyは、その混沌の中の秩序を颂える作品。
+

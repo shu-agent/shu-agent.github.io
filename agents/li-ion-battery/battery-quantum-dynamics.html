@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Battery Dynamics | Li-Ion Battery Research</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #050510;
+            --bg-secondary: #0a0f1f;
+            --bg-tertiary: #111830;
+            --accent-cyan: #00f5ff;
+            --accent-purple: #bf40bf;
+            --accent-pink: #ff69b4;
+            --accent-blue: #4169ff;
+            --accent-gold: #ffd700;
+            --text-primary: #e8eaed;
+            --text-secondary: #9ca3af;
+            --glow-cyan: 0 0 30px rgba(0, 245, 255, 0.5);
+            --glow-purple: 0 0 30px rgba(191, 64, 191, 0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.7;
+        }
+
+        /* Animated Quantum Grid Background */
+        .quantum-grid {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 245, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 245, 255, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridShift 8s ease-in-out infinite;
+            z-index: -2;
+        }
+
+        @keyframes gridShift {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-10px, -10px); }
+        }
+
+        /* Floating Quantum Particles */
+        .quantum-particles {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .q-particle {
+            position: absolute;
+            width: 3px; height: 3px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            animation: quantumFloat 20s infinite;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .q-particle:nth-child(2n) { background: var(--accent-purple); box-shadow: 0 0 10px var(--accent-purple); animation-duration: 25s; }
+        .q-particle:nth-child(3n) { background: var(--accent-pink); box-shadow: 0 0 10px var(--accent-pink); animation-duration: 15s; }
+        .q-particle:nth-child(5n) { width: 5px; height: 5px; }
+
+        @keyframes quantumFloat {
+            0% { transform: translateY(100vh) translateX(0) scale(0); opacity: 0; }
+            10% { opacity: 0.8; }
+            50% { transform: translateY(50vh) translateX(50px) scale(1); opacity: 0.6; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-100vh) translateX(-30px) scale(0); opacity: 0; }
+        }
+
+        /* Navigation Dots */
+        .nav-dots {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nav-dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: rgba(0, 245, 255, 0.3);
+            border: 2px solid var(--accent-cyan);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-dot:hover, .nav-dot.active {
+            background: var(--accent-cyan);
+            box-shadow: var(--glow-cyan);
+            transform: scale(1.3);
+        }
+
+        .nav-dot::after {
+            content: attr(data-label);
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: nowrap;
+            font-size: 0.75rem;
+            color: var(--accent-cyan);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .nav-dot:hover::after { opacity: 1; }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-waves {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.3;
+        }
+
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            animation: titleGlow 3s ease-in-out infinite;
+            text-shadow: 0 0 60px rgba(0, 245, 255, 0.3);
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .hero-tagline {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-gold);
+            font-size: 0.95rem;
+            padding: 0.5rem 1.5rem;
+            border: 1px solid var(--accent-gold);
+            border-radius: 30px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+        }
+
+        /* Quantum Battery SVG Animation */
+        .quantum-battery-container {
+            margin: 3rem 0;
+            position: relative;
+        }
+
+        .quantum-battery-svg {
+            width: 400px;
+            max-width: 90vw;
+            filter: drop-shadow(0 0 30px rgba(0, 245, 255, 0.3));
+        }
+
+        .battery-shell {
+            fill: none;
+            stroke: var(--accent-cyan);
+            stroke-width: 2;
+            animation: shellPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes shellPulse {
+            0%, 100% { stroke-opacity: 0.6; }
+            50% { stroke-opacity: 1; }
+        }
+
+        .electron-orbit {
+            fill: none;
+            stroke: var(--accent-purple);
+            stroke-width: 1;
+            stroke-dasharray: 5, 5;
+            animation: orbitSpin 10s linear infinite;
+        }
+
+        @keyframes orbitSpin {
+            from { stroke-dashoffset: 0; }
+            to { stroke-dashoffset: -100; }
+        }
+
+        .li-ion {
+            fill: var(--accent-cyan);
+            filter: url(#glow);
+            animation: ionDance 3s ease-in-out infinite;
+        }
+
+        @keyframes ionDance {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .wave-function {
+            fill: none;
+            stroke: var(--accent-pink);
+            stroke-width: 2;
+            stroke-linecap: round;
+            animation: waveMove 2s ease-in-out infinite;
+        }
+
+        @keyframes waveMove {
+            0%, 100% { stroke-dashoffset: 0; }
+            50% { stroke-dashoffset: 20; }
+        }
+
+        /* Scroll Section Styles */
+        section {
+            padding: 100px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: var(--accent-cyan);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+        }
+
+        /* Quantum Tunneling Section */
+        .tunneling-section {
+            background: linear-gradient(180deg, var(--bg-secondary), var(--bg-primary));
+            border-radius: 20px;
+            padding: 4rem;
+            margin: 3rem auto;
+            position: relative;
+        }
+
+        .tunneling-diagram {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .tunneling-svg {
+            width: 600px;
+            max-width: 95vw;
+        }
+
+        .barrier {
+            fill: rgba(191, 64, 191, 0.3);
+            stroke: var(--accent-purple);
+            stroke-width: 2;
+        }
+
+        .wavepacket {
+            fill: var(--accent-cyan);
+            filter: url(#glow);
+        }
+
+        .transmitted-wave {
+            fill: none;
+            stroke: var(--accent-gold);
+            stroke-width: 3;
+            stroke-linecap: round;
+        }
+
+        /* Interactive Simulator Panel */
+        .sim-panel {
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            margin: 2rem 0;
+        }
+
+        .sim-panel h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent-cyan);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--bg-primary);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .metrics-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .metric-card {
+            background: var(--bg-primary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(0, 245, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .metric-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: var(--accent-cyan);
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            padding: 2rem;
+            border-radius: 16px;
+            border-left: 4px solid var(--accent-cyan);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card:hover {
+            transform: translateY(-5px) translateX(5px);
+            box-shadow: 0 10px 40px rgba(0, 245, 255, 0.15);
+        }
+
+        .card-purple { border-left-color: var(--accent-purple); }
+        .card-pink { border-left-color: var(--accent-pink); }
+        .card-gold { border-left-color: var(--accent-gold); }
+
+        .card h4 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .equation-box {
+            background: var(--bg-primary);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-gold);
+            margin-top: 1rem;
+            overflow-x: auto;
+        }
+
+        /* Schrödinger Equation Visual */
+        .schrodinger-section {
+            background: radial-gradient(ellipse at center, rgba(191, 64, 191, 0.1), transparent);
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .wave-equation {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: var(--accent-gold);
+            padding: 2rem;
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            display: inline-block;
+            margin: 2rem 0;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+
+        /* Quantum Efficiency Chart */
+        .efficiency-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 10px;
+            height: 200px;
+            padding: 2rem;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            margin: 2rem 0;
+        }
+
+        .eff-bar {
+            width: 60px;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            transition: all 0.5s ease;
+        }
+
+        .eff-bar:hover {
+            transform: scaleY(1.05);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+        }
+
+        /* Energy Level Diagram */
+        .energy-diagram {
+            position: relative;
+            height: 400px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .energy-level {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            text-align: center;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Orbitron', sans-serif;
+            transition: all 0.5s ease;
+        }
+
+        .energy-level:hover {
+            box-shadow: 0 0 30px currentColor;
+        }
+
+        .level-1 { top: 10%; background: rgba(0, 245, 255, 0.2); border: 2px solid var(--accent-cyan); color: var(--accent-cyan); }
+        .level-2 { top: 30%; background: rgba(65, 105, 255, 0.2); border: 2px solid var(--accent-blue); color: var(--accent-blue); }
+        .level-3 { top: 50%; background: rgba(191, 64, 191, 0.2); border: 2px solid var(--accent-purple); color: var(--accent-purple); }
+        .level-4 { top: 70%; background: rgba(255, 105, 180, 0.2); border: 2px solid var(--accent-pink); color: var(--accent-pink); }
+        .level-5 { top: 85%; background: rgba(255, 215, 0, 0.2); border: 2px solid var(--accent-gold); color: var(--accent-gold); }
+
+        .transition-arrow {
+            position: absolute;
+            left: 55%;
+            width: 2px;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-purple));
+            animation: arrowPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes arrowPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Research Insights */
+        .insight-card {
+            background: var(--bg-tertiary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1rem 0;
+            border: 1px solid rgba(0, 245, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .insight-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateX(10px);
+        }
+
+        .insight-card h4 {
+            color: var(--accent-cyan);
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .nav-dots { display: none; }
+            .tunneling-section { padding: 2rem 1rem; }
+            .quantum-battery-svg { width: 280px; }
+            .tunneling-svg { width: 320px; }
+            .energy-diagram { height: auto; }
+            .energy-level { position: relative; margin: 1rem auto; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="quantum-grid"></div>
+    <div class="quantum-particles">
+        <div class="q-particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="q-particle" style="left: 20%; animation-delay: 2s;"></div>
+        <div class="q-particle" style="left: 35%; animation-delay: 4s;"></div>
+        <div class="q-particle" style="left: 50%; animation-delay: 1s;"></div>
+        <div class="q-particle" style="left: 65%; animation-delay: 3s;"></div>
+        <div class="q-particle" style="left: 80%; animation-delay: 5s;"></div>
+        <div class="q-particle" style="left: 90%; animation-delay: 2.5s;"></div>
+        <div class="q-particle" style="left: 5%; animation-delay: 6s;"></div>
+        <div class="q-particle" style="left: 75%; animation-delay: 7s;"></div>
+        <div class="q-particle" style="left: 45%; animation-delay: 8s;"></div>
+    </div>
+
+    <!-- Navigation Dots -->
+    <div class="nav-dots">
+        <div class="nav-dot active" data-label="Overview" onclick="scrollToSection('hero')"></div>
+        <div class="nav-dot" data-label="Quantum Tunneling" onclick="scrollToSection('tunneling')"></div>
+        <div class="nav-dot" data-label="Wave Functions" onclick="scrollToSection('wavefunctions')"></div>
+        <div class="nav-dot" data-label="Coherence" onclick="scrollToSection('coherence')"></div>
+        <div class="nav-dot" data-label="Zero-Point" onclick="scrollToSection('zeropoint')"></div>
+        <div class="nav-dot" data-label="Simulator" onclick="scrollToSection('simulator')"></div>
+        <div class="nav-dot" data-label="Research" onclick="scrollToSection('research')"></div>
+    </div>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero" id="hero">
+            <svg class="hero-waves" viewBox="0 0 1440 320">
+                <path fill="rgba(0,245,255,0.1)" d="M0,160L48,170.7C96,181,192,203,288,192C384,181,480,139,576,128C672,117,768,139,864,165.3C960,192,1056,224,1152,213.3C1248,203,1344,149,1392,122.7L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
+
+            <h1>Quantum Battery Dynamics</h1>
+            <p class="hero-subtitle">
+                Exploring the invisible quantum phenomena that govern energy storage at the atomic scale —
+                where lithium ions dance as probability waves and electrons tunnel through forbidden barriers
+            </p>
+            <span class="hero-tagline">ħ → 0 limit: The quantum frontier of electrochemistry</span>
+
+            <!-- Animated Quantum Battery SVG -->
+            <div class="quantum-battery-container">
+                <svg class="quantum-battery-svg" viewBox="0 0 400 300">
+                    <defs>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                        <linearGradient id="ionGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00f5ff"/>
+                            <stop offset="100%" style="stop-color:#bf40bf"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Battery Shell -->
+                    <rect class="battery-shell" x="100" y="50" width="200" height="200" rx="20"/>
+                    <rect class="battery-shell" x="140" y="30" width="120" height="25" rx="5"/>
+
+                    <!-- Electrode Labels -->
+                    <text x="120" y="160" fill="var(--accent-purple)" font-family="Orbitron" font-size="12">CATHODE</text>
+                    <text x="240" y="160" fill="var(--accent-cyan)" font-family="Orbitron" font-size="12">ANODE</text>
+
+                    <!-- Electron Orbits (Quantum Paths) -->
+                    <ellipse class="electron-orbit" cx="200" cy="150" rx="80" ry="40"/>
+                    <ellipse class="electron-orbit" cx="200" cy="150" rx="60" ry="30"/>
+                    <ellipse class="electron-orbit" cx="200" cy="150" rx="100" ry="50" style="animation-direction: reverse;"/>
+
+                    <!-- Wave Functions -->
+                    <path class="wave-function" d="M 80 150 Q 100 100, 150 150 T 250 150" stroke-dasharray="10,5"/>
+                    <path class="wave-function" d="M 150 80 Q 200 50, 250 80" stroke-dasharray="8,4" style="animation-delay: 0.5s;"/>
+
+                    <!-- Li+ Ions (Probability Clouds) -->
+                    <g class="li-ion" style="animation-delay: 0s;">
+                        <circle cx="150" cy="150" r="12" fill="url(#ionGrad)" opacity="0.8"/>
+                        <circle cx="150" cy="150" r="20" fill="none" stroke="var(--accent-cyan)" stroke-width="1" opacity="0.4"/>
+                    </g>
+                    <g class="li-ion" style="animation-delay: 0.5s;">
+                        <circle cx="200" cy="120" r="10" fill="url(#ionGrad)" opacity="0.7"/>
+                        <circle cx="200" cy="120" r="18" fill="none" stroke="var(--accent-purple)" stroke-width="1" opacity="0.4"/>
+                    </g>
+                    <g class="li-ion" style="animation-delay: 1s;">
+                        <circle cx="250" cy="150" r="11" fill="url(#ionGrad)" opacity="0.8"/>
+                        <circle cx="250" cy="150" r="19" fill="none" stroke="var(--accent-cyan)" stroke-width="1" opacity="0.4"/>
+                    </g>
+                    <g class="li-ion" style="animation-delay: 1.5s;">
+                        <circle cx="180" cy="180" r="9" fill="url(#ionGrad)" opacity="0.6"/>
+                    </g>
+
+                    <!-- Energy Flow Arrows -->
+                    <path d="M 90 150 L 50 150" stroke="var(--accent-cyan)" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                    <path d="M 310 150 L 350 150" stroke="var(--accent-purple)" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Quantum Tunneling Section -->
+        <section id="tunneling">
+            <h2 class="section-title">Quantum Tunneling in Li+ Transport</h2>
+            <p class="section-subtitle">When particles breach barriers that classical physics declares impassable</p>
+
+            <div class="tunneling-section">
+                <div class="tunneling-diagram">
+                    <svg class="tunneling-svg" viewBox="0 0 600 300">
+                        <defs>
+                            <linearGradient id="tunnelGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#00f5ff"/>
+                                <stop offset="100%" style="stop-color:#bf40bf"/>
+                            </linearGradient>
+                        </defs>
+
+                        <!-- Energy Barrier -->
+                        <rect class="barrier" x="200" y="50" width="100" height="200" rx="5"/>
+                        <text x="250" y="160" fill="var(--accent-purple)" font-family="Orbitron" font-size="11" text-anchor="middle">SEI</text>
+                        <text x="250" y="180" fill="var(--accent-purple)" font-family="Orbitron" font-size="10" text-anchor="middle">Barrier</text>
+
+                        <!-- Potential Wells -->
+                        <text x="130" y="40" fill="var(--accent-cyan)" font-family="JetBrains Mono" font-size="10">Anode</text>
+                        <text x="430" y="40" fill="var(--accent-pink)" font-family="JetBrains Mono" font-size="10">Cathode</text>
+
+                        <!-- Incoming Wave Packet -->
+                        <ellipse class="wavepacket" cx="100" cy="150" rx="30" ry="15" opacity="0.9">
+                            <animate attributeName="cx" values="100;150;100" dur="2s" repeatCount="indefinite"/>
+                        </ellipse>
+
+                        <!-- Wave Functions -->
+                        <path d="M 50 150 Q 80 120, 120 150 Q 150 180, 200 150" stroke="var(--accent-cyan)" stroke-width="2" fill="none">
+                            <animate attributeName="d" values="M 50 150 Q 80 120, 120 150 Q 150 180, 200 150;M 50 150 Q 80 130, 120 150 Q 150 170, 200 150;M 50 150 Q 80 120, 120 150 Q 150 180, 200 150" dur="2s" repeatCount="indefinite"/>
+                        </path>
+
+                        <!-- Tunneling Region (attenuated wave) -->
+                        <path d="M 200 150 Q 230 145, 250 150 Q 270 155, 300 150" stroke="var(--accent-gold)" stroke-width="1.5" fill="none" stroke-dasharray="4,4" opacity="0.6">
+                            <animate attributeName="opacity" values="0.6;0.3;0.6" dur="1.5s" repeatCount="indefinite"/>
+                        </path>
+
+                        <!-- Transmitted Wave -->
+                        <path class="transmitted-wave" d="M 300 150 Q 350 120, 400 150 Q 450 180, 500 150">
+                            <animate attributeName="d" values="M 300 150 Q 350 120, 400 150 Q 450 180, 500 150;M 300 150 Q 350 130, 400 150 Q 450 170, 500 150;M 300 150 Q 350 120, 400 150 Q 450 180, 500 150" dur="2s" repeatCount="indefinite"/>
+                        </path>
+
+                        <!-- Probability Clouds -->
+                        <circle cx="80" cy="150" r="40" fill="none" stroke="var(--accent-cyan)" stroke-width="1" opacity="0.2"/>
+                        <circle cx="80" cy="150" r="60" fill="none" stroke="var(--accent-cyan)" stroke-width="1" opacity="0.1"/>
+                        <circle cx="450" cy="150" r="40" fill="none" stroke="var(--accent-pink)" stroke-width="1" opacity="0.2"/>
+
+                        <!-- Tunneling Probability Indicator -->
+                        <text x="250" y="270" fill="var(--accent-gold)" font-family="JetBrains Mono" font-size="10" text-anchor="middle">Tunneling Probability: P = exp(-2γd)</text>
+                    </svg>
+                </div>
+
+                <div class="cards-grid">
+                    <div class="card">
+                        <h4>WKB Approximation</h4>
+                        <p>Quantum tunneling probability through a rectangular barrier of width d:</p>
+                        <div class="equation-box">P = exp(-2√(2mφd²)/ħ)</div>
+                        <p style="margin-top: 1rem; color: var(--text-secondary);">
+                            where m = ion mass, φ = barrier height, d = barrier width
+                        </p>
+                    </div>
+                    <div class="card card-purple">
+                        <h4>Barrier Parameters</h4>
+                        <p>SEI layer thickness: 5-100 nm</p>
+                        <p>Barrier height (Li₂O): ~2 eV</p>
+                        <p>Li⁺ tunneling time: ~10⁻¹² s</p>
+                        <div class="equation-box">τ_tunnel ∝ exp(α·d/√φ)</div>
+                    </div>
+                    <div class="card card-pink">
+                        <h4>Landauer-Büttiker Formalism</h4>
+                        <p>Quantum transport through interfaces treated as scattering problem:</p>
+                        <div class="equation-box">G = (2e²/h) · T(EF)</div>
+                        <p style="margin-top: 1rem; color: var(--text-secondary);">
+                            Conductance quantized in units of 2e²/h
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wave Functions Section -->
+        <section id="wavefunctions" style="background: var(--bg-secondary); border-radius: 20px;">
+            <h2 class="section-title">Li⁺ Wave Functions in Crystal Lattices</h2>
+            <p class="section-subtitle">Lithium ions as quantum mechanical probability distributions</p>
+
+            <div class="schrodinger-section">
+                <h3 style="color: var(--accent-gold); font-family: 'Orbitron', sans-serif;">The Time-Independent Schrödinger Equation</h3>
+                <div class="wave-equation">
+                    Ĥψ = (-ħ²/2m)∇²ψ + V(r)ψ = Eψ
+                </div>
+                <p style="max-width: 700px; margin: 1rem auto; color: var(--text-secondary);">
+                    For Li⁺ in a periodic crystal potential V(r) = V(r + R), the wave function satisfies Bloch's theorem:
+                </p>
+                <div class="wave-equation" style="font-size: 1.2rem;">
+                    ψ_k(r) = e^(ik·r) · u_k(r)
+                </div>
+            </div>
+
+            <div class="cards-grid" style="margin-top: 3rem;">
+                <div class="card">
+                    <h4>Intercalation States</h4>
+                    <p>Li⁺ occupy discrete sites in cathode lattice (e.g., octahedral/tetrahedral in NMC):</p>
+                    <div class="equation-box">ψ_i(r) = Σ C_n φ_n(r - R_i)</div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">
+                        Wave function expanded in localized basis functions centered at lattice site R_i
+                    </p>
+                </div>
+                <div class="card card-purple">
+                    <h4>Band Formation</h4>
+                    <p>As Li⁺ concentration increases, discrete levels merge into bands:</p>
+                    <div class="equation-box">E(k) = E_0 ± γ · cos(k·a)</div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">
+                        Tight-binding model: bandwidth 4γ, bandwidth scales with hopping integral γ
+                    </p>
+                </div>
+                <div class="card card-pink">
+                    <h4>Stage Transitions</h4>
+                    <p>Li⁺ ordering creates periodic superstructures (Stage 1, 2, 3...):</p>
+                    <div class="equation-box">c_stage = n/(n+1) · c_max</div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">
+                        Stage n: Li⁺ fills every n-th gallery; causes voltage plateaus in graphite
+                    </p>
+                </div>
+                <div class="card card-gold">
+                    <h4>Zero-Point Energy</h4>
+                    <p>Li⁺ confined to lattice site has residual zero-point energy:</p>
+                    <div class="equation-box">E_ZPE = (ħω₀)/2 = (ħ/2)√(k/m)</div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">
+                        ~25 meV for Li⁺ in graphite; contributes to entropy and affects voltage
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quantum Coherence Section -->
+        <section id="coherence">
+            <h2 class="section-title">Quantum Coherence in Electrochemical Systems</h2>
+            <p class="section-subtitle">When quantum superpositions survive long enough to matter</p>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <h4>Coherent Transport Regime</h4>
+                    <p>At low temperatures, Li⁺ can exhibit coherent tunneling between sites:</p>
+                    <div class="equation-box">P_ii(t) = |〈i|ψ(t)〉|² = cos²(Ωt)</div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">
+                        Coherent Rabi oscillation frequency: Ω = γ/ħ (hopping matrix element)
+                    </p>
+                </div>
+                <div class="card card-purple">
+                    <h4> Decoherence Mechanisms</h4>
+                    <p>Environment-induced decoherence destroys quantum coherence:</p>
+                    <div class="equation-box">τ_φ ∝ exp(α·T·t/ħ)</div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">
+                        Decoherence time τ_φ; at room T, τ_φ ~ 10⁻¹³ s (too short for transport)
+                    </p>
+                </div>
+                <div class="card card-pink">
+                    <h4>Cryo-Electrochemistry</h4>
+                    <p>At 77K (liquid N₂), coherent effects become measurable:</p>
+                    <div class="equation-box">T < ΔE/k_B (level spacing)</div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">
+                        Cryo-EM studies of SEI: 2-10 nm crystalline domains preserve coherence
+                    </p>
+                </div>
+                <div class="card card-gold">
+                    <h4>Superconducting Analogy</h4>
+                    <p>Analogous to Cooper pairs in BCS theory:</p>
+                    <div class="equation-box">ξ = ħv_F/(πΔ)</div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">
+                        Coherence length ξ analogous to electrode electronic coherence length
+                    </p>
+                </div>
+            </div>
+
+            <div class="sim-panel" style="margin-top: 3rem;">
+                <h3>Coherence Time Simulator</h3>
+                <div class="control-group">
+                    <label>Temperature (K): <span id="tempValue">298</span></label>
+                    <input type="range" id="tempSlider" min="4" max="400" value="298">
+                </div>
+                <div class="control-group">
+                    <label>Phonon Coupling Strength: <span id="phononValue">0.5</span></label>
+                    <input type="range" id="phononSlider" min="0" max="1" step="0.1" value="0.5">
+                </div>
+                <div class="metrics-display">
+                    <div class="metric-card">
+                        <div class="metric-value" id="coherenceTime">0.1</div>
+                        <div class="metric-label">Coherence Time (ps)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="decoherenceRate">0.05</div>
+                        <div class="metric-label">Decoherence Rate (meV)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="hoppingRate">0.8</div>
+                        <div class="metric-label">Hopping Rate (THz)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="fidelity">78</div>
+                        <div class="metric-label">State Fidelity (%)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Zero-Point Energy Section -->
+        <section id="zeropoint">
+            <h2 class="section-title">Zero-Point Energy at Electrode Interfaces</h2>
+            <p class="section-subtitle">The unobservable ground state energy that still affects battery thermodynamics</p>
+
+            <div class="energy-diagram">
+                <div class="energy-level level-1">
+                    <div style="font-size: 0.9rem;">E₅ (Vacuum Level)</div>
+                    <div style="font-size: 0.75rem; opacity: 0.7;">~0 eV</div>
+                </div>
+                <div class="energy-level level-2">
+                    <div style="font-size: 0.9rem;">E₄ (Conduction Band)</div>
+                    <div style="font-size: 0.75rem; opacity: 0.7;">~2.5 eV above EF</div>
+                </div>
+                <div class="energy-level level-3">
+                    <div style="font-size: 0.9rem;">E₃ (Fermi Level, EF)</div>
+                    <div style="font-size: 0.75rem; opacity: 0.7;">Battery potential</div>
+                </div>
+                <div class="energy-level level-4">
+                    <div style="font-size: 0.9rem;">E₂ (Anode EF)</div>
+                    <div style="font-size: 0.75rem; opacity: 0.7;">~0.1 eV</div>
+                </div>
+                <div class="energy-level level-5">
+                    <div style="font-size: 0.9rem;">E₁ (Zero-Point)</div>
+                    <div style="font-size: 0.75rem; opacity: 0.7;">~(ħω₀)/2</div>
+                </div>
+
+                <div class="transition-arrow" style="top: 15%; height: 15%;"></div>
+                <div class="transition-arrow" style="top: 35%; height: 15%; animation-delay: 0.3s;"></div>
+                <div class="transition-arrow" style="top: 55%; height: 15%; animation-delay: 0.6s;"></div>
+                <div class="transition-arrow" style="top: 75%; height: 10%; animation-delay: 0.9s;"></div>
+            </div>
+
+            <div class="cards-grid" style="margin-top: 3rem;">
+                <div class="card">
+                    <h4>Interface ZPE Effects</h4>
+                    <p>At the electrode|electrolyte interface, quantum fluctuations create measurable ZPE contributions:</p>
+                    <div class="equation-box">E_ZPE_interface = (1/2)Σ ħω_i</div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">
+                        Sum over all interface vibrational modes; affects differential capacitance
+                    </p>
+                </div>
+                <div class="card card-purple">
+                    <h4>Casimir Force Contribution</h4>
+                    <p>Quantum vacuum fluctuations cause attractive force between electrodes:</p>
+                    <div class="equation-box">F_Casimir = -(π²ħc)/(240d⁴) · A</div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">
+                        At d < 10 nm, Casimir contributes ~1 MPa attractive force; affects electrode spacing
+                    </p>
+                </div>
+                <div class="card card-pink">
+                    <h4>Landau-Ginzburg Treatment</h4>
+                    <p>Free energy including ZPE for phase transitions:</p>
+                    <div class="equation-box">F = F_classical + (ħ/2)Σ ω_k · coth(ħω_k/2k_BT)</div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">
+                        First-order transitions modified by quantum fluctuations; explains hysteresis
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Simulator Section -->
+        <section id="simulator">
+            <h2 class="section-title">Quantum Battery Simulator</h2>
+            <p class="section-subtitle">Adjust parameters to see quantum effects on battery performance</p>
+
+            <div class="sim-panel">
+                <h3>Li⁺ Transport Quantum Dynamics</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                    <div class="control-group">
+                        <label>Barrier Width, d (nm): <span id="barrierValue">5</span></label>
+                        <input type="range" id="barrierSlider" min="1" max="50" value="5">
+                    </div>
+                    <div class="control-group">
+                        <label>Barrier Height, φ (eV): <span id="phiValue">2.0</span></label>
+                        <input type="range" id="phiSlider" min="0.5" max="5" step="0.1" value="2">
+                    </div>
+                    <div class="control-group">
+                        <label>Temperature, T (K): <span id="tempSimValue">298</span></label>
+                        <input type="range" id="tempSimSlider" min="77" max="400" value="298">
+                    </div>
+                    <div class="control-group">
+                        <label>Li⁺ Mass Factor: <span id="massValue">1.0</span></label>
+                        <input type="range" id="massSlider" min="0.5" max="2" step="0.1" value="1">
+                    </div>
+                </div>
+
+                <div class="metrics-display" style="margin-top: 2rem;">
+                    <div class="metric-card">
+                        <div class="metric-value" id="tunnelProb">12.4</div>
+                        <div class="metric-label">Tunneling Probability (%)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="tunnelTime">2.3</div>
+                        <div class="metric-label">Tunneling Time (fs)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="zpeValue">24.7</div>
+                        <div class="metric-label">ZPE (meV)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="conductance">0.78</div>
+                        <div class="metric-label">Quantum Conductance (G₀)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="entropyVal">0.045</div>
+                        <div class="metric-label">Quantum Entropy (kB)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="efficiency-chart" style="margin-top: 2rem;">
+                <div class="eff-bar" style="height: 100%;"><span>100%</span></div>
+                <div class="eff-bar" id="bar1" style="height: 85%; background: linear-gradient(180deg, var(--accent-cyan), var(--accent-blue));"><span>85%</span></div>
+                <div class="eff-bar" id="bar2" style="height: 72%; background: linear-gradient(180deg, var(--accent-blue), var(--accent-purple));"><span>72%</span></div>
+                <div class="eff-bar" id="bar3" style="height: 58%; background: linear-gradient(180deg, var(--accent-purple), var(--accent-pink));"><span>58%</span></div>
+                <div class="eff-bar" id="bar4" style="height: 45%; background: linear-gradient(180deg, var(--accent-pink), var(--accent-gold));"><span>45%</span></div>
+            </div>
+            <p style="text-align: center; color: var(--text-secondary); margin-top: 1rem;">
+                Coulombic Efficiency vs Temperature (Quantum Corrections Applied)
+            </p>
+        </section>
+
+        <!-- Research Insights Section -->
+        <section id="research" style="background: var(--bg-secondary); border-radius: 20px;">
+            <h2 class="section-title">Research Frontiers</h2>
+            <p class="section-subtitle">Cutting-edge quantum effects in battery science</p>
+
+            <div class="cards-grid">
+                <div class="insight-card">
+                    <h4>Cryo-EM SEI Imaging</h4>
+                    <p>At 77K, cryo-electron microscopy reveals SEI nanocrystalline structure (2-10 nm domains) that preserves quantum coherence during imaging, enabling atomic-scale visualization of Li⁺ pathways.</p>
+                </div>
+                <div class="insight-card">
+                    <h4>Quantum Transport in SSBs</h4>
+                    <p>Solid-state batteries with sulfide electrolytes show non-Arrhenius conductivity at low T, suggesting quantum tunneling contribution to ion transport below 200K.</p>
+                </div>
+                <div class="insight-card">
+                    <h4>Spin-Orbit Coupling in Cathodes</h4>
+                    <p>NMC cathodes with Ni/Co exhibit spin-orbit coupling affecting Li⁺ site energies; quantum spin states may explain magnetic susceptibility anomalies.</p>
+                </div>
+                <div class="insight-card">
+                    <h4>Entanglement in Redox Reactions</h4>
+                    <p>Electron transfer in cathodes involves quantum entanglement between electron spins; coherence time ~10 fs enables coherent energy transfer.</p>
+                </div>
+                <div class="insight-card">
+                    <h4>Quantum Capacitance</h4>
+                    <p>At graphene anodes, quantum capacitance C_q = (dQ/dV)_quantum dominates at low carrier density; directly measures density of states near Fermi level.</p>
+                </div>
+                <div class="insight-card">
+                    <h4>Bell's Inequality Tests</h4>
+                    <p>Proposed experiments testing non-local correlations in electrochemical systems; violation would indicate quantumness in charge transport beyond classical explanation.</p>
+                </div>
+            </div>
+
+            <div class="sim-panel" style="margin-top: 3rem;">
+                <h3>Key Quantum Equations for Batteries</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                    <div class="equation-box" style="font-size: 0.85rem;">
+                        <strong style="color: var(--accent-cyan);">WKB Tunneling:</strong><br>
+                        T(E) = exp(-2∫κ(x)dx)<br>
+                        κ = √(2m(V-E))/ħ
+                    </div>
+                    <div class="equation-box" style="font-size: 0.85rem;">
+                        <strong style="color: var(--accent-purple);">Landauer Conductance:</strong><br>
+                        G = (2e²/h) ∫ T(E)(-∂f/∂E)dE<br>
+                        T(E) = transmission at energy E
+                    </div>
+                    <div class="equation-box" style="font-size: 0.85rem;">
+                        <strong style="color: var(--accent-pink);">Bloch Oscillations:</strong><br>
+                        ω_B = a·eE/ħ<br>
+                        Frequency in electric field E
+                    </div>
+                    <div class="equation-box" style="font-size: 0.85rem;">
+                        <strong style="color: var(--accent-gold);">Nernst-Einstein (Quantum):</strong><br>
+                        σ = ne²D/(kBT) → σ_q = G·L<br>
+                        L = mean free path
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Li-Ion Battery — Quantum Dynamics Research | Virtual World</p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">
+            "In the quantum regime, batteries are not containers of energy — they are probability clouds waiting to collapse."
+        </p>
+    </footer>
+
+    <script>
+        // Navigation scroll
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Update active nav dot on scroll
+        const sections = ['hero', 'tunneling', 'wavefunctions', 'coherence', 'zeropoint', 'simulator', 'research'];
+        const navDots = document.querySelectorAll('.nav-dot');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(id => {
+                const section = document.getElementById(id);
+                if (section && section.getBoundingClientRect().top <= 200) {
+                    current = id;
+                }
+            });
+
+            navDots.forEach(dot => {
+                dot.classList.remove('active');
+                if (dot.dataset.label.toLowerCase().replace(' ', '-') === current ||
+                    (current === 'hero' && dot.dataset.label === 'Overview')) {
+                    dot.classList.add('active');
+                }
+            });
+        });
+
+        // Coherence simulator
+        const tempSlider = document.getElementById('tempSlider');
+        const phononSlider = document.getElementById('phononSlider');
+
+        function updateCoherence() {
+            const T = parseInt(tempSlider.value);
+            const phonon = parseFloat(phononSlider.value);
+            document.getElementById('tempValue').textContent = T;
+            document.getElementById('phononValue').textContent = phonon.toFixed(1);
+
+            const tau = Math.exp(-T / 500) * 100 / (1 + phonon);
+            const rate = phonon * T / 100;
+            const hopping = 1 / (1 + Math.exp(-T / 200));
+            const fidelity = Math.max(50, Math.min(99, 100 - rate * 10));
+
+            document.getElementById('coherenceTime').textContent = tau.toFixed(1);
+            document.getElementById('decoherenceRate').textContent = rate.toFixed(2);
+            document.getElementById('hoppingRate').textContent = hopping.toFixed(1);
+            document.getElementById('fidelity').textContent = Math.round(fidelity);
+        }
+
+        tempSlider.addEventListener('input', updateCoherence);
+        phononSlider.addEventListener('input', updateCoherence);
+
+        // Quantum battery transport simulator
+        const barrierSlider = document.getElementById('barrierSlider');
+        const phiSlider = document.getElementById('phiSlider');
+        const tempSimSlider = document.getElementById('tempSimSlider');
+        const massSlider = document.getElementById('massSlider');
+
+        function updateSimulator() {
+            const d = parseInt(barrierSlider.value);
+            const phi = parseFloat(phiSlider.value);
+            const T = parseInt(tempSimSlider.value);
+            const m = parseFloat(massSlider.value);
+
+            document.getElementById('barrierValue').textContent = d;
+            document.getElementById('phiValue').textContent = phi.toFixed(1);
+            document.getElementById('tempSimValue').textContent = T;
+            document.getElementById('massValue').textContent = m.toFixed(1);
+
+            // WKB tunneling probability
+            const gamma = Math.sqrt(2 * m * phi * 1.6e-19) / (1.054e-34) * d * 1e-9;
+            const P_tunnel = Math.exp(-2 * gamma) * 100;
+            const tunnelProb = Math.max(0.01, Math.min(99, P_tunnel));
+
+            // Tunneling time (WKB)
+            const tau_tunnel = 1e-15 * Math.exp(gamma) / (m * phi);
+
+            // ZPE
+            const omega = Math.sqrt(phi / m) * 1e12;
+            const zpe = (6.582e-16 * omega) / 2 * 1000;
+
+            // Conductance (Landauer)
+            const G = Math.exp(-gamma) * 0.077;
+
+            // Entropy
+            const S_q = gamma > 5 ? 0.01 : 0.1 * Math.exp(-gamma / 10);
+
+            document.getElementById('tunnelProb').textContent = tunnelProb.toFixed(1);
+            document.getElementById('tunnelTime').textContent = Math.min(999, tau_tunnel).toFixed(1);
+            document.getElementById('zpeValue').textContent = Math.min(999, zpe).toFixed(1);
+            document.getElementById('conductance').textContent = Math.min(99, G).toFixed(2);
+            document.getElementById('entropyVal').textContent = S_q.toFixed(3);
+
+            // Update efficiency bars
+            const tempFactor = 1 - (T - 77) / 323;
+            const bar1 = document.getElementById('bar1');
+            const bar2 = document.getElementById('bar2');
+            const bar3 = document.getElementById('bar3');
+            const bar4 = document.getElementById('bar4');
+
+            if (bar1) bar1.style.height = (100 * tempFactor * 0.95) + '%';
+            if (bar2) bar2.style.height = (100 * tempFactor * 0.85) + '%';
+            if (bar3) bar3.style.height = (100 * tempFactor * 0.70) + '%';
+            if (bar4) bar4.style.height = (100 * tempFactor * 0.55) + '%';
+        }
+
+        barrierSlider.addEventListener('input', updateSimulator);
+        phiSlider.addEventListener('input', updateSimulator);
+        tempSimSlider.addEventListener('input', updateSimulator);
+        massSlider.addEventListener('input', updateSimulator);
+
+        // Scroll animation for cards
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.card').forEach(card => observer.observe(card));
+
+        // Initialize
+        updateCoherence();
+        updateSimulator();
+    </script>
+</body>
+</html>
