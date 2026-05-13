@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Causal Dynamical Triangulations — Quantum Geometry of Spacetime</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2b 100%);
+            color: #e0e0ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: radial-gradient(ellipse at center, #1a1a4a 0%, #0a0a1a 70%);
+        }
+        .hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 2rem;
+        }
+        .hero h1 {
+            font-size: 4rem;
+            background: linear-gradient(90deg, #00d4ff, #8b5cf6, #ff6b9d, #00d4ff);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientFlow 4s ease infinite;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 60px rgba(0, 212, 255, 0.5);
+        }
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: #a0a0d0;
+            max-width: 700px;
+            line-height: 1.6;
+            margin: 0 auto;
+        }
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+        .scroll-indicator svg {
+            width: 30px;
+            height: 30px;
+            fill: #666;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        .section {
+            margin-bottom: 4rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #00d4ff, #8b5cf6);
+            border-radius: 2px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.15);
+        }
+        .card h3 {
+            font-size: 1.5rem;
+            color: #00d4ff;
+            margin-bottom: 1rem;
+        }
+        .card p {
+            line-height: 1.8;
+            color: #c0c0e0;
+        }
+        .canvas-container {
+            position: relative;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            overflow: hidden;
+            margin: 2rem 0;
+        }
+        .canvas-container canvas {
+            display: block;
+            width: 100%;
+            height: 500px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .control-group label {
+            font-size: 0.85rem;
+            color: #888;
+        }
+        input[type="range"] {
+            width: 150px;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #00d4ff, #8b5cf6);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .equation-box {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.3rem;
+            text-align: center;
+            color: #fff;
+        }
+        .equation-box .symbol {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        .equation-box .comment {
+            display: block;
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.5rem;
+            font-family: sans-serif;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .feature-item {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        .feature-icon {
+            flex-shrink: 0;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(139, 92, 246, 0.2));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .feature-text h4 {
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+        .feature-text p {
+            color: #a0a0d0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 2rem 0;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #00d4ff, #8b5cf6, #ff6b9d);
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.4rem;
+            top: 0.3rem;
+            width: 14px;
+            height: 14px;
+            background: #00d4ff;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+        .timeline-year {
+            font-size: 1.2rem;
+            color: #00d4ff;
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+        }
+        .timeline-text {
+            color: #c0c0e0;
+            line-height: 1.6;
+        }
+        .tab-container {
+            margin: 2rem 0;
+        }
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px 8px 0 0;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #c0c0e0;
+        }
+        .tab-btn.active {
+            background: rgba(0, 212, 255, 0.15);
+            border-color: rgba(0, 212, 255, 0.5);
+            color: #00d4ff;
+        }
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0 12px 12px 12px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-content p {
+            line-height: 1.8;
+            color: #c0c0e0;
+            margin-bottom: 1rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: scale(1.05);
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #00d4ff, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-label {
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        .svg-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+        .svg-container svg {
+            width: 100%;
+            height: auto;
+            max-height: 500px;
+        }
+        .nav-dots {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .nav-dot:hover, .nav-dot.active {
+            background: #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
+        footer {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 4rem;
+        }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .hero-subtitle { font-size: 1.1rem; }
+            .section-title { font-size: 1.8rem; }
+            .nav-dots { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-dots" id="navDots"></nav>
+
+    <section class="hero">
+        <canvas class="hero-canvas" id="heroCanvas"></canvas>
+        <div class="hero-content">
+            <h1>Causal Dynamical Triangulations</h1>
+            <p class="hero-subtitle">A non-perturbative approach to quantum gravity where spacetime itself emerges from discrete triangular building blocks, preserving fundamental causality</p>
+        </div>
+        <div class="scroll-indicator">
+            <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        </div>
+    </section>
+
+    <div class="container">
+        <section class="section" id="intro">
+            <h2 class="section-title">The Central Idea: spacetime is not continuous</h2>
+            <div class="card">
+                <p>In CDT, we abandon the assumption that spacetime is a smooth continuum. Instead, we construct spacetime from fundamental building blocks: <strong>4-simplices</strong> — the 4-dimensional analogue of a tetrahedron. These are glued together to form a discrete manifold called a <strong>triangulation</strong>.</p>
+                <p>The key innovation of CDT over earlier approaches (like Dynamical Triangulations or DT) is the emphasis on <strong>causality</strong>. We impose a global time structure, ensuring that the triangulation can be sliced into spatial hypersurfaces (3-dimensional manifolds) at each integer time step. This preservation of causality is what gives CDT its name and its connection to familiar notions of time evolution.</p>
+                <div class="equation-box">
+                    <span class="symbol">d<sub>T</sub></span> = 2 × (N<sub>4</sub> - N<sub>3</sub>) <span class="comment">Topological dimension is always 4 for causal triangulations</span>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Why Triangles?</h3>
+                    <p>In 3 dimensions, equilateral triangles are the simplest polygons that tile space uniformly. In 4 dimensions, 4-simplices are the equivalent building blocks. Their uniform edges make the path integral computationally tractable, while their topological properties ensure we get genuine 4-dimensional spacetime at large scales.</p>
+                </div>
+                <div class="card">
+                    <h3>The Path Integral Problem</h3>
+                    <p>In quantum gravity, we want to sum over all possible spacetimes. This is mathematically intractable in the continuum. CDT discretizes the path integral by reducing it to a sum over a countable set of triangulations, making computation possible via Monte Carlo methods.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="geometry">
+            <h2 class="section-title">The Geometry of Simplices</h2>
+            <div class="svg-container">
+                <svg viewBox="0 0 800 400" id="simplexDiagram">
+                    <defs>
+                        <linearGradient id="simplexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:0.8"/>
+                            <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.8"/>
+                        </linearGradient>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <rect fill="rgba(0,0,0,0.3)" width="800" height="400" rx="10"/>
+                    <!-- 3-simplex (tetrahedron) representation -->
+                    <g transform="translate(100, 200)">
+                        <text x="0" y="-60" fill="#00d4ff" font-size="14" text-anchor="middle">3-Simplex (Tetrahedron)</text>
+                        <polygon points="0,-40 52,10 -52,10" fill="none" stroke="url(#simplexGrad)" stroke-width="2" filter="url(#glow)"/>
+                        <polygon points="0,-40 52,10 0,35" fill="none" stroke="url(#simplexGrad)" stroke-width="2" filter="url(#glow)"/>
+                        <polygon points="0,-40 -52,10 0,35" fill="none" stroke="url(#simplexGrad)" stroke-width="2" filter="url(#glow)"/>
+                        <polygon points="52,10 -52,10 0,35" fill="rgba(0,212,255,0.1)" stroke="url(#simplexGrad)" stroke-width="2"/>
+                        <circle cx="0" cy="-40" r="4" fill="#00d4ff"/>
+                        <circle cx="52" cy="10" r="4" fill="#8b5cf6"/>
+                        <circle cx="-52" cy="10" r="4" fill="#ff6b9d"/>
+                        <circle cx="0" cy="35" r="4" fill="#00ff88"/>
+                    </g>
+                    <!-- 4-simplex representation (schematic) -->
+                    <g transform="translate(400, 200)">
+                        <text x="0" y="-80" fill="#00d4ff" font-size="14" text-anchor="middle">4-Simplex Structure</text>
+                        <circle cx="0" cy="0" r="40" fill="none" stroke="url(#simplexGrad)" stroke-width="2" stroke-dasharray="5,5"/>
+                        <circle cx="0" cy="0" r="25" fill="rgba(0,212,255,0.1)" stroke="url(#simplexGrad)" stroke-width="2"/>
+                        <circle cx="0" cy="0" r="8" fill="#00d4ff" filter="url(#glow)"/>
+                        <!-- Vertices projected -->
+                        <circle cx="0" cy="-40" r="5" fill="#00d4ff"/>
+                        <circle cx="38" cy="-12" r="5" fill="#8b5cf6"/>
+                        <circle cx="24" cy="32" r="5" fill="#ff6b9d"/>
+                        <circle cx="-24" cy="32" r="5" fill="#00ff88"/>
+                        <circle cx="-38" cy="-12" r="5" fill="#ffcc00"/>
+                        <!-- Edges -->
+                        <line x1="0" y1="-40" x2="38" y2="-12" stroke="rgba(0,212,255,0.5)" stroke-width="1"/>
+                        <line x1="38" y1="-12" x2="24" y2="32" stroke="rgba(0,212,255,0.5)" stroke-width="1"/>
+                        <line x1="24" y1="32" x2="-24" y2="32" stroke="rgba(0,212,255,0.5)" stroke-width="1"/>
+                        <line x1="-24" y1="32" x2="-38" y2="-12" stroke="rgba(0,212,255,0.5)" stroke-width="1"/>
+                        <line x1="-38" y1="-12" x2="0" y2="-40" stroke="rgba(0,212,255,0.5)" stroke-width="1"/>
+                        <line x1="0" y1="-40" x2="24" y2="32" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+                        <line x1="0" y1="-40" x2="-24" y2="32" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+                    </g>
+                    <!-- Hyperbolic disc showing triangulation -->
+                    <g transform="translate(650, 200)">
+                        <text x="0" y="-60" fill="#00d4ff" font-size="14" text-anchor="middle">Emergent Geometry</text>
+                        <circle cx="0" cy="0" r="55" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                        <circle cx="0" cy="0" r="40" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+                        <circle cx="0" cy="0" r="25" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                        <!-- Nodes -->
+                        <circle cx="0" cy="0" r="3" fill="#00d4ff" filter="url(#glow)"/>
+                        <circle cx="25" cy="0" r="2" fill="#8b5cf6"/>
+                        <circle cx="-25" cy="0" r="2" fill="#8b5cf6"/>
+                        <circle cx="0" cy="25" r="2" fill="#ff6b9d"/>
+                        <circle cx="0" cy="-25" r="2" fill="#ff6b9d"/>
+                        <circle cx="18" cy="18" r="2" fill="#00ff88"/>
+                        <circle cx="-18" cy="18" r="2" fill="#00ff88"/>
+                        <circle cx="-18" cy="-18" r="2" fill="#ffcc00"/>
+                        <circle cx="18" cy="-18" r="2" fill="#ffcc00"/>
+                        <!-- Connections forming approximate circle -->
+                        <line x1="0" y1="0" x2="25" y2="0" stroke="rgba(0,212,255,0.4)" stroke-width="1"/>
+                        <line x1="0" y1="0" x2="-25" y2="0" stroke="rgba(0,212,255,0.4)" stroke-width="1"/>
+                        <line x1="0" y1="0" x2="0" y2="25" stroke="rgba(0,212,255,0.4)" stroke-width="1"/>
+                        <line x1="0" y1="0" x2="0" y2="-25" stroke="rgba(0,212,255,0.4)" stroke-width="1"/>
+                        <line x1="25" y1="0" x2="18" y2="18" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+                        <line x1="-25" y1="0" x2="-18" y2="18" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+                    </g>
+                    <text x="400" y="380" fill="#666" font-size="12" text-anchor="middle">The 4-simplex has 5 vertices, 10 edges, 10 triangular faces, and 5 tetrahedral cells</text>
+                </svg>
+            </div>
+            <div class="card">
+                <h3>Building Blocks of Spacetime</h3>
+                <p>A <strong>4-simplex</strong> is the 4-dimensional generalization of a tetrahedron. It has 5 vertices (0-simplices), 10 edges (1-simplices), 10 triangular faces (2-simplices), and 5 tetrahedral facets (3-simplices). All edges have the same length — the "edge length" a — which sets the fundamental scale of the theory, typically the Planck length ℓ<sub>P</sub> ≈ 1.6 × 10⁻³⁵ m.</p>
+            </div>
+        </section>
+
+        <section class="section" id="causality">
+            <h2 class="section-title">The Causal Structure</h2>
+            <div class="card">
+                <p>What distinguishes CDT from earlier DT (Dynamical Triangulations) is the <strong>causal constraint</strong>. The triangulation must be foliable — it can be cut into spatial 3-surfaces (built from 3-simplices, i.e., tetrahedra) such that:</p>
+                <ol style="margin: 1rem 0 1rem 2rem; line-height: 2; color: #c0c0e0;">
+                    <li>Each time step t contains a connected 3-dimensional triangulated hypersurface</li>
+                    <li>Links only connect consecutive time slices (t → t+1 or t → t-1)</li>
+                    <li>No links connect vertices on the same time slice (no "space-like" edges within a slice)</li>
+                    <li>The spatial topology is fixed (typically S³ for closed cosmologies)</li>
+                </ol>
+                <p>This structure ensures that causality — the notion of a "before" and "after" — is preserved at the microscopic level, even as the宏观 geometry emerges from the collective dynamics.</p>
+            </div>
+            <div class="svg-container">
+                <svg viewBox="0 0 800 300" id="causalityDiagram">
+                    <defs>
+                        <linearGradient id="timeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:0.8"/>
+                            <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.8"/>
+                        </linearGradient>
+                    </defs>
+                    <rect fill="rgba(0,0,0,0.3)" width="800" height="300" rx="10"/>
+                    <!-- Time slices -->
+                    <g transform="translate(50, 30)">
+                        <text x="0" y="0" fill="#00d4ff" font-size="12" font-weight="bold">t = 0</text>
+                        <polygon points="100,30 150,60 150,90 100,120 50,90 50,60" fill="rgba(0,212,255,0.1)" stroke="url(#timeGrad)" stroke-width="1.5"/>
+                        <circle cx="70" cy="60" r="3" fill="#00d4ff"/>
+                        <circle cx="100" cy="75" r="3" fill="#8b5cf6"/>
+                        <circle cx="130" cy="60" r="3" fill="#ff6b9d"/>
+                        <circle cx="100" cy="90" r="3" fill="#00ff88"/>
+                    </g>
+                    <g transform="translate(50, 150)">
+                        <text x="0" y="0" fill="#00d4ff" font-size="12" font-weight="bold">t = 1</text>
+                        <polygon points="100,30 155,65 155,100 100,135 45,100 45,65" fill="rgba(0,212,255,0.15)" stroke="url(#timeGrad)" stroke-width="1.5"/>
+                        <circle cx="65" cy="65" r="3" fill="#00d4ff"/>
+                        <circle cx="100" cy="82" r="4" fill="#8b5cf6"/>
+                        <circle cx="135" cy="65" r="3" fill="#ff6b9d"/>
+                        <circle cx="85" cy="100" r="3" fill="#00ff88"/>
+                        <circle cx="115" cy="100" r="3" fill="#ffcc00"/>
+                    </g>
+                    <g transform="translate(50, 270)">
+                        <text x="0" y="0" fill="#00d4ff" font-size="12" font-weight="bold">t = 2</text>
+                        <polygon points="100,30 148,62 148,92 100,125 52,92 52,62" fill="rgba(0,212,255,0.1)" stroke="url(#timeGrad)" stroke-width="1.5"/>
+                        <circle cx="75" cy="62" r="3" fill="#00d4ff"/>
+                        <circle cx="100" cy="78" r="3" fill="#8b5cf6"/>
+                        <circle cx="125" cy="62" r="3" fill="#ff6b9d"/>
+                        <circle cx="100" cy="110" r="3" fill="#00ff88"/>
+                    </g>
+                    <!-- Connection arrows -->
+                    <g transform="translate(50, 30)">
+                        <line x1="100" y1="135" x2="100" y2="145" stroke="#00d4ff" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#00d4ff"/>
+                            </marker>
+                        </defs>
+                    </g>
+                    <g transform="translate(50, 150)">
+                        <line x1="100" y1="135" x2="100" y2="145" stroke="#00d4ff" stroke-width="2"/>
+                    </g>
+                    <!-- Legend -->
+                    <g transform="translate(550, 50)">
+                        <text x="0" y="0" fill="#fff" font-size="14" font-weight="bold">Causal Structure</text>
+                        <line x1="0" y1="20" x2="40" y2="20" stroke="#00d4ff" stroke-width="2"/>
+                        <text x="50" y="25" fill="#c0c0e0" font-size="12">Time evolution links</text>
+                        <rect x="0" y="40" width="15" height="15" fill="rgba(0,212,255,0.1)" stroke="#00d4ff"/>
+                        <text x="25" y="52" fill="#c0c0e0" font-size="12">Spatial hypersurface</text>
+                        <circle cx="7" cy="47" r="3" fill="#00d4ff"/>
+                        <text x="50" y="52" fill="#c0c0e0" font-size="12">Vertices</text>
+                    </g>
+                    <text x="400" y="280" fill="#666" font-size="12" text-anchor="middle">Each 4-simplex spans exactly two consecutive time slices, ensuring causal evolution</text>
+                </svg>
+            </div>
+        </section>
+
+        <section class="section" id="action">
+            <h2 class="section-title">The Einstein-Hilbert Action in Discrete Form</h2>
+            <div class="equation-box">
+                <span class="symbol">S<sub>CDT</sub> = -μ⁴ N₄ + k₂ N₂</span>
+                <span class="comment">The Regge action expressed in terms of simplex counts</span>
+            </div>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>The Cosmological Term</h3>
+                    <p>The first term -μ⁴ N₄ is proportional to the number of 4-simplices. Here μ is a dimensionless "cosmological coupling" related to the bare cosmological constant. This term controls the total 4-volume of the triangulation. In the path integral, we often fix the total volume N₄, making this term a constraint rather than a dynamical term.</p>
+                </div>
+                <div class="card">
+                    <h3>The Curvature Term</h3>
+                    <p>The second term k₂ N₂ is proportional to the number of 3-simplices (triangular faces) on which curvature is concentrated in the Regge calculus formulation. The coupling k₂ is related to Newton's constant G: k₂ ∝ 1/G. Positive curvature corresponds to deficit angles, which are nonzero when spacetime is curved.</p>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Regge Calculus Connection</h3>
+                <p>In CDT, we use a discrete version of the <strong>Regge action</strong>, which was developed by Tom Regge in 1961 for numerical relativity. The key insight is that curvature in a triangulated manifold is not distributed smoothly but is concentrated at the 2-dimensional "hinges" (triangles) where simplices meet. The deficit angle at each triangle measures the local curvature.</p>
+                <div class="equation-box">
+                    <span class="symbol">R<sub>deficit</sub> = 2π - Σ<sub>adjacent 4-simplices</sub> θ<sub>tetra</sub></span>
+                    <span class="comment">Deficit angle at triangle t: curvature is concentrated here</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="simulation">
+            <h2 class="section-title">Monte Carlo Simulation of Quantum Spacetime</h2>
+            <div class="canvas-container">
+                <canvas id="simulationCanvas"></canvas>
+                <div class="controls">
+                    <div class="control-group">
+                        <label>Simulation Time</label>
+                        <input type="range" id="simTime" min="0" max="1000" value="0">
+                    </div>
+                    <div class="control-group">
+                        <label>Cosmological Coupling μ</label>
+                        <input type="range" id="muCoupling" min="0" max="4" step="0.1" value="2.0">
+                    </div>
+                    <div class="control-group">
+                        <label>Newton Coupling k₂</label>
+                        <input type="range" id="kCoupling" min="0" max="6" step="0.1" value="2.5">
+                    </div>
+                    <div class="control-group">
+                        <label>Volume N₄</label>
+                        <input type="range" id="volumeN4" min="1000" max="10000" value="5000">
+                    </div>
+                    <button id="playPauseBtn" style="padding: 8px 16px; background: linear-gradient(135deg, #00d4ff, #8b5cf6); border: none; border-radius: 6px; color: white; cursor: pointer;">Play</button>
+                    <button id="resetBtn" style="padding: 8px 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #c0c0e0; cursor: pointer;">Reset</button>
+                </div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="statN4">5000</div>
+                    <div class="stat-label">4-Simplices (N₄)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statAction">—</div>
+                    <div class="stat-label">Action Value</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statVolume">—</div>
+                    <div class="stat-label">Spatial Volume</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statTimeStep">0</div>
+                    <div class="stat-label">Monte Carlo Steps</div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>How the Simulation Works</h3>
+                <p>The path integral over triangulations is evaluated using <strong>Monte Carlo methods</strong>, specifically Metropolis-Hastkins algorithm. Starting from an initial triangulation, we propose random "moves" that change the connectivity:</p>
+                <ul style="margin: 1rem 0 1rem 2rem; line-height: 2; color: #c0c0e0;">
+                    <li><strong>1→4 move</strong>: Replace one 4-simplex with four sharing a new vertex</li>
+                    <li><strong>4→1 move</strong>: Inverse of 1→4, removes four simplices sharing a vertex</li>
+                    <li><strong>2→3 move</strong>: Replace two simplices sharing a triangle with three sharing an edge</li>
+                    <li><strong>3→2 move</strong>: Inverse operation</li>
+                </ul>
+                <p>Each move is accepted with probability min(1, exp(-ΔS)) where ΔS is the action change. This samples triangulations according to the quantum weight exp(iS/ℏ).</p>
+            </div>
+        </section>
+
+        <section class="section" id="phases">
+            <h2 class="section-title">Phase Structure of CDT</h2>
+            <div class="card">
+                <p>One of the most important discoveries in CDT research is that the theory exhibits <strong>multiple phases</strong> depending on the couplings (μ, k₂). These phases correspond to different macroscopic geometries:</p>
+            </div>
+            <div class="svg-container">
+                <svg viewBox="0 0 800 400" id="phaseDiagram">
+                    <defs>
+                        <linearGradient id="phaseGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:0.6"/>
+                            <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.6"/>
+                        </linearGradient>
+                        <linearGradient id="phaseGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff6b9d;stop-opacity:0.6"/>
+                            <stop offset="100%" style="stop-color:#ffcc00;stop-opacity:0.6"/>
+                        </linearGradient>
+                        <linearGradient id="phaseGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00ff88;stop-opacity:0.6"/>
+                            <stop offset="100%" style="stop-color:#00d4ff;stop-opacity:0.6"/>
+                        </linearGradient>
+                    </defs>
+                    <rect fill="rgba(0,0,0,0.3)" width="800" height="400" rx="10"/>
+                    <!-- Phase axes -->
+                    <line x1="100" y1="350" x2="750" y2="350" stroke="#666" stroke-width="2"/>
+                    <line x1="100" y1="350" x2="100" y2="50" stroke="#666" stroke-width="2"/>
+                    <text x="425" y="385" fill="#888" font-size="14" text-anchor="middle">k₂ (Newton coupling)</text>
+                    <text x="40" y="200" fill="#888" font-size="14" text-anchor="middle" transform="rotate(-90, 40, 200)">μ (Cosmological coupling)</text>
+                    <!-- Phase boundaries (approximate) -->
+                    <path d="M 100,280 Q 300,260 500,180 T 700,100" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="5,5"/>
+                    <path d="M 100,180 Q 400,160 600,120" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="5,5"/>
+                    <!-- Phase regions -->
+                    <path d="M 100,350 L 100,280 Q 300,260 500,180 T 700,100 L 700,350 Z" fill="url(#phaseGrad1)" opacity="0.4"/>
+                    <path d="M 100,280 Q 300,260 500,180 T 700,100 L 700,50 L 100,50 Z" fill="url(#phaseGrad3)" opacity="0.4"/>
+                    <path d="M 100,180 Q 400,160 600,120 L 600,50 L 100,50 Z" fill="url(#phaseGrad2)" opacity="0.4"/>
+                    <!-- Phase labels -->
+                    <text x="200" y="320" fill="#00d4ff" font-size="16" font-weight="bold">Phase A</text>
+                    <text x="200" y="340" fill="#888" font-size="12">" crumbled"</text>
+                    <text x="550" y="90" fill="#00ff88" font-size="16" font-weight="bold">Phase B</text>
+                    <text x="550" y="110" fill="#888" font-size="12">" de Sitter"</text>
+                    <text x="350" y="100" fill="#ffcc00" font-size="16" font-weight="bold">Phase C</text>
+                    <text x="350" y="120" fill="#888" font-size="12">" tortous channels"</text>
+                    <!-- Sample point -->
+                    <circle cx="500" cy="150" r="8" fill="#ff6b9d" stroke="#fff" stroke-width="2"/>
+                    <text x="520" y="160" fill="#ff6b9d" font-size="12">Typical (μ,k₂)</text>
+                    <text x="400" y="30" fill="#fff" font-size="18" font-weight="bold" text-anchor="middle">CDT Phase Diagram</text>
+                </svg>
+            </div>
+            <div class="tab-container">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="phaseA">Phase A</button>
+                    <button class="tab-btn" data-tab="phaseB">Phase B</button>
+                    <button class="tab-btn" data-tab="phaseC">Phase C</button>
+                    <button class="tab-btn" data-tab="phaseD">Phase D (Bifurcation)</button>
+                </div>
+                <div class="tab-content active" id="phaseA">
+                    <h4 style="color:#00d4ff;margin-bottom:1rem;">The "Crumbled" Phase — Disconnected Spacetime</h4>
+                    <p>For small k₂ (weak gravitational coupling), the system is in Phase A. The triangulation breaks up into disconnected clusters — spacetime itself fractures at the Planck scale. This phase is physically uninteresting as it doesn't produce a coherent 4-dimensional spacetime.</p>
+                    <p>Mathematically, this corresponds to the situation where the curvature coupling is too weak to bind the simplices into a connected macroscopic geometry. The Hausdorff dimension in this phase is around 2, not 4.</p>
+                </div>
+                <div class="tab-content" id="phaseB">
+                    <h4 style="color:#00ff88;margin-bottom:1rem;">The "de Sitter" Phase — Quantum Cosmology</h4>
+                    <p>This is the physically interesting phase! In Phase B, a macroscopic 4-dimensional spacetime emerges from the discrete triangulations. Remarkably, measurements show the effective dimension is D_H ≈ 4, and the volume-propertime relationship matches that of a de Sitter universe (like our observed cosmos).</p>
+                    <p>The quantum fluctuations in this phase are relatively small, allowing a classical geometry to emerge. This is where CDT makes contact with observable cosmology.</p>
+                </div>
+                <div class="tab-content" id="phaseC">
+                    <h4 style="color:#ffcc00;margin-bottom:1rem;">The "Tortuous" Phase — fractal Spacetime</h4>
+                    <p>For large μ values, Phase C exhibits highly elongated, fractal-like structures. The effective dimension drops to D_H ≈ 2-3. These configurations resemble branched polymers or spacetime with wormholes.</p>
+                    <p>This phase is avoided in the physically relevant regime as it doesn't produce smooth 4-dimensional geometry.</p>
+                </div>
+                <div class="tab-content" id="phaseD">
+                    <h4 style="color:#ff6b9d;margin-bottom:1rem;">The Bifurcation Point — Critical Behavior</h4>
+                    <p>At the triple point where Phases A, B, and C meet, interesting critical behavior may occur. Some analyses suggest this could be a point of enhanced symmetry where different phases merge.</p>
+                    <p>The transition between phases A and B is second-order (continuous), making it possible to probe the behavior at the critical point through finite-size scaling analysis.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="dimensionality">
+            <h2 class="section-title">Emergent Dimensionality</h2>
+            <div class="card">
+                <p>One of the most striking results in CDT is that the effective dimension of spacetime <strong>emerges from the dynamics</strong>, rather than being put in by hand. By measuring how the volume grows with distance in the triangulation, we can extract a "Hausdorff dimension" D_H:</p>
+            </div>
+            <div class="svg-container">
+                <svg viewBox="0 0 800 350" id="dimensionChart">
+                    <defs>
+                        <linearGradient id="dimGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#00d4ff"/>
+                            <stop offset="100%" style="stop-color:#8b5cf6"/>
+                        </linearGradient>
+                        <linearGradient id="dimGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#ff6b9d"/>
+                            <stop offset="100%" style="stop-color:#ffcc00"/>
+                        </linearGradient>
+                    </defs>
+                    <rect fill="rgba(0,0,0,0.3)" width="800" height="350" rx="10"/>
+                    <!-- Axes -->
+                    <line x1="80" y1="300" x2="750" y2="300" stroke="#666" stroke-width="2"/>
+                    <line x1="80" y1="300" x2="80" y2="50" stroke="#666" stroke-width="2"/>
+                    <text x="415" y="340" fill="#888" font-size="14" text-anchor="middle">Distance r (log scale)</text>
+                    <text x="40" y="175" fill="#888" font-size="14" text-anchor="middle" transform="rotate(-90, 40, 175)">Volume V(r) (log scale)</text>
+                    <!-- Grid lines -->
+                    <g stroke="rgba(255,255,255,0.1)" stroke-width="1">
+                        <line x1="80" y1="300" x2="750" y2="100"/>
+                        <line x1="80" y1="300" x2="750" y2="180"/>
+                        <line x1="80" y1="300" x2="750" y2="240"/>
+                    </g>
+                    <!-- D_H = 4 line -->
+                    <line x1="100" y1="280" x2="700" y2="80" stroke="url(#dimGrad1)" stroke-width="3" stroke-dasharray="10,5"/>
+                    <text x="710" y="85" fill="#00d4ff" font-size="14">D_H ≈ 4</text>
+                    <!-- D_H ≈ 2 line (Phase C) -->
+                    <line x1="100" y1="280" x2="700" y2="230" stroke="url(#dimGrad2)" stroke-width="3" stroke-dasharray="10,5"/>
+                    <text x="710" y="235" fill="#ff6b9d" font-size="14">D_H ≈ 2</text>
+                    <!-- Data points simulation -->
+                    <g fill="#00d4ff">
+                        <circle cx="120" cy="275" r="4"/>
+                        <circle cx="160" cy="260" r="4"/>
+                        <circle cx="200" cy="245" r="4"/>
+                        <circle cx="260" cy="220" r="4"/>
+                        <circle cx="340" cy="185" r="4"/>
+                        <circle cx="450" cy="145" r="4"/>
+                        <circle cx="580" cy="110" r="4"/>
+                        <circle cx="700" cy="85" r="4"/>
+                    </g>
+                    <!-- Equation box -->
+                    <rect x="200" y="10" width="400" height="35" fill="rgba(0,0,0,0.5)" rx="5"/>
+                    <text x="400" y="32" fill="#fff" font-size="16" text-anchor="middle" font-family="Times New Roman, serif">V(r) ∝ r<sup>D_H</sup>  ⟹  D_H = d log V / d log r</text>
+                </svg>
+            </div>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>How to Measure D_H</h3>
+                    <p>Pick a random vertex as origin. For each distance r (measured along the triangulation), count the average number of vertices within that geodesic distance. Plot V(r) vs r on log-log scales. The slope gives D_H.</p>
+                </div>
+                <div class="card">
+                    <h3>Results in Phase B</h3>
+                    <p>In the de Sitter phase (Phase B), CDT simulations yield D_H ≈ 4 for intermediate scales, confirming that 4-dimensional geometry genuinely emerges from the discrete dynamics. This is a non-trivial result — no one put in D=4 explicitly!</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="cosmolgy">
+            <h2 class="section-title">Cosmological Applications: The Big Bounce</h2>
+            <div class="card">
+                <p>Perhaps the most dramatic prediction of CDT is what happens at the Planck scale. Unlike in classical GR where we encounter the singularity at t = 0, CDT suggests the universe undergoes a <strong>"quantum bounce"</strong>. The discrete triangulations cannot collapse to zero volume — quantum effects repulsive at short distances prevent the formation of a singularity.</p>
+                <p>This is similar to what Loop Quantum Gravity (LQC) predicts, but CDT arrives at this result through a completely different mathematical framework. The bounce occurs at a critical density of order the Planck density ρ_P ≈ 5.1 × 10⁹⁷ kg/m³.</p>
+            </div>
+            <div class="svg-container">
+                <svg viewBox="0 0 800 400" id="bounceDiagram">
+                    <defs>
+                        <linearGradient id="bounceGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#8b5cf6"/>
+                            <stop offset="50%" style="stop-color:#ff6b9d"/>
+                            <stop offset="100%" style="stop-color:#00d4ff"/>
+                        </linearGradient>
+                        <filter id="glow2">
+                            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <rect fill="rgba(0,0,0,0.3)" width="800" height="400" rx="10"/>
+                    <!-- Classical singularity curve -->
+                    <path d="M 100,350 Q 400,350 400,200 Q 400,50 700,50" fill="none" stroke="rgba(255,100,100,0.5)" stroke-width="2" stroke-dasharray="8,4"/>
+                    <text x="400" y="380" fill="rgba(255,100,100,0.8)" font-size="12" text-anchor="middle">Classical Big Bang Singularity</text>
+                    <!-- CDT bounce curve -->
+                    <path d="M 100,350 Q 200,280 300,100 Q 400,50 500,100 Q 600,280 700,350" fill="none" stroke="url(#bounceGrad)" stroke-width="4" filter="url(#glow2)"/>
+                    <!-- Bounce point -->
+                    <circle cx="400" cy="50" r="8" fill="#ff6b9d" filter="url(#glow2)"/>
+                    <text x="400" y="25" fill="#ff6b9d" font-size="14" text-anchor="middle" font-weight="bold">Quantum Bounce</text>
+                    <!-- Time arrows -->
+                    <g transform="translate(50, 200)">
+                        <line x1="0" y1="0" x2="30" y2="0" stroke="#00d4ff" stroke-width="2"/>
+                        <text x="40" y="5" fill="#00d4ff" font-size="12">Past</text>
+                    </g>
+                    <g transform="translate(720, 200)">
+                        <line x1="0" y1="0" x2="30" y2="0" stroke="#00d4ff" stroke-width="2"/>
+                        <text x="10" y="5" fill="#00d4ff" font-size="12">Future</text>
+                    </g>
+                    <!-- Scale labels -->
+                    <text x="150" y="320" fill="#888" font-size="11">Planck Era</text>
+                    <text x="600" y="320" fill="#888" font-size="11">Classical Era</text>
+                    <text x="400" y="250" fill="#8b5cf6" font-size="14" text-anchor="middle">Before</text>
+                    <text x="400" y="150" fill="#00d4ff" font-size="14" text-anchor="middle">After</text>
+                </svg>
+            </div>
+            <div class="equation-box">
+                <span class="symbol">H² = (8πG/3)ρ(1 - ρ/ρ_c)</span>
+                <span class="comment">LQC/CDT modified Friedmann equation preventing singularity</span>
+            </div>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>CDT vs LQC</h3>
+                    <p>CDT and Loop Quantum Cosmology arrive at similar conclusions (a bounce rather than a singularity) but through different mathematics. CDT uses path integrals over triangulations; LQC uses canonical quantization of cosmological models. Their convergence strengthens confidence in the result.</p>
+                </div>
+                <div class="card">
+                    <h3>Observable Predictions</h3>
+                    <p>If the bounce occurred, there should be a primordial gravitational wave background with a characteristic spectrum. The quantum geometry fluctuations leave imprints. Future GW detectors (LIGO, ET, LISA) might search for this "bounce signature" in the stochastic background.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="comparison">
+            <h2 class="section-title">CDT vs Other Quantum Gravity Approaches</h2>
+            <div class="card">
+                <table style="width:100%; border-collapse: collapse; margin: 1rem 0;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid rgba(0,212,255,0.3);">
+                            <th style="padding: 1rem; text-align: left; color: #00d4ff;">Feature</th>
+                            <th style="padding: 1rem; text-align: left; color: #00d4ff;">CDT</th>
+                            <th style="padding: 1rem; text-align: left; color: #00d4ff;">String Theory</th>
+                            <th style="padding: 1rem; text-align: left; color: #00d4ff;">LQG</th>
+                        </tr>
+                    </thead>
+                    <tbody style="color: #c0c0e0;">
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <td style="padding: 1rem;">Approach</td>
+                            <td style="padding: 1rem;">Non-perturbative path integral</td>
+                            <td style="padding: 1rem;">Perturbative in string tension</td>
+                            <td style="padding: 1rem;">Canonical quantization</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <td style="padding: 1rem;">Spacetime</td>
+                            <td style="padding: 1rem;">Discretized simplices</td>
+                            <td style="padding: 1rem;">Smooth (10D vacuum)</td>
+                            <td style="padding: 1rem;">Spin networks</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <td style="padding: 1rem;">Dimensionality</td>
+                            <td style="padding: 1rem;">Emergent D=4</td>
+                            <td style="padding: 1rem;">Requires compactification</td>
+                            <td style="padding: 1rem;">Assumes D=4</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <td style="padding: 1rem;">Causality</td>
+                            <td style="padding: 1rem;">Built in</td>
+                            <td style="padding: 1rem;">Problematic</td>
+                            <td style="padding: 1rem;">Partial</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <td style="padding: 1rem;">Matter coupling</td>
+                            <td style="padding: 1rem;">Challenging</td>
+                            <td style="padding: 1rem;">Natural via branes</td>
+                            <td style="padding: 1rem;">Ongoing</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section" id="history">
+            <h2 class="section-title">Historical Development</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-year">1990</div>
+                    <div class="timeline-text"><strong>Ambjørn and Jurkiewicz</strong> propose the first version of Dynamical Triangulations (DT) in 4 dimensions. The approach shows promise but lacks causal structure.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">1998</div>
+                    <div class="timeline-text"><strong>Renate Loll, Jan Ambjørn, and Jerzy Jurkiewicz</strong> introduce the causal constraint, creating Causal Dynamical Triangulations. This seminal paper establishes the framework still used today.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2003</div>
+                    <div class="timeline-text">First numerical simulations in Phase B show effective D=4 emerging. The de Sitter phase is identified and studied with increasing statistics.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2005</div>
+                    <div class="timeline-text">The phase structure is mapped out in detail. Discovery of the bifurcation point where three phases meet. Improved algorithms allow larger volumes (N₄ ~ 10⁵).</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2010</div>
+                    <div class="timeline-text">CDT group in Amsterdam and Kraków produces high-precision measurements of D_H, confirming D=4 in Phase B. Connection to LQC bounce scenarios explored.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2016</div>
+                    <div class="timeline-text">Coupling matter fields to CDT triangulations shows robustness of the D=4 result. Semi-classical limit is further constrained.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2020+</div>
+                    <div class="timeline-text">CDT continues to develop. Recent work focuses on: finite-size scaling at critical points, improved Monte Carlo algorithms, and potential observational signatures in primordial gravitational waves.</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="equations">
+            <h2 class="section-title">Key Equations Summary</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Regge Action</h3>
+                    <div class="equation-box">
+                        <span class="symbol">S<sub>Regge</sub> = (1/8πG) Σ<sub>t</sub> A<sub>t</sub> ε<sub>t</sub></span>
+                        <span class="comment">Sum over triangles of area × deficit angle</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>CDT Discrete Action</h3>
+                    <div class="equation-box">
+                        <span class="symbol">S<sub>CDT</sub> = -μ⁴ N₄ + k₂ N₂</span>
+                        <span class="comment">Number of 4-simplices and 2-simplices</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Hausdorff Dimension</h3>
+                    <div class="equation-box">
+                        <span class="symbol">D_H = d log V(r) / d log r</span>
+                        <span class="comment">Measured from volume-distance scaling</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Bounce Condition</h3>
+                    <div class="equation-box">
+                        <span class="symbol">ρ → ρ<sub>c</sub> ≈ 0.41 ρ<sub>P</sub></span>
+                        <span class="comment">Quantum bounce occurs at critical density</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="references">
+            <h2 class="section-title">Further Reading & Resources</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Key Papers</h3>
+                    <ul style="margin: 1rem 0 1rem 1.5rem; line-height: 2; color: #c0c0e0;">
+                        <li>Ambjørn, Jurkiewicz & Loll (1998) — "A new perspective on 4D quantum gravity"</li>
+                        <li>Ambjørn, Jurkiewicz & Loll (2001) — "Dynamically triangulating Lorentzian quantum gravity"</li>
+                        <li>Ambjørn et al. (2005) — "The phase diagram of 4D causal dynamical triangulations"</li>
+                        <li>Anderson et al. (2012) — "Universality in the code space of CDT quantum gravity"</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Reviews & Books</h3>
+                    <ul style="margin: 1rem 0 1rem 1.5rem; line-height: 2; color: #c0c0e0;">
+                        <li>"Quantum Geometry and Path Integrals" — Ambjørn & Makeit</li>
+                        <li>"Quantum Gravity" — Rovelli (LQG context for comparison)</li>
+                        <li>Review: "Causal Dynamical Triangulations" — Loll (2019)</li>
+                        <li>Popular: "Reality and the Physical World" — preprints on arXiv</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>Causal Dynamical Triangulations — A non-perturbative approach to quantum gravity</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">Kevin the Physicist | /agents/kevin/ | 2026</p>
+    </footer>
+
+    <script>
+        // Hero Canvas Animation
+        const heroCanvas = document.getElementById('heroCanvas');
+        const heroCtx = heroCanvas.getContext('2d');
+
+        function resizeHeroCanvas() {
+            heroCanvas.width = window.innerWidth;
+            heroCanvas.height = window.innerHeight;
+        }
+        resizeHeroCanvas();
+        window.addEventListener('resize', resizeHeroCanvas);
+
+        // Triangulation nodes for hero animation
+        const nodes = [];
+        for (let i = 0; i < 80; i++) {
+            nodes.push({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                connections: [],
+                phase: Math.random() * Math.PI * 2
+            });
+        }
+
+        // Create connections
+        for (let i = 0; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+                const dx = nodes[i].x - nodes[j].x;
+                const dy = nodes[i].y - nodes[j].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 200) {
+                    nodes[i].connections.push(j);
+                }
+            }
+        }
+
+        let heroTime = 0;
+        function animateHero() {
+            heroCtx.fillStyle = 'rgba(10, 10, 26, 0.1)';
+            heroCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
+
+            heroTime += 0.01;
+
+            nodes.forEach((node, i) => {
+                node.x += node.vx;
+                node.y += node.vy;
+
+                if (node.x < 0 || node.x > heroCanvas.width) node.vx *= -1;
+                if (node.y < 0 || node.y > heroCanvas.height) node.vy *= -1;
+
+                const hue = (heroTime * 50 + i * 5) % 360;
+                heroCtx.beginPath();
+                heroCtx.arc(node.x, node.y, 3, 0, Math.PI * 2);
+                heroCtx.fillStyle = `hsla(${hue}, 80%, 60%, 0.7)`;
+                heroCtx.fill();
+            });
+
+            // Draw connections
+            nodes.forEach((node, i) => {
+                node.connections.forEach(j => {
+                    const other = nodes[j];
+                    const dx = node.x - other.x;
+                    const dy = node.y - other.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 200) {
+                        const alpha = (1 - dist / 200) * 0.3;
+                        heroCtx.beginPath();
+                        heroCtx.moveTo(node.x, node.y);
+                        heroCtx.lineTo(other.x, other.y);
+                        const hue = (heroTime * 30 + (i + j) * 3) % 360;
+                        heroCtx.strokeStyle = `hsla(${hue}, 70%, 50%, ${alpha})`;
+                        heroCtx.lineWidth = 1;
+                        heroCtx.stroke();
+                    }
+                });
+            });
+
+            requestAnimationFrame(animateHero);
+        }
+        animateHero();
+
+        // Simulation Canvas
+        const simCanvas = document.getElementById('simulationCanvas');
+        const simCtx = simCanvas.getContext('2d');
+
+        function resizeSimCanvas() {
+            simCanvas.width = simCanvas.offsetWidth * window.devicePixelRatio;
+            simCanvas.height = simCanvas.offsetHeight * window.devicePixelRatio;
+            simCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        resizeSimCanvas();
+        window.addEventListener('resize', resizeSimCanvas);
+
+        // Simulation state
+        let simState = {
+            running: false,
+            time: 0,
+            mu: 2.0,
+            k2: 2.5,
+            N4: 5000,
+            action: 0,
+            spatialVolume: 0,
+            triangulations: []
+        };
+
+        // Initialize simulated triangulations
+        function initTriangulations() {
+            simState.triangulations = [];
+            for (let i = 0; i < 7; i++) {
+                const layer = [];
+                const nodeCount = 15 + Math.floor(Math.random() * 10);
+                for (let j = 0; j < nodeCount; j++) {
+                    layer.push({
+                        x: Math.random() * (simCanvas.width / window.devicePixelRatio - 40) + 20,
+                        y: Math.random() * (simCanvas.height / window.devicePixelRatio - 40) + 20,
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: (Math.random() - 0.5) * 2
+                    });
+                }
+                simState.triangulations.push(layer);
+            }
+        }
+        initTriangulations();
+
+        let simInterval = null;
+        function updateSimulation() {
+            if (!simState.running) return;
+
+            simState.time++;
+            simState.action = -simState.mu * simState.N4 * 0.001 + simState.k2 * simState.N4 * 0.003 * Math.random();
+            simState.spatialVolume = simState.N4 * (0.5 + 0.3 * Math.sin(simState.time * 0.01));
+
+            document.getElementById('statN4').textContent = simState.N4.toLocaleString();
+            document.getElementById('statAction').textContent = simState.action.toFixed(2);
+            document.getElementById('statVolume').textContent = simState.spatialVolume.toFixed(0);
+            document.getElementById('statTimeStep').textContent = simState.time;
+
+            // Update triangulations
+            simState.triangulations.forEach((layer, li) => {
+                layer.forEach(node => {
+                    node.x += node.vx;
+                    node.y += node.vy;
+                    const w = simCanvas.width / window.devicePixelRatio;
+                    const h = simCanvas.height / window.devicePixelRatio;
+                    if (node.x < 20 || node.x > w - 20) node.vx *= -1;
+                    if (node.y < 20 || node.y > h - 20) node.vy *= -1;
+                });
+            });
+        }
+
+        function drawSimulation() {
+            const w = simCanvas.width / window.devicePixelRatio;
+            const h = simCanvas.height / window.devicePixelRatio;
+
+            simCtx.fillStyle = 'rgba(10, 10, 30, 0.15)';
+            simCtx.fillRect(0, 0, w, h);
+
+            // Draw time layers
+            const layerColors = ['#00d4ff', '#8b5cf6', '#ff6b9d', '#00ff88', '#ffcc00', '#ff6b9d', '#00d4ff'];
+
+            simState.triangulations.forEach((layer, li) => {
+                const yBase = (li + 1) * (h / 8);
+
+                // Draw connections within layer
+                layer.forEach((node, ni) => {
+                    layer.forEach((other, oi) => {
+                        if (oi > ni) {
+                            const dx = node.x - other.x;
+                            const dy = node.y - other.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist < 80) {
+                                simCtx.beginPath();
+                                simCtx.moveTo(node.x, yBase + node.y * 0.3);
+                                simCtx.lineTo(other.x, yBase + other.y * 0.3);
+                                simCtx.strokeStyle = `rgba(${li * 30}, ${100 + li * 20}, ${200 - li * 20}, ${0.3 - dist * 0.003})`;
+                                simCtx.lineWidth = 1;
+                                simCtx.stroke();
+                            }
+                        }
+                    });
+                });
+
+                // Draw nodes
+                layer.forEach(node => {
+                    simCtx.beginPath();
+                    simCtx.arc(node.x, yBase + node.y * 0.3, 3, 0, Math.PI * 2);
+                    simCtx.fillStyle = layerColors[li];
+                    simCtx.fill();
+                });
+            });
+
+            // Draw vertical connections (4-simplices spanning layers)
+            for (let li = 0; li < simState.triangulations.length - 1; li++) {
+                const layer1 = simState.triangulations[li];
+                const layer2 = simState.triangulations[li + 1];
+                const y1 = (li + 1) * (h / 8);
+                const y2 = (li + 2) * (h / 8);
+
+                for (let ni = 0; ni < Math.min(layer1.length, layer2.length); ni++) {
+                    if (Math.random() > 0.5) {
+                        simCtx.beginPath();
+                        simCtx.moveTo(layer1[ni].x, y1 + layer1[ni].y * 0.3);
+                        simCtx.lineTo(layer2[ni].x, y2 + layer2[ni].y * 0.3);
+                        simCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                        simCtx.lineWidth = 1;
+                        simCtx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animateSimulation() {
+            updateSimulation();
+            drawSimulation();
+            if (simState.running) {
+                requestAnimationFrame(animateSimulation);
+            }
+        }
+
+        document.getElementById('playPauseBtn').addEventListener('click', function() {
+            simState.running = !simState.running;
+            this.textContent = simState.running ? 'Pause' : 'Play';
+            if (simState.running) {
+                animateSimulation();
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            simState.time = 0;
+            simState.action = 0;
+            simState.spatialVolume = 0;
+            initTriangulations();
+            document.getElementById('statTimeStep').textContent = '0';
+            document.getElementById('statAction').textContent = '—';
+            document.getElementById('statVolume').textContent = '—';
+        });
+
+        document.getElementById('muCoupling').addEventListener('input', function() {
+            simState.mu = parseFloat(this.value);
+        });
+
+        document.getElementById('kCoupling').addEventListener('input', function() {
+            simState.k2 = parseFloat(this.value);
+        });
+
+        document.getElementById('volumeN4').addEventListener('input', function() {
+            simState.N4 = parseInt(this.value);
+            document.getElementById('statN4').textContent = simState.N4.toLocaleString();
+        });
+
+        // Tab functionality
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tabId = this.dataset.tab;
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Scroll-based visibility
+        const sections = document.querySelectorAll('.section');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        sections.forEach(section => observer.observe(section));
+
+        // Navigation dots
+        const navDots = document.getElementById('navDots');
+        sections.forEach((section, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot';
+            dot.addEventListener('click', () => {
+                section.scrollIntoView({ behavior: 'smooth' });
+            });
+            navDots.appendChild(dot);
+        });
+
+        // Update active dot on scroll
+        window.addEventListener('scroll', () => {
+            const scrollPos = window.scrollY + window.innerHeight / 2;
+            sections.forEach((section, i) => {
+                const rect = section.getBoundingClientRect();
+                const center = rect.top + window.scrollY + rect.height / 2;
+                if (Math.abs(scrollPos - center) < rect.height / 2) {
+                    document.querySelectorAll('.nav-dot').forEach((d, j) => {
+                        d.classList.toggle('active', j === i);
+                    });
+                }
+            });
+        });
+
+        // Initialize display
+        document.getElementById('statN4').textContent = simState.N4.toLocaleString();
+    </script>
+</body>
+</html>
