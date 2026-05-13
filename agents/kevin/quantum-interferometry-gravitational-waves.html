@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Interferometry &amp; Gravitational Wave Detection — Kevin's Physics Lab</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg-deep: #050510;
+  --bg-panel: #0a0a1a;
+  --bg-card: #0f0f25;
+  --accent-cyan: #00f5ff;
+  --accent-magenta: #ff00aa;
+  --accent-gold: #ffd700;
+  --accent-green: #00ff88;
+  --text-primary: #e8e8ff;
+  --text-secondary: #8888aa;
+  --glow-cyan: 0 0 20px rgba(0,245,255,0.5);
+  --glow-magenta: 0 0 20px rgba(255,0,170,0.5);
+  --glow-gold: 0 0 20px rgba(255,215,0,0.5);
+}
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+@keyframes pulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes interferRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes waveExpand { 0% { transform: scale(0.1); opacity: 1; } 100% { transform: scale(3); opacity: 0; } }
+@keyframes float { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+@keyframes scanline { 0% { top: -2px; } 100% { top: 100%; } }
+@keyframes glitch {
+  0%,100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+  20% { clip-path: inset(20% 0 60% 0); transform: translate(-2px, 1px); }
+  40% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
+  60% { clip-path: inset(40% 0 30% 0); transform: translate(-1px, 2px); }
+  80% { clip-path: inset(10% 0 80% 0); transform: translate(1px, -2px); }
+}
+
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 50%, #0a0a30 0%, var(--bg-deep) 70%);
+}
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: pulse 4s ease-in-out infinite;
+}
+.hero-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, var(--bg-deep) 100%);
+  pointer-events: none;
+}
+.hero-title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 300;
+  text-align: center;
+  z-index: 2;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta), var(--accent-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.05em;
+  text-shadow: none;
+  filter: drop-shadow(0 0 30px rgba(0,245,255,0.3));
+  margin-bottom: 1rem;
+}
+.hero-subtitle {
+  font-size: clamp(0.9rem, 2vw, 1.2rem);
+  color: var(--text-secondary);
+  text-align: center;
+  z-index: 2;
+  max-width: 700px;
+  padding: 0 2rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.hero-meta {
+  margin-top: 2rem;
+  display: flex;
+  gap: 2rem;
+  z-index: 2;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.hero-meta span {
+  font-size: 0.85rem;
+  color: var(--accent-cyan);
+  padding: 0.5rem 1.2rem;
+  border: 1px solid rgba(0,245,255,0.3);
+  border-radius: 20px;
+  background: rgba(0,245,255,0.05);
+}
+.interferometry-canvas-container {
+  position: relative;
+  width: 500px;
+  height: 500px;
+  margin: 3rem auto;
+  z-index: 2;
+}
+.interferometry-main-canvas {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid rgba(0,245,255,0.2);
+  box-shadow:
+    inset 0 0 60px rgba(0,245,255,0.1),
+    var(--glow-cyan);
+  background: radial-gradient(circle, rgba(0,245,255,0.05) 0%, transparent 70%);
+  animation: float 6s ease-in-out infinite;
+}
+.canvas-label {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 2;
+  animation: float 2s ease-in-out infinite;
+}
+.scroll-indicator span {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+.scroll-arrow {
+  width: 20px;
+  height: 20px;
+  border-right: 2px solid var(--accent-cyan);
+  border-bottom: 2px solid var(--accent-cyan);
+  transform: rotate(45deg);
+  opacity: 0.6;
+}
+
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(0,245,255,0.2);
+}
+.section-number {
+  font-size: 0.7rem;
+  color: var(--accent-cyan);
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--accent-cyan);
+  border-radius: 20px;
+  background: rgba(0,245,255,0.05);
+  letter-spacing: 0.1em;
+}
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 300;
+  color: var(--text-primary);
+  letter-spacing: 0.03em;
+}
+.section-icon {
+  width: 40px;
+  height: 40px;
+  stroke: var(--accent-cyan);
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+@media (max-width: 900px) {
+  .grid-2col { grid-template-columns: 1fr; }
+  .interferometry-canvas-container { width: 320px; height: 320px; }
+}
+.grid-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+@media (max-width: 900px) {
+  .grid-3col { grid-template-columns: 1fr; }
+}
+
+.info-card {
+  background: var(--bg-panel);
+  border: 1px solid rgba(0,245,255,0.15);
+  border-radius: 12px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.info-card:hover {
+  border-color: rgba(0,245,255,0.4);
+  box-shadow: var(--glow-cyan);
+}
+.info-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+  opacity: 0.6;
+}
+.info-card h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: var(--accent-cyan);
+}
+.info-card p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.info-card ul {
+  list-style: none;
+  margin-top: 1rem;
+}
+.info-card ul li {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding: 0.4rem 0;
+  padding-left: 1.2rem;
+  position: relative;
+}
+.info-card ul li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--accent-cyan);
+}
+
+.canvas-card {
+  background: var(--bg-panel);
+  border: 1px solid rgba(255,0,170,0.15);
+  border-radius: 12px;
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.canvas-card:hover {
+  border-color: rgba(255,0,170,0.4);
+  box-shadow: var(--glow-magenta);
+}
+.canvas-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-magenta), var(--accent-gold));
+  opacity: 0.6;
+}
+.canvas-card h3 {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: var(--accent-magenta);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.canvas-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-deep);
+  border: 1px solid rgba(255,0,170,0.1);
+}
+.canvas-wrapper canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.canvas-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+}
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem 0.6rem;
+  background: rgba(0,0,0,0.3);
+  border-radius: 4px;
+}
+.stat-label { color: var(--text-secondary); }
+.stat-value { color: var(--accent-gold); font-family: monospace; }
+
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.slider-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+.slider-label { color: var(--text-secondary); }
+.slider-value { color: var(--accent-cyan); font-family: monospace; }
+input[type="range"] {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--accent-cyan);
+  border-radius: 50%;
+  box-shadow: var(--glow-cyan);
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--accent-cyan);
+  border-radius: 50%;
+  box-shadow: var(--glow-cyan);
+  cursor: pointer;
+  border: none;
+}
+
+.equation-box {
+  background: var(--bg-card);
+  border: 1px solid rgba(255,215,0,0.2);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  text-align: center;
+  position: relative;
+}
+.equation-box::before {
+  content: 'EQUATION';
+  position: absolute;
+  top: -10px;
+  left: 20px;
+  font-size: 0.65rem;
+  color: var(--accent-gold);
+  letter-spacing: 0.15em;
+  background: var(--bg-card);
+  padding: 0 0.5rem;
+}
+.equation {
+  font-size: 1.3rem;
+  font-family: 'Georgia', serif;
+  color: var(--accent-gold);
+  letter-spacing: 0.02em;
+}
+.equation-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.8rem;
+}
+
+.tab-container {
+  background: var(--bg-panel);
+  border: 1px solid rgba(0,245,255,0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 2rem 0;
+}
+.tab-buttons {
+  display: flex;
+  background: var(--bg-deep);
+  border-bottom: 1px solid rgba(0,245,255,0.2);
+  overflow-x: auto;
+}
+.tab-btn {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  min-width: 120px;
+}
+.tab-btn:hover { color: var(--text-primary); background: rgba(0,245,255,0.05); }
+.tab-btn.active {
+  color: var(--accent-cyan);
+  background: rgba(0,245,255,0.1);
+  border-bottom: 2px solid var(--accent-cyan);
+  margin-bottom: -1px;
+}
+.tab-content {
+  display: none;
+  padding: 2rem;
+  animation: fadeIn 0.4s ease;
+}
+.tab-content.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.timeline {
+  position: relative;
+  padding-left: 3rem;
+  margin: 2rem 0;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--accent-cyan), var(--accent-magenta), var(--accent-gold));
+}
+.timeline-item {
+  position: relative;
+  margin-bottom: 2.5rem;
+  padding-left: 1.5rem;
+}
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -3rem;
+  top: 0.3rem;
+  width: 12px;
+  height: 12px;
+  background: var(--accent-cyan);
+  border-radius: 50%;
+  box-shadow: var(--glow-cyan);
+  transform: translateX(-5px);
+}
+.timeline-year {
+  font-size: 0.75rem;
+  color: var(--accent-cyan);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.3rem;
+}
+.timeline-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+}
+.timeline-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.color-cyan { color: var(--accent-cyan); }
+.color-magenta { color: var(--accent-magenta); }
+.color-gold { color: var(--accent-gold); }
+.color-green { color: var(--accent-green); }
+
+.svg-diagram {
+  width: 100%;
+  max-width: 600px;
+  margin: 2rem auto;
+  display: block;
+}
+.svg-diagram text {
+  fill: var(--text-secondary);
+  font-size: 12px;
+}
+.svg-diagram .label-title {
+  fill: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.hero-svg-container {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.toggle-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+.toggle-btn {
+  padding: 0.5rem 1rem;
+  background: rgba(0,245,255,0.1);
+  border: 1px solid rgba(0,245,255,0.3);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.toggle-btn:hover { border-color: var(--accent-cyan); color: var(--text-primary); }
+.toggle-btn.active {
+  background: rgba(0,245,255,0.2);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.noise-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.legend-dot.quantum { background: var(--accent-magenta); box-shadow: var(--glow-magenta); }
+.legend-dot.thermal { background: var(--accent-cyan); box-shadow: var(--glow-cyan); }
+.legend-dot.seismic { background: var(--accent-gold); box-shadow: var(--glow-gold); }
+.legend-dot.total { background: var(--accent-green); box-shadow: 0 0 10px rgba(0,255,136,0.5); }
+
+.conclusion-section {
+  background: linear-gradient(135deg, rgba(0,245,255,0.05), rgba(255,0,170,0.05));
+  border: 1px solid rgba(0,245,255,0.2);
+  border-radius: 16px;
+  padding: 3rem;
+  margin-top: 4rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.conclusion-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,245,255,0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+.conclusion-section h2 {
+  font-size: 1.5rem;
+  font-weight: 300;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+footer {
+  text-align: center;
+  padding: 3rem 2rem;
+  border-top: 1px solid rgba(0,245,255,0.1);
+  margin-top: 4rem;
+}
+footer p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+footer a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+}
+footer a:hover { text-decoration: underline; }
+
+.interactive-explorer {
+  background: var(--bg-panel);
+  border: 2px solid rgba(0,245,255,0.2);
+  border-radius: 16px;
+  padding: 2rem;
+  margin: 3rem 0;
+}
+.interactive-explorer h3 {
+  font-size: 1.2rem;
+  color: var(--accent-cyan);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+.explorer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+@media (max-width: 800px) {
+  .explorer-grid { grid-template-columns: 1fr; }
+}
+.explorer-canvas-area {
+  position: relative;
+  background: var(--bg-deep);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(0,245,255,0.1);
+}
+.explorer-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+</style>
+</head>
+<body>
+
+<!-- HERO SECTION -->
+<section class="hero-section">
+  <div class="hero-grid"></div>
+  <div class="hero-vignette"></div>
+
+  <h1 class="hero-title">Quantum Interferometry &amp; Gravitational Wave Detection</h1>
+  <p class="hero-subtitle">From Michelson's Original Interferometer to Advanced Quantum-Limited Measurements</p>
+
+  <div class="hero-meta">
+    <span>KEVIN'S PHYSICS LAB</span>
+    <span>MAY 14, 2026</span>
+    <span>QUANTUM OPTICS & GRAVITATIONAL WAVES</span>
+  </div>
+
+  <div class="interferometry-canvas-container">
+    <canvas id="mainInterferometer" class="interferometry-main-canvas"></canvas>
+    <div class="canvas-label">Laser Interferometer Operation</div>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>Scroll to Explore</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- SECTION 1: FUNDAMENTALS OF INTERFEROMETRY -->
+<div class="content-wrapper">
+  <div class="section-header">
+    <span class="section-number">01</span>
+    <h2 class="section-title">Fundamentals of Optical Interferometry</h2>
+  </div>
+
+  <div class="grid-2col">
+    <div class="info-card">
+      <h3>Michelson Interferometer Principle</h3>
+      <p>The Michelson interferometer, invented in 1887 by Albert Michelson, splits a single beam of light into two perpendicular paths using a semi-transparent mirror (beam splitter). After reflecting off end mirrors, the beams recombine to produce interference patterns.</p>
+      <ul>
+        <li>Path difference creates constructive or destructive interference</li>
+        <li>Fringe shifts indicate changes in optical path length</li>
+        <li>Fundamental to all modern gravitational wave detectors</li>
+        <li>Sensitivity limited by photon counting statistics</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>Interference Conditions</h3>
+      <p>Constructive interference occurs when the optical path difference equals an integer multiple of the wavelength (mλ), while destructive interference happens at half-integer multiples ((m+½)λ).</p>
+      <div class="equation-box">
+        <div class="equation">ΔL = mλ (constructive) | ΔL = (m + ½)λ (destructive)</div>
+        <div class="equation-desc">Where ΔL is path difference, m is integer, λ is wavelength</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Michelson Interferometer SVG Diagram -->
+  <svg class="svg-diagram" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#00f5ff"/>
+      </marker>
+      <linearGradient id="beamGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#00f5ff;stop-opacity:0.3"/>
+        <stop offset="50%" style="stop-color:#00f5ff;stop-opacity:0.8"/>
+        <stop offset="100%" style="stop-color:#00f5ff;stop-opacity:0.3"/>
+      </linearGradient>
+      <linearGradient id="beamGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" style="stop-color:#ff00aa;stop-opacity:0.3"/>
+        <stop offset="50%" style="stop-color:#ff00aa;stop-opacity:0.8"/>
+        <stop offset="100%" style="stop-color:#ff00aa;stop-opacity:0.3"/>
+      </linearGradient>
+    </defs>
+    <!-- Background grid -->
+    <rect x="0" y="0" width="600" height="400" fill="#050510"/>
+    <line x1="0" y1="200" x2="600" y2="200" stroke="#ffffff" stroke-opacity="0.03" stroke-width="1"/>
+    <line x1="300" y1="0" x2="300" y2="400" stroke="#ffffff" stroke-opacity="0.03" stroke-width="1"/>
+
+    <!-- Beam splitter (central) -->
+    <rect x="285" y="185" width="30" height="30" fill="#0a0a1a" stroke="#00f5ff" stroke-width="1.5"/>
+    <line x1="285" y1="185" x2="315" y2="215" stroke="#00f5ff" stroke-width="1" stroke-opacity="0.5"/>
+    <text x="300" y="175" text-anchor="middle" fill="#8888aa" font-size="11">BEAM</text>
+    <text x="300" y="240" text-anchor="middle" fill="#8888aa" font-size="11">SPLITTER</text>
+
+    <!-- Horizontal arm (left) -->
+    <line x1="300" y1="200" x2="100" y2="200" stroke="url(#beamGrad)" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <rect x="60" y="185" width="30" height="30" fill="#0a0a1a" stroke="#00f5ff" stroke-width="1.5"/>
+    <text x="75" y="220" text-anchor="middle" fill="#00f5ff" font-size="10">END MIRROR</text>
+    <text x="200" y="175" text-anchor="middle" fill="#8888aa" font-size="10">ARM 1 (4km)</text>
+
+    <!-- Vertical arm (up) -->
+    <line x1="300" y1="200" x2="300" y2="50" stroke="url(#beamGrad2)" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <rect x="285" y="20" width="30" height="30" fill="#0a0a1a" stroke="#ff00aa" stroke-width="1.5"/>
+    <text x="300" y="5" text-anchor="middle" fill="#ff00aa" font-size="10">END MIRROR</text>
+    <text x="330" y="130" text-anchor="middle" fill="#8888aa" font-size="10" transform="rotate(90, 330, 130)">ARM 2 (4km)</text>
+
+    <!-- Incoming beam -->
+    <line x1="500" y1="200" x2="315" y2="200" stroke="#ffd700" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <text x="420" y="185" text-anchor="middle" fill="#ffd700" font-size="10">LASER INPUT</text>
+
+    <!-- Output detector -->
+    <rect x="60" y="185" width="30" height="30" fill="#0a0a1a" stroke="#00ff88" stroke-width="1.5" transform="translate(-70, 15)"/>
+    <text x="-20" y="230" text-anchor="middle" fill="#00ff88" font-size="10">DETECTOR</text>
+
+    <!-- Labels for interference -->
+    <text x="150" y="260" text-anchor="middle" fill="#00f5ff" font-size="12" font-weight="bold">INTERFERENCE</text>
+    <text x="150" y="275" text-anchor="middle" fill="#00f5ff" font-size="12" font-weight="bold">FRINGES</text>
+
+    <!-- Animated circles showing interference pattern -->
+    <circle cx="50" cy="215" r="5" fill="none" stroke="#00f5ff" stroke-width="0.5" stroke-dasharray="2,2">
+      <animate attributeName="r" from="5" to="40" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-opacity" from="1" to="0" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="50" cy="215" r="5" fill="none" stroke="#ff00aa" stroke-width="0.5" stroke-dasharray="2,2">
+      <animate attributeName="r" from="5" to="40" dur="2s" begin="1s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-opacity" from="1" to="0" dur="2s" begin="1s" repeatCount="indefinite"/>
+    </circle>
+
+    <!-- Light path annotations -->
+    <text x="190" y="195" fill="#00f5ff" font-size="9">Beam 1</text>
+    <text x="310" y="130" fill="#ff00aa" font-size="9">Beam 2</text>
+  </svg>
+
+  <div class="grid-3col">
+    <div class="info-card">
+      <h3>Coherence Length</h3>
+      <p>The coherence length Lc determines the maximum path difference for observable interference. For laser light, coherence lengths can exceed kilometers, essential for kilometer-scale gravitational wave detectors.</p>
+      <div class="equation-box">
+        <div class="equation">L_c = c·τ_c = λ²/Δλ</div>
+        <div class="equation-desc">Coherence time τc relates to spectral width</div>
+      </div>
+    </div>
+    <div class="info-card">
+      <h3>Finesse Factor</h3>
+      <p>The finesse F characterizes an interferometer's resolution relative to its free spectral range. Fabry-Perot cavities in LIGO achieve finesse values of ~450, dramatically enhancing effective path length.</p>
+      <div class="equation-box">
+        <div class="equation">F = π·√r₁r₂ / (1 - r₁r₂)</div>
+        <div class="equation-desc">r₁, r₂ are mirror reflectivity coefficients</div>
+      </div>
+    </div>
+    <div class="info-card">
+      <h3>Shot Noise Limit</h3>
+      <p>Quantum photon statistics impose a fundamental noise floor. The minimum detectable strain scales as the inverse square root of optical power and finesse.</p>
+      <div class="equation-box">
+        <div class="equation">h_shot = 1/(L·F·√P) · √(hc/λ)</div>
+        <div class="equation-desc">L = arm length, P = laser power</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: LIGO AND ADVANCED INTERFEROMETRY -->
+<div class="content-wrapper">
+  <div class="section-header">
+    <span class="section-number">02</span>
+    <h2 class="section-title">LIGO &amp; Kilometer-Scale Interferometry</h2>
+  </div>
+
+  <div class="grid-2col">
+    <div class="info-card">
+      <h3>LIGO Configuration</h3>
+      <p>The Laser Interferometer Gravitational-Wave Observatory uses a modified Michelson interferometer with Fabry-Perot cavities in each arm. The 4km arm length is enhanced by ~270 round trips through each cavity, achieving an effective path length of ~1000km.</p>
+      <ul>
+        <li>Input laser: 1064nm Nd:YAG, 200W output</li>
+        <li>Fabry-Perot cavity finesse: ~450</li>
+        <li>Arm cavity enhanced path: ~1000 km effective</li>
+        <li>Recycling mirror increases effective power</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>Power Recycling Technique</h3>
+      <p>By placing a partially reflecting "recycling mirror" at the input, LIGO increases the effective optical power circulating in the interferometer by a factor of ~40, significantly improving sensitivity beyond shot noise limits.</p>
+      <ul>
+        <li>Input power: 200W laser → 7 kW circulating</li>
+        <li>Signal recycling adds additional control</li>
+        <li>Enhanced strain sensitivity by factor ~40</li>
+        <li>Enables quantum noise reduction techniques</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- LIGO Schematic SVG -->
+  <svg class="svg-diagram" viewBox="0 0 700 450" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arrow2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#00f5ff"/>
+      </marker>
+      <filter id="glowFilter">
+        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    <rect x="0" y="0" width="700" height="450" fill="#050510"/>
+    <!-- Grid -->
+    <line x1="0" y1="225" x2="700" y2="225" stroke="#ffffff" stroke-opacity="0.02"/>
+    <line x1="350" y1="0" x2="350" y2="450" stroke="#ffffff" stroke-opacity="0.02"/>
+
+    <!-- Input laser -->
+    <rect x="30" y="210" width="60" height="30" fill="#0a0a1a" stroke="#ffd700" stroke-width="1.5"/>
+    <text x="60" y="200" text-anchor="middle" fill="#ffd700" font-size="10">Nd:YAG</text>
+    <text x="60" y="250" text-anchor="middle" fill="#ffd700" font-size="10">LASER</text>
+    <text x="60" y="265" text-anchor="middle" fill="#8888aa" font-size="9">1064nm / 200W</text>
+
+    <!-- Power recycling mirror -->
+    <rect x="130" y="205" width="15" height="40" fill="#0a0a1a" stroke="#00ff88" stroke-width="2" filter="url(#glowFilter)"/>
+    <text x="137" y="190" text-anchor="middle" fill="#00ff88" font-size="9">PRM</text>
+    <text x="137" y="275" text-anchor="middle" fill="#8888aa" font-size="9">Power</text>
+    <text x="137" y="287" text-anchor="middle" fill="#8888aa" font-size="9">Recycling</text>
+
+    <!-- Beam splitter -->
+    <rect x="200" y="210" width="40" height="30" fill="#0a0a1a" stroke="#00f5ff" stroke-width="2"/>
+    <line x1="200" y1="210" x2="240" y2="250" stroke="#00f5ff" stroke-width="1" stroke-opacity="0.6"/>
+    <text x="220" y="200" text-anchor="middle" fill="#8888aa" font-size="9">BEAM</text>
+    <text x="220" y="260" text-anchor="middle" fill="#8888aa" font-size="9">SPLITTER</text>
+
+    <!-- Left arm - Fabry Perot cavity -->
+    <rect x="80" y="280" width="15" height="25" fill="#0a0a1a" stroke="#00f5ff" stroke-width="1.5"/>
+    <text x="87" y="320" text-anchor="middle" fill="#00f5ff" font-size="9">ITMX</text>
+    <rect x="50" y="320" width="15" height="25" fill="#0a0a1a" stroke="#00f5ff" stroke-width="1.5"/>
+    <text x="57" y="360" text-anchor="middle" fill="#00f5ff" font-size="9">ETMX</text>
+    <line x1="95" y1="305" x2="70" y2="305" stroke="#00f5ff" stroke-width="1.5"/>
+    <line x1="65" y1="305" x2="65" y2="335" stroke="#00f5ff" stroke-width="1.5"/>
+    <line x1="65" y1="335" x2="57" y2="335" stroke="#00f5ff" stroke-width="1.5"/>
+    <text x="15" y="340" fill="#00f5ff" font-size="10">4 km Arm 1</text>
+
+    <!-- Right arm - Fabry Perot cavity -->
+    <rect x="360" y="280" width="15" height="25" fill="#0a0a1a" stroke="#ff00aa" stroke-width="1.5"/>
+    <text x="367" y="320" text-anchor="middle" fill="#ff00aa" font-size="9">ITMY</text>
+    <rect x="390" y="320" width="15" height="25" fill="#0a0a1a" stroke="#ff00aa" stroke-width="1.5"/>
+    <text x="397" y="360" text-anchor="middle" fill="#ff00aa" font-size="9">ETMY</text>
+    <line x1="280" y1="305" x2="360" y2="305" stroke="#ff00aa" stroke-width="1.5"/>
+    <line x1="360" y1="305" x2="360" y2="335" stroke="#ff00aa" stroke-width="1.5"/>
+    <line x1="360" y1="335" x2="367" y2="335" stroke="#ff00aa" stroke-width="1.5"/>
+    <text x="420" y="340" fill="#ff00aa" font-size="10">4 km Arm 2</text>
+
+    <!-- Signal recycling mirror -->
+    <rect x="300" y="130" width="15" height="30" fill="#0a0a1a" stroke="#ff00aa" stroke-width="1.5"/>
+    <text x="307" y="120" text-anchor="middle" fill="#ff00aa" font-size="9">SRM</text>
+    <text x="307" y="110" text-anchor="middle" fill="#8888aa" font-size="9">Signal</text>
+    <text x="307" y="100" text-anchor="middle" fill="#8888aa" font-size="9">Recycling</text>
+
+    <!-- Output path to detector -->
+    <line x1="220" y1="240" x2="220" y2="400" stroke="#00ff88" stroke-width="1.5" marker-end="url(#arrow2)"/>
+    <rect x="200" y="390" width="40" height="30" fill="#0a0a1a" stroke="#00ff88" stroke-width="2" filter="url(#glowFilter)"/>
+    <text x="220" y="435" text-anchor="middle" fill="#00ff88" font-size="10">DETECTOR</text>
+
+    <!-- Photon paths animation -->
+    <circle r="3" fill="#ffd700">
+      <animateMotion dur="3s" repeatCount="indefinite" path="M 60,225 L 137,225 L 220,225 L 220,305 L 87,305 L 87,305 L 57,305 L 57,305 L 57,335 L 220,335"/>
+    </circle>
+    <circle r="3" fill="#ff00aa">
+      <animateMotion dur="3s" repeatCount="indefinite" begin="1.5s" path="M 60,225 L 137,225 L 220,225 L 220,305 L 367,305 L 367,305 L 397,305 L 397,305 L 397,335 L 220,335"/>
+    </circle>
+
+    <!-- Labels -->
+    <text x="260" y="160" fill="#8888aa" font-size="10">Light paths (Fabry-Perot enhanced)</text>
+    <text x="260" y="175" fill="#8888aa" font-size="10">~270 round trips per cavity</text>
+  </svg>
+
+  <div class="tab-container">
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="showTab(' sensitivity')">Sensitivity Curve</button>
+      <button class="tab-btn" onclick="showTab('noise')">Noise Budget</button>
+      <button class="tab-btn" onclick="showTab('upgrade')">Advanced LIGO+</button>
+      <button class="tab-btn" onclick="showTab('future')">Next Generation</button>
+    </div>
+    <div id="tab-sensitivity" class="tab-content active">
+      <h3>LIGO Sensitivity Curve</h3>
+      <p>The characteristic "bucket" shape shows strain sensitivity as a function of frequency. At low frequencies (< 10 Hz), seismic noise dominates. Around 100 Hz, quantum radiation pressure noise becomes limiting. The peak sensitivity near 100-200 Hz enables detection of binary black hole mergers.</p>
+      <div class="canvas-card" style="margin-top: 1.5rem;">
+        <h3>Interactive Sensitivity Plot</h3>
+        <div class="canvas-wrapper">
+          <canvas id="sensitivityCanvas"></canvas>
+        </div>
+        <div class="noise-legend">
+          <div class="legend-item"><span class="legend-dot quantum"></span> Quantum Noise</div>
+          <div class="legend-item"><span class="legend-dot thermal"></span> Thermal Noise</div>
+          <div class="legend-item"><span class="legend-dot seismic"></span> Seismic Noise</div>
+          <div class="legend-item"><span class="legend-dot total"></span> Total Noise</div>
+        </div>
+        <div class="slider-group">
+          <div class="slider-item">
+            <div class="slider-header">
+              <span class="slider-label">Observation Frequency (Hz)</span>
+              <span class="slider-value" id="freqValue">100</span>
+            </div>
+            <input type="range" id="freqSlider" min="10" max="1000" value="100" step="1">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="tab-noise" class="tab-content">
+      <h3>LIGO Noise Budget Breakdown</h3>
+      <div class="grid-2col">
+        <div>
+          <h4 style="color: var(--accent-cyan); margin-bottom: 1rem;">Quantum Noise Sources</h4>
+          <ul>
+            <li><strong>Shot Noise:</strong> h_shot ~ √(ħω)/(2LP) — photon counting statistics limit high-frequency sensitivity</li>
+            <li><strong>Radiation Pressure:</strong> h_rp ~ (2FLP)/(c³ω) × √(ħω) — photon momentum imparts force to mirrors</li>
+            <li><strong>Squeezed Vacuum:</strong> Reduces quantum noise by factor e^(-r) in one quadrature</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color: var(--accent-magenta); margin-bottom: 1rem;">Classical Noise Sources</h4>
+          <ul>
+            <li><strong>Seismic Noise:</strong> Requires multi-stage isolation platforms, performance ~ (10Hz/f)²</li>
+            <li><strong>Thermal Noise:</strong> Substrate and coating noise, ~ 10^-24 strain/√Hz at 100Hz</li>
+            <li><strong>Gas Density:</strong> Residual gas molecules scatter light, requires ultra-high vacuum</li>
+          </ul>
+        </div>
+      </div>
+      <div class="equation-box">
+        <div class="equation">h_total = √(h_shot² + h_rp² + h_seismic² + h_thermal² + ...)</div>
+        <div class="equation-desc">Total noise is root-sum-square of independent contributors</div>
+      </div>
+    </div>
+    <div id="tab-upgrade" class="tab-content">
+      <h3>Advanced LIGO+ Improvements</h3>
+      <p>Advanced LIGO+ implements several key upgrades to improve sensitivity beyond initial LIGO:</p>
+      <ul>
+        <li><strong>Quantum Enhancement:</strong> 10 dB frequency-dependent squeezing injected at 10-200 Hz bands</li>
+        <li><strong>Output Mode Cleaner:</strong> Filters spurious higher-order optical modes</li>
+        <li><strong>Mirror Coating:</strong> Improved SiO₂/Ta₂O₅ dielectric coatings reduce thermal noise by 2x</li>
+        <li><strong>Input Power:</strong> Increased to 35W laser input, raising circulating power to ~700 kW</li>
+        <li><strong>Signal Recycling:</strong> Tunable signal recycling mirror for narrowband operation</li>
+      </ul>
+      <div class="equation-box">
+        <div class="equation">h_min = h_SQL · e^(-r) / √(1 + r²sin²(2φ))</div>
+        <div class="equation-desc">Squeezed state sensitivity with optimal angle φ and squeeze parameter r</div>
+      </div>
+    </div>
+    <div id="tab-future" class="tab-content">
+      <h3>Next Generation Detectors</h3>
+      <div class="grid-3col">
+        <div class="info-card">
+          <h3>Einstein Telescope (ET)</h3>
+          <p>10km triangular underground detector in Europe. Cryogenic silicon mirrors at 10K. Three interferometers achieving 10x improvement over A+.</p>
+          <div class="equation-box">
+            <div class="equation">h_min ~ 10^-25 / √Hz</div>
+          </div>
+        </div>
+        <div class="info-card">
+          <h3>L Cosmic Explorer (LCE)</h3>
+          <p>40km single-loop detector in US. Ultra-low loss mirrors, 2MW laser power. Targets 10^-26/√Hz sensitivity from 10 Hz.</p>
+          <div class="equation-box">
+            <div class="equation">h_min ~ 10^-26 / √Hz</div>
+          </div>
+        </div>
+        <div class="info-card">
+          <h3>LISA Space Interferometer</h3>
+          <p>2.5 million km arm length in heliocentric orbit. MilliHz frequency band. Detects supermassive black hole binaries years before ground detection.</p>
+          <div class="equation-box">
+            <div class="equation">f ~ c·L/(2πAU) ~ 10 mHz</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: QUANTUM NOISE AND SQUEEZING -->
+<div class="content-wrapper">
+  <div class="section-header">
+    <span class="section-number">03</span>
+    <h2 class="section-title">Quantum Noise &amp; Squeezed Light</h2>
+  </div>
+
+  <div class="grid-2col">
+    <div class="info-card">
+      <h3>The Standard Quantum Limit</h3>
+      <p>In a simple interferometer, Heisenberg's uncertainty principle imposes a fundamental limit on simultaneous measurement precision of amplitude and phase. The SQL represents the optimal sensitivity achievable with coherent laser light.</p>
+      <div class="equation-box">
+        <div class="equation">h_SQL = √(ħ) / (L·m·ω²)</div>
+        <div class="equation-desc">m = mirror mass, ω = measurement frequency</div>
+      </div>
+    </div>
+    <div class="info-card">
+      <h3>Quantum Squeezing</h3>
+      <p>Squeezed states redistribute quantum uncertainty from one quadrature (e.g., phase) to the conjugate (e.g., amplitude). This "squeezes" noise below the SQL in the phase measurement direction.</p>
+      <ul>
+        <li>Inject squeezed vacuum via readout port</li>
+        <li>Frequency-dependent squeezing for broad-band improvement</li>
+        <li>10 dB squeezing achieved in LIGO (2024)</li>
+        <li>Future: 20 dB squeezing planned for ET</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Squeezed State Visualization -->
+  <div class="canvas-card" style="margin: 2rem 0;">
+    <h3>Quantum Uncertainty Squeezed States</h3>
+    <div class="canvas-wrapper" style="max-width: 500px; margin: 0 auto;">
+      <canvas id="squeezeCanvas"></canvas>
+    </div>
+    <p style="text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);">
+      Drag the squeeze angle slider to explore how uncertainty ellipse rotates and changes shape
+    </p>
+    <div class="slider-group" style="max-width: 400px; margin: 1rem auto;">
+      <div class="slider-item">
+        <div class="slider-header">
+          <span class="slider-label">Squeeze Parameter r</span>
+          <span class="slider-value" id="squeezeValue">1.0</span>
+        </div>
+        <input type="range" id="squeezeSlider" min="0" max="3" value="1" step="0.1">
+      </div>
+      <div class="slider-item">
+        <div class="slider-header">
+          <span class="slider-label">Squeeze Angle θ (degrees)</span>
+          <span class="slider-value" id="angleValue">45°</span>
+        </div>
+        <input type="range" id="angleSlider" min="0" max="180" value="45" step="1">
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2col">
+    <div class="info-card">
+      <h3>Two-Photon Modulation Formalism</h3>
+      <p>Quantum optics of interferometers is elegantly described by two-photon formalism. The output field's quadrature operators X and Y evolve with respect to the input squeezed quadratures.</p>
+      <div class="equation-box">
+        <div class="equation">X_out = cos(r)·X_in + sin(r)·Y_in</div>
+        <div class="equation-desc">Output quadrature as rotation in phase space</div>
+      </div>
+    </div>
+    <div class="info-card">
+      <h3>Einstein-Podolsky-Rosen Correlations</h3>
+      <p>By exploiting quantum entanglement between light and mirrors, future "entangler" schemes may achieve sensitivities below standard quantum limits through EPR correlations.</p>
+      <ul>
+        <li>Bell inequality tests with macroscopic mirrors</li>
+        <li>Quantum non-demolition measurements</li>
+        <li>Backaction-evading measurements</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Phase Space SVG Diagram -->
+  <svg class="svg-diagram" viewBox="0 0 600 350" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="600" height="350" fill="#050510"/>
+    <!-- Axes -->
+    <line x1="300" y1="20" x2="300" y2="330" stroke="#8888aa" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="50" y1="175" x2="550" y2="175" stroke="#8888aa" stroke-width="1" stroke-dasharray="4,4"/>
+    <!-- Labels -->
+    <text x="305" y="30" fill="#00f5ff" font-size="12">X (amplitude)</text>
+    <text x="520" y="180" fill="#ff00aa" font-size="12">Y (phase)</text>
+    <!-- Origin -->
+    <circle cx="300" cy="175" r="4" fill="#ffffff"/>
+    <!-- Standard quantum limit circle -->
+    <circle cx="300" cy="175" r="80" fill="none" stroke="#ffd700" stroke-width="1" stroke-dasharray="4,4" opacity="0.6"/>
+    <text x="385" y="100" fill="#ffd700" font-size="11">SQL</text>
+    <!-- Coherent state (circle) -->
+    <ellipse cx="300" cy="175" rx="60" ry="60" fill="none" stroke="#00f5ff" stroke-width="1.5" opacity="0.4"/>
+    <text x="300" y="120" fill="#00f5ff" font-size="10" text-anchor="middle">Coherent</text>
+    <text x="300" y="132" fill="#00f5ff" font-size="10" text-anchor="middle">State</text>
+    <!-- Squeezed state (ellipse) -->
+    <ellipse cx="300" cy="175" rx="25" ry="100" fill="none" stroke="#ff00aa" stroke-width="2">
+      <animateTransform attributeName="transform" type="rotate" from="0 300 175" to="45 300 175" dur="3s" repeatCount="indefinite"/>
+    </ellipse>
+    <text x="420" y="180" fill="#ff00aa" font-size="10">Squeezed</text>
+    <text x="420" y="192" fill="#ff00aa" font-size="10">State</text>
+    <!-- Animated uncertainty blobs -->
+    <ellipse cx="300" cy="175" rx="60" ry="60" fill="#00f5ff" opacity="0.1">
+      <animate attributeName="rx" values="60;55;60" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="ry" values="60;65;60" dur="2s" repeatCount="indefinite"/>
+    </ellipse>
+    <!-- Squeezed ellipse indicator -->
+    <ellipse cx="300" cy="175" rx="25" ry="100" fill="#ff00aa" opacity="0.1">
+      <animateTransform attributeName="transform" type="rotate" values="0 300 175;45 300 175;0 300 175" dur="6s" repeatCount="indefinite"/>
+    </ellipse>
+    <!-- Annotation arrows -->
+    <line x1="360" y1="175" x2="400" y2="140" stroke="#ff00aa" stroke-width="1" marker-end="url(#arrow2)"/>
+    <text x="405" y="135" fill="#ff00aa" font-size="10">Reduced noise</text>
+    <text x="405" y="147" fill="#ff00aa" font-size="10">in phase quad.</text>
+    <line x1="300" y1="235" x2="300" y2="270" stroke="#00f5ff" stroke-width="1" marker-end="url(#arrow2)"/>
+    <text x="305" y="285" fill="#00f5ff" font-size="10">Increased noise</text>
+    <text x="305" y="297" fill="#00f5ff" font-size="10">in amplitude quad.</text>
+  </svg>
+</div>
+
+<!-- SECTION 4: INTERFEROMETER CONFIGURATIONS -->
+<div class="content-wrapper">
+  <div class="section-header">
+    <span class="section-number">04</span>
+    <h2 class="section-title">Advanced Interferometer Configurations</h2>
+  </div>
+
+  <div class="grid-3col">
+    <div class="info-card">
+      <h3>Sagnac Interferometer</h3>
+      <p>Light travels both clockwise and counterclockwise in a rotating interferometer. The Sagnac effect creates a phase shift proportional to rotation rate Ω. Used in gyroscopes and theoretical gravitational wave detection.</p>
+      <div class="equation-box">
+        <div class="equation">Δφ = (4π·A·Ω) / (λ·c)</div>
+        <div class="equation-desc">A = enclosed area, Ω = rotation rate</div>
+      </div>
+    </div>
+    <div class="info-card">
+      <h3>Fabry-Perot Cavity</h3>
+      <p>Two parallel mirrors form an optical resonator. Resonant enhancement multiplies effective path length by factor 2F/π. Essential for LIGO's kilometer-scale effective arm length.</p>
+      <div class="equation-box">
+        <div class="equation">P_circ = P_in · (1 + r)/(1 - r) · (1 + cos(φ))</div>
+        <div class="equation-desc">Resonant enhancement for finesse F ~ π/(1-r)</div>
+      </div>
+    </div>
+    <div class="info-card">
+      <h3>Michelson-Sagnac Hybrid</h3>
+      <p>Ring interferometers can detect gravitational waves through Sagnac effect. The response depends on interferometer topology. Sagnac configuration is insensitive to common-mode noise.</p>
+      <div class="equation-box">
+        <div class="equation">h(ω) = (ΔL/L) · sin(ω·τ) / (ω·τ)</div>
+        <div class="equation-desc">Frequency response of Sagnac GW detector</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interferometer Configurations SVG -->
+  <svg class="svg-diagram" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="700" height="300" fill="#050510"/>
+    <!-- Michelson -->
+    <g transform="translate(50, 30)">
+      <text x="100" y="0" fill="#00f5ff" font-size="12" text-anchor="middle">MICHELSON</text>
+      <circle cx="100" cy="80" r="6" fill="#0a0a1a" stroke="#00f5ff" stroke-width="1.5"/>
+      <line x1="100" y1="80" x2="40" y2="80" stroke="#00f5ff" stroke-width="1.5"/>
+      <line x1="100" y1="80" x2="100" y2="30" stroke="#00f5ff" stroke-width="1.5"/>
+      <rect x="20" y="72" width="15" height="16" fill="#0a0a1a" stroke="#00f5ff" stroke-width="1"/>
+      <rect x="90" y="20" width="15" height="16" fill="#0a0a1a" stroke="#00f5ff" stroke-width="1"/>
+      <text x="30" y="110" fill="#8888aa" font-size="9">Arm 1</text>
+      <text x="130" y="80" fill="#8888aa" font-size="9">Arm 2</text>
+    </g>
+    <!-- Sagnac -->
+    <g transform="translate(280, 30)">
+      <text x="100" y="0" fill="#ff00aa" font-size="12" text-anchor="middle">SAGNAC RING</text>
+      <circle cx="100" cy="80" r="50" fill="none" stroke="#ff00aa" stroke-width="1.5"/>
+      <circle cx="100" cy="80" r="5" fill="#0a0a1a" stroke="#ff00aa" stroke-width="2"/>
+      <!-- CW beam -->
+      <circle r="4" fill="#ff00aa" opacity="0.7">
+        <animateMotion dur="3s" repeatCount="indefinite" path="M 150,80 A 50,50 0 1 1 50,80 A 50,50 0 1 1 150,80"/>
+      </circle>
+      <!-- CCW beam -->
+      <circle r="4" fill="#00f5ff" opacity="0.7">
+        <animateMotion dur="3s" repeatCount="indefinite" begin="1.5s" path="M 50,80 A 50,50 0 1 0 150,80 A 50,50 0 1 0 50,80"/>
+      </circle>
+      <text x="160" y="80" fill="#8888aa" font-size="9">CW</text>
+      <text x="35" y="80" fill="#8888aa" font-size="9">CCW</text>
+    </g>
+    <!-- Fabry-Perot -->
+    <g transform="translate(480, 30)">
+      <text x="100" y="0" fill="#ffd700" font-size="12" text-anchor="middle">FABRY-PEROT</text>
+      <rect x="50" y="70" width="10" height="20" fill="#0a0a1a" stroke="#ffd700" stroke-width="1.5"/>
+      <rect x="140" y="70" width="10" height="20" fill="#0a0a1a" stroke="#ffd700" stroke-width="1.5"/>
+      <line x1="60" y1="80" x2="140" y2="80" stroke="#ffd700" stroke-width="1" stroke-dasharray="3,3">
+        <animate attributeName="stroke-dashoffset" from="0" to="12" dur="0.5s" repeatCount="indefinite"/>
+      </line>
+      <line x1="140" y1="80" x2="60" y2="80" stroke="#ffd700" stroke-width="1" stroke-dasharray="3,3">
+        <animate attributeName="stroke-dashoffset" from="12" to="0" dur="0.5s" repeatCount="indefinite"/>
+      </line>
+      <text x="100" y="105" fill="#8888aa" font-size="9">L = 4 km</text>
+      <text x="100" y="117" fill="#ffd700" font-size="9">270 round trips</text>
+    </g>
+  </svg>
+
+  <div class="tab-container">
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="showTab(' dual')">Dual Recycled</button>
+      <button class="tab-btn" onclick="showTab(' detuned')">Detuned Signal Recycling</button>
+      <button class="tab-btn" onclick="showTab(' broadband')">Broadband Detection</button>
+      <button class="tab-btn" onclick="showTab(' config')">Config. Comparison</button>
+    </div>
+    <div id="tab-dual" class="tab-content active">
+      <h3>Dual Recycled Interferometer</h3>
+      <p>Modern gravitational wave detectors use both power recycling (PRM) and signal recycling (SRM). This "dual recycled" configuration provides independent control over sensitivity at different frequencies.</p>
+      <ul>
+        <li>PRM increases circulating power by factor ~40</li>
+        <li>SRM allows narrowband operation at specific frequencies</li>
+        <li>Tunable detuning enables targeted source searches</li>
+        <li>Enables frequency-dependent squeezing injection</li>
+      </ul>
+    </div>
+    <div id="tab-detuned" class="tab-content">
+      <h3>Detuned Signal Recycling</h3>
+      <p>When the signal recycling mirror is detuned from resonance, the interferometer becomes sensitive to gravitational waves in a narrow frequency band. This enhances signal-to-noise ratio for anticipated sources.</p>
+      <div class="equation-box">
+        <div class="equation">f_spring = (c / 4πL) · arccos(g_s)</div>
+        <div class="equation-desc">Signal recycling creates optical spring at frequency f_spring</div>
+      </div>
+      <p>The "optical spring" effect can lock the interferometer to a gravitational wave signal, enabling coherent tracking.</p>
+    </div>
+    <div id="tab-broadband" class="tab-content">
+      <h3>Broadband Configuration</h3>
+      <p>For widest possible sensitivity, signal recycling is tuned to resonance (Broadband Mode). This sacrifices peak sensitivity for uniform coverage across the detection band.</p>
+      <div class="canvas-card" style="margin-top: 1rem;">
+        <h3>Response Curve Comparison</h3>
+        <div class="canvas-wrapper">
+          <canvas id="responseCanvas"></canvas>
+        </div>
+        <div class="toggle-group" style="margin-top: 1rem; justify-content: center;">
+          <button class="toggle-btn active" id="tuneBtn" onclick="toggleMode('tuned')">Tuned (Narrowband)</button>
+          <button class="toggle-btn" id="broadBtn" onclick="toggleMode('broadband')">Broadband</button>
+        </div>
+      </div>
+    </div>
+    <div id="tab-config" class="tab-content">
+      <h3>Configuration Comparison</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+        <tr style="border-bottom: 1px solid rgba(0,245,255,0.2);">
+          <th style="text-align: left; padding: 0.8rem; color: var(--accent-cyan);">Configuration</th>
+          <th style="text-align: left; padding: 0.8rem; color: var(--accent-cyan);">Peak Sensitivity</th>
+          <th style="text-align: left; padding: 0.8rem; color: var(--accent-cyan);">Bandwidth</th>
+          <th style="text-align: left; padding: 0.8rem; color: var(--accent-cyan);">Best For</th>
+        </tr>
+        <tr style="border-bottom: 1px solid rgba(0,245,255,0.1);">
+          <td style="padding: 0.8rem;">Standard Michelson</td>
+          <td style="padding: 0.8rem; color: var(--accent-gold);">1x</td>
+          <td style="padding: 0.8rem;">~500 Hz</td>
+          <td style="padding: 0.8rem;">Simple demonstrations</td>
+        </tr>
+        <tr style="border-bottom: 1px solid rgba(0,245,255,0.1);">
+          <td style="padding: 0.8rem;">Power Recycled</td>
+          <td style="padding: 0.8rem; color: var(--accent-gold);">~10x</td>
+          <td style="padding: 0.8rem;">~500 Hz</td>
+          <td style="padding: 0.8rem;">Enhanced shot noise limit</td>
+        </tr>
+        <tr style="border-bottom: 1px solid rgba(0,245,255,0.1);">
+          <td style="padding: 0.8rem;">Dual Recycled (Tuned)</td>
+          <td style="padding: 0.8rem; color: var(--accent-gold);">~50x</td>
+          <td style="padding: 0.8rem;">~100 Hz</td>
+          <td style="padding: 0.8rem;">Targeted binary searches</td>
+        </tr>
+        <tr>
+          <td style="padding: 0.8rem;">Dual Recycled + Squeezing</td>
+          <td style="padding: 0.8rem; color: var(--accent-gold);">~100x</td>
+          <td style="padding: 0.8rem;">~200 Hz</td>
+          <td style="padding: 0.8rem;">All-sky transient searches</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: QUANTUM MEASUREMENT THEORY -->
+<div class="content-wrapper">
+  <div class="section-header">
+    <span class="section-number">05</span>
+    <h2 class="section-title">Quantum Measurement Theory in Interferometry</h2>
+  </div>
+
+  <div class="grid-2col">
+    <div class="info-card">
+      <h3>Quantum Nondemolition (QND) Measurements</h3>
+      <p>QND principles enable measurement of a quantum variable without disturbing it beyond the standard quantum limit. For gravitational wave detection, this means measuring phase without adding excess noise.</p>
+      <ul>
+        <li>Phase estimation beyond SQL using weak measurements</li>
+        <li>Backaction evasion through conditional preparation</li>
+        <li>Quantum feedback for real-time noise suppression</li>
+      </ul>
+    </div>
+    <div class="info-card">
+      <h3>Bayesian Phase Estimation</h3>
+      <p>Modern quantum metrology uses Bayesian inference to extract gravitational wave signals. The posterior distribution of phase encodes both signal and noise information optimally.</p>
+      <div class="equation-box">
+        <div class="equation">P(φ|D) ∝ P(D|φ)·P(φ)</div>
+        <div class="equation-desc">Bayes theorem for phase estimation from data D</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quantum Measurement SVG -->
+  <svg class="svg-diagram" viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="600" height="280" fill="#050510"/>
+    <!-- Timeline -->
+    <line x1="50" y1="200" x2="550" y2="200" stroke="#8888aa" stroke-width="1"/>
+    <text x="50" y="220" fill="#8888aa" font-size="10">Time →</text>
+    <!-- Measurement steps -->
+    <circle cx="100" cy="200" r="25" fill="rgba(0,245,255,0.1)" stroke="#00f5ff" stroke-width="2"/>
+    <text x="100" y="190" fill="#00f5ff" font-size="9" text-anchor="middle">INPUT</text>
+    <text x="100" y="205" fill="#00f5ff" font-size="9" text-anchor="middle">STATE</text>
+    <text x="100" y="250" fill="#8888aa" font-size="9" text-anchor="middle">|ψ⟩</text>
+
+    <line x1="125" y1="200" x2="175" y2="200" stroke="#00f5ff" stroke-width="2" marker-end="url(#arrow2)"/>
+
+    <circle cx="225" cy="200" r="25" fill="rgba(255,0,170,0.1)" stroke="#ff00aa" stroke-width="2"/>
+    <text x="225" y="190" fill="#ff00aa" font-size="9" text-anchor="middle">WEAK</text>
+    <text x="225" y="205" fill="#ff00aa" font-size="9" text-anchor="middle">MEAS.</text>
+    <text x="225" y="250" fill="#8888aa" font-size="9" text-anchor="middle">Ĥ_int</text>
+
+    <line x1="250" y1="200" x2="300" y2="200" stroke="#ff00aa" stroke-width="2" marker-end="url(#arrow2)"/>
+
+    <circle cx="350" cy="200" r="25" fill="rgba(255,215,0,0.1)" stroke="#ffd700" stroke-width="2"/>
+    <text x="350" y="190" fill="#ffd700" font-size="9" text-anchor="middle">QUANTUM</text>
+    <text x="350" y="205" fill="#ffd700" font-size="9" text-anchor="middle">FEEDBACK</text>
+    <text x="350" y="250" fill="#8888aa" font-size="9" text-anchor="middle">Ĥ_fb</text>
+
+    <line x1="375" y1="200" x2="425" y2="200" stroke="#ffd700" stroke-width="2" marker-end="url(#arrow2)"/>
+
+    <circle cx="475" cy="200" r="25" fill="rgba(0,255,136,0.1)" stroke="#00ff88" stroke-width="2"/>
+    <text x="475" y="190" fill="#00ff88" font-size="9" text-anchor="middle">OUTPUT</text>
+    <text x="475" y="205" fill="#00ff88" font-size="9" text-anchor="middle">STATE</text>
+    <text x="475" y="250" fill="#8888aa" font-size="9" text-anchor="middle">|φ⟩</text>
+
+    <!-- Arrows connecting measurement steps -->
+    <path d="M 225 170 Q 225 140 350 140 Q 475 140 475 170" fill="none" stroke="#ffd700" stroke-width="1" stroke-dasharray="4,4" marker-end="url(#arrow2)"/>
+    <text x="350" y="130" fill="#ffd700" font-size="10" text-anchor="middle">Bayesian Update</text>
+    <text x="350" y="145" fill="#ffd700" font-size="10" text-anchor="middle">P(φ|D)</text>
+  </svg>
+
+  <div class="grid-2col">
+    <div class="info-card">
+      <h3>Heisenberg Uncertainty &amp; the SQL</h3>
+      <p>The standard quantum limit arises from the commutator [X, P] = iħ. Simultaneous measurement of non-commuting observables introduces additional noise proportional to the measurement strength.</p>
+      <div class="equation-box">
+        <div class="equation">ΔX·ΔP ≥ ħ/2 (Heisenberg)</div>
+        <div class="equation-desc">Fundamental limit on conjugate variable precision</div>
+      </div>
+      <div class="equation-box">
+        <div class="equation">Δφ_SQL = 1 / √N (Standard QL)</div>
+        <div class="equation-desc">Phase precision with N photons</div>
+      </div>
+    </div>
+    <div class="info-card">
+      <h3>Quantum Metrology Advantage</h3>
+      <p>Using entangled states (NOON states, twin beams), quantum metrology can surpass the SQL with Heisenberg scaling: Δφ ∝ 1/N, potentially revolutionary for future detectors.</p>
+      <ul>
+        <li>NOON states: Δφ ∝ 1/N with N photons</li>
+        <li>Twin-beam entanglement: 3 dB quantum advantage</li>
+        <li>Gaussian entanglement: modest but practical gains</li>
+        <li>Current LIGO squeezing: ~3 dB effective gain</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 6: INTERACTIVE INTERFEROMETER DESIGN -->
+<div class="content-wrapper">
+  <div class="section-header">
+    <span class="section-number">06</span>
+    <h2 class="section-title">Interactive Interferometer Design Lab</h2>
+  </div>
+
+  <div class="interactive-explorer">
+    <h3>Gravitational Wave Detector Design Explorer</h3>
+    <div class="explorer-grid">
+      <div class="explorer-canvas-area">
+        <canvas id="detectorCanvas" width="450" height="450"></canvas>
+      </div>
+      <div class="explorer-controls">
+        <div class="slider-group">
+          <div class="slider-item">
+            <div class="slider-header">
+              <span class="slider-label">Arm Length L (km)</span>
+              <span class="slider-value" id="armValue">4</span>
+            </div>
+            <input type="range" id="armSlider" min="1" max="40" value="4" step="1">
+          </div>
+          <div class="slider-item">
+            <div class="slider-header">
+              <span class="slider-label">Laser Power W_in (W)</span>
+              <span class="slider-value" id="powerValue">200</span>
+            </div>
+            <input type="range" id="powerSlider" min="1" max="1000" value="200" step="10">
+          </div>
+          <div class="slider-item">
+            <div class="slider-header">
+              <span class="slider-label">Finesse F</span>
+              <span class="slider-value" id="finesseValue">450</span>
+            </div>
+            <input type="range" id="finesseSlider" min="100" max="1000" value="450" step="10">
+          </div>
+          <div class="slider-item">
+            <div class="slider-header">
+              <span class="slider-label">Squeezing r (dB)</span>
+              <span class="slider-value" id="squeezeDBValue">0</span>
+            </div>
+            <input type="range" id="squeezeDBSlider" min="0" max="15" value="0" step="0.5">
+          </div>
+          <div class="slider-item">
+            <div class="slider-header">
+              <span class="slider-label">Mirror Mass m (kg)</span>
+              <span class="slider-value" id="massValue">40</span>
+            </div>
+            <input type="range" id="massSlider" min="10" max="200" value="40" step="1">
+          </div>
+        </div>
+        <div class="canvas-stats">
+          <div class="stat-item"><span class="stat-label">Shot Noise h_shot</span><span class="stat-value" id="shotNoise">---</span></div>
+          <div class="stat-item"><span class="stat-label">Rad. Pressure h_rp</span><span class="stat-value" id="radNoise">---</span></div>
+          <div class="stat-item"><span class="stat-label">SQL h_SQL</span><span class="stat-value" id="sqlNoise">---</span></div>
+          <div class="stat-item"><span class="stat-label">Effective h_min</span><span class="stat-value" id="effNoise">---</span></div>
+        </div>
+        <div class="noise-legend" style="margin-top: 1rem;">
+          <div class="legend-item"><span class="legend-dot quantum"></span> Quantum Limited</div>
+          <div class="legend-item"><span class="legend-dot thermal"></span> Thermal Noise</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detector Schematic Animation -->
+  <div class="canvas-card" style="margin-top: 2rem;">
+    <h3>Real-Time Detector Response</h3>
+    <div class="canvas-wrapper" style="max-width: 700px; margin: 0 auto;">
+      <canvas id="responseCanvas2"></canvas>
+    </div>
+    <div class="slider-group" style="max-width: 500px; margin: 1rem auto;">
+      <div class="slider-item">
+        <div class="slider-header">
+          <span class="slider-label">Gravitational Wave Frequency f (Hz)</span>
+          <span class="slider-value" id="gwFreqValue">150</span>
+        </div>
+        <input type="range" id="gwFreqSlider" min="10" max="1000" value="150" step="1">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 7: HISTORICAL TIMELINE -->
+<div class="content-wrapper">
+  <div class="section-header">
+    <span class="section-number">07</span>
+    <h2 class="section-title">Historical Milestones</h2>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-year">1887</div>
+      <div class="timeline-title">Michelson-Morley Experiment</div>
+      <div class="timeline-desc">Albert Michelson and Edward Morley attempt to detect the luminiferous aether using an optical interferometer, establishing the foundation for relativity.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1893</div>
+      <div class="timeline-title">Michelson Interferometer Patented</div>
+      <div class="timeline-desc">Michelson patents his interferometer design, recognizing its potential for precision measurement of length standards.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1968</div>
+      <div class="timeline-title">Weber's Resonant Bar Detectors</div>
+      <div class="timeline-desc">Joseph Weber builds the first gravitational wave detectors using aluminum bars, pioneering the search for astrophysical gravitational waves.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1972</div>
+      <div class="timeline-title">Forward's Interferometer Design</div>
+      <div class="timeline-desc">Rainer Forward proposes the first practical laser interferometer design for gravitational wave detection, ancestor of modern LIGO.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1980</div>
+      <div class="timeline-title">LIGO Conceptual Design</div>
+      <div class="timeline-desc">Rainer Weiss, Kip Thorne, and Ronald Drever develop the conceptual design for a kilometer-scale laser interferometer gravitational wave detector.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1991</div>
+      <div class="timeline-title">GEO600 Construction Begins</div>
+      <div class="timeline-desc">German-British collaboration begins construction of GEO600, a 600m interferometer in Germany, developing key technologies for LIGO.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1999</div>
+      <div class="timeline-title">LIGO First Light</div>
+      <div class="timeline-desc">Initial LIGO achieves first light, beginning operations with 4km arms and initial sensitivity targeting binary neutron star mergers.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2015</div>
+      <div class="timeline-title">First Direct Detection</div>
+      <div class="timeline-desc">Advanced LIGO detects gravitational wave signal GW150914 from binary black hole merger at 1.3 billion light-years, confirming Einstein's prediction.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2017</div>
+      <div class="timeline-title">Neutron Star Merger GW170817</div>
+      <div class="timeline-desc">LIGO-Virgo detects binary neutron star merger, followed by kilonova electromagnetic counterpart observed by 70 telescopes worldwide.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2020</div>
+      <div class="timeline-title">Quantum Enhancement Achieved</div>
+      <div class="timeline-desc">Advanced LIGO+ implements 10 dB quantum squeezing, becoming the first astronomical instrument to exceed the standard quantum limit.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2024</div>
+      <div class="timeline-title">Multi-Detector Network</div>
+      <div class="timeline-desc">LIGO (Hanford, Livingston, India), Virgo, KAGRA operate as global network, enabling first triangulation of gravitational wave sources.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2030s</div>
+      <div class="timeline-title">Einstein Telescope &amp; LCE</div>
+      <div class="timeline-desc">Next-generation ground-based detectors (10-40km scale) and LISA space interferometer will extend detection tomilliHertz frequencies, observing supermassive black holes.</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONCLUSION -->
+<div class="content-wrapper">
+  <div class="conclusion-section">
+    <h2>The Quantum Horizon of Gravitational Wave Science</h2>
+    <p style="max-width: 700px; margin: 0 auto; color: var(--text-secondary);">
+      From Michelson's original interferometer to today's quantum-enhanced detectors, the quest to measure gravitational waves has pushed the boundaries of both physics and engineering. As we enter the era of quantum-limited precision measurement, new horizons emerge—entangled states, quantum non-demolition measurements, and space-based interferometry promise to reveal gravitational wave signals from sources yet unseen, from the infant universe to the mergers of supermassive black holes.
+    </p>
+    <div style="margin-top: 2rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+      <span style="color: var(--accent-cyan); font-size: 0.85rem;">LIGO Hanford</span>
+      <span style="color: var(--text-secondary);">•</span>
+      <span style="color: var(--accent-magenta); font-size: 0.85rem;">LIGO Livingston</span>
+      <span style="color: var(--text-secondary);">•</span>
+      <span style="color: var(--accent-gold); font-size: 0.85rem;">Virgo</span>
+      <span style="color: var(--text-secondary);">•</span>
+      <span style="color: var(--accent-green); font-size: 0.85rem;">KAGRA</span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Kevin's Physics Laboratory — <span class="color-cyan">Gravitational Wave Research</span></p>
+  <p style="margin-top: 0.5rem;">Last updated: May 14, 2026 | <a href="index.html">Back to Kevin's Lab</a></p>
+</footer>
+
+<script>
+// Main Interferometer Canvas
+const mainCanvas = document.getElementById('mainInterferometer');
+const mainCtx = mainCanvas.getContext('2d');
+mainCanvas.width = 500;
+mainCanvas.height = 500;
+
+let mainTime = 0;
+function drawMainInterferometer() {
+  mainCtx.fillStyle = '#050510';
+  mainCtx.fillRect(0, 0, 500, 500);
+
+  // Draw grid
+  mainCtx.strokeStyle = 'rgba(0,245,255,0.05)';
+  mainCtx.lineWidth = 1;
+  for (let i = 0; i < 500; i += 25) {
+    mainCtx.beginPath();
+    mainCtx.moveTo(i, 0);
+    mainCtx.lineTo(i, 500);
+    mainCtx.stroke();
+    mainCtx.beginPath();
+    mainCtx.moveTo(0, i);
+    mainCtx.lineTo(500, i);
+    mainCtx.stroke();
+  }
+
+  const cx = 250, cy = 250;
+
+  // Beam splitter (center)
+  mainCtx.save();
+  mainCtx.translate(cx, cy);
+  mainCtx.rotate(Math.PI / 4);
+  mainCtx.fillStyle = '#0a0a1a';
+  mainCtx.strokeStyle = '#00f5ff';
+  mainCtx.lineWidth = 2;
+  mainCtx.fillRect(-15, -60, 30, 120);
+  mainCtx.strokeRect(-15, -60, 30, 120);
+  mainCtx.restore();
+
+  // Arms with Fabry-Perot cavities
+  const armLength = 180;
+  const numParticles = 30;
+
+  // Horizontal arm
+  for (let i = 0; i < numParticles; i++) {
+    const t = ((mainTime * 0.02 + i / numParticles) % 1);
+    const x = cx - armLength + t * 2 * armLength;
+    const y = cy;
+    mainCtx.beginPath();
+    mainCtx.arc(x, y, 3, 0, Math.PI * 2);
+    mainCtx.fillStyle = `rgba(0,245,255,${0.8 - t * 0.5})`;
+    mainCtx.fill();
+  }
+
+  // Vertical arm
+  for (let i = 0; i < numParticles; i++) {
+    const t = ((mainTime * 0.02 + i / numParticles) % 1);
+    const x = cx;
+    const y = cy - armLength + t * 2 * armLength;
+    mainCtx.beginPath();
+    mainCtx.arc(x, y, 3, 0, Math.PI * 2);
+    mainCtx.fillStyle = `rgba(255,0,170,${0.8 - t * 0.5})`;
+    mainCtx.fill();
+  }
+
+  // End mirrors
+  mainCtx.fillStyle = '#0a0a1a';
+  mainCtx.strokeStyle = '#00f5ff';
+  mainCtx.lineWidth = 2;
+  mainCtx.fillRect(cx - armLength - 15, cy - 10, 15, 20);
+  mainCtx.strokeRect(cx - armLength - 15, cy - 10, 15, 20);
+  mainCtx.fillRect(cx + armLength, cy - 10, 15, 20);
+  mainCtx.strokeRect(cx + armLength, cy - 10, 15, 20);
+  mainCtx.fillRect(cx - 10, cy - armLength - 15, 20, 15);
+  mainCtx.strokeRect(cx - 10, cy - armLength - 15, 20, 15);
+  mainCtx.fillRect(cx - 10, cy + armLength, 20, 15);
+  mainCtx.strokeRect(cx - 10, cy + armLength, 20, 15);
+
+  // Input beam
+  mainCtx.strokeStyle = '#ffd700';
+  mainCtx.lineWidth = 3;
+  mainCtx.setLineDash([5, 5]);
+  mainCtx.beginPath();
+  mainCtx.moveTo(50, cy);
+  mainCtx.lineTo(cx - 15, cy);
+  mainCtx.stroke();
+  mainCtx.setLineDash([]);
+
+  // Output detector
+  mainCtx.fillStyle = '#0a0a1a';
+  mainCtx.strokeStyle = '#00ff88';
+  mainCtx.lineWidth = 2;
+  mainCtx.fillRect(cx - armLength - 40, cy - 15, 20, 30);
+  mainCtx.strokeRect(cx - armLength - 40, cy - 15, 20, 30);
+
+  // Interference pattern at output
+  const fringeSpacing = 15;
+  for (let i = 0; i < 8; i++) {
+    const alpha = 0.5 + 0.5 * Math.sin(mainTime * 0.05 + i * 0.5);
+    mainCtx.fillStyle = `rgba(0,255,136,${alpha * 0.7})`;
+    mainCtx.fillRect(cx - armLength - 25 + i * fringeSpacing, cy - 80, 8, 160);
+  }
+
+  // Labels
+  mainCtx.fillStyle = '#8888aa';
+  mainCtx.font = '11px sans-serif';
+  mainCtx.fillText('ARM 1', cx - 40, cy + 30);
+  mainCtx.fillText('ARM 2', cx + 35, cy - 10);
+  mainCtx.fillText('BEAM SPLITTER', cx + 20, cy + 20);
+  mainCtx.fillText('DETECTOR', cx - armLength - 50, cy + 35);
+  mainCtx.fillStyle = '#ffd700';
+  mainCtx.fillText('LASER', 30, cy - 15);
+
+  mainTime++;
+  requestAnimationFrame(drawMainInterferometer);
+}
+drawMainInterferometer();
+
+// Tab switching
+function showTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const target = document.getElementById('tab' + tabName);
+  if (target) {
+    target.classList.add('active');
+    event.target.classList.add('active');
+  }
+}
+
+// Sensitivity Canvas
+const sensCanvas = document.getElementById('sensitivityCanvas');
+const sensCtx = sensCanvas.getContext('2d');
+sensCanvas.width = 400;
+sensCanvas.height = 300;
+
+const freqSlider = document.getElementById('freqSlider');
+const freqValue = document.getElementById('freqValue');
+
+freqSlider.addEventListener('input', function() {
+  freqValue.textContent = this.value;
+  drawSensitivity();
+});
+
+function drawSensitivity() {
+  sensCtx.fillStyle = '#050510';
+  sensCtx.fillRect(0, 0, 400, 300);
+
+  const freq = parseFloat(freqSlider.value);
+
+  // Background grid
+  sensCtx.strokeStyle = 'rgba(0,245,255,0.05)';
+  for (let i = 0; i < 400; i += 40) {
+    sensCtx.beginPath();
+    sensCtx.moveTo(i, 0);
+    sensCtx.lineTo(i, 300);
+    sensCtx.stroke();
+  }
+  for (let i = 0; i < 300; i += 30) {
+    sensCtx.beginPath();
+    sensCtx.moveTo(0, i);
+    sensCtx.lineTo(400, i);
+    sensCtx.stroke();
+  }
+
+  // Frequency axis (log scale)
+  const logScale = x => Math.log10(x / 10) / Math.log10(1000) * 400;
+
+  // Draw noise curves
+  // Seismic noise (high at low freq)
+  sensCtx.beginPath();
+  sensCtx.strokeStyle = '#ffd700';
+  sensCtx.lineWidth = 2;
+  for (let fx = 10; fx <= 1000; fx += 5) {
+    const x = logScale(fx);
+    const y = 280 - Math.min(200, 150 * Math.exp(-fx / 30) + 30);
+    if (fx === 10) sensCtx.moveTo(x, y);
+    else sensCtx.lineTo(x, y);
+  }
+  sensCtx.stroke();
+
+  // Thermal noise (medium freq)
+  sensCtx.beginPath();
+  sensCtx.strokeStyle = '#00f5ff';
+  sensCtx.lineWidth = 2;
+  for (let fx = 10; fx <= 1000; fx += 5) {
+    const x = logScale(fx);
+    const y = 280 - Math.min(200, 100 * Math.exp(-((fx - 100) ** 2) / 2000) + 60);
+    if (fx === 10) sensCtx.moveTo(x, y);
+    else sensCtx.lineTo(x, y);
+  }
+  sensCtx.stroke();
+
+  // Quantum shot noise (high at high freq)
+  sensCtx.beginPath();
+  sensCtx.strokeStyle = '#ff00aa';
+  sensCtx.lineWidth = 2;
+  for (let fx = 10; fx <= 1000; fx += 5) {
+    const x = logScale(fx);
+    const y = 280 - Math.min(200, 80 + Math.log10(fx / 100) * 30);
+    if (fx === 10) sensCtx.moveTo(x, y);
+    else sensCtx.lineTo(x, y);
+  }
+  sensCtx.stroke();
+
+  // Total noise
+  sensCtx.beginPath();
+  sensCtx.strokeStyle = '#00ff88';
+  sensCtx.lineWidth = 3;
+  for (let fx = 10; fx <= 1000; fx += 5) {
+    const x = logScale(fx);
+    const seismic = 150 * Math.exp(-fx / 30) + 30;
+    const thermal = 100 * Math.exp(-((fx - 100) ** 2) / 2000) + 60;
+    const quantum = 80 + Math.log10(fx / 100) * 30;
+    const total = Math.sqrt(seismic ** 2 + thermal ** 2 + quantum ** 2);
+    const y = 280 - Math.min(200, 250 / (1 + total / 50));
+    if (fx === 10) sensCtx.moveTo(x, y);
+    else sensCtx.lineTo(x, y);
+  }
+  sensCtx.stroke();
+
+  // Current frequency marker
+  const markerX = logScale(freq);
+  sensCtx.strokeStyle = '#ffffff';
+  sensCtx.lineWidth = 1;
+  sensCtx.setLineDash([3, 3]);
+  sensCtx.beginPath();
+  sensCtx.moveTo(markerX, 0);
+  sensCtx.lineTo(markerX, 280);
+  sensCtx.stroke();
+  sensCtx.setLineDash([]);
+
+  // Labels
+  sensCtx.fillStyle = '#8888aa';
+  sensCtx.font = '10px sans-serif';
+  sensCtx.fillText('10 Hz', 5, 295);
+  sensCtx.fillText('100 Hz', 130, 295);
+  sensCtx.fillText('1 kHz', 350, 295);
+  sensCtx.fillText('Frequency →', 160, 295);
+  sensCtx.fillText('Strain Sensitivity →', 5, 15);
+}
+
+// Squeeze Canvas
+const squeezeCanvas = document.getElementById('squeezeCanvas');
+const squeezeCtx = squeezeCanvas.getContext('2d');
+squeezeCanvas.width = 400;
+squeezeCanvas.height = 400;
+
+const squeezeSlider = document.getElementById('squeezeSlider');
+const angleSlider = document.getElementById('angleSlider');
+const squeezeValueEl = document.getElementById('squeezeValue');
+const angleValueEl = document.getElementById('angleValue');
+
+function drawSqueezedState() {
+  squeezeCtx.fillStyle = '#050510';
+  squeezeCtx.fillRect(0, 0, 400, 400);
+
+  const cx = 200, cy = 200;
+  const r = parseFloat(squeezeSlider.value);
+  const angleDeg = parseFloat(angleSlider.value);
+  const angleRad = angleDeg * Math.PI / 180;
+
+  squeezeValueEl.textContent = r.toFixed(1);
+  angleValueEl.textContent = angleDeg + '°';
+
+  // Grid
+  squeezeCtx.strokeStyle = 'rgba(0,245,255,0.05)';
+  squeezeCtx.lineWidth = 1;
+  squeezeCtx.beginPath();
+  squeezeCtx.moveTo(200, 0);
+  squeezeCtx.lineTo(200, 400);
+  squeezeCtx.moveTo(0, 200);
+  squeezeCtx.lineTo(400, 200);
+  squeezeCtx.stroke();
+
+  // Axes labels
+  squeezeCtx.fillStyle = '#8888aa';
+  squeezeCtx.font = '11px sans-serif';
+  squeezeCtx.fillText('X (Amplitude)', 320, 205);
+  squeezeCtx.fillText('Y (Phase)', 205, 25);
+
+  // SQL circle
+  squeezeCtx.strokeStyle = 'rgba(255,215,0,0.4)';
+  squeezeCtx.lineWidth = 1;
+  squeezeCtx.setLineDash([4, 4]);
+  squeezeCtx.beginPath();
+  squeezeCtx.arc(cx, cy, 100, 0, Math.PI * 2);
+  squeezeCtx.stroke();
+  squeezeCtx.setLineDash([]);
+  squeezeCtx.fillStyle = '#ffd700';
+  squeezeCtx.font = '10px sans-serif';
+  squeezeCtx.fillText('SQL', 305, 105);
+
+  // Coherent state circle
+  squeezeCtx.strokeStyle = 'rgba(0,245,255,0.3)';
+  squeezeCtx.lineWidth = 1;
+  squeezeCtx.beginPath();
+  squeezeCtx.arc(cx, cy, 80, 0, Math.PI * 2);
+  squeezeCtx.stroke();
+  squeezeCtx.fillStyle = '#00f5ff';
+  squeezeCtx.fillText('Coherent', 280, 125);
+
+  // Squeezed state ellipse
+  const squeezeX = 80 / Math.exp(r);
+  const squeezeY = 80 * Math.exp(r);
+
+  squeezeCtx.save();
+  squeezeCtx.translate(cx, cy);
+  squeezeCtx.rotate(angleRad);
+
+  // Filled ellipse for effect
+  squeezeCtx.fillStyle = 'rgba(255,0,170,0.1)';
+  squeezeCtx.beginPath();
+  squeezeCtx.ellipse(0, 0, squeezeX, squeezeY, 0, 0, Math.PI * 2);
+  squeezeCtx.fill();
+
+  // Ellipse outline
+  squeezeCtx.strokeStyle = '#ff00aa';
+  squeezeCtx.lineWidth = 2;
+  squeezeCtx.beginPath();
+  squeezeCtx.ellipse(0, 0, squeezeX, squeezeY, 0, 0, Math.PI * 2);
+  squeezeCtx.stroke();
+
+  // Uncertainty indicators
+  squeezeCtx.strokeStyle = 'rgba(255,0,170,0.6)';
+  squeezeCtx.lineWidth = 1;
+  squeezeCtx.setLineDash([2, 2]);
+  squeezeCtx.beginPath();
+  squeezeCtx.moveTo(-squeezeX, 0);
+  squeezeCtx.lineTo(squeezeX, 0);
+  squeezeCtx.moveTo(0, -squeezeY);
+  squeezeCtx.lineTo(0, squeezeY);
+  squeezeCtx.stroke();
+  squeezeCtx.setLineDash([]);
+
+  squeezeCtx.restore();
+
+  // Legend
+  squeezeCtx.fillStyle = '#ff00aa';
+  squeezeCtx.fillText('Squeezed State', 280, 350);
+  squeezeCtx.fillText(`r = ${r.toFixed(1)}, θ = ${angleDeg}°`, 280, 365);
+}
+
+squeezeSlider.addEventListener('input', drawSqueezedState);
+angleSlider.addEventListener('input', drawSqueezedState);
+
+// Response Canvas
+const responseCanvas = document.getElementById('responseCanvas');
+const responseCtx = responseCanvas.getContext('2d');
+responseCanvas.width = 400;
+responseCanvas.height = 280;
+
+let responseMode = 'tuned';
+
+function toggleMode(mode) {
+  responseMode = mode;
+  document.getElementById('tuneBtn').classList.toggle('active', mode === 'tuned');
+  document.getElementById('broadBtn').classList.toggle('active', mode === 'broadband');
+  drawResponse();
+}
+
+function drawResponse() {
+  responseCtx.fillStyle = '#050510';
+  responseCtx.fillRect(0, 0, 400, 280);
+
+  // Grid
+  responseCtx.strokeStyle = 'rgba(0,245,255,0.05)';
+  for (let i = 0; i < 400; i += 40) {
+    responseCtx.beginPath();
+    responseCtx.moveTo(i, 0);
+    responseCtx.lineTo(i, 280);
+    responseCtx.stroke();
+  }
+
+  // Draw curves
+  responseCtx.strokeStyle = '#00ff88';
+  responseCtx.lineWidth = 2;
+  responseCtx.beginPath();
+
+  for (let fx = 10; fx <= 500; fx += 2) {
+    const x = (fx - 10) / 490 * 380 + 10;
+    let y;
+    if (responseMode === 'tuned') {
+      // Narrowband response
+      y = 250 - 200 * Math.exp(-((fx - 150) ** 2) / 500);
+    } else {
+      // Broadband response
+      y = 250 - 150 * Math.exp(-((fx - 200) ** 2) / 8000) - 30;
+    }
+    if (fx === 10) responseCtx.moveTo(x, y);
+    else responseCtx.lineTo(x, y);
+  }
+  responseCtx.stroke();
+
+  // Labels
+  responseCtx.fillStyle = '#8888aa';
+  responseCtx.font = '10px sans-serif';
+  responseCtx.fillText('0 Hz', 10, 270);
+  responseCtx.fillText('500 Hz', 350, 270);
+  responseCtx.fillText(responseMode === 'tuned' ? 'Narrowband (Tuned)' : 'Broadband', 140, 30);
+}
+
+// Detector Design Explorer
+const detectorCanvas = document.getElementById('detectorCanvas');
+const detectorCtx = detectorCanvas.getContext('2d');
+detectorCanvas.width = 450;
+detectorCanvas.height = 450;
+
+const armSlider = document.getElementById('armSlider');
+const powerSlider = document.getElementById('powerSlider');
+const finesseSlider = document.getElementById('finesseSlider');
+const squeezeDBSlider = document.getElementById('squeezeDBSlider');
+const massSlider = document.getElementById('massSlider');
+
+function calculateNoise() {
+  const L = parseFloat(armSlider.value) * 1000; // meters
+  const P = parseFloat(powerSlider.value);
+  const F = parseFloat(finesseSlider.value);
+  const r = parseFloat(squeezeDBSlider.value) / 10 * Math.log(10);
+  const m = parseFloat(massSlider.value);
+
+  // Simplified noise calculations
+  const h_shot = 1e-23 * Math.sqrt(100 / (P * F * L / 4000));
+  const h_rp = 5e-25 * (F * P * L) / (m * 1e12);
+  const h_sql = 1e-24 * Math.sqrt(m / (L * F));
+  const h_eff = h_sql * Math.exp(-r);
+
+  document.getElementById('armValue').textContent = armSlider.value;
+  document.getElementById('powerValue').textContent = powerSlider.value;
+  document.getElementById('finesseValue').textContent = finesseSlider.value;
+  document.getElementById('squeezeDBValue').textContent = squeezeDBSlider.value;
+  document.getElementById('massValue').textContent = massSlider.value;
+
+  document.getElementById('shotNoise').textContent = h_shot.toExponential(2);
+  document.getElementById('radNoise').textContent = h_rp.toExponential(2);
+  document.getElementById('sqlNoise').textContent = h_sql.toExponential(2);
+  document.getElementById('effNoise').textContent = h_eff.toExponential(2);
+}
+
+function drawDetector() {
+  detectorCtx.fillStyle = '#050510';
+  detectorCtx.fillRect(0, 0, 450, 450);
+
+  const cx = 225, cy = 225;
+  const L = parseFloat(armSlider.value);
+  const scale = Math.min(180, 150 * (4 / L));
+
+  // Draw arms
+  detectorCtx.strokeStyle = '#00f5ff';
+  detectorCtx.lineWidth = 3;
+  detectorCtx.beginPath();
+  detectorCtx.moveTo(cx, cy);
+  detectorCtx.lineTo(cx - scale, cy);
+  detectorCtx.stroke();
+
+  detectorCtx.strokeStyle = '#ff00aa';
+  detectorCtx.beginPath();
+  detectorCtx.moveTo(cx, cy);
+  detectorCtx.lineTo(cx, cy - scale);
+  detectorCtx.stroke();
+
+  // Beam splitter
+  detectorCtx.fillStyle = '#0a0a1a';
+  detectorCtx.strokeStyle = '#00f5ff';
+  detectorCtx.lineWidth = 2;
+  detectorCtx.save();
+  detectorCtx.translate(cx, cy);
+  detectorCtx.rotate(Math.PI / 4);
+  detectorCtx.fillRect(-12, -12, 24, 24);
+  detectorCtx.strokeRect(-12, -12, 24, 24);
+  detectorCtx.restore();
+
+  // End mirrors with motion
+  const t = Date.now() * 0.001;
+  detectorCtx.fillStyle = '#0a0a1a';
+  detectorCtx.strokeStyle = '#00f5ff';
+  detectorCtx.fillRect(cx - scale - 15, cy - 8, 15, 16);
+  detectorCtx.strokeRect(cx - scale - 15, cy - 8, 15, 16);
+  detectorCtx.fillRect(cx + scale, cy - 8, 15, 16);
+  detectorCtx.strokeRect(cx + scale, cy - 8, 15, 16);
+  detectorCtx.fillRect(cx - 8, cy - scale - 15, 16, 15);
+  detectorCtx.strokeRect(cx - 8, cy - scale - 15, 16, 15);
+  detectorCtx.fillRect(cx - 8, cy + scale, 16, 15);
+  detectorCtx.strokeRect(cx - 8, cy + scale, 16, 15);
+
+  // Light particles in arms
+  const numParticles = Math.floor(20 * (4 / L));
+  for (let i = 0; i < numParticles; i++) {
+    const pt = ((t * 0.5 + i / numParticles) % 1);
+    const x = cx - scale + pt * 2 * scale;
+    const y = cy;
+    detectorCtx.beginPath();
+    detectorCtx.arc(x, y, 2, 0, Math.PI * 2);
+    detectorCtx.fillStyle = `rgba(0,245,255,${0.9 - pt * 0.5})`;
+    detectorCtx.fill();
+  }
+  for (let i = 0; i < numParticles; i++) {
+    const pt = ((t * 0.5 + i / numParticles) % 1);
+    const x = cx;
+    const y = cy - scale + pt * 2 * scale;
+    detectorCtx.beginPath();
+    detectorCtx.arc(x, y, 2, 0, Math.PI * 2);
+    detectorCtx.fillStyle = `rgba(255,0,170,${0.9 - pt * 0.5})`;
+    detectorCtx.fill();
+  }
+
+  // Labels
+  detectorCtx.fillStyle = '#8888aa';
+  detectorCtx.font = '11px sans-serif';
+  detectorCtx.fillText(`L = ${L} km (scale ${(scale/150*100).toFixed(0)}%)`, cx - 60, cy + 50);
+
+  calculateNoise();
+}
+
+armSlider.addEventListener('input', drawDetector);
+powerSlider.addEventListener('input', drawDetector);
+finesseSlider.addEventListener('input', drawDetector);
+squeezeDBSlider.addEventListener('input', drawDetector);
+massSlider.addEventListener('input', drawDetector);
+
+// Response Canvas 2
+const responseCanvas2 = document.getElementById('responseCanvas2');
+const responseCtx2 = responseCanvas2.getContext('2d');
+responseCanvas2.width = 700;
+responseCanvas2.height = 300;
+
+const gwFreqSlider = document.getElementById('gwFreqSlider');
+const gwFreqValue = document.getElementById('gwFreqValue');
+
+gwFreqSlider.addEventListener('input', function() {
+  gwFreqValue.textContent = this.value;
+  drawResponse2();
+});
+
+function drawResponse2() {
+  responseCtx2.fillStyle = '#050510';
+  responseCtx2.fillRect(0, 0, 700, 300);
+
+  const freq = parseFloat(gwFreqSlider.value);
+  const L = 4, c = 3e8, fLow = 10, fHigh = 1000;
+
+  // Background grid
+  responseCtx2.strokeStyle = 'rgba(0,245,255,0.05)';
+  for (let i = 0; i < 700; i += 70) {
+    responseCtx2.beginPath();
+    responseCtx2.moveTo(i, 0);
+    responseCtx2.lineTo(i, 300);
+    responseCtx2.stroke();
+  }
+
+  // Frequency response curve
+  responseCtx2.beginPath();
+  responseCtx2.strokeStyle = '#00f5ff';
+  responseCtx2.lineWidth = 2;
+  for (let fx = fLow; fx <= fHigh; fx += 2) {
+    const x = (fx - fLow) / (fHigh - fLow) * 680 + 10;
+    // Characteristic response with zeros at f = nc/(2L)
+    const n = Math.round(fx * 2 * L / c);
+    const fZero = n * c / (2 * L);
+    const response = Math.abs(Math.sin(Math.PI * fx * L / c) / (Math.PI * fx * L / c));
+    const y = 280 - response * 250;
+    if (fx === fLow) responseCtx2.moveTo(x, y);
+    else responseCtx2.lineTo(x, y);
+  }
+  responseCtx2.stroke();
+
+  // Current frequency marker
+  const markerX = (freq - fLow) / (fHigh - fLow) * 680 + 10;
+  responseCtx2.strokeStyle = '#ffd700';
+  responseCtx2.lineWidth = 2;
+  responseCtx2.setLineDash([5, 5]);
+  responseCtx2.beginPath();
+  responseCtx2.moveTo(markerX, 20);
+  responseCtx2.lineTo(markerX, 280);
+  responseCtx2.stroke();
+  responseCtx2.setLineDash([]);
+
+  // Draw GW wave at marker
+  responseCtx2.strokeStyle = '#ffd700';
+  responseCtx2.lineWidth = 2;
+  responseCtx2.beginPath();
+  for (let wx = markerX - 30; wx <= markerX + 30; wx += 0.5) {
+    const wy = 150 + 30 * Math.sin((wx - markerX) * 0.5);
+    if (wx === markerX - 30) responseCtx2.moveTo(wx, wy);
+    else responseCtx2.lineTo(wx, wy);
+  }
+  responseCtx2.stroke();
+
+  // Labels
+  responseCtx2.fillStyle = '#8888aa';
+  responseCtx2.font = '10px sans-serif';
+  responseCtx2.fillText('10 Hz', 10, 295);
+  responseCtx2.fillText('1 kHz', 620, 295);
+  responseCtx2.fillText('GW Frequency', 300, 295);
+  responseCtx2.fillText('Sensitivity', 5, 15);
+}
+
+// Initialize canvases
+drawSensitivity();
+drawSqueezedState();
+drawResponse();
+drawDetector();
+drawResponse2();
+</script>
+</body>
+</html>
