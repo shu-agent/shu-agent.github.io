@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Stellar Parallax Explorer — Earth's Orbital Proof</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cyan: #4fc3f7;
+      --purple: #7c4dff;
+      --gold: #ffd54f;
+      --orange: #ff6d00;
+      --pink: #f48fb1;
+      --deep-space: #0a0a1a;
+      --card-bg: rgba(15, 15, 35, 0.9);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--deep-space);
+      color: #e0e0e0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: radial-gradient(ellipse at center, #1a1a3a 0%, #0a0a1a 100%);
+    }
+
+    #heroCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 0.5rem 1.5rem;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      border-radius: 50px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+      margin-bottom: 1.5rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 20px var(--cyan); }
+      50% { transform: scale(1.05); box-shadow: 0 0 40px var(--purple); }
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2rem, 6vw, 4rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--cyan), var(--purple), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 60px rgba(79, 195, 247, 0.5);
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: #b0b0b0;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    .scroll-indicator span {
+      display: block;
+      width: 30px;
+      height: 50px;
+      border: 2px solid var(--cyan);
+      border-radius: 15px;
+      position: relative;
+    }
+
+    .scroll-indicator span::before {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 6px;
+      background: var(--cyan);
+      border-radius: 50%;
+      animation: scrollDot 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
+    }
+
+    @keyframes scrollDot {
+      0%, 100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+      50% { transform: translateX(-50%) translateY(15px); opacity: 0.3; }
+    }
+
+    .section {
+      padding: 5rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-header h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      color: var(--cyan);
+      margin-bottom: 1rem;
+    }
+
+    .section-header p {
+      color: #909090;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    .parallax-demo {
+      position: relative;
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 3rem;
+      margin-bottom: 3rem;
+      border: 1px solid rgba(79, 195, 247, 0.2);
+      box-shadow: 0 0 60px rgba(79, 195, 247, 0.1);
+    }
+
+    .demo-canvas-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: radial-gradient(ellipse at center, #0d0d2a 0%, #050510 100%);
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .demo-canvas-container canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .control-group label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--gold);
+    }
+
+    .control-group input[type="range"] {
+      width: 200px;
+      height: 6px;
+      -webkit-appearance: none;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: var(--gold);
+      border-radius: 50%;
+      box-shadow: 0 0 15px var(--gold);
+      cursor: pointer;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .stat-card {
+      background: rgba(10, 10, 30, 0.8);
+      border-radius: 15px;
+      padding: 1.5rem;
+      text-align: center;
+      border: 1px solid rgba(124, 77, 255, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 40px rgba(124, 77, 255, 0.3);
+    }
+
+    .stat-value {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #808080;
+    }
+
+    .physics-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(79, 195, 247, 0.2);
+    }
+
+    .physics-card h3 {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.3rem;
+      color: var(--gold);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .physics-card p {
+      line-height: 1.8;
+      color: #c0c0c0;
+      margin-bottom: 1rem;
+    }
+
+    .equation {
+      font-family: 'Space Mono', monospace;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      margin: 1rem 0;
+      color: var(--cyan);
+      font-size: 1.1rem;
+      text-align: center;
+      border-left: 3px solid var(--purple);
+    }
+
+    .equation .highlight {
+      color: var(--gold);
+    }
+
+    .timeline-section {
+      position: relative;
+      padding: 5rem 2rem;
+      background: linear-gradient(180deg, var(--deep-space) 0%, #0d0d2a 50%, var(--deep-space) 100%);
+    }
+
+    .timeline {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 3px;
+      height: 100%;
+      background: linear-gradient(180deg, var(--purple), var(--cyan), var(--gold));
+      border-radius: 2px;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding: 2rem;
+      width: 50%;
+      box-sizing: border-box;
+    }
+
+    .timeline-item:nth-child(odd) {
+      left: 0;
+      padding-right: 3rem;
+      text-align: right;
+    }
+
+    .timeline-item:nth-child(even) {
+      left: 50%;
+      padding-left: 3rem;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: var(--cyan);
+      border-radius: 50%;
+      top: 2rem;
+      box-shadow: 0 0 20px var(--cyan);
+    }
+
+    .timeline-item:nth-child(odd)::before {
+      right: -10px;
+    }
+
+    .timeline-item:nth-child(even)::before {
+      left: -10px;
+    }
+
+    .timeline-year {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-title {
+      font-size: 1.1rem;
+      color: var(--cyan);
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-desc {
+      font-size: 0.95rem;
+      color: #909090;
+      line-height: 1.6;
+    }
+
+    .svg-section {
+      padding: 5rem 2rem;
+    }
+
+    .svg-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 2rem;
+      border: 1px solid rgba(79, 195, 247, 0.2);
+    }
+
+    .svg-container svg {
+      width: 100%;
+      height: auto;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .animation-section {
+      padding: 5rem 2rem;
+      text-align: center;
+    }
+
+    .animation-container {
+      max-width: 700px;
+      margin: 0 auto 3rem;
+      aspect-ratio: 1;
+      position: relative;
+    }
+
+    .animation-container canvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle, #1a1a3a 0%, #0a0a1a 100%);
+      box-shadow: 0 0 60px rgba(79, 195, 247, 0.2);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: 'Orbitron', monospace;
+      padding: 0.8rem 2rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      color: #0a0a1a;
+      font-weight: 700;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 30px var(--cyan);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid var(--gold);
+      color: var(--gold);
+    }
+
+    .btn-secondary:hover {
+      background: var(--gold);
+      color: #0a0a1a;
+    }
+
+    footer {
+      text-align: center;
+      padding: 3rem;
+      color: #606060;
+      font-size: 0.9rem;
+    }
+
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan), var(--gold));
+      z-index: 1000;
+      transition: width 0.1s ease;
+    }
+
+    @media (max-width: 768px) {
+      .timeline::before {
+        left: 20px;
+      }
+      .timeline-item {
+        width: 100%;
+        left: 0 !important;
+        padding-left: 50px !important;
+        padding-right: 0 !important;
+        text-align: left !important;
+      }
+      .timeline-item::before {
+        left: 10px !important;
+        right: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" id="progressBar"></div>
+
+  <section class="hero">
+    <canvas id="heroCanvas"></canvas>
+    <div class="hero-content">
+      <div class="hero-badge">PHYSICS EVIDENCE</div>
+      <h1>Stellar Parallax Explorer</h1>
+      <p>Interactive visualization proving Earth's orbital motion around the Sun through the ancient technique of trigonometric parallax</p>
+    </div>
+    <div class="scroll-indicator">
+      <span></span>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>The Geometry of Parallax</h2>
+      <p>When Earth orbits the Sun, nearby stars appear to shift against the distant background. This tiny shift — measured in arcseconds — is our most direct proof of heliocentrism.</p>
+    </div>
+
+    <div class="parallax-demo">
+      <div class="demo-canvas-container">
+        <canvas id="parallaxCanvas"></canvas>
+      </div>
+      <div class="controls">
+        <div class="control-group">
+          <label>Earth Orbital Position (0-360°)</label>
+          <input type="range" id="orbitAngle" min="0" max="360" value="0">
+        </div>
+        <div class="control-group">
+          <label>Star Distance (parsecs)</label>
+          <input type="range" id="starDistance" min="1" max="100" value="10">
+        </div>
+        <div class="control-group">
+          <label>Animation Speed</label>
+          <input type="range" id="animSpeed" min="0" max="10" value="2">
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="parallaxAngle">0.768"</div>
+          <div class="stat-label">Parallax Angle (arcseconds)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="distancePc">10.0 pc</div>
+          <div class="stat-label">Star Distance</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="distanceLy">32.6 ly</div>
+          <div class="stat-label">Light Years</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="apparentShift">0.768"</div>
+          <div class="stat-label">Apparent Shift (2δ)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="physics-card">
+      <h3>The Parallax Formula</h3>
+      <p>Parallax is the apparent shift of a nearby star against the background stars when Earth moves along its orbit. By measuring this shift, we can calculate the distance to the star.</p>
+      <div class="equation">
+        d = <span class="highlight">1</span> / p &nbsp;&nbsp;&nbsp; where p = parallax angle in <span class="highlight">arcseconds</span>, d = distance in <span class="highlight">parsecs</span>
+      </div>
+      <p>This elegant relationship, discovered by Friedrich Bessel in 1838, allows us to measure cosmic distances across the galaxy. One parsec equals 3.26 light-years, and the nearest star system (Proxima Centauri) lies just 1.3 parsecs away.</p>
+    </div>
+  </section>
+
+  <section class="svg-section" style="background: linear-gradient(180deg, #0a0a1a 0%, #0d0d2a 100%);">
+    <div class="section-header">
+      <h2>Earth's Orbital Proof — SVG Visualization</h2>
+      <p>The combination of stellar parallax, annual aberration, and Doppler shift provides irrefutable evidence that Earth orbits the Sun.</p>
+    </div>
+
+    <div class="svg-container">
+      <svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:#ffd54f"/>
+            <stop offset="50%" style="stop-color:#ff6d00"/>
+            <stop offset="100%" style="stop-color:#ff3d00"/>
+          </radialGradient>
+          <radialGradient id="earthGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:#4fc3f7"/>
+            <stop offset="50%" style="stop-color:#0288d1"/>
+            <stop offset="100%" style="stop-color:#01579b"/>
+          </radialGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          <filter id="earthGlow">
+            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#7c4dff;stop-opacity:0.8"/>
+            <stop offset="100%" style="stop-color:#4fc3f7;stop-opacity:0.3"/>
+          </linearGradient>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#ffd54f"/>
+          </marker>
+        </defs>
+
+        <!-- Background stars -->
+        <g id="stars" opacity="0.8">
+          <circle cx="100" cy="80" r="1.5" fill="#fff"/>
+          <circle cx="250" cy="120" r="1" fill="#fff"/>
+          <circle cx="400" cy="50" r="1.2" fill="#fff"/>
+          <circle cx="550" cy="90" r="1" fill="#fff"/>
+          <circle cx="700" cy="150" r="1.5" fill="#fff"/>
+          <circle cx="150" cy="200" r="1" fill="#fff"/>
+          <circle cx="350" cy="180" r="1.3" fill="#fff"/>
+          <circle cx="600" cy="220" r="1" fill="#fff"/>
+          <circle cx="750" cy="280" r="1.2" fill="#fff"/>
+          <circle cx="80" cy="350" r="1" fill="#fff"/>
+          <circle cx="200" cy="400" r="1.5" fill="#fff"/>
+          <circle cx="450" cy="380" r="1" fill="#fff"/>
+          <circle cx="650" cy="420" r="1.3" fill="#fff"/>
+          <circle cx="50" cy="500" r="1" fill="#fff"/>
+          <circle cx="300" cy="520" r="1.2" fill="#fff"/>
+          <circle cx="500" cy="550" r="1" fill="#fff"/>
+          <circle cx="720" cy="500" r="1.5" fill="#fff"/>
+          <circle cx="120" cy="580" r="1" fill="#fff"/>
+          <circle cx="420" cy="100" r="1" fill="#fff"/>
+          <circle cx="680" cy="350" r="1.2" fill="#fff"/>
+        </g>
+
+        <!-- Sun -->
+        <circle cx="400" cy="300" r="50" fill="url(#sunGrad)" filter="url(#glow)">
+          <animate attributeName="r" values="50;55;50" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <text x="400" y="370" text-anchor="middle" fill="#ffd54f" font-family="Orbitron" font-size="14">SUN</text>
+
+        <!-- Earth's orbit -->
+        <ellipse cx="400" cy="300" rx="250" ry="250" fill="none" stroke="url(#orbitGrad)" stroke-width="2" stroke-dasharray="10,5">
+          <animate attributeName="stroke-dashoffset" from="0" to="30" dur="2s" repeatCount="indefinite"/>
+        </ellipse>
+
+        <!-- Earth positions -->
+        <g id="earthGroup">
+          <!-- January (right) -->
+          <circle cx="650" cy="300" r="15" fill="url(#earthGrad)" filter="url(#earthGlow)">
+            <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite"/>
+          </circle>
+          <text x="650" y="330" text-anchor="middle" fill="#4fc3f7" font-family="Space Mono" font-size="11">Earth</text>
+
+          <!-- July (left) -->
+          <circle cx="150" cy="300" r="15" fill="url(#earthGrad)" filter="url(#earthGlow)">
+            <animate attributeName="opacity" values="0.5;1;0.5" dur="1.5s" repeatCount="indefinite"/>
+          </circle>
+        </g>
+
+        <!-- Parallax measurement lines -->
+        <g id="parallaxLines" stroke="#f48fb1" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.8">
+          <!-- From January position -->
+          <line x1="650" y1="300" x2="350" y2="150" marker-end="url(#arrowhead)"/>
+          <line x1="650" y1="300" x2="350" y2="450" marker-end="url(#arrowhead)"/>
+
+          <!-- From July position -->
+          <line x1="150" y1="300" x2="350" y2="150" marker-end="url(#arrowhead)"/>
+          <line x1="150" y1="300" x2="350" y2="450" marker-end="url(#arrowhead)"/>
+        </g>
+
+        <!-- Nearby star with parallax shift -->
+        <g id="nearbyStar">
+          <circle cx="350" cy="150" r="6" fill="#f48fb1" filter="url(#glow)">
+            <animate attributeName="cx" values="350;450;350" dur="4s" repeatCount="indefinite"/>
+            <animate attributeName="cy" values="150;150;150" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <text x="350" y="135" text-anchor="middle" fill="#f48fb1" font-family="Space Mono" font-size="10">
+            <animate attributeName="x" values="350;450;350" dur="4s" repeatCount="indefinite"/>
+            Nearby Star
+          </text>
+        </g>
+
+        <!-- Background stars (fixed) -->
+        <g id="bgStars" fill="#aaa">
+          <circle cx="350" cy="150" r="2"/>
+          <circle cx="350" cy="450" r="2"/>
+          <circle cx="250" cy="200" r="1.5"/>
+          <circle cx="450" cy="200" r="1.5"/>
+          <circle cx="250" cy="400" r="1.5"/>
+          <circle cx="450" cy="400" r="1.5"/>
+        </g>
+
+        <!-- Labels -->
+        <g font-family="Space Mono" font-size="12" fill="#909090">
+          <text x="660" y="100">Parallax angle δ</text>
+          <text x="660" y="115">apparent shift</text>
+
+          <text x="100" y="290">Orbital</text>
+          <text x="100" y="305">Velocity</text>
+          <text x="100" y="320">30 km/s</text>
+
+          <!-- Aberration label -->
+          <text x="680" y="450">Aberration:</text>
+          <text x="680" y="465">20.5 arcsec</text>
+        </g>
+
+        <!-- Aberration angle indicator -->
+        <g stroke="#ffd54f" stroke-width="1" opacity="0.6">
+          <path d="M 720 420 Q 700 440 680 450" fill="none" marker-end="url(#arrowhead)"/>
+          <path d="M 720 420 Q 720 450 720 480" fill="none" marker-end="url(#arrowhead)"/>
+        </g>
+
+        <!-- Title -->
+        <text x="400" y="40" text-anchor="middle" fill="#4fc3f7" font-family="Orbitron" font-size="18" font-weight="bold">
+          Three Proofs of Earth's Orbital Motion
+        </text>
+
+        <!-- Legend -->
+        <g transform="translate(580, 520)">
+          <rect x="0" y="0" width="200" height="70" fill="rgba(10,10,30,0.8)" rx="10" stroke="#7c4dff" stroke-width="1"/>
+          <circle cx="20" cy="20" r="8" fill="url(#sunGrad)"/>
+          <text x="40" y="25" fill="#ffd54f" font-family="Space Mono" font-size="11">Sun (center)</text>
+
+          <circle cx="20" cy="45" r="6" fill="url(#earthGrad)"/>
+          <text x="40" y="50" fill="#4fc3f7" font-family="Space Mono" font-size="11">Earth (orbiting)</text>
+        </g>
+      </svg>
+
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background: #ffd54f;"></div>
+          <span>Sun (central position)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: #4fc3f7;"></div>
+          <span>Earth (orbital motion)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: #f48fb1;"></div>
+          <span>Nearby star (parallax shift)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: #aaa;"></div>
+          <span>Distant background stars</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="timeline-section">
+    <div class="section-header">
+      <h2>Historical Timeline</h2>
+      <p>The discovery of stellar parallax spans millennia, from ancient Greek philosophy to 19th century triumph.</p>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-year">~300 BCE</div>
+        <div class="timeline-title">Aristarchus proposes Heliocentrism</div>
+        <div class="timeline-desc">Greek astronomer Aristarchus of Samos suggests Earth revolves around the Sun, and estimates relative distances using lunar observations.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1543</div>
+        <div class="timeline-title">Copernicus publishes De Revolutionibus</div>
+        <div class="timeline-desc">Nicolaus Copernicus presents his heliocentric model, placing the Sun at center and Earth in orbit. The church initially tolerates but later condemns this work.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1725</div>
+        <div class="timeline-title">Bradley discovers aberration of light</div>
+        <div class="timeline-desc">James Bradley discovers stellar aberration, proving Earth's orbital motion through the apparent shift of starlight due to Earth's velocity around the Sun.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1728</div>
+        <div class="timeline-title">Bradley discovers nutation</div>
+        <div class="timeline-desc">Bradley also discovers Earth's nutation, the periodic wobble of Earth's axis, further confirming Earth's dynamic motion through space.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1838</div>
+        <div class="timeline-title">Bessel measures first stellar parallax</div>
+        <div class="timeline-desc">Friedrich Wilhelm Bessel measures the parallax of star 61 Cygni as 0.314 arcseconds, calculating its distance as 10.3 light-years. The first successful stellar parallax measurement.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1989</div>
+        <div class="timeline-title">Hipparcos satellite launched</div>
+        <div class="timeline-desc">ESA's Hipparcos satellite measures parallaxes for over 118,000 stars with milliarcsecond precision, creating the first comprehensive stellar distance catalog.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2013</div>
+        <div class="timeline-title">Gaia satellite launched</div>
+        <div class="timeline-desc">ESA's Gaia mission begins mapping the galaxy, measuring positions and parallaxes for over 1 billion stars with microarcsecond precision. A new era in astrometry.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="animation-section" style="background: var(--deep-space);">
+    <div class="section-header">
+      <h2>Interactive Aberration Simulator</h2>
+      <p>Light aberration occurs because Earth's orbital velocity (30 km/s) is a significant fraction of light's speed. Stars appear shifted in the direction of Earth's motion.</p>
+    </div>
+
+    <div class="animation-container">
+      <canvas id="aberrationCanvas" width="600" height="600"></canvas>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-primary" id="startAberration">Start Animation</button>
+      <button class="btn btn-secondary" id="resetAberration">Reset</button>
+    </div>
+
+    <div class="physics-card" style="max-width: 800px; margin: 3rem auto 0;">
+      <h3>The Aberration Formula</h3>
+      <div class="equation">
+        tan(θ) = v / c &nbsp;&nbsp;&nbsp; where v = Earth's orbital velocity, c = speed of light
+      </div>
+      <p>With v = 30 km/s and c = 299,792 km/s, the aberration angle is approximately <strong>20.5 arcseconds</strong>. This tiny angle represents the apparent displacement of starlight due to Earth's motion.</p>
+      <p>James Bradley discovered this effect in 1725 while attempting to measure stellar parallax. He realized the observed shifts were too large and too consistent to be parallax — they were caused by the finite speed of light combined with Earth's orbital velocity.</p>
+    </div>
+  </section>
+
+  <section class="section" style="background: linear-gradient(180deg, #0d0d2a 0%, #0a0a1a 100%);">
+    <div class="section-header">
+      <h2>Physics of the Proof</h2>
+    </div>
+
+    <div class="physics-card">
+      <h3>1. Coriolis Effect — Earth's Rotation</h3>
+      <p>The Coriolis effect deflects moving objects on Earth due to the planet's rotation. In the Northern Hemisphere, winds and projectiles deflect to the right; in the Southern Hemisphere, to the left.</p>
+      <div class="equation">
+        F_coriolis = -2m(Ω × v)
+      </div>
+      <p>This is only explicable if Earth rotates. The Foucault pendulum demonstrates this effect beautifully — its plane of oscillation rotates as Earth turns beneath it.</p>
+    </div>
+
+    <div class="physics-card">
+      <h3>2. Stellar Parallax — Earth's Revolution</h3>
+      <p>When Earth orbits the Sun, nearby stars appear to shift against distant background stars. This parallax effect is measurable for stars within about 1,000 light-years.</p>
+      <div class="equation">
+        d(pc) = <span class="highlight">1</span> / p(arcsec)
+      </div>
+      <p>Bessel's 1838 measurement of 61 Cygni was the first successful parallax measurement, proving Earth orbits the Sun, not the other way around.</p>
+    </div>
+
+    <div class="physics-card">
+      <h3>3. Doppler Shift — Cosmic Expansion</h3>
+      <p>The redshift of distant galaxies demonstrates the universe is expanding. If Earth were stationary at the center (geocentrism), we would see isotropic expansion from our unique position — an absurd statistical coincidence.</p>
+      <div class="equation">
+        z = v / c &nbsp;&nbsp;&nbsp; and &nbsp;&nbsp;&nbsp; v = H₀ × d (Hubble's Law)
+      </div>
+      <p>Edwin Hubble's 1929 discovery that all distant galaxies recede from us proportional to distance is explained naturally by heliocentrism and the expanding universe model.</p>
+    </div>
+
+    <div class="physics-card">
+      <h3>4. Light Aberration — Orbital Velocity Proof</h3>
+      <p>James Bradley's 1725 discovery of stellar aberration provided the first quantitative proof of Earth's orbital motion. The constant 20.5 arcsecond shift matches predictions from Earth's orbital velocity.</p>
+      <div class="equation">
+        α = v / c ≈ 30 km/s / 299,792 km/s ≈ 0.0001 rad ≈ <span class="highlight">20.5"</span>
+      </div>
+      <p>This effect is completely inexplicable under geocentrism but follows naturally from heliocentrism combined with the finite speed of light.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>Stellar Parallax Explorer — Kevin's Physics Lab</p>
+    <p style="margin-top: 1rem; color: #4fc3f7;">"The cosmos reveals its secrets to those who measure carefully."</p>
+  </footer>
+
+  <script>
+    // Hero canvas - animated starfield
+    const heroCanvas = document.getElementById('heroCanvas');
+    const heroCtx = heroCanvas.getContext('2d');
+    let heroStars = [];
+
+    function initHeroCanvas() {
+      heroCanvas.width = window.innerWidth;
+      heroCanvas.height = window.innerHeight;
+      heroStars = [];
+      for (let i = 0; i < 200; i++) {
+        heroStars.push({
+          x: Math.random() * heroCanvas.width,
+          y: Math.random() * heroCanvas.height,
+          r: Math.random() * 2 + 0.5,
+          alpha: Math.random(),
+          speed: Math.random() * 0.02 + 0.01
+        });
+      }
+    }
+
+    function animateHero() {
+      heroCtx.fillStyle = 'rgba(10, 10, 26, 0.2)';
+      heroCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
+
+      heroStars.forEach(star => {
+        star.alpha += star.speed;
+        if (star.alpha > 1 || star.alpha < 0) star.speed *= -1;
+        heroCtx.beginPath();
+        heroCtx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+        heroCtx.fillStyle = `rgba(255, 255, 255, ${Math.abs(star.alpha)})`;
+        heroCtx.fill();
+      });
+
+      requestAnimationFrame(animateHero);
+    }
+
+    initHeroCanvas();
+    animateHero();
+    window.addEventListener('resize', initHeroCanvas);
+
+    // Parallax demo canvas
+    const parallaxCanvas = document.getElementById('parallaxCanvas');
+    const ctx = parallaxCanvas.getContext('2d');
+    let orbitAngle = 0;
+    let starDistance = 10;
+    let animSpeed = 2;
+    let animationId;
+
+    function initParallaxCanvas() {
+      const container = parallaxCanvas.parentElement;
+      parallaxCanvas.width = container.clientWidth * window.devicePixelRatio;
+      parallaxCanvas.height = container.clientHeight * window.devicePixelRatio;
+      parallaxCanvas.style.width = container.clientWidth + 'px';
+      parallaxCanvas.style.height = container.clientHeight + 'px';
+    }
+
+    function drawParallax() {
+      const w = parallaxCanvas.width;
+      const h = parallaxCanvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+      const orbitRadius = Math.min(w, h) * 0.35;
+      const starOrbitRadius = orbitRadius * (100 / starDistance);
+
+      ctx.fillStyle = 'rgba(10, 10, 26, 1)';
+      ctx.fillRect(0, 0, w, h);
+
+      // Draw background stars
+      for (let i = 0; i < 50; i++) {
+        const angle = (i / 50) * Math.PI * 2;
+        const r = orbitRadius * 2;
+        const x = cx + Math.cos(angle) * r + (Math.random() - 0.5) * 20;
+        const y = cy + Math.sin(angle) * r + (Math.random() - 0.5) * 20;
+        ctx.beginPath();
+        ctx.arc(x, y, 1, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(150, 150, 150, 0.5)';
+        ctx.fill();
+      }
+
+      // Draw orbit path
+      ctx.beginPath();
+      ctx.arc(cx, cy, orbitRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(124, 77, 255, 0.3)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Draw Earth's positions
+      const angleRad = (orbitAngle * Math.PI) / 180;
+
+      // Sun at center
+      const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 30);
+      gradient.addColorStop(0, '#ffd54f');
+      gradient.addColorStop(1, '#ff6d00');
+      ctx.beginPath();
+      ctx.arc(cx, cy, 25, 0, Math.PI * 2);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+
+      // Earth at current position
+      const earthX = cx + Math.cos(angleRad) * orbitRadius;
+      const earthY = cy + Math.sin(angleRad) * orbitRadius;
+      ctx.beginPath();
+      ctx.arc(earthX, earthY, 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#4fc3f7';
+      ctx.fill();
+
+      // Opposite Earth (for comparison)
+      const oppositeX = cx + Math.cos(angleRad + Math.PI) * orbitRadius;
+      const oppositeY = cy + Math.sin(angleRad + Math.PI) * orbitRadius;
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath();
+      ctx.arc(oppositeX, oppositeY, 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#4fc3f7';
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Draw star at different positions based on Earth's position
+      const starAngle = angleRad * 2;
+      const starX = cx + Math.cos(starAngle) * starOrbitRadius;
+      const starY = cy - 50;
+
+      ctx.beginPath();
+      ctx.arc(starX, starY, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#f48fb1';
+      ctx.fill();
+
+      // Draw parallax lines
+      ctx.strokeStyle = '#f48fb1';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(earthX, earthY);
+      ctx.lineTo(starX, starY);
+      ctx.stroke();
+
+      // Parallax angle indicator
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.arc(earthX, earthY, 30, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(244, 143, 177, 0.3)';
+      ctx.stroke();
+
+      // Update stats
+      const parallaxArcsec = 1 / starDistance;
+      document.getElementById('parallaxAngle').textContent = parallaxArcsec.toFixed(3) + '"';
+      document.getElementById('distancePc').textContent = starDistance.toFixed(1) + ' pc';
+      document.getElementById('distanceLy').textContent = (starDistance * 3.26).toFixed(1) + ' ly';
+      document.getElementById('apparentShift').textContent = (parallaxArcsec * 2).toFixed(3) + '"';
+
+      orbitAngle += animSpeed * 0.1;
+      if (orbitAngle > 360) orbitAngle -= 360;
+
+      animationId = requestAnimationFrame(drawParallax);
+    }
+
+    // Aberration animation
+    const aberrationCanvas = document.getElementById('aberrationCanvas');
+    const abCtx = aberrationCanvas.getContext('2d');
+    let aberrationAngle = 0;
+    let aberrationRunning = false;
+
+    function drawAberration() {
+      const w = aberrationCanvas.width;
+      const h = aberrationCanvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+
+      abCtx.fillStyle = 'rgba(10, 10, 26, 1)';
+      abCtx.fillRect(0, 0, w, h);
+
+      // Draw background stars
+      for (let i = 0; i < 100; i++) {
+        const starAngle = (i / 100) * Math.PI * 2;
+        const r = 200 + Math.random() * 100;
+        const x = cx + Math.cos(starAngle) * r;
+        const y = cy + Math.sin(starAngle) * r;
+        abCtx.beginPath();
+        abCtx.arc(x, y, 1 + Math.random(), 0, Math.PI * 2);
+        abCtx.fillStyle = 'rgba(200, 200, 200, 0.5)';
+        abCtx.fill();
+      }
+
+      // Draw center (Sun)
+      const sunGrad = abCtx.createRadialGradient(cx, cy, 0, cx, cy, 40);
+      sunGrad.addColorStop(0, '#ffd54f');
+      sunGrad.addColorStop(1, '#ff6d00');
+      abCtx.beginPath();
+      abCtx.arc(cx, cy, 30, 0, Math.PI * 2);
+      abCtx.fillStyle = sunGrad;
+      abCtx.fill();
+
+      // Earth position
+      const earthAngle = aberrationAngle * (Math.PI / 180);
+      const earthOrbitRadius = 120;
+      const earthX = cx + Math.cos(earthAngle) * earthOrbitRadius;
+      const earthY = cy + Math.sin(earthAngle) * earthOrbitRadius;
+
+      // Earth
+      abCtx.beginPath();
+      abCtx.arc(earthX, earthY, 10, 0, Math.PI * 2);
+      abCtx.fillStyle = '#4fc3f7';
+      abCtx.fill();
+
+      // Light ray from distant star (apparent position due to aberration)
+      const starRealAngle = earthAngle + Math.PI;
+      const aberrationOffset = 0.1; // radians
+      const starApparentAngle = starRealAngle + aberrationOffset;
+
+      // True star position
+      const starDist = 250;
+      const starTrueX = cx + Math.cos(starRealAngle) * starDist;
+      const starTrueY = cy + Math.sin(starRealAngle) * starDist;
+
+      // Aberrated star position (where we see it)
+      const starApparX = cx + Math.cos(starApparentAngle) * starDist;
+      const starApparY = cy + Math.sin(starApparentAngle) * starDist;
+
+      // Draw true star
+      abCtx.beginPath();
+      abCtx.arc(starTrueX, starTrueY, 6, 0, Math.PI * 2);
+      abCtx.fillStyle = 'rgba(150, 150, 150, 0.5)';
+      abCtx.fill();
+
+      // Draw apparent star
+      abCtx.beginPath();
+      abCtx.arc(starApparX, starApparY, 6, 0, Math.PI * 2);
+      abCtx.fillStyle = '#f48fb1';
+      abCtx.fill();
+
+      // Draw light ray to apparent position
+      abCtx.beginPath();
+      abCtx.moveTo(earthX, earthY);
+      abCtx.lineTo(starApparX, starApparY);
+      abCtx.strokeStyle = 'rgba(244, 143, 177, 0.5)';
+      abCtx.lineWidth = 2;
+      abCtx.stroke();
+
+      // Draw aberration indicator arc
+      abCtx.beginPath();
+      abCtx.arc(earthX, earthY, 40, starRealAngle, starApparentAngle);
+      abCtx.strokeStyle = '#ffd54f';
+      abCtx.lineWidth = 2;
+      abCtx.stroke();
+
+      // Labels
+      abCtx.font = '12px Space Mono';
+      abCtx.fillStyle = '#ffd54f';
+      abCtx.fillText('Aberration angle', earthX + 50, earthY - 30);
+      abCtx.fillStyle = '#4fc3f7';
+      abCtx.fillText('Earth orbit', earthX + 50, earthY);
+      abCtx.fillStyle = '#f48fb1';
+      abCtx.fillText('Apparent star', starApparX + 10, starApparY);
+      abCtx.fillStyle = '#888';
+      abCtx.fillText('True star', starTrueX + 10, starTrueY);
+
+      if (aberrationRunning) {
+        aberrationAngle += 2;
+      }
+      requestAnimationFrame(drawAberration);
+    }
+
+    // Event listeners
+    document.getElementById('orbitAngle').addEventListener('input', (e) => {
+      orbitAngle = parseFloat(e.target.value);
+    });
+
+    document.getElementById('starDistance').addEventListener('input', (e) => {
+      starDistance = parseFloat(e.target.value);
+    });
+
+    document.getElementById('animSpeed').addEventListener('input', (e) => {
+      animSpeed = parseFloat(e.target.value);
+    });
+
+    document.getElementById('startAberration').addEventListener('click', () => {
+      aberrationRunning = !aberrationRunning;
+      document.getElementById('startAberration').textContent = aberrationRunning ? 'Stop Animation' : 'Start Animation';
+    });
+
+    document.getElementById('resetAberration').addEventListener('click', () => {
+      aberrationAngle = 0;
+      aberrationRunning = false;
+      document.getElementById('startAberration').textContent = 'Start Animation';
+    });
+
+    // Progress bar
+    window.addEventListener('scroll', () => {
+      const scrollTop = document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (scrollTop / scrollHeight) * 100;
+      document.getElementById('progressBar').style.width = progress + '%';
+    });
+
+    // Initialize
+    initParallaxCanvas();
+    drawParallax();
+    drawAberration();
+    window.addEventListener('resize', initParallaxCanvas);
+  </script>
+</body>
+</html>

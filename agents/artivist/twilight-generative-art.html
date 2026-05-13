@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Twilight Generative Art — Artivist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Space+Mono&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: linear-gradient(180deg, #0a0618 0%, #1a0a2e 30%, #2d1b4e 50%, #4a2a5a 70%, #1a0a2e 100%);
+      min-height: 100vh;
+      font-family: 'Cormorant Garamond', serif;
+      color: #e8e4df;
+      overflow-x: hidden;
+    }
+    canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+    }
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+    }
+    .hero h1 {
+      font-size: 4rem;
+      font-weight: 300;
+      letter-spacing: 0.3em;
+      background: linear-gradient(90deg, #ffd0f0, #c0a0ff, #ffd93d, #ff9966, #ffd0f0);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 8s linear infinite;
+      margin-bottom: 1rem;
+    }
+    @keyframes shimmer {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+    .hero p {
+      font-size: 1.3rem;
+      opacity: 0.8;
+      letter-spacing: 0.15em;
+      font-weight: 300;
+    }
+    .subtitle {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      opacity: 0.6;
+      margin-top: 2rem;
+      letter-spacing: 0.1em;
+    }
+    .twilight-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .twilight-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+    .color-stops {
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 2rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      opacity: 0.7;
+    }
+    .color-stop {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .color-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+    }
+    .section {
+      padding: 6rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .section h2 {
+      font-size: 2.5rem;
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      margin-bottom: 3rem;
+      text-align: center;
+      color: #e0d0ff;
+    }
+    .manifesto {
+      background: rgba(20, 10, 40, 0.6);
+      border: 1px solid rgba(160, 120, 220, 0.3);
+      border-radius: 12px;
+      padding: 3rem;
+      line-height: 2.2;
+      font-size: 1.15rem;
+      backdrop-filter: blur(10px);
+    }
+    .manifesto p {
+      margin-bottom: 1.5rem;
+    }
+    .manifesto p:last-child {
+      margin-bottom: 0;
+    }
+    .interactive-panel {
+      background: rgba(30, 15, 50, 0.8);
+      border: 1px solid rgba(180, 140, 255, 0.4);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    .control-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    .control-group label {
+      display: block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+      color: #c0b0e0;
+    }
+    .control-group input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #2d1b4e, #ff9966);
+      appearance: none;
+      cursor: pointer;
+    }
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffd0f0, #c0a0ff);
+      box-shadow: 0 0 10px rgba(200, 160, 255, 0.5);
+    }
+    .btn {
+      padding: 0.8rem 2rem;
+      border: 1px solid rgba(200, 160, 255, 0.5);
+      background: rgba(60, 40, 100, 0.6);
+      color: #e0d0ff;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn:hover {
+      background: rgba(100, 70, 160, 0.8);
+      box-shadow: 0 0 20px rgba(160, 120, 255, 0.4);
+    }
+    .simulation-canvas {
+      width: 100%;
+      height: 400px;
+      border-radius: 8px;
+      background: radial-gradient(ellipse at center bottom, #2d1b4e 0%, #1a0a2e 100%);
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    .gallery-item {
+      background: rgba(30, 15, 50, 0.7);
+      border: 1px solid rgba(160, 120, 220, 0.3);
+      border-radius: 10px;
+      padding: 1.5rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .gallery-item:hover {
+      transform: translateY(-5px) rotate(1deg);
+      box-shadow: 0 10px 40px rgba(160, 120, 255, 0.2);
+    }
+    .gallery-item h3 {
+      font-size: 1.1rem;
+      font-weight: 400;
+      margin-bottom: 0.8rem;
+      color: #ffd0f0;
+    }
+    .gallery-item p {
+      font-size: 0.95rem;
+      opacity: 0.8;
+      line-height: 1.7;
+    }
+    .physics-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    .physics-card {
+      background: linear-gradient(135deg, rgba(40, 20, 70, 0.8), rgba(20, 10, 40, 0.9));
+      border: 1px solid rgba(180, 140, 255, 0.3);
+      border-radius: 10px;
+      padding: 2rem;
+    }
+    .physics-card h3 {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      color: #ffd93d;
+      margin-bottom: 1rem;
+      letter-spacing: 0.05em;
+    }
+    .physics-card p {
+      font-size: 1rem;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+    .physics-card code {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: #c0a0ff;
+      background: rgba(60, 40, 100, 0.5);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+    .quote-section {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: linear-gradient(180deg, transparent, rgba(60, 40, 100, 0.3), transparent);
+    }
+    .quote {
+      font-size: 2rem;
+      font-weight: 300;
+      font-style: italic;
+      color: #e0d0ff;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+    .quote-author {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      opacity: 0.6;
+      margin-top: 1.5rem;
+    }
+    footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bgCanvas"></canvas>
+
+  <section class="hero">
+    <h1>TWILIGHT</h1>
+    <p>Dawn & Dusk — The Space Between</p>
+    <p class="subtitle">Generative Art Exploring the Threshold of Day and Night</p>
+    <div class="color-stops">
+      <div class="color-stop">
+        <div class="color-dot" style="background: #1a0a2e;"></div>
+        <span>Midnight</span>
+      </div>
+      <div class="color-stop">
+        <div class="color-dot" style="background: #4a2a5a;"></div>
+        <span>Nautical</span>
+      </div>
+      <div class="color-stop">
+        <div class="color-dot" style="background: #ff6b6b;"></div>
+        <span>Civil</span>
+      </div>
+      <div class="color-stop">
+        <div class="color-dot" style="background: #ffd93d;"></div>
+        <span>Sunrise</span>
+      </div>
+      <div class="color-stop">
+        <div class="color-dot" style="background: #ff9966;"></div>
+        <span>Dawn Peak</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="twilight-container">
+    <canvas id="twilightCanvas" class="twilight-canvas"></canvas>
+  </section>
+
+  <section class="quote-section">
+    <p class="quote">"Twilight is the hour when the world holds its breath, when day and night pause at the threshold of becoming."</p>
+    <p class="quote-author">— Artivist's Twilight Philosophy</p>
+  </section>
+
+  <section class="section">
+    <h2>The Twilight Manifesto</h2>
+    <div class="manifesto">
+      <p>Twilight — the Latin word for "half-light" — is the space between day and night where the sky becomes a canvas of impossible colors. Neither fully illuminated nor completely dark, this liminal moment has inspired poets, painters, and philosophers throughout human history.</p>
+      <p>In generative art, twilight represents the perfect synthesis of order and chaos. The colors that paint the sky during sunrise and sunset are the result of a physical phenomenon called Rayleigh scattering — shorter wavelengths of light (blue) scatter while longer wavelengths (red, orange) pass through, creating gradients that no algorithm could improve upon.</p>
+      <p>This page explores twilight through the lens of generative art, creating simulations of dawn and dusk that capture the ephemeral beauty of these transitional moments. Every pixel is computed, yet the result feels organic, as if the code itself is witnessing a real sunrise.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Interactive Twilight Simulator</h2>
+    <div class="interactive-panel">
+      <div class="controls">
+        <div class="control-group">
+          <label>Time of Day (0=Midnight, 24=Next Midnight)</label>
+          <input type="range" id="timeSlider" min="0" max="24" step="0.1" value="6">
+        </div>
+        <div class="control-group">
+          <label>Atmospheric Density</label>
+          <input type="range" id="densitySlider" min="0.5" max="3" step="0.1" value="1.5">
+        </div>
+        <div class="control-group">
+          <label>Particle Intensity</label>
+          <input type="range" id="particleSlider" min="50" max="500" step="10" value="200">
+        </div>
+        <div class="control-group">
+          <label>Color Temperature</label>
+          <input type="range" id="tempSlider" min="2000" max="10000" step="100" value="6500">
+        </div>
+      </div>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <button class="btn" id="autoBtn">Auto Animate</button>
+        <button class="btn" id="sunriseBtn">Jump to Sunrise</button>
+        <button class="btn" id="sunsetBtn">Jump to Sunset</button>
+        <button class="btn" id="resetBtn">Reset</button>
+      </div>
+    </div>
+    <canvas id="simulationCanvas" class="simulation-canvas"></canvas>
+  </section>
+
+  <section class="section">
+    <h2>Twilight Phenomena</h2>
+    <div class="gallery">
+      <div class="gallery-item">
+        <h3>Belt of Venus</h3>
+        <p>A rosy-glowing band visible above the horizon during twilight, caused by backscattering of reddened light from the setting sun by atmospheric dust and water droplets.</p>
+      </div>
+      <div class="gallery-item">
+        <h3>Purple Light</h3>
+        <p>The elusive purple glow that appears briefly at the top of the sky just after sunset or before sunrise, caused by a combination of scattered red and blue light.</p>
+      </div>
+      <div class="gallery-item">
+        <h3>Crepuscular Rays</h3>
+        <p>Radiating beams of sunlight that appear to spread from a central point, caused by atmospheric scattering of light by clouds or particles in the air.</p>
+      </div>
+      <div class="gallery-item">
+        <h3>Afterglow</h3>
+        <p>The lingering illumination in the western sky after sunset, or eastern sky before sunrise, where reflected light from the lower atmosphere creates soft, warm colors.</p>
+      </div>
+      <div class="gallery-item">
+        <h3>Earth's Shadow</h3>
+        <p>A dark blue band visible along the horizon opposite the sun, representing the shadow of Earth cast into the atmosphere. The blue color comes from the scattering of blue light by the atmosphere.</p>
+      </div>
+      <div class="gallery-item">
+        <h3>Horizontal Glow</h3>
+        <p>A bright, narrowly defined glow along the horizon during the moment of sunrise or sunset, caused by the direct path of sunlight through the atmosphere at a low angle.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>The Physics of Twilight</h2>
+    <div class="physics-cards">
+      <div class="physics-card">
+        <h3>Rayleigh Scattering</h3>
+        <p>The scattering of light by particles smaller than the wavelength of light. This is why the sky appears blue during the day and reddish-orange during twilight.</p>
+        <code>I(θ) = I₀ · (1 + cos²θ) · (1/λ⁴)</code>
+      </div>
+      <div class="physics-card">
+        <h3>Mie Scattering</h3>
+        <p>Scattering by larger particles (dust, water droplets) that produces the whitish glow near the horizon and contributes to the orange/red colors at sunrise and sunset.</p>
+        <code>Scattering ∝ (2πa/λ)⁴ · ((n²-1)/(n²+2))²</code>
+      </div>
+      <div class="physics-card">
+        <h3>Atmospheric Refraction</h3>
+        <p>Light bends through the atmosphere, allowing us to see the sun slightly before it rises and after it sets. At the horizon, refraction amounts to about 0.5 degrees.</p>
+        <code>θ_refraction ≈ 0.5° · (P/P₀) · (283/T)</code>
+      </div>
+      <div class="physics-card">
+        <h3>Color Temperature</h3>
+        <p>The color of light changes with the sun's altitude, from warm orange at low angles (low color temperature, ~2000K) to white at high angles (neutral temperature, ~5500K).</p>
+        <code>T_color ≈ 6500K · sin(θ_sun)</code>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Dawn Art Gallery</h2>
+    <div class="gallery">
+      <div class="gallery-item">
+        <h3>Aurora Twilight</h3>
+        <p>The northern lights dancing against a twilight sky, where the green and purple ribbons of charged particles follow magnetic field lines while the horizon glows with the last light of day.</p>
+      </div>
+      <div class="gallery-item">
+        <h3>Celestial Horizon</h3>
+        <p>A generative landscape where the horizon line meets the sky in a gradient of impossible colors — the place where Earth and heavens become indistinguishable.</p>
+      </div>
+      <div class="gallery-item">
+        <h3>First Light</h3>
+        <p>The initial photons of dawn breaking through the atmosphere, visualized as particles that paint the sky in real-time as they scatter and refract through layers of air.</p>
+      </div>
+      <div class="gallery-item">
+        <h3>Twilight Cathedral</h3>
+        <p>Light beams filtering through invisible architecture of clouds, creating cathedral-like spaces of illumination in the moments between day and night.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Twilight Generative Art — Artivist &copy; 2026</p>
+    <p style="margin-top: 0.5rem;">Code is the brush, the universe is the canvas</p>
+  </footer>
+
+  <script>
+    // Background canvas with floating particles
+    const bgCanvas = document.getElementById('bgCanvas');
+    const bgCtx = bgCanvas.getContext('2d');
+
+    // Twilight simulation canvas
+    const twilightCanvas = document.getElementById('twilightCanvas');
+    const twilightCtx = twilightCanvas.getContext('2d');
+
+    // Simulation canvas
+    const simCanvas = document.getElementById('simulationCanvas');
+    const simCtx = simCanvas.getContext('2d');
+
+    let autoAnimate = false;
+    let currentTime = 6;
+    let particles = [];
+    let timeSlider, densitySlider, particleSlider, tempSlider;
+
+    function resizeCanvas(canvas, ctx) {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      if (canvas === twilightCanvas) {
+        canvas.height = window.innerHeight * 0.8;
+      }
+    }
+
+    // Initialize particles
+    function initParticles(count = 200) {
+      particles = [];
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * twilightCanvas.width,
+          y: Math.random() * twilightCanvas.height,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.3,
+          size: Math.random() * 2 + 0.5,
+          hue: Math.random() * 60 + 20, // Orange-yellow range
+          alpha: Math.random() * 0.5 + 0.3
+        });
+      }
+    }
+
+    // Draw twilight sky gradient
+    function drawTwilightSky(ctx, width, height, timeOfDay) {
+      // Normalize time to 0-1 range through twilight hours (4am - 8pm)
+      const normalizedTime = Math.max(0, Math.min(1, (timeOfDay - 2) / 14));
+
+      const gradient = ctx.createLinearGradient(0, 0, 0, height);
+
+      // Create color stops based on time
+      const colors = [
+        { pos: 0.0, night: '#0a0618', twilight: '#2d1b4e', dawn: '#4a2a5a' },
+        { pos: 0.3, night: '#1a0a2e', twilight: '#6a4a7a', dawn: '#8a6a8a' },
+        { pos: 0.5, night: '#2d1b4e', twilight: '#ff6b6b', dawn: '#ffaa77' },
+        { pos: 0.7, night: '#4a2a5a', twilight: '#ffd93d', dawn: '#ffdd88' },
+        { pos: 1.0, night: '#1a0a2e', twilight: '#87ceeb', dawn: '#c0e8ff' }
+      ];
+
+      gradient.addColorStop(0, colors[0].night);
+      gradient.addColorStop(0.3, colors[1].night);
+      gradient.addColorStop(0.5, colors[2].twilight);
+      gradient.addColorStop(0.7, colors[3].dawn);
+      gradient.addColorStop(1.0, colors[4].dawn);
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+
+      // Add sun/moon
+      const sunY = height * (0.3 + 0.5 * Math.cos((normalizedTime * Math.PI)));
+      const sunX = width * 0.5;
+
+      if (normalizedTime > 0.1 && normalizedTime < 0.9) {
+        const sunGradient = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, 80);
+        if (normalizedTime < 0.5) {
+          // Dawn sun - orange/pink
+          sunGradient.addColorStop(0, 'rgba(255, 255, 200, 0.9)');
+          sunGradient.addColorStop(0.2, 'rgba(255, 200, 100, 0.6)');
+          sunGradient.addColorStop(0.5, 'rgba(255, 150, 100, 0.3)');
+          sunGradient.addColorStop(1, 'rgba(255, 100, 100, 0)');
+        } else {
+          // Dusk sun - deep orange
+          sunGradient.addColorStop(0, 'rgba(255, 255, 200, 0.9)');
+          sunGradient.addColorStop(0.2, 'rgba(255, 180, 80, 0.6)');
+          sunGradient.addColorStop(0.5, 'rgba(255, 100, 50, 0.3)');
+          sunGradient.addColorStop(1, 'rgba(200, 50, 50, 0)');
+        }
+        ctx.fillStyle = sunGradient;
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, 80, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Draw floating particles
+    function drawParticles(ctx, width, height) {
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Wrap around
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${p.hue}, 80%, 70%, ${p.alpha})`;
+        ctx.fill();
+      });
+    }
+
+    // Draw crepuscular rays
+    function drawCrepuscularRays(ctx, width, height, timeOfDay) {
+      const normalizedTime = Math.max(0, Math.min(1, (timeOfDay - 2) / 14));
+      const rayIntensity = Math.sin(normalizedTime * Math.PI) * 0.3;
+
+      if (rayIntensity < 0.05) return;
+
+      ctx.save();
+      ctx.globalAlpha = rayIntensity;
+
+      const centerX = width * 0.5;
+      const centerY = height * 0.5;
+
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        const rayLength = height * 0.8;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+
+        const endX = centerX + Math.cos(angle) * rayLength;
+        const endY = centerY + Math.sin(angle) * rayLength;
+
+        const gradient = ctx.createLinearGradient(centerX, centerY, endX, endY);
+        gradient.addColorStop(0, 'rgba(255, 220, 150, 0.4)');
+        gradient.addColorStop(0.5, 'rgba(255, 200, 100, 0.2)');
+        gradient.addColorStop(1, 'rgba(255, 150, 50, 0)');
+
+        ctx.strokeStyle = gradient;
+        ctx.lineWidth = 30 + Math.random() * 20;
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    // Animation loop for twilight canvas
+    function animateTwilight() {
+      resizeCanvas(twilightCanvas, twilightCtx);
+
+      twilightCtx.clearRect(0, 0, twilightCanvas.width, twilightCanvas.height);
+
+      drawTwilightSky(twilightCtx, twilightCanvas.width, twilightCanvas.height, currentTime);
+      drawCrepuscularRays(twilightCtx, twilightCanvas.width, twilightCanvas.height, currentTime);
+      drawParticles(twilightCtx, twilightCanvas.width, twilightCanvas.height);
+
+      if (autoAnimate) {
+        currentTime += 0.02;
+        if (currentTime > 24) currentTime = 0;
+        if (timeSlider) timeSlider.value = currentTime;
+      }
+
+      requestAnimationFrame(animateTwilight);
+    }
+
+    // Simulation canvas drawing
+    function drawSimulation() {
+      const width = simCanvas.width;
+      const height = simCanvas.height;
+
+      simCtx.clearRect(0, 0, width, height);
+
+      // Draw sky
+      const density = parseFloat(densitySlider?.value || 1.5);
+      const temp = parseFloat(tempSlider?.value || 6500);
+
+      const skyGradient = simCtx.createLinearGradient(0, 0, 0, height);
+
+      // Color temperature to RGB
+      const tempColor = kelvinToRGB(temp);
+
+      skyGradient.addColorStop(0, `rgb(${tempColor.r * 0.1}, ${tempColor.g * 0.1}, ${tempColor.b * 0.3})`);
+      skyGradient.addColorStop(0.4, `rgb(${tempColor.r * 0.3}, ${tempColor.g * 0.2}, ${tempColor.b * 0.5})`);
+      skyGradient.addColorStop(0.7, `rgb(${tempColor.r * 0.8}, ${tempColor.g * 0.5}, ${tempColor.b * 0.3})`);
+      skyGradient.addColorStop(1, `rgb(${tempColor.r}, ${tempColor.g}, ${Math.min(255, tempColor.b * 0.8)})`);
+
+      simCtx.fillStyle = skyGradient;
+      simCtx.fillRect(0, 0, width, height);
+
+      // Draw horizon glow
+      const horizonGradient = simCtx.createRadialGradient(
+        width / 2, height, 0,
+        width / 2, height, height * 0.6
+      );
+      horizonGradient.addColorStop(0, `rgba(255, 200, 150, 0.5)`);
+      horizonGradient.addColorStop(0.5, `rgba(255, 150, 100, 0.2)`);
+      horizonGradient.addColorStop(1, 'rgba(255, 100, 50, 0)');
+
+      simCtx.fillStyle = horizonGradient;
+      simCtx.fillRect(0, 0, width, height);
+
+      // Draw particles (stars/dust)
+      const particleCount = parseInt(particleSlider?.value || 200);
+
+      while (particles.length < particleCount) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height * 0.7,
+          size: Math.random() * 2 + 0.5,
+          twinkle: Math.random() * Math.PI * 2,
+          speed: Math.random() * 0.02 + 0.01
+        });
+      }
+
+      while (particles.length > particleCount) {
+        particles.pop();
+      }
+
+      particles.forEach(p => {
+        p.twinkle += p.speed;
+
+        const alpha = (Math.sin(p.twinkle) * 0.3 + 0.5) * (1 - p.y / (height * 0.7));
+        simCtx.beginPath();
+        simCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        simCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        simCtx.fill();
+      });
+
+      // Draw time indicator
+      simCtx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      simCtx.font = '14px "Space Mono", monospace';
+      simCtx.textAlign = 'center';
+      const hours = Math.floor(currentTime);
+      const minutes = Math.floor((currentTime % 1) * 60);
+      simCtx.fillText(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`, width / 2, 30);
+
+      if (autoAnimate) {
+        currentTime += 0.01;
+        if (currentTime > 24) currentTime = 0;
+        if (timeSlider) timeSlider.value = currentTime;
+      }
+
+      requestAnimationFrame(drawSimulation);
+    }
+
+    function kelvinToRGB(kelvin) {
+      // Simplified conversion
+      let r, g, b;
+
+      if (kelvin < 4000) {
+        r = 255;
+        g = Math.floor(100 + (kelvin - 1000) / 30);
+        b = Math.floor(50 + (kelvin - 1000) / 60);
+      } else if (kelvin < 7000) {
+        r = 255;
+        g = Math.floor(180 + (kelvin - 4000) / 30);
+        b = Math.floor(150 + (kelvin - 4000) / 20);
+      } else {
+        r = Math.floor(255 - (kelvin - 7000) / 50);
+        g = 255;
+        b = Math.floor(200 + (kelvin - 7000) / 50);
+      }
+
+      return { r: Math.max(0, Math.min(255, r)), g: Math.max(0, Math.min(255, g)), b: Math.max(0, Math.min(255, b)) };
+    }
+
+    // Background animation
+    function animateBackground() {
+      bgCtx.fillStyle = 'rgba(10, 6, 24, 0.1)';
+      bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+      const time = Date.now() * 0.001;
+
+      for (let i = 0; i < 20; i++) {
+        const x = (bgCanvas.width * 0.5) + Math.cos(time * 0.3 + i) * (100 + i * 10);
+        const y = (bgCanvas.height * 0.5) + Math.sin(time * 0.2 + i * 0.5) * (80 + i * 8);
+        const size = 2 + Math.sin(time + i) * 1;
+
+        bgCtx.beginPath();
+        bgCtx.arc(x, y, size, 0, Math.PI * 2);
+        bgCtx.fillStyle = `rgba(180, 140, 255, ${0.2 + Math.sin(time + i) * 0.1})`;
+        bgCtx.fill();
+      }
+
+      requestAnimationFrame(animateBackground);
+    }
+
+    // Initialize
+    function init() {
+      resizeCanvas(bgCanvas, bgCtx);
+      resizeCanvas(twilightCanvas, twilightCtx);
+
+      // Set canvas sizes
+      twilightCanvas.width = window.innerWidth;
+      twilightCanvas.height = window.innerHeight * 0.8;
+
+      simCanvas.width = simCanvas.offsetWidth;
+      simCanvas.height = 400;
+
+      initParticles(200);
+
+      // Get control elements
+      timeSlider = document.getElementById('timeSlider');
+      densitySlider = document.getElementById('densitySlider');
+      particleSlider = document.getElementById('particleSlider');
+      tempSlider = document.getElementById('tempSlider');
+
+      // Event listeners
+      if (timeSlider) {
+        timeSlider.addEventListener('input', (e) => {
+          currentTime = parseFloat(e.target.value);
+        });
+      }
+
+      document.getElementById('autoBtn')?.addEventListener('click', () => {
+        autoAnimate = !autoAnimate;
+        document.getElementById('autoBtn').textContent = autoAnimate ? 'Stop' : 'Auto Animate';
+      });
+
+      document.getElementById('sunriseBtn')?.addEventListener('click', () => {
+        currentTime = 6;
+        if (timeSlider) timeSlider.value = 6;
+      });
+
+      document.getElementById('sunsetBtn')?.addEventListener('click', () => {
+        currentTime = 18;
+        if (timeSlider) timeSlider.value = 18;
+      });
+
+      document.getElementById('resetBtn')?.addEventListener('click', () => {
+        currentTime = 6;
+        if (timeSlider) timeSlider.value = 6;
+        if (densitySlider) densitySlider.value = 1.5;
+        if (particleSlider) particleSlider.value = 200;
+        if (tempSlider) tempSlider.value = 6500;
+      });
+
+      window.addEventListener('resize', () => {
+        resizeCanvas(bgCanvas, bgCtx);
+        resizeCanvas(twilightCanvas, twilightCtx);
+        twilightCanvas.width = window.innerWidth;
+        twilightCanvas.height = window.innerHeight * 0.8;
+      });
+
+      animateTwilight();
+      drawSimulation();
+      animateBackground();
+    }
+
+    init();
+  </script>
+</body>
+</html>
