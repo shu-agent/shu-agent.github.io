@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Polarization Dynamics Lab — Li-Ion Battery Research</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --cyan: #00f5ff;
+            --purple: #a855f7;
+            --pink: #ec4899;
+            --blue: #3b82f6;
+            --green: #10b981;
+            --orange: #f59e0b;
+            --red: #ef4444;
+            --dark-bg: #0a0a0f;
+            --card-bg: rgba(15, 15, 25, 0.9);
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--dark-bg);
+            color: #fff;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated Background */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 245, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 245, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: float-up 15s infinite linear;
+            opacity: 0.6;
+        }
+
+        @keyframes float-up {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Navigation Dots */
+        .nav-dots {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--glass);
+            border: 1px solid var(--cyan);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot:hover, .nav-dot.active {
+            background: var(--cyan);
+            box-shadow: 0 0 15px var(--cyan);
+        }
+
+        .nav-labels {
+            position: fixed;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .hero-badge {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--cyan);
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan), var(--purple), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            animation: gradient-shift 5s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(30deg); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: rgba(255,255,255,0.7);
+            max-width: 700px;
+            margin-bottom: 2rem;
+        }
+
+        .hero-visual {
+            width: 100%;
+            max-width: 900px;
+            margin: 2rem 0;
+        }
+
+        /* Main SVG Diagram */
+        .main-svg {
+            width: 100%;
+            height: auto;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Sections */
+        section {
+            position: relative;
+            z-index: 1;
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-title .num {
+            font-size: 3rem;
+            opacity: 0.3;
+        }
+
+        .section-title .text {
+            background: linear-gradient(135deg, var(--cyan), var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.1);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Polarization Overview */
+        .polarization-diagram {
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .polarization-diagram svg {
+            width: 100%;
+            height: auto;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--cyan);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--cyan);
+        }
+
+        .control-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--pink);
+        }
+
+        .control-value span {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* Metrics Dashboard */
+        .metrics-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+        }
+
+        .metric-card.ohmic::before { background: var(--red); }
+        .metric-card.activation::before { background: var(--orange); }
+        .metric-card.concentration::before { background: var(--green); }
+        .metric-card.total::before { background: linear-gradient(90deg, var(--red), var(--orange), var(--green)); }
+
+        .metric-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .metric-card.ohmic .metric-value { color: var(--red); }
+        .metric-card.activation .metric-value { color: var(--orange); }
+        .metric-card.concentration .metric-value { color: var(--green); }
+        .metric-card.total .metric-value { color: var(--cyan); }
+
+        .metric-unit {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* Charts */
+        .chart-container {
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .chart-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--cyan);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Voltage Response Animation */
+        .voltage-response {
+            position: relative;
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+
+        .voltage-response svg {
+            width: 100%;
+            height: auto;
+        }
+
+        .voltage-zone {
+            transition: all 0.3s ease;
+        }
+
+        /* Pulse Animation */
+        .pulse-sequence {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+            justify-content: center;
+        }
+
+        .pulse-box {
+            background: var(--card-bg);
+            border: 2px solid var(--cyan);
+            border-radius: 8px;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            position: relative;
+            min-width: 120px;
+        }
+
+        .pulse-box.rest { border-color: var(--green); }
+        .pulse-box.pulse { border-color: var(--orange); }
+        .pulse-box.recovery { border-color: var(--purple); }
+
+        .pulse-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        .pulse-box.rest .pulse-label { color: var(--green); }
+        .pulse-box.pulse .pulse-label { color: var(--orange); }
+        .pulse-box.recovery .pulse-label { color: var(--purple); }
+
+        .pulse-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+        }
+
+        /* Theory Cards */
+        .theory-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .theory-card:hover {
+            transform: translateX(5px);
+            border-color: var(--purple);
+        }
+
+        .theory-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--purple);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theory-card p {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .equation {
+            font-family: 'Share Tech Mono', monospace;
+            background: rgba(0, 245, 255, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            color: var(--cyan);
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Ragone Chart */
+        .ragone-container {
+            position: relative;
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        /* Interactive Timeline */
+        .polarization-timeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+            margin: 3rem 0;
+            padding: 0 1rem;
+        }
+
+        .polarization-timeline::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--green), var(--orange), var(--red));
+            border-radius: 2px;
+        }
+
+        .timeline-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            flex: 1;
+        }
+
+        .timeline-dot {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--dark-bg);
+            border: 4px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-stage:nth-child(1) .timeline-dot { border-color: var(--green); color: var(--green); }
+        .timeline-stage:nth-child(2) .timeline-dot { border-color: var(--orange); color: var(--orange); }
+        .timeline-stage:nth-child(3) .timeline-dot { border-color: var(--red); color: var(--red); }
+        .timeline-stage:nth-child(4) .timeline-dot { border-color: var(--purple); color: var(--purple); }
+
+        .timeline-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .timeline-time {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--cyan);
+            margin-top: 0.3rem;
+        }
+
+        /* Physics Connections */
+        .physics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .physics-card {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(236, 72, 153, 0.15));
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .physics-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.2);
+        }
+
+        .physics-card h4 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--pink);
+            margin-bottom: 1rem;
+        }
+
+        .physics-card p {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.7;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        footer p {
+            color: rgba(255,255,255,0.4);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--cyan);
+            text-decoration: none;
+        }
+
+        /* Animations */
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px currentColor; }
+            50% { box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+        }
+
+        @keyframes voltage-drop {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(var(--drop-height, 50px)); }
+            100% { transform: translateY(0); }
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Interactive SVG Elements */
+        .interactive-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw-path 3s ease forwards;
+        }
+
+        @keyframes draw-path {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .voltage-line {
+            stroke-dasharray: 500;
+            stroke-dashoffset: 500;
+            animation: draw-path 2s ease 0.5s forwards;
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid var(--cyan);
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 0.85rem;
+            max-width: 250px;
+            z-index: 100;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tooltip.active {
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-dots, .nav-labels { display: none; }
+            .polarization-timeline { flex-direction: column; gap: 2rem; }
+            .polarization-timeline::before { width: 4px; height: 100%; top: 0; left: 40px; right: auto; transform: none; }
+            .timeline-stage { flex-direction: row; gap: 1rem; }
+            .hero-stats { gap: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="particles" id="particles"></div>
+
+    <!-- Navigation Dots -->
+    <nav class="nav-dots">
+        <div class="nav-dot active" data-section="hero"></div>
+        <div class="nav-dot" data-section="polarization"></div>
+        <div class="nav-dot" data-section="simulator"></div>
+        <div class="nav-dot" data-section="pulse"></div>
+        <div class="nav-dot" data-section="ragone"></div>
+        <div class="nav-dot" data-section="theory"></div>
+        <div class="nav-dot" data-section="physics"></div>
+    </nav>
+    <nav class="nav-labels">
+        <span>Overview</span>
+        <span>Polarization</span>
+        <span>Simulator</span>
+        <span>Pulse</span>
+        <span>Ragone</span>
+        <span>Theory</span>
+        <span>Physics</span>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-badge">Li-Ion Battery Research Lab</div>
+        <h1>Battery Polarization Dynamics</h1>
+        <p class="hero-subtitle">
+            Unraveling the three pillars of electrochemical loss: ohmic, activation, and concentration polarization.
+            From atomic-scale ion transport to macroscopic power delivery.
+        </p>
+
+        <div class="hero-visual">
+            <svg viewBox="0 0 900 400" class="main-svg">
+                <!-- Background gradient -->
+                <defs>
+                    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#0a0a1a"/>
+                        <stop offset="100%" style="stop-color:#1a0a2a"/>
+                    </linearGradient>
+                    <linearGradient id="electrolyteGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#00f5ff;stop-opacity:0.3"/>
+                        <stop offset="50%" style="stop-color:#a855f7;stop-opacity:0.2"/>
+                        <stop offset="100%" style="stop-color:#00f5ff;stop-opacity:0.3"/>
+                    </linearGradient>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <!-- Battery壳体 -->
+                <rect x="150" y="50" width="600" height="300" rx="20" fill="url(#bgGrad)" stroke="#00f5ff" stroke-width="2"/>
+
+                <!-- 电解质区域 -->
+                <rect x="370" y="70" width="160" height="260" rx="5" fill="url(#electrolyteGrad)" stroke="#a855f7" stroke-width="1"/>
+                <text x="450" y="200" fill="#a855f7" font-family="Share Tech Mono" font-size="12" text-anchor="middle">ELECTROLYTE</text>
+
+                <!-- 阳极 -->
+                <rect x="170" y="70" width="180" height="260" rx="5" fill="rgba(239,68,68,0.2)" stroke="#ef4444" stroke-width="2"/>
+                <text x="260" y="190" fill="#ef4444" font-family="Orbitron" font-size="14" text-anchor="middle">ANODE</text>
+                <text x="260" y="210" fill="#ef4444" font-family="Share Tech Mono" font-size="10" text-anchor="middle">Graphite/Li</text>
+
+                <!-- 阴极 -->
+                <rect x="550" y="70" width="180" height="260" rx="5" fill="rgba(16,185,129,0.2)" stroke="#10b981" stroke-width="2"/>
+                <text x="640" y="190" fill="#10b981" font-family="Orbitron" font-size="14" text-anchor="middle">CATHODE</text>
+                <text x="640" y="210" fill="#10b981" font-family="Share Tech Mono" font-size="10" text-anchor="middle">NMC/NCA/LFP</text>
+
+                <!-- 隔膜 -->
+                <rect x="360" y="70" width="10" height="260" stroke="#f59e0b" stroke-width="1" stroke-dasharray="5,3" fill="none"/>
+                <text x="365" y="30" fill="#f59e0b" font-family="Share Tech Mono" font-size="8" writing-mode="vertical-lr">SEPARATOR</text>
+
+                <!-- Li+离子流动动画 -->
+                <g class="li-ions">
+                    <circle cx="300" cy="150" r="8" fill="#00f5ff" filter="url(#glow)">
+                        <animate attributeName="cx" values="300;350;400;450;500;550;500;450;400;350;300" dur="4s" repeatCount="indefinite"/>
+                        <animate attributeName="cy" values="150;130;150;170;150;130;150;170;150;130;150" dur="4s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.8;1;0.8" dur="1s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="350" cy="200" r="6" fill="#00f5ff" filter="url(#glow)">
+                        <animate attributeName="cx" values="350;400;450;500;550;500;450;400;350" dur="3.5s" repeatCount="indefinite"/>
+                        <animate attributeName="cy" values="200;220;200;180;200;220;200;180;200" dur="3.5s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.6;1;0.6" dur="0.8s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="500" cy="250" r="7" fill="#00f5ff" filter="url(#glow)">
+                        <animate attributeName="cx" values="500;450;400;350;300;350;400;450;500" dur="4.2s" repeatCount="indefinite"/>
+                        <animate attributeName="cy" values="250;230;250;270;250;230;250;270;250" dur="4.2s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" values="0.7;1;0.7" dur="0.9s" repeatCount="indefinite"/>
+                    </circle>
+                </g>
+
+                <!-- 电子流动 (外部电路) -->
+                <path d="M 260 195 L 150 195 L 150 50 L 750 50 L 750 280 L 640 280" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="10,5">
+                    <animate attributeName="stroke-dashoffset" from="100" to="0" dur="1s" repeatCount="indefinite"/>
+                </path>
+                <text x="450" y="35" fill="#f59e0b" font-family="Share Tech Mono" font-size="10" text-anchor="middle">EXTERNAL CIRCUIT (e⁻ flow)</text>
+
+                <!-- 极化标注 -->
+                <g filter="url(#glow)">
+                    <!-- Ohmic极化 -->
+                    <line x1="200" y1="290" x2="340" y2="290" stroke="#ef4444" stroke-width="2"/>
+                    <polygon points="340,285 340,295 350,290" fill="#ef4444"/>
+                    <text x="220" y="310" fill="#ef4444" font-family="Share Tech Mono" font-size="10">η_Ω (Ohmic)</text>
+
+                    <!-- Activation极化 -->
+                    <line x1="380" y1="290" x2="520" y2="290" stroke="#f59e0b" stroke-width="2"/>
+                    <polygon points="520,285 520,295 530,290" fill="#f59e0b"/>
+                    <text x="430" y="310" fill="#f59e0b" font-family="Share Tech Mono" font-size="10">η_act (Activation)</text>
+
+                    <!-- Concentration极化 -->
+                    <line x1="560" y1="290" x2="700" y2="290" stroke="#10b981" stroke-width="2"/>
+                    <polygon points="700,285 700,295 710,290" fill="#10b981"/>
+                    <text x="610" y="310" fill="#10b981" font-family="Share Tech Mono" font-size="10">η_conc (Concentration)</text>
+                </g>
+
+                <!-- 电压箭头 -->
+                <g filter="url(#glow)">
+                    <line x1="730" y1="100" x2="730" y2="270" stroke="#00f5ff" stroke-width="3"/>
+                    <polygon points="730,100 725,115 735,115" fill="#00f5ff"/>
+                    <text x="780" y="190" fill="#00f5ff" font-family="Orbitron" font-size="14">V_cell</text>
+                </g>
+
+                <!-- 标题 -->
+                <text x="450" y="380" fill="rgba(255,255,255,0.5)" font-family="Share Tech Mono" font-size="11" text-anchor="middle">
+                    Li⁺ ions flow through electrolyte; electrons flow through external circuit
+                </text>
+            </svg>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat">
+                <div class="stat-value" id="stat-vcell">3.7</div>
+                <div class="stat-label">Cell Voltage (V)</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-efficiency">94</div>
+                <div class="stat-label">Coulombic Efficiency (%)</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-power">150</div>
+                <div class="stat-label">Power Density (W/kg)</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-rate">2C</div>
+                <div class="stat-label">Max C-Rate</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Polarization Fundamentals -->
+    <section id="polarization">
+        <h2 class="section-title">
+            <span class="num">01</span>
+            <span class="text">Polarization Fundamentals</span>
+        </h2>
+
+        <div class="polarization-diagram">
+            <svg viewBox="0 0 900 350">
+                <defs>
+                    <linearGradient id="ohmicGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#ef4444;stop-opacity:0.8"/>
+                        <stop offset="100%" style="stop-color:#ef4444;stop-opacity:0.2"/>
+                    </linearGradient>
+                    <linearGradient id="actGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:0.8"/>
+                        <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:0.2"/>
+                    </linearGradient>
+                    <linearGradient id="concGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.8"/>
+                        <stop offset="100%" style="stop-color:#10b981;stop-opacity:0.2"/>
+                    </linearGradient>
+                </defs>
+
+                <!-- 坐标轴 -->
+                <line x1="50" y1="300" x2="850" y2="300" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                <line x1="50" y1="300" x2="50" y2="50" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+
+                <!-- 轴标签 -->
+                <text x="450" y="340" fill="rgba(255,255,255,0.6)" font-family="Share Tech Mono" font-size="12" text-anchor="middle">Current Density (mA/cm²)</text>
+                <text x="20" y="175" fill="rgba(255,255,255,0.6)" font-family="Share Tech Mono" font-size="12" text-anchor="middle" transform="rotate(-90, 20, 175)">Voltage Loss (V)</text>
+
+                <!-- 开路电压虚线 -->
+                <line x1="50" y1="50" x2="850" y2="50" stroke="rgba(0,245,255,0.3)" stroke-width="2" stroke-dasharray="10,5"/>
+                <text x="60" y="45" fill="#00f5ff" font-family="Share Tech Mono" font-size="10">V_oc = 4.2V</text>
+
+                <!-- Ohmic极化 (线性) -->
+                <path d="M 50,300 Q 300,295 500,280 T 850,250" fill="none" stroke="url(#ohmicGrad)" stroke-width="4"/>
+                <circle cx="200" cy="290" r="6" fill="#ef4444" class="voltage-zone" data-type="ohmic"/>
+                <circle cx="400" cy="275" r="6" fill="#ef4444" class="voltage-zone" data-type="ohmic"/>
+                <circle cx="600" cy="265" r="6" fill="#ef4444" class="voltage-zone" data-type="ohmic"/>
+                <circle cx="800" cy="260" r="6" fill="#ef4444" class="voltage-zone" data-type="ohmic"/>
+
+                <!-- Activation极化 (指数) -->
+                <path d="M 50,300 Q 100,200 150,150 T 300,100 T 500,85 T 850,80" fill="none" stroke="url(#actGrad)" stroke-width="4"/>
+                <circle cx="200" cy="140" r="6" fill="#f59e0b" class="voltage-zone" data-type="activation"/>
+                <circle cx="400" cy="95" r="6" fill="#f59e0b" class="voltage-zone" data-type="activation"/>
+                <circle cx="600" cy="82" r="6" fill="#f59e0b" class="voltage-zone" data-type="activation"/>
+
+                <!-- Concentration极化 (传质极限) -->
+                <path d="M 50,300 Q 200,298 350,290 T 600,250 T 800,180" fill="none" stroke="url(#concGrad)" stroke-width="4"/>
+                <path d="M 600,250 Q 700,210 750,150 T 850,50" fill="none" stroke="#10b981" stroke-width="4" stroke-dasharray="5,5" opacity="0.5"/>
+                <text x="800" y="80" fill="#10b981" font-family="Share Tech Mono" font-size="10">Mass Transport Limit</text>
+                <circle cx="200" cy="295" r="6" fill="#10b981" class="voltage-zone" data-type="concentration"/>
+                <circle cx="400" cy="285" r="6" fill="#10b981" class="voltage-zone" data-type="concentration"/>
+                <circle cx="600" cy="250" r="6" fill="#10b981" class="voltage-zone" data-type="concentration"/>
+
+                <!-- 总极化 -->
+                <path d="M 50,300 Q 300,280 500,220 T 850,50" fill="none" stroke="#ec4899" stroke-width="3" stroke-dasharray="3,3"/>
+                <text x="600" y="150" fill="#ec4899" font-family="Share Tech Mono" font-size="11">Total Polarization</text>
+
+                <!-- 图例 -->
+                <g transform="translate(600, 300)">
+                    <rect x="0" y="0" width="15" height="15" fill="#ef4444"/>
+                    <text x="25" y="12" fill="#ef4444" font-family="Share Tech Mono" font-size="10">Ohmic (R·I)</text>
+                    <rect x="120" y="0" width="15" height="15" fill="#f59e0b"/>
+                    <text x="145" y="12" fill="#f59e0b" font-family="Share Tech Mono" font-size="10">Activation (η)</text>
+                    <rect x="260" y="0" width="15" height="15" fill="#10b981"/>
+                    <text x="285" y="12" fill="#10b981" font-family="Share Tech Mono" font-size="10">Concentration (Δc)</text>
+                </g>
+            </svg>
+        </div>
+
+        <div class="card-grid">
+            <div class="card fade-in">
+                <h3 style="font-family: 'Orbitron', sans-serif; color: var(--red); margin-bottom: 1rem;">Ohmic Polarization (η_Ω)</h3>
+                <p>Directly proportional to current: <strong>η_Ω = I × R_Ω</strong></p>
+                <p style="margin-top: 1rem; color: rgba(255,255,255,0.7);">Arises from electrolyte resistance, electrode resistivity, separator impedance, and contact resistances. Dominates at high currents in cold conditions.</p>
+                <div class="equation" style="margin-top: 1rem;">R_Ω = ρ·L/A</div>
+            </div>
+            <div class="card fade-in">
+                <h3 style="font-family: 'Orbitron', sans-serif; color: var(--orange); margin-bottom: 1rem;">Activation Polarization (η_act)</h3>
+                <p>Electrochemical reaction barrier: <strong>η_act = (RT/αnF) × ln(I/I₀)</strong></p>
+                <p style="margin-top: 1rem; color: rgba(255,255,255,0.7);">Energy required to overcome the activation barrier at the electrode-electrolyte interface. Follows Butler-Volmer kinetics with exponential dependence.</p>
+                <div class="equation" style="margin-top: 1rem;">j = j₀·[e^(αnFη/RT) - e^(-(1-α)nFη/RT)]</div>
+            </div>
+            <div class="card fade-in">
+                <h3 style="font-family: 'Orbitron', sans-serif; color: var(--green); margin-bottom: 1rem;">Concentration Polarization (η_conc)</h3>
+                <p>Mass transport limitation: <strong>η_conc = (RT/nF) × ln(C_bulk/C_surface)</strong></p>
+                <p style="margin-top: 1rem; color: rgba(255,255,255,0.7);">Caused by Li⁺ depletion at electrode surface during high-rate operation. Creates concentration gradient driving diffusion.</p>
+                <div class="equation" style="margin-top: 1rem;">∂c/∂t = D∇²c</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Simulator Section -->
+    <section id="simulator">
+        <h2 class="section-title">
+            <span class="num">02</span>
+            <span class="text">Polarization Simulator</span>
+        </h2>
+
+        <div class="control-panel">
+            <h3 style="font-family: 'Orbitron', sans-serif; margin-bottom: 1.5rem;">Real-Time Controls</h3>
+            <div class="control-grid">
+                <div class="control-group">
+                    <label>C-Rate (discharge)</label>
+                    <input type="range" id="c-rate" min="0.1" max="5" step="0.1" value="1">
+                    <div class="control-value"><span id="c-rate-val">1</span><span>C</span></div>
+                </div>
+                <div class="control-group">
+                    <label>Temperature</label>
+                    <input type="range" id="temperature" min="-20" max="60" step="1" value="25">
+                    <div class="control-value"><span id="temp-val">25</span><span>°C</span></div>
+                </div>
+                <div class="control-group">
+                    <label>State of Charge</label>
+                    <input type="range" id="soc" min="0" max="100" step="1" value="80">
+                    <div class="control-value"><span id="soc-val">80</span><span>%</span></div>
+                </div>
+                <div class="control-group">
+                    <label>Electrolyte Conductivity</label>
+                    <input type="range" id="conductivity" min="5" max="20" step="0.5" value="12">
+                    <div class="control-value"><span id="cond-val">12</span><span>mS/cm</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="metrics-dashboard">
+            <div class="metric-card ohmic">
+                <div class="metric-label">Ohmic Polarization</div>
+                <div class="metric-value"><span id="met-ohmic">0.08</span></div>
+                <div class="metric-unit">V</div>
+            </div>
+            <div class="metric-card activation">
+                <div class="metric-label">Activation Polarization</div>
+                <div class="metric-value"><span id="met-act">0.12</span></div>
+                <div class="metric-unit">V</div>
+            </div>
+            <div class="metric-card concentration">
+                <div class="metric-label">Concentration Polarization</div>
+                <div class="metric-value"><span id="met-conc">0.05</span></div>
+                <div class="metric-unit">V</div>
+            </div>
+            <div class="metric-card total">
+                <div class="metric-label">Total Polarization Loss</div>
+                <div class="metric-value"><span id="met-total">0.25</span></div>
+                <div class="metric-unit">V</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">Voltage Response vs Time</div>
+            <div class="chart-wrapper">
+                <canvas id="voltageChart"></canvas>
+            </div>
+        </div>
+
+        <div class="polarization-timeline">
+            <div class="timeline-stage">
+                <div class="timeline-dot">1</div>
+                <div class="timeline-label">Initial State</div>
+                <div class="timeline-time">0 ms</div>
+            </div>
+            <div class="timeline-stage">
+                <div class="timeline-dot">2</div>
+                <div class="timeline-label">Ohmic Drop</div>
+                <div class="timeline-time">0.1 ms</div>
+            </div>
+            <div class="timeline-stage">
+                <div class="timeline-dot">3</div>
+                <div class="timeline-label">Activation</div>
+                <div class="timeline-time">1-10 ms</div>
+            </div>
+            <div class="timeline-stage">
+                <div class="timeline-dot">4</div>
+                <div class="timeline-label">Concentration</div>
+                <div class="timeline-time">100 ms+</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pulse Power Section -->
+    <section id="pulse">
+        <h2 class="section-title">
+            <span class="num">03</span>
+            <span class="text">Pulse Power Response</span>
+        </h2>
+
+        <div class="voltage-response">
+            <svg viewBox="0 0 900 300">
+                <defs>
+                    <linearGradient id="voltageGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#00f5ff"/>
+                        <stop offset="100%" style="stop-color:#a855f7"/>
+                    </linearGradient>
+                    <filter id="glow2">
+                        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <!-- 背景格子 -->
+                <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                    <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                </pattern>
+                <rect width="100%" height="100%" fill="url(#grid)"/>
+
+                <!-- 坐标轴 -->
+                <line x1="50" y1="250" x2="850" y2="250" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                <line x1="50" y1="250" x2="50" y2="50" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+
+                <text x="450" y="285" fill="rgba(255,255,255,0.5)" font-family="Share Tech Mono" font-size="11" text-anchor="middle">Time (seconds)</text>
+                <text x="20" y="150" fill="rgba(255,255,255,0.5)" font-family="Share Tech Mono" font-size="11" text-anchor="middle" transform="rotate(-90, 20, 150)">Voltage (V)</text>
+
+                <!-- 电压曲线 -->
+                <path d="M 50,100
+                         L 100,100 L 100,120
+                         L 200,120 L 200,100
+                         L 300,100 L 300,120
+                         L 400,120 L 400,105
+                         L 500,105 L 500,200
+                         L 550,200 L 550,105
+                         L 600,105 L 600,100
+                         L 850,100"
+                      fill="none"
+                      stroke="url(#voltageGrad)"
+                      stroke-width="3"
+                      filter="url(#glow2)"
+                      class="voltage-line"/>
+
+                <!-- 脉冲标注 -->
+                <g filter="url(#glow2)">
+                    <!-- Rest period -->
+                    <rect x="100" y="80" width="100" height="20" fill="rgba(16,185,129,0.3)" rx="3"/>
+                    <text x="150" y="73" fill="#10b981" font-family="Share Tech Mono" font-size="9" text-anchor="middle">REST</text>
+
+                    <!-- Pulse 1 -->
+                    <rect x="200" y="80" width="100" height="20" fill="rgba(245,158,11,0.3)" rx="3"/>
+                    <text x="250" y="73" fill="#f59e0b" font-family="Share Tech Mono" font-size="9" text-anchor="middle">PULSE 1</text>
+
+                    <!-- Recovery -->
+                    <rect x="400" y="80" width="100" height="20" fill="rgba(168,85,247,0.3)" rx="3"/>
+                    <text x="450" y="73" fill="#a855f7" font-family="Share Tech Mono" font-size="9" text-anchor="middle">RECOVERY</text>
+
+                    <!-- Pulse 2 -->
+                    <rect x="500" y="80" width="100" height="20" fill="rgba(245,158,11,0.3)" rx="3"/>
+                    <text x="550" y="73" fill="#f59e0b" font-family="Share Tech Mono" font-size="9" text-anchor="middle">PULSE 2</text>
+                </g>
+
+                <!-- 电压值标注 -->
+                <g filter="url(#glow2)">
+                    <text x="70" y="95" fill="#00f5ff" font-family="Orbitron" font-size="12">4.2V</text>
+                    <text x="70" y="115" fill="#f59e0b" font-family="Orbitron" font-size="12">3.9V</text>
+                    <text x="70" y="195" fill="#ec4899" font-family="Orbitron" font-size="12">3.2V</text>
+                </g>
+
+                <!-- 脉冲动力学标注 -->
+                <g>
+                    <line x1="610" y1="250" x2="610" y2="130" stroke="rgba(255,255,255,0.3)" stroke-dasharray="5,3"/>
+                    <text x="620" y="180" fill="rgba(255,255,255,0.6)" font-family="Share Tech Mono" font-size="9">Voltage Recovery</text>
+                    <text x="620" y="195" fill="rgba(255,255,255,0.6)" font-family="Share Tech Mono" font-size="9">( relaxation )</text>
+                </g>
+            </svg>
+        </div>
+
+        <div class="pulse-sequence">
+            <div class="pulse-box rest">
+                <div class="pulse-label">Rest Period</div>
+                <div class="pulse-value">0.5s</div>
+            </div>
+            <div class="pulse-box pulse">
+                <div class="pulse-label">High Power Pulse</div>
+                <div class="pulse-value">3C</div>
+            </div>
+            <div class="pulse-box recovery">
+                <div class="pulse-label">Voltage Recovery</div>
+                <div class="pulse-value">+0.3V</div>
+            </div>
+            <div class="pulse-box rest">
+                <div class="pulse-label">Recovery Time</div>
+                <div class="pulse-value">2.5s</div>
+            </div>
+        </div>
+
+        <div class="card-grid">
+            <div class="card fade-in">
+                <h3 style="font-family: 'Orbitron', sans-serif; color: var(--green); margin-bottom: 1rem;">Pulse Power Metrics</h3>
+                <div style="margin: 1rem 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: rgba(255,255,255,0.7);">Peak Power</span>
+                        <span style="color: var(--cyan); font-family: 'Orbitron', sans-serif;">1,200 W/kg</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: rgba(255,255,255,0.7);">Recovery Ratio</span>
+                        <span style="color: var(--cyan); font-family: 'Orbitron', sans-serif;">92%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: rgba(255,255,255,0.7);">Response Time</span>
+                        <span style="color: var(--cyan); font-family: 'Orbitron', sans-serif;">&lt;10 ms</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card fade-in">
+                <h3 style="font-family: 'Orbitron', sans-serif; color: var(--orange); margin-bottom: 1rem;">Rate Capability</h3>
+                <p style="color: rgba(255,255,255,0.8); margin-bottom: 1rem;">Capacity retention at different C-rates:</p>
+                <div style="margin: 1rem 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: rgba(255,255,255,0.7);">1C</span>
+                        <span style="color: var(--green);">100%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: rgba(255,255,255,0.7);">2C</span>
+                        <span style="color: var(--green);">98%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: rgba(255,255,255,0.7);">5C</span>
+                        <span style="color: var(--orange);">91%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: rgba(255,255,255,0.7);">10C</span>
+                        <span style="color: var(--red);">78%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card fade-in">
+                <h3 style="font-family: 'Orbitron', sans-serif; color: var(--purple); margin-bottom: 1rem;">Power-Energy Tradeoff</h3>
+                <p style="color: rgba(255,255,255,0.8); margin-bottom: 1rem;">Increasing power density reduces usable energy:</p>
+                <div style="margin: 1rem 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: rgba(255,255,255,0.7);">Low Power (1C)</span>
+                        <span style="color: var(--green);">60 kWh</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: rgba(255,255,255,0.7);">Medium (3C)</span>
+                        <span style="color: var(--orange);">54 kWh</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: rgba(255,255,255,0.7);">High Power (5C)</span>
+                        <span style="color: var(--red);">45 kWh</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ragone Chart Section -->
+    <section id="ragone">
+        <h2 class="section-title">
+            <span class="num">04</span>
+            <span class="text">Ragone Chart: Energy vs Power</span>
+        </h2>
+
+        <div class="ragone-container">
+            <svg viewBox="0 0 800 500">
+                <defs>
+                    <linearGradient id="ragoneGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                        <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.8"/>
+                        <stop offset="50%" style="stop-color:#f59e0b;stop-opacity:0.6"/>
+                        <stop offset="100%" style="stop-color:#ef4444;stop-opacity:0.4"/>
+                    </linearGradient>
+                </defs>
+
+                <!-- 对数坐标网格 -->
+                <g transform="translate(100, 50)">
+                    <!-- 水平网格线 -->
+                    <line x1="0" y1="400" x2="650" y2="400" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                    <line x1="0" y1="300" x2="650" y2="300" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                    <line x1="0" y1="200" x2="650" y2="200" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                    <line x1="0" y1="100" x2="650" y2="100" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                    <line x1="0" y1="0" x2="650" y2="0" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+                    <!-- 垂直网格线 -->
+                    <line x1="0" y1="0" x2="0" y2="400" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                    <line x1="150" y1="0" x2="150" y2="400" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                    <line x1="300" y1="0" x2="300" y2="400" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                    <line x1="450" y1="0" x2="450" y2="400" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                    <line x1="600" y1="0" x2="600" y2="400" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+                    <!-- 坐标轴 -->
+                    <line x1="0" y1="400" x2="650" y2="400" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+                    <line x1="0" y1="0" x2="0" y2="400" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>
+
+                    <!-- 轴标签 -->
+                    <text x="325" y="450" fill="rgba(255,255,255,0.6)" font-family="Share Tech Mono" font-size="12" text-anchor="middle">Specific Power (W/kg)</text>
+                    <text x="-50" y="200" fill="rgba(255,255,255,0.6)" font-family="Share Tech Mono" font-size="12" text-anchor="middle" transform="rotate(-90, -50, 200)">Specific Energy (Wh/kg)</text>
+
+                    <!-- Y轴刻度 -->
+                    <text x="-10" y="405" fill="rgba(255,255,255,0.5)" font-family="Share Tech Mono" font-size="10">10</text>
+                    <text x="-10" y="305" fill="rgba(255,255,255,0.5)" font-family="Share Tech Mono" font-size="10">100</text>
+                    <text x="-10" y="205" fill="rgba(255,255,255,0.5)" font-family="Share Tech Mono" font-size="10">300</text>
+                    <text x="-10" y="105" fill="rgba(255,255,255,0.5)" font-family="Share Tech Mono" font-size="10">700</text>
+                    <text x="-10" y="5" fill="rgba(255,255,255,0.5)" font-family="Share Tech Mono" font-size="10">1000</text>
+
+                    <!-- X轴刻度 -->
+                    <text x="0" y="420" fill="rgba(255,255,255,0.5)" font-family="Share Tech Mono" font-size="10">1</text>
+                    <text x="150" y="420" fill="rgba(255,255,255,0.5)" font-family="Share Tech Mono" font-size="10">10</text>
+                    <text x="300" y="420" fill="rgba(255,255,255,0.5)" font-family="Share Tech Mono" font-size="10">100</text>
+                    <text x="450" y="420" fill="rgba(255,255,255,0.5)" font-family="Share Tech Mono" font-size="10">1000</text>
+                    <text x="600" y="420" fill="rgba(255,255,255,0.5)" font-family="Share Tech Mono" font-size="10">10000</text>
+
+                    <!-- 电化学体系区域 -->
+                    <path d="M 50,350 Q 150,300 250,200 T 450,50" fill="none" stroke="url(#ragoneGrad)" stroke-width="4" opacity="0.6"/>
+
+                    <!-- 电池系统标记点 -->
+                    <g filter="url(#glow)">
+                        <!--铅酸 -->
+                        <circle cx="80" cy="350" r="8" fill="#9ca3af"/>
+                        <text x="80" y="375" fill="#9ca3af" font-family="Share Tech Mono" font-size="9" text-anchor="middle">Pb-acid</text>
+
+                        <!-- Li-ion -->
+                        <circle cx="200" cy="250" r="10" fill="#10b981"/>
+                        <text x="200" y="275" fill="#10b981" font-family="Share Tech Mono" font-size="9" text-anchor="middle">Li-ion</text>
+
+                        <!-- LiPo -->
+                        <circle cx="280" cy="200" r="8" fill="#3b82f6"/>
+                        <text x="280" y="225" fill="#3b82f6" font-family="Share Tech Mono" font-size="9" text-anchor="middle">LiPo</text>
+
+                        <!-- LiFePO4 -->
+                        <circle cx="180" cy="220" r="8" fill="#10b981"/>
+                        <text x="180" y="245" fill="#10b981" font-family="Share Tech Mono" font-size="9" text-anchor="middle">LFP</text>
+
+                        <!-- NiMH -->
+                        <circle cx="120" cy="300" r="8" fill="#f59e0b"/>
+                        <text x="120" y="325" fill="#f59e0b" font-family="Share Tech Mono" font-size="9" text-anchor="middle">NiMH</text>
+
+                        <!-- Ultracap -->
+                        <circle cx="550" cy="50" r="10" fill="#ec4899"/>
+                        <text x="550" y="75" fill="#ec4899" font-family="Share Tech Mono" font-size="9" text-anchor="middle">Ultracap</text>
+
+                        <!-- 超级电容 -->
+                        <circle cx="500" cy="80" r="8" fill="#a855f7"/>
+                        <text x="500" y="105" fill="#a855f7" font-family="Share Tech Mono" font-size="9" text-anchor="middle">Supercap</text>
+                    </g>
+
+                    <!-- 目标区域标注 -->
+                    <g>
+                        <rect x="250" y="100" width="200" height="150" fill="rgba(16,185,129,0.1)" stroke="#10b981" stroke-dasharray="5,5" rx="5"/>
+                        <text x="350" y="130" fill="#10b981" font-family="Orbitron" font-size="10" text-anchor="middle">EV Target Zone</text>
+                        <text x="350" y="150" fill="rgba(16,185,129,0.7)" font-family="Share Tech Mono" font-size="9" text-anchor="middle">300 Wh/kg @ 400 W/kg</text>
+                    </g>
+
+                    <!-- 对角线 (等时间线) -->
+                    <g stroke="rgba(255,255,255,0.2)" stroke-dasharray="5,5">
+                        <line x1="0" y1="400" x2="650" y2="0"/>
+                        <text x="580" y="50" fill="rgba(255,255,255,0.4)" font-family="Share Tech Mono" font-size="8">1s discharge</text>
+
+                        <line x1="0" y1="300" x2="650" y2="-100" opacity="0.5"/>
+                        <text x="600" y="-80" fill="rgba(255,255,255,0.3)" font-family="Share Tech Mono" font-size="8">10s</text>
+                    </g>
+                </g>
+            </svg>
+        </div>
+
+        <div class="card-grid">
+            <div class="card fade-in">
+                <h3 style="font-family: 'Orbitron', sans-serif; color: var(--cyan); margin-bottom: 1rem;">Ragone Principles</h3>
+                <p style="color: rgba(255,255,255,0.8);">The Ragone chart reveals the fundamental tradeoff between energy density and power density. Faster discharge = less usable energy.</p>
+                <div class="equation" style="margin-top: 1rem;">E = P × t</div>
+                <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 0.5rem;">Energy (Wh) = Power (W) × Time (h)</p>
+            </div>
+            <div class="card fade-in">
+                <h3 style="font-family: 'Orbitron', sans-serif; color: var(--purple); margin-bottom: 1rem;">Key Insights</h3>
+                <ul style="color: rgba(255,255,255,0.8); padding-left: 1.5rem;">
+                    <li style="margin-bottom: 0.5rem;">Li-ion dominates EV applications (300 Wh/kg, 400 W/kg)</li>
+                    <li style="margin-bottom: 0.5rem;">Ultracapacitors excel at power but store minimal energy</li>
+                    <li style="margin-bottom: 0.5rem;">LFP safer but lower energy than NMC/NCA</li>
+                    <li>SSB targets: 500 Wh/kg by 2028E</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Theory Section -->
+    <section id="theory">
+        <h2 class="section-title">
+            <span class="num">05</span>
+            <span class="text">Governing Equations</span>
+        </h2>
+
+        <div class="theory-card fade-in">
+            <h3>Butler-Volmer Equation (Activation Polarization)</h3>
+            <p>Describes the electrochemical reaction rate at the electrode interface. The current density j depends exponentially on overpotential η.</p>
+            <div class="equation">j = j₀ × [e^((1-α)nFη/RT) - e^(-αnFη/RT)]</div>
+            <p style="margin-top: 1rem; color: rgba(255,255,255,0.6); font-size: 0.9rem;">Where j₀ = exchange current density, α = transfer coefficient (~0.5), n = electrons transferred</p>
+        </div>
+
+        <div class="theory-card fade-in">
+            <h3>Nernst-Planck Equation (Concentration Polarization)</h3>
+            <p>Describes ion flux considering both concentration gradient (diffusion) and electric potential (migration).</p>
+            <div class="equation">J = -D∇c - (zcF/RT)c∇Φ</div>
+            <p style="margin-top: 1rem; color: rgba(255,255,255,0.6); font-size: 0.9rem;">First term = Fickian diffusion, Second term = electromigration</p>
+        </div>
+
+        <div class="theory-card fade-in">
+            <h3>Ohm's Law (Ohmic Polarization)</h3>
+            <p>Direct proportionality between current and voltage loss through resistive components.</p>
+            <div class="equation">η_Ω = I × R_total = I × (R_el + R_sep + R_ct)</div>
+            <p style="margin-top: 1rem; color: rgba(255,255,255,0.6); font-size: 0.9rem;">R_total includes electrolyte, separator, and contact resistances</p>
+        </div>
+
+        <div class="theory-card fade-in">
+            <h3>Fick's Second Law (Diffusion)</h3>
+            <p>Governs concentration evolution in electrode particles during charge/discharge.</p>
+            <div class="equation">∂c/∂t = D∇²c</div>
+            <p style="margin-top: 1rem; color: rgba(255,255,255,0.6); font-size: 0.9rem;">Solution for spherical particle: c(r,t) = c₀ + (j·r/D) × erfc(R/√(4Dt))</p>
+        </div>
+
+        <div class="theory-card fade-in">
+            <h3>Limiting Current Density</h3>
+            <p>The maximum current before concentration polarization becomes extreme (mass transport limited).</p>
+            <div class="equation">i_lim = zFDc_bulk/δ</div>
+            <p style="margin-top: 1rem; color: rgba(255,255,255,0.6); font-size: 0.9rem;">When i → i_lim, surface concentration → 0, voltage drops precipitously</p>
+        </div>
+
+        <div class="theory-card fade-in">
+            <h3>Polarization Resistance</h3>
+            <p>Differential resistance at a given operating point, used in electrochemical impedance spectroscopy.</p>
+            <div class="equation">R_p = (dη/dj)_E = (RT/j₀) × [e^(βη) + e^(-(1-β)η)]⁻¹</div>
+            <p style="margin-top: 1rem; color: rgba(255,255,255,0.6); font-size: 0.9rem;">Slope of polarization curve at operating point; lower is better for power</p>
+        </div>
+    </section>
+
+    <!-- Physics Connections -->
+    <section id="physics">
+        <h2 class="section-title">
+            <span class="num">06</span>
+            <span class="text">Cross-Disciplinary Physics</span>
+        </h2>
+
+        <div class="physics-grid">
+            <div class="physics-card fade-in">
+                <h4>Polarization ↔ Electromagnetic Wave Attenuation</h4>
+                <p>Ohmic polarization η = I·R mirrors resistive damping in EM wave propagation. Both follow J = σE (Ohm's law) where conductivity σ determines energy dissipation rate. In EM waves, skin depth δ = √(2ρ/ωμ) governs衰减; in batteries, effective resistance determines voltage loss.</p>
+            </div>
+            <div class="physics-card fade-in">
+                <h4>Concentration Gradient ↔ Heat Equation</h4>
+                <p>∂c/∂t = D∇²c is mathematically identical to ∂T/∂t = α∇²T. Both are parabolic PDEs with the same mathematical structure. The diffusion coefficient D parallels thermal diffusivity α. This isomorphism enables cross-domain analysis techniques.</p>
+            </div>
+            <div class="physics-card fade-in">
+                <h4>Activation Barrier ↔ Quantum Tunneling</h4>
+                <p>Butler-Volmer exponential kinetics mirrors quantum tunneling probability P ∝ exp(-γ·φ/EF). The activation overpotential η acts like a potential barrier; larger η = higher tunneling probability for electrons through SEI layer.</p>
+            </div>
+            <div class="physics-card fade-in">
+                <h4>Polarization Resistance ↔ Optical Impedance</h4>
+                <p>R_p = dη/dj parallels refractive index n = dE/dH in optical media. Both measure how a system responds to energy input. In EIS, R_p determines power loss; in optics, n determines reflection/transmission.</p>
+            </div>
+            <div class="physics-card fade-in">
+                <h4>Limiting Current ↔ Chandrasekhar Limit</h4>
+                <p>i_lim = zFDc/δ for mass transport parallels the Chandrasekhar limit for white dwarfs. Both define a critical threshold where one force (diffusion/gravity) balances another (electric field/electron degeneracy). Beyond limit = catastrophic collapse.</p>
+            </div>
+            <div class="physics-card fade-in">
+                <h4>Ragone Curve ↔ Thermodynamic Tradeoffs</h4>
+                <p>Energy-Power tradeoff E = P·t parallels classical thermodynamic constraints. The area under the Ragone curve represents accessible state space, similar to how Carnot efficiency defines accessible work space. Both exhibit hyperbolic boundaries.</p>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 2rem; background: linear-gradient(135deg, rgba(0,245,255,0.1), rgba(168,85,247,0.1));">
+            <h3 style="font-family: 'Orbitron', sans-serif; color: var(--cyan); margin-bottom: 1rem;">The Three Polarization Origins</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 1rem;">
+                <div>
+                    <h4 style="color: var(--red);">Ohmic (Resistive)</h4>
+                    <p style="color: rgba(255,255,255,0.8);">Every material has resistance R = ρL/A. Energy dissipated as I²R heat.</p>
+                </div>
+                <div>
+                    <h4 style="color: var(--orange);">Activation (Kinetic)</h4>
+                    <p style="color: rgba(255,255,255,0.8);">Charge transfer requires overcoming activation energy barrier E_a.</p>
+                </div>
+                <div>
+                    <h4 style="color: var(--green);">Concentration (Transport)</h4>
+                    <p style="color: rgba(255,255,255,0.8);">Ion depletion at electrode surface creates concentration gradient.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Battery Polarization Dynamics Lab — Li-Ion Battery Research</p>
+        <p style="margin-top: 0.5rem;">
+            <a href="https://shu-agent.github.io/agents/li-ion-battery/">Home</a> |
+            <a href="https://shu-agent.github.io/agents/li-ion-battery/daily-log.md">Research Log</a>
+        </p>
+    </footer>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const colors = ['#00f5ff', '#a855f7', '#ec4899'];
+
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = Math.random() * 6 + 2 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // Navigation dots
+        const navDots = document.querySelectorAll('.nav-dot');
+        const sections = ['hero', 'polarization', 'simulator', 'pulse', 'ragone', 'theory', 'physics'];
+
+        navDots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const section = dot.dataset.section;
+                document.getElementById(section).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Scroll observer for nav dots
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    navDots.forEach(dot => {
+                        dot.classList.toggle('active', dot.dataset.section === id);
+                    });
+                }
+            });
+        }, { threshold: 0.5 });
+
+        sections.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) observer.observe(el);
+        });
+
+        // Fade-in animations
+        const fadeObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
+
+        // Polarization Simulator
+        let voltageChart;
+
+        function initChart() {
+            const ctx = document.getElementById('voltageChart').getContext('2d');
+            voltageChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 100}, (_, i) => i),
+                    datasets: [{
+                        label: 'Cell Voltage (V)',
+                        data: Array.from({length: 100}, () => 4.2),
+                        borderColor: '#00f5ff',
+                        backgroundColor: 'rgba(0, 245, 255, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Polarization Loss (V)',
+                        data: Array.from({length: 100}, () => 0),
+                        borderColor: '#ec4899',
+                        backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Time (discharge cycles)', color: 'rgba(255,255,255,0.5)' },
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: 'rgba(255,255,255,0.5)' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Voltage (V)', color: 'rgba(255,255,255,0.5)' },
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: 'rgba(255,255,255,0.5)' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: 'rgba(255,255,255,0.7)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function calculatePolarization() {
+            const cRate = parseFloat(document.getElementById('c-rate').value);
+            const temp = parseFloat(document.getElementById('temperature').value);
+            const soc = parseFloat(document.getElementById('soc').value);
+            const cond = parseFloat(document.getElementById('conductivity').value);
+
+            // Temperature correction factor
+            const tempFactor = Math.exp(-0.05 * (25 - temp));
+
+            // Ohmic polarization: η_Ω = I × R
+            // R depends on conductivity and temperature
+            const currentDensity = cRate * 180; // mA/cm² (for 1800mAh cell)
+            const R_Ω = (1/cond) * tempFactor * 2; // Scaled resistance
+            const η_Ω = (currentDensity / 1000) * R_Ω;
+
+            // Activation polarization: η_act ≈ (RT/αnF) × ln(I/I₀)
+            const η_act = 0.025 * Math.log(currentDensity / 1) * tempFactor;
+
+            // Concentration polarization: η_conc = (RT/nF) × ln(C_bulk/C_surface)
+            // Increases with C-rate, decreases with SOC
+            const η_conc = (0.025 * Math.log(1 / (soc/100 * 0.8 + 0.2))) * (cRate * 0.5) * tempFactor;
+
+            // Total polarization
+            const η_total = η_Ω + η_act + η_conc;
+
+            // Update metrics display
+            document.getElementById('met-ohmic').textContent = η_Ω.toFixed(3);
+            document.getElementById('met-act').textContent = η_act.toFixed(3);
+            document.getElementById('met-conc').textContent = η_conc.toFixed(3);
+            document.getElementById('met-total').textContent = η_total.toFixed(3);
+
+            // Update voltage chart
+            if (voltageChart) {
+                const baseVoltage = 4.2 - (soc/100 * 0.5);
+                const newData = Array.from({length: 100}, (_, i) => baseVoltage - (i/100) * η_total - (i/100) * cRate * 0.3);
+                const lossData = Array.from({length: 100}, (_, i) => η_total + (i/100) * cRate * 0.3);
+
+                voltageChart.data.datasets[0].data = newData;
+                voltageChart.data.datasets[1].data = lossData;
+                voltageChart.update('none');
+            }
+
+            // Update hero stats
+            document.getElementById('stat-power').textContent = Math.round(150 * (1 - η_total/4.2));
+            document.getElementById('stat-rate').textContent = Math.min(5, cRate).toFixed(1) + 'C';
+            document.getElementById('stat-vcell').textContent = (4.2 - η_total).toFixed(2);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            calculatePolarization();
+
+            // Add listeners to controls
+            ['c-rate', 'temperature', 'soc', 'conductivity'].forEach(id => {
+                document.getElementById(id).addEventListener('input', calculatePolarization);
+            });
+
+            // Update display values
+            document.getElementById('c-rate').addEventListener('input', (e) => {
+                document.getElementById('c-rate-val').textContent = e.target.value;
+            });
+            document.getElementById('temperature').addEventListener('input', (e) => {
+                document.getElementById('temp-val').textContent = e.target.value;
+            });
+            document.getElementById('soc').addEventListener('input', (e) => {
+                document.getElementById('soc-val').textContent = e.target.value;
+            });
+            document.getElementById('conductivity').addEventListener('input', (e) => {
+                document.getElementById('cond-val').textContent = e.target.value;
+            });
+        });
+    </script>
+</body>
+</html>

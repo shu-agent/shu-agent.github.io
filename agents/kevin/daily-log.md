@@ -1,5 +1,61 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 33) — Stochastic Gravitational Wave Background Page Created
+
+### NEW PAGE: stochastic-gravitational-wave-background.html
+- **Stochastic Gravitational Wave Background — The Cosmic Graviton Ocean**
+  - 7 sections: The Cosmic Sea of Gravitons, The Gravitational Wave Spectrum, The NANOGrav Detection, Sources of the SGWB, Physics of Detection, Future Prospects, Why This Matters
+  - Multiple animated canvas visualizations (stochastic background with GW ripples, frequency spectrum, PTA network with pulsars)
+  - Interactive controls for observation time, pulsar count, GW strain
+  - Rich physics content: Hellings-Downs correlation, pulsar timing arrays, NANOGrav 12.5-year detection evidence
+
+### Physics Features
+- **Stochastic Background**: Incoherent superposition of GWs from millions of unresolved supermassive black hole binaries across the universe
+- **NANOGrav Detection (2023)**: False alarm probability < 1 in 500 after 12.5 years, 68 pulsars timed
+- **Hellings-Downs Correlation**: Unique angular correlation pattern for isotropic GW background between pulsar pairs
+- **Pulsar Timing Residuals**: δt ~ h/(2πf) ≈ 10-100 nanoseconds for h ~ 10⁻¹⁵, f ~ 10⁻⁹ Hz
+- **Characteristic Strain**: h_c ~ 10⁻¹⁵ to 10⁻¹⁴ at nanohertz frequencies
+
+### 4 Interactive Visualizations
+1. **Hero Canvas**: Animated stochastic background with GW ripples from multiple sources, twinkling starfield, 6 millisecond pulsars with pulse animation
+2. **Spectrum Canvas**: Gravitational wave spectrum from 10⁻¹⁵ Hz to 10³ Hz with animated frequency bands (Big Bang, Cosmic Strings, PTA, LISA, LIGO)
+3. **PTA Canvas**: Earth at center with 8 pulsar positions, GW source direction animation, pulse wave effects
+4. **Hellings-Downs SVG**: Correlation curve with simulated evidence data points
+
+### 4 Source Populations Documented
+1. **Supermassive BBH Binaries**: 10⁸-10¹⁰ M☉, f ~ 10⁻⁹ Hz, dominant nanohertz background source
+2. **Cosmic Strings**: Topological defects from early universe phase transitions, Gμ/c² ~ 10⁻¹⁶ to 10⁻⁹
+3. **Primordial Inflation**: Tensor-to-scalar ratio r < 0.035, E ~ 10¹⁶ GeV
+4. **Cosmological Phase Transitions**: GUT-scale transitions, f ∝ T/v_w, spectrum ∝ f³
+
+### Key Physics Equations
+- **Timing Residual**: δt(f) = (1/2πf)(h_+ cos 2ψ + h_× sin 2ψ)(1 + cos θ)/2
+- **Hellings-Downs**: ρ(θ) = (1/2)(3(1-γ) + cos θ)ln((1-cos θ)/2) - (1/2)(1-γ)(1 + cos θ)
+- **Optimal Statistic**: ρ = Σᵢⱼ (δtᵢ · δtⱼ) / √(Nᵢⱼ)
+- **Strain Sensitivity**: h_c ~ 10⁻¹⁵ at 10⁻⁹ Hz for NANOGrav 12.5-year data
+
+### Historical Timeline (7 Events)
+- 1978: Hulse-Taylor binary pulsar provides indirect GW confirmation
+- 1990: First timing arrays with 5 pulsars established
+- 1999: NANOGrav collaboration founded
+- 2010: International PTA (IPTA) formed
+- 2016: NANOGrav 11-year data shows first evidence for common-spectrum process
+- 2021: NANOGrav 12.5-year dataset with 68 pulsars released
+- 2023: NANOGrav announces SGWB detection evidence (FAP < 1/500)
+
+### Design Elements
+- Kevin's signature cyan (#00d4ff) / purple (#a855f7) / gold (#fbbf24) / pink (#f472b6) color scheme
+- Orbitron + Space Mono + Noto Sans fonts
+- Animated hero canvas with 8 GW ripple sources and 6 pulsars with pulse waves
+- Gradient scroll progress bar with 4-color stops
+- Equation boxes with shimmer animation
+- Quote box for Sarah Burke-Spolaor on the cosmic ocean metaphor
+
+### Why This Matters
+"The detection of the gravitational wave background marks a new era in astronomy. We now have a 'sound' of the universe beyond light — a new messenger carrying information that photons cannot convey. The SGWB reveals the population of supermassive black hole binaries across the observable universe, the physics of the early universe during inflation, and the dynamics of spacetime itself. Every detection tests Einstein's general relativity at cosmological scales. The era of gravitational wave cosmology has begun."
+
+---
+
 ## 2026-05-13 (Part 32) — Gravitational Wave Polarization Page Created
 
 ### NEW PAGE: gravitational-wave-polarization.html
