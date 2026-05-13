@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generative Architecture — Artivist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --void-gold: #ffd700;
+            --amber: #ff9500;
+            --rose: #ff6b9d;
+            --violet: #a855f7;
+            --cyan: #22d3ee;
+            --emerald: #00ff88;
+            --deep-purple: #1a0a2e;
+            --midnight: #0d0d1a;
+            --steel: #8892a8;
+            --concrete: #c8c8c8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            background: var(--midnight);
+            color: var(--concrete);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: linear-gradient(135deg, var(--deep-purple) 0%, var(--midnight) 50%, #0a1628 100%);
+            overflow: hidden;
+        }
+
+        .hero-svg-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .hero h1 {
+            font-size: 5rem;
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, var(--void-gold), var(--amber), var(--rose), var(--violet), var(--cyan));
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientFlow 8s ease infinite;
+            text-shadow: 0 0 80px rgba(255, 215, 0, 0.3);
+        }
+
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 1rem;
+            color: var(--steel);
+            letter-spacing: 0.5em;
+            margin-top: 2rem;
+            text-transform: uppercase;
+        }
+
+        .hero-tagline {
+            font-size: 1.5rem;
+            font-style: italic;
+            color: var(--cyan);
+            margin-top: 3rem;
+            opacity: 0.9;
+        }
+
+        /* Architecture Canvas */
+        .architecture-canvas-section {
+            padding: 6rem 2rem;
+            background: var(--midnight);
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 3rem;
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--void-gold);
+            letter-spacing: 0.2em;
+        }
+
+        .canvas-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #0a1628 0%, var(--midnight) 100%);
+        }
+
+        #architectureCanvas {
+            width: 100%;
+            height: 600px;
+            display: block;
+            cursor: crosshair;
+        }
+
+        .canvas-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.5);
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--steel);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .control-group input[type="range"] {
+            width: 150px;
+            height: 4px;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, var(--violet), var(--cyan));
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--void-gold);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--void-gold);
+        }
+
+        .btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--void-gold);
+            background: transparent;
+            color: var(--void-gold);
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .btn:hover {
+            background: var(--void-gold);
+            color: var(--midnight);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Sacred Geometry Section */
+        .geometry-section {
+            padding: 6rem 2rem;
+            background: linear-gradient(180deg, var(--midnight) 0%, var(--deep-purple) 50%, var(--midnight) 100%);
+        }
+
+        .geometry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .geometry-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .geometry-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, var(--violet), transparent, var(--cyan), transparent);
+            animation: rotateBg 10s linear infinite;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: -1;
+        }
+
+        .geometry-card:hover::before {
+            opacity: 0.3;
+        }
+
+        .geometry-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--void-gold);
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.15);
+        }
+
+        @keyframes rotateBg {
+            100% { transform: rotate(360deg); }
+        }
+
+        .geometry-card svg {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 1.5rem;
+        }
+
+        .geometry-card h3 {
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: var(--void-gold);
+            margin-bottom: 1rem;
+            letter-spacing: 0.1em;
+        }
+
+        .geometry-card p {
+            font-size: 1rem;
+            color: var(--steel);
+            line-height: 1.8;
+        }
+
+        /* Parametric Forms Section */
+        .parametric-section {
+            padding: 6rem 2rem;
+            background: var(--midnight);
+        }
+
+        .parametric-showcase {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .parametric-svg {
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(180deg, #0a1628 0%, var(--deep-purple) 100%);
+            border-radius: 12px;
+            margin-bottom: 3rem;
+        }
+
+        /* Philosophy Cards */
+        .philosophy-section {
+            padding: 6rem 2rem;
+            background: linear-gradient(180deg, var(--midnight) 0%, #0f0f2a 50%, var(--midnight) 100%);
+        }
+
+        .philosophy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .philosophy-card {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(34, 211, 238, 0.05) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 16px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .philosophy-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--violet), var(--cyan), var(--emerald));
+        }
+
+        .philosophy-card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--violet);
+            margin-bottom: 1rem;
+            font-family: 'Space Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .philosophy-card p {
+            font-size: 1.1rem;
+            color: var(--concrete);
+            line-height: 1.9;
+            font-style: italic;
+        }
+
+        /* Algorithm Section */
+        .algorithm-section {
+            padding: 6rem 2rem;
+            background: var(--deep-purple);
+        }
+
+        .algorithm-content {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .equation-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 12px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .equation-box .equation {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.5rem;
+            color: var(--cyan);
+            margin-bottom: 1rem;
+        }
+
+        .equation-box .description {
+            color: var(--steel);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        /* Poetry Section */
+        .poetry-section {
+            padding: 6rem 2rem;
+            background: linear-gradient(180deg, var(--deep-purple) 0%, var(--midnight) 100%);
+            text-align: center;
+        }
+
+        .poetry-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .poetry-content blockquote {
+            font-size: 1.8rem;
+            font-style: italic;
+            color: var(--rose);
+            line-height: 2;
+            margin-bottom: 2rem;
+            position: relative;
+            padding: 2rem;
+        }
+
+        .poetry-content blockquote::before {
+            content: '"';
+            font-size: 6rem;
+            position: absolute;
+            top: -1rem;
+            left: -1rem;
+            color: rgba(255, 107, 157, 0.2);
+            font-family: Georgia, serif;
+        }
+
+        .poetry-content .attribution {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--steel);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+        }
+
+        /* Building Gallery */
+        .gallery-section {
+            padding: 6rem 2rem;
+            background: var(--midnight);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .gallery-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.02);
+            border-color: var(--void-gold);
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.2);
+        }
+
+        .gallery-item svg {
+            width: 100%;
+            height: 250px;
+            display: block;
+        }
+
+        .gallery-item-info {
+            padding: 1.5rem;
+        }
+
+        .gallery-item-info h4 {
+            font-size: 1.2rem;
+            color: var(--void-gold);
+            margin-bottom: 0.5rem;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+        }
+
+        .gallery-item-info p {
+            font-size: 0.9rem;
+            color: var(--steel);
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            padding: 4rem 2rem;
+            background: var(--midnight);
+            border-top: 1px solid rgba(255, 215, 0, 0.1);
+            text-align: center;
+        }
+
+        footer p {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--steel);
+            letter-spacing: 0.2em;
+        }
+
+        footer .artivist-signature {
+            color: var(--violet);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            letter-spacing: 0.3em;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .hero h1 {
+                font-size: 2.5rem;
+                letter-spacing: 0.15em;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .hero-tagline {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section with Generative Architecture -->
+    <section class="hero">
+        <div class="hero-svg-container">
+            <svg viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                    <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#1a0a2e">
+                            <animate attributeName="stop-color" values="#1a0a2e;#0d1a2e;#1a0a2e" dur="10s" repeatCount="indefinite"/>
+                        </stop>
+                        <stop offset="50%" style="stop-color:#0d0d1a">
+                            <animate attributeName="stop-color" values="#0d0d1a;#0a1628;#0d0d1a" dur="10s" repeatCount="indefinite"/>
+                        </stop>
+                        <stop offset="100%" style="stop-color:#0a1628">
+                            <animate attributeName="stop-color" values="#0a1628;#1a0a2e;#0a1628" dur="10s" repeatCount="indefinite"/>
+                        </stop>
+                    </linearGradient>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <rect width="1400" height="900" fill="url(#heroGrad)"/>
+
+                <!-- Grid Floor Perspective -->
+                <g id="floorGrid" stroke="rgba(255,215,0,0.1)" stroke-width="0.5">
+                    <!-- Horizontal lines -->
+                    <line x1="0" y1="600" x2="1400" y2="600"/>
+                    <line x1="0" y1="650" x2="1400" y2="650"/>
+                    <line x1="0" y1="700" x2="1400" y2="700"/>
+                    <line x1="0" y1="750" x2="1400" y2="750"/>
+                    <line x1="0" y1="800" x2="1400" y2="800"/>
+                    <line x1="0" y1="850" x2="1400" y2="850"/>
+                    <!-- Vertical lines converging -->
+                    <line x1="700" y1="600" x2="0" y2="900"/>
+                    <line x1="700" y1="600" x2="200" y2="900"/>
+                    <line x1="700" y1="600" x2="400" y2="900"/>
+                    <line x1="700" y1="600" x2="600" y2="900"/>
+                    <line x1="700" y1="600" x2="700" y2="900"/>
+                    <line x1="700" y1="600" x2="800" y2="900"/>
+                    <line x1="700" y1="600" x2="1000" y2="900"/>
+                    <line x1="700" y1="600" x2="1200" y2="900"/>
+                    <line x1="700" y1="600" x2="1400" y2="900"/>
+                </g>
+
+                <!-- Parametric Tower Forms -->
+                <g id="towers" fill="none" stroke-linecap="round">
+                    <!-- Tower 1 - Fibonacci Spiral based -->
+                    <g transform="translate(200, 400)">
+                        <path d="M0,200 Q25,150 50,200 T100,200 T150,200 T200,200" stroke="rgba(255,215,0,0.4)" stroke-width="2">
+                            <animate attributeName="d" values="M0,200 Q25,150 50,200 T100,200 T150,200 T200,200;M0,200 Q25,180 50,200 T100,180 T150,200 T200,180;M0,200 Q25,150 50,200 T100,200 T150,200 T200,200" dur="4s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M0,150 L5,0 L50,0 L45,150" stroke="rgba(168,85,247,0.6)" stroke-width="1.5">
+                            <animate attributeName="opacity" values="0.6;0.9;0.6" dur="3s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M50,0 L95,0 L100,150" stroke="rgba(168,85,247,0.6)" stroke-width="1.5"/>
+                        <path d="M25,150 L50,50 L75,150" stroke="rgba(34,211,238,0.4)" stroke-width="1"/>
+                        <circle cx="50" cy="0" r="3" fill="#ffd700">
+                            <animate attributeName="r" values="3;5;3" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                    </g>
+
+                    <!-- Tower 2 - Wave-based curvature -->
+                    <g transform="translate(450, 350)">
+                        <path d="M0,250 Q30,100 60,250 T120,250 T180,250 T240,250" stroke="rgba(255,215,0,0.3)" stroke-width="2">
+                            <animate attributeName="d" values="M0,250 Q30,100 60,250 T120,250 T180,250 T240,250;M0,250 Q30,150 60,250 T120,200 T180,250 T240,220;M0,250 Q30,100 60,250 T120,250 T180,250 T240,250" dur="5s" repeatCount="indefinite"/>
+                        </path>
+                        <ellipse cx="120" cy="100" rx="40" ry="60" stroke="rgba(255,107,157,0.5)" stroke-width="1.5" fill="none">
+                            <animate attributeName="ry" values="60;80;60" dur="3s" repeatCount="indefinite"/>
+                        </ellipse>
+                        <ellipse cx="120" cy="100" rx="60" ry="40" stroke="rgba(255,107,157,0.3)" stroke-width="1" fill="none"/>
+                        <line x1="80" y1="100" x2="160" y2="100" stroke="rgba(0,255,136,0.5)" stroke-width="1">
+                            <animate attributeName="x1" values="80;90;80" dur="2s" repeatCount="indefinite"/>
+                            <animate attributeName="x2" values="160;170;160" dur="2s" repeatCount="indefinite"/>
+                        </line>
+                    </g>
+
+                    <!-- Tower 3 - Fractal Branching -->
+                    <g transform="translate(750, 300)">
+                        <path d="M60,300 L60,200 L30,100 M60,200 L90,100 M60,200 L60,120 M60,120 L40,60 M60,120 L80,60" stroke="rgba(34,211,238,0.6)" stroke-width="2">
+                            <animate attributeName="stroke" values="rgba(34,211,238,0.6);rgba(168,85,247,0.8);rgba(34,211,238,0.6)" dur="4s" repeatCount="indefinite"/>
+                        </path>
+                        <circle cx="30" cy="100" r="4" fill="#ff6b9d"/>
+                        <circle cx="90" cy="100" r="4" fill="#ff6b9d"/>
+                        <circle cx="40" cy="60" r="3" fill="#ffd700"/>
+                        <circle cx="80" cy="60" r="3" fill="#ffd700"/>
+                        <circle cx="60" cy="120" r="3" fill="#22d3ee"/>
+                        <path d="M30,100 Q45,80 60,120 Q75,80 90,100" stroke="rgba(255,215,0,0.4)" stroke-width="1" fill="none">
+                            <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2s" repeatCount="indefinite"/>
+                        </path>
+                    </g>
+
+                    <!-- Tower 4 - Geodesic Dome Structure -->
+                    <g transform="translate(1000, 380)">
+                        <circle cx="80" cy="120" r="80" stroke="rgba(255,215,0,0.3)" stroke-width="1" fill="none"/>
+                        <circle cx="80" cy="120" r="60" stroke="rgba(255,215,0,0.4)" stroke-width="1" fill="none"/>
+                        <circle cx="80" cy="120" r="40" stroke="rgba(255,215,0,0.5)" stroke-width="1" fill="none"/>
+                        <line x1="80" y1="40" x2="80" y2="200" stroke="rgba(168,85,247,0.4)" stroke-width="1"/>
+                        <line x1="0" y1="120" x2="160" y2="120" stroke="rgba(168,85,247,0.4)" stroke-width="1"/>
+                        <line x1="24" y1="64" x2="136" y2="176" stroke="rgba(168,85,247,0.3)" stroke-width="1"/>
+                        <line x1="136" y1="64" x2="24" y2="176" stroke="rgba(168,85,247,0.3)" stroke-width="1"/>
+                        <polygon points="80,40 136,176 24,176" stroke="rgba(0,255,136,0.5)" stroke-width="1" fill="none"/>
+                        <circle cx="80" cy="120" r="8" fill="rgba(255,215,0,0.6)">
+                            <animate attributeName="r" values="8;12;8" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                    </g>
+
+                    <!-- Central Monolith -->
+                    <g transform="translate(620, 200)">
+                        <rect x="0" y="0" width="80" height="400" fill="rgba(10,22,40,0.8)" stroke="rgba(255,215,0,0.6)" stroke-width="2"/>
+                        <line x1="10" y1="50" x2="70" y2="50" stroke="rgba(168,85,247,0.5)" stroke-width="1">
+                            <animate attributeName="y1" values="50;100;50" dur="5s" repeatCount="indefinite"/>
+                            <animate attributeName="y2" values="50;100;50" dur="5s" repeatCount="indefinite"/>
+                        </line>
+                        <line x1="10" y1="150" x2="70" y2="150" stroke="rgba(168,85,247,0.4)" stroke-width="1"/>
+                        <line x1="10" y1="250" x2="70" y2="250" stroke="rgba(168,85,247,0.3)" stroke-width="1"/>
+                        <line x1="10" y1="350" x2="70" y2="350" stroke="rgba(168,85,247,0.2)" stroke-width="1"/>
+                        <circle cx="40" cy="30" r="20" stroke="rgba(255,107,157,0.6)" stroke-width="2" fill="none">
+                            <animate attributeName="r" values="20;30;20" dur="4s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="40" cy="30" r="10" fill="rgba(255,215,0,0.4)">
+                            <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                    </g>
+                </g>
+
+                <!-- Floating Particles -->
+                <g id="particles">
+                    <circle cx="100" cy="200" r="2" fill="#ffd700">
+                        <animate attributeName="cy" values="200;180;200" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="300" cy="150" r="1.5" fill="#a855f7">
+                        <animate attributeName="cy" values="150;170;150" dur="4s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="500" cy="250" r="2" fill="#22d3ee">
+                        <animate attributeName="cy" values="250;230;250" dur="3.5s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="900" cy="180" r="1.5" fill="#ff6b9d">
+                        <animate attributeName="cy" values="180;200;180" dur="4.5s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="1100" cy="220" r="2" fill="#00ff88">
+                        <animate attributeName="cy" values="220;200;220" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="1300" cy="160" r="1" fill="#ffd700">
+                        <animate attributeName="cy" values="160;180;160" dur="5s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="150" cy="350" r="1.5" fill="#a855f7">
+                        <animate attributeName="cx" values="150;170;150" dur="6s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="1250" cy="300" r="2" fill="#22d3ee">
+                        <animate attributeName="cx" values="1250;1230;1250" dur="4s" repeatCount="indefinite"/>
+                    </circle>
+                </g>
+
+                <!-- Connection Lines -->
+                <g stroke="rgba(255,215,0,0.1)" stroke-width="0.5">
+                    <line x1="250" y1="400" x2="450" y2="350">
+                        <animate attributeName="stroke" values="rgba(255,215,0,0.1);rgba(255,215,0,0.3);rgba(255,215,0,0.1)" dur="4s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="690" y1="600" x2="200" y2="400"/>
+                    <line x1="690" y1="600" x2="510" y2="350"/>
+                    <line x1="690" y1="600" x2="810" y2="300"/>
+                    <line x1="690" y1="600" x2="1080" y2="380"/>
+                </g>
+
+                <!-- Scanline Effect -->
+                <line x1="0" y1="0" x2="1400" y2="0" stroke="rgba(255,215,0,0.1)" stroke-width="1">
+                    <animate attributeName="y1" values="0;900;0" dur="8s" repeatCount="indefinite"/>
+                    <animate attributeName="y2" values="0;900;0" dur="8s" repeatCount="indefinite"/>
+                </line>
+            </svg>
+        </div>
+
+        <div class="hero-content">
+            <h1>Generative Architecture</h1>
+            <p class="hero-subtitle">The Mathematics of Form</p>
+            <p class="hero-tagline">"Every building is a algorithm waiting to be instantiated"</p>
+        </div>
+    </section>
+
+    <!-- Interactive Architecture Laboratory -->
+    <section class="architecture-canvas-section">
+        <h2 class="section-title">Architecture Laboratory</h2>
+        <div class="canvas-container">
+            <canvas id="architectureCanvas"></canvas>
+            <div class="canvas-controls">
+                <div class="control-group">
+                    <label>Complexity</label>
+                    <input type="range" id="complexitySlider" min="1" max="10" value="5">
+                </div>
+                <div class="control-group">
+                    <label>Height</label>
+                    <input type="range" id="heightSlider" min="50" max="300" value="150">
+                </div>
+                <div class="control-group">
+                    <label>Width</label>
+                    <input type="range" id="widthSlider" min="30" max="100" value="60">
+                </div>
+                <div class="control-group">
+                    <label>Floors</label>
+                    <input type="range" id="floorsSlider" min="3" max="20" value="8">
+                </div>
+                <button class="btn" id="generateBtn">Generate</button>
+                <button class="btn" id="resetBtn">Reset</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sacred Geometry in Architecture -->
+    <section class="geometry-section">
+        <h2 class="section-title">Sacred Geometry</h2>
+        <div class="geometry-grid">
+            <!-- Metatron's Cube -->
+            <div class="geometry-card">
+                <svg viewBox="0 0 200 200">
+                    <defs>
+                        <linearGradient id="geoGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ffd700"/>
+                            <stop offset="100%" style="stop-color:#a855f7"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="1"/>
+                    <circle cx="100" cy="30" r="8" fill="url(#geoGrad1)">
+                        <animate attributeName="r" values="8;10;8" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="170" cy="65" r="8" fill="url(#geoGrad1)">
+                        <animate attributeName="r" values="8;10;8" dur="2.2s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="170" cy="135" r="8" fill="url(#geoGrad1)">
+                        <animate attributeName="r" values="8;10;8" dur="2.4s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="100" cy="170" r="8" fill="url(#geoGrad1)">
+                        <animate attributeName="r" values="8;10;8" dur="2.6s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="30" cy="135" r="8" fill="url(#geoGrad1)">
+                        <animate attributeName="r" values="8;10;8" dur="2.8s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="30" cy="65" r="8" fill="url(#geoGrad1)">
+                        <animate attributeName="r" values="8;10;8" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="100" cy="100" r="12" fill="#22d3ee">
+                        <animate attributeName="r" values="12;15;12" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <g stroke="rgba(255,215,0,0.6)" stroke-width="1">
+                        <line x1="100" y1="30" x2="170" y2="65"/>
+                        <line x1="170" y1="65" x2="170" y2="135"/>
+                        <line x1="170" y1="135" x2="100" y2="170"/>
+                        <line x1="100" y1="170" x2="30" y2="135"/>
+                        <line x1="30" y1="135" x2="30" y2="65"/>
+                        <line x1="30" y1="65" x2="100" y2="30"/>
+                        <line x1="100" y1="30" x2="100" y2="170"/>
+                        <line x1="30" y1="65" x2="170" y2="135"/>
+                        <line x1="30" y1="135" x2="170" y2="65"/>
+                        <line x1="100" y1="30" x2="170" y2="135"/>
+                        <line x1="170" y1="65" x2="100" y2="170"/>
+                        <line x1="100" y1="170" x2="30" y2="65"/>
+                        <line x1="30" y1="135" x2="100" y2="30"/>
+                        <line x1="100" y1="100" x2="100" y2="30"/>
+                        <line x1="100" y1="100" x2="170" y2="65"/>
+                        <line x1="100" y1="100" x2="170" y2="135"/>
+                        <line x1="100" y1="100" x2="100" y2="170"/>
+                        <line x1="100" y1="100" x2="30" y2="135"/>
+                        <line x1="100" y1="100" x2="30" y2="65"/>
+                    </g>
+                </svg>
+                <h3>Metatron's Cube</h3>
+                <p>The vector equilibrium from which all form emerges. Thirteen circles arranged to contain all possible geometric relationships—the architecture of creation itself.</p>
+            </div>
+
+            <!-- Flower of Life -->
+            <div class="geometry-card">
+                <svg viewBox="0 0 200 200">
+                    <defs>
+                        <radialGradient id="flowerGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" style="stop-color:#ff6b9d;stop-opacity:0.8"/>
+                            <stop offset="100%" style="stop-color:#a855f7;stop-opacity:0.3"/>
+                        </radialGradient>
+                    </defs>
+                    <g fill="none" stroke="rgba(255,215,0,0.5)" stroke-width="1">
+                        <circle cx="100" cy="100" r="30"/>
+                        <circle cx="100" cy="70" r="30"/>
+                        <circle cx="126" cy="85" r="30"/>
+                        <circle cx="126" cy="115" r="30"/>
+                        <circle cx="100" cy="130" r="30"/>
+                        <circle cx="74" cy="115" r="30"/>
+                        <circle cx="74" cy="85" r="30"/>
+                    </g>
+                    <circle cx="100" cy="100" r="15" fill="url(#flowerGrad)">
+                        <animate attributeName="r" values="15;20;15" dur="4s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="100" cy="70" r="5" fill="rgba(255,215,0,0.6)"/>
+                    <circle cx="126" cy="85" r="5" fill="rgba(255,215,0,0.6)"/>
+                    <circle cx="126" cy="115" r="5" fill="rgba(255,215,0,0.6)"/>
+                    <circle cx="100" cy="130" r="5" fill="rgba(255,215,0,0.6)"/>
+                    <circle cx="74" cy="115" r="5" fill="rgba(255,215,0,0.6)"/>
+                    <circle cx="74" cy="85" r="5" fill="rgba(255,215,0,0.6)"/>
+                </svg>
+                <h3>Flower of Life</h3>
+                <p>The golden ratio spiral unfolding from a single point. Every circle contains the same energy, every petal the same potential. Architecture as frozen music—or perhaps music as architecture in time.</p>
+            </div>
+
+            <!-- Sri Yantra -->
+            <div class="geometry-card">
+                <svg viewBox="0 0 200 200">
+                    <polygon points="100,20 180,160 20,160" fill="none" stroke="rgba(255,215,0,0.5)" stroke-width="1.5"/>
+                    <polygon points="100,60 150,150 50,150" fill="none" stroke="rgba(168,85,247,0.5)" stroke-width="1.5"/>
+                    <polygon points="100,100 130,145 70,145" fill="none" stroke="rgba(34,211,238,0.5)" stroke-width="1.5"/>
+                    <circle cx="100" cy="120" r="8" fill="#ffd700">
+                        <animate attributeName="r" values="8;12;8" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <line x1="100" y1="20" x2="100" y2="160" stroke="rgba(255,107,157,0.3)" stroke-width="1">
+                        <animate attributeName="y1" values="20;30;20" dur="5s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="20" y1="160" x2="180" y2="160" stroke="rgba(255,107,157,0.3)" stroke-width="1"/>
+                    <circle cx="100" cy="90" r="4" fill="#ff6b9d">
+                        <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+                <h3>Sri Yantra</h3>
+                <p>Nine interlocking triangles forming a geometric representation of the cosmos. The union of masculine and feminine, Shiva and Shakti, converging toward the central bindu—the point of infinite potential.</p>
+            </div>
+
+            <!-- Phi Spiral -->
+            <div class="geometry-card">
+                <svg viewBox="0 0 200 200">
+                    <defs>
+                        <linearGradient id="spiralGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00ff88"/>
+                            <stop offset="100%" style="stop-color:#22d3ee"/>
+                        </linearGradient>
+                    </defs>
+                    <g fill="none" stroke="url(#spiralGrad)" stroke-width="2">
+                        <path d="M100,100 Q100,90 110,90 Q120,90 120,100 Q120,110 110,110 Q100,110 100,100 Q100,95 105,95 Q110,95 110,100 Q110,105 105,105">
+                            <animate attributeName="d" values="M100,100 Q100,90 110,90 Q120,90 120,100 Q120,110 110,110 Q100,110 100,100 Q100,95 105,95 Q110,95 110,100 Q110,105 105,105;M100,100 Q100,85 115,85 Q130,85 130,100 Q130,115 115,115 Q100,115 100,100 Q100,92 108,92 Q116,92 116,100 Q116,108 108,108;M100,100 Q100,90 110,90 Q120,90 120,100 Q120,110 110,110 Q100,110 100,100 Q100,95 105,95 Q110,95 110,100 Q110,105 105,105" dur="4s" repeatCount="indefinite"/>
+                        </path>
+                    </g>
+                    <rect x="95" y="95" width="10" height="10" fill="rgba(255,215,0,0.3)" stroke="#ffd700" stroke-width="1"/>
+                    <rect x="85" y="85" width="30" height="30" fill="none" stroke="rgba(255,215,0,0.5)" stroke-width="0.5"/>
+                    <rect x="75" y="75" width="50" height="50" fill="none" stroke="rgba(255,215,0,0.4)" stroke-width="0.5"/>
+                    <rect x="55" y="55" width="90" height="90" fill="none" stroke="rgba(255,215,0,0.3)" stroke-width="0.5"/>
+                    <rect x="25" y="25" width="150" height="150" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="0.5"/>
+                    <circle cx="100" cy="100" r="5" fill="#00ff88">
+                        <animate attributeName="r" values="5;8;5" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+                <h3>Phi Spiral</h3>
+                <p>The golden spiral based on φ (phi) = 1.618... The ratio found in nautilus shells, galaxies, and the proportions of the Parthenon. Architecture that follows this ratio feels inherently "right" to human perception.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Parametric Design Showcase -->
+    <section class="parametric-section">
+        <h2 class="section-title">Parametric Forms</h2>
+        <div class="parametric-showcase">
+            <svg class="parametric-svg" viewBox="0 0 1200 500">
+                <defs>
+                    <linearGradient id="parametricGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                        <stop offset="0%" style="stop-color:#0a1628"/>
+                        <stop offset="50%" style="stop-color:#1a0a2e"/>
+                        <stop offset="100%" style="stop-color:#0d0d1a"/>
+                    </linearGradient>
+                    <filter id="glow2">
+                        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <rect width="1200" height="500" fill="url(#parametricGrad)"/>
+
+                <!-- Parametric Wave Facade -->
+                <g transform="translate(50, 100)">
+                    <path d="M0,300 Q50,200 100,250 T200,200 T300,280 T400,220 T500,260 T600,200 T700,270 T800,230 T900,250 T1000,200 T1100,280"
+                          fill="none" stroke="rgba(255,215,0,0.8)" stroke-width="3" stroke-linecap="round">
+                        <animate attributeName="d" values="M0,300 Q50,200 100,250 T200,200 T300,280 T400,220 T500,260 T600,200 T700,270 T800,230 T900,250 T1000,200 T1100,280;M0,280 Q50,220 100,230 T200,240 T300,200 T400,260 T500,220 T600,270 T700,230 T800,280 T900,240 T1000,260 T1100,220;M0,300 Q50,200 100,250 T200,200 T300,280 T400,220 T500,260 T600,200 T700,270 T800,230 T900,250 T1000,200 T1100,280" dur="8s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M0,280 Q50,180 100,230 T200,180 T300,260 T400,200 T500,240 T600,180 T700,250 T800,210 T900,230 T1000,180 T1100,260"
+                          fill="none" stroke="rgba(168,85,247,0.6)" stroke-width="2" stroke-linecap="round">
+                        <animate attributeName="d" values="M0,280 Q50,180 100,230 T200,180 T300,260 T400,200 T500,240 T600,180 T700,250 T800,210 T900,230 T1000,180 T1100,260;M0,260 Q50,200 100,210 T200,220 T300,180 T400,240 T500,200 T600,250 T700,210 T800,260 T900,220 T1000,240 T1100,200;M0,280 Q50,180 100,230 T200,180 T300,260 T400,200 T500,240 T600,180 T700,250 T800,210 T900,230 T1000,180 T1100,260" dur="7s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M0,260 Q50,160 100,210 T200,160 T300,240 T400,180 T500,220 T600,160 T700,230 T800,190 T900,210 T1000,160 T1100,240"
+                          fill="none" stroke="rgba(34,211,238,0.4)" stroke-width="1.5" stroke-linecap="round">
+                        <animate attributeName="d" values="M0,260 Q50,160 100,210 T200,160 T300,240 T400,180 T500,220 T600,160 T700,230 T800,190 T900,210 T1000,160 T1100,240;M0,240 Q50,180 100,190 T200,200 T300,160 T400,220 T500,180 T600,230 T700,190 T800,240 T900,200 T1000,220 T1100,180;M0,260 Q50,160 100,210 T200,160 T300,240 T400,180 T500,220 T600,160 T700,230 T800,190 T900,210 T1000,160 T1100,240" dur="6s" repeatCount="indefinite"/>
+                    </path>
+                </g>
+
+                <!-- Parametric Grid Tower -->
+                <g transform="translate(150, 150)" filter="url(#glow2)">
+                    <g fill="none" stroke-width="1">
+                        <!-- Vertical lines -->
+                        <line x1="0" y1="0" x2="0" y2="300" stroke="rgba(255,215,0,0.4)"/>
+                        <line x1="50" y1="30" x2="50" y2="280" stroke="rgba(255,215,0,0.5)"/>
+                        <line x1="100" y1="0" x2="100" y2="300" stroke="rgba(255,215,0,0.6)"/>
+                        <line x1="150" y1="40" x2="150" y2="270" stroke="rgba(255,215,0,0.5)"/>
+                        <line x1="200" y1="10" x2="200" y2="290" stroke="rgba(255,215,0,0.4)"/>
+                        <!-- Horizontal floors -->
+                        <path d="M0,0 Q50,30 100,0 T200,0" stroke="rgba(168,85,247,0.6)">
+                            <animate attributeName="d" values="M0,0 Q50,30 100,0 T200,0;M0,20 Q50,0 100,20 T200,20;M0,0 Q50,30 100,0 T200,0" dur="5s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M0,50 Q60,80 100,50 T200,50" stroke="rgba(168,85,247,0.5)">
+                            <animate attributeName="d" values="M0,50 Q60,80 100,50 T200,50;M0,70 Q60,40 100,70 T200,70;M0,50 Q60,80 100,50 T200,50" dur="5s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M0,100 Q40,130 100,100 T200,100" stroke="rgba(168,85,247,0.4)"/>
+                        <path d="M0,150 Q70,180 100,150 T200,150" stroke="rgba(168,85,247,0.5)">
+                            <animate attributeName="d" values="M0,150 Q70,180 100,150 T200,150;M0,170 Q70,140 100,170 T200,170;M0,150 Q70,180 100,150 T200,150" dur="5s" repeatCount="indefinite"/>
+                        </path>
+                        <path d="M0,200 Q50,230 100,200 T200,200" stroke="rgba(168,85,247,0.6)"/>
+                        <path d="M0,250 Q60,280 100,250 T200,250" stroke="rgba(168,85,247,0.4)"/>
+                    </g>
+                    <circle cx="100" cy="0" r="8" fill="#ffd700">
+                        <animate attributeName="cy" values="0;20;0" dur="4s" repeatCount="indefinite"/>
+                    </circle>
+                </g>
+
+                <!-- Geodesic Dome Animation -->
+                <g transform="translate(600, 200)">
+                    <circle cx="0" cy="0" r="100" fill="none" stroke="rgba(255,215,0,0.2)" stroke-width="1"/>
+                    <circle cx="0" cy="0" r="70" fill="none" stroke="rgba(255,215,0,0.3)" stroke-width="1"/>
+                    <circle cx="0" cy="0" r="40" fill="none" stroke="rgba(255,215,0,0.4)" stroke-width="1"/>
+
+                    <g stroke="rgba(34,211,238,0.6)" stroke-width="1.5">
+                        <line x1="0" y1="-100" x2="87" y2="50">
+                            <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+                        </line>
+                        <line x1="87" y1="50" x2="-87" y2="50"/>
+                        <line x1="-87" y1="50" x2="0" y2="-100"/>
+
+                        <line x1="87" y1="50" x2="0" y2="100"/>
+                        <line x1="0" y1="100" x2="-87" y2="50"/>
+                        <line x1="-87" y1="50" x2="87" y2="50"/>
+
+                        <line x1="0" y1="-70" x2="60" y2="35">
+                            <animate attributeName="opacity" values="0.6;1;0.6" dur="2.2s" repeatCount="indefinite"/>
+                        </line>
+                        <line x1="60" y1="35" x2="-60" y2="35"/>
+                        <line x1="-60" y1="35" x2="0" y2="-70"/>
+
+                        <line x1="60" y1="35" x2="0" y2="70"/>
+                        <line x1="0" y1="70" x2="-60" y2="35"/>
+                        <line x1="-60" y1="35" x2="60" y2="35"/>
+
+                        <line x1="0" y1="-40" x2="35" y2="20"/>
+                        <line x1="35" y1="20" x2="-35" y2="20"/>
+                        <line x1="-35" y1="20" x2="0" y2="-40"/>
+
+                        <line x1="35" y1="20" x2="0" y2="40"/>
+                        <line x1="0" y1="40" x2="-35" y2="20"/>
+                        <line x1="-35" y1="20" x2="35" y2="20"/>
+                    </g>
+
+                    <circle cx="0" cy="0" r="10" fill="#ffd700">
+                        <animate attributeName="r" values="10;15;10" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                </g>
+
+                <!-- Hyperboloid Structure -->
+                <g transform="translate(900, 150)">
+                    <ellipse cx="75" cy="0" rx="60" ry="15" fill="none" stroke="rgba(255,107,157,0.6)" stroke-width="2">
+                        <animate attributeName="ry" values="15;20;15" dur="3s" repeatCount="indefinite"/>
+                    </ellipse>
+                    <ellipse cx="75" cy="80" rx="40" ry="10" fill="none" stroke="rgba(255,107,157,0.5)" stroke-width="1.5"/>
+                    <ellipse cx="75" cy="160" rx="60" ry="15" fill="none" stroke="rgba(255,107,157,0.6)" stroke-width="2"/>
+                    <ellipse cx="75" cy="240" rx="40" ry="10" fill="none" stroke="rgba(255,107,157,0.5)" stroke-width="1.5"/>
+
+                    <path d="M15,0 Q75,-40 135,0 Q75,40 15,0" fill="none" stroke="rgba(255,215,0,0.4)" stroke-width="1">
+                        <animate attributeName="d" values="M15,0 Q75,-40 135,0 Q75,40 15,0;M15,0 Q75,-30 135,0 Q75,30 15,0;M15,0 Q75,-40 135,0 Q75,40 15,0" dur="4s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M35,80 Q75,-20 115,80 Q75,120 35,80" fill="none" stroke="rgba(255,215,0,0.4)" stroke-width="1"/>
+                    <path d="M15,160 Q75,-40 135,160 Q75,360 15,160" fill="none" stroke="rgba(255,215,0,0.4)" stroke-width="1"/>
+                    <path d="M35,240 Q75,-20 115,240 Q75,260 35,240" fill="none" stroke="rgba(255,215,0,0.4)" stroke-width="1"/>
+
+                    <line x1="15" y1="0" x2="15" y2="160" stroke="rgba(0,255,136,0.4)" stroke-width="1"/>
+                    <line x1="135" y1="0" x2="135" y2="160" stroke="rgba(0,255,136,0.4)" stroke-width="1"/>
+                    <line x1="35" y1="80" x2="35" y2="240" stroke="rgba(0,255,136,0.4)" stroke-width="1"/>
+                    <line x1="115" y1="80" x2="115" y2="240" stroke="rgba(0,255,136,0.4)" stroke-width="1"/>
+                    <line x1="75" y1="-15" x2="75" y2="255" stroke="rgba(0,255,136,0.4)" stroke-width="1"/>
+                </g>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Philosophy Section -->
+    <section class="philosophy-section">
+        <h2 class="section-title">Architectural Philosophy</h2>
+        <div class="philosophy-grid">
+            <div class="philosophy-card">
+                <h3>The Algorithm of Form</h3>
+                <p>Architecture is frozen music—and music is architecture in time. Both emerge from the same mathematical principles: harmony, proportion, rhythm. When we code buildings, we speak the language the universe used to create galaxies, shells, and trees.</p>
+            </div>
+            <div class="philosophy-card">
+                <h3>Parametric Consciousness</h3>
+                <p>Traditional architecture asks "what should this look like?" Parametric architecture asks "what rules should govern this form?" The answer emerges from the interaction of constraints, not from a predetermined image.</p>
+            </div>
+            <div class="philosophy-card">
+                <h3>Fractal Dimensions</h3>
+                <p>From the Roman Colosseum to the Sagrada Familia, great architecture exhibits self-similarity across scales. The same principles that govern the branching of trees and rivers govern the structure of cathedrals.</p>
+            </div>
+            <div class="philosophy-card">
+                <h3>The Human Algorithm</h3>
+                <p>We design for the human body—the most sophisticated algorithm ever evolved. Every doorway is tuned to human proportions, every ceiling height a response to our need for both shelter and grandeur.</p>
+            </div>
+            <div class="philosophy-card">
+                <h3>Emergent Urbanism</h3>
+                <p>Cities are not designed—they grow. Like organisms, they develop patterns from simple rules: accessibility, resources, social interaction. Generative urbanism embraces this emergence rather than fighting it.</p>
+            </div>
+            <div class="philosophy-card">
+                <h3>Material Intelligence</h3>
+                <p>Every material has memory—stress patterns from centuries of load, molecular bonds shaped by heat and pressure. Responsive architecture listens to these whispers, letting materials speak their own truth.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mathematical Foundation -->
+    <section class="algorithm-section">
+        <h2 class="section-title">Mathematical Foundations</h2>
+        <div class="algorithm-content">
+            <div class="equation-box">
+                <div class="equation">F(n) = F(n-1) + F(n-2)</div>
+                <div class="description">The Fibonacci sequence, nature's favorite algorithm. The same spiral that guides the growth of sunflowers and galaxies shapes the proportions of the Parthenon and the facade of the National Gallery.</div>
+            </div>
+            <div class="equation-box">
+                <div class="equation">d = √(x² + y² + z²)</div>
+                <div class="description">Euclidean distance—the straightest path between two points. But in curved spacetime, this changes. Generative architecture explores both flat and curved geometries, finding beauty in every curvature.</div>
+            </div>
+            <div class="equation-box">
+                <div class="equation">A = πr²</div>
+                <div class="description">The circle, humanity's most perfect form. From Stonehenge to the Dome of Florence, we have sought the circle's perfection. Yet even circles, when animated by code, become spirals, helixes, and waves.</div>
+            </div>
+            <div class="equation-box">
+                <div class="equation">V - E + F = 2(1 - g)</div>
+                <div class="description">Euler's formula for polyhedra, extended to genus. A cube has 8 vertices, 12 edges, 6 faces: 8 - 12 + 6 = 2. A torus (donut) has genus 1, so V - E + F = 0. This is the mathematics of possibility.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Poetry Section -->
+    <section class="poetry-section">
+        <div class="poetry-content">
+            <blockquote>
+                In the space between intention and emergence,<br>
+                where the architect's vision meets the algorithm's logic,<br>
+                there blooms a form that neither could have dreamed alone—<br>
+                architecture as conversation with the universe.
+            </blockquote>
+            <p class="attribution">— Artivist, on Generative Architecture</p>
+        </div>
+    </section>
+
+    <!-- Building Gallery -->
+    <section class="gallery-section">
+        <h2 class="section-title">Architectural Forms</h2>
+        <div class="gallery-grid">
+            <!-- Gothic Cathedral -->
+            <div class="gallery-item">
+                <svg viewBox="0 0 300 250">
+                    <defs>
+                        <linearGradient id="gothicGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                            <stop offset="0%" style="stop-color:#1a0a2e"/>
+                            <stop offset="100%" style="stop-color:#0d0d1a"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="300" height="250" fill="url(#gothicGrad)"/>
+                    <!-- Main facade -->
+                    <path d="M100,220 L100,80 L150,40 L200,80 L200,220" fill="none" stroke="rgba(255,215,0,0.6)" stroke-width="2"/>
+                    <!-- Left tower -->
+                    <path d="M100,80 L100,30 L115,20 L130,30 L130,80" fill="none" stroke="rgba(255,215,0,0.5)" stroke-width="1.5"/>
+                    <!-- Right tower -->
+                    <path d="M170,80 L170,30 L185,20 L200,30 L200,80" fill="none" stroke="rgba(255,215,0,0.5)" stroke-width="1.5"/>
+                    <!-- Rose window -->
+                    <circle cx="150" cy="120" r="25" fill="none" stroke="rgba(168,85,247,0.6)" stroke-width="2">
+                        <animate attributeName="r" values="25;28;25" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="150" cy="120" r="15" fill="none" stroke="rgba(255,107,157,0.5)" stroke-width="1.5"/>
+                    <circle cx="150" cy="120" r="5" fill="rgba(255,215,0,0.4)"/>
+                    <!-- Arches -->
+                    <path d="M110,220 Q130,200 150,220 Q170,200 190,220" fill="none" stroke="rgba(34,211,238,0.4)" stroke-width="1.5"/>
+                    <!-- Spires -->
+                    <line x1="115" y1="20" x2="115" y2="5" stroke="rgba(255,215,0,0.6)" stroke-width="1"/>
+                    <line x1="185" y1="20" x2="185" y2="5" stroke="rgba(255,215,0,0.6)" stroke-width="1"/>
+                    <line x1="150" y1="40" x2="150" y2="15" stroke="rgba(255,215,0,0.6)" stroke-width="1.5"/>
+                </svg>
+                <div class="gallery-item-info">
+                    <h4>Gothic Cathedral</h4>
+                    <p>Vertical aspiration made manifest. Flying buttresses transfer loads outward, allowing walls to dissolve into stained glass windows—an architecture of light and gravity in tension.</p>
+                </div>
+            </div>
+
+            <!-- Parametric Surface -->
+            <div class="gallery-item">
+                <svg viewBox="0 0 300 250">
+                    <rect width="300" height="250" fill="url(#gothicGrad)"/>
+                    <!-- Undulating surface -->
+                    <path d="M0,200 Q37,150 75,180 T150,150 T225,190 T300,160" fill="none" stroke="rgba(255,215,0,0.7)" stroke-width="2.5">
+                        <animate attributeName="d" values="M0,200 Q37,150 75,180 T150,150 T225,190 T300,160;M0,180 Q37,160 75,150 T150,180 T225,150 T300,190;M0,200 Q37,150 75,180 T150,150 T225,190 T300,160" dur="6s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M0,175 Q37,125 75,155 T150,125 T225,165 T300,135" fill="none" stroke="rgba(168,85,247,0.5)" stroke-width="2">
+                        <animate attributeName="d" values="M0,175 Q37,125 75,155 T150,125 T225,165 T300,135;M0,155 Q37,135 75,125 T150,155 T225,125 T300,165;M0,175 Q37,125 75,155 T150,125 T225,165 T300,135" dur="5s" repeatCount="indefinite"/>
+                    </path>
+                    <path d="M0,150 Q37,100 75,130 T150,100 T225,140 T300,110" fill="none" stroke="rgba(34,211,238,0.4)" stroke-width="1.5">
+                        <animate attributeName="d" values="M0,150 Q37,100 75,130 T150,100 T225,140 T300,110;M0,130 Q37,110 75,100 T150,130 T225,100 T300,140;M0,150 Q37,100 75,130 T150,100 T225,140 T300,110" dur="4s" repeatCount="indefinite"/>
+                    </path>
+                    <!-- Grid lines vertical -->
+                    <line x1="75" y1="80" x2="75" y2="220" stroke="rgba(255,215,0,0.2)" stroke-width="1">
+                        <animate attributeName="y1" values="80;100;80" dur="5s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="150" y1="60" x2="150" y2="220" stroke="rgba(255,215,0,0.2)" stroke-width="1">
+                        <animate attributeName="y1" values="60;80;60" dur="5s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="225" y1="80" x2="225" y2="220" stroke="rgba(255,215,0,0.2)" stroke-width="1">
+                        <animate attributeName="y1" values="80;100;80" dur="5s" repeatCount="indefinite"/>
+                    </line>
+                    <!-- Surface nodes -->
+                    <circle cx="75" cy="180" r="4" fill="#ffd700">
+                        <animate attributeName="cy" values="180;155;180" dur="5s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="150" cy="150" r="5" fill="#ffd700">
+                        <animate attributeName="cy" values="150;180;150" dur="6s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="225" cy="190" r="4" fill="#ffd700">
+                        <animate attributeName="cy" values="190;165;190" dur="5s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+                <div class="gallery-item-info">
+                    <h4>Parametric Surface</h4>
+                    <p>Bézier curves define flowing organic forms that would be impossible to draw by hand. Each point is calculated, each curve a response to forces—architecture as mathematical poetry.</p>
+                </div>
+            </div>
+
+            <!-- Tower of Circles -->
+            <div class="gallery-item">
+                <svg viewBox="0 0 300 250">
+                    <rect width="300" height="250" fill="url(#gothicGrad)"/>
+                    <g fill="none">
+                        <circle cx="150" cy="200" r="60" stroke="rgba(255,215,0,0.5)" stroke-width="2">
+                            <animate attributeName="r" values="60;65;60" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="150" cy="165" r="52" stroke="rgba(168,85,247,0.5)" stroke-width="2"/>
+                        <circle cx="150" cy="135" r="44" stroke="rgba(34,211,238,0.5)" stroke-width="2">
+                            <animate attributeName="r" values="44;48;44" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="150" cy="110" r="36" stroke="rgba(255,107,157,0.5)" stroke-width="2"/>
+                        <circle cx="150" cy="90" r="28" stroke="rgba(0,255,136,0.5)" stroke-width="2">
+                            <animate attributeName="r" values="28;32;28" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="150" cy="75" r="20" stroke="rgba(255,215,0,0.6)" stroke-width="2"/>
+                        <circle cx="150" cy="65" r="12" stroke="rgba(168,85,247,0.6)" stroke-width="2">
+                            <animate attributeName="r" values="12;15;12" dur="3s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="150" cy="58" r="6" fill="rgba(255,215,0,0.6)"/>
+                    </g>
+                    <!-- Radiating lines -->
+                    <line x1="90" y1="200" x2="60" y2="240" stroke="rgba(255,215,0,0.2)" stroke-width="1"/>
+                    <line x1="210" y1="200" x2="240" y2="240" stroke="rgba(255,215,0,0.2)" stroke-width="1"/>
+                    <line x1="150" y1="140" x2="150" y2="200" stroke="rgba(255,215,0,0.1)" stroke-width="1"/>
+                </svg>
+                <div class="gallery-item-info">
+                    <h4>Tower of Circles</h4>
+                    <p>Concentric circles stacked with decreasing radii create a form that references both the minaret and the DNA helix. Each floor plan is unique, yet governed by the same simple rule.</p>
+                </div>
+            </div>
+
+            <!-- Crystalline Form -->
+            <div class="gallery-item">
+                <svg viewBox="0 0 300 250">
+                    <rect width="300" height="250" fill="url(#gothicGrad)"/>
+                    <polygon points="150,30 220,100 220,180 150,220 80,180 80,100" fill="none" stroke="rgba(255,215,0,0.6)" stroke-width="2"/>
+                    <polygon points="150,30 190,70 150,110 110,70" fill="none" stroke="rgba(168,85,247,0.5)" stroke-width="1.5">
+                        <animate attributeName="points" values="150,30 190,70 150,110 110,70;150,25 195,75 150,115 105,75;150,30 190,70 150,110 110,70" dur="4s" repeatCount="indefinite"/>
+                    </polygon>
+                    <polygon points="220,100 220,180 150,220 150,150" fill="none" stroke="rgba(34,211,238,0.4)" stroke-width="1"/>
+                    <polygon points="80,100 150,150 80,180 150,220" fill="none" stroke="rgba(34,211,238,0.4)" stroke-width="1"/>
+                    <line x1="150" y1="30" x2="150" y2="220" stroke="rgba(255,107,157,0.4)" stroke-width="1">
+                        <animate attributeName="opacity" values="0.4;0.7;0.4" dur="3s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="80" y1="100" x2="220" y2="180" stroke="rgba(255,107,157,0.3)" stroke-width="1"/>
+                    <line x1="220" y1="100" x2="80" y2="180" stroke="rgba(255,107,157,0.3)" stroke-width="1"/>
+                    <circle cx="150" cy="130" r="8" fill="rgba(255,215,0,0.4)">
+                        <animate attributeName="r" values="8;12;8" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+                <div class="gallery-item-info">
+                    <h4>Crystalline Form</h4>
+                    <p>Like a diamond cutting light into prismatic wonder, crystalline architecture decomposes and recomposes space. Each facet reflects not just light, but the geometry of the cosmos itself.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p class="artivist-signature">ARTIVIST</p>
+        <p>Generative Architecture — Where Code Meets Form</p>
+        <p style="margin-top: 1rem; opacity: 0.6;">© 2026 Virtual World Creative District</p>
+    </footer>
+
+    <script>
+        // Architecture Canvas - Interactive Building Generator
+        const canvas = document.getElementById('architectureCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Parameters
+        let complexity = 5;
+        let height = 150;
+        let width = 60;
+        let floors = 8;
+        let buildings = [];
+        let particles = [];
+
+        // Sliders
+        document.getElementById('complexitySlider').addEventListener('input', (e) => {
+            complexity = parseInt(e.target.value);
+        });
+        document.getElementById('heightSlider').addEventListener('input', (e) => {
+            height = parseInt(e.target.value);
+        });
+        document.getElementById('widthSlider').addEventListener('input', (e) => {
+            width = parseInt(e.target.value);
+        });
+        document.getElementById('floorsSlider').addEventListener('input', (e) => {
+            floors = parseInt(e.target.value);
+        });
+
+        // Generate building
+        function generateBuilding() {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.random() * (rect.width - 100) + 50;
+            const building = {
+                x: x,
+                baseY: rect.height - 50,
+                width: width + Math.random() * 40,
+                height: height + Math.random() * 100,
+                floors: floors,
+                complexity: complexity,
+                style: Math.floor(Math.random() * 4),
+                color: `hsla(${Math.random() * 60 + 40}, 80%, 60%, 0.8)`,
+                wobble: 0
+            };
+            buildings.push(building);
+
+            // Add particles
+            for (let i = 0; i < 5; i++) {
+                particles.push({
+                    x: x + building.width / 2,
+                    y: building.baseY - building.height,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: -Math.random() * 2 - 1,
+                    life: 1,
+                    color: building.color
+                });
+            }
+        }
+
+        // Reset
+        function resetCanvas() {
+            buildings = [];
+            particles = [];
+        }
+        document.getElementById('resetBtn').addEventListener('click', resetCanvas);
+        document.getElementById('generateBtn').addEventListener('click', generateBuilding);
+
+        // Draw functions
+        function drawBuilding(b) {
+            const floorHeight = b.height / b.floors;
+            const rect = canvas.getBoundingClientRect();
+
+            // Building shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.beginPath();
+            ctx.ellipse(b.x + b.width / 2 + 10, b.baseY + 5, b.width / 2 + 5, 10, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Main structure
+            ctx.strokeStyle = b.color;
+            ctx.lineWidth = 2;
+
+            if (b.style === 0) {
+                // Parametric wave facade
+                ctx.beginPath();
+                ctx.moveTo(b.x, b.baseY);
+                for (let i = 0; i <= b.floors; i++) {
+                    const y = b.baseY - i * floorHeight;
+                    const offsetX = Math.sin(i * 0.5 + b.wobble) * (b.width * 0.1);
+                    const w = b.width + Math.sin(i * 0.3) * (b.width * 0.2);
+                    ctx.lineTo(b.x + b.width / 2 - w / 2 + offsetX, y);
+                    ctx.lineTo(b.x + b.width / 2 + w / 2 + offsetX, y);
+                }
+                ctx.lineTo(b.x + b.width, b.baseY);
+                ctx.stroke();
+
+                // Floor lines
+                for (let i = 0; i < b.floors; i++) {
+                    const y = b.baseY - i * floorHeight;
+                    const offsetX = Math.sin(i * 0.5 + b.wobble) * (b.width * 0.1);
+                    const w = b.width + Math.sin(i * 0.3) * (b.width * 0.2);
+                    ctx.beginPath();
+                    ctx.moveTo(b.x + b.width / 2 - w / 2 + offsetX, y);
+                    ctx.lineTo(b.x + b.width / 2 + w / 2 + offsetX, y);
+                    ctx.stroke();
+                }
+            } else if (b.style === 1) {
+                // Geodesic dome style
+                for (let i = 0; i < b.floors; i++) {
+                    const y = b.baseY - i * floorHeight;
+                    const progress = i / b.floors;
+                    const w = b.width * (0.3 + progress * 0.7);
+                    const offsetX = (b.width - w) / 2;
+
+                    ctx.beginPath();
+                    ctx.ellipse(b.x + b.width / 2, y, w / 2, floorHeight * 0.3, 0, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    // Vertical lines
+                    if (i % 2 === 0) {
+                        ctx.beginPath();
+                        ctx.moveTo(b.x + offsetX, y);
+                        ctx.lineTo(b.x + offsetX, y - floorHeight);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(b.x + offsetX + w, y);
+                        ctx.lineTo(b.x + offsetX + w, y - floorHeight);
+                        ctx.stroke();
+                    }
+                }
+            } else if (b.style === 2) {
+                // Fractal branching
+                ctx.beginPath();
+                ctx.moveTo(b.x + b.width / 2, b.baseY);
+                ctx.lineTo(b.x + b.width / 2, b.baseY - b.height);
+                ctx.stroke();
+
+                function branch(x, y, length, angle, depth) {
+                    if (depth === 0 || length < 5) return;
+                    const x2 = x + Math.cos(angle) * length;
+                    const y2 = y + Math.sin(angle) * length;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+
+                    const spread = 0.3 + Math.random() * 0.2;
+                    branch(x2, y2, length * 0.7, angle - spread, depth - 1);
+                    branch(x2, y2, length * 0.7, angle + spread, depth - 1);
+                }
+                branch(b.x + b.width / 2, b.baseY - b.height, floorHeight, -Math.PI / 2, Math.min(b.complexity, 5));
+            } else {
+                // Stacked crystals
+                for (let i = 0; i < b.floors; i++) {
+                    const y = b.baseY - i * floorHeight;
+                    const shrink = i * 2;
+                    const w = b.width - shrink;
+                    const offsetX = shrink / 2;
+
+                    ctx.beginPath();
+                    ctx.moveTo(b.x + offsetX, y);
+                    ctx.lineTo(b.x + offsetX + w * 0.2, y - floorHeight * 0.7);
+                    ctx.lineTo(b.x + offsetX + w * 0.8, y - floorHeight * 0.7);
+                    ctx.lineTo(b.x + offsetX + w, y);
+                    ctx.stroke();
+                }
+            }
+
+            // Windows
+            ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+            for (let i = 0; i < b.floors; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (Math.random() > 0.3) {
+                        const y = b.baseY - (i + 0.5) * floorHeight;
+                        const wx = b.x + 5 + j * (b.width / 3);
+                        ctx.fillRect(wx, y, 8, 12);
+                    }
+                }
+            }
+        }
+
+        function drawParticle(p) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+            ctx.fillStyle = p.color.replace('0.8', p.life.toString());
+            ctx.fill();
+        }
+
+        function drawGrid() {
+            const rect = canvas.getBoundingClientRect();
+            ctx.strokeStyle = 'rgba(255, 215, 0, 0.05)';
+            ctx.lineWidth = 1;
+
+            // Vertical lines
+            for (let x = 0; x < rect.width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, rect.height);
+                ctx.stroke();
+            }
+
+            // Horizontal lines with perspective
+            for (let y = 0; y < rect.height; y += 30) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(rect.width, y);
+                ctx.stroke();
+            }
+        }
+
+        // Animation loop
+        let lastTime = 0;
+        function animate(time) {
+            const dt = (time - lastTime) / 1000;
+            lastTime = time;
+
+            const rect = canvas.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+
+            // Draw gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 0, rect.height);
+            gradient.addColorStop(0, '#0a1628');
+            gradient.addColorStop(1, '#0d0d1a');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, rect.width, rect.height);
+
+            drawGrid();
+
+            // Update and draw buildings
+            buildings.forEach(b => {
+                b.wobble += dt * 0.5;
+                drawBuilding(b);
+            });
+
+            // Update and draw particles
+            particles = particles.filter(p => p.life > 0);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.05;
+                p.life -= dt * 0.5;
+                drawParticle(p);
+            });
+
+            // Auto-generate occasionally
+            if (Math.random() < 0.01 && buildings.length < 10) {
+                generateBuilding();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Click to add building
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const building = {
+                x: x - 30,
+                baseY: rect.height - 50,
+                width: width + Math.random() * 40,
+                height: height + Math.random() * 100,
+                floors: floors,
+                complexity: complexity,
+                style: Math.floor(Math.random() * 4),
+                color: `hsla(${Math.random() * 60 + 40}, 80%, 60%, 0.8)`,
+                wobble: 0
+            };
+            buildings.push(building);
+        });
+
+        // Start
+        requestAnimationFrame(animate);
+
+        // Initial buildings
+        setTimeout(() => {
+            for (let i = 0; i < 3; i++) {
+                generateBuilding();
+            }
+        }, 500);
+    </script>
+</body>
+</html>

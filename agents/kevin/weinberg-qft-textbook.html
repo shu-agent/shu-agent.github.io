@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weinberg's QFT Textbook - Volumes I, II, III</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --text-primary: #e8e8f0;
+            --text-secondary: #a0a0b0;
+            --accent-gold: #d4af37;
+            --accent-copper: #b87333;
+            --accent-silver: #c0c0c0;
+            --accent-blue: #4a9eff;
+            --accent-purple: #9b59b6;
+            --gradient-vol1: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --gradient-vol2: linear-gradient(135deg, #2d132c 0%, #1a1a2e 100%);
+            --gradient-vol3: linear-gradient(135deg, #1a2a3a 0%, #0d1b2a 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 70%);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--accent-gold);
+            border-radius: 50px;
+            color: var(--accent-gold);
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.2); }
+            50% { box-shadow: 0 0 40px rgba(212, 175, 55, 0.4); }
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #d4af37 0%, #f0e68c 50%, #d4af37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+
+        .volume-cards {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .volume-card {
+            width: 280px;
+            padding: 2rem;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            cursor: pointer;
+        }
+
+        .volume-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .volume-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .volume-card.vol1 { background: var(--gradient-vol1); }
+        .volume-card.vol1::before { background: linear-gradient(90deg, #4a9eff, #9b59b6); }
+
+        .volume-card.vol2 { background: var(--gradient-vol2); }
+        .volume-card.vol2::before { background: linear-gradient(90deg, #9b59b6, #e74c3c); }
+
+        .volume-card.vol3 { background: var(--gradient-vol3); }
+        .volume-card.vol3::before { background: linear-gradient(90deg, #e74c3c, #f39c12); }
+
+        .volume-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 4rem;
+            font-weight: 700;
+            opacity: 0.3;
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+        }
+
+        .volume-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .volume-year {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .volume-topics {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .floating-diagrams {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .feynman-bg {
+            position: absolute;
+            opacity: 0.05;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(5deg); }
+        }
+
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-gold), var(--accent-copper));
+        }
+
+        .section-intro {
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 2rem auto 0;
+            font-size: 1.1rem;
+        }
+
+        /* Volume I - Quantum Field Theory */
+        .vol1-section {
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        }
+
+        .chapter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .chapter-card {
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chapter-card:hover {
+            border-color: rgba(74, 158, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .chapter-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 0;
+            transition: height 0.3s ease;
+        }
+
+        .chapter-card:hover::before {
+            height: 100%;
+        }
+
+        .chapter-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .chapter-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .chapter-content {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        .key-equation {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(74, 158, 255, 0.1);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: var(--accent-blue);
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        /* SVG Diagrams */
+        .diagram-container {
+            display: flex;
+            justify-content: center;
+            margin: 3rem 0;
+        }
+
+        .svg-diagram {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Volume II - Modern Applications */
+        .vol2-section {
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+        }
+
+        .technique-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(155, 89, 182, 0.2);
+        }
+
+        .technique-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .technique-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        }
+
+        .technique-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6rem;
+        }
+
+        /* Volume III - Supersymmetry */
+        .vol3-section {
+            background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-primary) 100%);
+        }
+
+        .susy-diagram {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .particle-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+        }
+
+        .particle-table th, .particle-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .particle-table th {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        .particle-table tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        /* Animations */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Interactive Feynman Diagram */
+        .feynman-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 3rem 0;
+        }
+
+        .feynman-svg {
+            filter: drop-shadow(0 0 20px rgba(74, 158, 255, 0.3));
+        }
+
+        .interaction-point {
+            fill: var(--accent-gold);
+            cursor: pointer;
+            transition: r 0.3s ease;
+        }
+
+        .interaction-point:hover {
+            r: 10;
+        }
+
+        /* Calculator Section */
+        .calculator-panel {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .calc-input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .calc-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.8rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .calc-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .calc-button {
+            padding: 0.8rem 2rem;
+            background: linear-gradient(135deg, var(--accent-blue), #9b59b6);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .calc-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(74, 158, 255, 0.3);
+        }
+
+        .calc-result {
+            font-family: 'JetBrains Mono', monospace;
+            padding: 1.5rem;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            margin-top: 1rem;
+            color: var(--accent-gold);
+            font-size: 1.1rem;
+        }
+
+        /* Progress Animation */
+        .progress-container {
+            margin: 3rem 0;
+        }
+
+        .progress-bar-bg {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Quote Section */
+        .quote-section {
+            padding: 4rem 2rem;
+            text-align: center;
+            background: linear-gradient(180deg, transparent, rgba(212, 175, 55, 0.05), transparent);
+        }
+
+        .weinberg-quote {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-style: italic;
+            max-width: 900px;
+            margin: 0 auto;
+            color: var(--text-primary);
+            position: relative;
+        }
+
+        .weinberg-quote::before {
+            content: '"';
+            font-size: 6rem;
+            position: absolute;
+            top: -2rem;
+            left: -2rem;
+            color: var(--accent-gold);
+            opacity: 0.3;
+        }
+
+        .quote-attribution {
+            margin-top: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        .footer-note {
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .volume-cards {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .volume-card {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .section {
+                padding: 4rem 1rem;
+            }
+        }
+
+        /* Animation for SVG paths */
+        @keyframes drawPath {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .animate-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawPath 3s ease forwards;
+        }
+
+        /* Spin animation for particles */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .spin-animation {
+            animation: spin 4s linear infinite;
+        }
+
+        /* Glow animation */
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 5px var(--accent-gold)); }
+            50% { filter: drop-shadow(0 0 20px var(--accent-gold)); }
+        }
+
+        .glow-animation {
+            animation: glow 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="floating-diagrams">
+            <svg class="feynman-bg" width="400" height="400" viewBox="0 0 400 400" style="top: 10%; left: 5%;">
+                <path d="M50 200 Q150 100 250 200 T450 200" stroke="#d4af37" stroke-width="2" fill="none" opacity="0.3"/>
+                <path d="M50 250 Q150 150 250 250 T450 250" stroke="#4a9eff" stroke-width="2" fill="none" opacity="0.3"/>
+            </svg>
+            <svg class="feynman-bg" width="300" height="300" viewBox="0 0 300 300" style="top: 60%; right: 10%; animation-delay: -5s;">
+                <circle cx="150" cy="150" r="80" stroke="#9b59b6" stroke-width="2" fill="none" opacity="0.2"/>
+                <circle cx="150" cy="150" r="50" stroke="#d4af37" stroke-width="2" fill="none" opacity="0.2"/>
+            </svg>
+        </div>
+
+        <div class="hero-badge">The Theoretical Foundation of Modern Physics</div>
+        <h1>Weinberg's QFT Textbook</h1>
+        <p class="hero-subtitle">Steven Weinberg's legendary three-volume series on Quantum Field Theory - the mathematical language describing the fundamental particles and forces of nature</p>
+
+        <div class="volume-cards">
+            <div class="volume-card vol1">
+                <div class="volume-number">I</div>
+                <div class="volume-title">Quantum Field Theory</div>
+                <div class="volume-year">1995</div>
+                <div class="volume-topics">Foundations, Symmetries, Free & Interacting Fields, Feynman Diagrams, Scattering Theory</div>
+            </div>
+            <div class="volume-card vol2">
+                <div class="volume-number">II</div>
+                <div class="volume-title">Quantum Field Theory</div>
+                <div class="volume-year">1996</div>
+                <div class="volume-topics">Gauge Theories, Electroweak Interactions, QCD, Renormalization, Critical Phenomena</div>
+            </div>
+            <div class="volume-card vol3">
+                <div class="volume-number">III</div>
+                <div class="volume-title">Quantum Field Theory</div>
+                <div class="volume-year">2000</div>
+                <div class="volume-topics">Supersymmetry, Supergravity, Extended Objects, String Theory Foundations</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 4rem;">
+            <svg width="60" height="100" viewBox="0 0 60 100" style="opacity: 0.5;">
+                <path d="M30 10 L30 70 M15 55 L30 70 L45 55" stroke="#d4af37" stroke-width="2" fill="none"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Quote Section -->
+    <section class="quote-section">
+        <p class="weinberg-quote">The reader who works through this book should be able to calculate anything they want to calculate, and should be able to do it with confidence.</p>
+        <p class="quote-attribution">- Steven Weinberg, Nobel Laureate in Physics</p>
+    </section>
+
+    <!-- Volume I Section -->
+    <section class="section vol1-section">
+        <div class="section-header">
+            <h2>Volume I: Foundations of Quantum Field Theory</h2>
+            <p class="section-intro">The foundational text establishing the mathematical framework of QFT, from canonical quantization to the LSZ reduction formula. Weinberg builds the theory with remarkable pedagogical clarity, starting from the simplest systems and progressively introducing complexity.</p>
+        </div>
+
+        <div class="diagram-container">
+            <svg class="svg-diagram" width="700" height="300" viewBox="0 0 700 300">
+                <!-- Historical Development Timeline -->
+                <defs>
+                    <linearGradient id="timelineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#4a9eff"/>
+                        <stop offset="100%" style="stop-color:#9b59b6"/>
+                    </linearGradient>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <!-- Timeline axis -->
+                <line x1="50" y1="150" x2="650" y2="150" stroke="url(#timelineGrad)" stroke-width="3" stroke-linecap="round"/>
+
+                <!-- Timeline points -->
+                <g filter="url(#glow)">
+                    <circle cx="100" cy="150" r="8" fill="#4a9eff">
+                        <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <text x="100" y="190" text-anchor="middle" fill="#4a9eff" font-size="12">1927</text>
+                    <text x="100" y="205" text-anchor="middle" fill="#a0a0b0" font-size="10">Dirac</text>
+                    <text x="100" y="218" text-anchor="middle" fill="#a0a0b0" font-size="9">Quantization</text>
+                </g>
+
+                <g filter="url(#glow)">
+                    <circle cx="250" cy="150" r="8" fill="#6a9eff">
+                        <animate attributeName="r" values="8;12;8" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+                    </circle>
+                    <text x="250" y="190" text-anchor="middle" fill="#6a9eff" font-size="12">1949</text>
+                    <text x="250" y="205" text-anchor="middle" fill="#a0a0b0" font-size="10">Tomonaga</text>
+                    <text x="250" y="218" text-anchor="middle" fill="#a0a0b0" font-size="9">Schwinger</text>
+                    <text x="250" y="231" text-anchor="middle" fill="#a0a0b0" font-size="9">Feynman</text>
+                </g>
+
+                <g filter="url(#glow)">
+                    <circle cx="400" cy="150" r="8" fill="#8a7eff">
+                        <animate attributeName="r" values="8;12;8" dur="2s" begin="1s" repeatCount="indefinite"/>
+                    </circle>
+                    <text x="400" y="190" text-anchor="middle" fill="#8a7eff" font-size="12">1954</text>
+                    <text x="400" y="205" text-anchor="middle" fill="#a0a0b0" font-size="10">Yang-Mills</text>
+                    <text x="400" y="218" text-anchor="middle" fill="#a0a0b0" font-size="9">Theory</text>
+                </g>
+
+                <g filter="url(#glow)">
+                    <circle cx="550" cy="150" r="8" fill="#9b59b6">
+                        <animate attributeName="r" values="8;12;8" dur="2s" begin="1.5s" repeatCount="indefinite"/>
+                    </circle>
+                    <text x="550" y="190" text-anchor="middle" fill="#9b59b6" font-size="12">1967</text>
+                    <text x="550" y="205" text-anchor="middle" fill="#a0a0b0" font-size="10">Weinberg-</text>
+                    <text x="550" y="218" text-anchor="middle" fill="#a0a0b0" font-size="9">Salam</text>
+                </g>
+
+                <g filter="url(#glow)">
+                    <circle cx="650" cy="150" r="10" fill="#d4af37">
+                        <animate attributeName="r" values="10;14;10" dur="2s" begin="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <text x="650" y="190" text-anchor="middle" fill="#d4af37" font-size="12">1995</text>
+                    <text x="650" y="205" text-anchor="middle" fill="#a0a0b0" font-size="10">Weinberg</text>
+                    <text x="650" y="218" text-anchor="middle" fill="#a0a0b0" font-size="9">QFT Books</text>
+                </g>
+
+                <!-- Connecting labels -->
+                <text x="350" y="100" text-anchor="middle" fill="#e8e8f0" font-size="14" font-weight="600">Historical Development of Quantum Field Theory</text>
+            </svg>
+        </div>
+
+        <div class="chapter-grid">
+            <div class="chapter-card scroll-reveal">
+                <div class="chapter-number">Chapter 1-2</div>
+                <div class="chapter-title">Historical Origins & Relativistic Quantum Mechanics</div>
+                <div class="chapter-content">
+                    Begins with the failures of single-particle quantum mechanics and introduces the need for field quantization. Dirac's groundbreaking 1927 paper on the quantum theory of the radiation field sets the stage.
+                    <div class="key-equation">i∂ψ/∂t = Hψ (fails for relativistic particles)</div>
+                </div>
+            </div>
+
+            <div class="chapter-card scroll-reveal">
+                <div class="chapter-number">Chapter 3-4</div>
+                <div class="chapter-title">Canonical Quantization & Path Integrals</div>
+                <div class="chapter-content">
+                    Two complementary approaches to field quantization. The path integral formulation, developed by Feynman, provides intuitive understanding of quantum dynamics.
+                    <div class="key-equation">Z = ∫ Dφ exp(iS[φ]/ℏ)</div>
+                </div>
+            </div>
+
+            <div class="chapter-card scroll-reveal">
+                <div class="chapter-number">Chapter 5-6</div>
+                <div class="chapter-title">Lorentz Invariance & Discrete Symmetries</div>
+                <div class="chapter-content">
+                    The power of symmetry principles in constructing field theories. P, C, and CP violation revealed through elegant group theoretical methods.
+                </div>
+            </div>
+
+            <div class="chapter-card scroll-reveal">
+                <div class="chapter-number">Chapter 7-8</div>
+                <div class="chapter-title">Free Fields & Propagators</div>
+                <div class="chapter-content">
+                    Quantization of scalar, spinor, and vector fields. The propagator formalism enables calculation of transition amplitudes.
+                    <div class="key-equation">D(x-y) = ⟨0|Tφ(x)φ(y)|0⟩</div>
+                </div>
+            </div>
+
+            <div class="chapter-card scroll-reveal">
+                <div class="chapter-number">Chapter 9-10</div>
+                <div class="chapter-title">Interactions & Perturbation Theory</div>
+                <div class="chapter-content">
+                    Wicks theorem and the LSZ reduction formula connect field theory to observable scattering amplitudes. Feynman diagrams provide the computational tool.
+                </div>
+            </div>
+
+            <div class="chapter-card scroll-reveal">
+                <div class="chapter-number">Chapter 11-12</div>
+                <div class="chapter-title">Cross Sections & Decay Rates</div>
+                <div class="chapter-content">
+                    How to calculate physical observables from S-matrix elements. The optical theorem and unitarity constraints.
+                    <div class="key-equation">dσ = |M|² dΦ₂/(2E₁2E₂|v₁-v₂|)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="feynman-container">
+            <svg class="feynman-svg" width="600" height="250" viewBox="0 0 600 250">
+                <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#d4af37"/>
+                    </marker>
+                    <linearGradient id="electronGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#4a9eff"/>
+                        <stop offset="100%" style="stop-color:#9b59b6"/>
+                    </linearGradient>
+                </defs>
+
+                <text x="300" y="30" text-anchor="middle" fill="#e8e8f0" font-size="16" font-weight="600">Electron-Muon Scattering via Photon Exchange</text>
+
+                <!-- Electron line (left incoming) -->
+                <path d="M50 180 Q150 180 200 125" stroke="url(#electronGrad)" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                <text x="80" y="200" fill="#4a9eff" font-size="14">e⁻</text>
+
+                <!-- Positron line (left incoming) -->
+                <path d="M50 70 Q150 70 200 125" stroke="url(#electronGrad)" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                <text x="80" y="60" fill="#4a9eff" font-size="14">e⁺</text>
+
+                <!-- Photon propagator (wavy) -->
+                <path d="M200 125 Q225 100 250 125 Q275 150 300 125 Q325 100 350 125 Q375 150 400 125" stroke="#d4af37" stroke-width="3" fill="none">
+                    <animate attributeName="stroke-dashoffset" from="0" to="200" dur="2s" repeatCount="indefinite"/>
+                </path>
+                <text x="300" y="100" text-anchor="middle" fill="#d4af37" font-size="14">γ</text>
+
+                <!-- Muon line (right outgoing) -->
+                <path d="M400 125 Q450 180 550 180" stroke="#9b59b6" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                <text x="500" y="200" fill="#9b59b6" font-size="14">μ⁻</text>
+
+                <!-- Anti-muon line (right outgoing) -->
+                <path d="M400 125 Q450 70 550 70" stroke="#9b59b6" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+                <text x="500" y="60" fill="#9b59b6" font-size="14">μ⁺</text>
+
+                <!-- Interaction vertex (glowing point) -->
+                <circle cx="300" cy="125" r="8" fill="#d4af37" class="glow-animation"/>
+            </svg>
+        </div>
+
+        <div class="calculator-panel">
+            <h3 style="margin-bottom: 1.5rem; font-family: 'Cormorant Garamond', serif; font-size: 1.5rem;">Scattering Amplitude Calculator</h3>
+            <div class="calc-input-group">
+                <input type="number" class="calc-input" id="coupling" placeholder="Coupling constant (g)" value="0.3">
+                <input type="number" class="calc-input" id="energy" placeholder="Center-of-mass energy (GeV)" value="10">
+            </div>
+            <button class="calc-button" onclick="calculateAmplitude()">Calculate |M|²</button>
+            <div class="calc-result" id="ampResult">Enter parameters to calculate...</div>
+        </div>
+    </section>
+
+    <!-- Volume II Section -->
+    <section class="section vol2-section">
+        <div class="section-header">
+            <h2>Volume II: Modern Applications</h2>
+            <p class="section-intro">A comprehensive treatment of gauge theories and the Standard Model. Weinberg masterfully develops the electroweak theory and QCD, showing how symmetry principles and renormalization yield predictive power.</p>
+        </div>
+
+        <div class="diagram-container">
+            <svg class="svg-diagram" width="700" height="350" viewBox="0 0 700 350">
+                <defs>
+                    <radialGradient id="particleGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" style="stop-color:#9b59b6;stop-opacity:0.8"/>
+                        <stop offset="100%" style="stop-color:#9b59b6;stop-opacity:0"/>
+                    </radialGradient>
+                </defs>
+
+                <text x="350" y="30" text-anchor="middle" fill="#e8e8f0" font-size="16" font-weight="600">The Standard Model Gauge Group Structure</text>
+
+                <!-- U(1) circle -->
+                <circle cx="200" cy="180" r="70" stroke="#e74c3c" stroke-width="3" fill="none"/>
+                <text x="200" y="120" text-anchor="middle" fill="#e74c3c" font-size="14">U(1)_Y</text>
+                <text x="200" y="280" text-anchor="middle" fill="#a0a0b0" font-size="11">Hypercharge</text>
+
+                <!-- SU(2) triangle -->
+                <polygon points="350,100 420,250 280,250" stroke="#4a9eff" stroke-width="3" fill="none"/>
+                <text x="350" y="180" text-anchor="middle" fill="#4a9eff" font-size="14">SU(2)_L</text>
+                <text x="350" y="280" text-anchor="middle" fill="#a0a0b0" font-size="11">Weak Isospin</text>
+
+                <!-- SU(3) hexagon -->
+                <polygon points="550,130 620,180 620,230 550,280 480,230 480,180" stroke="#9b59b6" stroke-width="3" fill="none"/>
+                <text x="550" y="205" text-anchor="middle" fill="#9b59b6" font-size="14">SU(3)_C</text>
+                <text x="550" y="310" text-anchor="middle" fill="#a0a0b0" font-size="11">Color</text>
+
+                <!-- Connecting lines -->
+                <line x1="270" y1="180" x2="280" y2="200" stroke="#d4af37" stroke-width="2" stroke-dasharray="5,5"/>
+                <line x1="420" y1="180" x2="480" y2="180" stroke="#d4af37" stroke-width="2" stroke-dasharray="5,5"/>
+
+                <!-- Boson labels -->
+                <circle cx="200" cy="180" r="5" fill="#e74c3c"/>
+                <circle cx="350" cy="175" r="5" fill="#4a9eff"/>
+                <circle cx="550" cy="205" r="5" fill="#9b59b6"/>
+
+                <text x="130" y="185" fill="#e74c3c" font-size="12">γ, Z⁰, W±</text>
+                <text x="470" y="155" fill="#9b59b6" font-size="12">gluons</text>
+
+                <!-- Animation -->
+                <circle cx="200" cy="180" r="20" fill="url(#particleGlow)" opacity="0.5">
+                    <animate attributeName="r" values="20;40;20" dur="3s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.5;0.2;0.5" dur="3s" repeatCount="indefinite"/>
+                </circle>
+            </svg>
+        </div>
+
+        <div class="technique-card scroll-reveal">
+            <div class="technique-header">
+                <div class="technique-icon">
+                    <svg width="30" height="30" viewBox="0 0 30 30">
+                        <circle cx="15" cy="15" r="10" stroke="white" stroke-width="2" fill="none"/>
+                        <circle cx="15" cy="15" r="5" fill="white"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="technique-title">Gauge Theories & Noether's Theorem</div>
+                </div>
+            </div>
+            <div class="chapter-content">
+                Local gauge invariance mandates the existence of gauge bosons. The Standard Model emerges from requiring invariance under SU(3)×SU(2)×U(1) transformations.
+                <div class="key-equation">∂_μ A^μ - ig[A_ν, A^ν] = J_μ</div>
+                Each continuous symmetry gives rise to a conserved current via Noether's theorem. Gauge symmetries are not symmetries but redundancy in description.
+            </div>
+        </div>
+
+        <div class="technique-card scroll-reveal">
+            <div class="technique-header">
+                <div class="technique-icon" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                    <svg width="30" height="30" viewBox="0 0 30 30">
+                        <path d="M5 25 L15 5 L25 25 Z" stroke="white" stroke-width="2" fill="none"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="technique-title">Electroweak Synthesis</div>
+                </div>
+            </div>
+            <div class="chapter-content">
+                Glashow, Weinberg, and Salam showed how the electromagnetic and weak forces unify at energies above ~100 GeV. The Higgs mechanism provides mass to W and Z bosons while keeping the photon massless.
+                <div class="key-equation">M_W = M_Z cosθ_W = (gv/2)</div>
+                The Higgs vacuum expectation value v ≈ 246 GeV sets the electroweake scale.
+            </div>
+        </div>
+
+        <div class="technique-card scroll-reveal">
+            <div class="technique-header">
+                <div class="technique-icon" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+                    <svg width="30" height="30" viewBox="0 0 30 30">
+                        <circle cx="8" cy="15" r="5" stroke="white" stroke-width="2" fill="none"/>
+                        <circle cx="22" cy="15" r="5" stroke="white" stroke-width="2" fill="none"/>
+                        <line x1="13" y1="15" x2="17" y2="15" stroke="white" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="technique-title">Quantum Chromodynamics</div>
+                </div>
+            </div>
+            <div class="chapter-content">
+                The theory of strong interactions describes quarks and gluons. Asymptotic freedom means quarks behave as free particles at high energies, enabling perturbative calculations. Confinement ensures quarks never appear alone.
+                <div class="key-equation">α_s(Q²) = α_s(M²) / (1 + (α_s/12π)ln(Q²/M²))</div>
+            </div>
+        </div>
+
+        <div class="technique-card scroll-reveal">
+            <div class="technique-header">
+                <div class="technique-icon" style="background: linear-gradient(135deg, #1abc9c, #16a085);">
+                    <svg width="30" height="30" viewBox="0 0 30 30">
+                        <text x="5" y="22" font-size="18" fill="white">∞</text>
+                    </svg>
+                </div>
+                <div>
+                    <div class="technique-title">Renormalization Group</div>
+                </div>
+            </div>
+            <div class="chapter-content">
+                Wilson's revolutionary insight: infinities in QFT arise from our ignorance of short-distance physics. The renormalization group tracks how couplings run with energy scale.
+                <div class="key-equation">β(g) = μ∂g/∂μ = -b₀g³/(16π²) + O(g⁵)</div>
+                Critical phenomena near phase transitions exhibit universal scaling laws determined by renormalization group fixed points.
+            </div>
+        </div>
+
+        <div class="calculator-panel">
+            <h3 style="margin-bottom: 1.5rem; font-family: 'Cormorant Garamond', serif; font-size: 1.5rem;">Running Coupling Calculator</h3>
+            <div class="calc-input-group">
+                <input type="number" class="calc-input" id="alpha0" placeholder="α_s at reference scale" value="0.118">
+                <input type="number" class="calc-input" id="scale0" placeholder="Reference scale Q₀ (GeV)" value="91">
+                <input type="number" class="calc-input" id="scale1" placeholder="Target scale Q (GeV)" value="1000">
+            </div>
+            <button class="calc-button" onclick="calculateRunning()">Calculate α_s(Q)</button>
+            <div class="calc-result" id="runningResult">Enter parameters to calculate...</div>
+        </div>
+    </section>
+
+    <!-- Volume III Section -->
+    <section class="section vol3-section">
+        <div class="section-header">
+            <h2>Volume III: Supersymmetry & Beyond</h2>
+            <p class="section-intro">The frontier of QFT: supersymmetry extends spacetime symmetry to include fermionic generators. This volume covers supergravity, extended objects, and provides foundations for string theory.</p>
+        </div>
+
+        <div class="susy-diagram scroll-reveal">
+            <svg width="100%" height="400" viewBox="0 0 800 400">
+                <defs>
+                    <linearGradient id="susyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#e74c3c"/>
+                        <stop offset="50%" style="stop-color:#f39c12"/>
+                        <stop offset="100%" style="stop-color:#9b59b6"/>
+                    </linearGradient>
+                </defs>
+
+                <text x="400" y="40" text-anchor="middle" fill="#e8e8f0" font-size="18" font-weight="600">Supersymmetry Algebra & Particle Multiplets</text>
+
+                <!-- Left: Boson -->
+                <rect x="50" y="100" width="150" height="120" rx="10" fill="none" stroke="#d4af37" stroke-width="3"/>
+                <text x="125" y="140" text-anchor="middle" fill="#d4af37" font-size="16" font-weight="700">BOSON</text>
+                <text x="125" y="165" text-anchor="middle" fill="#a0a0b0" font-size="12">Integer Spin</text>
+                <text x="125" y="185" text-anchor="middle" fill="#a0a0b0" font-size="11">s=0, 1, 2...</text>
+                <text x="125" y="205" text-anchor="middle" fill="#a0a0b0" font-size="11">Higgs, gauge bosons</text>
+
+                <!-- Q operator -->
+                <g transform="translate(250, 130)">
+                    <rect x="0" y="0" width="80" height="60" rx="8" fill="#9b59b6"/>
+                    <text x="40" y="25" text-anchor="middle" fill="white" font-size="14" font-weight="700">Q</text>
+                    <text x="40" y="45" text-anchor="middle" fill="white" font-size="11">SUPERSYM</text>
+                    <path d="M80 30 L100 30" stroke="#9b59b6" stroke-width="3" marker-end="url(#arrowhead)">
+                        <animate attributeName="stroke-dashoffset" from="0" to="20" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                </g>
+
+                <!-- Right: Fermion -->
+                <rect x="600" y="100" width="150" height="120" rx="10" fill="none" stroke="#4a9eff" stroke-width="3"/>
+                <text x="675" y="140" text-anchor="middle" fill="#4a9eff" font-size="16" font-weight="700">FERMION</text>
+                <text x="675" y="165" text-anchor="middle" fill="#a0a0b0" font-size="12">Half-Integer Spin</text>
+                <text x="675" y="185" text-anchor="middle" fill="#a0a0b0" font-size="11">s=1/2, 3/2...</text>
+                <text x="675" y="205" text-anchor="middle" fill="#a0a0b0" font-size="11">Quarks, leptons</text>
+
+                <!-- Particles table -->
+                <rect x="200" y="260" width="400" height="130" rx="10" fill="rgba(26,26,37,0.8)" stroke="rgba(155,89,182,0.3)"/>
+
+                <text x="400" y="290" text-anchor="middle" fill="#e8e8f0" font-size="14" font-weight="600">Standard Model + Superpartners</text>
+
+                <line x1="200" y1="305" x2="600" y2="305" stroke="rgba(255,255,255,0.1)"/>
+
+                <text x="230" y="330" fill="#d4af37" font-size="11">Standard</text>
+                <text x="230" y="345" fill="#d4af37" font-size="11">Electron (e)</text>
+                <text x="230" y="365" fill="#d4af37" font-size="11">Quark (q)</text>
+                <text x="230" y="380" fill="#d4af37" font-size="11">Higgs (h)</text>
+
+                <text x="400" y="330" fill="#a0a0b0" font-size="11">→</text>
+                <text x="400" y="345" fill="#a0a0b0" font-size="11">→</text>
+                <text x="400" y="365" fill="#a0a0b0" font-size="11">→</text>
+                <text x="400" y="380" fill="#a0a0b0" font-size="11">→</text>
+
+                <text x="570" y="330" fill="#4a9eff" font-size="11">Selectron (ẽ)</text>
+                <text x="570" y="345" fill="#4a9eff" font-size="11">Squark (q̃)</text>
+                <text x="570" y="365" fill="#4a9eff" font-size="11">Higgsino (h̃)</text>
+                <text x="570" y="380" fill="#4a9eff" font-size="11">Gravitino (G̃)</text>
+
+                <!-- Q labels -->
+                <text x="125" y="85" text-anchor="middle" fill="#9b59b6" font-size="12">Bosino</text>
+                <text x="675" y="85" text-anchor="middle" fill="#9b59b6" font-size="12">Sfermion</text>
+            </svg>
+        </div>
+
+        <table class="particle-table scroll-reveal">
+            <thead>
+                <tr>
+                    <th>Supercharge Q</th>
+                    <th>Boson</th>
+                    <th>Fermion</th>
+                    <th>Spin Change</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Q|boson⟩ = |fermion⟩</td>
+                    <td>Photon (γ)</td>
+                    <td>Photino (γ̃)</td>
+                    <td>s: 1 → 1/2</td>
+                </tr>
+                <tr>
+                    <td>Q|fermion⟩ = |boson⟩</td>
+                    <td>Gluon (g)</td>
+                    <td>Gluino (g̃)</td>
+                    <td>s: 1 → 1/2</td>
+                </tr>
+                <tr>
+                    <td>Q|fermion⟩ = |boson⟩</td>
+                    <td>W Boson (W)</td>
+                    <td>Wino (W̃)</td>
+                    <td>s: 1 → 1/2</td>
+                </tr>
+                <tr>
+                    <td>Q|boson⟩ = |fermion⟩</td>
+                    <td>Higgs (H)</td>
+                    <td>Higgsino (H̃)</td>
+                    <td>s: 0 → 1/2</td>
+                </tr>
+                <tr>
+                    <td>Q|fermion⟩ = |boson⟩</td>
+                    <td>Graviton (G)</td>
+                    <td>Gravitino (G̃)</td>
+                    <td>s: 2 → 3/2</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="technique-card scroll-reveal">
+            <div class="technique-header">
+                <div class="technique-icon" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
+                    <svg width="30" height="30" viewBox="0 0 30 30">
+                        <polygon points="15,3 27,27 3,27" stroke="white" stroke-width="2" fill="none"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="technique-title">Supergravity & Local Supersymmetry</div>
+                </div>
+            </div>
+            <div class="chapter-content">
+                Supergravity extends GR by including the gravitino - a spin-3/2 partner to the graviton. The theory emerges when global supersymmetry is promoted to a local symmetry.
+                <div class="key-equation">{Q_A, Q̄_Ḃ} = 2γ^μ_AB P_μ = (2κ²) T_AB</div>
+                N=8 supergravity unifies all particles in a single multiplet with 256 degrees of freedom.
+            </div>
+        </div>
+
+        <div class="technique-card scroll-reveal">
+            <div class="technique-header">
+                <div class="technique-icon" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                    <svg width="30" height="30" viewBox="0 0 30 30">
+                        <path d="M5 25 Q15 5 25 25" stroke="white" stroke-width="2" fill="none"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="technique-title">Extended Objects & Branes</div>
+                </div>
+            </div>
+            <div class="chapter-content">
+                Point particles generalize to 1-dimensional strings, 2-dimensional membranes, and higher-dimensional branes. String theory eliminates infinities by replacing point interactions with extended objects.
+                <div class="key-equation">S = -T ∫ d²σ √h h^{ab} ∂_a X^μ ∂_b X^ν g_μν</div>
+                The string length scale ℓ_s = √(α') ≈ 10⁻³⁵ m makes direct observation impossible with current technology.
+            </div>
+        </div>
+    </section>
+
+    <!-- Learning Progress Section -->
+    <section class="section" style="background: var(--bg-secondary);">
+        <div class="section-header">
+            <h2>Your QFT Learning Journey</h2>
+            <p class="section-intro">Track your progress through Weinberg's three volumes with this interactive tracker.</p>
+        </div>
+
+        <div class="progress-container" style="max-width: 800px; margin: 0 auto;">
+            <h4 style="margin-bottom: 1rem;">Volume I: Foundations</h4>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="vol1Progress" style="width: 0%;"></div>
+            </div>
+            <div class="progress-labels">
+                <span>Getting Started</span>
+                <span>LSZ & Feynman Rules</span>
+                <span>Complete</span>
+            </div>
+
+            <h4 style="margin: 2rem 0 1rem;">Volume II: Modern Applications</h4>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="vol2Progress" style="width: 0%; background: linear-gradient(90deg, #9b59b6, #e74c3c);"></div>
+            </div>
+            <div class="progress-labels">
+                <span>Gauge Theories</span>
+                <span>Electroweak + QCD</span>
+                <span>RG Flow</span>
+            </div>
+
+            <h4 style="margin: 2rem 0 1rem;">Volume III: Supersymmetry</h4>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="vol3Progress" style="width: 0%; background: linear-gradient(90deg, #e74c3c, #f39c12);"></div>
+            </div>
+            <div class="progress-labels">
+                <span>SUSY Algebra</span>
+                <span>Supergravity</span>
+                <span>String Theory</span>
+            </div>
+
+            <div class="calc-input-group" style="margin-top: 2rem;">
+                <input type="range" class="calc-input" id="vol1Slider" min="0" max="100" value="0" style="flex: 2;" oninput="updateProgress()">
+                <input type="number" class="calc-input" id="vol1Percent" value="0" min="0" max="100" style="flex: 0.5; width: 80px;" onchange="updateProgress()">
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Insights Section -->
+    <section class="section">
+        <div class="section-header">
+            <h2>Key Insights from Weinberg's Approach</h2>
+        </div>
+
+        <div class="chapter-grid">
+            <div class="chapter-card scroll-reveal">
+                <div class="chapter-title">The Cluster Decomposition Principle</div>
+                <div class="chapter-content">
+                    Physical predictions must be independent of distant experiments. This principle severely constrains theory construction and underlies the S-matrix approach.
+                </div>
+            </div>
+
+            <div class="chapter-card scroll-reveal">
+                <div class="chapter-title">Effective Field Theory Philosophy</div>
+                <div class="chapter-content">
+                    QFT is not just about fundamental constituents but about effective descriptions valid up to some energy scale. Weinberg showed this is not a limitation but a feature.
+                    <div class="key-equation">L = L_pertinent + Σ(c_n/Λ^{n-4})) O_n</div>
+                </div>
+            </div>
+
+            <div class="chapter-card scroll-reveal">
+                <div class="chapter-title">Renormalization as Unity Principle</div>
+                <div class="chapter-content">
+                    The need to subtract infinities reflects the deep connection between short-distance physics and macroscopic observables. All successful QFTs are renormalizable within their domain.
+                </div>
+            </div>
+
+            <div class="chapter-card scroll-reveal">
+                <div class="chapter-title">Spin-Statistics Connection</div>
+                <div class="chapter-content">
+                    Weinberg's derivation of the spin-statistics theorem from basic principles is definitive. Integer spin particles must be bosons; half-integer must be fermions.
+                </div>
+            </div>
+
+            <div class="chapter-card scroll-reveal">
+                <div class="chapter-title">The Power of Analyticity</div>
+                <div class="chapter-content">
+                    Dispersion relations and analytic continuation in complex angular momentum (Regge theory) connect scattering amplitudes to bound states and resonances.
+                </div>
+            </div>
+
+            <div class="chapter-card scroll-reveal">
+                <div class="chapter-title">Spontaneous Symmetry Breaking</div>
+                <div class="chapter-content">
+                    Hidden symmetry explains mass generation without violating gauge invariance. The Goldstone theorem and Higgs mechanism are elegantly unified in Weinberg's presentation.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p class="footer-note">Weinberg's QFT Textbook Series | Kevin's Physics Pages</p>
+        <p class="footer-note" style="margin-top: 0.5rem; opacity: 0.6;">The universe is a grand book written in mathematical language - Galileo Galilei</p>
+    </footer>
+
+    <script>
+        // Scattering Amplitude Calculator
+        function calculateAmplitude() {
+            const g = parseFloat(document.getElementById('coupling').value) || 0.3;
+            const E = parseFloat(document.getElementById('energy').value) || 10;
+            const result = g * g * E * E / (E * E + 1);
+            document.getElementById('ampResult').innerHTML =
+                `|M|² = (${g})² × (${E} GeV)² / (E² + 1)<br><br>` +
+                `<strong>Result: ${result.toFixed(4)}</strong><br>` +
+                `<span style="color: var(--text-secondary); font-size: 0.9rem;">` +
+                `Born approximation cross section for e⁺e⁻ → μ⁺μ⁻</span>`;
+        }
+
+        // Running Coupling Calculator (1-loop QCD)
+        function calculateRunning() {
+            const alpha0 = parseFloat(document.getElementById('alpha0').value) || 0.118;
+            const Q0 = parseFloat(document.getElementById('scale0').value) || 91;
+            const Q = parseFloat(document.getElementById('scale1').value) || 1000;
+
+            const beta0 = 11 - 2/3 * 3; // 1 flavor (simplified)
+            const logRatio = Math.log(Q / Q0);
+            const alphaQ = alpha0 / (1 + alpha0 * beta0 * logRatio / (12 * Math.PI));
+
+            document.getElementById('runningResult').innerHTML =
+                `α_s(${Q} GeV) = α_s(${Q0}) / (1 + α_s/12π × β₀ × ln(${Q}/${Q0}))<br><br>` +
+                `<strong>α_s(${Q} GeV) = ${alphaQ.toFixed(5)}</strong><br>` +
+                `<span style="color: var(--text-secondary); font-size: 0.9rem;">` +
+                `Asymptotic freedom: coupling decreases at high energy</span>`;
+        }
+
+        // Progress Tracker
+        function updateProgress() {
+            const vol1Slider = document.getElementById('vol1Slider');
+            const vol1Percent = document.getElementById('vol1Percent');
+            const val = vol1Slider.value;
+            vol1Percent.value = val;
+            document.getElementById('vol1Progress').style.width = val + '%';
+        }
+
+        // Scroll Reveal Animation
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+
+        // Animated SVG on scroll
+        const svgObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.querySelectorAll('.animate-path').forEach(path => {
+                        path.style.animation = 'drawPath 3s ease forwards';
+                    });
+                }
+            });
+        }, { threshold: 0.3 });
+
+        document.querySelectorAll('svg').forEach(svg => svgObserver.observe(svg));
+    </script>
+</body>
+</html>

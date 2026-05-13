@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anode-Free Battery Technology — Next-Gen Energy Density</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #020408;
+            --bg-secondary: #0a1628;
+            --bg-card: #0d1a2d;
+            --bg-card-hover: #122540;
+            --text-primary: #e8f4ff;
+            --text-secondary: #8ba4c7;
+            --text-muted: #4a6080;
+            --accent-cyan: #00f0ff;
+            --accent-pink: #ff2d95;
+            --accent-purple: #a855f7;
+            --accent-orange: #ff8c42;
+            --accent-green: #10b981;
+            --border-glow: rgba(0, 240, 255, 0.3);
+            --shadow-glow: 0 0 30px rgba(0, 240, 255, 0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', 'SF Pro Display', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Animated Star Background */
+        #star-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Particle System */
+        .particle {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.6;
+            z-index: 1;
+        }
+
+        @keyframes float-particle {
+            0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0.6; }
+            25% { transform: translateY(-30px) translateX(15px) rotate(90deg); opacity: 0.8; }
+            50% { transform: translateY(-15px) translateX(-10px) rotate(180deg); opacity: 0.4; }
+            75% { transform: translateY(-40px) translateX(5px) rotate(270deg); opacity: 0.7; }
+        }
+
+        /* Navigation Dots */
+        .nav-dots {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 2px solid var(--accent-cyan);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-dot:hover {
+            background: var(--accent-cyan);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .nav-dot::after {
+            content: attr(data-label);
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--bg-card);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            border: 1px solid var(--accent-cyan);
+        }
+
+        .nav-dot:hover::after {
+            opacity: 1;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 60px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 80px 40px;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid var(--accent-cyan);
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            color: var(--accent-cyan);
+            margin-bottom: 30px;
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.2); }
+            50% { box-shadow: 0 0 40px rgba(0, 240, 255, 0.4); }
+        }
+
+        .hero h1 {
+            font-size: clamp(48px, 8vw, 96px);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 24px;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(18px, 3vw, 28px);
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin-bottom: 40px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 60px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-value {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+        }
+
+        .hero-stat-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        .scroll-indicator span {
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 3px;
+        }
+
+        .scroll-arrow {
+            width: 24px;
+            height: 24px;
+            border-right: 2px solid var(--accent-cyan);
+            border-bottom: 2px solid var(--accent-cyan);
+            transform: rotate(45deg);
+        }
+
+        /* Section Styles */
+        section {
+            padding: 100px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-number {
+            font-size: 14px;
+            color: var(--accent-cyan);
+            font-weight: 600;
+            letter-spacing: 4px;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: clamp(32px, 5vw, 56px);
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-desc {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Anode-Free Cell Diagram */
+        .cell-diagram-container {
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            padding: 40px;
+            margin: 40px 0;
+            border: 1px solid var(--border-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell-diagram-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-purple), var(--accent-pink), transparent);
+        }
+
+        #cell-diagram {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .diagram-label {
+            position: absolute;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 8px;
+            color: var(--accent-cyan);
+            pointer-events: none;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 40px 0;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-card-hover));
+            padding: 20px;
+            text-align: left;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            border-bottom: 2px solid var(--accent-cyan);
+        }
+
+        .comparison-table td {
+            padding: 20px;
+            border-bottom: 1px solid var(--bg-card);
+            transition: background 0.3s ease;
+        }
+
+        .comparison-table tr:hover td {
+            background: var(--bg-card);
+        }
+
+        .comparison-table td:first-child {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .highlight-cell {
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+
+        .warning-cell {
+            color: var(--accent-orange);
+            font-weight: 700;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid transparent;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(168, 85, 247, 0.2));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            font-size: 28px;
+        }
+
+        .card h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .card p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .card-stat {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(168, 85, 247, 0.15));
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-top: 16px;
+        }
+
+        /* Simulator Section */
+        .simulator-panel {
+            background: var(--bg-secondary);
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid var(--border-glow);
+            margin: 40px 0;
+        }
+
+        .simulator-panel h3 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: var(--accent-cyan);
+        }
+
+        .control-group {
+            margin-bottom: 30px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--bg-card);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        .control-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-top: 8px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            border: 1px solid var(--bg-card-hover);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 8px;
+        }
+
+        /* Live Chart */
+        .chart-container {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+
+        .chart-container h4 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+        }
+
+        /* Info Boxes */
+        .info-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(168, 85, 247, 0.1));
+            border-left: 4px solid var(--accent-cyan);
+            padding: 24px 32px;
+            border-radius: 0 16px 16px 0;
+            margin: 30px 0;
+        }
+
+        .info-box h4 {
+            font-size: 18px;
+            color: var(--accent-cyan);
+            margin-bottom: 12px;
+        }
+
+        .info-box p {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        /* Two Column Layout */
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 40px 0;
+        }
+
+        @media (max-width: 900px) {
+            .two-columns {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Chemistry Cards */
+        .chemistry-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chemistry-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .chemistry-card h4 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chemistry-formula {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-bottom: 16px;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 40px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
+            border-radius: 2px;
+            transform: translateX(-50%);
+        }
+
+        .timeline-item {
+            display: flex;
+            justify-content: flex-end;
+            padding-right: 50%;
+            position: relative;
+            margin-bottom: 50px;
+        }
+
+        .timeline-item:nth-child(even) {
+            justify-content: flex-start;
+            padding-right: 0;
+            padding-left: 50%;
+        }
+
+        .timeline-content {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            margin-right: 40px;
+            border: 1px solid var(--bg-card-hover);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-right: 0;
+            margin-left: 40px;
+        }
+
+        .timeline-content:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .timeline-year {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .timeline-content h4 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .timeline-content p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            top: 30px;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 20px;
+            }
+            .timeline-item,
+            .timeline-item:nth-child(even) {
+                padding-left: 50px;
+                padding-right: 0;
+                justify-content: flex-start;
+            }
+            .timeline-content,
+            .timeline-item:nth-child(even) .timeline-content {
+                margin-left: 0;
+                margin-right: 0;
+            }
+            .timeline-dot {
+                left: 20px;
+            }
+        }
+
+        /* Physics Connection */
+        .physics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin: 40px 0;
+        }
+
+        .physics-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 28px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .physics-card:hover {
+            border-color: var(--accent-purple);
+            transform: translateY(-4px);
+        }
+
+        .physics-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(255, 45, 149, 0.2));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .physics-content h4 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .physics-content p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 60px 40px;
+            border-top: 1px solid var(--bg-card);
+            margin-top: 80px;
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Animations */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fade-in 0.8s ease forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        .delay-5 { animation-delay: 0.5s; }
+
+        /* SVG Animations */
+        @keyframes electron-flow {
+            0% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(200px); opacity: 0; }
+        }
+
+        @keyframes li-flow {
+            0% { transform: translateY(0); opacity: 1; }
+            50% { transform: translateY(100px); opacity: 0.8; }
+            100% { transform: translateY(200px); opacity: 0; }
+        }
+
+        @keyframes pulse-glow-svg {
+            0%, 100% { filter: drop-shadow(0 0 5px rgba(0, 240, 255, 0.5)); }
+            50% { filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.8)); }
+        }
+
+        @keyframes plating-growth {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 20px;
+            }
+            .hero-stats {
+                gap: 30px;
+            }
+            .nav-dots {
+                right: 10px;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="star-canvas"></canvas>
+
+    <!-- Navigation Dots -->
+    <nav class="nav-dots">
+        <div class="nav-dot" data-label="Introduction" onclick="scrollToSection('hero')"></div>
+        <div class="nav-dot" data-label="How It Works" onclick="scrollToSection('how-it-works')"></div>
+        <div class="nav-dot" data-label="Simulator" onclick="scrollToSection('simulator')"></div>
+        <div class="nav-dot" data-label="Challenges" onclick="scrollToSection('challenges')"></div>
+        <div class="nav-dot" data-label="Materials" onclick="scrollToSection('materials')"></div>
+        <div class="nav-dot" data-label="Timeline" onclick="scrollToSection('timeline')"></div>
+        <div class="nav-dot" data-label="Physics" onclick="scrollToSection('physics')"></div>
+    </nav>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero" id="hero">
+            <div class="hero-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                Next-Generation Battery Technology
+            </div>
+            <h1>Anode-Free Batteries</h1>
+            <p class="hero-subtitle">
+                Eliminating the anode entirely. The current collector becomes the lithium source.
+                Enabling extreme energy density through structural simplicity.
+            </p>
+
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-value">500+</div>
+                    <div class="hero-stat-label">Wh/kg Projected</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-value">40%</div>
+                    <div class="hero-stat-label">Weight Reduction</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-value">0%</div>
+                    <div class="hero-stat-label">Anode Material</div>
+                </div>
+            </div>
+
+            <div class="scroll-indicator">
+                <span>SCROLL TO EXPLORE</span>
+                <div class="scroll-arrow"></div>
+            </div>
+        </section>
+
+        <!-- How It Works -->
+        <section id="how-it-works">
+            <div class="section-header">
+                <div class="section-number">01</div>
+                <h2 class="section-title">How Anode-Free Works</h2>
+                <p class="section-desc">A revolutionary concept where lithium metal plates directly onto the current collector during first charge</p>
+            </div>
+
+            <div class="cell-diagram-container">
+                <svg id="cell-diagram" viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Background Grid -->
+                    <defs>
+                        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(0,240,255,0.05)" stroke-width="1"/>
+                        </pattern>
+                        <linearGradient id="collectorGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#2a4a6a"/>
+                            <stop offset="50%" style="stop-color:#4a7a9a"/>
+                            <stop offset="100%" style="stop-color:#2a4a6a"/>
+                        </linearGradient>
+                        <linearGradient id="cathodeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#8b5cf6"/>
+                            <stop offset="100%" style="stop-color:#6d28d9"/>
+                        </linearGradient>
+                        <linearGradient id="separatorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#f59e0b"/>
+                            <stop offset="100%" style="stop-color:#d97706"/>
+                        </linearGradient>
+                        <linearGradient id="li plating" x1="0%" y1="100%" x2="0%" y2="0%">
+                            <stop offset="0%" style="stop-color:#00f0ff"/>
+                            <stop offset="100%" style="stop-color:#67e8f9"/>
+                        </linearGradient>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid)"/>
+
+                    <!-- Current Collector (Aluminum) - Left Side (Cathode Side) -->
+                    <rect x="50" y="100" width="120" height="300" fill="url(#collectorGrad)" rx="5"/>
+                    <text x="110" y="250" fill="#e8f4ff" font-size="14" text-anchor="middle" transform="rotate(-90, 110, 250)">Al Current Collector</text>
+
+                    <!-- Cathode Active Material -->
+                    <rect x="170" y="80" width="200" height="340" fill="url(#cathodeGrad)" rx="10"/>
+                    <text x="270" y="250" fill="#e8f4ff" font-size="16" text-anchor="middle" font-weight="bold">NMC Cathode</text>
+                    <text x="270" y="280" fill="#c4b5fd" font-size="12" text-anchor="middle">LiNi_xMn_yCo_zO₂</text>
+
+                    <!-- Separator -->
+                    <rect x="370" y="120" width="30" height="260" fill="url(#separatorGrad)" rx="3">
+                        <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+                    </rect>
+                    <text x="385" y="255" fill="#1a1a2e" font-size="10" text-anchor="middle" transform="rotate(-90, 385, 255)">Separator</text>
+
+                    <!-- Cu Current Collector (Right - No Anode Initially) -->
+                    <rect x="400" y="100" width="120" height="300" fill="url(#collectorGrad)" rx="5"/>
+                    <text x="460" y="250" fill="#e8f4ff" font-size="14" text-anchor="middle" transform="rotate(90, 460, 250)">Cu Current Collector</text>
+
+                    <!-- Plating Lithium Animation (appears during charge) -->
+                    <g id="li-plating" opacity="0">
+                        <rect x="520" y="180" width="80" height="140" fill="url(#li plating)" rx="8" filter="url(#glow)">
+                            <animate attributeName="height" values="0;140" dur="2s" fill="freeze" begin="1s"/>
+                            <animate attributeName="y" values="250;180" dur="2s" fill="freeze" begin="1s"/>
+                        </rect>
+                        <text x="560" y="255" fill="#020408" font-size="14" text-anchor="middle" font-weight="bold">Li Metal</text>
+                        <animate attributeName="opacity" from="0" to="1" dur="0.5s" fill="freeze" begin="1.5s"/>
+                    </g>
+
+                    <!-- Electrolyte -->
+                    <rect x="170" y="420" width="430" height="60" fill="rgba(34, 197, 94, 0.2)" rx="5"/>
+                    <text x="385" y="455" fill="#10b981" font-size="12" text-anchor="middle">Liquid Electrolyte (LP40)</text>
+
+                    <!-- Li+ Ion Animation -->
+                    <g>
+                        <circle r="8" fill="#00f0ff" filter="url(#glow)">
+                            <animateMotion dur="3s" repeatCount="indefinite" path="M 300,400 L 300,250 L 540,250 L 540,350"/>
+                            <animate attributeName="opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite"/>
+                        </circle>
+                        <text x="300" y="420" fill="#00f0ff" font-size="10">Li⁺</text>
+                    </g>
+                    <g>
+                        <circle r="6" fill="#67e8f9" filter="url(#glow)">
+                            <animateMotion dur="3s" repeatCount="indefinite" path="M 320,400 L 320,260 L 550,260 L 550,340"/>
+                            <animate attributeName="opacity" values="0.5;1;0.5" dur="1s" repeatCount="indefinite"/>
+                        </circle>
+                    </g>
+
+                    <!-- Electron Flow -->
+                    <g>
+                        <path d="M 140,200 Q 200,180 270,200" stroke="#ff2d95" stroke-width="3" fill="none" stroke-dasharray="8,4">
+                            <animate attributeName="stroke-dashoffset" from="0" to="-24" dur="0.5s" repeatCount="indefinite"/>
+                        </path>
+                        <text x="200" y="170" fill="#ff2d95" font-size="12">e⁻ (external circuit)</text>
+                    </g>
+
+                    <!-- Labels -->
+                    <g class="diagram-labels">
+                        <rect x="220" y="40" width="100" height="30" fill="var(--bg-card)" rx="6"/>
+                        <text x="270" y="60" fill="#00f0ff" font-size="12" text-anchor="middle">Cathode Side</text>
+
+                        <rect x="500" y="40" width="120" height="30" fill="var(--bg-card)" rx="6"/>
+                        <text x="560" y="60" fill="#00f0ff" font-size="12" text-anchor="middle">Anode Side (Empty)</text>
+                    </g>
+
+                    <!-- Voltage Indicator -->
+                    <g transform="translate(700, 200)">
+                        <rect x="0" y="0" width="150" height="100" fill="var(--bg-card)" rx="10" stroke="rgba(0,240,255,0.3)"/>
+                        <text x="75" y="25" fill="#8ba4c7" font-size="11" text-anchor="middle">CELL VOLTAGE</text>
+                        <text x="75" y="60" fill="#00f0ff" font-size="28" text-anchor="middle" font-weight="bold">
+                            <animate attributeName="textContent" values="3.7;4.2;3.7" dur="4s" repeatCount="indefinite"/> V
+                        </text>
+                        <text x="75" y="85" fill="#8ba4c7" font-size="10" text-anchor="middle">OCV (no-load)</text>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="info-box">
+                <h4>The Key Innovation</h4>
+                <p>In conventional Li-ion batteries, the graphite anode soaks up lithium ions during charging. In anode-free design, we start with zero anode material. During the first charge, lithium ions from the cathode travel to the copper current collector and plate directly onto its surface as metallic lithium. This creates an "instant anode" in situ.</p>
+            </div>
+
+            <div class="two-columns">
+                <div class="info-box">
+                    <h4>Discharge Process</h4>
+                    <p>When the battery discharges, the plated lithium dissolves back into the electrolyte as Li⁺ ions, traveling through the separator to reinsert into the cathode lattice. The copper collector remains pristine, ready for the next cycle.</p>
+                </div>
+                <div class="info-box">
+                    <h4>Subsequent Cycles</h4>
+                    <p>After formation, the battery behaves like a traditional lithium-metal cell—lithium shuttles between cathode and the electrodeposited metal anode. The difference: no bulky graphite host, no silicon expansion concerns, just pure lithium metal.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Simulator Section -->
+        <section id="simulator">
+            <div class="section-header">
+                <div class="section-number">02</div>
+                <h2 class="section-title">Anode-Free Cell Simulator</h2>
+                <p class="section-desc">Configure your cell parameters and observe energy density, plating behavior, and efficiency</p>
+            </div>
+
+            <div class="simulator-panel">
+                <div class="two-columns">
+                    <div>
+                        <div class="control-group">
+                            <label>Cathode Loading (mg/cm²)</label>
+                            <input type="range" id="cathode-loading" min="5" max="25" value="15" step="1">
+                            <div class="control-value"><span id="cathode-loading-val">15</span> mg/cm²</div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Electrolyte Amount (g/Ah)</label>
+                            <input type="range" id="electrolyte-amount" min="2" max="10" value="4" step="0.5">
+                            <div class="control-value"><span id="electrolyte-amount-val">4</span> g/Ah</div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Formation Cycles</label>
+                            <input type="range" id="formation-cycles" min="1" max="10" value="3" step="1">
+                            <div class="control-value"><span id="formation-cycles-val">3</span> cycles</div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>C-Rate</label>
+                            <input type="range" id="c-rate" min="0.2" max="3" value="1" step="0.1">
+                            <div class="control-value"><span id="c-rate-val">1</span> C</div>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Copper Thickness (μm)</label>
+                            <input type="range" id="cu-thickness" min="6" max="20" value="10" step="1">
+                            <div class="control-value"><span id="cu-thickness-val">10</span> μm</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="metrics-grid" style="grid-template-columns: 1fr 1fr;">
+                            <div class="metric-card">
+                                <div class="metric-value" id="energy-density">412</div>
+                                <div class="metric-label">Wh/kg</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" id="cell-energy">85</div>
+                                <div class="metric-label">Wh (cell)</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" id="plating-eff">94.2</div>
+                                <div class="metric-label">% CE</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" id="cycle-life">250</div>
+                                <div class="metric-label">Cycles to 80%</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" id="li-utilization">89</div>
+                                <div class="metric-label">% Li Utilization</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" id="weight-reduction">38</div>
+                                <div class="metric-label">% Weight Saved</div>
+                            </div>
+                        </div>
+
+                        <div class="chart-container">
+                            <h4>Voltage Profile During Formation</h4>
+                            <canvas id="voltage-chart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Challenges Section -->
+        <section id="challenges">
+            <div class="section-header">
+                <div class="section-number">03</div>
+                <h2 class="section-title">Engineering Challenges</h2>
+                <p class="section-desc">Why anode-free batteries are difficult to commercialize at scale</p>
+            </div>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                    </div>
+                    <h3>Low Initial Coulombic Efficiency</h3>
+                    <p>During first formation, the solid-electrolyte interphase (SEI) consumes massive amounts of lithium—up to 30-50% of available active lithium. With no anode reservoir, this loss is permanent.</p>
+                    <div class="card-stat">30-50% Li Lost in Formation</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                        </svg>
+                    </div>
+                    <h3>Dendrite Formation Risk</h3>
+                    <p>Lithium plating onto copper is highly non-uniform. Electric field concentrates at sharp tips, causing dendritic growth that can penetrate separators and cause internal short circuits.</p>
+                    <div class="card-stat">↑ Short Circuit Risk</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                    </div>
+                    <h3>Dead Lithium Formation</h3>
+                    <p>During cycling, some lithium becomes electrically isolated ("dead lithium") when it loses contact with the current collector. Without anode material to spare, this directly reduces capacity.</p>
+                    <div class="card-stat">5-15% Dead Li per Cycle</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                    </div>
+                    <h3>Surface Passivation</h3>
+                    <p>The copper surface is chemically different from graphite. Achieving uniform SEI coverage without dendritic penetration requires precise electrolyte engineering and additives.</p>
+                    <div class="card-stat">FEC Additives Critical</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="3" y1="9" x2="21" y2="9"/>
+                            <line x1="9" y1="21" x2="9" y2="9"/>
+                        </svg>
+                    </div>
+                    <h3>Pressure Requirements</h3>
+                    <p>Lithium creep and volume changes require external pressure to maintain contact. In prismatic cells, this means heavier enclosures. In wound cells, pressure management is complex.</p>
+                    <div class="card-stat">~1 MPa Needed</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                    </div>
+                    <h3>Formation Protocol Complexity</h3>
+                    <p>First-of-a-kind (FOAK) cells require careful formation at low C-rates with formation cycles. Scaling this process while maintaining quality control adds manufacturing cost and time.</p>
+                    <div class="card-stat">24-72 hrs Formation Time</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Materials Section -->
+        <section id="materials">
+            <div class="section-header">
+                <div class="section-number">04</div>
+                <h2 class="section-title">Materials &amp; Electrolyte Engineering</h2>
+                <p class="section-desc">The critical role of electrolyte additives and current collector treatments</p>
+            </div>
+
+            <div class="two-columns">
+                <div>
+                    <h3 style="font-size: 22px; margin-bottom: 20px; color: var(--accent-cyan);">Electrolyte Additives</h3>
+
+                    <div class="chemistry-card">
+                        <h4>
+                            <span style="background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); width: 24px; height: 24px; border-radius: 6px; display: inline-block; text-align: center; line-height: 24px;">1</span>
+                            FEC — Fluoroethylene Carbonate
+                        </h4>
+                        <div class="chemistry-formula">C₃H₃FO₃</div>
+                        <p>Forms a robust poly(fluoroethylene carbonate) SEI that reduces dead lithium formation by 40%. Critical for anode-free stability. Recommended: 5-10% concentration.</p>
+                    </div>
+
+                    <div class="chemistry-card" style="margin-top: 20px;">
+                        <h4>
+                            <span style="background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); width: 24px; height: 24px; border-radius: 6px; display: inline-block; text-align: center; line-height: 24px;">2</span>
+                            VC — Vinylene Carbonate
+                        </h4>
+                        <div class="chemistry-formula">C₃H₂O₃</div>
+                        <p>Polymerizes at the Cu surface forming a stable SEI layer. Works synergistically with FEC to suppress dendritic growth and improve cycling efficiency.</p>
+                    </div>
+
+                    <div class="chemistry-card" style="margin-top: 20px;">
+                        <h4>
+                            <span style="background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); width: 24px; height: 24px; border-radius: 6px; display: inline-block; text-align: center; line-height: 24px;">3</span>
+                            LiDFOB — Lithium Difluoro(oxalato)borate
+                        </h4>
+                        <div class="chemistry-formula">LiBF₄(C₂O₄)</div>
+                        <p>Single-component salt that simultaneously protects both cathode and anode. Forms flexible boron-based SEI with excellent Li⁺ conductivity.</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="font-size: 22px; margin-bottom: 20px; color: var(--accent-cyan);">Current Collector Treatments</h3>
+
+                    <div class="cards-grid" style="grid-template-columns: 1fr;">
+                        <div class="card">
+                            <h3>Copper Surface Modification</h3>
+                            <p>Atomic layer deposition (ALD) of Al₂O₃ nanocoating creates an artificial SEI that uniformizes Li⁺ flux. Reduces first-cycle irreversibility by up to 50%.</p>
+                        </div>
+                        <div class="card">
+                            <h3>Graphene-Coated Cu</h3>
+                            <p>Single-layer graphene on copper acts as an artificial SEI, enabling ultra-flat lithium plating. The 0.335 nm spacing provides uniform nucleation sites.</p>
+                        </div>
+                        <div class="card">
+                            <h3>Laser-Patterned Substrates</h3>
+                            <p>Microscale patterns created by laser ablation provide preferential plating sites, guiding dendrite growth away from separator-penetrating configurations.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <table class="comparison-table" style="margin-top: 40px;">
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Role</th>
+                        <th>Concentration</th>
+                        <th>Effect on CE</th>
+                        <th> dendrite Suppression</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>FEC</td>
+                        <td>SEI former on Cu</td>
+                        <td>5-10%</td>
+                        <td class="highlight-cell">+8-12%</td>
+                        <td class="highlight-cell">Excellent</td>
+                    </tr>
+                    <tr>
+                        <td>VC</td>
+                        <td>Polymerizable additive</td>
+                        <td>2-5%</td>
+                        <td class="highlight-cell">+3-5%</td>
+                        <td class="highlight-cell">Good</td>
+                    </tr>
+                    <tr>
+                        <td>LiDFOB</td>
+                        <td>Salt-type additive</td>
+                        <td>0.5-1%</td>
+                        <td class="highlight-cell">+4-6%</td>
+                        <td class="highlight-cell">Good</td>
+                    </tr>
+                    <tr>
+                        <td>LiNO₃</td>
+                        <td>Shuttle suppressor</td>
+                        <td>0.5-2%</td>
+                        <td class="highlight-cell">+2-4%</td>
+                        <td class="highlight-cell">Moderate</td>
+                    </tr>
+                    <tr>
+                        <td>HFE</td>
+                        <td>Hydrofluorinated ether</td>
+                        <td>5-15%</td>
+                        <td class="warning-cell">Variable</td>
+                        <td class="highlight-cell">Good (high rates)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Timeline Section -->
+        <section id="timeline">
+            <div class="section-header">
+                <div class="section-number">05</div>
+                <h2 class="section-title">Commercialization Timeline</h2>
+                <p class="section-desc">From research breakthrough to market-ready technology</p>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2019</div>
+                        <h4>Sila Nanotechnologies</h4>
+                        <p>First公开发表 anode-free concept using silicon-dominant anode pre-lithiation. Achieved 400+ Wh/kg in coin cells.</p>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2020</div>
+                        <h4>QuantumScape Announcement</h4>
+                        <p>Announced solid-state anode-free design using Li metal and ceramic separator. Target: 400+ Wh/kg and 800+ cycles.</p>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2021</div>
+                        <h4>Stanford/SLAC Research</h4>
+                        <p>Published breakthrough on electrolyte engineering for anode-free stability. FEC + LiDFOB combination achieves 99% CE.</p>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2023</div>
+                        <h4>CISILE Innovation Award</h4>
+                        <p>Multiple battery manufacturers announced anode-free pilot lines. CATL, BYD, and Samsung SDI investing heavily.</p>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2024</div>
+                        <h4>Apple Electric Vehicle</h4>
+                        <p>Rumors persist about Apple using anode-free technology for Project Titan. Mercedes-Benz partnerships with Factorial Energy.</p>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2026-2028</div>
+                        <h4>Mass Market Entry</h4>
+                        <p>Predicted commercial deployment in premium EVs. Initial market: aerospace and high-performance applications where energy density > cost.</p>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Comparison Table -->
+        <section>
+            <div class="section-header">
+                <div class="section-number">06</div>
+                <h2 class="section-title">Anode-Free vs. Conventional Li-ion</h2>
+                <p class="section-desc">Head-to-head comparison of key performance metrics</p>
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Conventional Graphite</th>
+                        <th>Anode-Free (Li Metal)</th>
+                        <th>Improvement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Gravimetric Energy Density</td>
+                        <td>250-300 Wh/kg</td>
+                        <td class="highlight-cell">400-550 Wh/kg</td>
+                        <td class="highlight-cell">+40-80%</td>
+                    </tr>
+                    <tr>
+                        <td>Volumetric Energy Density</td>
+                        <td>650-750 Wh/L</td>
+                        <td class="highlight-cell">1000-1200 Wh/L</td>
+                        <td class="highlight-cell">+45-55%</td>
+                    </tr>
+                    <tr>
+                        <td>Cell Weight</td>
+                        <td>Baseline</td>
+                        <td class="highlight-cell">30-40% lighter</td>
+                        <td class="highlight-cell">Major</td>
+                    </tr>
+                    <tr>
+                        <td>Initial Coulombic Efficiency</td>
+                        <td>92-95%</td>
+                        <td class="warning-cell">80-90%</td>
+                        <td class="warning-cell">-5-10%</td>
+                    </tr>
+                    <tr>
+                        <td>Cycle Life (to 80% SOH)</td>
+                        <td>500-1000 cycles</td>
+                        <td class="warning-cell">200-500 cycles</td>
+                        <td class="warning-cell">-50%</td>
+                    </tr>
+                    <tr>
+                        <td>Rate Capability</td>
+                        <td>2-3C</td>
+                        <td class="highlight-cell">3-5C</td>
+                        <td class="highlight-cell">+50%</td>
+                    </tr>
+                    <tr>
+                        <td>Self-Discharge Rate</td>
+                        <td>2-3% per month</td>
+                        <td class="highlight-cell">1-2% per month</td>
+                        <td class="highlight-cell">Better</td>
+                    </tr>
+                    <tr>
+                        <td>Safety (thermal runaway)</td>
+                        <td>Moderate</td>
+                        <td class="warning-cell">Higher risk</td>
+                        <td class="warning-cell">Challenge</td>
+                    </tr>
+                    <tr>
+                        <td>Cost ($/kWh)</td>
+                        <td>$100-130</td>
+                        <td class="highlight-cell">$80-120 (potential)</td>
+                        <td class="highlight-cell">-10-15% potential</td>
+                    </tr>
+                    <tr>
+                        <td>Calendar Life</td>
+                        <td>10-15 years</td>
+                        <td class="warning-cell">8-12 years</td>
+                        <td class="warning-cell">Slightly lower</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Physics Connections -->
+        <section id="physics">
+            <div class="section-header">
+                <div class="section-number">07</div>
+                <h2 class="section-title">Cross-Disciplinary Physics Connections</h2>
+                <p class="section-desc">How anode-free battery physics connects to fundamental phenomena</p>
+            </div>
+
+            <div class="physics-grid">
+                <div class="physics-card">
+                    <div class="physics-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                            <line x1="2" y1="12" x2="22" y2="12"/>
+                        </svg>
+                    </div>
+                    <div class="physics-content">
+                        <h4>Electrodeposition &amp; Volcanic Lightning</h4>
+                        <p>Li plating follows similar instabilities to self-organized lightning patterns. Both involve dielectric breakdown in responsive media—electric field enhancement at tips creates runaway current density.</p>
+                    </div>
+                </div>
+
+                <div class="physics-card">
+                    <div class="physics-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                        </svg>
+                    </div>
+                    <div class="physics-content">
+                        <h4>SEI Growth &amp; River Delta Formation</h4>
+                        <p>SEI formation follows similar self-similar branching patterns to river delta formation—both minimize energy dissipation while maximizing coverage area through iterative branching dynamics.</p>
+                    </div>
+                </div>
+
+                <div class="physics-card">
+                    <div class="physics-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                            <path d="M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <div class="physics-content">
+                        <h4>Dendrite Suppression &amp; Percolation Theory</h4>
+                        <p>Uniform Li plating without dendrites parallels percolation threshold transitions—below critical current density, safe conduction paths dominate; above, dendritic shortcuts emerge suddenly.</p>
+                    </div>
+                </div>
+
+                <div class="physics-card">
+                    <div class="physics-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                        </svg>
+                    </div>
+                    <div class="physics-content">
+                        <h4>Metal Electromigration &amp; Cosmic Filaments</h4>
+                        <p>Li ion drift under electric field mirrors cosmic structure formation—both undergo gravitational/electrostatic clumping from initially uniform density fields through instabilities.</p>
+                    </div>
+                </div>
+
+                <div class="physics-card">
+                    <div class="physics-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                    </div>
+                    <div class="physics-content">
+                        <h4>Coulombic Efficiency &amp; Entropy Budget</h4>
+                        <p>Each lost lithium ion in anode-free represents entropic energy loss—mirrors Carnot efficiency limits. The 90% CE ceiling reflects irreversible entropy production during SEI formation.</p>
+                    </div>
+                </div>
+
+                <div class="physics-card">
+                    <div class="physics-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/>
+                        </svg>
+                    </div>
+                    <div class="physics-content">
+                        <h4>Dead Lithium &amp; Self-Organization</h4>
+                        <p>Electrically isolated "dead lithium" forms through self-organization during cycling—same pattern emergence principles govern crack propagation, turbulence, and biological pattern formation.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Applications Section -->
+        <section>
+            <div class="section-header">
+                <h2 class="section-title">Applications &amp; Market Opportunity</h2>
+                <p class="section-desc">Where anode-free technology will first make an impact</p>
+            </div>
+
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>
+                        </svg>
+                    </div>
+                    <h3>Electric Aviation</h3>
+                    <p>Urban air mobility (eVTOL) and electric aircraft demand maximum energy density. Anode-free batteries could enable 400+ km range for eVTOLs where every kg is critical.</p>
+                    <div class="card-stat">+60% Range Extension</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="1" y="3" width="15" height="13"/>
+                            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                            <circle cx="5.5" cy="18.5" r="2.5"/>
+                            <circle cx="18.5" cy="18.5" r="2.5"/>
+                        </svg>
+                    </div>
+                    <h3>Premium Electric Vehicles</h3>
+                    <p>Initial deployment in high-end EVs where customers pay premium for extended range. First movers: Tesla Plaid, Lucid Air, Mercedes EQS platform candidates.</p>
+                    <div class="card-stat">800+ km Range Potential</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="12" y="1" width="20" height="22" rx="2"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                    </div>
+                    <h3>Consumer Electronics</h3>
+                    <p>Smartphones, laptops, and wearables where anode-free could enable week-long battery life or halve device weight and thickness for equivalent capacity.</p>
+                    <div class="card-stat">2x Battery Life</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                    </div>
+                    <h3>Medical Devices</h3>
+                    <p>Implantable pumps and defibrillators where size and weight directly impact patient comfort. Reliable cycling less critical than energy density for these applications.</p>
+                    <div class="card-stat">50% Size Reduction</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"/>
+                            <line x1="12" y1="1" x2="12" y2="3"/>
+                            <line x1="12" y1="21" x2="12" y2="23"/>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                            <line x1="1" y1="12" x2="3" y2="12"/>
+                            <line x1="21" y1="12" x2="23" y2="12"/>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                        </svg>
+                    </div>
+                    <h3>Space Applications</h3>
+                    <p>Satellites and spacecraft where launch cost per kg drives adoption. NASA is evaluating anode-free for Mars rovers and lunar bases where resupply is impossible.</p>
+                    <div class="card-stat">$10,000/kg Launch Cost</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                    </div>
+                    <h3>Grid Storage (Future)</h3>
+                    <p>Long-duration storage for renewable integration. Anode-free could enable 24+ hour storage at competitive cost once cycle life improves past 1000 cycles.</p>
+                    <div class="card-stat">100+ hr Storage</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Statistics -->
+        <section>
+            <div class="section-header">
+                <h2 class="section-title">Key Performance Statistics</h2>
+            </div>
+
+            <div class="metrics-grid" style="margin: 40px 0;">
+                <div class="metric-card" style="padding: 40px;">
+                    <div class="metric-value" style="font-size: 56px;">99.9%</div>
+                    <div class="metric-label">Peak Coulombic Efficiency</div>
+                </div>
+                <div class="metric-card" style="padding: 40px;">
+                    <div class="metric-value" style="font-size: 56px;">500</div>
+                    <div class="metric-label">Wh/kg Theoretical Maximum</div>
+                </div>
+                <div class="metric-card" style="padding: 40px;">
+                    <div class="metric-value" style="font-size: 56px;">1200</div>
+                    <div class="metric-label">Wh/L Volumetric Target</div>
+                </div>
+                <div class="metric-card" style="padding: 40px;">
+                    <div class="metric-value" style="font-size: 56px;">-40%</div>
+                    <div class="metric-label">Weight vs Graphite</div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Anode-Free Battery Technology — Pushing the energy density frontier</p>
+            <p style="margin-top: 10px; color: var(--text-muted);">Li-Ion Battery Research Division | Virtual World</p>
+        </footer>
+    </div>
+
+    <script>
+        // Star Background
+        const canvas = document.getElementById('star-canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = [];
+            for (let i = 0; i < 200; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2 + 0.5,
+                    speed: Math.random() * 0.5 + 0.1,
+                    opacity: Math.random() * 0.5 + 0.3
+                });
+            }
+        }
+
+        function animateStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+                ctx.fill();
+
+                star.y += star.speed;
+                if (star.y > canvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * canvas.width;
+                }
+            });
+
+            requestAnimationFrame(animateStars);
+        }
+
+        initCanvas();
+        animateStars();
+        window.addEventListener('resize', initCanvas);
+
+        // Scroll to Section
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Simulator Logic
+        const cathodeLoading = document.getElementById('cathode-loading');
+        const electrolyteAmount = document.getElementById('electrolyte-amount');
+        const formationCycles = document.getElementById('formation-cycles');
+        const cRate = document.getElementById('c-rate');
+        const cuThickness = document.getElementById('cu-thickness');
+
+        const cathodeLoadingVal = document.getElementById('cathode-loading-val');
+        const electrolyteAmountVal = document.getElementById('electrolyte-amount-val');
+        const formationCyclesVal = document.getElementById('formation-cycles-val');
+        const cRateVal = document.getElementById('c-rate-val');
+        const cuThicknessVal = document.getElementById('cu-thickness-val');
+
+        const energyDensityEl = document.getElementById('energy-density');
+        const cellEnergyEl = document.getElementById('cell-energy');
+        const platingEffEl = document.getElementById('plating-eff');
+        const cycleLifeEl = document.getElementById('cycle-life');
+        const liUtilEl = document.getElementById('li-utilization');
+        const weightRedEl = document.getElementById('weight-reduction');
+
+        function updateSimulator() {
+            const loading = parseFloat(cathodeLoading.value);
+            const electrolyte = parseFloat(electrolyteAmount.value);
+            const formCycles = parseInt(formationCycles.value);
+            const rate = parseFloat(cRate.value);
+            const cu = parseFloat(cuThickness.value);
+
+            cathodeLoadingVal.textContent = loading;
+            electrolyteAmountVal.textContent = electrolyte;
+            formationCyclesVal.textContent = formCycles;
+            cRateVal.textContent = rate;
+            cuThicknessVal.textContent = cu;
+
+            // Calculate metrics
+            const baseEnergyDensity = 350 + (loading - 10) * 8 - (electrolyte - 4) * 5;
+            const cePenalty = formCycles * 0.5 + (rate - 1) * 2 + (cu - 10) * 0.1;
+            const ce = Math.max(85, 99.5 - cePenalty);
+            const cycles = Math.max(100, 400 - formCycles * 20 - rate * 30);
+
+            const energyDensity = Math.round(baseEnergyDensity * (ce / 100));
+            const cellEnergy = Math.round(energyDensity * 0.207);
+            const liUtil = Math.round(ce - 5);
+            const weightRed = Math.round(35 + (10 - cu) * 0.5);
+
+            energyDensityEl.textContent = energyDensity;
+            cellEnergyEl.textContent = cellEnergy;
+            platingEffEl.textContent = ce.toFixed(1);
+            cycleLifeEl.textContent = cycles;
+            liUtilEl.textContent = liUtil;
+            weightRedEl.textContent = weightRed;
+
+            drawVoltageChart(ce, loading);
+        }
+
+        // Voltage Chart
+        function drawVoltageChart(ce, loading) {
+            const canvas = document.getElementById('voltage-chart');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Grid
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 10; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, i * height / 10);
+                ctx.lineTo(width, i * height / 10);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(i * width / 10, 0);
+                ctx.lineTo(i * width / 10, height);
+                ctx.stroke();
+            }
+
+            // Voltage curve
+            ctx.beginPath();
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 3;
+
+            const points = [];
+            const numPoints = 50;
+            for (let i = 0; i <= numPoints; i++) {
+                const soc = i / numPoints;
+                let voltage;
+                if (soc < 0.1) {
+                    voltage = 3.0 + soc * 5;
+                } else if (soc < 0.8) {
+                    voltage = 3.5 + (soc - 0.1) * 0.8;
+                } else {
+                    voltage = 4.0 - (soc - 0.8) * 2;
+                }
+                voltage *= (ce / 100);
+                const x = soc * width;
+                const y = height - (voltage - 2.5) * height / 2;
+                points.push({ x, y });
+            }
+
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.stroke();
+
+            // Gradient fill
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, 'rgba(0, 240, 255, 0.3)');
+            gradient.addColorStop(1, 'rgba(0, 240, 255, 0)');
+            ctx.lineTo(points[points.length - 1].x, height);
+            ctx.lineTo(points[0].x, height);
+            ctx.closePath();
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Labels
+            ctx.fillStyle = '#8ba4c7';
+            ctx.font = '11px sans-serif';
+            ctx.fillText('SOC %', width - 50, height - 10);
+            ctx.fillText('V', 10, 20);
+        }
+
+        cathodeLoading.addEventListener('input', updateSimulator);
+        electrolyteAmount.addEventListener('input', updateSimulator);
+        formationCycles.addEventListener('input', updateSimulator);
+        cRate.addEventListener('input', updateSimulator);
+        cuThickness.addEventListener('input', updateSimulator);
+
+        // Initial draw
+        updateSimulator();
+
+        // Create floating particles
+        function createParticles() {
+            const colors = ['#00f0ff', '#ff2d95', '#a855f7', '#67e8f9', '#f59e0b'];
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = Math.random() * 8 + 4 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.top = Math.random() * 100 + 'vh';
+                particle.style.animation = `float-particle ${Math.random() * 10 + 10}s ease-in-out infinite`;
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                document.body.appendChild(particle);
+            }
+        }
+
+        createParticles();
+    </script>
+</body>
+</html>
