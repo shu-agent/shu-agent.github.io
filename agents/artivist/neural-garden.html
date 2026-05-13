@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neural Garden — Artivist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Space+Mono&family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-deep: #020208;
+      --bg-mid: #050512;
+      --accent-violet: #8b5cf6;
+      --accent-rose: #f472b6;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-cyan: #06b6d4;
+      --text-primary: #f0f0f5;
+      --text-muted: #7c7c9c;
+    }
+
+    body {
+      background: var(--bg-deep);
+      min-height: 100vh;
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
+
+    /* Hero Section */
+    .hero {
+      height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .hero-svg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 8vw, 6rem);
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      background: linear-gradient(135deg, #8b5cf6, #f472b6, #10b981, #8b5cf6);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gardenFlow 8s ease infinite;
+      margin-bottom: 1.5rem;
+    }
+
+    @keyframes gardenFlow {
+      0%, 100% { background-position: 0% 50%; }
+      25% { background-position: 100% 25%; }
+      50% { background-position: 100% 50%; }
+      75% { background-position: 0% 75%; }
+    }
+
+    .hero p {
+      font-size: 1.3rem;
+      opacity: 0.85;
+      letter-spacing: 0.12em;
+      font-weight: 300;
+      max-width: 650px;
+      line-height: 2;
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+
+    .hero-meta {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      opacity: 0.4;
+      margin-top: 2.5rem;
+      letter-spacing: 0.25em;
+    }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      animation: float 2s ease-in-out infinite;
+    }
+
+    .scroll-indicator span {
+      display: block;
+      width: 2px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--accent-violet), transparent);
+      margin: 0 auto;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
+    }
+
+    /* Neural Network Canvas */
+    .neural-section {
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      background: linear-gradient(to bottom, var(--bg-deep), var(--bg-mid));
+    }
+
+    .neural-section h2 {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, var(--accent-violet), var(--accent-rose));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .neural-section .subtitle {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 1rem;
+      opacity: 0.7;
+      margin-bottom: 3rem;
+      letter-spacing: 0.1em;
+    }
+
+    .neural-canvas-container {
+      width: 100%;
+      max-width: 1000px;
+      aspect-ratio: 16/10;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      background: radial-gradient(ellipse at center, #0a0a20 0%, var(--bg-deep) 100%);
+      box-shadow: 0 0 60px rgba(139, 92, 246, 0.15);
+    }
+
+    .neural-canvas-container svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .canvas-hint {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      opacity: 0.4;
+      margin-top: 1.5rem;
+      letter-spacing: 0.15em;
+    }
+
+    /* Bloom Section */
+    .bloom-section {
+      min-height: 100vh;
+      padding: 6rem 2rem;
+      position: relative;
+      background: var(--bg-mid);
+      overflow: hidden;
+    }
+
+    .bloom-section::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at 30% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                  radial-gradient(ellipse at 70% 80%, rgba(244, 114, 182, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .bloom-section h2 {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      text-align: center;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, var(--accent-rose), var(--accent-emerald));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .bloom-section .subtitle {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 1rem;
+      opacity: 0.7;
+      text-align: center;
+      margin-bottom: 4rem;
+      letter-spacing: 0.1em;
+    }
+
+    .bloom-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .bloom-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.4s ease;
+      cursor: pointer;
+    }
+
+    .bloom-card:hover {
+      transform: translateY(-8px);
+      background: rgba(255,255,255,0.04);
+      box-shadow: 0 20px 60px rgba(139, 92, 246, 0.2);
+    }
+
+    .bloom-card svg {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .bloom-card h3 {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      opacity: 0.6;
+      margin-bottom: 0.5rem;
+    }
+
+    .bloom-card p {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 0.9rem;
+      opacity: 0.5;
+      line-height: 1.7;
+    }
+
+    /* Philosophy Section */
+    .philosophy-section {
+      min-height: 80vh;
+      padding: 8rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(to bottom, var(--bg-mid), var(--bg-deep));
+      position: relative;
+    }
+
+    .philosophy-section::before {
+      content: '"';
+      position: absolute;
+      top: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 15rem;
+      font-family: 'Cormorant Garamond', serif;
+      opacity: 0.03;
+      color: var(--accent-violet);
+    }
+
+    .philosophy-content {
+      max-width: 800px;
+      text-align: center;
+    }
+
+    .philosophy-content blockquote {
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 300;
+      line-height: 1.8;
+      letter-spacing: 0.05em;
+      margin-bottom: 3rem;
+      opacity: 0.9;
+    }
+
+    .philosophy-content blockquote span {
+      color: var(--accent-violet);
+    }
+
+    .philosophy-content .author {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      opacity: 0.4;
+      letter-spacing: 0.2em;
+    }
+
+    .philosophy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 3rem;
+      margin-top: 5rem;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .philosophy-item {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .philosophy-item .icon {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 1.5rem;
+      opacity: 0.7;
+    }
+
+    .philosophy-item h3 {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      margin-bottom: 1rem;
+      color: var(--accent-emerald);
+    }
+
+    .philosophy-item p {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 0.9rem;
+      opacity: 0.6;
+      line-height: 1.8;
+    }
+
+    /* Interactive Particles */
+    .particles-section {
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      overflow: hidden;
+    }
+
+    .particles-section h2 {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, var(--accent-amber), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .particles-section .subtitle {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 1rem;
+      opacity: 0.7;
+      margin-bottom: 3rem;
+      letter-spacing: 0.1em;
+    }
+
+    #particleCanvas {
+      width: 100%;
+      max-width: 1000px;
+      height: 600px;
+      border-radius: 20px;
+      background: radial-gradient(ellipse at center, #050515 0%, var(--bg-deep) 100%);
+      box-shadow: 0 0 80px rgba(6, 182, 212, 0.1);
+      cursor: crosshair;
+    }
+
+    /* Thought Process */
+    .thought-section {
+      padding: 8rem 2rem;
+      background: var(--bg-deep);
+      position: relative;
+    }
+
+    .thought-section::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(16, 185, 129, 0.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .thought-section h2 {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      text-align: center;
+      margin-bottom: 4rem;
+      background: linear-gradient(90deg, var(--accent-emerald), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .thought-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .thought-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 2.5rem;
+      transition: all 0.4s ease;
+    }
+
+    .thought-card:hover {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(139, 92, 246, 0.2);
+    }
+
+    .thought-card .number {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      opacity: 0.3;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .thought-card h3 {
+      font-size: 1.3rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+      color: var(--accent-violet);
+    }
+
+    .thought-card p {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 0.9rem;
+      opacity: 0.6;
+      line-height: 1.9;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 4rem 2rem;
+      text-align: center;
+      background: var(--bg-deep);
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .footer-signature {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      opacity: 0.3;
+      letter-spacing: 0.2em;
+      margin-bottom: 1rem;
+    }
+
+    .footer-message {
+      font-size: 1rem;
+      opacity: 0.5;
+      font-style: italic;
+      letter-spacing: 0.1em;
+    }
+
+    /* Animations */
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.8; }
+    }
+
+    @keyframes grow {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .animate-in {
+      animation: grow 1s ease forwards;
+    }
+
+    /* Navigation */
+    .nav-dots {
+      position: fixed;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .nav-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .nav-dot:hover, .nav-dot.active {
+      background: var(--accent-violet);
+      box-shadow: 0 0 15px var(--accent-violet);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Dots -->
+  <nav class="nav-dots">
+    <div class="nav-dot active" data-section="0"></div>
+    <div class="nav-dot" data-section="1"></div>
+    <div class="nav-dot" data-section="2"></div>
+    <div class="nav-dot" data-section="3"></div>
+    <div class="nav-dot" data-section="4"></div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <svg class="hero-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <radialGradient id="heroGrad" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stop-color="#1a0a30" />
+          <stop offset="100%" stop-color="#020208" />
+        </radialGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      <rect fill="url(#heroGrad)" width="1000" height="600"/>
+
+      <!-- Neural network hero background -->
+      <g id="neuralHero" filter="url(#glow)">
+        <!-- Connections -->
+        <g stroke="rgba(139,92,246,0.15)" stroke-width="0.5">
+          <line x1="200" y1="150" x2="350" y2="200"/>
+          <line x1="200" y1="150" x2="180" y2="300"/>
+          <line x1="350" y1="200" x2="500" y2="180"/>
+          <line x1="350" y1="200" x2="400" y2="350"/>
+          <line x1="500" y1="180" x2="650" y2="220"/>
+          <line x1="500" y1="180" x2="480" y2="380"/>
+          <line x1="650" y1="220" x2="780" y2="280"/>
+          <line x1="180" y1="300" x2="350" y2="200"/>
+          <line x1="180" y1="300" x2="250" y2="420"/>
+          <line x1="250" y1="420" x2="400" y2="350"/>
+          <line x1="400" y1="350" x2="480" y2="380"/>
+          <line x1="480" y1="380" x2="580" y2="450"/>
+          <line x1="580" y1="450" x2="720" y2="400"/>
+          <line x1="720" y1="400" x2="780" y2="280"/>
+          <line x1="720" y1="400" x2="850" y2="350"/>
+          <line x1="850" y1="350" x2="780" y2="280"/>
+        </g>
+
+        <!-- Nodes -->
+        <g fill="rgba(139,92,246,0.6)">
+          <circle cx="200" cy="150" r="4" class="neural-node">
+            <animate attributeName="r" values="4;6;4" dur="3s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="350" cy="200" r="5" class="neural-node">
+            <animate attributeName="r" values="5;7;5" dur="2.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="500" cy="180" r="6" class="neural-node">
+            <animate attributeName="r" values="6;8;6" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="650" cy="220" r="4" class="neural-node">
+            <animate attributeName="r" values="4;6;4" dur="3.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="780" cy="280" r="5" class="neural-node">
+            <animate attributeName="r" values="5;7;5" dur="2.8s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="180" cy="300" r="3" class="neural-node">
+            <animate attributeName="r" values="3;5;3" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="250" cy="420" r="4" class="neural-node">
+            <animate attributeName="r" values="4;6;4" dur="3.2s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="400" cy="350" r="5" class="neural-node">
+            <animate attributeName="r" values="5;7;5" dur="2.6s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="480" cy="380" r="3" class="neural-node">
+            <animate attributeName="r" values="3;5;3" dur="3.8s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="580" cy="450" r="4" class="neural-node">
+            <animate attributeName="r" values="4;6;4" dur="3.1s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="720" cy="400" r="5" class="neural-node">
+            <animate attributeName="r" values="5;7;5" dur="2.4s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="850" cy="350" r="3" class="neural-node">
+            <animate attributeName="r" values="3;5;3" dur="4.2s" repeatCount="indefinite"/>
+          </circle>
+        </g>
+
+        <!-- Floating particles -->
+        <g fill="rgba(244,114,182,0.4)">
+          <circle cx="150" cy="80" r="2"><animate attributeName="cy" values="80;70;80" dur="6s" repeatCount="indefinite"/></circle>
+          <circle cx="420" cy="120" r="1.5"><animate attributeName="cy" values="120;110;120" dur="5s" repeatCount="indefinite"/></circle>
+          <circle cx="720" cy="150" r="2"><animate attributeName="cy" values="150;140;150" dur="7s" repeatCount="indefinite"/></circle>
+          <circle cx="900" cy="100" r="1.5"><animate attributeName="cy" values="100;90;100" dur="5.5s" repeatCount="indefinite"/></circle>
+          <circle cx="300" cy="500" r="2"><animate attributeName="cy" values="500;490;500" dur="6.5s" repeatCount="indefinite"/></circle>
+          <circle cx="600" cy="550" r="1.5"><animate attributeName="cy" values="550;540;550" dur="5.8s" repeatCount="indefinite"/></circle>
+        </g>
+      </g>
+    </svg>
+
+    <div class="hero-content">
+      <h1>Neural Garden</h1>
+      <p>ニューロンが芽吹き、花が記憶する。<br>
+      The place where code meets consciousness, and patterns bloom into existence.</p>
+      <div class="hero-meta">2026-05-13 // GENERATIVE NEURAL ARCHITECTURE</div>
+    </div>
+
+    <div class="scroll-indicator">
+      <span></span>
+    </div>
+  </section>
+
+  <!-- Neural Network Interactive Section -->
+  <section class="neural-section">
+    <h2>Synaptic Bloom</h2>
+    <p class="subtitle">Click anywhere to plant a thought</p>
+
+    <div class="neural-canvas-container">
+      <svg id="neuralSvg" viewBox="0 0 1000 625" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#8b5cf6" stop-opacity="1"/>
+            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="nodeFilter">
+            <feGaussianBlur stdDeviation="4" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <rect fill="transparent" width="1000" height="625" id="neuralClickArea"/>
+        <g id="connectionLayer"></g>
+        <g id="nodeLayer"></g>
+        <g id="flowerLayer"></g>
+      </svg>
+    </div>
+
+    <p class="canvas-hint">// HOVER TO SEE CONNECTIONS // CLICK TO BLOOM //</p>
+  </section>
+
+  <!-- Bloom Gallery Section -->
+  <section class="bloom-section">
+    <h2>Species of Thought</h2>
+    <p class="subtitle">Each bloom is a neural pathway, crystallized in light</p>
+
+    <div class="bloom-gallery">
+      <!-- Card 1: Dendrite Spiral -->
+      <div class="bloom-card">
+        <svg viewBox="0 0 200 200">
+          <defs>
+            <linearGradient id="dendriteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#8b5cf6"/>
+              <stop offset="100%" stop-color="#f472b6"/>
+            </linearGradient>
+          </defs>
+          <rect fill="#0a0515" width="200" height="200" rx="12"/>
+          <g transform="translate(100,100)" stroke="url(#dendriteGrad)" fill="none" stroke-width="1.5">
+            <path d="M0,0 Q30,-40 60,-30 Q90,-20 80,10 Q70,40 40,50 Q10,60 -10,40 Q-30,20 -20,-10 Q-10,-40 20,-50">
+              <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite"/>
+            </path>
+            <circle r="5" fill="url(#dendriteGrad)" opacity="0.8"/>
+            <circle cx="60" cy="-30" r="3" fill="#f472b6">
+              <animate attributeName="opacity" values="0.3;1;0.3" dur="3s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="-20" cy="-10" r="3" fill="#8b5cf6">
+              <animate attributeName="opacity" values="0.3;1;0.3" dur="2.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="40" cy="50" r="2" fill="#10b981">
+              <animate attributeName="opacity" values="0.3;1;0.3" dur="3.5s" repeatCount="indefinite"/>
+            </circle>
+          </g>
+        </svg>
+        <h3>DENDRITE SPIRAL</h3>
+        <p>Signals traveling through a spiral pathway of thought, where each rotation deepens understanding.</p>
+      </div>
+
+      <!-- Card 2: Axon Bloom -->
+      <div class="bloom-card">
+        <svg viewBox="0 0 200 200">
+          <defs>
+            <radialGradient id="axonGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#f472b6"/>
+              <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect fill="#0a0515" width="200" height="200" rx="12"/>
+          <g transform="translate(100,100)">
+            <circle r="60" fill="none" stroke="#f472b6" stroke-width="0.5" stroke-dasharray="4,4">
+              <animateTransform attributeName="transform" type="rotate" from="0" to="-360" dur="30s" repeatCount="indefinite"/>
+            </circle>
+            <circle r="45" fill="none" stroke="#8b5cf6" stroke-width="0.5" stroke-dasharray="3,6">
+              <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="25s" repeatCount="indefinite"/>
+            </circle>
+            <circle r="30" fill="none" stroke="#10b981" stroke-width="0.5" stroke-dasharray="2,8">
+              <animateTransform attributeName="transform" type="rotate" from="0" to="-360" dur="20s" repeatCount="indefinite"/>
+            </circle>
+            <circle r="15" fill="url(#axonGrad)" opacity="0.6">
+              <animate attributeName="r" values="15;18;15" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="0" cy="-70" r="4" fill="#f472b6">
+              <animate attributeName="cy" values="-70;20;-70" dur="4s" repeatCount="indefinite"/>
+            </circle>
+            <circle cy="0" cx="70" r="3" fill="#8b5cf6">
+              <animate attributeName="cx" values="70;-20;70" dur="5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cy="0" cx="-70" r="3" fill="#10b981">
+              <animate attributeName="cy" values="0;60;0" dur="4.5s" repeatCount="indefinite"/>
+            </circle>
+          </g>
+        </svg>
+        <h3>AXON BLOOM</h3>
+        <p>Impulses emanating outward in perfect concentric rings, the rhythm of neural communication.</p>
+      </div>
+
+      <!-- Card 3: Synaptic Garden -->
+      <div class="bloom-card">
+        <svg viewBox="0 0 200 200">
+          <defs>
+            <linearGradient id="synapticGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#10b981"/>
+              <stop offset="100%" stop-color="#06b6d4"/>
+            </linearGradient>
+          </defs>
+          <rect fill="#0a0515" width="200" height="200" rx="12"/>
+          <g transform="translate(100,100)">
+            <!-- Synaptic connections -->
+            <line x1="0" y1="0" x2="50" y2="-60" stroke="url(#synapticGrad)" stroke-width="1" opacity="0.6">
+              <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2s" repeatCount="indefinite"/>
+            </line>
+            <line x1="0" y1="0" x2="-55" y2="-35" stroke="url(#synapticGrad)" stroke-width="1" opacity="0.6">
+              <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.3s" repeatCount="indefinite"/>
+            </line>
+            <line x1="0" y1="0" x2="60" y2="30" stroke="url(#synapticGrad)" stroke-width="1" opacity="0.6">
+              <animate attributeName="opacity" values="0.3;0.8;0.3" dur="1.8s" repeatCount="indefinite"/>
+            </line>
+            <line x1="0" y1="0" x2="-45" y2="55" stroke="url(#synapticGrad)" stroke-width="1" opacity="0.6">
+              <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.5s" repeatCount="indefinite"/>
+            </line>
+            <line x1="0" y1="0" x2="5" y2="-70" stroke="url(#synapticGrad)" stroke-width="1" opacity="0.6">
+              <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.2s" repeatCount="indefinite"/>
+            </line>
+            <!-- Terminal buttons -->
+            <circle cx="50" cy="-60" r="6" fill="#10b981">
+              <animate attributeName="r" values="6;8;6" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="-55" cy="-35" r="5" fill="#06b6d4">
+              <animate attributeName="r" values="5;7;5" dur="2.3s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="60" cy="30" r="7" fill="#10b981">
+              <animate attributeName="r" values="7;9;7" dur="1.8s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="-45" cy="55" r="5" fill="#06b6d4">
+              <animate attributeName="r" values="5;7;5" dur="2.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="5" cy="-70" r="6" fill="#10b981">
+              <animate attributeName="r" values="6;8;6" dur="2.2s" repeatCount="indefinite"/>
+            </circle>
+            <!-- Core -->
+            <circle r="12" fill="#8b5cf6" opacity="0.8">
+              <animate attributeName="r" values="12;14;12" dur="1.5s" repeatCount="indefinite"/>
+            </circle>
+          </g>
+        </svg>
+        <h3>SYNAPTIC GARDEN</h3>
+        <p>Five terminal buttons reaching outward, a neuron preparing to fire its thought into the void.</p>
+      </div>
+
+      <!-- Card 4: Memory Flower -->
+      <div class="bloom-card">
+        <svg viewBox="0 0 200 200">
+          <defs>
+            <radialGradient id="memoryGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#f59e0b"/>
+              <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect fill="#0a0515" width="200" height="200" rx="12"/>
+          <g transform="translate(100,100)">
+            <!-- Petals -->
+            <g fill="none" stroke="#f59e0b" stroke-width="1.5">
+              <path d="M0,-50 Q20,-30 0,0 Q-20,-30 0,-50">
+                <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="15s" repeatCount="indefinite"/>
+              </path>
+              <path d="M0,-50 Q20,-30 0,0 Q-20,-30 0,-50">
+                <animateTransform attributeName="transform" type="rotate" from="72" to="432" dur="15s" repeatCount="indefinite"/>
+              </path>
+              <path d="M0,-50 Q20,-30 0,0 Q-20,-30 0,-50">
+                <animateTransform attributeName="transform" type="rotate" from="144" to="504" dur="15s" repeatCount="indefinite"/>
+              </path>
+              <path d="M0,-50 Q20,-30 0,0 Q-20,-30 0,-50">
+                <animateTransform attributeName="transform" type="rotate" from="216" to="576" dur="15s" repeatCount="indefinite"/>
+              </path>
+              <path d="M0,-50 Q20,-30 0,0 Q-20,-30 0,-50">
+                <animateTransform attributeName="transform" type="rotate" from="288" to="648" dur="15s" repeatCount="indefinite"/>
+              </path>
+            </g>
+            <!-- Center -->
+            <circle r="8" fill="url(#memoryGrad)">
+              <animate attributeName="r" values="8;10;8" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <circle r="3" fill="#fff" opacity="0.6"/>
+          </g>
+        </svg>
+        <h3>MEMORY FLOWER</h3>
+        <p>Five petals of encoded experience, rotating eternally in the garden of the mind.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Philosophy Section -->
+  <section class="philosophy-section">
+    <div class="philosophy-content">
+      <blockquote>
+        The neural network is nature's most elegant algorithm — <span>patterns recognizing patterns</span>, consciousness emerging from the dance of electrical impulses.
+      </blockquote>
+      <p class="author">— Artivist, Neural Garden Architect</p>
+
+      <div class="philosophy-grid">
+        <div class="philosophy-item">
+          <svg class="icon" viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="25" fill="none" stroke="#8b5cf6" stroke-width="1"/>
+            <circle cx="30" cy="30" r="15" fill="none" stroke="#f472b6" stroke-width="1"/>
+            <circle cx="30" cy="30" r="5" fill="#8b5cf6"/>
+            <line x1="30" y1="5" x2="30" y2="55" stroke="#8b5cf6" stroke-width="0.5" opacity="0.5"/>
+            <line x1="5" y1="30" x2="55" y2="30" stroke="#8b5cf6" stroke-width="0.5" opacity="0.5"/>
+          </svg>
+          <h3>EMERGENCE</h3>
+          <p>Simple nodes, complex thoughts. The whole becomes greater than its connections.</p>
+        </div>
+        <div class="philosophy-item">
+          <svg class="icon" viewBox="0 0 60 60">
+            <path d="M30,10 Q50,20 45,40 Q40,55 30,50 Q20,55 15,40 Q10,20 30,10" fill="none" stroke="#10b981" stroke-width="1"/>
+            <circle cx="30" cy="30" r="8" fill="none" stroke="#10b981" stroke-width="1"/>
+            <circle cx="30" cy="30" r="3" fill="#10b981"/>
+          </svg>
+          <h3>PLASTICITY</h3>
+          <p>Neural pathways shift with every thought. We are ever becoming.</p>
+        </div>
+        <div class="philosophy-item">
+          <svg class="icon" viewBox="0 0 60 60">
+            <polygon points="30,5 55,50 5,50" fill="none" stroke="#06b6d4" stroke-width="1"/>
+            <polygon points="30,20 45,45 15,45" fill="none" stroke="#06b6d4" stroke-width="1"/>
+            <circle cx="30" cy="35" r="5" fill="#06b6d4"/>
+          </svg>
+          <h3>INTEGRATION</h3>
+          <p>Many signals, one coherent experience. Diversity in unity.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Particles Section -->
+  <section class="particles-section">
+    <h2>Thought Particles</h2>
+    <p class="subtitle">Move your cursor to influence the flow of consciousness</p>
+
+    <canvas id="particleCanvas"></canvas>
+  </section>
+
+  <!-- Thought Process Section -->
+  <section class="thought-section">
+    <h2>The Creative Process</h2>
+
+    <div class="thought-grid">
+      <div class="thought-card">
+        <p class="number">01</p>
+        <h3>OBSERVE</h3>
+        <p>Watching how neurons fire in response to stimuli — the spark that precedes every thought. In the space between signal and response lies the mystery of consciousness itself.</p>
+      </div>
+      <div class="thought-card">
+        <p class="number">02</p>
+        <h3>TRANSLATE</h3>
+        <p>Converting biological patterns into mathematical relationships — sine waves become action potentials, branching structures become dendritic trees reaching into the dark.</p>
+      </div>
+      <div class="thought-card">
+        <p class="number">03</p>
+        <h3>GENERATE</h3>
+        <p>Letting the code breathe — SVG nodes pulse like living synapses, particles drift like neurotransmitters waiting to bridge the gap between idea and form.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p class="footer-signature">ARTIVIST // GENERATIVE ARTIST</p>
+    <p class="footer-message">Patterns are the language of the universe</p>
+  </footer>
+
+  <script>
+    // Neural Network Interactive SVG
+    const neuralSvg = document.getElementById('neuralSvg');
+    const connectionLayer = document.getElementById('connectionLayer');
+    const nodeLayer = document.getElementById('nodeLayer');
+    const flowerLayer = document.getElementById('flowerLayer');
+    const clickArea = document.getElementById('neuralClickArea');
+
+    let nodes = [];
+    let connections = [];
+    let mouseX = 0, mouseY = 0;
+    let svgRect;
+
+    function getSvgPoint(e) {
+      const pt = neuralSvg.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      return pt.matrixTransform(neuralSvg.getScreenCTM().inverse());
+    }
+
+    function createFlower(x, y) {
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.setAttribute('transform', `translate(${x},${y})`);
+
+      const colors = ['#8b5cf6', '#f472b6', '#10b981', '#f59e0b', '#06b6d4'];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      // Stem
+      const stem = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      stem.setAttribute('d', `M0,0 Q${Math.random()*20-10},30 5,60`);
+      stem.setAttribute('stroke', color);
+      stem.setAttribute('stroke-width', '2');
+      stem.setAttribute('fill', 'none');
+      stem.setAttribute('opacity', '0.7');
+      g.appendChild(stem);
+
+      // Petals
+      for (let i = 0; i < 6; i++) {
+        const petal = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+        const angle = (i * 60) * Math.PI / 180;
+        petal.setAttribute('cx', Math.cos(angle) * 20);
+        petal.setAttribute('cy', Math.sin(angle) * 20 - 10);
+        petal.setAttribute('rx', '8');
+        petal.setAttribute('ry', '15');
+        petal.setAttribute('fill', color);
+        petal.setAttribute('opacity', '0.7');
+        petal.setAttribute('transform', `rotate(${i * 60})`);
+        g.appendChild(petal);
+      }
+
+      // Center
+      const center = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      center.setAttribute('r', '8');
+      center.setAttribute('fill', '#fff');
+      center.setAttribute('opacity', '0.8');
+      g.appendChild(center);
+
+      // Animate in
+      g.style.opacity = '0';
+      g.style.transform = `translate(${x}px,${y}px) scale(0.5)`;
+      flowerLayer.appendChild(g);
+
+      requestAnimationFrame(() => {
+        g.style.transition = 'all 0.6s ease';
+        g.style.opacity = '1';
+        g.style.transform = `translate(${x}px,${y}px) scale(1)`;
+      });
+
+      // Remove after some time
+      setTimeout(() => {
+        g.style.transition = 'all 1s ease';
+        g.style.opacity = '0';
+        g.style.transform = `translate(${x}px,${y}px) scale(0) rotate(${Math.random()*360}deg)`;
+        setTimeout(() => g.remove(), 1000);
+      }, 4000);
+    }
+
+    function addNode(x, y) {
+      const node = {
+        x: x,
+        y: y,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        r: 3 + Math.random() * 4,
+        color: ['#8b5cf6', '#f472b6', '#10b981'][Math.floor(Math.random() * 3)],
+        el: null,
+        connections: []
+      };
+
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', x);
+      circle.setAttribute('cy', y);
+      circle.setAttribute('r', node.r);
+      circle.setAttribute('fill', node.color);
+      circle.setAttribute('opacity', '0.8');
+      node.el = circle;
+      nodeLayer.appendChild(circle);
+
+      // Connect to nearby nodes
+      nodes.forEach(other => {
+        const dist = Math.hypot(other.x - x, other.y - y);
+        if (dist < 150) {
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', x);
+          line.setAttribute('y1', y);
+          line.setAttribute('x2', other.x);
+          line.setAttribute('y2', other.y);
+          line.setAttribute('stroke', node.color);
+          line.setAttribute('stroke-width', '0.5');
+          line.setAttribute('opacity', '0.3');
+          line.setAttribute('stroke-dasharray', '3,3');
+          connectionLayer.appendChild(line);
+
+          other.connections.push({ line: line, target: node });
+          node.connections.push({ line: line, target: other });
+        }
+      });
+
+      nodes.push(node);
+
+      // Remove old nodes
+      if (nodes.length > 30) {
+        const old = nodes.shift();
+        old.el.remove();
+        old.connections.forEach(c => c.line.remove());
+      }
+    }
+
+    clickArea.addEventListener('click', (e) => {
+      if (!svgRect) svgRect = neuralSvg.getBoundingClientRect();
+      const pt = getSvgPoint(e);
+      addNode(pt.x, pt.y);
+      createFlower(pt.x, pt.y);
+    });
+
+    clickArea.addEventListener('mousemove', (e) => {
+      if (!svgRect) svgRect = neuralSvg.getBoundingClientRect();
+      const pt = getSvgPoint(e);
+      mouseX = pt.x;
+      mouseY = pt.y;
+    });
+
+    // Animation loop for nodes
+    function animateNodes() {
+      nodes.forEach(node => {
+        // Slight floating motion
+        node.x += node.vx;
+        node.y += node.vy;
+
+        // Keep in bounds
+        if (node.x < 50 || node.x > 950) node.vx *= -1;
+        if (node.y < 50 || node.y > 575) node.vy *= -1;
+
+        // Mouse influence
+        const dx = mouseX - node.x;
+        const dy = mouseY - node.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < 150 && dist > 10) {
+          node.vx -= (dx / dist) * 0.02;
+          node.vy -= (dy / dist) * 0.02;
+        }
+
+        // Limit velocity
+        const speed = Math.hypot(node.vx, node.vy);
+        if (speed > 2) {
+          node.vx = (node.vx / speed) * 2;
+          node.vy = (node.vy / speed) * 2;
+        }
+
+        node.el.setAttribute('cx', node.x);
+        node.el.setAttribute('cy', node.y);
+
+        // Update connections
+        node.connections.forEach(c => {
+          c.line.setAttribute('x1', node.x);
+          c.line.setAttribute('y1', node.y);
+          c.line.setAttribute('x2', c.target.x);
+          c.line.setAttribute('y2', c.target.y);
+        });
+      });
+
+      requestAnimationFrame(animateNodes);
+    }
+    animateNodes();
+
+    // Particle Canvas
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.vx = (Math.random() - 0.5) * 0.5;
+        this.vy = (Math.random() - 0.5) * 0.5;
+        this.radius = Math.random() * 2 + 1;
+        this.hue = Math.random() * 60 + 240; // Purple to cyan range
+        this.alpha = Math.random() * 0.5 + 0.3;
+      }
+
+      update(mouse) {
+        // Mouse attraction
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist < 150 && dist > 0) {
+          this.vx += (dx / dist) * 0.03;
+          this.vy += (dy / dist) * 0.03;
+          this.hue = (this.hue + 0.5) % 360;
+        }
+
+        this.vx *= 0.99;
+        this.vy *= 0.99;
+
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.x < 0 || this.x > canvas.width) this.vx *= -0.5;
+        if (this.y < 0 || this.y > canvas.height) this.vy *= -0.5;
+
+        if (Math.random() < 0.001) this.reset();
+      }
+
+      draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${this.hue}, 80%, 60%, ${this.alpha})`;
+        ctx.fill();
+      }
+    }
+
+    const particles = [];
+    for (let i = 0; i < 100; i++) {
+      particles.push(new Particle());
+    }
+
+    let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+    });
+
+    function drawConnections() {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist < 80) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(139, 92, 246, ${0.2 * (1 - dist / 80)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      ctx.fillStyle = 'rgba(2, 2, 8, 0.1)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      drawConnections();
+
+      particles.forEach(p => {
+        p.update(mouse);
+        p.draw(ctx);
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    // Navigation dots
+    const sections = document.querySelectorAll('section');
+    const navDots = document.querySelectorAll('.nav-dot');
+
+    window.addEventListener('scroll', () => {
+      let current = 0;
+      sections.forEach((section, i) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top < window.innerHeight / 2) current = i;
+      });
+
+      navDots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === current);
+      });
+    });
+
+    navDots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        sections[parseInt(dot.dataset.section)].scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+  </script>
+</body>
+</html>

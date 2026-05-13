@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Field Theory & Standard Model — Kevin's Physics Lab</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono&family=Noto+Sans:wght@300;400;700&display=swap');
+
+    :root {
+      --cyan: #4fc3f7;
+      --purple: #7c4dff;
+      --gold: #ffd54f;
+      --orange: #ff6d00;
+      --pink: #ff4081;
+      --green: #00e676;
+      --deep-bg: #0a0a2e;
+      --card-bg: rgba(30, 30, 80, 0.85);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #050510 0%, #0a0a2e 50%, #12082a 100%);
+      min-height: 100vh;
+      color: #eef;
+      font-family: 'Noto Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      z-index: 1000;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--purple), var(--gold), var(--orange));
+      width: 0%;
+      transition: width 0.15s;
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      overflow: hidden;
+      padding: 2rem;
+    }
+
+    .hero-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      max-width: 950px;
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.8rem, 5vw, 3.5rem);
+      background: linear-gradient(135deg, var(--cyan), var(--purple), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 80px rgba(79, 195, 247, 0.6);
+      letter-spacing: 2px;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(0.9rem, 2vw, 1.3rem);
+      color: var(--cyan);
+      margin-bottom: 2rem;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .hero-quote {
+      font-style: italic;
+      color: #aaf;
+      font-size: 1.1rem;
+      padding: 1.5rem 2rem;
+      background: rgba(30, 30, 80, 0.6);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 12px 12px 0;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Section Styles */
+    .section {
+      padding: 6rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      color: var(--cyan);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 40px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+      border-radius: 2px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(79, 195, 247, 0.2);
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(79, 195, 247, 0.15);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* Equation Box */
+    .equation-box {
+      background: linear-gradient(135deg, rgba(15, 15, 50, 0.9), rgba(30, 30, 80, 0.8));
+      border: 1px solid var(--purple);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 1.2rem;
+      text-align: center;
+      margin: 1.5rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .equation-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(124, 77, 255, 0.2), transparent);
+      animation: eqShimmer 3s infinite;
+    }
+
+    @keyframes eqShimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    /* Interactive Controls */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      padding: 1.5rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 150px;
+    }
+
+    .control-group label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--cyan);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      height: 6px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: var(--gold);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--gold);
+    }
+
+    .btn {
+      font-family: 'Orbitron', sans-serif;
+      padding: 0.8rem 2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 30px rgba(124, 77, 255, 0.6);
+      transform: scale(1.05);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid var(--cyan);
+      color: var(--cyan);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(79, 195, 247, 0.2);
+    }
+
+    /* SVG Visualizations */
+    .viz-container {
+      position: relative;
+      background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(20,20,60,0.3) 100%);
+      border-radius: 16px;
+      padding: 2rem;
+      margin: 2rem 0;
+      overflow: hidden;
+    }
+
+    .viz-svg {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      display: block;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .stat-box {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      padding: 1.2rem;
+      text-align: center;
+      border: 1px solid rgba(79, 195, 247, 0.3);
+    }
+
+    .stat-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      color: var(--gold);
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--cyan);
+      text-transform: uppercase;
+    }
+
+    /* Particle Cards */
+    .particle-card {
+      background: linear-gradient(135deg, rgba(20, 20, 60, 0.8), rgba(40, 40, 80, 0.6));
+      border-radius: 12px;
+      padding: 1.2rem;
+      border-left: 4px solid var(--particle-color, var(--cyan));
+      transition: all 0.3s;
+    }
+
+    .particle-card:hover {
+      transform: translateX(8px);
+      border-left-width: 6px;
+    }
+
+    .particle-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      color: var(--particle-color, var(--cyan));
+      margin-bottom: 0.5rem;
+    }
+
+    .particle-props {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: #aaf;
+      line-height: 1.6;
+    }
+
+    /* Tab Navigation */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+    }
+
+    .tab {
+      font-family: 'Orbitron', sans-serif;
+      padding: 0.7rem 1.5rem;
+      background: rgba(30, 30, 80, 0.6);
+      border: 1px solid rgba(79, 195, 247, 0.3);
+      border-radius: 8px;
+      color: #aaf;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.85rem;
+    }
+
+    .tab:hover {
+      background: rgba(79, 195, 247, 0.2);
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      color: #fff;
+      border-color: var(--cyan);
+    }
+
+    /* Gauge Symmetry Visualization */
+    .gauge-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      padding: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .gauge-boson {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      text-align: center;
+      animation: gaugePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes gaugePulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 20px currentColor; }
+      50% { transform: scale(1.1); box-shadow: 0 0 40px currentColor; }
+    }
+
+    /* Feynman Diagram Styles */
+    .feynman-svg {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    /* Dark Matter Section */
+    .matter-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .matter-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(124, 77, 255, 0.2), transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .section { padding: 4rem 1rem; }
+      .card { padding: 1.5rem; }
+      .controls { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+  <!-- Hero Section with Animated Particle Field -->
+  <section class="hero">
+    <svg class="hero-svg" id="heroCanvas" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="particleGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" style="stop-color:#4fc3f7;stop-opacity:1"/>
+          <stop offset="100%" style="stop-color:#4fc3f7;stop-opacity:0"/>
+        </radialGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      <!-- Animated particles will be drawn here -->
+    </svg>
+    <div class="hero-content">
+      <h1>Quantum Field Theory & The Standard Model</h1>
+      <p class="hero-subtitle">The Fundamental Architecture of Reality</p>
+      <div class="hero-quote">
+        "The universe is made of fields. Particles are just excitations of these fields — ripples in the fabric of reality. The Standard Model is humanity's most precise description of matter and forces, yet it leaves 95% of the cosmos unexplained."
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 1: What is QFT -->
+  <section class="section" id="intro">
+    <h2 class="section-title">The Revolution: From Particles to Fields</h2>
+
+    <div class="card">
+      <p style="font-size: 1.1rem; line-height: 1.8; color: #ccf;">
+        In Quantum Field Theory, <strong style="color: var(--cyan);">every particle is a quantum of excitation</strong> in an underlying field. The electron is a ripple in the electron field, the photon is a ripple in the electromagnetic field, and the Higgs boson is a ripple in the Higgs field. This revolutionary framework unifies quantum mechanics with special relativity.
+      </p>
+
+      <div class="equation-box">
+        <strong style="color: var(--gold);">Dirac Equation (Relativistic Quantum Mechanics):</strong><br>
+        <span style="font-size: 1.4rem; color: var(--cyan);">(i&gamma;&mu;&part;&mu; - m)&psi; = 0</span>
+      </div>
+
+      <p style="font-size: 1.05rem; line-height: 1.8; color: #aaf; margin-top: 1.5rem;">
+        The Dirac equation predicted <strong style="color: var(--gold);">antimatter</strong> before it was discovered experimentally. It describes how particles and antiparticles emerge from quantum fields — the fundamental entities of the Standard Model.
+      </p>
+    </div>
+
+    <div class="viz-container">
+      <svg class="viz-svg" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+        <!-- Field Grid Background -->
+        <defs>
+          <pattern id="fieldGrid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(79,195,247,0.1)" stroke-width="1"/>
+          </pattern>
+          <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#4fc3f7"/>
+            <stop offset="50%" style="stop-color:#7c4dff"/>
+            <stop offset="100%" style="stop-color:#ff6d00"/>
+          </linearGradient>
+        </defs>
+        <rect width="800" height="400" fill="url(#fieldGrid)"/>
+
+        <!-- Animated Wave -->
+        <path id="fieldWave" d="" fill="none" stroke="url(#waveGrad)" stroke-width="3" filter="url(#glow)"/>
+
+        <!-- Particle Excitation -->
+        <g id="particleExc" opacity="0">
+          <circle r="20" fill="url(#particleGlow)"/>
+          <circle r="8" fill="#fff"/>
+          <text x="30" y="5" fill="#ffd54f" font-family="Space Mono" font-size="12">e⁻</text>
+        </g>
+
+        <!-- Labels -->
+        <text x="50" y="30" fill="#4fc3f7" font-family="Orbitron" font-size="14">QUANTUM FIELD</text>
+        <text x="50" y="370" fill="#7c4dff" font-family="Space Mono" font-size="11">Spatial Dimension →</text>
+        <text x="10" y="200" fill="#ffd54f" font-family="Space Mono" font-size="11" transform="rotate(-90, 20, 200)">Amplitude</text>
+
+        <!-- Second excitation -->
+        <g id="antiparticleExc" opacity="0">
+          <circle r="20" fill="url(#particleGlow)" fill="rgba(255,64,129,0.5)"/>
+          <circle r="8" fill="#ff4081"/>
+          <text x="30" y="5" fill="#ff4081" font-family="Space Mono" font-size="12">e⁺</text>
+        </g>
+      </svg>
+      <div class="controls" style="justify-content: center;">
+        <button class="btn btn-primary" onclick="animateField()">Animate Field</button>
+        <button class="btn btn-secondary" onclick="resetField()">Reset</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: Standard Model Particles -->
+  <section class="section" id="particles">
+    <h2 class="section-title">The Particle Zoo: Standard Model constituents</h2>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showParticleTab('fermions')">Fermions (Matter)</button>
+      <button class="tab" onclick="showParticleTab('bosons')">Bosons (Forces)</button>
+      <button class="tab" onclick="showParticleTab('higgs')">Higgs Sector</button>
+    </div>
+
+    <!-- Fermions Tab -->
+    <div id="fermions-tab" class="tab-content">
+      <div class="card">
+        <h3 style="color: var(--cyan); font-family: Orbitron; margin-bottom: 1rem;">Quarks & Leptons: The Building Blocks</h3>
+        <p style="color: #aaf; line-height: 1.7; margin-bottom: 1.5rem;">
+          Fermions are particles with half-integer spin (1/2, 3/2, ...) that obey the Pauli exclusion principle. They form all matter. There are <strong style="color: var(--gold);">6 quarks</strong> (up, down, charm, strange, top, bottom) and <strong style="color: var(--gold);">6 leptons</strong> (electron, muon, tau, plus their neutrinos).
+        </p>
+
+        <div class="equation-box">
+          <strong style="color: var(--gold);">Fermion Generation Formula:</strong><br>
+          <span style="color: var(--cyan);">
+            1st Gen: (u, d, e, v<sub>e</sub>) → 2nd Gen: (c, s, &mu;, v<sub>&mu;</sub>) → 3rd Gen: (t, b, &tau;, v<sub>&tau;</sub>)
+          </span>
+        </div>
+      </div>
+
+      <div class="viz-container">
+        <svg class="viz-svg" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+          <!-- Generation Columns -->
+          <rect x="50" y="50" width="200" height="400" fill="rgba(79,195,247,0.1)" rx="12"/>
+          <rect x="300" y="50" width="200" height="400" fill="rgba(124,77,255,0.1)" rx="12"/>
+          <rect x="550" y="50" width="200" height="400" fill="rgba(255,109,0,0.1)" rx="12"/>
+
+          <!-- Generation Labels -->
+          <text x="150" y="35" fill="#4fc3f7" font-family="Orbitron" font-size="14" text-anchor="middle">1ST GENERATION</text>
+          <text x="400" y="35" fill="#7c4dff" font-family="Orbitron" font-size="14" text-anchor="middle">2ND GENERATION</text>
+          <text x="650" y="35" fill="#ff6d00" font-family="Orbitron" font-size="14" text-anchor="middle">3RD GENERATION</text>
+
+          <!-- Quark Labels -->
+          <text x="150" y="80" fill="#ffd54f" font-family="Orbitron" font-size="12" text-anchor="middle">QUARKS</text>
+
+          <!-- Up-type Quarks -->
+          <g class="quark-card" style="cursor: pointer;" onclick="showQuarkDetail('up')">
+            <rect x="70" y="95" width="160" height="55" fill="rgba(255,213,79,0.2)" rx="8" stroke="#ffd54f" stroke-width="1"/>
+            <text x="150" y="120" fill="#ffd54f" font-family="Orbitron" font-size="18" text-anchor="middle">u</text>
+            <text x="150" y="140" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">up · +2/3 e</text>
+          </g>
+
+          <g class="quark-card" style="cursor: pointer;" onclick="showQuarkDetail('charm')">
+            <rect x="320" y="95" width="160" height="55" fill="rgba(255,213,79,0.2)" rx="8" stroke="#ffd54f" stroke-width="1"/>
+            <text x="400" y="120" fill="#ffd54f" font-family="Orbitron" font-size="18" text-anchor="middle">c</text>
+            <text x="400" y="140" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">charm · +2/3 e</text>
+          </g>
+
+          <g class="quark-card" style="cursor: pointer;" onclick="showQuarkDetail('top')">
+            <rect x="570" y="95" width="160" height="55" fill="rgba(255,213,79,0.2)" rx="8" stroke="#ffd54f" stroke-width="1"/>
+            <text x="650" y="120" fill="#ffd54f" font-family="Orbitron" font-size="18" text-anchor="middle">t</text>
+            <text x="650" y="140" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">top · +2/3 e</text>
+          </g>
+
+          <!-- Down-type Quarks -->
+          <g class="quark-card" style="cursor: pointer;" onclick="showQuarkDetail('down')">
+            <rect x="70" y="165" width="160" height="55" fill="rgba(0,230,118,0.2)" rx="8" stroke="#00e676" stroke-width="1"/>
+            <text x="150" y="190" fill="#00e676" font-family="Orbitron" font-size="18" text-anchor="middle">d</text>
+            <text x="150" y="210" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">down · -1/3 e</text>
+          </g>
+
+          <g class="quark-card" style="cursor: pointer;" onclick="showQuarkDetail('strange')">
+            <rect x="320" y="165" width="160" height="55" fill="rgba(0,230,118,0.2)" rx="8" stroke="#00e676" stroke-width="1"/>
+            <text x="400" y="190" fill="#00e676" font-family="Orbitron" font-size="18" text-anchor="middle">s</text>
+            <text x="400" y="210" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">strange · -1/3 e</text>
+          </g>
+
+          <g class="quark-card" style="cursor: pointer;" onclick="showQuarkDetail('bottom')">
+            <rect x="570" y="165" width="160" height="55" fill="rgba(0,230,118,0.2)" rx="8" stroke="#00e676" stroke-width="1"/>
+            <text x="650" y="190" fill="#00e676" font-family="Orbitron" font-size="18" text-anchor="middle">b</text>
+            <text x="650" y="210" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">bottom · -1/3 e</text>
+          </g>
+
+          <!-- Lepton Labels -->
+          <text x="150" y="270" fill="#ff4081" font-family="Orbitron" font-size="12" text-anchor="middle">LEPTONS</text>
+
+          <!-- Charged Leptons -->
+          <g class="lepton-card" style="cursor: pointer;" onclick="showLeptonDetail('electron')">
+            <rect x="70" y="285" width="160" height="55" fill="rgba(255,64,129,0.2)" rx="8" stroke="#ff4081" stroke-width="1"/>
+            <text x="150" y="310" fill="#ff4081" font-family="Orbitron" font-size="18" text-anchor="middle">e⁻</text>
+            <text x="150" y="330" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">electron · 0.511 MeV</text>
+          </g>
+
+          <g class="lepton-card" style="cursor: pointer;" onclick="showLeptonDetail('muon')">
+            <rect x="320" y="285" width="160" height="55" fill="rgba(255,64,129,0.2)" rx="8" stroke="#ff4081" stroke-width="1"/>
+            <text x="400" y="310" fill="#ff4081" font-family="Orbitron" font-size="18" text-anchor="middle">&mu;⁻</text>
+            <text x="400" y="330" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">muon · 105.7 MeV</text>
+          </g>
+
+          <g class="lepton-card" style="cursor: pointer;" onclick="showLeptonDetail('tau')">
+            <rect x="570" y="285" width="160" height="55" fill="rgba(255,64,129,0.2)" rx="8" stroke="#ff4081" stroke-width="1"/>
+            <text x="650" y="310" fill="#ff4081" font-family="Orbitron" font-size="18" text-anchor="middle">&tau;⁻</text>
+            <text x="650" y="330" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">tau · 1776.9 MeV</text>
+          </g>
+
+          <!-- Neutrinos -->
+          <g class="neutrino-card" style="cursor: pointer;" onclick="showLeptonDetail('neutrino')">
+            <rect x="70" y="355" width="160" height="55" fill="rgba(79,195,247,0.15)" rx="8" stroke="#4fc3f7" stroke-width="1" stroke-dasharray="4"/>
+            <text x="150" y="380" fill="#4fc3f7" font-family="Orbitron" font-size="18" text-anchor="middle">v<sub>e</sub></text>
+            <text x="150" y="400" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">e-neutrino · &lt;0.8 eV</text>
+          </g>
+
+          <g class="neutrino-card" style="cursor: pointer;" onclick="showLeptonDetail('neutrino')">
+            <rect x="320" y="355" width="160" height="55" fill="rgba(79,195,247,0.15)" rx="8" stroke="#4fc3f7" stroke-width="1" stroke-dasharray="4"/>
+            <text x="400" y="380" fill="#4fc3f7" font-family="Orbitron" font-size="18" text-anchor="middle">v<sub>&mu;</sub></text>
+            <text x="400" y="400" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">&mu;-neutrino · &lt;0.8 eV</text>
+          </g>
+
+          <g class="neutrino-card" style="cursor: pointer;" onclick="showLeptonDetail('neutrino')">
+            <rect x="570" y="355" width="160" height="55" fill="rgba(79,195,247,0.15)" rx="8" stroke="#4fc3f7" stroke-width="1" stroke-dasharray="4"/>
+            <text x="650" y="380" fill="#4fc3f7" font-family="Orbitron" font-size="18" text-anchor="middle">v<sub>&tau;</sub></text>
+            <text x="650" y="400" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">&tau;-neutrino · &lt;0.8 eV</text>
+          </g>
+
+          <!-- Mass progression arrows -->
+          <path d="M 250 200 L 290 200" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+          <path d="M 500 200 L 540 200" stroke="#666" stroke-width="2"/>
+
+          <!-- Arrow def -->
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#666"/>
+            </marker>
+          </defs>
+
+          <!-- Mass label -->
+          <text x="400" y="470" fill="#666" font-family="Space Mono" font-size="11" text-anchor="middle">Mass Increases →</text>
+        </svg>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-value" style="color: #ffd54f;">6</div>
+          <div class="stat-label">Quarks</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" style="color: #ff4081;">6</div>
+          <div class="stat-label">Leptons</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" style="color: #00e676;">3</div>
+          <div class="stat-label">Generations</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" style="color: #4fc3f7;">173 GeV</div>
+          <div class="stat-label">Top Quark Mass</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bosons Tab -->
+    <div id="bosons-tab" class="tab-content" style="display: none;">
+      <div class="card">
+        <h3 style="color: var(--gold); font-family: Orbitron; margin-bottom: 1rem;">Gauge Bosons: The Force Carriers</h3>
+        <p style="color: #aaf; line-height: 1.7;">
+          Gauge bosons mediate the four fundamental forces. Unlike fermions, they have <strong style="color: var(--gold);">integer spin</strong> (0, 1, 2) and <strong style="color: var(--gold);">do not obey</strong> the Pauli exclusion principle. The photon, gluon, W&plusmn;, Z&sup0;, and graviton are gauge bosons.
+        </p>
+
+        <div class="equation-box">
+          <strong style="color: var(--gold);">Gauge Coupling Hierarchy:</strong><br>
+          <span style="color: var(--cyan);">
+            Strong (g<sub>s</sub>=1) &gt; Electroweak (&alpha;=1/137) &gt; Gravity (G&prop;10⁻³⁹)
+          </span>
+        </div>
+      </div>
+
+      <div class="viz-container">
+        <svg class="viz-svg" viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+          <!-- Force Mediator Cards -->
+          <!-- Photon -->
+          <g transform="translate(50, 50)">
+            <rect width="140" height="250" rx="12" fill="rgba(255,213,79,0.15)" stroke="#ffd54f" stroke-width="2"/>
+            <circle cx="70" cy="70" r="40" fill="none" stroke="#ffd54f" stroke-width="3">
+              <animate attributeName="r" values="30;45;30" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="70" cy="70" r="8" fill="#ffd54f"/>
+            <text x="70" y="140" fill="#ffd54f" font-family="Orbitron" font-size="14" text-anchor="middle">&gamma;</text>
+            <text x="70" y="165" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">Photon</text>
+            <text x="70" y="185" fill="#aaa" font-family="Space Mono" font-size="9" text-anchor="middle">EM Force</text>
+            <text x="70" y="210" fill="#4fc3f7" font-family="Space Mono" font-size="9" text-anchor="middle">Mass: 0</text>
+            <text x="70" y="230" fill="#4fc3f7" font-family="Space Mono" font-size="9" text-anchor="middle">Range: &infin;</text>
+          </g>
+
+          <!-- Gluon -->
+          <g transform="translate(220, 50)">
+            <rect width="140" height="250" rx="12" fill="rgba(0,230,118,0.15)" stroke="#00e676" stroke-width="2"/>
+            <circle cx="70" cy="70" r="40" fill="none" stroke="#00e676" stroke-width="3">
+              <animate attributeName="r" values="30;45;30" dur="1.5s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="70" cy="70" r="8" fill="#00e676"/>
+            <text x="70" y="140" fill="#00e676" font-family="Orbitron" font-size="14" text-anchor="middle">g</text>
+            <text x="70" y="165" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">Gluon</text>
+            <text x="70" y="185" fill="#aaa" font-family="Space Mono" font-size="9" text-anchor="middle">Strong Force</text>
+            <text x="70" y="210" fill="#4fc3f7" font-family="Space Mono" font-size="9" text-anchor="middle">Mass: 0</text>
+            <text x="70" y="230" fill="#4fc3f7" font-family="Space Mono" font-size="9" text-anchor="middle">Range: 10⁻¹⁵ m</text>
+          </g>
+
+          <!-- W Boson -->
+          <g transform="translate(390, 50)">
+            <rect width="140" height="250" rx="12" fill="rgba(124,77,255,0.15)" stroke="#7c4dff" stroke-width="2"/>
+            <circle cx="70" cy="70" r="40" fill="none" stroke="#7c4dff" stroke-width="3">
+              <animate attributeName="r" values="30;45;30" dur="1.8s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="1;0.5;1" dur="1.8s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="70" cy="70" r="8" fill="#7c4dff"/>
+            <text x="70" y="140" fill="#7c4dff" font-family="Orbitron" font-size="14" text-anchor="middle">W&plusmn;</text>
+            <text x="70" y="165" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">W Boson</text>
+            <text x="70" y="185" fill="#aaa" font-family="Space Mono" font-size="9" text-anchor="middle">Weak Force</text>
+            <text x="70" y="210" fill="#4fc3f7" font-family="Space Mono" font-size="9" text-anchor="middle">Mass: 80.4 GeV</text>
+            <text x="70" y="230" fill="#4fc3f7" font-family="Space Mono" font-size="9" text-anchor="middle">Range: 10⁻¹⁸ m</text>
+          </g>
+
+          <!-- Z Boson -->
+          <g transform="translate(560, 50)">
+            <rect width="140" height="250" rx="12" fill="rgba(255,64,129,0.15)" stroke="#ff4081" stroke-width="2"/>
+            <circle cx="70" cy="70" r="40" fill="none" stroke="#ff4081" stroke-width="3">
+              <animate attributeName="r" values="30;45;30" dur="2.1s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="1;0.5;1" dur="2.1s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="70" cy="70" r="8" fill="#ff4081"/>
+            <text x="70" y="140" fill="#ff4081" font-family="Orbitron" font-size="14" text-anchor="middle">Z&sup0;</text>
+            <text x="70" y="165" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">Z Boson</text>
+            <text x="70" y="185" fill="#aaa" font-family="Space Mono" font-size="9" text-anchor="middle">Weak Force</text>
+            <text x="70" y="210" fill="#4fc3f7" font-family="Space Mono" font-size="9" text-anchor="middle">Mass: 91.2 GeV</text>
+            <text x="70" y="230" fill="#4fc3f7" font-family="Space Mono" font-size="9" text-anchor="middle">Range: 10⁻¹⁸ m</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Higgs Tab -->
+    <div id="higgs-tab" class="tab-content" style="display: none;">
+      <div class="card">
+        <h3 style="color: var(--orange); font-family: Orbitron; margin-bottom: 1rem;">The Higgs Mechanism: Giving Mass to Particles</h3>
+        <p style="color: #aaf; line-height: 1.7;">
+          The Higgs field is a scalar field that permeates all space. Particles gain mass by interacting with this field — the more they couple, the more mass they acquire. The <strong style="color: var(--orange);">Higgs boson</strong> is the quantum excitation of this field, discovered at CERN in 2012.
+        </p>
+
+        <div class="equation-box">
+          <strong style="color: var(--gold);">Higgs Potential (Mexican Hat):</strong><br>
+          <span style="color: var(--cyan); font-size: 1.1rem;">
+            V(&phi;) = -&mu;&sup2;|&phi;|&sup2; + &lambda;|&phi;|&sup4;
+          </span>
+        </div>
+
+        <p style="color: #aaf; line-height: 1.7; margin-top: 1rem;">
+          The "Mexican hat" potential has a nonzero vacuum expectation value <span style="color: var(--gold);">&lang;&phi;&rang; = 246 GeV</span>. When particles move through this nonzero baseline, they experience resistance — what we call <strong style="color: var(--orange);">mass</strong>. This is electroweak symmetry breaking.
+        </p>
+      </div>
+
+      <div class="viz-container">
+        <svg class="viz-svg" id="higgsViz" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="higgsGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" style="stop-color:#ff6d00;stop-opacity:1"/>
+              <stop offset="100%" style="stop-color:#ff6d00;stop-opacity:0"/>
+            </radialGradient>
+          </defs>
+
+          <!-- Potential Surface -->
+          <path id="potentialSurface" d="" fill="none" stroke="#ff6d00" stroke-width="3" opacity="0.8"/>
+
+          <!-- Ball on Potential -->
+          <circle id="higgsBall" r="12" fill="#ffd54f"/>
+
+          <!-- Field Labels -->
+          <text x="400" y="30" fill="#ff6d00" font-family="Orbitron" font-size="16" text-anchor="middle">HIGGS POTENTIAL</text>
+          <text x="50" y="420" fill="#aaa" font-family="Space Mono" font-size="11">Field Value &phi;</text>
+          <text x="750" y="420" fill="#aaa" font-family="Space Mono" font-size="11" text-anchor="end">Field Value &phi;</text>
+          <text x="20" y="250" fill="#aaa" font-family="Space Mono" font-size="11" transform="rotate(-90, 20, 250)">Potential V(&phi;)</text>
+
+          <!-- Vacuum Expectation Value Marker -->
+          <line id="vevLine" x1="400" y1="300" x2="400" y2="400" stroke="#4fc3f7" stroke-width="2" stroke-dasharray="5"/>
+          <text x="400" y="435" fill="#4fc3f7" font-family="Space Mono" font-size="11" text-anchor="middle">v = 246 GeV</text>
+
+          <!-- Particle Mass Indicator -->
+          <g id="massIndicator" opacity="0">
+            <rect x="600" y="150" width="180" height="200" rx="12" fill="rgba(255,109,0,0.2)" stroke="#ff6d00"/>
+            <text x="690" y="180" fill="#ff6d00" font-family="Orbitron" font-size="12" text-anchor="middle">MASS GAIN</text>
+            <line x1="620" y1="200" x2="760" y2="200" stroke="#666"/>
+            <text x="690" y="220" fill="#ffd54f" font-family="Orbitron" font-size="14" text-anchor="middle">TOP QUARK</text>
+            <text x="690" y="245" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">Mass: 173 GeV</text>
+            <text x="690" y="265" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">Coupling: Strong</text>
+            <line x1="620" y1="290" x2="760" y2="290" stroke="#666"/>
+            <text x="690" y="310" fill="#4fc3f7" font-family="Orbitron" font-size="14" text-anchor="middle">ELECTRON</text>
+            <text x="690" y="335" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">Mass: 0.511 MeV</text>
+            <text x="690" y="355" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">Coupling: Weak</text>
+          </g>
+        </svg>
+        <div class="controls" style="justify-content: center;">
+          <button class="btn btn-primary" onclick="animateHiggs()">Animate Symmetry Breaking</button>
+          <button class="btn btn-secondary" onclick="resetHiggs()">Reset</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: Gauge Symmetry -->
+  <section class="section" id="gauge">
+    <h2 class="section-title">Gauge Symmetry: The Architecture of Forces</h2>
+
+    <div class="card">
+      <p style="font-size: 1.1rem; line-height: 1.8; color: #ccf;">
+        The Standard Model is built on <strong style="color: var(--cyan);">gauge symmetry principles</strong>. Each force corresponds to a symmetry group:
+      </p>
+
+      <div class="equation-box">
+        <strong style="color: var(--gold);">Standard Model Gauge Group:</strong><br>
+        <span style="color: var(--cyan); font-size: 1.2rem;">
+          G<sub>SM</sub> = SU(3)<sub>C</sub> &times; SU(2)<sub>L</sub> &times; U(1)<sub>Y</sub>
+        </span>
+      </div>
+
+      <div class="viz-container">
+        <svg class="viz-svg" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- SU(3) Color -->
+          <g transform="translate(100, 50)">
+            <rect width="180" height="300" rx="12" fill="rgba(0,230,118,0.15)" stroke="#00e676" stroke-width="2"/>
+            <text x="90" y="35" fill="#00e676" font-family="Orbitron" font-size="14" text-anchor="middle">SU(3)<sub>C</sub></text>
+            <text x="90" y="60" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">Quantum Chromodynamics</text>
+
+            <!-- Color charges -->
+            <circle cx="90" cy="120" r="25" fill="rgba(255,0,0,0.3)" stroke="red" stroke-width="2"/>
+            <text x="90" y="125" fill="red" font-family="Orbitron" font-size="14" text-anchor="middle">R</text>
+
+            <circle cx="50" cy="200" r="25" fill="rgba(0,255,0,0.3)" stroke="green" stroke-width="2"/>
+            <text x="50" y="205" fill="green" font-family="Orbitron" font-size="14" text-anchor="middle">G</text>
+
+            <circle cx="130" cy="200" r="25" fill="rgba(0,0,255,0.3)" stroke="blue" stroke-width="2"/>
+            <text x="130" y="205" fill="blue" font-family="Orbitron" font-size="14" text-anchor="middle">B</text>
+
+            <text x="90" y="270" fill="#aaa" font-family="Space Mono" font-size="9" text-anchor="middle">8 Gluon Colors</text>
+            <text x="90" y="290" fill="#4fc3f7" font-family="Space Mono" font-size="9" text-anchor="middle">8 generators</text>
+          </g>
+
+          <!-- SU(2) Weak -->
+          <g transform="translate(310, 50)">
+            <rect width="180" height="300" rx="12" fill="rgba(124,77,255,0.15)" stroke="#7c4dff" stroke-width="2"/>
+            <text x="90" y="35" fill="#7c4dff" font-family="Orbitron" font-size="14" text-anchor="middle">SU(2)<sub>L</sub></text>
+            <text x="90" y="60" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">Electroweak (Left)</text>
+
+            <!-- Isospin arrows -->
+            <line x1="90" y1="120" x2="90" y2="180" stroke="#7c4dff" stroke-width="3" marker-end="url(#arrow)"/>
+            <text x="110" y="140" fill="#7c4dff" font-family="Space Mono" font-size="10">I<sub>3</sub></text>
+
+            <circle cx="90" cy="200" r="20" fill="rgba(124,77,255,0.3)" stroke="#7c4dff" stroke-width="2"/>
+            <text x="90" y="205" fill="#7c4dff" font-family="Orbitron" font-size="12" text-anchor="middle">W&plusmn;</text>
+
+            <text x="90" y="270" fill="#aaa" font-family="Space Mono" font-size="9" text-anchor="middle">3 Weak Bosons</text>
+            <text x="90" y="290" fill="#4fc3f7" font-family="Space Mono" font-size="9" text-anchor="middle">W&sup1;, W&sup2;, W&sup3;</text>
+          </g>
+
+          <!-- U(1) Hypercharge -->
+          <g transform="translate(520, 50)">
+            <rect width="180" height="300" rx="12" fill="rgba(255,213,79,0.15)" stroke="#ffd54f" stroke-width="2"/>
+            <text x="90" y="35" fill="#ffd54f" font-family="Orbitron" font-size="14" text-anchor="middle">U(1)<sub>Y</sub></text>
+            <text x="90" y="60" fill="#aaa" font-family="Space Mono" font-size="10" text-anchor="middle">Hypercharge</text>
+
+            <!-- Hypercharge circle -->
+            <circle cx="90" cy="160" r="50" fill="none" stroke="#ffd54f" stroke-width="2">
+              <animate attributeName="stroke-dasharray" values="0,314;314,0" dur="2s" fill="freeze"/>
+            </circle>
+            <circle cx="90" cy="160" r="8" fill="#ffd54f"/>
+
+            <text x="90" y="250" fill="#aaa" font-family="Space Mono" font-size="9" text-anchor="middle">1 Generator</text>
+            <text x="90" y="270" fill="#aaa" font-family="Space Mono" font-size="9" text-anchor="middle">(B&mu; Boson)</text>
+            <text x="90" y="290" fill="#4fc3f7" font-family="Space Mono" font-size="9" text-anchor="middle">Y = 2(Q - I<sub>3</sub>)</text>
+          </g>
+
+          <!-- Connection arrows -->
+          <path d="M 280 200 L 300 200" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+          <path d="M 490 200 L 510 200" stroke="#666" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Product symbol -->
+          <text x="400" y="400" fill="#aaa" font-family="Orbitron" font-size="12" text-anchor="middle">Direct Product Group</text>
+        </svg>
+      </div>
+
+      <div class="equation-box" style="margin-top: 2rem;">
+        <strong style="color: var(--gold);">Electroweak Mixing ( Weinberg Angle ):</strong><br>
+        <span style="color: var(--cyan); font-size: 1.1rem;">
+          sin&sup2;&theta;<sub>W</sub> = 0.231, &nbsp;&nbsp; M<sub>W</sub> = M<sub>Z</sub>cos&theta;<sub>W</sub>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: Feynman Diagrams -->
+  <section class="section" id="interactions">
+    <h2 class="section-title">Fundamental Interactions: Feynman Diagrams</h2>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showInteractionTab('em')">Electromagnetic</button>
+      <button class="tab" onclick="showInteractionTab('weak')">Weak</button>
+      <button class="tab" onclick="showInteractionTab('strong')">Strong</button>
+      <button class="tab" onclick="showInteractionTab('higgs')">Higgs</button>
+    </div>
+
+    <div id="em-tab" class="tab-content">
+      <div class="card">
+        <h3 style="color: var(--gold); font-family: Orbitron;">Electromagnetic Interaction: e&minus; + e&minus; Scattering</h3>
+        <p style="color: #aaf; line-height: 1.7;">
+          The photon mediates electromagnetic interactions between charged particles. In QED, the photon is a massless gauge boson with spin-1, and the coupling strength is the fine structure constant <span style="color: var(--gold);">&alpha; = 1/137</span>.
+        </p>
+
+        <div class="equation-box">
+          <span style="color: var(--cyan);">e&minus; + e&minus; &rarr; e&minus; + e&minus;</span> via virtual &gamma; exchange
+        </div>
+      </div>
+
+      <div class="viz-container">
+        <svg class="viz-svg feynman-svg" viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- Time axis -->
+          <line x1="50" y1="350" x2="650" y2="350" stroke="#666" stroke-width="1"/>
+          <text x="650" y="370" fill="#666" font-family="Space Mono" font-size="10">Time</text>
+
+          <!-- Space axis -->
+          <line x1="50" y1="350" x2="50" y2="50" stroke="#666" stroke-width="1"/>
+          <text x="30" y="50" fill="#666" font-family="Space Mono" font-size="10">Space</text>
+
+          <!-- Electron 1 (left) -->
+          <line x1="100" y1="80" x2="300" y2="200" stroke="#4fc3f7" stroke-width="3"/>
+          <circle cx="100" cy="80" r="6" fill="#4fc3f7"/>
+          <text x="80" y="70" fill="#4fc3f7" font-family="Space Mono" font-size="12">e&minus;</text>
+
+          <!-- Electron 2 (left, coming in) -->
+          <line x1="100" y1="200" x2="300" y2="80" stroke="#4fc3f7" stroke-width="3"/>
+          <circle cx="100" cy="200" r="6" fill="#4fc3f7"/>
+          <text x="80" y="210" fill="#4fc3f7" font-family="Space Mono" font-size="12">e&minus;</text>
+
+          <!-- Photon exchange (wavy line) -->
+          <path d="M 200 140 Q 250 170 200 200" fill="none" stroke="#ffd54f" stroke-width="2">
+            <animate attributeName="stroke-dashoffset" from="100" to="0" dur="1s" repeatCount="indefinite"/>
+          </path>
+          <text x="270" y="175" fill="#ffd54f" font-family="Space Mono" font-size="10">&gamma; (virtual)</text>
+
+          <!-- Electron 1 (right, outgoing) -->
+          <line x1="400" y1="200" x2="600" y2="80" stroke="#4fc3f7" stroke-width="3"/>
+          <circle cx="600" cy="80" r="6" fill="#4fc3f7"/>
+          <text x="620" y="70" fill="#4fc3f7" font-family="Space Mono" font-size="12">e&minus;</text>
+
+          <!-- Electron 2 (right, outgoing) -->
+          <line x1="400" y1="200" x2="600" y2="200" stroke="#4fc3f7" stroke-width="3"/>
+          <circle cx="600" cy="200" r="6" fill="#4fc3f7"/>
+          <text x="620" y="210" fill="#4fc3f7" font-family="Space Mono" font-size="12">e&minus;</text>
+
+          <!-- Vertex markers -->
+          <circle cx="300" cy="200" r="4" fill="#fff"/>
+          <circle cx="400" cy="200" r="4" fill="#fff"/>
+        </svg>
+      </div>
+    </div>
+
+    <div id="weak-tab" class="tab-content" style="display: none;">
+      <div class="card">
+        <h3 style="color: var(--purple); font-family: Orbitron;">Weak Interaction: Beta Decay</h3>
+        <p style="color: #aaf; line-height: 1.7;">
+          The weak force is unique in that it can change particle identity — a down quark becomes an up quark, converting a neutron into a proton. This is how the Sun burns hydrogen. The <span style="color: var(--purple);">W boson</span; carries the weak charge.
+        </p>
+
+        <div class="equation-box">
+          <span style="color: var(--cyan);">n &rarr; p + e&minus; + v̄<sub>e</sub></span> via W&minus; exchange
+        </div>
+      </div>
+
+      <div class="viz-container">
+        <svg class="viz-svg feynman-svg" viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- Neutron line -->
+          <line x1="100" y1="100" x2="300" y2="100" stroke="#00e676" stroke-width="3"/>
+          <circle cx="100" cy="100" r="8" fill="#00e676"/>
+          <text x="80" y="90" fill="#00e676" font-family="Space Mono" font-size="11">d</text>
+
+          <!-- W- boson (wavy, going down) -->
+          <path d="M 300 100 Q 350 150 300 200" fill="none" stroke="#7c4dff" stroke-width="2" stroke-dasharray="5"/>
+          <text x="360" y="160" fill="#7c4dff" font-family="Space Mono" font-size="10">W&minus;</text>
+
+          <!-- Proton line -->
+          <line x1="300" y1="100" x2="500" y2="100" stroke="#ff4081" stroke-width="3"/>
+          <circle cx="500" cy="100" r="8" fill="#ff4081"/>
+          <text x="515" y="90" fill="#ff4081" font-family="Space Mono" font-size="11">p</text>
+
+          <!-- Electron line -->
+          <line x1="300" y1="200" x2="550" y2="300" stroke="#4fc3f7" stroke-width="3"/>
+          <circle cx="550" cy="300" r="6" fill="#4fc3f7"/>
+          <text x="570" y="310" fill="#4fc3f7" font-family="Space Mono" font-size="11">e&minus;</text>
+
+          <!-- Antineutrino line -->
+          <line x1="300" y1="200" x2="450" y2="300" stroke="#aaa" stroke-width="2" stroke-dasharray="3"/>
+          <text x="350" y="280" fill="#aaa" font-family="Space Mono" font-size="10">v̄<sub>e</sub></text>
+
+          <!-- Vertices -->
+          <circle cx="300" cy="100" r="4" fill="#fff"/>
+          <circle cx="300" cy="200" r="4" fill="#fff"/>
+        </svg>
+      </div>
+    </div>
+
+    <div id="strong-tab" class="tab-content" style="display: none;">
+      <div class="card">
+        <h3 style="color: var(--green); font-family: Orbitron;">Strong Interaction: Quark Confinement</h3>
+        <p style="color: #aaf; line-height: 1.7;">
+          The strong force binds quarks into hadrons. Gluons carry color charge — they themselves interact with each other. This is why quarks can never be isolated; they are permanently confined within hadrons.
+        </p>
+
+        <div class="equation-box">
+          <span style="color: var(--cyan);">q + q̄ &rarr; meson (pion) via gluon exchange</span>
+        </div>
+      </div>
+
+      <div class="viz-container">
+        <svg class="viz-svg feynman-svg" viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- Quark (red) -->
+          <line x1="100" y1="80" x2="300" y2="200" stroke="red" stroke-width="3"/>
+          <circle cx="100" cy="80" r="6" fill="red"/>
+          <text x="80" y="70" fill="red" font-family="Space Mono" font-size="11">q (r)</text>
+
+          <!-- Antiquark (anti-red = cyan) -->
+          <line x1="100" y1="200" x2="300" y2="80" stroke="cyan" stroke-width="3"/>
+          <circle cx="100" cy="200" r="6" fill="cyan"/>
+          <text x="80" y="210" fill="cyan" font-family="Space Mono" font-size="11">q̄ (c̄)</text>
+
+          <!-- Gluon exchange (spring-like) -->
+          <path d="M 200 140 Q 250 170 200 200" fill="none" stroke="#00e676" stroke-width="3">
+            <animate attributeName="stroke-dashoffset" from="50" to="0" dur="0.5s" repeatCount="indefinite"/>
+          </path>
+          <path d="M 200 140 Q 250 170 200 200" fill="none" stroke="#00e676" stroke-width="1" stroke-dasharray="3"/>
+          <text x="270" y="175" fill="#00e676" font-family="Space Mono" font-size="10">g (gluon)</text>
+
+          <!-- Outgoing quark -->
+          <line x1="400" y1="200" x2="600" y2="80" stroke="red" stroke-width="3"/>
+          <circle cx="600" cy="80" r="6" fill="red"/>
+          <text x="620" y="70" fill="red" font-family="Space Mono" font-size="11">q (r)</text>
+
+          <!-- Outgoing antiquark -->
+          <line x1="400" y1="200" x2="600" y2="200" stroke="cyan" stroke-width="3"/>
+          <circle cx="600" cy="200" r="6" fill="cyan"/>
+          <text x="620" y="210" fill="cyan" font-family="Space Mono" font-size="11">q̄ (c̄)</text>
+
+          <!-- Vertices -->
+          <circle cx="300" cy="200" r="4" fill="#fff"/>
+          <circle cx="400" cy="200" r="4" fill="#fff"/>
+        </svg>
+      </div>
+    </div>
+
+    <div id="higgs-tab-interaction" class="tab-content" style="display: none;">
+      <div class="card">
+        <h3 style="color: var(--orange); font-family: Orbitron;">Higgs Production: Gluon Fusion</h3>
+        <p style="color: #aaf; line-height: 1.7;">
+          At the LHC, the Higgs boson is primarily produced via gluon fusion. Two gluons merge through a heavy quark loop (mainly top quark) to produce the Higgs. This is because the Higgs couples most strongly to the heaviest particles.
+        </p>
+
+        <div class="equation-box">
+          <span style="color: var(--cyan);">g + g &rarr; H via top-quark loop</span>
+        </div>
+      </div>
+
+      <div class="viz-container">
+        <svg class="viz-svg feynman-svg" viewBox="0 0 700 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- Gluon 1 -->
+          <line x1="100" y1="80" x2="250" y2="160" stroke="#00e676" stroke-width="3"/>
+          <circle cx="100" cy="80" r="6" fill="#00e676"/>
+          <text x="80" y="70" fill="#00e676" font-family="Space Mono" font-size="11">g</text>
+
+          <!-- Gluon 2 -->
+          <line x1="100" y1="160" x2="250" y2="80" stroke="#00e676" stroke-width="3"/>
+          <circle cx="100" cy="160" r="6" fill="#00e676"/>
+          <text x="80" y="170" fill="#00e676" font-family="Space Mono" font-size="11">g</text>
+
+          <!-- Top quark loop -->
+          <ellipse cx="350" cy="120" rx="60" ry="80" fill="none" stroke="#ffd54f" stroke-width="2" stroke-dasharray="5"/>
+          <text x="350" y="215" fill="#ffd54f" font-family="Space Mono" font-size="11" text-anchor="middle">t-loop</text>
+
+          <!-- Top quark markers -->
+          <circle cx="290" cy="160" r="5" fill="#ffd54f"/>
+          <circle cx="410" cy="160" r="5" fill="#ffd54f"/>
+          <text x="440" y="130" fill="#ffd54f" font-family="Space Mono" font-size="10">t</text>
+
+          <!-- Higgs boson -->
+          <line x1="500" y1="120" x2="600" y2="120" stroke="#ff6d00" stroke-width="4"/>
+          <circle cx="600" cy="120" r="10" fill="#ff6d00">
+            <animate attributeName="r" values="8;12;8" dur="1s" repeatCount="indefinite"/>
+          </circle>
+          <text x="620" y="125" fill="#ff6d00" font-family="Space Mono" font-size="11">H</text>
+
+          <!-- Vertices -->
+          <circle cx="250" cy="160" r="4" fill="#fff"/>
+          <circle cx="450" cy="120" r="4" fill="#fff"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 5: The Lagrangian -->
+  <section class="section" id="lagrangian">
+    <h2 class="section-title">The Standard Model Lagrangian</h2>
+
+    <div class="card">
+      <p style="font-size: 1.05rem; line-height: 1.8; color: #ccf; margin-bottom: 2rem;">
+        The entire Standard Model can be written in a single equation — the Lagrangian density. This remarkably compact expression contains all the information about particle physics (excluding gravity):
+      </p>
+
+      <div class="equation-box" style="font-size: 1rem; line-height: 2;">
+        <span style="color: var(--cyan);">
+          &Lscr; = &sum;<sub>f</sub> ψ̄<sub>f</sub>(i&part;&mu; - m<sub>f</sub>)ψ<sub>f</sub> + &sum;<sub>g</sub> (D<sub>&mu;</sub>ψ<sub>g</sub>)(D<sup>&mu;</sup>ψ<sub>g</sub>) - V(&phi;)
+        </span>
+        <br><br>
+        <span style="color: var(--gold); font-size: 0.9rem;">
+          + Electroweak sector + QCD sector + Higgs sector + Yukawa couplings
+        </span>
+      </div>
+
+      <div class="viz-container">
+        <svg class="viz-svg" viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+          <!-- Term boxes -->
+          <g transform="translate(30, 30)">
+            <rect width="170" height="80" rx="8" fill="rgba(79,195,247,0.2)" stroke="#4fc3f7" stroke-width="2"/>
+            <text x="85" y="30" fill="#4fc3f7" font-family="Orbitron" font-size="11" text-anchor="middle">FERMION KINETIC</text>
+            <text x="85" y="55" fill="#aaa" font-family="Space Mono" font-size="9" text-anchor="middle">Dirac term</text>
+            <text x="85" y="70" fill="#666" font-family="Space Mono" font-size="8" text-anchor="middle">Matter fields</text>
+          </g>
+
+          <g transform="translate(220, 30)">
+            <rect width="170" height="80" rx="8" fill="rgba(255,213,79,0.2)" stroke="#ffd54f" stroke-width="2"/>
+            <text x="85" y="30" fill="#ffd54f" font-family="Orbitron" font-size="11" text-anchor="middle">GAUGE INTERACTION</text>
+            <text x="85" y="55" fill="#aaa" font-family="Space Mono" font-size="9" text-anchor="middle">D<sub>&mu;</sub> term</text>
+            <text x="85" y="70" fill="#666" font-family="Space Mono" font-size="8" text-anchor="middle">Force carriers</text>
+          </g>
+
+          <g transform="translate(410, 30)">
+            <rect width="170" height="80" rx="8" fill="rgba(255,109,0,0.2)" stroke="#ff6d00" stroke-width="2"/>
+            <text x="85" y="30" fill="#ff6d00" font-family="Orbitron" font-size="11" text-anchor="middle">HIGGS POTENTIAL</text>
+            <text x="85" y="55" fill="#aaa" font-family="Space Mono" font-size="9" text-anchor="middle">V(&phi;) term</text>
+            <text x="85" y="70" fill="#666" font-family="Space Mono" font-size="8" text-anchor="middle">Mass generation</text>
+          </g>
+
+          <g transform="translate(600, 30)">
+            <rect width="170" height="80" rx="8" fill="rgba(124,77,255,0.2)" stroke="#7c4dff" stroke-width="2"/>
+            <text x="85" y="30" fill="#7c4dff" font-family="Orbitron" font-size="11" text-anchor="middle">YUKAWA COUPLING</text>
+            <text x="85" y="55" fill="#aaa" font-family="Space Mono" font-size="9" text-anchor="middle">y<sub>f</sub>&phi;ψ̄ψ</text>
+            <text x="85" y="70" fill="#666" font-family="Space Mono" font-size="8" text-anchor="middle">Fermion masses</text>
+          </g>
+
+          <!-- Connection lines -->
+          <line x1="200" y1="70" x2="220" y2="70" stroke="#666" stroke-width="1"/>
+          <line x1="390" y1="70" x2="410" y2="70" stroke="#666" stroke-width="1"/>
+          <line x1="580" y1="70" x2="600" y2="70" stroke="#666" stroke-width="1"/>
+
+          <!-- Plus signs -->
+          <text x="210" y="75" fill="#666" font-family="Space Mono" font-size="14">+</text>
+          <text x="400" y="75" fill="#666" font-family="Space Mono" font-size="14">+</text>
+          <text x="590" y="75" fill="#666" font-family="Space Mono" font-size="14">+</text>
+
+          <!-- Summary -->
+          <rect x="100" y="150" width="600" height="150" rx="12" fill="rgba(0,0,0,0.3)" stroke="rgba(79,195,247,0.3)"/>
+          <text x="400" y="180" fill="#4fc3f7" font-family="Orbitron" font-size="14" text-anchor="middle">EACH TERM HAS DEEP PHYSICS</text>
+
+          <text x="150" y="215" fill="#ffd54f" font-family="Space Mono" font-size="10">Fermion term:</text>
+          <text x="150" y="235" fill="#aaa" font-family="Space Mono" font-size="9">All fermions (quarks & leptons)</text>
+
+          <text x="400" y="215" fill="#00e676" font-family="Space Mono" font-size="10">Gauge term:</text>
+          <text x="400" y="235" fill="#aaa" font-family="Space Mono" font-size="9">Gluons, W, Z, photon dynamics</text>
+
+          <text x="150" y="265" fill="#ff6d00" font-family="Space Mono" font-size="10">Higgs term:</text>
+          <text x="150" y="285" fill="#aaa" font-family="Space Mono" font-size="9">Spontaneous symmetry breaking</text>
+
+          <text x="400" y="265" fill="#7c4dff" font-family="Space Mono" font-size="10">Yukawa term:</text>
+          <text x="400" y="285" fill="#aaa" font-family="Space Mono" font-size="9">Fermion mass after EW symmetry breaking</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 6: Open Questions -->
+  <section class="section" id="questions">
+    <h2 class="section-title">Beyond the Standard Model: The Frontier</h2>
+
+    <div class="card-grid">
+      <div class="card matter-card">
+        <h3 style="color: var(--purple); font-family: Orbitron; margin-bottom: 1rem;">Dark Matter</h3>
+        <p style="color: #aaf; line-height: 1.7;">
+          The Standard Model describes only <strong style="color: var(--gold);">5% of the universe</strong>. The remaining 95% is dark matter (27%) and dark energy (68%). What is dark matter made of? The leading candidates are WIMPs, axions, or primordial black holes.
+        </p>
+        <div class="equation-box" style="margin-top: 1rem;">
+          <span style="color: var(--cyan);">&Omega;<sub>DM</sub> = 0.27 &plusmn; 0.03</span>
+        </div>
+      </div>
+
+      <div class="card matter-card">
+        <h3 style="color: var(--orange); font-family: Orbitron; margin-bottom: 1rem;">Matter-Antimatter Asymmetry</h3>
+        <p style="color: #aaf; line-height: 1.7;">
+          The Big Bang should have created equal matter and antimatter. Today, we see only matter. This asymmetry requires <strong style="color: var(--orange);">CP violation</strong> (which the Standard Model explains partially) and baryogenesis conditions.
+        </p>
+        <div class="equation-box" style="margin-top: 1rem;">
+          <span style="color: var(--cyan);">n<sub>B</sub>/n<sub>&gamma;</sub> &asymp; 6 &times; 10<sup>-10</sup></span>
+        </div>
+      </div>
+
+      <div class="card matter-card">
+        <h3 style="color: var(--cyan); font-family: Orbitron; margin-bottom: 1rem;">Hierarchy Problem</h3>
+        <p style="color: #aaf; line-height: 1.7;">
+          Why is the Higgs mass so small compared to the Planck scale? Quantum corrections should drive it to 10<sup>19</sup> GeV, but it's measured at 125 GeV. This requires either incredible fine-tuning or new physics like supersymmetry.
+        </p>
+        <div class="equation-box" style="margin-top: 1rem;">
+          <span style="color: var(--cyan);">M<sub>h</sub> = 125 GeV &ll; M<sub>Planck</sub> = 10<sup>19</sup> GeV</span>
+        </div>
+      </div>
+
+      <div class="card matter-card">
+        <h3 style="color: var(--pink); font-family: Orbitron; margin-bottom: 1rem;">Quantum Gravity</h3>
+        <p style="color: #aaf; line-height: 1.7;">
+          The Standard Model is incompatible with general relativity. At the Planck scale (10<sup>35</sup> m), quantum effects dominate. String theory, loop quantum gravity, and other approaches seek to unify these frameworks.
+        </p>
+        <div class="equation-box" style="margin-top: 1rem;">
+          <span style="color: var(--cyan);">&ell;<sub>P</sub> = &radic;(G&hbar;/c&sup3;) &approx; 1.6 &times; 10<sup>-35</sup> m</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 7: Key Constants -->
+  <section class="section" id="constants">
+    <h2 class="section-title">Key Particles & Constants</h2>
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-value" style="color: var(--cyan);">19</div>
+        <div class="stat-label">Free Parameters</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" style="color: var(--gold);">246</div>
+        <div class="stat-label">Higgs VEV (GeV)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" style="color: var(--purple);">125</div>
+        <div class="stat-label">Higgs Mass (GeV)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" style="color: var(--orange);">173 TeV</div>
+        <div class="stat-label">Top Quark Mass</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" style="color: var(--green);">0.511</div>
+        <div class="stat-label">Electron Mass (MeV)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" style="color: var(--pink);">1/137</div>
+        <div class="stat-label">Fine Structure &alpha;</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="text-align: center; padding: 3rem 2rem; border-top: 1px solid rgba(79,195,247,0.2);">
+    <p style="color: #666; font-family: 'Space Mono', monospace; font-size: 0.85rem;">
+      "Physics is not about what things are, but about what things do. The Standard Model tells us how particles interact — the deepest description of nature we possess."
+    </p>
+    <p style="color: #4fc3f7; font-family: 'Orbitron', sans-serif; font-size: 0.8rem; margin-top: 1rem;">
+      Kevin's Physics Lab — Exploring the Fundamental
+    </p>
+  </footer>
+
+  <script>
+    // Progress bar
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      document.getElementById('progress').style.width = (winScroll / height * 100) + '%';
+    });
+
+    // Hero particle animation
+    const heroCanvas = document.getElementById('heroCanvas');
+    let particles = [];
+    let animationFrame;
+
+    function initParticles() {
+      for (let i = 0; i < 60; i++) {
+        particles.push({
+          x: Math.random() * 800,
+          y: Math.random() * 400,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          r: Math.random() * 3 + 1,
+          color: ['#4fc3f7', '#7c4dff', '#ffd54f', '#ff4081'][Math.floor(Math.random() * 4)]
+        });
+      }
+    }
+
+    function animateParticles() {
+      const svg = heroCanvas;
+      svg.innerHTML = '<defs><radialGradient id="particleGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:#4fc3f7;stop-opacity:1"/><stop offset="100%" style="stop-color:#4fc3f7;stop-opacity:0"/></radialGradient><filter id="glow"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > 800) p.vx *= -1;
+        if (p.y < 0 || p.y > 400) p.vy *= -1;
+
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', p.x);
+        circle.setAttribute('cy', p.y);
+        circle.setAttribute('r', p.r);
+        circle.setAttribute('fill', p.color);
+        circle.setAttribute('opacity', '0.7');
+        circle.setAttribute('filter', 'url(#glow)');
+        svg.appendChild(circle);
+
+        // Draw connections
+        particles.forEach(p2 => {
+          const dx = p.x - p2.x;
+          const dy = p.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 100 && dist > 20) {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', p.x);
+            line.setAttribute('y1', p.y);
+            line.setAttribute('x2', p2.x);
+            line.setAttribute('y2', p2.y);
+            line.setAttribute('stroke', p.color);
+            line.setAttribute('stroke-width', '0.5');
+            line.setAttribute('opacity', (1 - dist / 100) * 0.3);
+            svg.appendChild(line);
+          }
+        });
+      });
+
+      animationFrame = requestAnimationFrame(animateParticles);
+    }
+
+    initParticles();
+    animateParticles();
+
+    // Field wave animation
+    let fieldAnimating = false;
+
+    function animateField() {
+      if (fieldAnimating) return;
+      fieldAnimating = true;
+
+      const wave = document.getElementById('fieldWave');
+      const particle = document.getElementById('particleExc');
+      const antiparticle = document.getElementById('antiparticleExc');
+
+      let t = 0;
+      function drawWave() {
+        let d = 'M 50 200';
+        for (let x = 50; x <= 750; x += 5) {
+          const y = 200 + 80 * Math.sin(x * 0.02 + t * 0.05) * Math.exp(-x * 0.002);
+          d += ' L ' + x + ' ' + y;
+        }
+        wave.setAttribute('d', d);
+
+        // Show particle excitations
+        if (t > 30 && t < 80) {
+          particle.setAttribute('opacity', '1');
+          particle.setAttribute('transform', 'translate(350, 180)');
+        } else if (t >= 80 && t < 130) {
+          particle.setAttribute('opacity', '0');
+          antiparticle.setAttribute('opacity', '1');
+          antiparticle.setAttribute('transform', 'translate(450, 180)');
+        } else {
+          particle.setAttribute('opacity', '0');
+          antiparticle.setAttribute('opacity', '0');
+        }
+
+        t++;
+        if (t < 180) {
+          requestAnimationFrame(drawWave);
+        } else {
+          fieldAnimating = false;
+        }
+      }
+      drawWave();
+    }
+
+    function resetField() {
+      document.getElementById('fieldWave').setAttribute('d', '');
+      document.getElementById('particleExc').setAttribute('opacity', '0');
+      document.getElementById('antiparticleExc').setAttribute('opacity', '0');
+      fieldAnimating = false;
+    }
+
+    // Higgs animation
+    let higgsAnimating = false;
+
+    function animateHiggs() {
+      if (higgsAnimating) return;
+      higgsAnimating = true;
+
+      const potential = document.getElementById('potentialSurface');
+      const ball = document.getElementById('higgsBall');
+      const massInd = document.getElementById('massIndicator');
+
+      let t = 0;
+
+      function drawPotential() {
+        let d = 'M 50 100';
+        for (let x = 50; x <= 750; x += 5) {
+          const phi = (x - 400) / 50;
+          const v = 50 + phi * phi * 30 - phi * phi * phi * 2 + phi * phi * phi * phi * 0.1;
+          d += ' L ' + x + ' ' + (300 - v);
+        }
+        potential.setAttribute('d', d);
+
+        if (t < 60) {
+          // Ball at peak
+          ball.setAttribute('cx', 400);
+          ball.setAttribute('cy', 100);
+        } else if (t < 120) {
+          // Ball rolling down
+          const rollT = (t - 60) / 60;
+          const newX = 400 + rollT * 200;
+          ball.setAttribute('cx', newX);
+          ball.setAttribute('cy', 300 - (50 + Math.pow((rollT * 2), 2) * 30 - Math.pow((rollT * 2), 3) * 2 + Math.pow((rollT * 2), 4) * 0.1));
+        } else {
+          // Ball at minimum
+          ball.setAttribute('cx', 600);
+          ball.setAttribute('cy', 300);
+          massInd.setAttribute('opacity', '1');
+        }
+
+        t++;
+        if (t < 150) {
+          requestAnimationFrame(drawPotential);
+        } else {
+          higgsAnimating = false;
+        }
+      }
+      drawPotential();
+    }
+
+    function resetHiggs() {
+      document.getElementById('potentialSurface').setAttribute('d', '');
+      document.getElementById('higgsBall').setAttribute('cx', 400);
+      document.getElementById('higgsBall').setAttribute('cy', 100);
+      document.getElementById('massIndicator').setAttribute('opacity', '0');
+      higgsAnimating = false;
+    }
+
+    // Tab switching
+    function showParticleTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.getElementById('fermions-tab').style.display = 'none';
+      document.getElementById('bosons-tab').style.display = 'none';
+      document.getElementById('higgs-tab').style.display = 'none';
+      document.getElementById(tab + '-tab').style.display = 'block';
+    }
+
+    function showInteractionTab(tab) {
+      document.querySelectorAll('#interactions .tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.getElementById('em-tab').style.display = 'none';
+      document.getElementById('weak-tab').style.display = 'none';
+      document.getElementById('strong-tab').style.display = 'none';
+      document.getElementById(tab + '-tab-interaction').style.display = 'block';
+    }
+
+    // Particle detail functions (placeholder)
+    function showQuarkDetail(quark) {
+      alert('Quark detail: ' + quark.toUpperCase() + '\nSpin: 1/2\nColor charge: Yes\nWeak interaction: Yes');
+    }
+
+    function showLeptonDetail(lepton) {
+      alert('Lepton detail: ' + lepton + '\nSpin: 1/2\nColor charge: No\nWeak interaction: Yes');
+    }
+  </script>
+</body>
+</html>

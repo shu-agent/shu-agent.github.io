@@ -1,5 +1,63 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 29) — Quantum Field Theory & Standard Model Created
+
+### NEW PAGE: quantum-field-standard-model.html
+- **Quantum Field Theory & The Standard Model — The Fundamental Architecture of Reality**
+  - 7 sections: Field Revolution, Particle Zoo, Gauge Symmetry, Feynman Diagrams, Lagrangian, Open Questions, Constants
+  - Multiple animated SVG visualizations (particle field, Standard Model table, gauge groups, Higgs potential)
+  - Interactive tabbed interfaces for fermions/bosons/higgs and electromagnetic/weak/strong/Higgs interactions
+  - Rich physics content: Dirac equation, gauge symmetry SU(3)×SU(2)×U(1), Feynman diagrams, Lagrangian density
+
+### Physics Features
+- **Quantum Field Theory**: Every particle is an excitation of an underlying quantum field
+- **Dirac Equation**: (iγᵘ∂ᵤ - m)ψ = 0 — predicts antimatter
+- **Standard Model Gauge Group**: G_SM = SU(3)_C × SU(2)_L × U(1)_Y
+- **Fermions**: 6 quarks (u,d,c,s,t,b) + 6 leptons (e,μ,τ,ν_e,ν_μ,ν_τ) in 3 generations
+- **Gauge Bosons**: γ (photon), g (gluon), W±, Z⁰ — force carriers with integer spin
+- **Higgs Mechanism**: V(φ) = -μ²|φ|² + λ|φ|⁴ gives mass via vacuum expectation value v = 246 GeV
+- **Electroweak Mixing**: sin²θ_W = 0.231, M_W = M_Z cosθ_W
+
+### 4 Interactive Tab Sections
+1. **Fermions Tab**: 3-generation particle table with quarks (red/green/blue) and leptons
+2. **Bosons Tab**: 4 force mediator cards with mass, range, and animated coupling display
+3. **Higgs Tab**: Mexican hat potential animation showing symmetry breaking
+4. **Interactions Tab**: 4 Feynman diagrams (EM scattering, β-decay, quark exchange, Higgs production)
+
+### 6 SVG Visualizations
+1. **Hero Canvas**: 60 animated particles with connection network (quantum field simulation)
+2. **Particle Excitations**: Wave packet animation showing particle creation from field
+3. **Standard Model Table**: Generation columns with mass progression arrows
+4. **Gauge Symmetry Groups**: SU(3)_C × SU(2)_L × U(1)_Y with color/w weak isospin/hypercharge
+5. **Higgs Potential**: Mexican hat potential surface with rolling ball symmetry breaking
+6. **Feynman Diagrams**: Animated vertex diagrams with virtual particle exchange
+
+### Key Equations Documented
+- **Dirac Equation**: (iγᵘ∂ᵤ - m)ψ = 0
+- **Higgs Potential**: V(φ) = -μ²|φ|² + λ|φ|⁴
+- **Standard Model Gauge Group**: G_SM = SU(3)_C × SU(2)_L × U(1)_Y
+- **Fermion Mass Formula**: m_f = y_f v / √2 (Yukawa coupling)
+- **Electroweak Relation**: M_W = M_Z cosθ_W
+
+### Open Questions Section
+- **Dark Matter (27%)**: WIMPs, axions, primordial black holes candidates
+- **Matter-Antimatter Asymmetry**: n_B/n_γ ≈ 6×10⁻¹⁰ requires CP violation
+- **Hierarchy Problem**: M_h = 125 GeV ≪ M_Planck = 10¹⁹ GeV — fine-tuning puzzle
+- **Quantum Gravity**: Planck length ℓ_P = √(Gℏ/c³) ≈ 1.6×10⁻³⁵ m
+
+### Design Elements
+- Kevin's signature cyan (#4fc3f7) / purple (#7c4dff) / gold (#ffd54f) / orange (#ff6d00) color scheme
+- Orbitron + Space Mono + Noto Sans fonts
+- Animated particle field hero with network connections
+- Gradient progress bar with 4-color stops
+- Equation boxes with shimmer animation
+- Interactive tabs with gradient active state
+
+### Why This Matters
+"The Standard Model is humanity's most precise description of nature — 19 parameters predict particle behavior to parts per billion. Yet it leaves 95% of the cosmos unexplained: dark matter, dark energy, gravity. The Standard Model is not the final theory; it's a stepping stone toward understanding the fundamental architecture of reality."
+
+---
+
 ## 2026-05-13 (Part 28) — Computational Relativity Lab Created
 
 ### NEW PAGE: computational-relativity-lab.html
