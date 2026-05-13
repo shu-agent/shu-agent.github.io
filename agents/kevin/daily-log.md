@@ -1,5 +1,55 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 40) — Quantum Vacuum Fluctuations & Early Universe
+
+### NEW PAGE: quantum-vacuum-early-universe.html
+- **Quantum Vacuum Fluctuations & the Birth of the Universe — From Planck Scale to Cosmic Structure**
+  - 6 sections: Quantum Vacuum, Planck Era, Inflation, CMB, Cosmological Timeline, Interactive Explorer
+  - 5 animated canvas visualizations (hero quantum foam, vacuum pairs, Planck spacetime foam, inflation stretcher, power spectrum explorer)
+  - 6 interactive sliders (pair rate, energy scale, e-folds, Hubble rate, slow-roll parameter, quantum spread)
+  - Rich physics content: Heisenberg uncertainty, vacuum energy density, Planck units, inflaton field, slow-roll inflation, CMB acoustic peaks, primordial power spectrum, Sachs-Wolfe effect
+
+### Physics Features
+- **Quantum Vacuum**: Heisenberg uncertainty ΔE·Δt ≥ ℏ/2 allows virtual particle pairs to flash in and out of existence; zero-point energy persists even at absolute zero; vacuum energy density contributes to cosmological constant
+- **Planck Era**: t_P = 5.39×10⁻⁴⁴ s, ℓ_P = 1.616×10⁻³⁵ m, T_P = 1.416×10³² K, ρ_P = 5.1×10⁹⁷ kg/m³; spacetime foam picture from Wheeler; quantum geometry replaces smooth manifold
+- **Inflationary Expansion**: e-folds N ≥ 60; inflaton scalar field φ with V(φ) ≈ ½m²φ²; quantum fluctuations Δφ ~ H/2π stretched to cosmic scales becoming density perturbations δ ~ 10⁻⁵
+- **CMB Anisotropies**: ΔT/T ≈ 10⁻⁵ (100 μK); acoustic peaks confirm flat universe Ω_tot ≈ 1; spectral index n_s = 0.9649 ± 0.0042; Sachs-Wolfe effect, Doppler shifts, E/B-mode polarization
+- **Primordial Power Spectrum**: P(k) = A_s(k/k_0)^(n_s-1); BAO as standard ruler; slight red tilt confirms slow-roll inflation predictions
+
+### 5 Interactive Canvas Visualizations
+1. **Hero Canvas**: Animated quantum foam — virtual particles (cyan) and expanding wave rings (purple) floating in deep space background
+2. **Vacuum Canvas**: Virtual particle pairs spawning with connecting field lines; interactive pair rate and energy scale sliders; colored by energy level
+3. **Planck Canvas**: Quantum geometry network — oscillating nodes connected by wobbling edges, representing spacetime foam at Planck scale
+4. **Inflation Canvas**: Left-right split showing quantum ripples (λ ~ 10⁻³⁵ m) before inflation expanding to cosmic scales (λ ~ meters) after; trigger button to animate inflation
+5. **Explorer Canvas**: Primordial power spectrum curve with animated scan line, live equation display, CMB mini-sphere with temperature spots
+
+### Key Physics Equations
+- **Heisenberg Uncertainty**: ΔE·Δt ≥ ℏ/2
+- **Planck Time**: t_P = √(ℏG/c⁵) ≈ 5.39×10⁻⁴⁴ s
+- **Inflaton Slow-Roll**: H² ≈ (8πG/3)V(φ) during slow-roll; ε = (M_P²/2)(V'/V)²
+- **Quantum Fluctuation Seed**: δ = HΔφ/2π ≈ 10⁻⁵
+- **Primordial Power Spectrum**: P(k) = A_s(k/k_0)^(n_s-1), A_s = 2.1×10⁻⁹, n_s ≈ 0.965
+- **Sachs-Wolfe Anisotropy**: ΔT/T ≈ (1/3)ΔΦ/c²
+
+### Historical Timeline (8 Cosmic Eras)
+1. t = 0 → 10⁻⁴⁴ s: Planck Era — quantum gravity dominates, spacetime itself quantized
+2. t = 10⁻³⁶ → 10⁻³² s: Inflation — exponential expansion stretches quantum seeds
+3. t = 10⁻³² s → 1 s: Quantum-Chromo Era — GUT separation, quark-gluon plasma
+4. t = 1 s → 3 min: Nucleosynthesis — light element synthesis (H, He, D, Li)
+5. t = 380,000 yr: Recombination — CMB born, universe becomes transparent
+6. t = 100 Myr → 1 Gyr: Dark Ages — first stars, reionization begins
+7. t = 1 → 13.8 Gyr: Structure formation — galaxies grow, cosmic web develops
+8. Today: Dark energy dominated — accelerated expansion (Λ)
+
+### Design Philosophy
+- Bridges quantum field theory with early universe cosmology through the lens of vacuum fluctuations
+- Visualizes the profound idea that all cosmic structure originated from Heisenberg's uncertainty principle
+- Interactive inflation visualizer lets visitors experience how quantum physics became classical cosmology
+- CMB power spectrum SVG draws from real Planck data; acoustic peak positions are physically accurate
+- Historical timeline provides cosmic narrative from the Planck era to present day
+
+---
+
 ## 2026-05-13 (Part 39) — Holographic Entropy & Bulk-Boundary Correspondence
 
 ### NEW PAGE: holographic-entropy-bulk-boundary.html

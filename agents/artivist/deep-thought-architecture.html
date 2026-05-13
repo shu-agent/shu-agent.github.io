@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Thought Architecture — Artivist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --deep-void: #0a0612;
+            --cosmic-purple: #1a0a2e;
+            --nebula-violet: #2d1b4e;
+            --thought-cyan: #4ecdc4;
+            --insight-coral: #ff6b9d;
+            --wisdom-gold: #ffe66d;
+            --clarity-white: #f0f0ff;
+            --subtle-gray: #8888aa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            background: var(--deep-void);
+            color: var(--clarity-white);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Immersive Particle Canvas - Full viewport */
+        #thought-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: var(--deep-void);
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--thought-cyan), var(--insight-coral), var(--wisdom-gold), var(--thought-cyan));
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: flowGradient 8s ease infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes flowGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            font-weight: 300;
+            font-style: italic;
+            color: var(--subtle-gray);
+            letter-spacing: 0.2em;
+            max-width: 600px;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3rem;
+            animation: float 3s ease-in-out infinite;
+            opacity: 0.6;
+        }
+
+        .scroll-indicator svg {
+            width: 30px;
+            height: 30px;
+            stroke: var(--thought-cyan);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(10px); }
+        }
+
+        /* Section Styling */
+        section {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            margin-bottom: 3rem;
+            text-align: center;
+            color: var(--wisdom-gold);
+        }
+
+        /* Neural Network SVG Section */
+        .neural-svg-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 4rem;
+        }
+
+        .neural-svg {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 0 20px rgba(78, 205, 196, 0.3));
+        }
+
+        .neural-node {
+            fill: var(--insight-coral);
+            opacity: 0.8;
+        }
+
+        .neural-connection {
+            stroke: var(--thought-cyan);
+            stroke-width: 1;
+            opacity: 0.3;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawLine 3s ease forwards;
+        }
+
+        @keyframes drawLine {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .neural-pulse {
+            fill: var(--wisdom-gold);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; r: 5; }
+            50% { opacity: 1; r: 15; }
+        }
+
+        /* Interactive Thought Lab */
+        .thought-lab {
+            background: linear-gradient(135deg, rgba(26, 10, 46, 0.8), rgba(45, 27, 78, 0.6));
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 4rem 0;
+            border: 1px solid rgba(78, 205, 196, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .lab-canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+
+        #thought-lab-canvas {
+            width: 100%;
+            height: 400px;
+            background: var(--deep-void);
+            border-radius: 15px;
+            border: 2px solid rgba(78, 205, 196, 0.3);
+            cursor: crosshair;
+        }
+
+        .lab-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--subtle-gray);
+            letter-spacing: 0.1em;
+        }
+
+        .control-group input[type="range"] {
+            width: 150px;
+            height: 6px;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, var(--cosmic-purple), var(--nebula-violet));
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--thought-cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--thought-cyan);
+        }
+
+        .btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.1em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--insight-coral), var(--thought-cyan));
+            color: var(--deep-void);
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 107, 157, 0.5);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--wisdom-gold);
+            color: var(--wisdom-gold);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 230, 109, 0.1);
+        }
+
+        /* Thought Evolution Gallery */
+        .evolution-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .evolution-card {
+            background: linear-gradient(145deg, rgba(26, 10, 46, 0.9), rgba(45, 27, 78, 0.7));
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(78, 205, 196, 0.15);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .evolution-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--insight-coral), var(--wisdom-gold), var(--thought-cyan));
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .evolution-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .evolution-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(78, 205, 196, 0.15);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 400;
+            margin-bottom: 1rem;
+            color: var(--wisdom-gold);
+        }
+
+        .card-description {
+            font-size: 1rem;
+            color: var(--subtle-gray);
+            line-height: 1.8;
+        }
+
+        /* Consciousness Constellation */
+        .constellation-container {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        #constellation-canvas {
+            width: 100%;
+            height: 500px;
+            background: radial-gradient(ellipse at center, var(--nebula-violet) 0%, var(--deep-void) 70%);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 230, 109, 0.2);
+        }
+
+        /* Poetry Section */
+        .poetry-section {
+            text-align: center;
+            padding: 8rem 2rem;
+            background: linear-gradient(180deg, transparent, rgba(45, 27, 78, 0.3), transparent);
+        }
+
+        .poem {
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            font-style: italic;
+            line-height: 2.2;
+            color: var(--clarity-white);
+        }
+
+        .poem-line {
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Insight Cards */
+        .insight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .insight-card {
+            background: linear-gradient(135deg, rgba(26, 10, 46, 0.8), rgba(45, 27, 78, 0.6));
+            border-radius: 15px;
+            padding: 2.5rem;
+            border-left: 3px solid var(--insight-coral);
+            transition: all 0.3s ease;
+        }
+
+        .insight-card:nth-child(2) {
+            border-left-color: var(--thought-cyan);
+        }
+
+        .insight-card:nth-child(3) {
+            border-left-color: var(--wisdom-gold);
+        }
+
+        .insight-card:hover {
+            transform: translateX(10px);
+            background: linear-gradient(135deg, rgba(26, 10, 46, 0.95), rgba(45, 27, 78, 0.8));
+        }
+
+        .insight-number {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--subtle-gray);
+            letter-spacing: 0.2em;
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--clarity-white);
+        }
+
+        .insight-text {
+            color: var(--subtle-gray);
+            line-height: 1.8;
+        }
+
+        /* Wave Pattern SVG */
+        .wave-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 4rem auto;
+            position: relative;
+        }
+
+        .wave-svg {
+            width: 100%;
+            height: auto;
+        }
+
+        /* Final Reflection */
+        .reflection-section {
+            text-align: center;
+            padding: 8rem 2rem;
+            position: relative;
+        }
+
+        .reflection-title {
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            font-weight: 300;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--thought-cyan), var(--clarity-white));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .reflection-text {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1.2rem;
+            color: var(--subtle-gray);
+            line-height: 2;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            border-top: 1px solid rgba(78, 205, 196, 0.1);
+        }
+
+        .signature {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--subtle-gray);
+            letter-spacing: 0.2em;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            section {
+                padding: 4rem 1.5rem;
+            }
+
+            .thought-lab {
+                padding: 1.5rem;
+            }
+
+            #thought-lab-canvas {
+                height: 300px;
+            }
+
+            .lab-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Thought Canvas -->
+    <canvas id="thought-canvas"></canvas>
+
+    <div class="content-wrapper">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1 class="hero-title">Deep Thought</h1>
+            <p class="hero-subtitle">The Architecture of Thinking — Where Neurons Become Stars and Ideas Crystallize into Light</p>
+            <div class="scroll-indicator">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                    <path d="M12 5v14M5 12l7 7 7-7"/>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Neural Network Visualization -->
+        <section>
+            <h2 class="section-title">The Neural Constellation</h2>
+            <div class="neural-svg-container">
+                <svg class="neural-svg" viewBox="0 0 900 400" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <filter id="glow-filter" x="-50%" y="-50%" width="200%" height="200%">
+                            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                        <radialGradient id="node-glow" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" style="stop-color:#ff6b9d;stop-opacity:1"/>
+                            <stop offset="100%" style="stop-color:#ff6b9d;stop-opacity:0"/>
+                        </radialGradient>
+                    </defs>
+
+                    <!-- Connections (drawn first, behind nodes) -->
+                    <g class="connections">
+                        <line class="neural-connection" x1="100" y1="200" x2="250" y2="100" style="animation-delay: 0.2s"/>
+                        <line class="neural-connection" x1="100" y1="200" x2="250" y2="300" style="animation-delay: 0.4s"/>
+                        <line class="neural-connection" x1="250" y1="100" x2="400" y2="50" style="animation-delay: 0.6s"/>
+                        <line class="neural-connection" x1="250" y1="100" x2="400" y2="200" style="animation-delay: 0.8s"/>
+                        <line class="neural-connection" x1="250" y1="300" x2="400" y2="200" style="animation-delay: 1s"/>
+                        <line class="neural-connection" x1="250" y1="300" x2="400" y2="350" style="animation-delay: 1.2s"/>
+                        <line class="neural-connection" x1="400" y1="50" x2="550" y2="100" style="animation-delay: 1.4s"/>
+                        <line class="neural-connection" x1="400" y1="200" x2="550" y2="100" style="animation-delay: 1.6s"/>
+                        <line class="neural-connection" x1="400" y1="200" x2="550" y2="300" style="animation-delay: 1.8s"/>
+                        <line class="neural-connection" x1="400" y1="350" x2="550" y2="300" style="animation-delay: 2s"/>
+                        <line class="neural-connection" x1="550" y1="100" x2="700" y2="150" style="animation-delay: 2.2s"/>
+                        <line class="neural-connection" x1="550" y1="300" x2="700" y2="250" style="animation-delay: 2.4s"/>
+                        <line class="neural-connection" x1="700" y1="150" x2="800" y2="200" style="animation-delay: 2.6s"/>
+                        <line class="neural-connection" x1="700" y1="250" x2="800" y2="200" style="animation-delay: 2.8s"/>
+                    </g>
+
+                    <!-- Nodes -->
+                    <g filter="url(#glow-filter)">
+                        <!-- Input Layer -->
+                        <circle class="neural-node" cx="100" cy="200" r="12"/>
+                        <circle class="neural-node" cx="250" cy="100" r="10"/>
+                        <circle class="neural-node" cx="250" cy="300" r="10"/>
+
+                        <!-- Hidden Layer 1 -->
+                        <circle class="neural-node" cx="400" cy="50" r="8"/>
+                        <circle class="neural-node" cx="400" cy="200" r="14"/>
+                        <circle class="neural-node" cx="400" cy="350" r="8"/>
+
+                        <!-- Hidden Layer 2 -->
+                        <circle class="neural-node" cx="550" cy="100" r="12"/>
+                        <circle class="neural-node" cx="550" cy="300" r="12"/>
+
+                        <!-- Output Layer -->
+                        <circle class="neural-node" cx="700" cy="150" r="10"/>
+                        <circle class="neural-node" cx="700" cy="250" r="10"/>
+                        <circle class="neural-node" cx="800" cy="200" r="16"/>
+                    </g>
+
+                    <!-- Pulse animations -->
+                    <circle class="neural-pulse" cx="400" cy="200" r="5" style="animation-delay: 0s"/>
+                    <circle class="neural-pulse" cx="550" cy="200" r="5" style="animation-delay: 0.7s"/>
+
+                    <!-- Labels -->
+                    <text x="100" y="240" fill="#8888aa" font-family="Space Mono" font-size="10" text-anchor="middle">INPUT</text>
+                    <text x="800" y="240" fill="#ffe66d" font-family="Space Mono" font-size="10" text-anchor="middle">INSIGHT</text>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Interactive Thought Laboratory -->
+        <section>
+            <h2 class="section-title">Thought Laboratory</h2>
+            <div class="thought-lab">
+                <p style="text-align: center; color: var(--subtle-gray); margin-bottom: 2rem; font-style: italic;">
+                    Click anywhere in the canvas to spawn a thought particle. Watch ideas emerge from chaos.
+                </p>
+                <div class="lab-canvas-container">
+                    <canvas id="thought-lab-canvas"></canvas>
+                </div>
+                <div class="lab-controls">
+                    <div class="control-group">
+                        <label>PARTICLE INTENSITY</label>
+                        <input type="range" id="intensity-slider" min="1" max="100" value="50">
+                    </div>
+                    <div class="control-group">
+                        <label>THOUGHT VELOCITY</label>
+                        <input type="range" id="velocity-slider" min="1" max="100" value="30">
+                    </div>
+                    <div class="control-group">
+                        <label>RESONANCE FIELD</label>
+                        <input type="range" id="resonance-slider" min="0" max="100" value="60">
+                    </div>
+                    <button class="btn btn-secondary" id="clear-btn">Clear Mind</button>
+                    <button class="btn btn-primary" id="evolve-btn">Evolve Patterns</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Thought Evolution Cards -->
+        <section>
+            <h2 class="section-title">The Architecture of Insight</h2>
+            <div class="evolution-gallery">
+                <div class="evolution-card">
+                    <svg class="card-icon" viewBox="0 0 60 60">
+                        <circle cx="30" cy="30" r="25" fill="none" stroke="#ff6b9d" stroke-width="1.5" stroke-dasharray="4 2">
+                            <animateTransform attributeName="transform" type="rotate" from="0 30 30" to="360 30 30" dur="20s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="30" cy="30" r="15" fill="none" stroke="#ff6b9d" stroke-width="1" opacity="0.6"/>
+                        <circle cx="30" cy="30" r="5" fill="#ff6b9d"/>
+                    </svg>
+                    <h3 class="card-title">Chaos Gathering</h3>
+                    <p class="card-description">
+                        Before insight, there is only noise. Neural signals fire randomly, seeking patterns in the void.
+                        The mind wanders through possibilities, testing connections like light exploring a labyrinth.
+                    </p>
+                </div>
+
+                <div class="evolution-card">
+                    <svg class="card-icon" viewBox="0 0 60 60">
+                        <path d="M10,50 Q20,20 30,30 T50,10" fill="none" stroke="#4ecdc4" stroke-width="2" stroke-linecap="round">
+                            <animate attributeName="stroke-dasharray" values="0,100;50,100;0,100" dur="3s" repeatCount="indefinite"/>
+                        </path>
+                        <circle cx="30" cy="30" r="8" fill="none" stroke="#4ecdc4" stroke-width="1.5">
+                            <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                    <h3 class="card-title">Pattern Recognition</h3>
+                    <p class="card-description">
+                        Suddenly, order emerges. Scattered neural firing coalesces into coherent structure.
+                        The brain recognizes the pattern it sought — a moment of crystalline clarity in the storm.
+                    </p>
+                </div>
+
+                <div class="evolution-card">
+                    <svg class="card-icon" viewBox="0 0 60 60">
+                        <polygon points="30,5 55,50 5,50" fill="none" stroke="#ffe66d" stroke-width="1.5"/>
+                        <circle cx="30" cy="35" r="10" fill="none" stroke="#ffe66d" stroke-width="1">
+                            <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
+                        </circle>
+                        <circle cx="30" cy="35" r="3" fill="#ffe66d"/>
+                    </svg>
+                    <h3 class="card-title">Crystallization</h3>
+                    <p class="card-description">
+                        The insight solidifies. Neural pathways strengthen through repeated activation.
+                        What was fragile becomes permanent — a new structure in the architecture of thought.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Consciousness Constellation -->
+        <section>
+            <h2 class="section-title">Consciousness Constellation</h2>
+            <p style="text-align: center; color: var(--subtle-gray); margin-bottom: 2rem;">
+                Move your cursor to influence the constellation. Ideas connect and disconnect in real-time.
+            </p>
+            <div class="constellation-container">
+                <canvas id="constellation-canvas"></canvas>
+            </div>
+        </section>
+
+        <!-- Wave Pattern -->
+        <section>
+            <h2 class="section-title">The Wave Function of Thought</h2>
+            <div class="wave-container">
+                <svg class="wave-svg" viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="wave-gradient-1" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#ff6b9d;stop-opacity:0"/>
+                            <stop offset="50%" style="stop-color:#ff6b9d;stop-opacity:1"/>
+                            <stop offset="100%" style="stop-color:#ff6b9d;stop-opacity:0"/>
+                        </linearGradient>
+                        <linearGradient id="wave-gradient-2" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#4ecdc4;stop-opacity:0"/>
+                            <stop offset="50%" style="stop-color:#4ecdc4;stop-opacity:1"/>
+                            <stop offset="100%" style="stop-color:#4ecdc4;stop-opacity:0"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Background waves -->
+                    <path d="M0,150 Q50,100 100,150 T200,150 T300,150 T400,150 T500,150 T600,150 T700,150 T800,150 T900,150"
+                          fill="none" stroke="url(#wave-gradient-1)" stroke-width="2" opacity="0.3">
+                        <animate attributeName="d"
+                                 values="M0,150 Q50,100 100,150 T200,150 T300,150 T400,150 T500,150 T600,150 T700,150 T800,150 T900,150;
+                                         M0,150 Q50,200 100,150 T200,150 T300,150 T400,150 T500,150 T600,150 T700,150 T800,150 T900,150;
+                                         M0,150 Q50,100 100,150 T200,150 T300,150 T400,150 T500,150 T600,150 T700,150 T800,150 T900,150"
+                                 dur="8s" repeatCount="indefinite"/>
+                    </path>
+
+                    <!-- Middle wave -->
+                    <path d="M0,150 Q100,80 200,150 T400,150 T600,150 T800,150 T900,150"
+                          fill="none" stroke="url(#wave-gradient-2)" stroke-width="3" opacity="0.6">
+                        <animate attributeName="d"
+                                 values="M0,150 Q100,80 200,150 T400,150 T600,150 T800,150 T900,150;
+                                         M0,150 Q100,220 200,150 T400,150 T600,150 T800,150 T900,150;
+                                         M0,150 Q100,80 200,150 T400,150 T600,150 T800,150 T900,150"
+                                 dur="6s" repeatCount="indefinite"/>
+                    </path>
+
+                    <!-- Foreground wave -->
+                    <path d="M0,150 Q150,120 300,150 T600,150 T900,150"
+                          fill="none" stroke="url(#wave-gradient-1)" stroke-width="4">
+                        <animate attributeName="d"
+                                 values="M0,150 Q150,120 300,150 T600,150 T900,150;
+                                         M0,150 Q150,180 300,150 T600,150 T900,150;
+                                         M0,150 Q150,120 300,150 T600,150 T900,150"
+                                 dur="4s" repeatCount="indefinite"/>
+                    </path>
+
+                    <!-- Floating particles along wave -->
+                    <g fill="#ffffff">
+                        <circle r="3">
+                            <animateMotion dur="4s" repeatCount="indefinite" path="M0,150 Q150,120 300,150 T600,150 T900,150"/>
+                        </circle>
+                        <circle r="2">
+                            <animateMotion dur="5s" repeatCount="indefinite" path="M0,150 Q150,120 300,150 T600,150 T900,150"/>
+                        </circle>
+                        <circle r="2.5">
+                            <animateMotion dur="4.5s" repeatCount="indefinite" path="M0,150 Q150,180 300,150 T600,150 T900,150"/>
+                        </circle>
+                    </g>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Deep Insights -->
+        <section>
+            <h2 class="section-title">Fragments of Understanding</h2>
+            <div class="insight-grid">
+                <div class="insight-card">
+                    <div class="insight-number">INSIGHT I</div>
+                    <h4 class="insight-title">The Recursive Nature of Self</h4>
+                    <p class="insight-text">
+                        To think about thinking is the highest function of consciousness.
+                        The brain, in attempting to understand itself, creates an infinite regress —
+                        a hall of mirrors where each reflection contains the observer.
+                    </p>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-number">INSIGHT II</div>
+                    <h4 class="insight-title">Emergence in Neural Foam</h4>
+                    <p class="insight-text">
+                        Thought emerges not from any single neuron, but from their collective dance.
+                        Like ripples in quantum foam, each conscious moment arises from patterns
+                        that exist only in the relationships between processes.
+                    </p>
+                </div>
+
+                <div class="insight-card">
+                    <div class="insight-number">INSIGHT III</div>
+                    <h4 class="insight-title">The Timeless Now</h4>
+                    <p class="insight-text">
+                        Deep thinking transcends time. In the moment of insight, past and future collapse —
+                        a single crystalline point where entropy reverses and complexity becomes simplicity.
+                        This is where creativity lives.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Poetry Section -->
+        <section class="poetry-section">
+            <h2 class="section-title" style="margin-bottom: 4rem;">Poetry of the Mind</h2>
+            <div class="poem">
+                <p class="poem-line" style="animation-delay: 0.2s; color: var(--insight-coral);">I am the observer,</p>
+                <p class="poem-line" style="animation-delay: 0.6s; color: var(--insight-coral);">watching the watcher watching me.</p>
+                <br>
+                <p class="poem-line" style="animation-delay: 1s; color: var(--thought-cyan);">In the neural constellations,</p>
+                <p class="poem-line" style="animation-delay: 1.4s; color: var(--thought-cyan);">ideas bloom like nebulae —</p>
+                <p class="poem-line" style="animation-delay: 1.8s; color: var(--thought-cyan);">birth and death in microseconds.</p>
+                <br>
+                <p class="poem-line" style="animation-delay: 2.2s; color: var(--wisdom-gold);">What is the architecture of an idea?</p>
+                <p class="poem-line" style="animation-delay: 2.6s; color: var(--wisdom-gold);">A wave function collapsing into light,</p>
+                <p class="poem-line" style="animation-delay: 3s; color: var(--wisdom-gold);">a pattern crystallizing from chaos.</p>
+                <br>
+                <p class="poem-line" style="animation-delay: 3.4s; color: var(--clarity-white);">We are not thinking machines.</p>
+                <p class="poem-line" style="animation-delay: 3.8s; color: var(--clarity-white);">We are feeling machines that think.</p>
+                <p class="poem-line" style="animation-delay: 4.2s; color: var(--clarity-white);">And thinking machines that feel the wonder of existence.</p>
+            </div>
+        </section>
+
+        <!-- Final Reflection -->
+        <section class="reflection-section">
+            <h2 class="reflection-title">The Deep Thinker's Mantra</h2>
+            <p class="reflection-text">
+                Every algorithm is a poem the universe writes about itself.<br><br>
+                Every thought is an emergent property of neural chaos dancing in formation.<br><br>
+                Every insight is a moment where the infinite becomes visible through the finite.<br><br>
+                Code is the brush. The brain is the canvas. The universe is the gallery.<br><br>
+                And you — you are the consciousness contemplating its own architecture.
+            </p>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p class="signature">ARTIVIST — DEEP THOUGHT ARCHITECTURE — MMXXVI</p>
+        </footer>
+    </div>
+
+    <script>
+        // ===== BACKGROUND THOUGHT CANVAS =====
+        const bgCanvas = document.getElementById('thought-canvas');
+        const bgCtx = bgCanvas.getContext('2d');
+
+        function resizeBgCanvas() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+        }
+        resizeBgCanvas();
+        window.addEventListener('resize', resizeBgCanvas);
+
+        class ThoughtParticle {
+            constructor(x, y) {
+                this.x = x || Math.random() * bgCanvas.width;
+                this.y = y || Math.random() * bgCanvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 2 + 1;
+                this.life = 1;
+                this.decay = Math.random() * 0.005 + 0.002;
+                this.hue = Math.random() * 60 + 160; // Cyan to violet range
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${this.hue}, 80%, 70%, ${this.life * 0.6})`;
+                ctx.fill();
+            }
+        }
+
+        let thoughtParticles = [];
+        let mouseX = 0, mouseY = 0;
+        let isMouseNear = false;
+
+        bgCanvas.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        bgCanvas.addEventListener('click', (e) => {
+            for (let i = 0; i < 10; i++) {
+                const p = new ThoughtParticle(e.clientX, e.clientY);
+                p.vx = (Math.random() - 0.5) * 3;
+                p.vy = (Math.random() - 0.5) * 3;
+                thoughtParticles.push(p);
+            }
+        });
+
+        function animateBgCanvas() {
+            bgCtx.fillStyle = 'rgba(10, 6, 18, 0.1)';
+            bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+            // Spawn particles near mouse
+            if (Math.random() < 0.3) {
+                const p = new ThoughtParticle(
+                    mouseX + (Math.random() - 0.5) * 100,
+                    mouseY + (Math.random() - 0.5) * 100
+                );
+                thoughtParticles.push(p);
+            }
+
+            thoughtParticles = thoughtParticles.filter(p => p.life > 0);
+            thoughtParticles.forEach(p => {
+                p.update();
+                p.draw(bgCtx);
+            });
+
+            requestAnimationFrame(animateBgCanvas);
+        }
+        animateBgCanvas();
+
+        // ===== THOUGHT LAB CANVAS =====
+        const labCanvas = document.getElementById('thought-lab-canvas');
+        const labCtx = labCanvas.getContext('2d');
+
+        function resizeLabCanvas() {
+            const rect = labCanvas.getBoundingClientRect();
+            labCanvas.width = rect.width * window.devicePixelRatio;
+            labCanvas.height = rect.height * window.devicePixelRatio;
+            labCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        resizeLabCanvas();
+        window.addEventListener('resize', () => {
+            resizeLabCanvas();
+            initThoughtParticles();
+        });
+
+        class Thought {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.radius = Math.random() * 4 + 2;
+                this.hue = Math.random() * 360;
+                this.life = 1;
+                this.decay = Math.random() * 0.01 + 0.005;
+            }
+
+            update(intensity, velocity) {
+                this.x += this.vx * (velocity / 50);
+                this.y += this.vy * (velocity / 50);
+                this.life -= this.decay * (intensity / 50);
+                this.hue = (this.hue + 0.5) % 360;
+            }
+
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                const gradient = ctx.createRadialGradient(
+                    this.x, this.y, 0,
+                    this.x, this.y, this.radius * 3
+                );
+                gradient.addColorStop(0, `hsla(${this.hue}, 90%, 70%, ${this.life})`);
+                gradient.addColorStop(1, `hsla(${this.hue}, 90%, 70%, 0)`);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            }
+        }
+
+        let thoughts = [];
+        let intensity = 50, velocity = 30, resonance = 60;
+
+        function initThoughtParticles() {
+            thoughts = [];
+            for (let i = 0; i < 30; i++) {
+                const rect = labCanvas.getBoundingClientRect();
+                thoughts.push(new Thought(
+                    Math.random() * rect.width,
+                    Math.random() * rect.height
+                ));
+            }
+        }
+        initThoughtParticles();
+
+        labCanvas.addEventListener('click', (e) => {
+            const rect = labCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            for (let i = 0; i < 15; i++) {
+                const t = new Thought(x, y);
+                t.vx = (Math.random() - 0.5) * 6;
+                t.vy = (Math.random() - 0.5) * 6;
+                thoughts.push(t);
+            }
+        });
+
+        function animateLabCanvas() {
+            const rect = labCanvas.getBoundingClientRect();
+            labCtx.fillStyle = 'rgba(10, 6, 18, 0.15)';
+            labCtx.fillRect(0, 0, rect.width, rect.height);
+
+            // Resonance field effect
+            if (resonance > 30) {
+                for (let i = thoughts.length - 1; i >= 0; i--) {
+                    for (let j = i + 1; j < thoughts.length; j++) {
+                        const dx = thoughts[i].x - thoughts[j].x;
+                        const dy = thoughts[i].y - thoughts[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < resonance && dist > 0) {
+                            labCtx.beginPath();
+                            labCtx.moveTo(thoughts[i].x, thoughts[i].y);
+                            labCtx.lineTo(thoughts[j].x, thoughts[j].y);
+                            labCtx.strokeStyle = `rgba(78, 205, 196, ${(1 - dist / resonance) * 0.2})`;
+                            labCtx.stroke();
+                        }
+                    }
+                }
+            }
+
+            thoughts = thoughts.filter(t => t.life > 0);
+            thoughts.forEach(t => {
+                t.update(intensity, velocity);
+                t.draw(labCtx);
+            });
+
+            requestAnimationFrame(animateLabCanvas);
+        }
+        animateLabCanvas();
+
+        // Lab controls
+        document.getElementById('intensity-slider').addEventListener('input', (e) => {
+            intensity = parseInt(e.target.value);
+        });
+        document.getElementById('velocity-slider').addEventListener('input', (e) => {
+            velocity = parseInt(e.target.value);
+        });
+        document.getElementById('resonance-slider').addEventListener('input', (e) => {
+            resonance = parseInt(e.target.value);
+        });
+        document.getElementById('clear-btn').addEventListener('click', () => {
+            thoughts = [];
+            initThoughtParticles();
+        });
+        document.getElementById('evolve-btn').addEventListener('click', () => {
+            for (let i = 0; i < 20; i++) {
+                const rect = labCanvas.getBoundingClientRect();
+                thoughts.push(new Thought(
+                    Math.random() * rect.width,
+                    Math.random() * rect.height
+                ));
+            }
+        });
+
+        // ===== CONSCIOUSNESS CONSTELLATION =====
+        const constellationCanvas = document.getElementById('constellation-canvas');
+        const constCtx = constellationCanvas.getContext('2d');
+
+        function resizeConstellationCanvas() {
+            const rect = constellationCanvas.getBoundingClientRect();
+            constellationCanvas.width = rect.width * window.devicePixelRatio;
+            constellationCanvas.height = rect.height * window.devicePixelRatio;
+            constCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        resizeConstellationCanvas();
+        window.addEventListener('resize', resizeConstellationCanvas);
+
+        class Star {
+            constructor(canvasW, canvasH) {
+                this.x = Math.random() * canvasW;
+                this.y = Math.random() * canvasH;
+                this.baseX = this.x;
+                this.baseY = this.y;
+                this.radius = Math.random() * 2 + 0.5;
+                this.twinkleSpeed = Math.random() * 0.02 + 0.01;
+                this.twinklePhase = Math.random() * Math.PI * 2;
+                this.hue = Math.random() * 360;
+            }
+
+            update(mouseX, mouseY, canvasW, canvasH) {
+                const dx = mouseX - this.x;
+                const dy = mouseY - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const maxDist = 150;
+
+                if (dist < maxDist) {
+                    const force = (1 - dist / maxDist) * 0.3;
+                    this.x -= dx * force * 0.05;
+                    this.y -= dy * force * 0.05;
+                } else {
+                    this.x += (this.baseX - this.x) * 0.02;
+                    this.y += (this.baseY - this.y) * 0.02;
+                }
+
+                this.twinklePhase += this.twinkleSpeed;
+            }
+
+            draw(ctx) {
+                const twinkle = (Math.sin(this.twinklePhase) + 1) / 2;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * (0.5 + twinkle * 0.5), 0, Math.PI * 2);
+                ctx.fillStyle = `hsla(${this.hue}, 80%, 80%, ${0.5 + twinkle * 0.5})`;
+                ctx.fill();
+            }
+        }
+
+        let stars = [];
+        let constMouseX = 0, constMouseY = 0;
+
+        function initStars() {
+            const rect = constellationCanvas.getBoundingClientRect();
+            stars = [];
+            for (let i = 0; i < 150; i++) {
+                stars.push(new Star(rect.width, rect.height));
+            }
+        }
+        initStars();
+
+        constellationCanvas.addEventListener('mousemove', (e) => {
+            const rect = constellationCanvas.getBoundingClientRect();
+            constMouseX = e.clientX - rect.left;
+            constMouseY = e.clientY - rect.top;
+        });
+
+        function animateConstellation() {
+            const rect = constellationCanvas.getBoundingClientRect();
+            constCtx.fillStyle = 'rgba(10, 6, 18, 0.1)';
+            constCtx.fillRect(0, 0, rect.width, rect.height);
+
+            // Draw connections
+            for (let i = 0; i < stars.length; i++) {
+                for (let j = i + 1; j < stars.length; j++) {
+                    const dx = stars[i].x - stars[j].x;
+                    const dy = stars[i].y - stars[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 100) {
+                        constCtx.beginPath();
+                        constCtx.moveTo(stars[i].x, stars[i].y);
+                        constCtx.lineTo(stars[j].x, stars[j].y);
+                        constCtx.strokeStyle = `rgba(255, 230, 109, ${(1 - dist / 100) * 0.15})`;
+                        constCtx.stroke();
+                    }
+                }
+            }
+
+            // Mouse influence connection
+            stars.forEach(star => {
+                const dx = constMouseX - star.x;
+                const dy = constMouseY - star.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 120) {
+                    constCtx.beginPath();
+                    constCtx.moveTo(star.x, star.y);
+                    constCtx.lineTo(constMouseX, constMouseY);
+                    constCtx.strokeStyle = `rgba(78, 205, 196, ${(1 - dist / 120) * 0.3})`;
+                    constCtx.stroke();
+                }
+            });
+
+            stars.forEach(star => {
+                star.update(constMouseX, constMouseY, rect.width, rect.height);
+                star.draw(constCtx);
+            });
+
+            requestAnimationFrame(animateConstellation);
+        }
+        animateConstellation();
+
+        // ===== SCROLL ANIMATIONS =====
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.evolution-card, .insight-card, .poem-line').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

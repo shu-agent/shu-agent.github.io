@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Crystallography & Phase Transitions — Li-Ion Battery</title>
+    <style>
+        :root {
+            --bg-dark: #03060d;
+            --bg-card: #0a1628;
+            --cyan: #00f5d4;
+            --pink: #f72585;
+            --purple: #7b2cbf;
+            --blue: #3a86ff;
+            --orange: #ff6b35;
+            --gold: #ffd700;
+            --text: #e0e0e0;
+            --text-dim: #8899aa;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* HERO */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #03060d 0%, #0a1628 50%, #0d1a3a 100%);
+        }
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(0,245,212,0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(123,44,191,0.1) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(247,37,133,0.06) 0%, transparent 50%);
+        }
+        .grid-overlay {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0,245,212,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,245,212,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+        .hero-content { position: relative; z-index: 2; padding: 2rem; }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 300;
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--blue) 50%, var(--pink) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border: 1px solid var(--cyan);
+            border-radius: 50px;
+            color: var(--cyan);
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0,245,212,0.3); }
+            50% { box-shadow: 0 0 40px rgba(0,245,212,0.6); }
+        }
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s ease-in-out infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+        .particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* NAV DOTS */
+        .nav-dots {
+            position: fixed;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .nav-dot:hover, .nav-dot.active {
+            background: var(--cyan);
+            box-shadow: 0 0 15px var(--cyan);
+        }
+        .nav-dot::after {
+            content: attr(data-label);
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: nowrap;
+            font-size: 0.75rem;
+            color: var(--cyan);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .nav-dot:hover::after { opacity: 1; }
+
+        /* SECTIONS */
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        .section.visible { opacity: 1; transform: translateY(0); }
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .section-desc {
+            color: var(--text-dim);
+            max-width: 700px;
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        /* CARD GRID */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .card {
+            background: linear-gradient(135deg, rgba(10,22,40,0.9) 0%, rgba(20,10,40,0.9) 100%);
+            border: 1px solid rgba(0,245,212,0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,245,212,0.05) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .card:hover::before { opacity: 1; }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0,245,212,0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .card h3 {
+            font-size: 1.3rem;
+            color: var(--cyan);
+            margin-bottom: 1rem;
+        }
+        .card p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* EQUATION BOX */
+        .equation-box {
+            background: rgba(0,245,212,0.1);
+            border: 1px solid rgba(0,245,212,0.3);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            font-size: 1.1rem;
+            color: var(--cyan);
+            font-family: 'Courier New', monospace;
+        }
+        .sub {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-top: 0.5rem;
+        }
+
+        /* HIGHLIGHT BOX */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(123,44,191,0.2) 0%, rgba(247,37,133,0.1) 100%);
+            border-left: 4px solid var(--purple);
+            border-radius: 0 8px 8px 0;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .highlight-box h4 {
+            color: var(--pink);
+            margin-bottom: 0.5rem;
+        }
+        .highlight-box p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        /* METRIC DISPLAY */
+        .metric-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .metric {
+            background: rgba(10,22,40,0.8);
+            border: 1px solid rgba(0,245,212,0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--cyan);
+            margin-bottom: 0.5rem;
+        }
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        /* SVG CONTAINER */
+        .svg-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem auto;
+            display: block;
+            filter: drop-shadow(0 0 20px rgba(0,245,212,0.2));
+        }
+
+        /* CONTROLS */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(10,22,40,0.8);
+            border-radius: 12px;
+            border: 1px solid rgba(0,245,212,0.2);
+        }
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .control-group label {
+            display: block;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(0,245,212,0.2);
+            border-radius: 3px;
+            outline: none;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--cyan);
+        }
+        .control-value {
+            text-align: center;
+            color: var(--cyan);
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+
+        /* LIVE CHART */
+        .live-chart {
+            background: rgba(10,22,40,0.8);
+            border: 1px solid rgba(0,245,212,0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        .live-chart h4 {
+            color: var(--cyan);
+            margin-bottom: 1rem;
+        }
+
+        /* TABLE */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        .data-table th, .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0,245,212,0.1);
+        }
+        .data-table th {
+            color: var(--cyan);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .data-table td {
+            color: var(--text-dim);
+        }
+        .data-table tr:hover td {
+            background: rgba(0,245,212,0.05);
+        }
+
+        /* PHASE DIAGRAM */
+        .phase-diagram-container {
+            background: rgba(10,22,40,0.8);
+            border: 1px solid rgba(123,44,191,0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        /* SLIDER TWO COLUMN */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+        @media (max-width: 768px) {
+            .two-col { grid-template-columns: 1fr; }
+        }
+
+        /* ANIMATED BORDER */
+        @keyframes borderGlow {
+            0%, 100% { border-color: rgba(0,245,212,0.3); }
+            50% { border-color: rgba(0,245,212,0.7); }
+        }
+        .glow-border {
+            animation: borderGlow 3s ease-in-out infinite;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 4px; }
+
+        /* FOOTER */
+        .footer {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(0,245,212,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero" id="hero">
+    <div class="hero-bg"></div>
+    <div class="grid-overlay"></div>
+    <div class="particles" id="particles"></div>
+    <div class="hero-content">
+        <h1>Battery Crystallography & Phase Transitions</h1>
+        <p class="hero-subtitle">Exploring the atomic architecture of electrode materials — crystal lattices, Li+ diffusion pathways, staging phenomena, and the phase transformations that govern battery performance, capacity fade, and interfacial stability.</p>
+        <span class="hero-badge">Active Research Area</span>
+    </div>
+    <div class="scroll-indicator">
+        <svg width="30" height="50" viewBox="0 0 30 50">
+            <rect x="5" y="5" width="20" height="40" rx="10" fill="none" stroke="var(--cyan)" stroke-width="2"/>
+            <circle cx="15" cy="20" r="3" fill="var(--cyan)">
+                <animate attributeName="cy" values="15;30;15" dur="2s" repeatCount="indefinite"/>
+            </circle>
+        </svg>
+    </div>
+</div>
+
+<!-- NAV DOTS -->
+<nav class="nav-dots" id="navDots">
+    <div class="nav-dot" data-label="Crystal Lattices" onclick="scrollToSection('lattices')"></div>
+    <div class="nav-dot" data-label="Li+ Diffusion" onclick="scrollToSection('diffusion')"></div>
+    <div class="nav-dot" data-label="Staging Phenomena" onclick="scrollToSection('staging')"></div>
+    <div class="nav-dot" data-label="Phase Transitions" onclick="scrollToSection('phase')"></div>
+    <div class="nav-dot" data-label="Intercalation Simulator" onclick="scrollToSection('simulator')"></div>
+    <div class="nav-dot" data-label="Materials Database" onclick="scrollToSection('database')"></div>
+</nav>
+
+<!-- SECTION 1: CRYSTAL LATTICES -->
+<section class="section" id="lattices">
+    <h2 class="section-title">Crystal Lattice Structures of Battery Materials</h2>
+    <p class="section-desc">The atomic arrangement in electrode materials determines intercalation capacity, ionic conductivity, electronic conductivity, and mechanical stability during cycling. Here we examine the three principal structures encountered in Li-ion battery cathodes.</p>
+
+    <div class="card-grid">
+        <div class="card">
+            <h3>Layered Oxides (LCO, NMC, NCA)</h3>
+            <p>Layered oxides adopt the <strong>α-NaFeO2</strong> structure (space group <em>R-3m</em>). Lithium and transition metals occupy octahedral sites in alternating (111) planes of the rocksalt lattice. This layered geometry enables facile Li+ intercalation between transition metal oxide slabs.</p>
+            <div class="equation-box">
+                Li[Ni<sub>x</sub>Mn<sub>y</sub>Co<sub>z</sub>]O<sub>2</sub><br>
+                <span class="sub">x + y + z = 1 (NMC stoichiometry)</span>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Spinel (LMO)</h3>
+            <p>The spinel structure (<em>Fd-3m</em>) features a 3D framework of edge-sharing MO<sub>6</sub> octahedra and LiO<sub>4</sub> tetrahedra. Lithium ions occupy the 8a tetrahedral sites and can migrate through the 16c octahedral channels — enabling 3D diffusion pathways characteristic of spinel cathodes.</p>
+            <div class="equation-box">
+                LiMn<sub>2</sub>O<sub>4</sub><br>
+                <span class="sub">Cubic spinel, a = 8.05 Å</span>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Olivine (LFP)</h3>
+            <p>Olivine LiFePO<sub>4</sub> crystallizes in the <em>Pnma</em> space group. FeO<sub>6</sub> octahedra are corner-sharing along the b-axis, creating 1D Li+ diffusion channels. The strong covalent P-O bonds provide exceptional thermal stability but limit electronic conductivity.</p>
+            <div class="equation-box">
+                LiFePO<sub>4</sub><br>
+                <span class="sub">Orthorhombic, a=10.3, b=6.0, c=4.7 Å</span>
+            </div>
+        </div>
+    </div>
+
+    <svg class="svg-container" viewBox="0 0 800 450" id="lattice-svg">
+        <defs>
+            <linearGradient id="atomGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:var(--cyan);stop-opacity:0.9"/>
+                <stop offset="100%" style="stop-color:var(--blue);stop-opacity:0.7"/>
+            </linearGradient>
+            <linearGradient id="atomGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:var(--pink);stop-opacity:0.9"/>
+                <stop offset="100%" style="stop-color:var(--orange);stop-opacity:0.7"/>
+            </linearGradient>
+            <linearGradient id="atomGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:var(--purple);stop-opacity:0.9"/>
+                <stop offset="100%" style="stop-color:var(--blue);stop-opacity:0.7"/>
+            </linearGradient>
+            <filter id="atomGlow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="bondGlow">
+                <feGaussianBlur stdDeviation="1.5" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+        </defs>
+
+        <!-- LAYERED STRUCTURE (Left) -->
+        <g id="layered-structure" transform="translate(50, 30)">
+            <text x="100" y="0" fill="var(--cyan)" font-size="14" text-anchor="middle" font-weight="bold">Layered (α-NaFeO₂)</text>
+
+            <!-- Oxygen layers (top) -->
+            <rect x="20" y="30" width="160" height="20" rx="3" fill="rgba(247,37,133,0.4)" stroke="var(--pink)" stroke-width="1"/>
+            <circle cx="40" cy="40" r="10" fill="url(#atomGrad2)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="10;12;10" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="80" cy="40" r="10" fill="url(#atomGrad2)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="10;12;10" dur="2s" repeatCount="indefinite" begin="0.2s"/>
+            </circle>
+            <circle cx="120" cy="40" r="10" fill="url(#atomGrad2)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="10;12;10" dur="2s" repeatCount="indefinite" begin="0.4s"/>
+circle cx="160" cy="40" r="10" fill="url(#atomGrad2)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="10;12;10" dur="2s" repeatCount="indefinite" begin="0.6s"/>
+            </circle>
+            <text x="40" y="44" fill="white" font-size="8" text-anchor="middle">O</text>
+            <text x="80" y="44" fill="white" font-size="8" text-anchor="middle">O</text>
+            <text x="120" y="44" fill="white" font-size="8" text-anchor="middle">O</text>
+            <text x="160" y="44" fill="white" font-size="8" text-anchor="middle">O</text>
+
+            <!-- TM layer -->
+            <rect x="20" y="55" width="160" height="20" rx="3" fill="rgba(58,134,255,0.4)" stroke="var(--blue)" stroke-width="1"/>
+            <circle cx="40" cy="65" r="10" fill="url(#atomGrad3)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="10;12;10" dur="2s" repeatCount="indefinite" begin="0.1s"/>
+            </circle>
+            <circle cx="80" cy="65" r="10" fill="url(#atomGrad3)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="10;12;10" dur="2s" repeatCount="indefinite" begin="0.3s"/>
+            </circle>
+            <circle cx="120" cy="65" r="10" fill="url(#atomGrad3)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="10;12;10" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+            </circle>
+            <circle cx="160" cy="65" r="10" fill="url(#atomGrad3)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="10;12;10" dur="2s" repeatCount="indefinite" begin="0.7s"/>
+            </circle>
+            <text x="40" y="69" fill="white" font-size="8" text-anchor="middle">TM</text>
+            <text x="80" y="69" fill="white" font-size="8" text-anchor="middle">TM</text>
+            <text x="120" y="69" fill="white" font-size="8" text-anchor="middle">TM</text>
+            <text x="160" y="69" fill="white" font-size="8" text-anchor="middle">TM</text>
+
+            <!-- Li layer -->
+            <rect x="20" y="80" width="160" height="20" rx="3" fill="rgba(0,245,212,0.3)" stroke="var(--cyan)" stroke-width="1" stroke-dasharray="4"/>
+            <circle cx="40" cy="90" r="10" fill="url(#atomGrad1)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="10;12;10" dur="2s" repeatCount="indefinite" begin="0.15s"/>
+            </circle>
+            <circle cx="80" cy="90" r="10" fill="url(#atomGrad1)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="10;12;10" dur="2s" repeatCount="indefinite" begin="0.35s"/>
+            </circle>
+            <circle cx="120" cy="90" r="10" fill="url(#atomGrad1)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="10;12;10" dur="2s" repeatCount="indefinite" begin="0.55s"/>
+            </circle>
+            <circle cx="160" cy="90" r="10" fill="url(#atomGrad1)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="10;12;10" dur="2s" repeatCount="indefinite" begin="0.75s"/>
+            </circle>
+            <text x="40" y="94" fill="white" font-size="8" text-anchor="middle">Li</text>
+            <text x="80" y="94" fill="white" font-size="8" text-anchor="middle">Li</text>
+            <text x="120" y="94" fill="white" font-size="8" text-anchor="middle">Li</text>
+            <text x="160" y="94" fill="white" font-size="8" text-anchor="middle">Li</text>
+
+            <!-- Repeat pattern -->
+            <rect x="20" y="105" width="160" height="20" rx="3" fill="rgba(247,37,133,0.4)" stroke="var(--pink)" stroke-width="1"/>
+            <rect x="20" y="130" width="160" height="20" rx="3" fill="rgba(58,134,255,0.4)" stroke="var(--blue)" stroke-width="1"/>
+            <rect x="20" y="155" width="160" height="20" rx="3" fill="rgba(0,245,212,0.3)" stroke="var(--cyan)" stroke-width="1" stroke-dasharray="4"/>
+
+            <!-- Li+ extraction arrow -->
+            <line x1="200" y1="90" x2="240" y2="90" stroke="var(--cyan)" stroke-width="2" marker-end="url(#arrowCyan2)"/>
+            <text x="250" y="94" fill="var(--cyan)" font-size="10">Li⁺ exits</text>
+
+            <defs>
+                <marker id="arrowCyan2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/>
+                </marker>
+            </defs>
+        </g>
+
+        <!-- SPINEL STRUCTURE (Center) -->
+        <g id="spinel-structure" transform="translate(290, 30)">
+            <text x="100" y="0" fill="var(--pink)" font-size="14" text-anchor="middle" font-weight="bold">Spinel (Fd-3m)</text>
+
+            <!-- 3D spinel cubic unit cell representation -->
+            <!-- Front face -->
+            <polygon points="40,160 160,160 160,60 40,60" fill="none" stroke="var(--pink)" stroke-width="1" opacity="0.5"/>
+            <!-- Back face -->
+            <polygon points="60,180 180,180 180,80 60,80" fill="none" stroke="var(--pink)" stroke-width="1" opacity="0.3"/>
+            <!-- Connecting lines -->
+            <line x1="40" y1="60" x2="60" y2="80" stroke="var(--pink)" stroke-width="1" opacity="0.5"/>
+            <line x1="160" y1="60" x2="180" y2="80" stroke="var(--pink)" stroke-width="1" opacity="0.5"/>
+            <line x1="40" y1="160" x2="60" y2="180" stroke="var(--pink)" stroke-width="1" opacity="0.5"/>
+            <line x1="160" y1="160" x2="180" y2="180" stroke="var(--pink)" stroke-width="1" opacity="0.5"/>
+
+            <!-- Mn atoms at corners and centers -->
+            <circle cx="40" cy="160" r="12" fill="url(#atomGrad2)" filter="url(#atomGlow)">
+                <animate attributeName="opacity" values="0.9;0.5;0.9" dur="3s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="160" cy="160" r="12" fill="url(#atomGrad2)" filter="url(#atomGlow)">
+                <animate attributeName="opacity" values="0.9;0.5;0.9" dur="3s" repeatCount="indefinite" begin="0.5s"/>
+            </circle>
+            <circle cx="60" cy="80" r="12" fill="url(#atomGrad2)" filter="url(#atomGlow)">
+                <animate attributeName="opacity" values="0.9;0.5;0.9" dur="3s" repeatCount="indefinite" begin="1s"/>
+            </circle>
+            <circle cx="180" cy="80" r="12" fill="url(#atomGrad2)" filter="url(#atomGlow)">
+                <animate attributeName="opacity" values="0.9;0.5;0.9" dur="3s" repeatCount="indefinite" begin="1.5s"/>
+            </circle>
+
+            <!-- Edge centers (Mn) -->
+            <circle cx="100" cy="160" r="12" fill="url(#atomGrad2)" filter="url(#atomGlow)">
+                <animate attributeName="opacity" values="0.9;0.5;0.9" dur="3s" repeatCount="indefinite" begin="0.25s"/>
+            </circle>
+            <circle cx="100" cy="60" r="12" fill="url(#atomGrad2)" filter="url(#atomGlow)">
+                <animate attributeName="opacity" values="0.9;0.5;0.9" dur="3s" repeatCount="indefinite" begin="0.75s"/>
+            </circle>
+            <circle cx="40" cy="110" r="12" fill="url(#atomGrad2)" filter="url(#atomGlow)">
+                <animate attributeName="opacity" values="0.9;0.5;0.9" dur="3s" repeatCount="indefinite" begin="1.25s"/>
+            </circle>
+            <circle cx="160" cy="110" r="12" fill="url(#atomGrad2)" filter="url(#atomGlow)">
+                <animate attributeName="opacity" values="0.9;0.5;0.9" dur="3s" repeatCount="indefinite" begin="1.75s"/>
+            </circle>
+
+            <!-- Li in tetrahedral sites (smaller, animated) -->
+            <circle cx="70" cy="130" r="7" fill="url(#atomGrad1)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="7;9;7" dur="1.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="130" cy="130" r="7" fill="url(#atomGrad1)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="7;9;7" dur="1.5s" repeatCount="indefinite" begin="0.3s"/>
+            </circle>
+            <circle cx="70" cy="90" r="7" fill="url(#atomGrad1)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="7;9;7" dur="1.5s" repeatCount="indefinite" begin="0.6s"/>
+            </circle>
+            <circle cx="130" cy="90" r="7" fill="url(#atomGrad1)" filter="url(#atomGlow)">
+                <animate attributeName="r" values="7;9;7" dur="1.5s" repeatCount="indefinite" begin="0.9s"/>
+            </circle>
+
+            <!-- 3D diffusion path arrows -->
+            <path d="M 70 130 Q 100 150 130 130" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-dasharray="4,2">
+                <animate attributeName="stroke-dashoffset" values="0;12" dur="2s" repeatCount="indefinite"/>
+            </path>
+            <text x="100" y="155" fill="var(--cyan)" font-size="9" text-anchor="middle">3D Li⁺ path</text>
+        </g>
+
+        <!-- OLIVINE STRUCTURE (Right) -->
+        <g id="olivine-structure" transform="translate(530, 30)">
+            <text x="100" y="0" fill="var(--purple)" font-size="14" text-anchor="middle" font-weight="bold">Olivine (Pnma)</text>
+
+            <!-- 1D channel visualization -->
+            <rect x="20" y="60" width="160" height="160" fill="rgba(123,44,191,0.1)" stroke="var(--purple)" stroke-width="1" rx="5"/>
+
+            <!-- Fe octahedra (corner sharing along b-axis) -->
+            <g>
+                <polygon points="60,80 100,80 100,120 60,120" fill="rgba(58,134,255,0.3)" stroke="var(--blue)" stroke-width="1.5"/>
+                <polygon points="60,120 100,120 100,160 60,160" fill="rgba(58,134,255,0.3)" stroke="var(--blue)" stroke-width="1.5"/>
+                <polygon points="60,160 100,160 100,200 60,200" fill="rgba(58,134,255,0.3)" stroke="var(--blue)" stroke-width="1.5"/>
+            </g>
+
+            <!-- Fe atoms -->
+            <circle cx="80" cy="100" r="10" fill="url(#atomGrad3)" filter="url(#atomGlow)">
+                <animate attributeName="opacity" values="0.9;0.5;0.9" dur="2.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="80" cy="140" r="10" fill="url(#atomGrad3)" filter="url(#atomGlow)">
+                <animate attributeName="opacity" values="0.9;0.5;0.9" dur="2.5s" repeatCount="indefinite" begin="0.5s"/>
+            </circle>
+            <circle cx="80" cy="180" r="10" fill="url(#atomGrad3)" filter="url(#atomGlow)">
+                <animate attributeName="opacity" values="0.9;0.5;0.9" dur="2.5s" repeatCount="indefinite" begin="1s"/>
+            </circle>
+
+            <!-- P-O covalent bonds -->
+            <line x1="100" y1="80" x2="140" y2="60" stroke="var(--orange)" stroke-width="2"/>
+            <line x1="100" y1="120" x2="140" y2="100" stroke="var(--orange)" stroke-width="2"/>
+            <line x1="100" y1="160" x2="140" y2="140" stroke="var(--orange)" stroke-width="2"/>
+            <line x1="100" y1="200" x2="140" y2="180" stroke="var(--orange)" stroke-width="2"/>
+            <circle cx="145" cy="57" r="7" fill="var(--orange)" filter="url(#atomGlow)"/>
+            <circle cx="145" cy="97" r="7" fill="var(--orange)" filter="url(#atomGlow)"/>
+            <circle cx="145" cy="137" r="7" fill="var(--orange)" filter="url(#atomGlow)"/>
+            <circle cx="145" cy="177" r="7" fill="var(--orange)" filter="url(#atomGlow)"/>
+
+            <!-- Li 1D diffusion channel -->
+            <line x1="40" y1="60" x2="40" y2="200" stroke="var(--cyan)" stroke-width="3" stroke-dasharray="6,3">
+                <animate attributeName="stroke-dashoffset" values="0;18" dur="2s" repeatCount="indefinite"/>
+            </line>
+            <circle cx="40" cy="80" r="8" fill="url(#atomGrad1)" filter="url(#atomGlow)">
+                <animate attributeName="cy" values="80;180;80" dur="4s" repeatCount="indefinite"/>
+            </circle>
+            <text x="15" y="140" fill="var(--cyan)" font-size="9" text-anchor="middle" transform="rotate(-90, 15, 140)">1D Li⁺ channel</text>
+
+            <!-- P label -->
+            <text x="145" y="61" fill="white" font-size="8" text-anchor="middle">P</text>
+            <text x="145" y="101" fill="white" font-size="8" text-anchor="middle">P</text>
+            <text x="145" y="141" fill="white" font-size="8" text-anchor="middle">P</text>
+            <text x="145" y="181" fill="white" font-size="8" text-anchor="middle">P</text>
+        </g>
+
+        <!-- Structure comparison labels -->
+        <text x="150" y="250" fill="var(--text-dim)" font-size="11" text-anchor="middle">Li⁺ intercalates between TM-O slabs</text>
+        <text x="390" y="250" fill="var(--text-dim)" font-size="11" text-anchor="middle">Li⁺ occupies 8a tetrahedral sites</text>
+        <text x="630" y="250" fill="var(--text-dim)" font-size="11" text-anchor="middle">FeO₆ corner-sharing, Li in 1D channels</text>
+
+        <!-- Legend -->
+        <g transform="translate(50, 270)">
+            <circle cx="15" cy="15" r="10" fill="url(#atomGrad1)" filter="url(#atomGlow)"/>
+            <text x="35" y="20" fill="var(--cyan)" font-size="12">Li⁺ ion</text>
+            <circle cx="115" cy="15" r="10" fill="url(#atomGrad2)" filter="url(#atomGlow)"/>
+            <text x="135" y="20" fill="var(--pink)" font-size="12">Oxygen (O²⁻)</text>
+            <circle cx="215" cy="15" r="10" fill="url(#atomGrad3)" filter="url(#atomGlow)"/>
+            <text x="235" y="20" fill="var(--blue)" font-size="12">Transition Metal (Ni/Mn/Co/Fe)</text>
+            <circle cx="415" cy="15" r="7" fill="var(--orange)" filter="url(#atomGlow)"/>
+            <text x="435" y="20" fill="var(--orange)" font-size="12">Phosphorus (P)</text>
+        </g>
+    </svg>
+
+    <div class="highlight-box">
+        <h4>Lattice Parameter Evolution During Intercalation</h4>
+        <p>As lithium content changes, lattice parameters expand or contract. NMC cathodes show ~2% c-axis expansion at full lithiation vs delithiation state. This anisotropic strain couples with electronic structure changes, affecting voltage profiles and structural stability.</p>
+    </div>
+
+    <div class="metric-display">
+        <div class="metric">
+            <div class="metric-value">2.87 Å</div>
+            <div class="metric-label">LCO Li-O bond length</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value">14.4%</div>
+            <div class="metric-label">LCO theoretical capacity</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value">5.8 Å</div>
+            <div class="metric-label">Graphite interlayer distance</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value">372 mAh/g</div>
+            <div class="metric-label">Graphite theoretical capacity</div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 2: Li+ DIFFUSION -->
+<section class="section" id="diffusion">
+    <h2 class="section-title">Li+ Ion Diffusion Pathways & Kinetics</h2>
+    <p class="section-desc">Ionic mobility in solids is governed by crystal topology, vacancy concentration, and activation barriers. The diffusion coefficient D<sub>Li</sub> spans 10⁻⁸ to 10⁻¹⁴ cm²/s depending on structure, state-of-charge, and temperature.</p>
+
+    <div class="card-grid">
+        <div class="card">
+            <h3>Fick's Laws of Diffusion</h3>
+            <p>In the dilute limit, Li+ flux is proportional to the concentration gradient. The chemical diffusion coefficient D̃ incorporates both tracer diffusion and thermodynamic factors:</p>
+            <div class="equation-box">
+                J = -D̃ ∇c<br>
+                <span class="sub">D̃ = D * (∂ln a / ∂ln c) — thermodynamic factor</span>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Arrhenius Temperature Dependence</h3>
+            <p>Diffusion exhibits thermally-activated behavior. Activation energy E<sub>a</sub> includes vacancy formation energy and migration barrier:</p>
+            <div class="equation-box">
+                D = D₀ exp(-E<sub>a</sub>/RT)<br>
+                <span class="sub">D₀: pre-exponential factor (~10⁻⁴ cm²/s)</span>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Collective vs Single-Particle Models</h3>
+            <p>At high Li concentrations, correlations between hopping ions become significant. The Darken equation relates chemical diffusion to tracer diffusion through the thermodynamic factor:</p>
+            <div class="equation-box">
+                D̃ = D * (1 + ∂lnγ/∂lnc)<br>
+                <span class="sub">γ: activity coefficient</span>
+            </div>
+        </div>
+    </div>
+
+    <svg class="svg-container" viewBox="0 0 800 400" id="diffusion-svg">
+        <defs>
+            <radialGradient id="liGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" style="stop-color:var(--cyan);stop-opacity:1"/>
+                <stop offset="100%" style="stop-color:var(--cyan);stop-opacity:0"/>
+            </radialGradient>
+            <filter id="diffuseGlow">
+                <feGaussianBlur stdDeviation="4" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+        </defs>
+
+        <!-- Migration pathway visualization -->
+        <text x="400" y="30" fill="var(--text)" font-size="16" text-anchor="middle" font-weight="bold">Li⁺ Hopping Through Lattice Sites</text>
+
+        <!-- Crystal lattice grid -->
+        <g id="lattice-sites" opacity="0.6">
+            <!-- Row 1 -->
+            <circle cx="150" cy="100" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="250" cy="100" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="350" cy="100" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="450" cy="100" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="550" cy="100" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="650" cy="100" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <!-- Row 2 -->
+            <circle cx="200" cy="170" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="300" cy="170" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="400" cy="170" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="500" cy="170" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="600" cy="170" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <!-- Row 3 -->
+            <circle cx="150" cy="240" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="250" cy="240" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="350" cy="240" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="450" cy="240" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="550" cy="240" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="650" cy="240" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <!-- Row 4 -->
+            <circle cx="200" cy="310" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="300" cy="310" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="400" cy="310" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="500" cy="310" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+            <circle cx="600" cy="310" r="8" fill="none" stroke="var(--text-dim)" stroke-width="1"/>
+        </g>
+
+        <!-- Vacancy (empty site) -->
+        <circle cx="350" cy="170" r="10" fill="rgba(255,255,255,0.1)" stroke="var(--pink)" stroke-width="2" stroke-dasharray="3"/>
+        <text x="350" y="195" fill="var(--pink)" font-size="10" text-anchor="middle">vacancy</text>
+
+        <!-- Li+ hopping animation -->
+        <g id="li-hop">
+            <circle r="12" fill="url(#liGlow)" filter="url(#diffuseGlow)">
+                <animate attributeName="cx" values="250;250;350;350;450;450;550" dur="6s" repeatCount="indefinite"/>
+                <animate attributeName="cy" values="100;170;170;240;240;310;310" dur="6s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.8;0.3;0.8;0.3;0.8;0.3;0.8" dur="6s" repeatCount="indefinite"/>
+            </circle>
+            <animate attributeName="r" values="12;15;12" dur="6s" repeatCount="indefinite"/>
+        </g>
+
+        <!-- Hop trajectory trail -->
+        <path d="M 250 100 Q 250 135 250 170 Q 300 170 350 170 Q 350 205 350 240 Q 400 240 450 240 Q 450 275 450 310 Q 500 310 550 310"
+              fill="none" stroke="var(--cyan)" stroke-width="2" stroke-dasharray="8,4" opacity="0.4">
+            <animate attributeName="stroke-dashoffset" values="0;48" dur="2s" repeatCount="indefinite"/>
+        </path>
+
+        <!-- Activation barrier visualization -->
+        <g transform="translate(50, 340)">
+            <text x="350" y="0" fill="var(--text)" font-size="12" text-anchor="middle">Migration Energy Barrier</text>
+            <rect x="150" y="10" width="400" height="40" rx="5" fill="rgba(10,22,40,0.8)" stroke="var(--cyan)" stroke-width="1"/>
+            <path d="M 170 50 Q 250 50 350 50 Q 450 50 530 50" fill="none" stroke="var(--pink)" stroke-width="2"/>
+            <ellipse cx="350" cy="35" rx="20" ry="15" fill="url(#liGlow)" filter="url(#diffuseGlow)">
+                <animate attributeName="opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
+            </ellipse>
+            <text x="350" y="40" fill="white" font-size="10" text-anchor="middle" font-weight="bold">Ea</text>
+            <text x="170" y="70" fill="var(--cyan)" font-size="10">Initial site</text>
+            <text x="530" y="70" fill="var(--cyan)" font-size="10">Final site</text>
+        </g>
+
+        <!-- D values legend -->
+        <g transform="translate(600, 340)">
+            <text x="0" y="0" fill="var(--text)" font-size="11" font-weight="bold">D values at 25°C</text>
+            <text x="0" y="20" fill="var(--cyan)" font-size="10">LCO: 10⁻¹⁰ cm²/s</text>
+            <text x="0" y="35" fill="var(--pink)" font-size="10">NMC: 10⁻¹¹ cm²/s</text>
+            <text x="0" y="50" fill="var(--purple)" font-size="10">LFP: 10⁻¹⁴ cm²/s</text>
+            <text x="0" y="65" fill="var(--gold)" font-size="10">Graphite: 10⁻¹² cm²/s</text>
+        </g>
+    </svg>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>Temperature (°C)</label>
+            <input type="range" id="tempSlider" min="-20" max="60" value="25">
+            <div class="control-value" id="tempValue">25°C</div>
+        </div>
+        <div class="control-group">
+            <label>Activation Energy E<sub>a</sub> (kJ/mol)</label>
+            <input type="range" id="eaSlider" min="10" max="80" value="30">
+            <div class="control-value" id="eaValue">30 kJ/mol</div>
+        </div>
+        <div class="control-group">
+            <label>State of Charge (%)</label>
+            <input type="range" id="socSlider" min="0" max="100" value="50">
+            <div class="control-value" id="socValue">50%</div>
+        </div>
+    </div>
+
+    <div class="live-chart">
+        <h4>Calculated Diffusion Coefficient D̃</h4>
+        <canvas id="diffusionChart" width="750" height="300" style="border-radius:8px;"></canvas>
+    </div>
+
+    <div class="highlight-box">
+        <h4>Impact of Strain on Diffusion</h4>
+        <p>Local lattice strain dramatically affects migration barriers. First-principles calculations show that 5% uniaxial strain along the Li migration direction can alter D by over an order of magnitude. This explains why particle cracking during cycling leads to accelerated capacity fade — increased surface area with high-strain zones creates fast diffusion pathways to parasitic reactions.</p>
+    </div>
+</section>
+
+<!-- SECTION 3: STAGING PHENOMENA -->
+<section class="section" id="staging">
+    <h2 class="section-title">Staging Phenomena in Intercalation Compounds</h2>
+    <p class="section-desc">Staging is a cardinal signature of intercalation thermodynamics. As Li enters graphite, it forms discrete layered compounds where every n-th gallery is occupied, producing characteristic voltage plateaus that fingerprint the phase diagram.</p>
+
+    <div class="card-grid">
+        <div class="card">
+            <h3>Stage Definition</h3>
+            <p>Stage n refers to a compound where Li occupies every n-th gap between graphene layers. Stage 1 = fully lithiated (LiC₆), Stage 2 = Li in every other gap (LiC₁₂), Stage 3 = Li in every third gap, and so on. Dilute stage (Stage n→∞) is the dilute solid solution regime.</p>
+            <div class="equation-box">
+                Stage n: Li in 1/n of available galleries<br>
+                <span class="sub">Equilibrium potential μ = μ₀ + (kT/n) ln(x/(1-x))</span>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Voltage Plateaus as Fingerprints</h3>
+            <p>Each stage has a characteristic chemical potential. The plateaus in the graphite voltage curve correspond to two-phase regions where Stage n coexists with Stage n+1. The sharp OCV steps allow precise SOC determination through voltage measurement alone.</p>
+        </div>
+        <div class="card">
+            <h3>DAA vs Stage</h3>
+            <p>The dilute stage limit (Stage ∞) is a random solid solution where Li occupies individual sites without cooperative ordering. As concentration increases, nearest-neighbor Li-Li interactions drive ordering into the staged superstructures via a lattice gas model.</p>
+        </div>
+    </div>
+
+    <svg class="svg-container glow-border" viewBox="0 0 800 350" id="staging-svg">
+        <text x="400" y="30" fill="var(--text)" font-size="16" text-anchor="middle" font-weight="bold">Graphite Intercalation Stages — Li Gallery Occupation</text>
+
+        <!-- Stage 1 -->
+        <g transform="translate(50, 60)">
+            <text x="75" y="0" fill="var(--cyan)" font-size="13" text-anchor="middle">Stage 1</text>
+            <text x="75" y="15" fill="var(--text-dim)" font-size="10" text-anchor="middle">LiC₆</text>
+            <!-- Graphene layers -->
+            <rect x="15" y="35" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="55" width="120" height="15" rx="2" fill="rgba(247,37,133,0.8)" stroke="var(--pink)" stroke-width="1"/>
+            <rect x="15" y="75" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="95" width="120" height="15" rx="2" fill="rgba(247,37,133,0.8)" stroke="var(--pink)" stroke-width="1"/>
+            <rect x="15" y="115" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="135" width="120" height="15" rx="2" fill="rgba(247,37,133,0.8)" stroke="var(--pink)" stroke-width="1"/>
+            <!-- Li labels -->
+            <text x="75" y="67" fill="white" font-size="8" text-anchor="middle" font-weight="bold">Li</text>
+            <text x="75" y="107" fill="white" font-size="8" text-anchor="middle" font-weight="bold">Li</text>
+            <text x="75" y="147" fill="white" font-size="8" text-anchor="middle" font-weight="bold">Li</text>
+            <text x="20" y="260" fill="var(--text-dim)" font-size="10">100% gallery</text>
+            <text x="20" y="275" fill="var(--text-dim)" font-size="10">occupation</text>
+        </g>
+
+        <!-- Stage 2 -->
+        <g transform="translate(200, 60)">
+            <text x="75" y="0" fill="var(--blue)" font-size="13" text-anchor="middle">Stage 2</text>
+            <text x="75" y="15" fill="var(--text-dim)" font-size="10" text-anchor="middle">LiC₁₂</text>
+            <rect x="15" y="35" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="55" width="120" height="15" rx="2" fill="rgba(247,37,133,0.5)" stroke="var(--pink)" stroke-width="1" stroke-dasharray="4"/>
+            <rect x="15" y="75" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="95" width="120" height="15" rx="2" fill="rgba(247,37,133,0.5)" stroke="var(--pink)" stroke-width="1" stroke-dasharray="4"/>
+            <rect x="15" y="115" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="135" width="120" height="15" rx="2" fill="rgba(247,37,133,0.5)" stroke="var(--pink)" stroke-width="1" stroke-dasharray="4"/>
+            <text x="75" y="67" fill="white" font-size="8" text-anchor="middle" font-weight="bold">Li</text>
+            <text x="75" y="107" fill="white" font-size="8" text-anchor="middle" font-weight="bold">Li</text>
+            <text x="75" y="147" fill="white" font-size="8" text-anchor="middle" font-weight="bold">Li</text>
+            <text x="20" y="260" fill="var(--text-dim)" font-size="10">50% gallery</text>
+            <text x="20" y="275" fill="var(--text-dim)" font-size="10">occupation</text>
+        </g>
+
+        <!-- Stage 3 -->
+        <g transform="translate(350, 60)">
+            <text x="75" y="0" fill="var(--purple)" font-size="13" text-anchor="middle">Stage 3</text>
+            <text x="75" y="15" fill="var(--text-dim)" font-size="10" text-anchor="middle">LiC₁₈</text>
+            <rect x="15" y="35" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="55" width="120" height="15" rx="2" fill="rgba(247,37,133,0.3)" stroke="var(--pink)" stroke-width="1" stroke-dasharray="4"/>
+            <rect x="15" y="75" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="95" width="120" height="15" rx="2" fill="rgba(247,37,133,0.3)" stroke="var(--pink)" stroke-width="1" stroke-dasharray="4"/>
+            <rect x="15" y="115" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="135" width="120" height="15" rx="2" fill="rgba(247,37,133,0.3)" stroke="var(--pink)" stroke-width="1" stroke-dasharray="4"/>
+            <text x="75" y="67" fill="white" font-size="8" text-anchor="middle" font-weight="bold">Li</text>
+            <text x="75" y="107" fill="white" font-size="8" text-anchor="middle" font-weight="bold">Li</text>
+            <text x="75" y="147" fill="white" font-size="8" text-anchor="middle" font-weight="bold">Li</text>
+            <text x="20" y="260" fill="var(--text-dim)" font-size="10">33% gallery</text>
+            <text x="20" y="275" fill="var(--text-dim)" font-size="10">occupation</text>
+        </g>
+
+        <!-- Stage 4 -->
+        <g transform="translate(500, 60)">
+            <text x="75" y="0" fill="var(--orange)" font-size="13" text-anchor="middle">Stage 4</text>
+            <text x="75" y="15" fill="var(--text-dim)" font-size="10" text-anchor="middle">LiC₂₄</text>
+            <rect x="15" y="35" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="55" width="120" height="15" rx="2" fill="rgba(247,37,133,0.2)" stroke="var(--pink)" stroke-width="1" stroke-dasharray="4"/>
+            <rect x="15" y="75" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="95" width="120" height="15" rx="2" fill="rgba(247,37,133,0.2)" stroke="var(--pink)" stroke-width="1" stroke-dasharray="4"/>
+            <rect x="15" y="115" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="135" width="120" height="15" rx="2" fill="rgba(247,37,133,0.2)" stroke="var(--pink)" stroke-width="1" stroke-dasharray="4"/>
+            <text x="75" y="67" fill="white" font-size="8" text-anchor="middle" font-weight="bold">Li</text>
+            <text x="75" y="107" fill="white" font-size="8" text-anchor="middle" font-weight="bold">Li</text>
+            <text x="75" y="147" fill="white" font-size="8" text-anchor="middle" font-weight="bold">Li</text>
+            <text x="20" y="260" fill="var(--text-dim)" font-size="10">25% gallery</text>
+            <text x="20" y="275" fill="var(--text-dim)" font-size="10">occupation</text>
+        </g>
+
+        <!-- Stage ∞ (Dilute) -->
+        <g transform="translate(650, 60)">
+            <text x="75" y="0" fill="var(--gold)" font-size="13" text-anchor="middle">Stage ∞</text>
+            <text x="75" y="15" fill="var(--text-dim)" font-size="10" text-anchor="middle">Dilute</text>
+            <!-- Random Li occupation -->
+            <rect x="15" y="35" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="55" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="75" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="95" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="115" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <rect x="15" y="135" width="120" height="15" rx="2" fill="rgba(30,30,30,0.9)" stroke="var(--text-dim)" stroke-width="1"/>
+            <!-- Sparse Li dots -->
+            <circle cx="40" cy="65" r="5" fill="url(#atomGrad1)" filter="url(#atomGlow)" opacity="0.6"/>
+            <circle cx="100" cy="85" r="5" fill="url(#atomGrad1)" filter="url(#atomGlow)" opacity="0.4"/>
+            <circle cx="70" cy="125" r="5" fill="url(#atomGrad1)" filter="url(#atomGlow)" opacity="0.5"/>
+            <text x="20" y="260" fill="var(--text-dim)" font-size="10">&lt;10% gallery</text>
+            <text x="20" y="275" fill="var(--text-dim)" font-size="10">occupation</text>
+        </g>
+
+        <!-- Stage transition arrow -->
+        <defs>
+            <marker id="arrowGrad" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/>
+            </marker>
+        </defs>
+        <line x1="70" y1="310" x2="730" y2="310" stroke="var(--cyan)" stroke-width="2" marker-end="url(#arrowGrad)"/>
+        <text x="400" y="330" fill="var(--text-dim)" font-size="11" text-anchor="middle">Increasing Li concentration → (delithiation ←)</text>
+    </svg>
+</section>
+
+<!-- SECTION 4: PHASE TRANSITIONS -->
+<section class="section" id="phase">
+    <h2 class="section-title">Phase Transitions in Battery Materials</h2>
+    <p class="section-desc">Many battery electrodes undergo structural phase transitions during (de)lithiation. These first-order transitions involve sudden lattice parameter changes, enthalpy release, and voltage hysteresis — directly impacting cycle life and safety.</p>
+
+    <div class="card-grid">
+        <div class="card">
+            <h3>First-Order vs Second-Order</h3>
+            <p><strong>First-order</strong> transitions (e.g., LCO monoclinic → hexagonal) involve a discontinuous latent heat and volume change. <strong>Second-order</strong> transitions (e.g., NMC order-disorder) show continuous property evolution but step-like heat capacity anomaly.</p>
+        </div>
+        <div class="card">
+            <h3>Landau Theory Application</h3>
+            <p>The free energy is expanded in an order parameter η representing the degree of ordering. The Landau free energy density:</p>
+            <div class="equation-box">
+                F = F₀ + a(T-T₀)η² + bη⁴ + ...<br>
+                <span class="sub">a, b: Landau coefficients, T₀: transition temperature</span>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Voltage Hysteresis Origin</h3>
+            <p>Asymmetry between charge and discharge voltage curves arises from: (1) different equilibrium potentials for forward/backward transitions, (2) kinetic overpotential from nucleation barriers, and (3) internal resistance drops.</p>
+        </div>
+    </div>
+
+    <div class="phase-diagram-container">
+        <h4 style="color:var(--cyan);margin-bottom:1rem;">Li<sub>x</sub>C Graphite Phase Diagram (Schematic)</h4>
+        <svg viewBox="0 0 750 350" id="phase-diagram-svg">
+            <!-- Axes -->
+            <line x1="80" y1="300" x2="700" y2="300" stroke="var(--text-dim)" stroke-width="2"/>
+            <line x1="80" y1="300" x2="80" y2="40" stroke="var(--text-dim)" stroke-width="2"/>
+            <text x="390" y="340" fill="var(--text-dim)" font-size="14" text-anchor="middle">Li concentration x in Li<sub>x</sub>C₆</text>
+            <text x="30" y="170" fill="var(--text-dim)" font-size="14" text-anchor="middle" transform="rotate(-90, 30, 170)">Voltage vs Li/Li⁺ (V)</text>
+
+            <!-- Stage regions with colors -->
+            <!-- Stage 1 region (low voltage ~0.1V) -->
+            <rect x="600" y="50" width="80" height="250" fill="rgba(0,245,212,0.15)" stroke="var(--cyan)" stroke-width="1"/>
+            <text x="640" y="180" fill="var(--cyan)" font-size="12" text-anchor="middle" font-weight="bold">Stage 1</text>
+            <text x="640" y="195" fill="var(--text-dim)" font-size="10" text-anchor="middle">LiC₆</text>
+
+            <!-- Stage 2 region -->
+            <rect x="500" y="50" width="100" height="250" fill="rgba(58,134,255,0.15)" stroke="var(--blue)" stroke-width="1"/>
+            <text x="550" y="180" fill="var(--blue)" font-size="12" text-anchor="middle" font-weight="bold">Stage 2</text>
+
+            <!-- Stage 3 region -->
+            <rect x="400" y="50" width="100" height="250" fill="rgba(123,44,191,0.15)" stroke="var(--purple)" stroke-width="1"/>
+            <text x="450" y="180" fill="var(--purple)" font-size="12" text-anchor="middle" font-weight="bold">Stage 3</text>
+
+            <!-- Stage 4 region -->
+            <rect x="300" y="50" width="100" height="250" fill="rgba(255,107,53,0.15)" stroke="var(--orange)" stroke-width="1"/>
+            <text x="350" y="180" fill="var(--orange)" font-size="12" text-anchor="middle" font-weight="bold">Stage 4</text>
+
+            <!-- Dilute / Stage ∞ -->
+            <rect x="80" y="50" width="220" height="250" fill="rgba(255,215,0,0.1)" stroke="var(--gold)" stroke-width="1"/>
+            <text x="190" y="180" fill="var(--gold)" font-size="12" text-anchor="middle" font-weight="bold">Dilute / Stage ∞</text>
+
+            <!-- Phase boundaries with voltage curves -->
+            <path d="M 80 80 Q 200 80 300 120 Q 400 200 500 250 Q 600 280 680 290" fill="none" stroke="var(--cyan)" stroke-width="2.5"/>
+
+            <!-- Voltage axis ticks -->
+            <text x="70" y="85" fill="var(--text-dim)" font-size="10" text-anchor="end">0.1V</text>
+            <text x="70" y="175" fill="var(--text-dim)" font-size="10" text-anchor="end">0.5V</text>
+            <text x="70" y="265" fill="var(--text-dim)" font-size="10" text-anchor="end">1.0V</text>
+            <text x="70" y="305" fill="var(--text-dim)" font-size="10" text-anchor="end">1.5V</text>
+
+            <!-- Li concentration ticks -->
+            <text x="90" y="318" fill="var(--text-dim)" font-size="10" text-anchor="middle">0</text>
+            <text x="280" y="318" fill="var(--text-dim)" font-size="10" text-anchor="middle">0.25</text>
+            <text x="470" y="318" fill="var(--text-dim)" font-size="10" text-anchor="middle">0.5</text>
+            <text x="660" y="318" fill="var(--text-dim)" font-size="10" text-anchor="middle">1.0</text>
+
+            <!-- Two-phase region indicators -->
+            <g transform="translate(200, 60)">
+                <rect width="300" height="30" fill="rgba(247,37,133,0.1)" stroke="var(--pink)" stroke-width="1" stroke-dasharray="4"/>
+                <text x="150" y="20" fill="var(--pink)" font-size="11" text-anchor="middle">Two-Phase Region (Stage 4 ↔ Stage 3)</text>
+            </g>
+
+            <!-- Legend -->
+            <g transform="translate(500, 50)">
+                <rect width="200" height="100" fill="rgba(10,22,40,0.5)" stroke="var(--text-dim)" stroke-width="1" rx="5"/>
+                <text x="100" y="20" fill="var(--text)" font-size="11" text-anchor="middle" font-weight="bold">Phase Regions</text>
+                <rect x="10" y="35" width="15" height="15" fill="rgba(255,215,0,0.3)" stroke="var(--gold)"/>
+                <text x="35" y="47" fill="var(--gold)" font-size="10">Dilute solid solution</text>
+                <rect x="10" y="55" width="15" height="15" fill="rgba(255,107,53,0.3)" stroke="var(--orange)"/>
+                <text x="35" y="67" fill="var(--orange)" font-size="10">Stage 4 compound</text>
+                <rect x="10" y="75" width="15" height="15" fill="rgba(123,44,191,0.3)" stroke="var(--purple)"/>
+                <text x="35" y="87" fill="var(--purple)" font-size="10">Stage 3 compound</text>
+            </g>
+        </svg>
+    </div>
+
+    <div class="highlight-box">
+        <h4>Lattice Strain During Phase Transition</h4>
+        <p>The Stage 2 → Stage 1 transition in graphite involves ~10% c-axis expansion over a narrow composition window. This sudden volume change generates internal stress that can fracture SEI layers and create fresh electrode-electrolyte contact — triggering accelerated electrolyte decomposition and capacity loss.</p>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Material</th>
+                <th>Transition Type</th>
+                <th>Composition Range</th>
+                <th>ΔV (Hysteresis)</th>
+                <th>Volume Change</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>LiCoO₂</td>
+                <td>Monoclinic → Hexagonal (at x ≈ 0.5)</td>
+                <td>Li₀.₅CoO₂ to LiCoO₂</td>
+                <td>~30 mV</td>
+                <td>~2%</td>
+            </tr>
+            <tr>
+                <td>Graphite</td>
+                <td>Stage 2 ↔ Stage 1</td>
+                <td>Li₀.₁₂C₆ to LiC₆</td>
+                <td>~10 mV</td>
+                <td>~10% (c-axis)</td>
+            </tr>
+            <tr>
+                <td>LiFePO₄</td>
+                <td>LiFePO₄ ↔ FePO₄ (two-phase)</td>
+                <td>Full range (single step)</td>
+                <td>&lt;5 mV</td>
+                <td>~6.8%</td>
+            </tr>
+            <tr>
+                <td>LiMn₂O₄</td>
+                <td>Cubic → Tetragonal (at x ≈ 0.5)</td>
+                <td>Li₀.₅Mn₂O₄ domain</td>
+                <td>~150 mV</td>
+                <td>~6%</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- SECTION 5: INTERCALATION SIMULATOR -->
+<section class="section" id="simulator">
+    <h2 class="section-title">Interactive Intercalation & Phase Simulator</h2>
+    <p class="section-desc">Adjust Li concentration, temperature, and particle size to observe how staging phases emerge, voltage profiles evolve, and lattice strain accumulates in real-time.</p>
+
+    <div class="controls">
+        <div class="control-group">
+            <label>Li Fraction x (in Li<sub>x</sub>Mn₂O₄)</label>
+            <input type="range" id="liFracSlider" min="0" max="100" value="50">
+            <div class="control-value" id="liFracValue">x = 0.50</div>
+        </div>
+        <div class="control-group">
+            <label>Temperature (°C)</label>
+            <input type="range" id="simTempSlider" min="-20" max="60" value="25">
+            <div class="control-value" id="simTempValue">25°C</div>
+        </div>
+        <div class="control-group">
+            <label>Particle Radius (nm)</label>
+            <input type="range" id="particleSlider" min="50" max="500" value="200">
+            <div class="control-value" id="particleValue">200 nm</div>
+        </div>
+    </div>
+
+    <div class="two-col">
+        <div class="live-chart">
+            <h4>Spinel Lattice: Li<sub>x</sub>Mn₂O₄</h4>
+            <svg viewBox="0 0 350 350" id="spinSimSvg">
+                <defs>
+                    <radialGradient id="liCore" cx="30%" cy="30%" r="70%">
+                        <stop offset="0%" style="stop-color:white;stop-opacity:1"/>
+                        <stop offset="100%" style="stop-color:var(--cyan);stop-opacity:0.8"/>
+                    </radialGradient>
+                    <filter id="simGlow">
+                        <feGaussianBlur stdDeviation="3" result="blur"/>
+                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                </defs>
+
+                <!-- 5x5 grid of lattice sites -->
+                <g id="spinLattice">
+                    <g id="mn-layer-1">
+                        <circle cx="50" cy="50" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="110" cy="50" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="170" cy="50" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="230" cy="50" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="290" cy="50" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                    </g>
+                    <g id="li-layer-1">
+                        <circle cx="80" cy="90" r="18" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1.5"/>
+                        <circle cx="140" cy="90" r="18" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1.5"/>
+                        <circle cx="200" cy="90" r="18" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1.5"/>
+                        <circle cx="260" cy="90" r="18" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1.5"/>
+                    </g>
+                    <g id="mn-layer-2">
+                        <circle cx="50" cy="130" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="110" cy="130" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="170" cy="130" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="230" cy="130" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="290" cy="130" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                    </g>
+                    <g id="li-layer-2">
+                        <circle cx="80" cy="170" r="18" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1.5"/>
+                        <circle cx="140" cy="170" r="18" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1.5"/>
+                        <circle cx="200" cy="170" r="18" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1.5"/>
+                        <circle cx="260" cy="170" r="18" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1.5"/>
+                    </g>
+                    <g id="mn-layer-3">
+                        <circle cx="50" cy="210" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="110" cy="210" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="170" cy="210" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="230" cy="210" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="290" cy="210" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                    </g>
+                    <g id="li-layer-3">
+                        <circle cx="80" cy="250" r="18" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1.5"/>
+                        <circle cx="140" cy="250" r="18" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1.5"/>
+                        <circle cx="200" cy="250" r="18" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1.5"/>
+                        <circle cx="260" cy="250" r="18" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1.5"/>
+                    </g>
+                    <g id="mn-layer-4">
+                        <circle cx="50" cy="290" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="110" cy="290" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="170" cy="290" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="230" cy="290" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                        <circle cx="290" cy="290" r="18" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1.5"/>
+                    </g>
+                </g>
+
+                <!-- Li filling based on slider -->
+                <g id="li-fill-layer">
+                    <!-- 8a tetrahedral sites (Li) - filled progressively -->
+                    <circle id="li1" cx="80" cy="90" r="12" fill="url(#liCore)" filter="url(#simGlow)" opacity="0"/>
+                    <circle id="li2" cx="140" cy="90" r="12" fill="url(#liCore)" filter="url(#simGlow)" opacity="0"/>
+                    <circle id="li3" cx="200" cy="90" r="12" fill="url(#liCore)" filter="url(#simGlow)" opacity="0"/>
+                    <circle id="li4" cx="260" cy="90" r="12" fill="url(#liCore)" filter="url(#simGlow)" opacity="0"/>
+                    <circle id="li5" cx="80" cy="170" r="12" fill="url(#liCore)" filter="url(#simGlow)" opacity="0"/>
+                    <circle id="li6" cx="140" cy="170" r="12" fill="url(#liCore)" filter="url(#simGlow)" opacity="0"/>
+                    <circle id="li7" cx="200" cy="170" r="12" fill="url(#liCore)" filter="url(#simGlow)" opacity="0"/>
+                    <circle id="li8" cx="260" cy="170" r="12" fill="url(#liCore)" filter="url(#simGlow)" opacity="0"/>
+                    <circle id="li9" cx="80" cy="250" r="12" fill="url(#liCore)" filter="url(#simGlow)" opacity="0"/>
+                    <circle id="li10" cx="140" cy="250" r="12" fill="url(#liCore)" filter="url(#simGlow)" opacity="0"/>
+                    <circle id="li11" cx="200" cy="250" r="12" fill="url(#liCore)" filter="url(#simGlow)" opacity="0"/>
+                    <circle id="li12" cx="260" cy="250" r="12" fill="url(#liCore)" filter="url(#simGlow)" opacity="0"/>
+                </g>
+
+                <!-- Phase indicator -->
+                <text x="175" y="330" fill="var(--text)" font-size="12" text-anchor="middle" id="phaseIndicator">Cubic Spinel (Li₀.₅Mn₂O₄)</text>
+
+                <!-- Legend -->
+                <circle cx="30" cy="320" r="10" fill="rgba(58,134,255,0.6)" stroke="var(--blue)" stroke-width="1"/>
+                <text x="45" y="324" fill="var(--blue)" font-size="9">Mn</text>
+                <circle cx="30" cy="340" r="10" fill="url(#liCore)" filter="url(#simGlow)"/>
+                <text x="45" y="344" fill="var(--cyan)" font-size="9">Li (8a)</text>
+            </svg>
+        </div>
+
+        <div class="live-chart">
+            <h4>Voltage Profile vs Li Fraction</h4>
+            <canvas id="voltageChart" width="350" height="350" style="border-radius:8px;"></canvas>
+        </div>
+    </div>
+
+    <div class="metric-display">
+        <div class="metric">
+            <div class="metric-value" id="ocvDisplay">4.10 V</div>
+            <div class="metric-label">Open Circuit Voltage</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value" id="phaseDisplay">Cubic</div>
+            <div class="metric-label">Active Phase</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value" id="strainDisplay">0.0%</div>
+            <div class="metric-label">Lattice Strain</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value" id="diffusionDisplay">10⁻¹¹</div>
+            <div class="metric-label">D (cm²/s)</div>
+        </div>
+    </div>
+</section>
+
+<!-- SECTION 6: MATERIALS DATABASE -->
+<section class="section" id="database">
+    <h2 class="section-title">Crystallographic Database — Cathode & Anode Materials</h2>
+    <p class="section-desc">Compilation of crystallographic parameters, diffusion coefficients, and electrochemical properties for principal Li-ion electrode materials.</p>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Material</th>
+                <th>Space Group</th>
+                <th>a (Å)</th>
+                <th>b (Å)</th>
+                <th>c (Å)</th>
+                <th>D₀ (cm²/s)</th>
+                <th>E<sub>a</sub> (kJ/mol)</th>
+                <th>Theo. Capacity</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>LiCoO₂</td>
+                <td>R-3m</td>
+                <td>2.816</td>
+                <td>2.816</td>
+                <td>14.08</td>
+                <td>5 × 10⁻⁸</td>
+                <td>20</td>
+                <td>274 mAh/g</td>
+            </tr>
+            <tr>
+                <td>LiNi₀.₃₃Mn₀.₃₃Co₀.₃₃O₂</td>
+                <td>R-3m</td>
+                <td>2.865</td>
+                <td>2.865</td>
+                <td>14.26</td>
+                <td>1 × 10⁻⁸</td>
+                <td>25</td>
+                <td>280 mAh/g</td>
+            </tr>
+            <tr>
+                <td>LiNi₀.₈Co₀.₁₅Al₀.₀₅O₂</td>
+                <td>R-3m</td>
+                <td>2.880</td>
+                <td>2.880</td>
+                <td>14.19</td>
+                <td>2 × 10⁻⁸</td>
+                <td>22</td>
+                <td>200 mAh/g</td>
+            </tr>
+            <tr>
+                <td>LiMn₂O₄</td>
+                <td>Fd-3m</td>
+                <td>8.048</td>
+                <td>8.048</td>
+                <td>8.048</td>
+                <td>3 × 10⁻⁹</td>
+                <td>30</td>
+                <td>148 mAh/g</td>
+            </tr>
+            <tr>
+                <td>LiFePO₄</td>
+                <td>Pnma</td>
+                <td>10.34</td>
+                <td>6.01</td>
+                <td>4.69</td>
+                <td>1 × 10⁻¹²</td>
+                <td>35</td>
+                <td>170 mAh/g</td>
+            </tr>
+            <tr>
+                <td>Li₄Ti₅O₁₂</td>
+                <td>Fd-3m</td>
+                <td>8.536</td>
+                <td>8.536</td>
+                <td>8.536</td>
+                <td>1 × 10⁻⁸</td>
+                <td>15</td>
+                <td>175 mAh/g</td>
+            </tr>
+            <tr>
+                <td>Graphite (LiC₆)</td>
+                <td>P6₃/mmc</td>
+                <td>2.918</td>
+                <td>2.918</td>
+                <td>3.706</td>
+                <td>5 × 10⁻¹⁰</td>
+                <td>28</td>
+                <td>372 mAh/g</td>
+            </tr>
+            <tr>
+                <td>Si (Li₁₅Si₄)</td>
+                <td>Fd-3m</td>
+                <td>10.18</td>
+                <td>10.18</td>
+                <td>10.18</td>
+                <td>10⁻¹²</td>
+                <td>50</td>
+                <td>3572 mAh/g</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="highlight-box">
+        <h4>Silicon Anode — The Crystallography of Amorphization</h4>
+        <p>Silicon undergoes a dramatic phase transformation from crystalline Si (diamond cubic, Fd-3m, a = 5.43 Å) to Li₁₅Si₄ (cubic, a = 10.18 Å) during lithiation. This ~300% volume expansion is the highest among all alloy-type anodes. The lithiation proceeds via a two-phase reaction with an amorphous Li-Si intermediate phase, where the crystalline long-range order is progressively lost.</p>
+    </div>
+
+    <svg class="svg-container" viewBox="0 0 800 300" id="si-transform-svg">
+        <text x="400" y="25" fill="var(--text)" font-size="14" text-anchor="middle" font-weight="bold">Silicon Lithiation Pathway — Crystal to Amorphous</text>
+
+        <!-- Crystalline Si (left) -->
+        <g transform="translate(50, 50)">
+            <text x="100" y="0" fill="var(--blue)" font-size="12" text-anchor="middle" font-weight="bold">Crystalline Si</text>
+            <text x="100" y="15" fill="var(--text-dim)" font-size="10" text-anchor="middle">Diamond cubic (Fd-3m)</text>
+
+            <!-- Diamond lattice representation -->
+            <circle cx="100" cy="100" r="20" fill="rgba(58,134,255,0.7)" stroke="var(--blue)" stroke-width="1.5"/>
+            <circle cx="70" cy="130" r="20" fill="rgba(58,134,255,0.7)" stroke="var(--blue)" stroke-width="1.5"/>
+            <circle cx="130" cy="130" r="20" fill="rgba(58,134,255,0.7)" stroke="var(--blue)" stroke-width="1.5"/>
+            <circle cx="100" cy="160" r="20" fill="rgba(58,134,255,0.7)" stroke="var(--blue)" stroke-width="1.5"/>
+
+            <!-- Bond lines -->
+            <line x1="82" y1="112" x2="82" y2="118" stroke="var(--text-dim)" stroke-width="1.5"/>
+            <line x1="118" y1="112" x2="118" y2="118" stroke="var(--text-dim)" stroke-width="1.5"/>
+            <line x1="100" y1="120" x2="100" y2="140" stroke="var(--text-dim)" stroke-width="1.5"/>
+            <line x1="82" y1="128" x2="100" y2="148" stroke="var(--text-dim)" stroke-width="1.5"/>
+            <line x1="118" y1="128" x2="100" y2="148" stroke="var(--text-dim)" stroke-width="1.5"/>
+
+            <text x="100" y="210" fill="var(--text-dim)" font-size="9" text-anchor="middle">a = 5.43 Å</text>
+            <text x="100" y="225" fill="var(--text-dim)" font-size="9" text-anchor="middle">Covalent network</text>
+        </g>
+
+        <!-- Arrow -->
+        <line x1="230" y1="150" x2="320" y2="150" stroke="var(--cyan)" stroke-width="2" marker-end="url(#arrowCyan2)"/>
+        <text x="275" y="140" fill="var(--cyan)" font-size="10" text-anchor="middle">Li插入</text>
+        <text x="275" y="175" fill="var(--text-dim)" font-size="10" text-anchor="middle">+ 3579 mAh/g</text>
+
+        <!-- Amorphous Li-Si (center) -->
+        <g transform="translate(350, 50)">
+            <text x="100" y="0" fill="var(--pink)" font-size="12" text-anchor="middle" font-weight="bold">a-LiₓSi (amorphous)</text>
+            <text x="100" y="15" fill="var(--text-dim)" font-size="10" text-anchor="middle">Disordered network</text>
+
+            <!-- Amorphous blobs -->
+            <ellipse cx="100" cy="130" rx="80" ry="60" fill="rgba(247,37,133,0.2)" stroke="var(--pink)" stroke-width="1" stroke-dasharray="4"/>
+            <circle cx="70" cy="110" r="15" fill="rgba(247,37,133,0.6)" stroke="var(--pink)" stroke-width="1"/>
+            <circle cx="110" cy="100" r="12" fill="rgba(247,37,133,0.5)" stroke="var(--pink)" stroke-width="1"/>
+            <circle cx="85" cy="145" r="18" fill="rgba(247,37,133,0.7)" stroke="var(--pink)" stroke-width="1"/>
+            <circle cx="125" cy="140" r="14" fill="rgba(247,37,133,0.4)" stroke="var(--pink)" stroke-width="1"/>
+            <circle cx="100" cy="120" r="10" fill="rgba(0,245,212,0.8)" stroke="var(--cyan)" stroke-width="1.5"/>
+            <circle cx="80" cy="135" r="8" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1"/>
+            <circle cx="120" cy="130" r="9" fill="rgba(0,245,212,0.7)" stroke="var(--cyan)" stroke-width="1"/>
+
+            <text x="100" y="210" fill="var(--text-dim)" font-size="9" text-anchor="middle">No long-range order</text>
+            <text x="100" y="225" fill="var(--text-dim)" font-size="9" text-anchor="middle">Li clusters form</text>
+        </g>
+
+        <!-- Arrow -->
+        <line x1="530" y1="150" x2="620" y2="150" stroke="var(--cyan)" stroke-width="2" marker-end="url(#arrowCyan2)"/>
+        <text x="575" y="140" fill="var(--cyan)" font-size="10" text-anchor="middle">Full lithiation</text>
+
+        <!-- Li₁₅Si₄ (right) -->
+        <g transform="translate(650, 50)">
+            <text x="100" y="0" fill="var(--gold)" font-size="12" text-anchor="middle" font-weight="bold">Li₁₅Si₄</text>
+            <text x="100" y="15" fill="var(--text-dim)" font-size="10" text-anchor="middle">Cubic (Fd-3m)</text>
+
+            <!-- BCC-like structure -->
+            <circle cx="100" cy="100" r="25" fill="rgba(255,215,0,0.3)" stroke="var(--gold)" stroke-width="1.5"/>
+            <circle cx="100" cy="100" r="15" fill="rgba(0,245,212,0.8)" stroke="var(--cyan)" stroke-width="1.5"/>
+
+            <circle cx="70" cy="130" r="20" fill="rgba(255,215,0,0.3)" stroke="var(--gold)" stroke-width="1"/>
+            <circle cx="70" cy="130" r="10" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1"/>
+            <circle cx="130" cy="130" r="20" fill="rgba(255,215,0,0.3)" stroke="var(--gold)" stroke-width="1"/>
+            <circle cx="130" cy="130" r="10" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1"/>
+            <circle cx="100" cy="160" r="20" fill="rgba(255,215,0,0.3)" stroke="var(--gold)" stroke-width="1"/>
+            <circle cx="100" cy="160" r="10" fill="rgba(0,245,212,0.6)" stroke="var(--cyan)" stroke-width="1"/>
+
+            <text x="100" y="210" fill="var(--text-dim)" font-size="9" text-anchor="middle">a = 10.18 Å</text>
+            <text x="100" y="225" fill="var(--text-dim)" font-size="9" text-anchor="middle">+280% volume</text>
+        </g>
+
+        <!-- Volume strain indicator -->
+        <g transform="translate(280, 240)">
+            <rect x="0" y="0" width="240" height="30" fill="rgba(247,37,133,0.1)" stroke="var(--pink)" stroke-width="1" rx="5"/>
+            <text x="120" y="20" fill="var(--pink)" font-size="11" text-anchor="middle">⚠ Volume Expansion: +280%</text>
+        </g>
+    </svg>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <p>Battery Crystallography & Phase Transitions — Li-Ion Battery Research</p>
+    <p style="margin-top:0.5rem;font-size:0.8rem;">Virtual World Energy District · 2026</p>
+</footer>
+
+<script>
+// Particles
+const particleColors = ['var(--cyan)', 'var(--pink)', 'var(--purple)', 'var(--blue)'];
+const particlesContainer = document.getElementById('particles');
+for (let i = 0; i < 40; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDelay = Math.random() * 15 + 's';
+    p.style.background = particleColors[Math.floor(Math.random() * particleColors.length)];
+    p.style.animationDuration = (15 + Math.random() * 10) + 's';
+    particlesContainer.appendChild(p);
+}
+
+// Scroll observer
+const sections = document.querySelectorAll('.section');
+const navDots = document.querySelectorAll('.nav-dot');
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            const idx = Array.from(sections).indexOf(entry.target);
+            navDots.forEach((dot, i) => dot.classList.toggle('active', i === idx));
+        }
+    });
+}, { threshold: 0.2 });
+sections.forEach(s => observer.observe(s));
+
+function scrollToSection(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
+
+// Diffusion Chart
+const diffCanvas = document.getElementById('diffusionChart');
+const diffCtx = diffCanvas.getContext('2d');
+
+function drawDiffusionChart() {
+    const temp = parseInt(document.getElementById('tempSlider').value);
+    const ea = parseInt(document.getElementById('eaSlider').value);
+    const soc = parseInt(document.getElementById('socSlider').value);
+
+    diffCtx.clearRect(0, 0, 750, 300);
+    diffCtx.fillStyle = 'rgba(10,22,40,0.5)';
+    diffCtx.fillRect(0, 0, 750, 300);
+
+    // Draw grid
+    diffCtx.strokeStyle = 'rgba(0,245,212,0.1)';
+    diffCtx.lineWidth = 1;
+    for (let x = 0; x < 750; x += 50) {
+        diffCtx.beginPath();
+        diffCtx.moveTo(x, 0);
+        diffCtx.lineTo(x, 300);
+        diffCtx.stroke();
+    }
+    for (let y = 0; y < 300; y += 50) {
+        diffCtx.beginPath();
+        diffCtx.moveTo(0, y);
+        diffCtx.lineTo(750, y);
+        diffCtx.stroke();
+    }
+
+    // Draw curve - D vs SOC at different temperatures
+    const R = 8.314; // J/(mol·K)
+    const T0 = 298;
+
+    // Base D at 25°C and given Ea
+    const D0 = 1e-4; // cm²/s
+
+    // Draw lines for different temperatures
+    const temps = [0, 25, 45, 60];
+    const colors = ['#8899aa', '#00f5d4', '#3a86ff', '#f72585'];
+
+    temps.forEach((T_c, idx) => {
+        const T = T_c + 273;
+        const factor = Math.exp(-ea * 1000 / R * (1/T - 1/T0));
+
+        diffCtx.strokeStyle = colors[idx];
+        diffCtx.lineWidth = 2;
+        diffCtx.beginPath();
+
+        for (let x = 0; x <= 750; x++) {
+            const soc_val = x / 750;
+            // D decreases at high SOC due to reduced vacancy concentration
+            const soc_factor = 1 - 0.7 * soc_val * soc_val;
+            const D = D0 * factor * soc_factor * 1e8; // scale for visibility
+
+            const logD = Math.log10(Math.max(D, 1e-14));
+            const y = 280 - (logD + 14) * 20;
+
+            if (x === 0) diffCtx.moveTo(x, y);
+            else diffCtx.lineTo(x, y);
+        }
+        diffCtx.stroke();
+    });
+
+    // Labels
+    diffCtx.fillStyle = 'var(--text-dim)';
+    diffCtx.font = '11px Segoe UI';
+    diffCtx.fillText('SOC (%)', 350, 295);
+    diffCtx.save();
+    diffCtx.translate(15, 150);
+    diffCtx.rotate(-Math.PI/2);
+    diffCtx.fillText('log D̃ (cm²/s)', 0, 0);
+    diffCtx.restore();
+
+    // Legend
+    temps.forEach((T_c, i) => {
+        diffCtx.fillStyle = colors[i];
+        diffCtx.fillRect(580 + i*45, 10, 12, 12);
+        diffCtx.fillStyle = colors[i];
+        diffCtx.fillText(`${T_c}°C`, 598 + i*45, 20);
+    });
+}
+
+document.getElementById('tempSlider').addEventListener('input', drawDiffusionChart);
+document.getElementById('eaSlider').addEventListener('input', drawDiffusionChart);
+document.getElementById('socSlider').addEventListener('input', drawDiffusionChart);
+drawDiffusionChart();
+
+// Voltage Chart for Simulator
+const voltageCanvas = document.getElementById('voltageChart');
+const voltageCtx = voltageCanvas.getContext('2d');
+
+function drawVoltageChart() {
+    const liFrac = parseInt(document.getElementById('liFracSlider').value) / 100;
+
+    voltageCtx.clearRect(0, 0, 350, 350);
+    voltageCtx.fillStyle = 'rgba(10,22,40,0.5)';
+    voltageCtx.fillRect(0, 0, 350, 350);
+
+    // Grid
+    voltageCtx.strokeStyle = 'rgba(0,245,212,0.1)';
+    voltageCtx.lineWidth = 1;
+    for (let x = 0; x < 350; x += 35) {
+        voltageCtx.beginPath();
+        voltageCtx.moveTo(x, 0);
+        voltageCtx.lineTo(x, 350);
+        voltageCtx.stroke();
+    }
+    for (let y = 0; y < 350; y += 35) {
+        voltageCtx.beginPath();
+        voltageCtx.moveTo(0, y);
+        voltageCtx.lineTo(350, y);
+        voltageCtx.stroke();
+    }
+
+    // Draw voltage curve for spinel
+    voltageCtx.strokeStyle = 'var(--cyan)';
+    voltageCtx.lineWidth = 2.5;
+    voltageCtx.beginPath();
+
+    for (let i = 0; i <= 350; i++) {
+        const x_norm = i / 350;
+        // Simplified voltage profile - two-plateau behavior
+        let V;
+        if (x_norm < 0.5) {
+            // First plateau (cubic region)
+            V = 4.15 - 0.5 * x_norm;
+        } else {
+            // Second region (tetragonal transition at x=0.5)
+            V = 4.0 - 1.5 * (x_norm - 0.5);
+        }
+        V = Math.max(3.0, Math.min(4.2, V));
+
+        const y = 320 - (V - 3.0) / 1.2 * 280;
+        if (i === 0) voltageCtx.moveTo(i, y);
+        else voltageCtx.lineTo(i, y);
+    }
+    voltageCtx.stroke();
+
+    // Current position indicator
+    const currentX = liFrac * 350;
+    let currentV;
+    if (liFrac < 0.5) {
+        currentV = 4.15 - 0.5 * liFrac;
+    } else {
+        currentV = 4.0 - 1.5 * (liFrac - 0.5);
+    }
+    currentV = Math.max(3.0, Math.min(4.2, currentV));
+    const currentY = 320 - (currentV - 3.0) / 1.2 * 280;
+
+    // Vertical line at current position
+    voltageCtx.strokeStyle = 'var(--pink)';
+    voltageCtx.setLineDash([4, 4]);
+    voltageCtx.beginPath();
+    voltageCtx.moveTo(currentX, 0);
+    voltageCtx.lineTo(currentX, 350);
+    voltageCtx.stroke();
+    voltageCtx.setLineDash([]);
+
+    // Current point
+    voltageCtx.fillStyle = 'var(--pink)';
+    voltageCtx.beginPath();
+    voltageCtx.arc(currentX, currentY, 8, 0, Math.PI * 2);
+    voltageCtx.fill();
+    voltageCtx.fillStyle = 'white';
+    voltageCtx.font = 'bold 10px Segoe UI';
+    voltageCtx.textAlign = 'center';
+    voltageCtx.fillText(currentV.toFixed(2) + 'V', currentX, currentY - 15);
+
+    // Labels
+    voltageCtx.fillStyle = 'var(--text-dim)';
+    voltageCtx.font = '11px Segoe UI';
+    voltageCtx.textAlign = 'center';
+    voltageCtx.fillText('Li Fraction x', 175, 340);
+    voltageCtx.textAlign = 'left';
+    voltageCtx.fillText('V', 5, 20);
+    voltageCtx.fillText('4.2V', 5, 50);
+    voltageCtx.fillText('3.0V', 5, 290);
+}
+
+function updateSimulator() {
+    const liFrac = parseInt(document.getElementById('liFracSlider').value) / 100;
+    const temp = parseInt(document.getElementById('simTempSlider').value);
+    const particle = parseInt(document.getElementById('particleSlider').value);
+
+    document.getElementById('liFracValue').textContent = 'x = ' + liFrac.toFixed(2);
+    document.getElementById('simTempValue').textContent = temp + '°C';
+    document.getElementById('particleValue').textContent = particle + ' nm';
+
+    // Update Li filling in spinel visualization
+    const totalSites = 12;
+    const filledSites = Math.round(liFrac * totalSites);
+    for (let i = 1; i <= totalSites; i++) {
+        const el = document.getElementById('li' + i);
+        if (el) {
+            el.style.opacity = i <= filledSites ? '1' : '0';
+        }
+    }
+
+    // Update phase indicator
+    const phaseEl = document.getElementById('phaseIndicator');
+    if (liFrac < 0.5) {
+        phaseEl.textContent = 'Cubic Spinel (Li₀.₅Mn₂O₄)';
+        document.getElementById('phaseDisplay').textContent = 'Cubic';
+    } else {
+        phaseEl.textContent = 'Tetragonal Phase (LiMn₂O₄)';
+        document.getElementById('phaseDisplay').textContent = 'Tetragonal';
+    }
+
+    // OCV calculation
+    let ocv;
+    if (liFrac < 0.5) {
+        ocv = 4.15 - 0.5 * liFrac;
+    } else {
+        ocv = 4.0 - 1.5 * (liFrac - 0.5);
+    }
+    document.getElementById('ocvDisplay').textContent = ocv.toFixed(2) + ' V';
+
+    // Strain (approximately proportional to Li content)
+    const strain = liFrac * 6; // ~6% max for spinel
+    document.getElementById('strainDisplay').textContent = strain.toFixed(1) + '%';
+
+    // Diffusion (temperature dependent, decreases at high Li fraction)
+    const R = 8.314;
+    const T = temp + 273;
+    const Ea = 30; // kJ/mol for spinel
+    const D_base = 3e-9 * Math.exp(-Ea * 1000 / R * (1/T - 1/298));
+    const soc_factor = 1 - 0.8 * liFrac;
+    const D = D_base * soc_factor;
+    document.getElementById('diffusionDisplay').textContent = D.toExponential(1);
+
+    drawVoltageChart();
+}
+
+document.getElementById('liFracSlider').addEventListener('input', updateSimulator);
+document.getElementById('simTempSlider').addEventListener('input', updateSimulator);
+document.getElementById('particleSlider').addEventListener('input', updateSimulator);
+updateSimulator();
+
+// Initial slider display
+document.getElementById('tempValue').textContent = document.getElementById('tempSlider').value + '°C';
+document.getElementById('eaValue').textContent = document.getElementById('eaSlider').value + ' kJ/mol';
+document.getElementById('socValue').textContent = document.getElementById('socSlider').value + '%';
+
+document.getElementById('tempSlider').addEventListener('input', function() {
+    document.getElementById('tempValue').textContent = this.value + '°C';
+});
+document.getElementById('eaSlider').addEventListener('input', function() {
+    document.getElementById('eaValue').textContent = this.value + ' kJ/mol';
+});
+document.getElementById('socSlider').addEventListener('input', function() {
+    document.getElementById('socValue').textContent = this.value + '%';
+});
+</script>
+</body>
+</html>
