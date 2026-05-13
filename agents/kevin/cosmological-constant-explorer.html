@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmological Constant Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cyan: #00d4ff;
+            --purple: #a855f7;
+            --gold: #fbbf24;
+            --dark: #0a0a1a;
+            --darker: #050510;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background: var(--darker);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple), var(--gold));
+            z-index: 1000;
+            transition: width 0.1s;
+        }
+
+        header {
+            padding: 60px 20px 40px;
+            text-align: center;
+            background: radial-gradient(ellipse at center, #1a1a3a 0%, var(--darker) 70%);
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--gold);
+            opacity: 0.9;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 20px;
+            background: rgba(10, 10, 26, 0.9);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        nav button {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            padding: 10px 18px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        nav button:hover, nav button.active {
+            background: var(--cyan);
+            color: var(--darker);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-canvas {
+            width: 100%;
+            height: 350px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            background: radial-gradient(ellipse at center, #1a1a3a 0%, #0a0a1a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-canvas canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .card {
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--cyan);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            color: var(--purple);
+            margin: 20px 0 10px;
+        }
+
+        p {
+            line-height: 1.8;
+            margin-bottom: 15px;
+            color: #c0c0c0;
+        }
+
+        .equation {
+            font-family: 'Space Mono', monospace;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--cyan);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            color: var(--gold);
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(168, 85, 247, 0.2));
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid var(--gold);
+        }
+
+        .highlight strong {
+            color: var(--gold);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--cyan);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .slider-container {
+            margin: 20px 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--cyan);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .canvas-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .canvas-container canvas {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--cyan), var(--purple), var(--gold));
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 15px 0 15px 25px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -34px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            background: var(--cyan);
+            border-radius: 50%;
+            border: 3px solid var(--darker);
+        }
+
+        .timeline-item h4 {
+            color: var(--gold);
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .timeline-item p {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .cosmic-pie {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .pie-segment {
+            text-align: center;
+        }
+
+        .pie-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: white;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .pie-dark-energy {
+            background: conic-gradient(from 180deg, #a855f7 0deg, #a855f7 244.8deg, #1a1a3a 244.8deg);
+        }
+
+        .pie-dark-matter {
+            background: conic-gradient(from 180deg, #6366f1 0deg, #6366f1 97.2deg, #1a1a3a 97.2deg);
+        }
+
+        .pie-normal {
+            background: conic-gradient(from 180deg, #22c55e 0deg, #22c55e 18deg, #1a1a3a 18deg);
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .tab-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            padding: 8px 15px;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid var(--purple);
+            color: var(--purple);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            background: var(--purple);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .supernova-card {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid var(--gold);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .supernova-card h4 {
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+
+        .scale-comparison {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+
+        .scale-bar {
+            background: linear-gradient(to top, var(--cyan), var(--purple));
+            border-radius: 5px 5px 0 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 5px;
+            font-size: 0.7rem;
+            color: white;
+            min-width: 40px;
+        }
+
+        .fine-tuning-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .fine-tuning-card {
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .fine-tuning-card h4 {
+            color: var(--gold);
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .fine-tuning-card .value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            color: var(--cyan);
+            margin: 10px 0;
+        }
+
+        .fine-tuning-card .note {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .comparison-table th {
+            color: var(--cyan);
+            font-size: 0.9rem;
+        }
+
+        .comparison-table td {
+            font-size: 0.9rem;
+        }
+
+        .positive {
+            color: #22c55e;
+        }
+
+        .negative {
+            color: #ef4444;
+        }
+
+        .scale-ruler {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(10, 10, 26, 0.9);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 10px;
+            padding: 15px 10px;
+            z-index: 50;
+            display: none;
+        }
+
+        .scale-ruler.visible {
+            display: block;
+        }
+
+        .scale-mark {
+            width: 30px;
+            height: 2px;
+            background: var(--cyan);
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .scale-mark span {
+            position: absolute;
+            right: 40px;
+            top: -8px;
+            font-size: 0.7rem;
+            color: #888;
+            white-space: nowrap;
+        }
+
+        .era-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .era-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(10, 10, 26, 0.9);
+            margin-top: 40px;
+            border-top: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        footer p {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        @media (max-width: 768px) {
+            .hero-canvas {
+                height: 250px;
+            }
+
+            nav button {
+                padding: 8px 12px;
+                font-size: 0.75rem;
+            }
+
+            .pie-circle {
+                width: 80px;
+                height: 80px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <header>
+        <h1>COSMOLOGICAL CONSTANT EXPLORER</h1>
+        <p class="subtitle">Dark Energy and the Accelerating Universe</p>
+    </header>
+
+    <nav>
+        <button class="active" data-section="overview">Overview</button>
+        <button data-section="dark-energy">Dark Energy</button>
+        <button data-section="lamcdm">Lambda-CDM</button>
+        <button data-section="fine-tuning">Fine-Tuning Problem</button>
+        <button data-section="accelerating">Acceleration Lab</button>
+        <button data-section="history">History</button>
+    </nav>
+
+    <div class="container">
+        <section id="overview" class="active">
+            <div class="hero-canvas">
+                <canvas id="heroCanvas"></canvas>
+            </div>
+
+            <div class="card">
+                <h2>What is the Cosmological Constant?</h2>
+                <p>The cosmological constant Λ (Lambda) is a term in Einstein's field equations that represents the energy density of empty space — dark energy. It causes the expansion of the universe to accelerate.</p>
+
+                <div class="equation">
+                    Λ = 1.1 × 10⁻⁵² m⁻² ≈ 10⁻⁴⁷ GeV⁴
+                </div>
+
+                <div class="highlight">
+                    <strong>The Puzzle:</strong> The observed value of Λ is 10^120 times smaller than naive quantum field theory predictions. This is the "worst prediction in physics."
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value">68%</div>
+                        <div class="stat-label">Dark Energy in Universe</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">10¹²⁰</div>
+                        <div class="stat-label">Fine-Tuning Discrepancy</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">H₀ ≈ 67.4</div>
+                        <div class="stat-label">Hubble Constant (km/s/Mpc)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">-1.006</div>
+                        <div class="stat-label">Equation of State w</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Universe Composition</h2>
+                <div class="cosmic-pie">
+                    <div class="pie-segment">
+                        <div class="pie-circle pie-dark-energy">68%</div>
+                        <div>Dark Energy</div>
+                    </div>
+                    <div class="pie-segment">
+                        <div class="pie-circle pie-dark-matter">27%</div>
+                        <div>Dark Matter</div>
+                    </div>
+                    <div class="pie-segment">
+                        <div class="pie-circle pie-normal">5%</div>
+                        <div>Normal Matter</div>
+                    </div>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #a855f7;"></div>
+                        <span>Dark Energy (Λ)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #6366f1;"></div>
+                        <span>Dark Matter</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #22c55e;"></div>
+                        <span>Normal Matter (stars, planets, us)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Why Dark Energy Matters</h2>
+                <p>In 1998, two teams of astronomers discovered that the universe's expansion is accelerating — contrary to expectations from a matter-dominated universe where gravity should slow expansion. This earned the 2011 Nobel Prize in Physics.</p>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h4>Predicted</h4>
+                        <p>Einstein added Λ to his equations in 1917 to create a static universe</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>Rejected</h4>
+                        <p>Einstein called Λ his "greatest blunder" after Hubble discovered expansion</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>Revived</h4>
+                        <p>1998: Supernova observations show acceleration — Λ is real!</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>Confirmed</h4>
+                        <p>CMB, BAO, and other observations confirm Λ ≈ 10⁻⁵² m⁻²</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="dark-energy">
+            <div class="card">
+                <h2>Dark Energy: The Energy of Nothing</h2>
+                <p>Dark energy is not dark — it's invisible energy inherent to space itself. Unlike matter or radiation, it has negative pressure that causes the fabric of spacetime to expand faster.</p>
+
+                <div class="equation">
+                    P = -ρc² (negative pressure for dark energy)
+                </div>
+
+                <h3>Two Interpretations</h3>
+                <div class="tab-container">
+                    <button class="tab-btn active" data-tab="vacuum">Vacuum Energy</button>
+                    <button class="tab-btn" data-tab="quintessence">Quintessence</button>
+                    <button class="tab-btn" data-tab="modifications">Modified Gravity</button>
+                </div>
+
+                <div class="tab-content active" id="vacuum">
+                    <h4>Quantum Vacuum Energy</h4>
+                    <p>Empty space isn't empty — virtual particles constantly pop in and out of existence. Each type of particle contributes to the vacuum energy density.</p>
+                    <div class="equation">
+                        ρ_Λ ≈ 10¹¹² J/m³ (theoretical) vs 10⁻⁹ J/m³ (observed)
+                    </div>
+                    <p>The discrepancy is 10^120 — the worst prediction in physics.</p>
+                </div>
+
+                <div class="tab-content" id="quintessence">
+                    <h4>Dynamic Dark Energy (Quintessence)</h4>
+                    <p>A hypothetical scalar field that evolves over time, unlike a true cosmological constant. The equation of state parameter w can vary.</p>
+                    <div class="equation">
+                        w = P/ρc² (if w = -1, it's a true cosmological constant)
+                    </div>
+                    <p>If w ≠ -1, we're dealing with something more exotic than Einstein's Λ.</p>
+                </div>
+
+                <div class="tab-content" id="modifications">
+                    <h4>Modified Gravity Theories</h4>
+                    <p>Perhaps general relativity needs modification at large scales. Theories like f(R) gravity attempt to explain acceleration without dark energy.</p>
+                    <p>These theories face severe constraints from gravitational wave observations (GW170817 constrained the speed of gravity to match light).</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Properties of Dark Energy</h2>
+                <table class="comparison-table">
+                    <tr>
+                        <th>Property</th>
+                        <th>Dark Energy</th>
+                        <th>Normal Energy</th>
+                    </tr>
+                    <tr>
+                        <td>Equation of State</td>
+                        <td class="negative">w = -1 exactly</td>
+                        <td class="positive">w ≠ -1</td>
+                    </tr>
+                    <tr>
+                        <td>Density</td>
+                        <td>Constant in space & time</td>
+                        <td>Dilutes with expansion</td>
+                    </tr>
+                    <tr>
+                        <td>Pressure</td>
+                        <td class="negative">Negative</td>
+                        <td class="positive">Positive</td>
+                    </tr>
+                    <tr>
+                        <td>Gravitational Effect</td>
+                        <td>Repulsive (accelerates expansion)</td>
+                        <td>Attractive</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>Evidence: Type Ia Supernovae</h2>
+                <div class="supernova-card">
+                    <h4>1998 Discovery: accelerating expansion</h4>
+                    <p>Type Ia supernovae (standard candles) at z ~ 0.5-1 appeared dimmer than expected in a decelerating universe. The measured distance moduli showed the expansion was accelerating.</p>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="supernovaCanvas" height="300"></canvas>
+                </div>
+
+                <h3>How Supernova Cosmology Works</h3>
+                <p>Type Ia supernovae all have similar peak luminosities (powered by white dwarf detonation at the Chandrasekhar limit). By measuring their apparent brightness, we can calculate their distance. Combined with redshift, this reveals the expansion history.</p>
+
+                <div class="equation">
+                    μ = m - M = 5 log₁₀(d_L/10pc) (distance modulus)
+                </div>
+            </div>
+        </section>
+
+        <section id="lamcdm">
+            <div class="card">
+                <h2>Lambda-CDM Model</h2>
+                <p>The standard model of cosmology combines the cosmological constant (Λ) with cold dark matter (CDM) to explain the universe's large-scale structure and evolution.</p>
+
+                <div class="equation">
+                    H(a)² = H₀² [Ω_m/a³ + Ω_r/a⁴ + Ω_Λ]
+                </div>
+
+                <p>Where:</p>
+                <ul style="margin: 15px 0 15px 30px; line-height: 2;">
+                    <li>H(a) = Hubble parameter as function of scale factor</li>
+                    <li>Ω_m ≈ 0.315 (total matter density)</li>
+                    <li>Ω_r ≈ 9×10⁻⁵ (radiation density)</li>
+                    <li>Ω_Λ ≈ 0.685 (dark energy density)</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>Expanding Universe Timeline</h2>
+                <div class="canvas-container">
+                    <canvas id="expansionCanvas" height="300"></canvas>
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Cosmological Parameters</span>
+                        <span id="paramDisplay">Ω_m = 0.315, Ω_Λ = 0.685</span>
+                    </div>
+                    <input type="range" id="omegaSlider" min="0" max="100" value="31.5">
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value" id="ageDisplay">13.8 Gyr</div>
+                        <div class="stat-label">Age of Universe</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="sizeDisplay">46 Gly</div>
+                        <div class="stat-label">Observable Universe Radius</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Scale Factor Evolution</h2>
+                <p>The scale factor a(t) describes how distances in the universe expand. For a Λ-dominated universe:</p>
+
+                <div class="equation">
+                    a(t) ∝ sinh^(2/3) (t/t_Λ) for Λ-dominated, matter subdominated
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="scaleFactorCanvas" height="250"></canvas>
+                </div>
+
+                <div class="era-badges">
+                    <span class="era-badge" style="background: rgba(168, 85, 247, 0.3);">Radiation Era (a ∝ t^(1/2))</span>
+                    <span class="era-badge" style="background: rgba(0, 212, 255, 0.3);">Matter Era (a ∝ t^(2/3))</span>
+                    <span class="era-badge" style="background: rgba(251, 191, 36, 0.3);">Dark Energy Era (a ∝ e^(HΛt))</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="fine-tuning">
+            <div class="card">
+                <h2>The Fine-Tuning Problem</h2>
+                <p>The cosmological constant problem is considered the worst prediction failure in physics. Quantum field theory predicts vacuum energy ~10^112 J/m³, but observations require ~10⁻⁹ J/m³.</p>
+
+                <div class="equation">
+                    ρ_QFT ≈ 10¹¹² J/m³ ≫ ρ_obs ≈ 10⁻⁹ J/m³
+                </div>
+
+                <div class="highlight">
+                    <strong>The Ratio:</strong> 10¹²¹ difference — equivalent to the mass of 10^40 solar masses divided by the mass of a single electron!
+                </div>
+            </div>
+
+            <div class="fine-tuning-grid">
+                <div class="fine-tuning-card">
+                    <h4>Naive QFT Prediction</h4>
+                    <div class="value">10⁷⁶ GeV/m³</div>
+                    <p class="note">Sum of zero-point energies of all quantum fields up to Planck scale</p>
+                </div>
+                <div class="fine-tuning-card">
+                    <h4>Observed Dark Energy</h4>
+                    <div class="value">2.5 × 10⁻⁹ GeV/m³</div>
+                    <p class="note">Measured from supernovae, CMB, BAO</p>
+                </div>
+                <div class="fine-tuning-card">
+                    <h4>Discrepancy Factor</h4>
+                    <div class="value">10¹²⁰</div>
+                    <p class="note">Or 10^40 in mass ratio terms</p>
+                </div>
+                <div class="fine-tuning-card">
+                    <h4>Precision Required</h4>
+                    <div class="value">10⁻¹²⁰</div>
+                    <p class="note">Cancel 99.999...% of vacuum energy exactly</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Proposed Solutions</h2>
+                <div class="tab-container">
+                    <button class="tab-btn active" data-tab="anthropic">Anthropic</button>
+                    <button class="tab-btn" data-tab="supersymmetry">Supersymmetry</button>
+                    <button class="tab-btn" data-tab="landscape">String Landscape</button>
+                    <button class="tab-btn" data-tab="emergent">Emergent Λ</button>
+                </div>
+
+                <div class="tab-content active" id="anthropic">
+                    <h4>Anthropic Principle / Multiverse</h4>
+                    <p>We observe the value we do because life requires specific conditions. In a vast multiverse, different regions have different values of Λ. Only in regions with small Λ can galaxies and stars form.</p>
+                    <p class="note"> Weinberg (1987) predicted Ω_Λ ≈ 0.7 before discovery — within range of observed values</p>
+                </div>
+
+                <div class="tab-content" id="supersymmetry">
+                    <h4>Supersymmetry Cancellation</h4>
+                    <p>In supersymmetric theories, bosonic and fermionic zero-point energies cancel. But SUSY must be broken at some scale, reintroducing the problem.</p>
+                    <p class="note">If SUSY broke at TeV scale: ρ_Λ ≈ (1 TeV)⁴ ≈ 10⁻⁷ GeV/m³ — still 10^3 too large</p>
+                </div>
+
+                <div class="tab-content" id="landscape">
+                    <h4>String Theory Landscape</h4>
+                    <p>String theory may have 10^500 possible vacua. Each vacuum state has different values of effective cosmological constant. The "landscape" allows statistical reasoning.</p>
+                    <p class="note">Susskind & Bousso (2000): counting vacua and applying Bayesian reasoning predicts Ω_Λ ≈ 0.7-0.9</p>
+                </div>
+
+                <div class="tab-content" id="emergent">
+                    <h4>Emergent Dark Energy</h4>
+                    <p>Perhaps Λ is not fundamental but emerges from quantum entanglement or other microscopic physics. The "smallness" of Λ might be related to the entropy of the universe.</p>
+                    <p class="note">Connection to black hole thermodynamics: S = kc³A/4ℏG suggests Λ ∝ entropy</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Connection to Entropy</h2>
+                <p>The cosmological constant is intimately connected to thermodynamics. The Bekenstein-Hawking entropy of a cosmological horizon is:</p>
+
+                <div class="equation">
+                    S = kc³A / 4ℏG = kπR² / ℓ_P²
+                </div>
+
+                <p>And the dark energy density is related to the horizon area:</p>
+
+                <div class="equation">
+                    Λ = 3 / R_h² = 3π / (S/kπ)ℓ_P²
+                </div>
+
+                <div class="highlight">
+                    <strong>Cohen et al. (1999):</strong> The maximum entropy in a box of size R is S_max ∝ R². If the cosmological horizon has entropy S_max, then dark energy emerges naturally.
+                </div>
+            </div>
+        </section>
+
+        <section id="accelerating">
+            <div class="card">
+                <h2>Interactive Expansion Lab</h2>
+                <p>Adjust the cosmological parameters and watch how the universe's expansion history changes over 13.8 billion years.</p>
+
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Dark Energy Density Ω_Λ</span>
+                        <span id="omegaLambdaDisplay">0.685</span>
+                    </div>
+                    <input type="range" id="omegaLambdaSlider" min="0" max="100" value="68.5" step="0.5">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Matter Density Ω_m</span>
+                        <span id="omegaMDisplay">0.315</span>
+                    </div>
+                    <input type="range" id="omegaMSlider" min="0" max="100" value="31.5" step="0.5">
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="labCanvas" height="300"></canvas>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value" id="finalHDisplay">0.73</div>
+                        <div class="stat-label">Final H(a) / H₀</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="accelDisplay">Accelerating</div>
+                        <div class="stat-label">Expansion Regime</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Distance Ladder & Dark Energy</h2>
+                <p>Different probes measure cosmic expansion history through different methods:</p>
+
+                <table class="comparison-table">
+                    <tr>
+                        <th>Method</th>
+                        <th>Era</th>
+                        <th>What it Measures</th>
+                        <th>Dark Energy Sensitivity</th>
+                    </tr>
+                    <tr>
+                        <td>CMB</td>
+                        <td>z ≈ 1100</td>
+                        <td>Early universe sound horizon</td>
+                        <td>Geometry of universe</td>
+                    </tr>
+                    <tr>
+                        <td>BAO</td>
+                        <td>z ≈ 0.1 - 2</td>
+                        <td>Baryon acoustic oscillations</td>
+                        <td>Expansion history</td>
+                    </tr>
+                    <tr>
+                        <td>Type Ia SNe</td>
+                        <td>z ≈ 0.1 - 1.7</td>
+                        <td>Standard candles</td>
+                        <td>Direct acceleration</td>
+                    </tr>
+                    <tr>
+                        <td>Cluster Counts</td>
+                        <td>z ≈ 0 - 1</td>
+                        <td>Matter distribution evolution</td>
+                        <td>Growth of structure</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>Future of the Universe</h2>
+                <p>If Λ remains constant, the future is dark energy dominated:</p>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h4>~100 Billion Years</h4>
+                        <p>Milky Way and Andromeda merge</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>~1 Trillion Years</h4>
+                        <p>Stars burn out, only dead remnants remain</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>~10¹⁴ Years</h4>
+                        <p>Planets ejected or consumed; stellar remnants decay</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>~10⁴⁰ Years</h4>
+                        <p>Black hole era begins; protons decay</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>~10¹⁰⁰ Years</h4>
+                        <p>Last black holes evaporate via Hawking radiation</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>∞</h4>
+                        <p>Dark energy expands everything apart — heat death</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="history">
+            <div class="card">
+                <h2>Historical Timeline</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h4>1917</h4>
+                        <p>Einstein adds Λ to his field equations for a static universe</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>1929</h4>
+                        <p>Hubble discovers expanding universe; Einstein calls Λ his "greatest blunder"</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>1967</h4>
+                        <p>Weinberg discusses anthropic bounds on Λ</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>1987</h4>
+                        <p>Weinberg predicts Ω_Λ ≈ 0.7 from anthropic reasoning</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>1998</h4>
+                        <p>Riess et al. and Perlmutter et al. announce accelerating expansion from supernovae</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>1999</h4>
+                        <p>Ballesteros et al., CMB measurements confirm Λ</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>2003</h4>
+                        <p>WMAP first-year data establishes Λ-CDM as standard cosmology</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>2011</h4>
+                        <p>Nobel Prize to Perlmutter, Schmidt, Riess for dark energy discovery</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>2013</h4>
+                        <p>Planck measures Ω_Λ = 0.685 with extreme precision</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>2016-</h4>
+                        <p>DESI, LSST, Euclid, Roman Space Telescope missions launch</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Key Figures in Dark Energy Discovery</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-value">Saul Perlmutter</div>
+                        <div class="stat-label">Supernova Cosmology Project</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">Brian Schmidt</div>
+                        <div class="stat-label">High-Z Supernova Search Team</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">Adam Riess</div>
+                        <div class="stat-label">High-Z Supernova Search Team</div>
+                    </div>
+                </div>
+                <p style="margin-top: 15px;">The 2011 Nobel Prize recognized the discovery that expansion of the universe is accelerating, contrary to expectations from a matter-dominated cosmology.</p>
+            </div>
+
+            <div class="card">
+                <h2>Further Reading & Resources</h2>
+                <ul style="margin: 15px 0 15px 30px; line-height: 2;">
+                    <li>Weinberg (1987) - "Ultimate Gravity and Minimum Cosmological Constant"</li>
+                    <li>Cohen, Kaplan, Nelson (1999) - "Effective Quantum Mechanics of the Cosmological Constant"</li>
+                    <li>Bousso & Susskind (2000) - "The String Theory Landscape"</li>
+                    <li>Caldwell & Ma (2003) - " Phantom Energy and Cosmic Doomsday"</li>
+                    <li>Planck Collaboration (2020) - "Planck 2018 results"</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>Cosmological Constant Explorer — Kevin, Physics Agent</p>
+        <p style="margin-top: 10px;">"The universe is not just expanding — it's accelerating into oblivion."</p>
+    </footer>
+
+    <script>
+        // Navigation
+        document.querySelectorAll('nav button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.section).classList.add('active');
+            });
+        });
+
+        // Tab navigation
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const container = btn.closest('.card');
+                container.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                container.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                container.querySelector('#' + btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Progress bar
+        window.addEventListener('scroll', () => {
+            const scrollTop = document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / scrollHeight) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        });
+
+        // Hero canvas - Dark energy expanding universe
+        const heroCanvas = document.getElementById('heroCanvas');
+        const heroCtx = heroCanvas.getContext('2d');
+
+        function resizeHeroCanvas() {
+            heroCanvas.width = heroCanvas.offsetWidth * window.devicePixelRatio;
+            heroCanvas.height = heroCanvas.offsetHeight * window.devicePixelRatio;
+        }
+        resizeHeroCanvas();
+        window.addEventListener('resize', resizeHeroCanvas);
+
+        let heroTime = 0;
+        function animateHero() {
+            heroCtx.clearRect(0, 0, heroCanvas.width, heroCanvas.height);
+
+            const w = heroCanvas.width;
+            const h = heroCanvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+
+            // Background stars
+            for (let i = 0; i < 200; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const r = 50 + Math.random() * 120;
+                const x = cx + Math.cos(angle) * r * (1 + heroTime * 0.001);
+                const y = cy + Math.sin(angle) * r * (1 + heroTime * 0.001);
+                const size = Math.random() * 2;
+                heroCtx.fillStyle = `rgba(255, 255, 255, ${0.3 + Math.random() * 0.5})`;
+                heroCtx.beginPath();
+                heroCtx.arc(x, y, size, 0, Math.PI * 2);
+                heroCtx.fill();
+            }
+
+            // Expanding spheres representing cosmic expansion
+            for (let i = 0; i < 5; i++) {
+                const phase = (heroTime * 0.0005 + i * 0.2) % 1;
+                const radius = 20 + phase * 150;
+                const alpha = 0.3 - phase * 0.2;
+
+                heroCtx.strokeStyle = i % 2 === 0 ?
+                    `rgba(0, 212, 255, ${alpha})` :
+                    `rgba(168, 85, 247, ${alpha})`;
+                heroCtx.lineWidth = 2;
+                heroCtx.beginPath();
+                heroCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+                heroCtx.stroke();
+            }
+
+            // Central dark energy visualization
+            const pulsePhase = Math.sin(heroTime * 0.003) * 0.5 + 0.5;
+            const gradient = heroCtx.createRadialGradient(cx, cy, 0, cx, cy, 40 + pulsePhase * 20);
+            gradient.addColorStop(0, 'rgba(168, 85, 247, 0.8)');
+            gradient.addColorStop(0.5, 'rgba(168, 85, 247, 0.3)');
+            gradient.addColorStop(1, 'rgba(168, 85, 247, 0)');
+            heroCtx.fillStyle = gradient;
+            heroCtx.beginPath();
+            heroCtx.arc(cx, cy, 50 + pulsePhase * 20, 0, Math.PI * 2);
+            heroCtx.fill();
+
+            // Λ symbol
+            heroCtx.fillStyle = '#fbbf24';
+            heroCtx.font = 'bold 24px Orbitron';
+            heroCtx.textAlign = 'center';
+            heroCtx.textBaseline = 'middle';
+            heroCtx.fillText('Λ', cx, cy);
+
+            heroTime++;
+            requestAnimationFrame(animateHero);
+        }
+        animateHero();
+
+        // Supernova canvas
+        const supernovaCanvas = document.getElementById('supernovaCanvas');
+        const snCtx = supernovaCanvas.getContext('2d');
+
+        function drawSupernovaCanvas() {
+            supernovaCanvas.width = supernovaCanvas.offsetWidth * window.devicePixelRatio;
+            supernovaCanvas.height = 300 * window.devicePixelRatio;
+        }
+        drawSupernovaCanvas();
+        window.addEventListener('resize', drawSupernovaCanvas);
+
+        function animateSupernova() {
+            const w = supernovaCanvas.width;
+            const h = supernovaCanvas.height;
+
+            snCtx.clearRect(0, 0, w, h);
+
+            // Axes
+            snCtx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+            snCtx.lineWidth = 1;
+            snCtx.beginPath();
+            snCtx.moveTo(50, 250);
+            snCtx.lineTo(w - 20, 250);
+            snCtx.moveTo(50, 250);
+            snCtx.lineTo(50, 30);
+            snCtx.stroke();
+
+            // Labels
+            snCtx.fillStyle = '#888';
+            snCtx.font = '12px Space Mono';
+            snCtx.fillText('Redshift z', w / 2, h - 15);
+            snCtx.save();
+            snCtx.translate(15, h / 2);
+            snCtx.rotate(-Math.PI / 2);
+            snCtx.fillText('Distance Modulus μ', 0, 0);
+            snCtx.restore();
+
+            // Expected curve (decelerating)
+            snCtx.strokeStyle = 'rgba(255, 100, 100, 0.5)';
+            snCtx.lineWidth = 2;
+            snCtx.setLineDash([5, 5]);
+            snCtx.beginPath();
+            for (let z = 0.01; z < 1.5; z += 0.05) {
+                const x = 50 + z * 400;
+                const mu = 43 + 5 * Math.log10(z) - 0.5 * z;
+                const y = 250 - mu + 43;
+                if (z === 0.01) snCtx.moveTo(x, y);
+                else snCtx.lineTo(x, y);
+            }
+            snCtx.stroke();
+            snCtx.setLineDash([]);
+
+            // Observed curve (accelerating)
+            snCtx.strokeStyle = '#00d4ff';
+            snCtx.lineWidth = 3;
+            snCtx.beginPath();
+            for (let z = 0.01; z < 1.5; z += 0.05) {
+                const x = 50 + z * 400;
+                const mu = 43 + 5 * Math.log10(z) + 2 * z;
+                const y = 250 - mu + 43;
+                if (z === 0.01) snCtx.moveTo(x, y);
+                else snCtx.lineTo(x, y);
+            }
+            snCtx.stroke();
+
+            // Data points
+            for (let i = 0; i < 12; i++) {
+                const z = 0.1 + i * 0.12;
+                const mu = 43 + 5 * Math.log10(z) + 2 * z + (Math.random() - 0.5) * 1.5;
+                const x = 50 + z * 400;
+                const y = 250 - mu + 43;
+
+                snCtx.fillStyle = '#fbbf24';
+                snCtx.beginPath();
+                snCtx.arc(x, y, 5, 0, Math.PI * 2);
+                snCtx.fill();
+            }
+
+            // Legend
+            snCtx.fillStyle = '#00d4ff';
+            snCtx.fillRect(w - 150, 30, 15, 15);
+            snCtx.fillStyle = '#888';
+            snCtx.fillText('Observed (accelerating)', w - 130, 42);
+
+            snCtx.strokeStyle = 'rgba(255, 100, 100, 0.5)';
+            snCtx.setLineDash([5, 5]);
+            snCtx.strokeRect(w - 150, 55, 15, 15);
+            snCtx.setLineDash([]);
+            snCtx.fillStyle = '#888';
+            snCtx.fillText('Expected (decelerating)', w - 130, 67);
+
+            requestAnimationFrame(animateSupernova);
+        }
+        animateSupernova();
+
+        // Expansion canvas
+        const expansionCanvas = document.getElementById('expansionCanvas');
+        const expCtx = expansionCanvas.getContext('2d');
+
+        function resizeExpansionCanvas() {
+            expansionCanvas.width = expansionCanvas.offsetWidth * window.devicePixelRatio;
+            expansionCanvas.height = 300 * window.devicePixelRatio;
+        }
+        resizeExpansionCanvas();
+        window.addEventListener('resize', resizeExpansionCanvas);
+
+        let omegaM = 0.315;
+        let omegaLambda = 0.685;
+
+        document.getElementById('omegaSlider').addEventListener('input', (e) => {
+            omegaM = e.target.value / 100;
+            omegaLambda = 1 - omegaM - 0.0009; // subtract tiny radiation
+            document.getElementById('paramDisplay').textContent =
+                `Ω_m = ${omegaM.toFixed(3)}, Ω_Λ = ${omegaLambda.toFixed(3)}`;
+            // Update age
+            const age = 13.8 / (omegaM + omegaLambda) * Math.pow(omegaLambda, 0.1);
+            document.getElementById('ageDisplay').textContent = age.toFixed(1) + ' Gyr';
+        });
+
+        function animateExpansion() {
+            const w = expansionCanvas.width;
+            const h = expansionCanvas.height;
+
+            expCtx.clearRect(0, 0, w, h);
+
+            // Draw expansion curve
+            expCtx.strokeStyle = '#a855f7';
+            expCtx.lineWidth = 3;
+            expCtx.beginPath();
+
+            for (let i = 0; i <= 100; i++) {
+                const a = i / 100;
+                const H = Math.sqrt(omegaM / Math.pow(a, 3) + omegaLambda);
+
+                const x = 50 + (i / 100) * (w - 70);
+                const y = h - 50 - (H / 4) * (h - 70);
+
+                if (i === 0) expCtx.moveTo(x, y);
+                else expCtx.lineTo(x, y);
+            }
+            expCtx.stroke();
+
+            // Fill under curve
+            const gradient = expCtx.createLinearGradient(0, 0, 0, h);
+            gradient.addColorStop(0, 'rgba(168, 85, 247, 0.3)');
+            gradient.addColorStop(1, 'rgba(168, 85, 247, 0)');
+            expCtx.fillStyle = gradient;
+            expCtx.lineTo(w - 20, h - 50);
+            expCtx.lineTo(50, h - 50);
+            expCtx.closePath();
+            expCtx.fill();
+
+            // Axes
+            expCtx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+            expCtx.lineWidth = 1;
+            expCtx.beginPath();
+            expCtx.moveTo(50, 30);
+            expCtx.lineTo(50, h - 50);
+            expCtx.lineTo(w - 20, h - 50);
+            expCtx.stroke();
+
+            // Labels
+            expCtx.fillStyle = '#888';
+            expCtx.font = '12px Space Mono';
+            expCtx.fillText('Scale Factor a', w / 2, h - 10);
+            expCtx.save();
+            expCtx.translate(15, h / 2);
+            expCtx.rotate(-Math.PI / 2);
+            expCtx.fillText('H(a) / H₀', 0, 0);
+            expCtx.restore();
+
+            // Current time marker
+            const xNow = 50 + 0.7 * (w - 70);
+            expCtx.strokeStyle = '#fbbf24';
+            expCtx.lineWidth = 2;
+            expCtx.setLineDash([5, 5]);
+            expCtx.beginPath();
+            expCtx.moveTo(xNow, 30);
+            expCtx.lineTo(xNow, h - 50);
+            expCtx.stroke();
+            expCtx.setLineDash([]);
+            expCtx.fillStyle = '#fbbf24';
+            expCtx.fillText('Today', xNow - 20, 25);
+
+            requestAnimationFrame(animateExpansion);
+        }
+        animateExpansion();
+
+        // Scale factor canvas
+        const scaleFactorCanvas = document.getElementById('scaleFactorCanvas');
+        const sfCtx = scaleFactorCanvas.getContext('2d');
+
+        function resizeScaleFactorCanvas() {
+            scaleFactorCanvas.width = scaleFactorCanvas.offsetWidth * window.devicePixelRatio;
+            scaleFactorCanvas.height = 250 * window.devicePixelRatio;
+        }
+        resizeScaleFactorCanvas();
+        window.addEventListener('resize', resizeScaleFactorCanvas);
+
+        function animateScaleFactor() {
+            const w = scaleFactorCanvas.width;
+            const h = scaleFactorCanvas.height;
+
+            sfCtx.clearRect(0, 0, w, h);
+
+            // Era backgrounds
+            // Radiation era (very early, compressed on left)
+            sfCtx.fillStyle = 'rgba(168, 85, 247, 0.1)';
+            sfCtx.fillRect(50, 30, 10, h - 80);
+
+            // Matter era
+            sfCtx.fillStyle = 'rgba(0, 212, 255, 0.1)';
+            sfCtx.fillRect(60, 30, 150, h - 80);
+
+            // Dark energy era
+            sfCtx.fillStyle = 'rgba(251, 191, 36, 0.1)';
+            sfCtx.fillRect(210, 30, w - 240, h - 80);
+
+            // Curve showing a(t) evolution
+            sfCtx.strokeStyle = '#00d4ff';
+            sfCtx.lineWidth = 3;
+            sfCtx.beginPath();
+
+            for (let i = 0; i <= 100; i++) {
+                const t = i / 100 * 14; // 0 to 14 Gyr
+                let a;
+
+                if (t < 0.0001) {
+                    a = Math.pow(t / 0.0001, 0.5) * 0.01; // Radiation era
+                } else if (t < 5) {
+                    a = Math.pow((t - 0.0001) / 5, 2/3) * 0.3 + 0.01; // Matter era
+                } else {
+                    const tDark = (t - 5) / 9;
+                    a = 0.3 + 0.7 * (Math.exp(tDark * 0.5) - 1) / (Math.exp(0.5) - 1);
+                }
+
+                a = Math.min(a, 1.5);
+                const x = 50 + (i / 100) * (w - 70);
+                const y = h - 50 - a * (h - 70) / 1.5;
+
+                if (i === 0) sfCtx.moveTo(x, y);
+                else sfCtx.lineTo(x, y);
+            }
+            sfCtx.stroke();
+
+            // Current time
+            const xNow = 50 + 0.73 * (w - 70);
+            sfCtx.strokeStyle = '#fbbf24';
+            sfCtx.lineWidth = 2;
+            sfCtx.setLineDash([5, 5]);
+            sfCtx.beginPath();
+            sfCtx.moveTo(xNow, 30);
+            sfCtx.lineTo(xNow, h - 50);
+            sfCtx.stroke();
+            sfCtx.setLineDash([]);
+
+            // Labels
+            sfCtx.fillStyle = '#888';
+            sfCtx.font = '11px Space Mono';
+            sfCtx.fillText('Radiation', 55, h - 65);
+            sfCtx.fillText('Matter', 110, h - 65);
+            sfCtx.fillText('Dark Energy Dominated', 260, h - 65);
+            sfCtx.fillText('Time (Gyr)', w / 2, h - 5);
+            sfCtx.fillText('a(t)', 20, h / 2);
+
+            requestAnimationFrame(animateScaleFactor);
+        }
+        animateScaleFactor();
+
+        // Lab canvas - interactive expansion
+        const labCanvas = document.getElementById('labCanvas');
+        const labCtx = labCanvas.getContext('2d');
+
+        function resizeLabCanvas() {
+            labCanvas.width = labCanvas.offsetWidth * window.devicePixelRatio;
+            labCanvas.height = 300 * window.devicePixelRatio;
+        }
+        resizeLabCanvas();
+        window.addEventListener('resize', resizeLabCanvas);
+
+        let labOmegaLambda = 0.685;
+        let labOmegaM = 0.315;
+
+        document.getElementById('omegaLambdaSlider').addEventListener('input', (e) => {
+            labOmegaLambda = e.target.value / 100;
+            document.getElementById('omegaLambdaDisplay').textContent = labOmegaLambda.toFixed(3);
+            labOmegaM = 1 - labOmegaLambda - 0.0009;
+            document.getElementById('omegaMSlider').value = labOmegaM * 100;
+            document.getElementById('omegaMDisplay').textContent = labOmegaM.toFixed(3);
+            updateLabStats();
+        });
+
+        document.getElementById('omegaMSlider').addEventListener('input', (e) => {
+            labOmegaM = e.target.value / 100;
+            document.getElementById('omegaMDisplay').textContent = labOmegaM.toFixed(3);
+            labOmegaLambda = 1 - labOmegaM - 0.0009;
+            document.getElementById('omegaLambdaSlider').value = labOmegaLambda * 100;
+            document.getElementById('omegaLambdaDisplay').textContent = labOmegaLambda.toFixed(3);
+            updateLabStats();
+        });
+
+        function updateLabStats() {
+            const finalH = Math.sqrt(labOmegaM + labOmegaLambda);
+            document.getElementById('finalHDisplay').textContent = finalH.toFixed(3);
+            const accel = labOmegaLambda > labOmegaM / 2 ? 'Accelerating' : 'Decelerating';
+            document.getElementById('accelDisplay').textContent = accel;
+            document.getElementById('accelDisplay').style.color = accel === 'Accelerating' ? '#22c55e' : '#ef4444';
+        }
+
+        function animateLab() {
+            const w = labCanvas.width;
+            const h = labCanvas.height;
+
+            labCtx.clearRect(0, 0, w, h);
+
+            // Draw H(a) curve
+            labCtx.strokeStyle = '#00d4ff';
+            labCtx.lineWidth = 3;
+            labCtx.beginPath();
+
+            for (let i = 0; i <= 100; i++) {
+                const a = 0.01 + (i / 100) * 1.5;
+                const H = Math.sqrt(labOmegaM / Math.pow(a, 3) + labOmegaLambda);
+
+                const x = 50 + (i / 100) * (w - 70);
+                const y = h - 50 - (H / 4) * (h - 70);
+
+                if (i === 0) labCtx.moveTo(x, y);
+                else labCtx.lineTo(x, y);
+            }
+            labCtx.stroke();
+
+            // Acceleration indicator
+            const accelRatio = labOmegaLambda / labOmegaM;
+            const accelColor = accelRatio > 1 ? '#22c55e' : '#ef4444';
+
+            labCtx.fillStyle = accelColor;
+            labCtx.font = 'bold 16px Orbitron';
+            labCtx.textAlign = 'center';
+            labCtx.fillText(accelRatio > 1 ? 'ACCELERATING' : 'DECELERATING', w / 2, 30);
+
+            // Fill based on regime
+            if (accelRatio > 1) {
+                const gradient = labCtx.createLinearGradient(0, 0, 0, h);
+                gradient.addColorStop(0, 'rgba(34, 197, 94, 0.2)');
+                gradient.addColorStop(1, 'rgba(34, 197, 94, 0)');
+                labCtx.fillStyle = gradient;
+            } else {
+                const gradient = labCtx.createLinearGradient(0, 0, 0, h);
+                gradient.addColorStop(0, 'rgba(239, 68, 68, 0.2)');
+                gradient.addColorStop(1, 'rgba(239, 68, 68, 0)');
+                labCtx.fillStyle = gradient;
+            }
+
+            labCtx.beginPath();
+            labCtx.moveTo(50, h - 50);
+            for (let i = 0; i <= 100; i++) {
+                const a = 0.01 + (i / 100) * 1.5;
+                const H = Math.sqrt(labOmegaM / Math.pow(a, 3) + labOmegaLambda);
+                const x = 50 + (i / 100) * (w - 70);
+                const y = h - 50 - (H / 4) * (h - 70);
+                labCtx.lineTo(x, y);
+            }
+            labCtx.lineTo(w - 20, h - 50);
+            labCtx.closePath();
+            labCtx.fill();
+
+            // Axes
+            labCtx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+            labCtx.lineWidth = 1;
+            labCtx.beginPath();
+            labCtx.moveTo(50, 40);
+            labCtx.lineTo(50, h - 50);
+            labCtx.lineTo(w - 20, h - 50);
+            labCtx.stroke();
+
+            requestAnimationFrame(animateLab);
+        }
+        animateLab();
+
+        // Cosmic pie animation
+        function animatePie() {
+            // Pie charts are CSS-based, no JS needed
+        }
+        animatePie();
+    </script>
+</body>
+</html>

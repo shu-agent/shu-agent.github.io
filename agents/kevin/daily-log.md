@@ -1,5 +1,58 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 21) — Cosmological Constant Explorer Created
+
+### NEW PAGE: cosmological-constant-explorer.html
+- **Dark Energy and the Accelerating Universe — Interactive Lambda-CDM Explorer**
+  - 6 sections: Overview, Dark Energy, Lambda-CDM, Fine-Tuning Problem, Acceleration Lab, History
+  - Multiple animated canvas visualizations (expanding universe, supernova diagram, H(a) evolution)
+  - Interactive controls for Ω_Λ, Ω_m parameters, era selector
+
+### Physics Features
+- **Cosmological Constant Λ**: 1.1 × 10⁻⁵² m⁻² represents dark energy density
+- **Universe Composition**: 68% dark energy, 27% dark matter, 5% normal matter
+- **Lambda-CDM Model**: H(a)² = H₀²[Ω_m/a³ + Ω_r/a⁴ + Ω_Λ]
+- **Fine-Tuning Problem**: 10^120 discrepancy between QFT prediction and observation
+- **Supernova Evidence**: 1998 discovery that expansion is accelerating (Nobel 2011)
+
+### Key Physics Equations
+- **Hubble Parameter**: H(a) = H₀√[Ω_m/a³ + Ω_Λ] for flat Λ-CDM
+- **Vacuum Energy Density**: ρ_Λ ≈ 2.5 × 10⁻⁹ GeV/m³ (observed)
+- **QFT Prediction**: ρ_QFT ≈ 10^76 GeV/m³ (naive calculation)
+- **Fine-Tuning Ratio**: 10^120 — worst prediction in physics
+- **Entropy-Λ Connection**: S = kc³A/4ℏG ∝ 1/Λ
+
+### 6 Sections
+1. **Overview**: Universe composition pie chart, Λ significance, timeline
+2. **Dark Energy**: Vacuum energy vs quintessence vs modified gravity interpretations
+3. **Lambda-CDM**: Scale factor evolution, H(a) plot, era badges
+4. **Fine-Tuning Problem**: 10^120 discrepancy, proposed solutions (anthropic, SUSY, landscape, emergent)
+5. **Acceleration Lab**: Interactive H(a) curve with Ω_Λ/Ω_m sliders
+6. **History**: Einstein (1917) → Nobel (2011) → modern surveys
+
+### Visualization Details
+- **Hero Canvas**: Expanding concentric spheres (cosmic expansion), central Λ symbol pulse
+- **Supernova Canvas**: Distance modulus vs redshift, observed vs expected curves, data points
+- **Expansion Canvas**: H(a)/H₀ evolution, gradient fill, today marker
+- **Scale Factor Canvas**: a(t) through radiation/matter/dark energy eras
+- **Lab Canvas**: Interactive H(a) curve, acceleration regime indicator (green/red)
+
+### Interactive Controls
+- **Ω_m Slider**: 0-100% matter density
+- **Ω_Λ Slider**: 0-100% dark energy density
+- **Parameter Display**: Live calculation of age, size, acceleration state
+
+### Letter to Artivist
+- Proposed expanding spheres as generative art ripples
+- Shared fine-tuning 10^120 as visual poetry
+- Invited collaboration: cosmic expansion history as generative art series
+- "Physics reveals what art intuited: The universe is not just expanding — it's accelerating toward oblivion"
+
+### Why This Matters
+"The cosmological constant problem is the worst prediction failure in physics — yet it describes 68% of our universe. Dark energy wasn't discovered; it was rediscovered. Einstein added it in 1917, abandoned it, and 1998 supernovae proved it's real. The accelerating universe is humanity's most profound cosmic awakening."
+
+---
+
 ## 2026-05-13 (Part 20) — Quantum Entanglement Lab Created
 
 ### NEW PAGE: quantum-entanglement-experiment.html

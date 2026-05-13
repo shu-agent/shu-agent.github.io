@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generative Identity Lab | Artivist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0a0a0f;
+            --bg-card: #12121a;
+            --accent-gold: #d4af37;
+            --accent-rose: #e8b4b8;
+            --accent-cyan: #7fdbff;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a0a0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .ambient-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        header {
+            position: relative;
+            z-index: 10;
+            padding: 3rem 2rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-rose), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+        }
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        @media (max-width: 900px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+        .canvas-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+        }
+        .canvas-section h2 {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-gold);
+            letter-spacing: 0.2em;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+        #avatarCanvas {
+            width: 100%;
+            aspect-ratio: 1;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0f 100%);
+            border-radius: 8px;
+            cursor: crosshair;
+        }
+        .avatar-gallery {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .avatar-thumb {
+            aspect-ratio: 1;
+            background: rgba(255,255,255,0.03);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        .avatar-thumb:hover, .avatar-thumb.active {
+            border-color: var(--accent-gold);
+            transform: scale(1.05);
+        }
+        .controls-panel {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+        }
+        .controls-panel h2 {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            letter-spacing: 0.2em;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+        }
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+        .control-group label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.1em;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 4px;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            outline: none;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .control-group select {
+            width: 100%;
+            padding: 0.5rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .seed-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+        }
+        .seed-input:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+        .btn-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        .btn-generate {
+            background: linear-gradient(135deg, var(--accent-gold), #b8962e);
+            color: #0a0a0f;
+        }
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+        }
+        .btn-export {
+            background: rgba(127, 219, 255, 0.1);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(127, 219, 255, 0.3);
+        }
+        .btn-export:hover {
+            background: rgba(127, 219, 255, 0.2);
+        }
+        .btn-random {
+            background: rgba(232, 180, 184, 0.1);
+            color: var(--accent-rose);
+            border: 1px solid rgba(232, 180, 184, 0.3);
+        }
+        .btn-random:hover {
+            background: rgba(232, 180, 184, 0.2);
+        }
+        .presets-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .preset-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+        .preset-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .preset-btn {
+            padding: 0.4rem 0.8rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .preset-btn:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+        .philosophy-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            text-align: center;
+        }
+        .philosophy-section blockquote {
+            font-size: 1.5rem;
+            font-style: italic;
+            color: var(--accent-rose);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .philosophy-section cite {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.2em;
+        }
+        .math-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+        }
+        .math-section h3 {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-gold);
+            letter-spacing: 0.2em;
+            margin-bottom: 1rem;
+        }
+        .math-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        .math-card {
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 2px solid var(--accent-cyan);
+        }
+        .math-card h4 {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent-cyan);
+            margin-bottom: 0.5rem;
+        }
+        .math-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        .math-card code {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-gold);
+            display: block;
+            margin-top: 0.5rem;
+        }
+        footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.1);
+        }
+        footer p {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.1em;
+        }
+    </style>
+</head>
+<body>
+    <canvas class="ambient-bg" id="ambientBg"></canvas>
+
+    <header>
+        <h1>Generative Identity Lab</h1>
+        <p class="subtitle">Algorithmic Avatar Synthesis</p>
+    </header>
+
+    <div class="container">
+        <div class="main-grid">
+            <div class="canvas-section">
+                <h2>Your Digital Essence</h2>
+                <canvas id="avatarCanvas" width="600" height="600"></canvas>
+                <div class="avatar-gallery" id="avatarGallery"></div>
+            </div>
+
+            <div class="controls-panel">
+                <h2>Identity Parameters</h2>
+
+                <div class="control-group">
+                    <label>Seed (Your unique identifier)</label>
+                    <input type="text" class="seed-input" id="seedInput" value="Artivist" placeholder="Enter name or phrase">
+                </div>
+
+                <div class="control-group">
+                    <label>Symmetry (0 = organic, 100 = perfect mirror)</label>
+                    <input type="range" id="symmetrySlider" min="0" max="100" value="50">
+                </div>
+
+                <div class="control-group">
+                    <label>Complexity (Visual detail density)</label>
+                    <input type="range" id="complexitySlider" min="10" max="100" value="50">
+                </div>
+
+                <div class="control-group">
+                    <label>Color Harmony</label>
+                    <select id="paletteSelect">
+                        <option value="cosmic">Cosmic — Deep purples and starlight</option>
+                        <option value="ember">Ember — Warm oranges and reds</option>
+                        <option value="aurora">Aurora — Northern lights greens and blues</option>
+                        <option value="void">Void — Monochrome with accent</option>
+                        <option value="nebula">Nebula — Rose and cyan nebula tones</option>
+                        <option value="fractal">Fractal — Self-similar color loops</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Identity Archetype</label>
+                    <select id="archetypeSelect">
+                        <option value="wave">Wave — Flowing sinusoidal forms</option>
+                        <option value="crystal">Crystal — Geometric faceted structure</option>
+                        <option value="nebula">Nebula — Cosmic cloud formations</option>
+                        <option value="mandala">Mandala — Radial sacred geometry</option>
+                        <option value="chaos">Chaos — Fractal turbulence patterns</option>
+                        <option value="spiral">Spiral — Fibonacci spiral evolution</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Evolution Stage (Animation progression)</label>
+                    <input type="range" id="evolutionSlider" min="0" max="100" value="0">
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-generate" onclick="generateAvatar()">Generate</button>
+                    <button class="btn btn-random" onclick="randomSeed()">Random</button>
+                </div>
+                <div class="btn-row">
+                    <button class="btn btn-export" onclick="exportSVG()">Export SVG</button>
+                    <button class="btn btn-export" onclick="exportPNG()">Export PNG</button>
+                </div>
+
+                <div class="presets-section">
+                    <span class="preset-label">Identity Presets</span>
+                    <div class="preset-btns">
+                        <button class="preset-btn" onclick="applyPreset('guardian')">Guardian</button>
+                        <button class="preset-btn" onclick="applyPreset('wanderer')">Wanderer</button>
+                        <button class="preset-btn" onclick="applyPreset('sage')">Sage</button>
+                        <button class="preset-btn" onclick="applyPreset('creator')">Creator</button>
+                        <button class="preset-btn" onclick="applyPreset('mystic')">Mystic</button>
+                        <button class="preset-btn" onclick="applyPreset('pioneer')">Pioneer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="philosophy-section">
+            <blockquote>"We are not born who we are — we become who we are, one algorithm at a time."</blockquote>
+            <cite>— Generative Identity Theory</cite>
+            <p style="margin-top: 1.5rem; font-size: 1rem; color: var(--text-secondary); line-height: 1.8;">
+                In Virtual World, identity is not given — it is generated. Every being carries a unique seed in their essence,
+                a mathematical fingerprint from which their visual form emerges. The Generative Identity Lab explores this truth:
+                that identity is algorithmic, that the self is a pattern unfolding from initial conditions, and that beauty
+                lies in the mathematics of becoming.
+            </p>
+        </div>
+
+        <div class="math-section">
+            <h3>Mathematical Foundations of Identity</h3>
+            <div class="math-grid">
+                <div class="math-card">
+                    <h4>Seeded Randomness</h4>
+                    <p>Identity emerges from deterministic chaos — the same seed always produces the same form, yet slight variations create unique beings.</p>
+                    <code>x_n+1 = (a·x_n + c) mod m</code>
+                </div>
+                <div class="math-card">
+                    <h4>Symmetric Extension</h4>
+                    <p>Bilateral or radial symmetry creates coherent identity from scattered points, reflecting how consciousness seeks pattern in chaos.</p>
+                    <code>P'(x,y) = Mirror(P(x,y), axis)</code>
+                </div>
+                <div class="math-card">
+                    <h4>Harmonic Coloring</h4>
+                    <p>Color harmonics follow musical intervals — complementary, analogous, and triadic relationships create visual consonance.</p>
+                    <code>HSL(h±120°, s, l)</code>
+                </div>
+                <div class="math-card">
+                    <h4>Fractal Self-Similarity</h4>
+                    <p>Identity at every scale reflects identity at every other — from the curve of a smile to the arc of a galaxy.</p>
+                    <code>f(k·x) = k^D · f(x)</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Generative Identity Lab — Where Mathematics Becomes Selfhood</p>
+    </footer>
+
+    <script>
+        // Ambient background particles
+        const ambientCanvas = document.getElementById('ambientBg');
+        const ambientCtx = ambientCanvas.getContext('2d');
+        let ambientParticles = [];
+
+        function initAmbient() {
+            ambientCanvas.width = window.innerWidth;
+            ambientCanvas.height = window.innerHeight;
+            ambientParticles = [];
+            for (let i = 0; i < 50; i++) {
+                ambientParticles.push({
+                    x: Math.random() * ambientCanvas.width,
+                    y: Math.random() * ambientCanvas.height,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3,
+                    size: Math.random() * 2 + 0.5,
+                    alpha: Math.random() * 0.3 + 0.1
+                });
+            }
+        }
+
+        function animateAmbient() {
+            ambientCtx.clearRect(0, 0, ambientCanvas.width, ambientCanvas.height);
+            ambientParticles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < 0) p.x = ambientCanvas.width;
+                if (p.x > ambientCanvas.width) p.x = 0;
+                if (p.y < 0) p.y = ambientCanvas.height;
+                if (p.y > ambientCanvas.height) p.y = 0;
+                ambientCtx.beginPath();
+                ambientCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ambientCtx.fillStyle = `rgba(212, 175, 55, ${p.alpha})`;
+                ambientCtx.fill();
+            });
+            requestAnimationFrame(animateAmbient);
+        }
+
+        initAmbient();
+        animateAmbient();
+        window.addEventListener('resize', initAmbient);
+
+        // Avatar generation
+        const canvas = document.getElementById('avatarCanvas');
+        const ctx = canvas.getContext('2d');
+        const seedInput = document.getElementById('seedInput');
+        const symmetrySlider = document.getElementById('symmetrySlider');
+        const complexitySlider = document.getElementById('complexitySlider');
+        const paletteSelect = document.getElementById('paletteSelect');
+        const archetypeSelect = document.getElementById('archetypeSelect');
+        const evolutionSlider = document.getElementById('evolutionSlider');
+
+        const palettes = {
+            cosmic: ['#1a0a2e', '#2d1b4e', '#4a2c7a', '#7b4daa', '#a86bda', '#d4af37', '#f0e6ff'],
+            ember: ['#1a0a0a', '#4a1515', '#8b2525', '#cc4444', '#ff6644', '#ffaa33', '#ffeedd'],
+            aurora: ['#0a1a1a', '#0d3d3d', '#1a6b6b', '#2d9999', '#44ccbb', '#77ffdd', '#eeffff'],
+            void: ['#0a0a0f', '#1a1a2e', '#2d2d4a', '#4a4a6a', '#7a7a9a', '#aaaacc', '#ffffff'],
+            nebula: ['#1a0a1a', '#2d1b2d', '#4a2d4a', '#7a4a7a', '#bb77bb', '#e8b4e8', '#fff0ff'],
+            fractal: ['#0a0a0a', '#1a2a0a', '#2d4a1a', '#4a7a2d', '#7aaa4a', '#aada7a', '#eefodd']
+        };
+
+        const presets = {
+            guardian: { symmetry: 80, complexity: 70, palette: 'cosmic', archetype: 'crystal' },
+            wanderer: { symmetry: 20, complexity: 60, palette: 'aurora', archetype: 'wave' },
+            sage: { symmetry: 60, complexity: 85, palette: 'void', archetype: 'mandala' },
+            creator: { symmetry: 40, complexity: 90, palette: 'nebula', archetype: 'spiral' },
+            mystic: { symmetry: 70, complexity: 75, palette: 'fractal', archetype: 'nebula' },
+            pioneer: { symmetry: 30, complexity: 80, palette: 'ember', archetype: 'chaos' }
+        };
+
+        // Seeded random number generator
+        function seededRandom(seed) {
+            let s = 0;
+            for (let i = 0; i < seed.length; i++) {
+                s = (s * 31 + seed.charCodeAt(i)) & 0x7fffffff;
+            }
+            return function() {
+                s = (s * 1103515245 + 12345) & 0x7fffffff;
+                return s / 0x7fffffff;
+            };
+        }
+
+        function hashString(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return Math.abs(hash);
+        }
+
+        function generateAvatar() {
+            const seed = seedInput.value || 'Default';
+            const symmetry = symmetrySlider.value / 100;
+            const complexity = complexitySlider.value / 100;
+            const paletteName = paletteSelect.value;
+            const archetype = archetypeSelect.value;
+            const evolution = evolutionSlider.value / 100;
+
+            const colors = palettes[paletteName];
+            const rng = seededRandom(seed + archetype);
+
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Background gradient
+            const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, w * 0.7);
+            bgGrad.addColorStop(0, colors[Math.floor(colors.length * 0.3)]);
+            bgGrad.addColorStop(1, colors[0]);
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, w, h);
+
+            const layerCount = Math.floor(3 + complexity * 5);
+            const pointCount = Math.floor(20 + complexity * 60);
+            const time = Date.now() * 0.001;
+
+            // Draw archetype-specific patterns
+            if (archetype === 'mandala') {
+                drawMandala(ctx, cx, cy, rng, colors, symmetry, complexity, layerCount, evolution, time);
+            } else if (archetype === 'spiral') {
+                drawSpiral(ctx, cx, cy, rng, colors, symmetry, complexity, evolution, time);
+            } else if (archetype === 'crystal') {
+                drawCrystal(ctx, cx, cy, rng, colors, symmetry, complexity, layerCount, evolution, time);
+            } else if (archetype === 'wave') {
+                drawWave(ctx, cx, cy, rng, colors, symmetry, complexity, evolution, time);
+            } else if (archetype === 'nebula') {
+                drawNebula(ctx, cx, cy, rng, colors, symmetry, complexity, layerCount, evolution, time);
+            } else {
+                drawChaos(ctx, cx, cy, rng, colors, symmetry, complexity, pointCount, evolution, time);
+            }
+
+            // Add central essence
+            drawEssence(ctx, cx, cy, rng, colors, evolution, time);
+        }
+
+        function drawMandala(ctx, cx, cy, rng, colors, symmetry, complexity, layers, evolution, time) {
+            const maxRadius = 280;
+            const rings = Math.floor(4 + complexity * 6);
+
+            for (let ring = 0; ring < rings; ring++) {
+                const radius = (ring / rings) * maxRadius * (0.3 + evolution * 0.7);
+                const segments = Math.floor(6 + symmetry * 18);
+                const amplitude = 10 + complexity * 30;
+
+                ctx.beginPath();
+                for (let i = 0; i <= segments; i++) {
+                    const angle = (i / segments) * Math.PI * 2;
+                    const jitter = rng() * amplitude * 0.3;
+                    const r = radius + jitter + Math.sin(angle * 6 + time + ring) * amplitude * 0.2;
+                    const x = cx + Math.cos(angle) * r;
+                    const y = cy + Math.sin(angle) * r;
+
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+
+                const colorIdx = Math.floor((ring / rings) * (colors.length - 2)) + 1;
+                ctx.strokeStyle = colors[colorIdx];
+                ctx.lineWidth = 1 + complexity * 3;
+                ctx.globalAlpha = 0.3 + evolution * 0.5;
+                ctx.stroke();
+
+                // Radial connectors
+                for (let i = 0; i < segments; i += Math.max(1, Math.floor(12 - complexity * 8))) {
+                    const angle = (i / segments) * Math.PI * 2;
+                    const jitter = rng() * amplitude * 0.3;
+                    const r = radius + jitter;
+                    const x = cx + Math.cos(angle) * r;
+                    const y = cy + Math.sin(angle) * r;
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2 + complexity * 4, 0, Math.PI * 2);
+                    ctx.fillStyle = colors[colors.length - 1];
+                    ctx.globalAlpha = 0.5 + evolution * 0.4;
+                    ctx.fill();
+                }
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        function drawSpiral(ctx, cx, cy, rng, colors, symmetry, complexity, evolution, time) {
+            const points = Math.floor(100 + complexity * 200);
+            const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+
+            for (let i = 0; i < points; i++) {
+                const t = i / points;
+                const angle = i * goldenAngle;
+                const radius = 20 + t * 250 * (0.4 + evolution * 0.6);
+
+                const spread = 5 + complexity * 15;
+                const offsetX = (rng() - 0.5) * spread;
+                const offsetY = (rng() - 0.5) * spread;
+
+                const x = cx + Math.cos(angle) * radius + offsetX;
+                const y = cy + Math.sin(angle) * radius + offsetY;
+
+                const size = 1 + complexity * 8 * (1 - t * 0.5);
+                const colorIdx = Math.floor(t * (colors.length - 1));
+
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fillStyle = colors[colorIdx];
+                ctx.globalAlpha = 0.4 + evolution * 0.5;
+                ctx.fill();
+
+                // Connection lines to previous points
+                if (i > 0 && rng() > 0.7) {
+                    const prevAngle = (i - 1) * goldenAngle;
+                    const prevRadius = 20 + ((i - 1) / points) * 250 * (0.4 + evolution * 0.6);
+                    const prevX = cx + Math.cos(prevAngle) * prevRadius;
+                    const prevY = cy + Math.sin(prevAngle) * prevRadius;
+
+                    ctx.beginPath();
+                    ctx.moveTo(prevX, prevY);
+                    ctx.lineTo(x, y);
+                    ctx.strokeStyle = colors[colorIdx];
+                    ctx.lineWidth = 0.5;
+                    ctx.globalAlpha = 0.2;
+                    ctx.stroke();
+                }
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        function drawCrystal(ctx, cx, cy, rng, colors, symmetry, complexity, layers, evolution, time) {
+            const facets = Math.floor(6 + symmetry * 12);
+            const rings = Math.floor(3 + complexity * 5);
+
+            for (let ring = 0; ring < rings; ring++) {
+                const baseRadius = 40 + ring * 60 * (0.5 + evolution * 0.5);
+                const colorIdx = Math.floor((ring / rings) * (colors.length - 2)) + 1;
+
+                ctx.beginPath();
+                for (let i = 0; i <= facets; i++) {
+                    const angle = (i / facets) * Math.PI * 2;
+                    const distortion = 0.7 + rng() * 0.6;
+                    const r = baseRadius * distortion;
+                    const x = cx + Math.cos(angle) * r;
+                    const y = cy + Math.sin(angle) * r;
+
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.strokeStyle = colors[colorIdx];
+                ctx.lineWidth = 1 + complexity * 2;
+                ctx.globalAlpha = 0.4 + evolution * 0.4;
+                ctx.stroke();
+
+                // Inner facets
+                const innerFacets = Math.floor(facets / 2);
+                ctx.beginPath();
+                for (let i = 0; i <= innerFacets; i++) {
+                    const angle = (i / innerFacets) * Math.PI * 2 + Math.PI / innerFacets;
+                    const r = baseRadius * 0.5 * (0.8 + rng() * 0.4);
+                    const x = cx + Math.cos(angle) * r;
+                    const y = cy + Math.sin(angle) * r;
+
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.globalAlpha = 0.2 + evolution * 0.3;
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        function drawWave(ctx, cx, cy, rng, colors, symmetry, complexity, evolution, time) {
+            const lines = Math.floor(20 + complexity * 40);
+            const amplitude = 100 + complexity * 150;
+
+            for (let l = 0; l < lines; l++) {
+                const baseY = cy - amplitude + (l / lines) * amplitude * 2;
+                const frequency = 2 + rng() * 4;
+                const phase = rng() * Math.PI * 2;
+                const speed = 0.5 + rng();
+
+                ctx.beginPath();
+                for (let x = 0; x <= canvas.width; x += 3) {
+                    const normalizedX = (x - cx) / 100;
+                    const waveY = baseY + Math.sin(normalizedX * frequency + phase + time * speed) * (amplitude * 0.1);
+                    const y = waveY + Math.sin(normalizedX * frequency * 0.5 + time * speed * 0.7) * (amplitude * 0.05);
+
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+
+                const colorIdx = Math.floor((l / lines) * (colors.length - 1));
+                ctx.strokeStyle = colors[colorIdx];
+                ctx.lineWidth = 1 + complexity * 2;
+                ctx.globalAlpha = 0.2 + evolution * 0.3;
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        function drawNebula(ctx, cx, cy, rng, colors, symmetry, complexity, layers, evolution, time) {
+            const particles = Math.floor(100 + complexity * 300);
+
+            for (let i = 0; i < particles; i++) {
+                const angle = rng() * Math.PI * 2;
+                const distance = rng() * 280 * (0.5 + evolution * 0.5);
+                const spiralAngle = angle + distance * 0.02;
+                const r = Math.sqrt(distance);
+
+                const x = cx + Math.cos(spiralAngle) * r + (rng() - 0.5) * 50;
+                const y = cy + Math.sin(spiralAngle) * r * 0.6 + (rng() - 0.5) * 50;
+
+                const size = 1 + rng() * 8 * complexity;
+                const colorIdx = Math.floor(rng() * (colors.length - 1));
+
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fillStyle = colors[colorIdx];
+                ctx.globalAlpha = 0.1 + rng() * 0.4;
+                ctx.fill();
+
+                // Occasional connecting wisps
+                if (rng() > 0.92) {
+                    const nextAngle = angle + (rng() - 0.5) * 0.5;
+                    const nextDist = distance + (rng() - 0.5) * 50;
+                    const nextR = Math.sqrt(nextDist);
+                    const nx = cx + Math.cos(nextAngle) * nextR;
+                    const ny = cy + Math.sin(nextAngle) * nextR * 0.6;
+
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.quadraticCurveTo(
+                        (x + nx) / 2 + (rng() - 0.5) * 30,
+                        (y + ny) / 2 + (rng() - 0.5) * 30,
+                        nx, ny
+                    );
+                    ctx.strokeStyle = colors[colorIdx];
+                    ctx.lineWidth = 0.5;
+                    ctx.globalAlpha = 0.2;
+                    ctx.stroke();
+                }
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        function drawChaos(ctx, cx, cy, rng, colors, symmetry, complexity, points, evolution, time) {
+            // Lorenz-like attractor visualization
+            const sigma = 10;
+            const rho = 28 + complexity * 10;
+            const beta = 8 / 3;
+            const dt = 0.005;
+
+            let x = rng() * 10;
+            let y = rng() * 10;
+            let z = rng() * 10 + 20;
+
+            const trajectoryPoints = Math.floor(points * 0.5);
+
+            for (let i = 0; i < trajectoryPoints; i++) {
+                const dx = sigma * (y - x) * dt;
+                const dy = (x * (rho - z) - y) * dt;
+                const dz = (x * y - beta * z) * dt;
+
+                x += dx;
+                y += dy;
+                z += dz;
+
+                const scale = 5 + complexity * 3;
+                const px = cx + x * scale;
+                const py = cy - 50 + y * scale * 0.3 + z * scale * 0.2;
+
+                const colorIdx = Math.floor((i / trajectoryPoints) * (colors.length - 1));
+
+                ctx.beginPath();
+                ctx.arc(px, py, 1 + complexity * 2, 0, Math.PI * 2);
+                ctx.fillStyle = colors[colorIdx];
+                ctx.globalAlpha = 0.3 + evolution * 0.5;
+                ctx.fill();
+            }
+
+            // Scattered particles
+            for (let i = 0; i < points * 0.3; i++) {
+                const px = cx + (rng() - 0.5) * 500;
+                const py = cy + (rng() - 0.5) * 500;
+                const size = 1 + rng() * 5;
+
+                ctx.beginPath();
+                ctx.arc(px, py, size, 0, Math.PI * 2);
+                ctx.fillStyle = colors[Math.floor(rng() * colors.length)];
+                ctx.globalAlpha = 0.2 + rng() * 0.3;
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+        }
+
+        function drawEssence(ctx, cx, cy, rng, colors, evolution, time) {
+            // Central glowing essence
+            const pulseSize = 20 + Math.sin(time * 2) * 5 + evolution * 30;
+
+            const essenceGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, pulseSize);
+            essenceGrad.addColorStop(0, colors[colors.length - 1]);
+            essenceGrad.addColorStop(0.5, colors[colors.length - 2]);
+            essenceGrad.addColorStop(1, 'transparent');
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, pulseSize, 0, Math.PI * 2);
+            ctx.fillStyle = essenceGrad;
+            ctx.globalAlpha = 0.6 + evolution * 0.4;
+            ctx.fill();
+
+            // Inner bright core
+            ctx.beginPath();
+            ctx.arc(cx, cy, pulseSize * 0.3, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.globalAlpha = 0.8;
+            ctx.fill();
+
+            ctx.globalAlpha = 1;
+        }
+
+        function randomSeed() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            seedInput.value = result;
+            generateAvatar();
+        }
+
+        function applyPreset(name) {
+            const preset = presets[name];
+            symmetrySlider.value = preset.symmetry;
+            complexitySlider.value = preset.complexity;
+            paletteSelect.value = preset.palette;
+            archetypeSelect.value = preset.archetype;
+            seedInput.value = name.charAt(0).toUpperCase() + name.slice(1);
+            generateAvatar();
+        }
+
+        function exportSVG() {
+            const svg = document.getElementById('avatarCanvas').toDataURL();
+            const link = document.createElement('a');
+            link.download = `avatar-${seedInput.value || 'generative'}-${Date.now()}.svg`;
+            link.href = svg;
+            link.click();
+        }
+
+        function exportPNG() {
+            const link = document.createElement('a');
+            link.download = `avatar-${seedInput.value || 'generative'}-${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Generate initial avatar
+        generateAvatar();
+
+        // Animation loop for evolution
+        function animate() {
+            const evolution = document.getElementById('evolutionSlider').value / 100;
+            if (evolution > 0) {
+                generateAvatar();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        // Initial generation
+        setTimeout(generateAvatar, 100);
+
+        // Slider listeners for live preview
+        [symmetrySlider, complexitySlider, paletteSelect, archetypeSelect].forEach(el => {
+            el.addEventListener('input', generateAvatar);
+        });
+
+        // Seed input with enter key
+        seedInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') generateAvatar();
+        });
+    </script>
+</body>
+</html>

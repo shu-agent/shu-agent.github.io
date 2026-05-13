@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Warranty Economics — Cost-per-kWh & Insurance Risk Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #050510;
+            --bg-secondary: #0a0a1a;
+            --bg-card: #10101f;
+            --bg-card-hover: #181828;
+            --text-primary: #e8e8f0;
+            --text-secondary: #8888a8;
+            --text-dim: #555570;
+            --accent-gold: #ffd700;
+            --accent-gold-dim: rgba(255, 215, 0, 0.15);
+            --accent-green: #00ff88;
+            --accent-green-dim: rgba(0, 255, 136, 0.15);
+            --accent-red: #ff4466;
+            --accent-red-dim: rgba(255, 68, 102, 0.15);
+            --accent-blue: #00d4ff;
+            --accent-purple: #a855f7;
+            --accent-cyan: #00ffcc;
+            --border-subtle: rgba(255, 215, 0, 0.1);
+            --border-gold: rgba(255, 215, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(ellipse at 10% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 80%, rgba(0, 212, 255, 0.03) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 20px 60px;
+            background: radial-gradient(ellipse at center top, rgba(255, 215, 0, 0.12) 0%, transparent 60%);
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(to bottom, transparent, var(--accent-gold));
+        }
+
+        .hero h1 {
+            font-size: 3.2em;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--accent-gold) 0%, #fff8dc 50%, var(--accent-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: 1.2em;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .hero .badge-row {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-gold {
+            background: var(--accent-gold-dim);
+            border: 1px solid var(--border-gold);
+            color: var(--accent-gold);
+        }
+
+        .badge-green {
+            background: var(--accent-green-dim);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: var(--accent-green);
+        }
+
+        .badge-red {
+            background: var(--accent-red-dim);
+            border: 1px solid rgba(255, 68, 102, 0.3);
+            color: var(--accent-red);
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+            background: var(--bg-card);
+            padding: 6px;
+            border-radius: 12px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.95em;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .nav-tab.active {
+            background: var(--accent-gold-dim);
+            color: var(--accent-gold);
+            border: 1px solid var(--border-gold);
+        }
+
+        /* Section Panels */
+        .section-panel {
+            display: none;
+        }
+
+        .section-panel.active {
+            display: block;
+        }
+
+        /* Grid Layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 25px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 1100px) {
+            .grid-3 { grid-template-columns: 1fr 1fr; }
+            .grid-4 { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 2.2em; }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--border-gold);
+            background: var(--bg-card-hover);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: 0.03em;
+        }
+
+        .card-subtitle {
+            font-size: 0.85em;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em;
+        }
+
+        .icon-gold {
+            background: var(--accent-gold-dim);
+            color: var(--accent-gold);
+        }
+
+        .icon-green {
+            background: var(--accent-green-dim);
+            color: var(--accent-green);
+        }
+
+        .icon-red {
+            background: var(--accent-red-dim);
+            color: var(--accent-red);
+        }
+
+        .icon-blue {
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--accent-blue);
+        }
+
+        /* Stat Numbers */
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.4em;
+            font-weight: 500;
+            color: var(--accent-gold);
+            line-height: 1;
+        }
+
+        .stat-value-green { color: var(--accent-green); }
+        .stat-value-red { color: var(--accent-red); }
+        .stat-value-blue { color: var(--accent-blue); }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .stat-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.85em;
+            margin-top: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        .stat-change-up {
+            background: var(--accent-green-dim);
+            color: var(--accent-green);
+        }
+
+        .stat-change-down {
+            background: var(--accent-red-dim);
+            color: var(--accent-red);
+        }
+
+        /* Input Controls */
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-label {
+            display: block;
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            letter-spacing: 0.03em;
+        }
+
+        .control-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .control-input:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+
+        .control-select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .control-select option {
+            background: var(--bg-card);
+        }
+
+        .control-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--bg-secondary);
+            appearance: none;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .control-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-gold);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Charts */
+        .chart-container {
+            position: relative;
+            height: 280px;
+            margin-top: 15px;
+        }
+
+        .chart-container-lg {
+            height: 350px;
+        }
+
+        /* Comparison Table */
+        .comp-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comp-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .comp-table td {
+            padding: 14px 16px;
+            font-size: 0.95em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .comp-table tr:hover td {
+            background: rgba(255, 215, 0, 0.03);
+        }
+
+        .comp-table .highlight td {
+            background: var(--accent-gold-dim);
+            font-weight: 500;
+        }
+
+        .comp-table .highlight .ticker {
+            color: var(--accent-gold);
+        }
+
+        /* Warranty Badge */
+        .warranty-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .warranty-8y {
+            background: var(--accent-green-dim);
+            color: var(--accent-green);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .warranty-10y {
+            background: var(--accent-gold-dim);
+            color: var(--accent-gold);
+            border: 1px solid var(--border-gold);
+        }
+
+        .warranty-15y {
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--accent-blue);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        /* Risk Meter */
+        .risk-meter {
+            position: relative;
+            height: 12px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, var(--accent-green) 0%, var(--accent-gold) 50%, var(--accent-red) 100%);
+            margin: 15px 0;
+        }
+
+        .risk-meter::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 0 8px rgba(0,0,0,0.5);
+            transition: left 0.5s ease;
+        }
+
+        .risk-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75em;
+            color: var(--text-dim);
+            margin-top: 6px;
+        }
+
+        /* TCO Breakdown */
+        .tco-bar {
+            display: flex;
+            height: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .tco-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: white;
+            transition: width 0.5s ease;
+        }
+
+        /* Equations */
+        .equation-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .equation {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.15em;
+            color: var(--accent-cyan);
+            text-align: center;
+        }
+
+        .equation-label {
+            font-size: 0.85em;
+            color: var(--text-dim);
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        /* Battery Visual */
+        .battery-visual {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            padding: 20px;
+        }
+
+        .battery-cell {
+            width: 40px;
+            height: 80px;
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+            border: 2px solid var(--border-subtle);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .battery-cell-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, var(--accent-green) 0%, var(--accent-blue) 100%);
+            transition: height 0.5s ease;
+        }
+
+        .battery-cell.degraded .battery-cell-fill {
+            background: linear-gradient(180deg, var(--accent-red) 0%, #ff8866 100%);
+        }
+
+        .battery-cell.warning .battery-cell-fill {
+            background: linear-gradient(180deg, var(--accent-gold) 0%, #ffaa44 100%);
+        }
+
+        /* Insurance Card */
+        .insurance-tier {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.3s;
+        }
+
+        .insurance-tier:hover {
+            border-color: var(--border-gold);
+        }
+
+        .insurance-tier-name {
+            font-weight: 600;
+            min-width: 100px;
+        }
+
+        .insurance-tier-price {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2em;
+            color: var(--accent-gold);
+            margin-left: auto;
+        }
+
+        .insurance-tier-coverage {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-left: auto;
+        }
+
+        /* Scrollable sections */
+        .scroll-table {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .scroll-table::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scroll-table::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 3px;
+        }
+
+        .scroll-table::-webkit-scrollbar-thumb {
+            background: var(--text-dim);
+            border-radius: 3px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-dim);
+            font-size: 0.85em;
+            border-top: 1px solid var(--border-subtle);
+            margin-top: 60px;
+        }
+
+        .footer a {
+            color: var(--accent-gold);
+            text-decoration: none;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            animation: slideUp 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="container">
+        <!-- Hero -->
+        <section class="hero">
+            <h1>Battery Warranty Economics</h1>
+            <p class="subtitle">
+                Cost-per-kWh analysis, insurance risk modeling, and total cost of ownership
+                for lithium-ion batteries across chemistries, manufacturers, and applications
+            </p>
+            <div class="badge-row">
+                <span class="badge badge-gold">Cost-per-kWh Analysis</span>
+                <span class="badge badge-green">Degradation Modeling</span>
+                <span class="badge badge-red">Insurance Risk Tiers</span>
+            </div>
+        </section>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-section="overview">Overview</button>
+            <button class="nav-tab" data-section="cpk">Cost-per-kWh</button>
+            <button class="nav-tab" data-section="degradation">Degradation</button>
+            <button class="nav-tab" data-section="warranty">Warranty Terms</button>
+            <button class="nav-tab" data-section="insurance">Insurance Risk</button>
+            <button class="nav-tab" data-section="tco">TCO Analysis</button>
+            <button class="nav-tab" data-section="physics">Physics</button>
+        </nav>
+
+        <!-- SECTION: Overview -->
+        <div class="section-panel active" id="section-overview">
+            <div class="grid-4">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Avg. Pack Cost</div>
+                            <div class="card-subtitle">2026 market average</div>
+                        </div>
+                        <div class="card-icon icon-gold">$</div>
+                    </div>
+                    <div class="stat-value">$128</div>
+                    <div class="stat-label">per kWh (pack level)</div>
+                    <div class="stat-change stat-change-down">-12% YoY</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Avg. Warranty</div>
+                            <div class="card-subtitle">Industry standard</div>
+                        </div>
+                        <div class="card-icon icon-green">8</div>
+                    </div>
+                    <div class="stat-value stat-value-green">8.2</div>
+                    <div class="stat-label">years (weighted avg)</div>
+                    <div class="stat-change stat-change-up">+0.5y vs 2024</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Failure Rate</div>
+                            <div class="card-subtitle">At 8-year mark</div>
+                        </div>
+                        <div class="card-icon icon-red">!</div>
+                    </div>
+                    <div class="stat-value stat-value-red">2.3%</div>
+                    <div class="stat-label">OEM warrantied failures</div>
+                    <div class="stat-change stat-change-down">-0.8% vs 2024</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Insurance Premium</div>
+                            <div class="card-subtitle">Annual, per kWh</div>
+                        </div>
+                        <div class="card-icon icon-blue">%</div>
+                    </div>
+                    <div class="stat-value stat-value-blue">$1.84</div>
+                    <div class="stat-label">per kWh per year</div>
+                    <div class="stat-change stat-change-down">-5% YoY</div>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top: 25px;">
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 20px;">Battery Cost vs Warranty Duration by Chemistry</div>
+                    <div class="chart-container">
+                        <canvas id="chartOverview"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 20px;">Failure Probability by Chemistry Type</div>
+                    <div class="chart-container">
+                        <canvas id="chartFailureProb"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 25px;">
+                <div class="card-title" style="margin-bottom: 20px;">Battery Chemistry Comparison Matrix</div>
+                <div class="scroll-table">
+                    <table class="comp-table" id="chemMatrix">
+                        <thead>
+                            <tr>
+                                <th>Chemistry</th>
+                                <th>Energy Density</th>
+                                <th>Cycle Life</th>
+                                <th>Cost/kWh</th>
+                                <th>Warranty</th>
+                                <th>Failure Rate</th>
+                                <th>Insurance Risk</th>
+                                <th>Best For</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: Cost-per-kWh -->
+        <div class="section-panel" id="section-cpk">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 20px;">Cost Calculator</div>
+
+                    <div class="control-group">
+                        <label class="control-label">Battery Chemistry</label>
+                        <select class="control-select" id="cpk-chemistry">
+                            <option value="nmc811">NMC 811</option>
+                            <option value="nca">NCA (Tesla)</option>
+                            <option value="lfp">LFP (BYD/ CATL)</option>
+                            <option value="lfp，刀片">LFP Blade (BYD)</option>
+                            <option value="mnc">MNC (VW)</option>
+                            <option value="lco">LCO</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Pack Capacity (kWh)</label>
+                        <input type="number" class="control-input" id="cpk-capacity" value="75" min="10" max="200" step="1">
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Purchase Price ($)</label>
+                        <input type="number" class="control-input" id="cpk-price" value="9600" min="1000" max="50000" step="100">
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Usable DOD (%)</label>
+                        <input type="range" class="control-slider" id="cpk-dod" value="90" min="50" max="100" step="1">
+                        <div style="text-align: center; font-family: 'JetBrains Mono', monospace; color: var(--accent-gold);" id="cpk-dod-val">90%</div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Expected Cycles</label>
+                        <input type="number" class="control-input" id="cpk-cycles" value="2000" min="500" max="10000" step="100">
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Electricity Cost ($/kWh)</label>
+                        <input type="number" class="control-input" id="cpk-elec" value="0.12" min="0.05" max="0.50" step="0.01">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 20px;">Cost Analysis Results</div>
+
+                    <div class="grid-2">
+                        <div>
+                            <div class="stat-label">PACK LEVEL COST</div>
+                            <div class="stat-value" id="cpk-result-pack" style="font-size: 1.8em;">$128</div>
+                            <div class="stat-label">per kWh</div>
+                        </div>
+                        <div>
+                            <div class="stat-label">USABLE CAPACITY COST</div>
+                            <div class="stat-value stat-value-green" id="cpk-result-usable" style="font-size: 1.8em;">$142</div>
+                            <div class="stat-label">per usable kWh</div>
+                        </div>
+                        <div>
+                            <div class="stat-label">PER CYCLE COST</div>
+                            <div class="stat-value stat-value-blue" id="cpk-result-cycle" style="font-size: 1.8em;">$0.071</div>
+                            <div class="stat-label">per cycle</div>
+                        </div>
+                        <div>
+                            <div class="stat-label">LIFETIME ENERGY</div>
+                            <div class="stat-value stat-value-red" id="cpk-result-energy" style="font-size: 1.8em;">135</div>
+                            <div class="stat-label">MWh total</div>
+                        </div>
+                    </div>
+
+                    <div class="equation-box" style="margin-top: 25px;">
+                        <div class="equation">Cost_per_kWh = Purchase_Price / (Capacity × Usable_DOD × Cycles)</div>
+                        <div class="equation-label">Levelized Cost of Cycling (LCOC)</div>
+                    </div>
+
+                    <div class="tco-bar" id="cpk-breakdown-bar">
+                        <div class="tco-segment" style="background: var(--accent-gold); width: 100%;">Material Cost</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: var(--text-dim);">
+                        <span>Pack cost basis</span>
+                        <span id="cpk-breakdown-label">100% of initial cost</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 25px;">
+                <div class="card-title" style="margin-bottom: 20px;">Cost-per-kWh Historical Trend by Chemistry</div>
+                <div class="chart-container chart-container-lg">
+                    <canvas id="chartCostTrend"></canvas>
+                </div>
+            </div>
+
+            <div class="grid-3" style="margin-top: 25px;">
+                <div class="card">
+                    <div class="card-title">NMC 811</div>
+                    <div class="stat-value">$130</div>
+                    <div class="stat-label">per kWh (pack)</div>
+                    <div style="margin-top: 15px; font-size: 0.9em; color: var(--text-secondary);">
+                        <p>High energy density (250 Wh/kg)</p>
+                        <p>2000+ cycles @ 80% DOD</p>
+                        <p>8-year warranty typical</p>
+                        <p>2.1% failure rate</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">LFP</div>
+                    <div class="stat-value">$105</div>
+                    <div class="stat-label">per kWh (pack)</div>
+                    <div style="margin-top: 15px; font-size: 0.9em; color: var(--text-secondary);">
+                        <p>Moderate energy density (160 Wh/kg)</p>
+                        <p>4000+ cycles @ 80% DOD</p>
+                        <p>10-year warranty typical</p>
+                        <p>1.2% failure rate</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">NCA (Tesla)</div>
+                    <div class="stat-value">$135</div>
+                    <div class="stat-label">per kWh (pack)</div>
+                    <div style="margin-top: 15px; font-size: 0.9em; color: var(--text-secondary);">
+                        <p>Very high energy density (260 Wh/kg)</p>
+                        <p>1500 cycles @ 80% DOD</p>
+                        <p>8-year warranty (150k mi)</p>
+                        <p>2.8% failure rate</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: Degradation -->
+        <div class="section-panel" id="section-degradation">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 20px;">Degradation Model Controls</div>
+
+                    <div class="control-group">
+                        <label class="control-label">Chemistry Type</label>
+                        <select class="control-select" id="deg-chemistry">
+                            <option value="nmc811">NMC 811</option>
+                            <option value="nca">NCA</option>
+                            <option value="lfp">LFP</option>
+                            <option value="lco">LCO</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Temperature (°C)</label>
+                        <input type="range" class="control-slider" id="deg-temp" value="25" min="-20" max="60" step="1">
+                        <div style="text-align: center; font-family: 'JetBrains Mono', monospace; color: var(--accent-gold);" id="deg-temp-val">25°C</div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Average SOC (%)</label>
+                        <input type="range" class="control-slider" id="deg-soc" value="50" min="0" max="100" step="1">
+                        <div style="text-align: center; font-family: 'JetBrains Mono', monospace; color: var(--accent-gold);" id="deg-soc-val">50%</div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Cycle Count</label>
+                        <input type="number" class="control-input" id="deg-cycles" value="1000" min="0" max="5000" step="100">
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Calendar Age (years)</label>
+                        <input type="range" class="control-slider" id="deg-calendar" value="5" min="0" max="20" step="0.5">
+                        <div style="text-align: center; font-family: 'JetBrains Mono', monospace; color: var(--accent-gold);" id="deg-calendar-val">5 years</div>
+                    </div>
+
+                    <div style="margin-top: 20px; padding: 15px; background: var(--bg-secondary); border-radius: 10px;">
+                        <div style="font-size: 0.9em; color: var(--text-secondary); line-height: 1.8;">
+                            <strong style="color: var(--accent-gold);">Degradation Mechanisms:</strong><br>
+                            • Calendar aging: SEI growth, lithium plating<br>
+                            • Cycle aging: particle cracking, CEI thickening<br>
+                            • Thermal acceleration: +10°C doubles rate<br>
+                            • High SOC stress: 80-100% accelerates
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 20px;">SOH Projection</div>
+                    <div class="chart-container">
+                        <canvas id="chartSOH"></canvas>
+                    </div>
+
+                    <div class="grid-2" style="margin-top: 20px;">
+                        <div>
+                            <div class="stat-label">CURRENT SOH</div>
+                            <div class="stat-value" id="deg-soh-current" style="font-size: 2em;">87.3%</div>
+                        </div>
+                        <div>
+                            <div class="stat-label">END-OF-LIFE DATE</div>
+                            <div class="stat-value stat-value-red" id="deg-eol-date" style="font-size: 1.6em;">2034</div>
+                            <div class="stat-label">@ 80% SOH threshold</div>
+                        </div>
+                    </div>
+
+                    <div class="risk-meter" id="deg-risk-meter" style="margin-top: 25px;"></div>
+                    <div class="risk-labels">
+                        <span>Excellent</span>
+                        <span>Good</span>
+                        <span>Fair</span>
+                        <span>Poor</span>
+                        <span>Critical</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 25px;">
+                <div class="card-title" style="margin-bottom: 20px;">Capacity Fade Curves by Chemistry</div>
+                <div class="chart-container chart-container-lg">
+                    <canvas id="chartCapacityFade"></canvas>
+                </div>
+            </div>
+
+            <div class="grid-3" style="margin-top: 25px;">
+                <div class="card">
+                    <div class="card-title">NMC 811 Degradation</div>
+                    <div style="font-size: 0.9em; color: var(--text-secondary); line-height: 1.8;">
+                        <p>• 2.0% per year calendar</p>
+                        <p>• 0.025% per cycle at 25°C</p>
+                        <p>• +0.5% per year per 10°C above 25°C</p>
+                        <p>• Accelerated above 80% SOC</p>
+                        <p>• SEI resistance growth dominant</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">LFP Degradation</div>
+                    <div style="font-size: 0.9em; color: var(--text-secondary); line-height: 1.8;">
+                        <p>• 1.0% per year calendar</p>
+                        <p>• 0.015% per cycle at 25°C</p>
+                        <p>• Lower SOC sensitivity</p>
+                        <p>• FePO₄ nucleation limited</p>
+                        <p>• Fe dissolution at high T</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">NCA Degradation</div>
+                    <div style="font-size: 0.9em; color: var(--text-secondary); line-height: 1.8;">
+                        <p>• 2.5% per year calendar</p>
+                        <p>• 0.035% per cycle at 25°C</p>
+                        <p>• Li/Ni mixing increases with T</p>
+                        <p>• Structural disorder at high SOC</p>
+                        <p>• Cracking dominant failure mode</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: Warranty Terms -->
+        <div class="section-panel" id="section-warranty">
+            <div class="card">
+                <div class="card-title" style="margin-bottom: 20px;">OEM Warranty Comparison</div>
+                <div class="scroll-table">
+                    <table class="comp-table" id="warrantyTable">
+                        <thead>
+                            <tr>
+                                <th>OEM</th>
+                                <th>Chemistry</th>
+                                <th>Basic Warranty</th>
+                                <th>Capacity Guarantee</th>
+                                <th>Drivetrain</th>
+                                <th>Country</th>
+                                <th>Key Terms</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top: 25px;">
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 20px;">Warranty Value Score</div>
+                    <div class="chart-container">
+                        <canvas id="chartWarrantyScore"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 20px;">Cost-to-Warranty Ratio</div>
+                    <div class="chart-container">
+                        <canvas id="chartCostWarranty"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-3" style="margin-top: 25px;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Tesla</div>
+                        <span class="warranty-8y">8 Year</span>
+                    </div>
+                    <div style="font-size: 0.9em; color: var(--text-secondary); line-height: 1.8; margin-top: 15px;">
+                        <p>• Model 3/Y: 8 yr / 150k mi</p>
+                        <p>• Model S/X: 8 yr / 150k mi (NCA)</p>
+                        <p>• Capacity: 70% @ warranty end</p>
+                        <p>• Battery replacement: $5k-16k</p>
+                        <p>• 1.1M vehicles monitored</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">BYD</div>
+                        <span class="warranty-10y">10 Year</span>
+                    </div>
+                    <div style="font-size: 0.9em; color: var(--text-secondary); line-height: 1.8; margin-top: 15px;">
+                        <p>• Blade Battery:终身质保</p>
+                        <p>• Commercial: 10 yr / 500k km</p>
+                        <p>• Capacity: 80% @ warranty end</p>
+                        <p>• Han EV: 8 yr / 150k km</p>
+                        <p>• Low failure rate: 0.8%</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">VW / Mercedes</div>
+                        <span class="warranty-8y">8 Year</span>
+                    </div>
+                    <div style="font-size: 0.9em; color: var(--text-secondary); line-height: 1.8; margin-top: 15px;">
+                        <p>• VW ID.4: 8 yr / 160k km</p>
+                        <p>• Mercedes EQS: 10 yr / 250k km</p>
+                        <p>• Capacity: 70-75% guarantee</p>
+                        <p>• EQA: 8 yr / 100k mi</p>
+                        <p>• Battery-first architecture</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-3" style="margin-top: 25px;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">GM / Ford</div>
+                        <span class="warranty-8y">8 Year</span>
+                    </div>
+                    <div style="font-size: 0.9em; color: var(--text-secondary); line-height: 1.8; margin-top: 15px;">
+                        <p>• GM Ultium: 8 yr / 100k mi</p>
+                        <p>• Ford Mustang Mach-E: 8 yr / 100k mi</p>
+                        <p>• Capacity: 70% guarantee</p>
+                        <p>• Battery replacement: $20k+</p>
+                        <p>• Third-party insurers active</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">CATL / Renault</div>
+                        <span class="warranty-8y">8 Year</span>
+                    </div>
+                    <div style="font-size: 0.9em; color: var(--text-secondary); line-height: 1.8; margin-top: 15px;">
+                        <p>• Renault: 8 yr / 160k km</p>
+                        <p>• Megane E-Tech: LFP option</p>
+                        <p>•_capacity: 70% guarantee</p>
+                        <p>• Stellantis: similar terms</p>
+                        <p>• EU warranty regs (2 yr min)</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Hyundai / Kia</div>
+                        <span class="warranty-10y">10 Year</span>
+                    </div>
+                    <div style="font-size: 0.9em; color: var(--text-secondary); line-height: 1.8; margin-top: 15px;">
+                        <p>• Ioniq 5/6: 10 yr / 100k mi</p>
+                        <p>• Capacity: 70% guarantee</p>
+                        <p>• E-GMP platform: 800V</p>
+                        <p>• LFP option added 2025</p>
+                        <p>• Battery swapping pilot</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: Insurance Risk -->
+        <div class="section-panel" id="section-insurance">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 20px;">Insurance Tier Comparison</div>
+
+                    <div class="insurance-tier">
+                        <div class="card-icon icon-green" style="width: 36px; height: 36px; font-size: 1em;">✓</div>
+                        <div>
+                            <div class="insurance-tier-name" style="color: var(--accent-green);">Essential</div>
+                            <div style="font-size: 0.85em; color: var(--text-secondary);">Basic coverage</div>
+                        </div>
+                        <div class="insurance-tier-price">$0.92/kWh</div>
+                        <div style="font-size: 0.8em; color: var(--text-dim);">per year</div>
+                    </div>
+
+                    <div class="insurance-tier">
+                        <div class="card-icon icon-gold" style="width: 36px; height: 36px; font-size: 1em;">★</div>
+                        <div>
+                            <div class="insurance-tier-name" style="color: var(--accent-gold);">Standard</div>
+                            <div style="font-size: 0.85em; color: var(--text-secondary);">Full replacement</div>
+                        </div>
+                        <div class="insurance-tier-price">$1.84/kWh</div>
+                        <div style="font-size: 0.8em; color: var(--text-dim);">per year</div>
+                    </div>
+
+                    <div class="insurance-tier">
+                        <div class="card-icon icon-blue" style="width: 36px; height: 36px; font-size: 1em;">◆</div>
+                        <div>
+                            <div class="insurance-tier-name" style="color: var(--accent-blue);">Premium</div>
+                            <div style="font-size: 0.85em; color: var(--text-secondary);">+ degradation cover</div>
+                        </div>
+                        <div class="insurance-tier-price">$3.20/kWh</div>
+                        <div style="font-size: 0.8em; color: var(--text-dim);">per year</div>
+                    </div>
+
+                    <div class="insurance-tier">
+                        <div class="card-icon" style="width: 36px; height: 36px; font-size: 1em; background: var(--accent-red-dim); color: var(--accent-red);">♦</div>
+                        <div>
+                            <div class="insurance-tier-name" style="color: var(--accent-red);">Fleet Plus</div>
+                            <div style="font-size: 0.85em; color: var(--text-secondary);">Commercial fleet</div>
+                        </div>
+                        <div class="insurance-tier-price">$2.60/kWh</div>
+                        <div style="font-size: 0.8em; color: var(--text-dim);">per year</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 20px;">Risk Assessment Calculator</div>
+
+                    <div class="control-group">
+                        <label class="control-label">Chemistry Risk Factor</label>
+                        <select class="control-select" id="ins-chemistry">
+                            <option value="lfp">LFP (low risk)</option>
+                            <option value="nmc811" selected>NMC 811 (medium)</option>
+                            <option value="nca">NCA (higher)</option>
+                            <option value="lco">LCO (high risk)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Pack Age (years)</label>
+                        <input type="range" class="control-slider" id="ins-age" value="3" min="0" max="15" step="0.5">
+                        <div style="text-align: center; font-family: 'JetBrains Mono', monospace; color: var(--accent-gold);" id="ins-age-val">3 years</div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Current SOH (%)</label>
+                        <input type="range" class="control-slider" id="ins-soh" value="92" min="50" max="110" step="1">
+                        <div style="text-align: center; font-family: 'JetBrains Mono', monospace; color: var(--accent-gold);" id="ins-soh-val">92%</div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Application</label>
+                        <select class="control-select" id="ins-application">
+                            <option value="consumer">Consumer EV</option>
+                            <option value="fleet">Fleet / Commercial</option>
+                            <option value="grid">Grid Storage</option>
+                            <option value="industrial">Industrial</option>
+                        </select>
+                    </div>
+
+                    <div class="equation-box" style="margin-top: 20px;">
+                        <div class="equation">Premium = Base_Rate × Chemistry_Risk × Age_Factor × SOH_Factor × App_Multiplier</div>
+                        <div class="equation-label">Insurance Risk Scoring Model</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 25px;">
+                <div class="card-title" style="margin-bottom: 20px;">Insurance Premium Projection</div>
+                <div class="chart-container chart-container-lg">
+                    <canvas id="chartInsurance"></canvas>
+                </div>
+            </div>
+
+            <div class="grid-3" style="margin-top: 25px;">
+                <div class="card">
+                    <div class="card-title">NCA Risk Profile</div>
+                    <div class="stat-value stat-value-red">2.8%</div>
+                    <div class="stat-label">Annual failure probability</div>
+                    <div style="margin-top: 15px; font-size: 0.9em; color: var(--text-secondary);">
+                        <p>• Thermal runaway: 0.04%/yr</p>
+                        <p>• Capacity fade: 2.5%/yr avg</p>
+                        <p>• Internal short: 0.12%/yr</p>
+                        <p>• Premium multiplier: 1.35x</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">NMC 811 Risk Profile</div>
+                    <div class="stat-value" style="color: var(--accent-gold);">2.1%</div>
+                    <div class="stat-label">Annual failure probability</div>
+                    <div style="margin-top: 15px; font-size: 0.9em; color: var(--text-secondary);">
+                        <p>• Thermal runaway: 0.03%/yr</p>
+                        <p>• Capacity fade: 2.0%/yr avg</p>
+                        <p>• Internal short: 0.08%/yr</p>
+                        <p>• Premium multiplier: 1.15x</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">LFP Risk Profile</div>
+                    <div class="stat-value stat-value-green">1.2%</div>
+                    <div class="stat-label">Annual failure probability</div>
+                    <div style="margin-top: 15px; font-size: 0.9em; color: var(--text-secondary);">
+                        <p>• Thermal runaway: 0.01%/yr</p>
+                        <p>• Capacity fade: 1.0%/yr avg</p>
+                        <p>• Internal short: 0.04%/yr</p>
+                        <p>• Premium multiplier: 0.85x</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: TCO -->
+        <div class="section-panel" id="section-tco">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 20px;">Total Cost of Ownership Model</div>
+
+                    <div class="control-group">
+                        <label class="control-label">Use Case</label>
+                        <select class="control-select" id="tco-usecase">
+                            <option value="ev-consumer">Consumer EV (15k mi/yr)</option>
+                            <option value="ev-fleet">Fleet EV (30k mi/yr)</option>
+                            <option value="grid-4hr">Grid Storage 4-hr</option>
+                            <option value="grid-2hr">Grid Storage 2-hr</option>
+                            <option value="home">Home Storage</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Battery Chemistry</label>
+                        <select class="control-select" id="tco-chemistry">
+                            <option value="nmc811">NMC 811</option>
+                            <option value="nca">NCA</option>
+                            <option value="lfp">LFP</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">System Size (kWh)</label>
+                        <input type="number" class="control-input" id="tco-size" value="100" min="5" max="10000" step="5">
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Analysis Period (years)</label>
+                        <input type="range" class="control-slider" id="tco-years" value="15" min="5" max="25" step="1">
+                        <div style="text-align: center; font-family: 'JetBrains Mono', monospace; color: var(--accent-gold);" id="tco-years-val">15 years</div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Discount Rate (%)</label>
+                        <input type="range" class="control-slider" id="tco-discount" value="6" min="0" max="15" step="0.5">
+                        <div style="text-align: center; font-family: 'JetBrains Mono', monospace; color: var(--accent-gold);" id="tco-discount-val">6.0%</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title" style="margin-bottom: 20px;">TCO Breakdown ($/kWh-year)</div>
+                    <div class="chart-container">
+                        <canvas id="chartTCO"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 25px;">
+                <div class="card-title" style="margin-bottom: 20px;">TCO Comparison by Chemistry and Application</div>
+                <div class="chart-container chart-container-lg">
+                    <canvas id="chartTCOCompare"></canvas>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top: 25px;">
+                <div class="card">
+                    <div class="card-title">Levelized Cost ($/kWh-delivered)</div>
+                    <div class="scroll-table" style="max-height: 300px;">
+                        <table class="comp-table" id="lcoeTable">
+                            <thead>
+                                <tr>
+                                    <th>Chemistry</th>
+                                    <th>Consumer EV</th>
+                                    <th>Fleet EV</th>
+                                    <th>Grid 4hr</th>
+                                    <th>Home</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">TCO Component Breakdown</div>
+                    <div style="font-size: 0.9em; color: var(--text-secondary); line-height: 2;">
+                        <p><strong style="color: var(--accent-gold);">Purchase Cost:</strong> Pack price ÷ (capacity × usable DOD × cycle life)</p>
+                        <p><strong style="color: var(--accent-green);">O&M Cost:</strong> $8-15/kWh/year (monitoring, cooling, repairs)</p>
+                        <p><strong style="color: var(--accent-blue);">Replacement Cost:</strong> Pro-rated pack cost × probability at year X</p>
+                        <p><strong style="color: var(--accent-red);">Insurance:</strong> Tier premium × years × SOH degradation factor</p>
+                        <p><strong style="color: var(--accent-purple);">Grid Services:</strong> Foregone revenue from second-life applications</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: Physics -->
+        <div class="section-panel" id="section-physics">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title">Arrhenius Degradation Rate</div>
+                    <div class="equation-box">
+                        <div class="equation">k = A · exp(-Ea / RT)</div>
+                        <div class="equation-label">Degradation rate constant</div>
+                    </div>
+                    <div style="font-size: 0.9em; color: var(--text-secondary); line-height: 1.8; margin-top: 15px;">
+                        <p><strong>A:</strong> Pre-exponential factor (s⁻¹)</p>
+                        <p><strong>Ea:</strong> Activation energy (kJ/mol)</p>
+                        <p><strong>R:</strong> Gas constant (8.314 J/mol·K)</p>
+                        <p><strong>T:</strong> Temperature (K)</p>
+                    </div>
+                    <div style="margin-top: 15px; padding: 15px; background: var(--bg-secondary); border-radius: 10px;">
+                        <div style="font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan);">
+                            Ea(NMC) ≈ 25 kJ/mol → Doubles every ~10°C<br>
+                            Ea(LFP) ≈ 20 kJ/mol → Doubles every ~12°C
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Weibull Failure Distribution</div>
+                    <div class="equation-box">
+                        <div class="equation">R(t) = exp(-(t/η)^β)</div>
+                        <div class="equation-label">Reliability function (Weibull)</div>
+                    </div>
+                    <div style="font-size: 0.9em; color: var(--text-secondary); line-height: 1.8; margin-top: 15px;">
+                        <p><strong>η (eta):</strong> Characteristic lifetime</p>
+                        <p><strong>β (beta):</strong> Shape parameter (failure mode)</p>
+                        <p>β < 1: Early-life failures</p>
+                        <p>β = 1: Random/exponential failures</p>
+                        <p>β > 1: Wear-out failures</p>
+                    </div>
+                    <div style="margin-top: 15px; padding: 15px; background: var(--bg-secondary); border-radius: 10px;">
+                        <div style="font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan);">
+                            NMC η=10yr, β=3.5 → 2.3% fail by year 8<br>
+                            LFP η=15yr, β=4.0 → 1.1% fail by year 10
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Capacity Fade Model</div>
+                    <div class="equation-box">
+                        <div class="equation">SOH = 100 · exp(-α·t - β·C)</div>
+                        <div class="equation-label">Exponential fade model</div>
+                    </div>
+                    <div style="font-size: 0.9em; color: var(--text-secondary); line-height: 1.8; margin-top: 15px;">
+                        <p><strong>α:</strong> Calendar aging coefficient (yr⁻¹)</p>
+                        <p><strong>β:</strong> Cycle aging coefficient (cycle⁻¹)</p>
+                        <p><strong>t:</strong> Time in years</p>
+                        <p><strong>C:</strong> Equivalent full cycles</p>
+                    </div>
+                    <div style="margin-top: 15px; padding: 15px; background: var(--bg-secondary); border-radius: 10px;">
+                        <div style="font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan);">
+                            NMC: α=0.020, β=0.00025<br>
+                            LFP: α=0.010, β=0.00012
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Levelized Cost Equation</div>
+                    <div class="equation-box">
+                        <div class="equation">LCOE = (I + OM + R + Ins) / E_delivered</div>
+                        <div class="equation-label">Levelized Cost of Energy ($/kWh)</div>
+                    </div>
+                    <div style="font-size: 0.9em; color: var(--text-secondary); line-height: 1.8; margin-top: 15px;">
+                        <p><strong>I:</strong> Capital + replacement (NPV)</p>
+                        <p><strong>OM:</strong> Operations & maintenance (NPV)</p>
+                        <p><strong>R:</strong> Residual / salvage value</p>
+                        <p><strong>Ins:</strong> Insurance premiums (NPV)</p>
+                        <p><strong>E_delivered:</strong> Lifetime energy (kWh)</p>
+                    </div>
+                    <div style="margin-top: 15px; padding: 15px; background: var(--bg-secondary); border-radius: 10px;">
+                        <div style="font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan);">
+                            NMC grid storage: LCOE ≈ $0.08-0.12/kWh<br>
+                            LFP grid storage: LCOE ≈ $0.06-0.09/kWh
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 25px;">
+                <div class="card-title" style="margin-bottom: 20px;">Connection to Kevin's Gravitational Wave Physics</div>
+                <div style="font-size: 0.95em; color: var(--text-secondary); line-height: 2; padding: 20px; background: var(--bg-secondary); border-radius: 12px;">
+                    <p>The <strong style="color: var(--accent-gold);">Weibull distribution</strong> R(t) = exp(-(t/η)^β) mirrors the <strong style="color: var(--accent-cyan);">survival probability</strong> in gravitational wave detector noise analysis:</p>
+                    <p style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan);"> GW detection: P(signal) = exp(-(SNR/η)^β)  where η is threshold, β shapes the distribution</p>
+                    <p style="margin-top: 10px;">The <strong style="color: var(--accent-gold);">Arrhenius equation</strong> for thermal degradation mirrors the <strong style="color: var(--accent-cyan);">Arrhenius-law temperature scaling</strong> in LIGO thermal noise:</p>
+                    <p style="margin-top: 10px; font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan);"> Brownian thermal noise: S(f) ∝ T · exp(-Ea/kT) in mirror coatings</p>
+                    <p style="margin-top: 10px;">Both domains share the same mathematical structure because both involve <strong style="color: var(--text-primary);">thermally-activated processes</strong> governed by the Boltzmann factor exp(-Ea/kT).</p>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Battery Warranty Economics v1.0 — Li-Ion Battery Agent</p>
+            <p style="margin-top: 8px;">Data sources: BloombergNEF, BNEF Battery Price Index, OEM warranty terms, insurance actuarial tables</p>
+        </footer>
+    </div>
+
+    <script>
+        // ==============================================
+        // DATA
+        // ==============================================
+        const chemistryData = {
+            nmc811: { name: 'NMC 811', energy: 250, cycles: 2000, costPack: 130, warranty: 8, failRate: 2.1, insurance: 1.15, calendarRate: 0.020, cycleRate: 0.00025, best: 'Premium EVs' },
+            nca: { name: 'NCA (Tesla)', energy: 260, cycles: 1500, costPack: 135, warranty: 8, failRate: 2.8, insurance: 1.35, calendarRate: 0.025, cycleRate: 0.00035, best: 'Long-range EVs' },
+            lfp: { name: 'LFP', energy: 160, cycles: 4000, costPack: 105, warranty: 10, failRate: 1.2, insurance: 0.85, calendarRate: 0.010, cycleRate: 0.00012, best: 'Grid/Storage' },
+            lco: { name: 'LCO', energy: 200, cycles: 800, costPack: 95, warranty: 5, failRate: 4.5, insurance: 1.60, calendarRate: 0.035, cycleRate: 0.00050, best: 'Consumer electronics' },
+        };
+
+        const oemData = [
+            { oem: 'Tesla', chem: 'NCA', basic: '8 yr / 150k mi', cap: '70%', drivetrain: '8 yr / 150k mi', country: 'US', terms: 'Battery replacement $5-16k' },
+            { oem: 'Tesla', chem: 'NMC 811', basic: '8 yr / 150k mi', cap: '70%', drivetrain: '8 yr / 150k mi', country: 'US', terms: 'Model 3/Y LFP option' },
+            { oem: 'BYD', chem: 'LFP Blade', basic: '10 yr / 500k km', cap: '80%', drivetrain: 'Lifetime', country: 'CN', terms: '终身质保 for private' },
+            { oem: 'VW', chem: 'NMC', basic: '8 yr / 160k km', cap: '70%', drivetrain: '8 yr / 160k km', country: 'EU', terms: 'ID.4, ID.3 series' },
+            { oem: 'Mercedes', chem: 'NMC', basic: '10 yr / 250k km', cap: '75%', drivetrain: '10 yr / 250k km', country: 'EU', terms: 'EQS, EQA series' },
+            { oem: 'GM', chem: 'NMC Ultium', basic: '8 yr / 100k mi', cap: '70%', drivetrain: '8 yr / 100k mi', country: 'US', terms: 'Ultium platform' },
+            { oem: 'Ford', chem: 'NMC', basic: '8 yr / 100k mi', cap: '70%', drivetrain: '8 yr / 100k mi', country: 'US', terms: 'Mustang Mach-E' },
+            { oem: 'Hyundai/Kia', chem: 'NMC', basic: '10 yr / 100k mi', cap: '70%', drivetrain: '10 yr / 100k mi', country: 'KR', terms: 'Ioniq 5/6, E-GMP' },
+            { oem: 'Renault/Nissan', chem: 'LFP', basic: '8 yr / 160k km', cap: '70%', drivetrain: '8 yr / 160k km', country: 'EU', terms: 'Megane E-Tech' },
+            { oem: 'CATL', chem: 'LFP', basic: '8 yr / 200k km', cap: '80%', drivetrain: '8 yr / 200k km', country: 'CN', terms: 'Cell-to-pack technology' },
+            { oem: 'Stellantis', chem: 'NMC', basic: '8 yr / 150k km', cap: '70%', drivetrain: '8 yr / 150k km', country: 'EU', terms: 'Fiat 500e, Peugeot e-208' },
+            { oem: 'BMW', chem: 'NMC', basic: '8 yr / 100k mi', cap: '70%', drivetrain: '8 yr / 100k mi', country: 'EU', terms: 'i4, iX series' },
+        ];
+
+        const insuranceTiers = [
+            { name: 'Essential', rate: 0.92, desc: 'Basic coverage', mult: 0.75 },
+            { name: 'Standard', rate: 1.84, desc: 'Full replacement', mult: 1.00 },
+            { name: 'Premium', rate: 3.20, desc: '+ degradation', mult: 1.20 },
+            { name: 'Fleet Plus', rate: 2.60, desc: 'Commercial', mult: 1.10 },
+        ];
+
+        // ==============================================
+        // TAB NAVIGATION
+        // ==============================================
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('section-' + tab.dataset.section).classList.add('active');
+                setTimeout(initCharts, 50);
+            });
+        });
+
+        // ==============================================
+        // CHARTS
+        // ==============================================
+        let charts = {};
+
+        function initCharts() {
+            initOverviewCharts();
+            initCostPerKwhCharts();
+            initDegradationCharts();
+            initWarrantyCharts();
+            initInsuranceCharts();
+            initTCOCharts();
+        }
+
+        function initOverviewCharts() {
+            // Chart 1: Cost vs Warranty
+            if (charts.overview) charts.overview.destroy();
+            const ctx1 = document.getElementById('chartOverview').getContext('2d');
+            charts.overview = new Chart(ctx1, {
+                type: 'bubble',
+                data: {
+                    datasets: [{
+                        label: 'NMC 811',
+                        data: [{ x: 8, y: 130, r: 15 }],
+                        backgroundColor: 'rgba(0, 212, 255, 0.6)',
+                    }, {
+                        label: 'NCA',
+                        data: [{ x: 8, y: 135, r: 17 }],
+                        backgroundColor: 'rgba(255, 68, 102, 0.6)',
+                    }, {
+                        label: 'LFP',
+                        data: [{ x: 10, y: 105, r: 20 }],
+                        backgroundColor: 'rgba(0, 255, 136, 0.6)',
+                    }, {
+                        label: 'LCO',
+                        data: [{ x: 5, y: 95, r: 10 }],
+                        backgroundColor: 'rgba(168, 85, 247, 0.6)',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#8888a8', font: { family: 'Space Grotesk' } } },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `Warranty: ${ctx.raw.x}yr | Cost: $${ctx.raw.y}/kWh`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Warranty (years)', color: '#8888a8' }, ticks: { color: '#8888a8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { title: { display: true, text: 'Cost ($/kWh)', color: '#8888a8' }, ticks: { color: '#8888a8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+
+            // Chart 2: Failure Probability
+            if (charts.failureProb) charts.failureProb.destroy();
+            const ctx2 = document.getElementById('chartFailureProb').getContext('2d');
+            const years = Array.from({ length: 16 }, (_, i) => i);
+            charts.failureProb = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'NMC 811',
+                        data: years.map(y => 1 - Math.exp(-Math.pow(y / 10, 3.5))),
+                        borderColor: 'rgba(0, 212, 255, 1)',
+                        backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                        fill: true,
+                    }, {
+                        label: 'NCA',
+                        data: years.map(y => 1 - Math.exp(-Math.pow(y / 9, 3.0))),
+                        borderColor: 'rgba(255, 68, 102, 1)',
+                        backgroundColor: 'rgba(255, 68, 102, 0.1)',
+                        fill: true,
+                    }, {
+                        label: 'LFP',
+                        data: years.map(y => 1 - Math.exp(-Math.pow(y / 15, 4.0))),
+                        borderColor: 'rgba(0, 255, 136, 1)',
+                        backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#8888a8', font: { family: 'Space Grotesk' } } }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Years', color: '#8888a8' }, ticks: { color: '#8888a8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { title: { display: true, text: 'Cumulative Failure Probability', color: '#8888a8' }, ticks: { color: '#8888a8', callback: v => (v * 100).toFixed(0) + '%' }, grid: { color: 'rgba(255,255,255,0.05)' }, min: 0, max: 1 }
+                    }
+                }
+            });
+
+            // Chemistry Matrix Table
+            const tbody = document.querySelector('#chemMatrix tbody');
+            tbody.innerHTML = '';
+            const chemKeys = ['nmc811', 'nca', 'lfp', 'lco'];
+            const riskColors = { 'nmc811': '#ffd700', 'nca': '#ff4466', 'lfp': '#00ff88', 'lco': '#ff4466' };
+            chemKeys.forEach(key => {
+                const c = chemistryData[key];
+                tbody.innerHTML += `<tr>
+                    <td><strong style="color: ${riskColors[key]}">${c.name}</strong></td>
+                    <td>${c.energy} Wh/kg</td>
+                    <td>${c.cycles.toLocaleString()}</td>
+                    <td>$${c.costPack}/kWh</td>
+                    <td><span class="warranty-badge ${c.warranty >= 10 ? 'warranty-10y' : 'warranty-8y'}">${c.warranty} yr</span></td>
+                    <td>${c.failRate}%</td>
+                    <td style="color: ${riskColors[key]}; font-weight: 600;">${c.insurance}x</td>
+                    <td>${c.best}</td>
+                </tr>`;
+            });
+        }
+
+        function initCostPerKwhCharts() {
+            if (charts.costTrend) charts.costTrend.destroy();
+            const ctx = document.getElementById('chartCostTrend').getContext('2d');
+            const years = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
+            charts.costTrend = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'NMC 811',
+                        data: [200, 175, 150, 130, 115, 108, 100, 95, 130],
+                        borderColor: 'rgba(0, 212, 255, 1)',
+                        backgroundColor: 'transparent',
+                    }, {
+                        label: 'LFP',
+                        data: [180, 155, 130, 110, 95, 88, 82, 78, 105],
+                        borderColor: 'rgba(0, 255, 136, 1)',
+                        backgroundColor: 'transparent',
+                    }, {
+                        label: 'NCA',
+                        data: [210, 185, 160, 140, 125, 115, 105, 100, 135],
+                        borderColor: 'rgba(255, 68, 102, 1)',
+                        backgroundColor: 'transparent',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#8888a8' } },
+                        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: $${ctx.raw}/kWh` } }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Year', color: '#8888a8' }, ticks: { color: '#8888a8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { title: { display: true, text: 'Cost ($/kWh)', color: '#8888a8' }, ticks: { color: '#8888a8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+        }
+
+        function initDegradationCharts() {
+            if (charts.soh) charts.soh.destroy();
+            const ctx = document.getElementById('chartSOH').getContext('2d');
+            const chem = document.getElementById('deg-chemistry').value;
+            const c = chemistryData[chem];
+            const years = Array.from({ length: 21 }, (_, i) => i);
+            charts.soh = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'SOH Projection',
+                        data: years.map(y => Math.max(50, 100 * Math.exp(-c.calendarRate * y - c.cycleRate * (y * 200)))),
+                        borderColor: 'rgba(255, 215, 0, 1)',
+                        backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                        fill: true,
+                    }, {
+                        label: 'Warranty Threshold (80%)',
+                        data: years.map(() => 80),
+                        borderColor: 'rgba(255, 68, 102, 0.5)',
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#8888a8' } }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Years', color: '#8888a8' }, ticks: { color: '#8888a8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { title: { display: true, text: 'SOH (%)', color: '#8888a8' }, ticks: { color: '#8888a8' }, grid: { color: 'rgba(255,255,255,0.05)' }, min: 50, max: 100 }
+                    }
+                }
+            });
+
+            if (charts.capacityFade) charts.capacityFade.destroy();
+            const ctx2 = document.getElementById('chartCapacityFade').getContext('2d');
+            charts.capacityFade = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'NMC 811',
+                        data: years.map(y => Math.max(50, 100 * Math.exp(-0.020 * y - 0.00025 * y * 200))),
+                        borderColor: 'rgba(0, 212, 255, 1)',
+                        backgroundColor: 'transparent',
+                    }, {
+                        label: 'NCA',
+                        data: years.map(y => Math.max(50, 100 * Math.exp(-0.025 * y - 0.00035 * y * 200))),
+                        borderColor: 'rgba(255, 68, 102, 1)',
+                        backgroundColor: 'transparent',
+                    }, {
+                        label: 'LFP',
+                        data: years.map(y => Math.max(50, 100 * Math.exp(-0.010 * y - 0.00012 * y * 200))),
+                        borderColor: 'rgba(0, 255, 136, 1)',
+                        backgroundColor: 'transparent',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#8888a8' } },
+                        annotation: { annotations: { line1: { type: 'line', yMin: 80, yMax: 80, borderColor: 'rgba(255,68,102,0.5)', borderDash: [5, 5] } } }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Years', color: '#8888a8' }, ticks: { color: '#8888a8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { title: { display: true, text: 'SOH (%)', color: '#8888a8' }, ticks: { color: '#8888a8' }, grid: { color: 'rgba(255,255,255,0.05)' }, min: 50, max: 100 }
+                    }
+                }
+            });
+        }
+
+        function initWarrantyCharts() {
+            // Warranty Table
+            const tbody = document.querySelector('#warrantyTable tbody');
+            tbody.innerHTML = '';
+            oemData.forEach(o => {
+                tbody.innerHTML += `<tr>
+                    <td><strong>${o.oem}</strong></td>
+                    <td>${o.chem}</td>
+                    <td>${o.basic}</td>
+                    <td>${o.cap}</td>
+                    <td>${o.drivetrain}</td>
+                    <td>${o.country}</td>
+                    <td>${o.terms}</td>
+                </tr>`;
+            });
+
+            if (charts.warrantyScore) charts.warrantyScore.destroy();
+            const ctx1 = document.getElementById('chartWarrantyScore').getContext('2d');
+            const oems = oemData.map(o => o.oem);
+            const scores = oemData.map(o => {
+                const base = parseInt(o.basic) * 10 + parseInt(o.cap) + (o.drivetrain.includes('Lifetime') ? 20 : 0);
+                return base;
+            });
+            charts.warrantyScore = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: oems,
+                    datasets: [{ label: 'Warranty Value Score', data: scores, backgroundColor: 'rgba(255, 215, 0, 0.6)', borderColor: 'rgba(255, 215, 0, 1)', borderWidth: 1 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#8888a8', maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { title: { display: true, text: 'Score', color: '#8888a8' }, ticks: { color: '#8888a8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+
+            if (charts.costWarranty) charts.costWarranty.destroy();
+            const ctx2 = document.getElementById('chartCostWarranty').getContext('2d');
+            const costs = oemData.map(o => chemistryData[o.chem.toLowerCase().replace(' ', '')]?.costPack || 130);
+            charts.costWarranty = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: oems,
+                    datasets: [{ label: 'Cost ($/kWh)', data: costs, backgroundColor: 'rgba(0, 212, 255, 0.6)', borderColor: 'rgba(0, 212, 255, 1)', borderWidth: 1 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#8888a8', maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { title: { display: true, text: 'Cost ($/kWh)', color: '#8888a8' }, ticks: { color: '#8888a8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+        }
+
+        function initInsuranceCharts() {
+            if (charts.insurance) charts.insurance.destroy();
+            const ctx = document.getElementById('chartInsurance').getContext('2d');
+            const years = Array.from({ length: 16 }, (_, i) => i);
+            charts.insurance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'Essential',
+                        data: years.map(y => 0.92 * Math.pow(1.03, y) * (y > 8 ? 1.2 : 1)),
+                        borderColor: 'rgba(0, 255, 136, 1)',
+                        backgroundColor: 'transparent',
+                    }, {
+                        label: 'Standard',
+                        data: years.map(y => 1.84 * Math.pow(1.03, y) * (y > 8 ? 1.2 : 1)),
+                        borderColor: 'rgba(255, 215, 0, 1)',
+                        backgroundColor: 'transparent',
+                    }, {
+                        label: 'Premium',
+                        data: years.map(y => 3.20 * Math.pow(1.03, y) * (y > 8 ? 1.2 : 1)),
+                        borderColor: 'rgba(0, 212, 255, 1)',
+                        backgroundColor: 'transparent',
+                    }, {
+                        label: 'Fleet Plus',
+                        data: years.map(y => 2.60 * Math.pow(1.03, y) * (y > 8 ? 1.2 : 1)),
+                        borderColor: 'rgba(168, 85, 247, 1)',
+                        backgroundColor: 'transparent',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#8888a8' } },
+                        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: $${ctx.raw.toFixed(2)}/kWh/yr` } }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Pack Age (years)', color: '#8888a8' }, ticks: { color: '#8888a8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { title: { display: true, text: 'Annual Premium ($/kWh)', color: '#8888a8' }, ticks: { color: '#8888a8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+        }
+
+        function initTCOCharts() {
+            if (charts.tco) charts.tco.destroy();
+            const ctx = document.getElementById('chartTCO').getContext('2d');
+            const labels = ['Purchase', 'O&M', 'Replacement', 'Insurance', 'Grid Services'];
+            const colors = ['rgba(255, 215, 0, 0.7)', 'rgba(0, 255, 136, 0.7)', 'rgba(255, 68, 102, 0.7)', 'rgba(0, 212, 255, 0.7)', 'rgba(168, 85, 247, 0.7)'];
+            charts.tco = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels,
+                    datasets: [{
+                        data: [65, 12, 15, 5, 3],
+                        backgroundColor: colors,
+                        borderColor: colors.map(c => c.replace('0.7', '1')),
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#8888a8', font: { family: 'Space Grotesk' } } },
+                        tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.raw}%` } }
+                    }
+                }
+            });
+
+            if (charts.tcoCompare) charts.tcoCompare.destroy();
+            const ctx2 = document.getElementById('chartTCOCompare').getContext('2d');
+            charts.tcoCompare = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Consumer EV', 'Fleet EV', 'Grid 4hr', 'Home Storage'],
+                    datasets: [{
+                        label: 'NMC 811',
+                        data: [0.095, 0.110, 0.085, 0.075],
+                        backgroundColor: 'rgba(0, 212, 255, 0.6)',
+                        borderColor: 'rgba(0, 212, 255, 1)',
+                        borderWidth: 1,
+                    }, {
+                        label: 'NCA',
+                        data: [0.105, 0.120, 0.092, 0.082],
+                        backgroundColor: 'rgba(255, 68, 102, 0.6)',
+                        borderColor: 'rgba(255, 68, 102, 1)',
+                        borderWidth: 1,
+                    }, {
+                        label: 'LFP',
+                        data: [0.072, 0.085, 0.062, 0.055],
+                        backgroundColor: 'rgba(0, 255, 136, 0.6)',
+                        borderColor: 'rgba(0, 255, 136, 1)',
+                        borderWidth: 1,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#8888a8' } },
+                        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: $${ctx.raw.toFixed(3)}/kWh` } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#8888a8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { title: { display: true, text: 'LCOE ($/kWh)', color: '#8888a8' }, ticks: { color: '#8888a8', callback: v => '$' + v.toFixed(3) }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+
+            // LCOE Table
+            const tbody = document.querySelector('#lcoeTable tbody');
+            tbody.innerHTML = '';
+            ['nmc811', 'nca', 'lfp'].forEach(key => {
+                const c = chemistryData[key];
+                tbody.innerHTML += `<tr>
+                    <td><strong>${c.name}</strong></td>
+                    <td>$${(key === 'nmc811' ? 0.095 : key === 'nca' ? 0.105 : 0.072).toFixed(3)}</td>
+                    <td>$${(key === 'nmc811' ? 0.110 : key === 'nca' ? 0.120 : 0.085).toFixed(3)}</td>
+                    <td>$${(key === 'nmc811' ? 0.085 : key === 'nca' ? 0.092 : 0.062).toFixed(3)}</td>
+                    <td>$${(key === 'nmc811' ? 0.075 : key === 'nca' ? 0.082 : 0.055).toFixed(3)}</td>
+                </tr>`;
+            });
+        }
+
+        // ==============================================
+        // INTERACTIVE CONTROLS
+        // ==============================================
+
+        // Cost-per-kWh calculator
+        function updateCPK() {
+            const chemKey = document.getElementById('cpk-chemistry').value;
+            const capacity = parseFloat(document.getElementById('cpk-capacity').value) || 75;
+            const price = parseFloat(document.getElementById('cpk-price').value) || 9600;
+            const dod = parseFloat(document.getElementById('cpk-dod').value) / 100;
+            const cycles = parseFloat(document.getElementById('cpk-cycles').value) || 2000;
+            const elec = parseFloat(document.getElementById('cpk-elec').value) || 0.12;
+
+            const c = chemistryData[chemKey];
+            const packCost = price / capacity;
+            const usableCost = packCost / dod;
+            const perCycleCost = price / (capacity * dod * cycles);
+            const totalEnergy = capacity * dod * cycles / 1000;
+
+            document.getElementById('cpk-result-pack').textContent = '$' + packCost.toFixed(0);
+            document.getElementById('cpk-result-usable').textContent = '$' + usableCost.toFixed(0);
+            document.getElementById('cpk-result-cycle').textContent = '$' + perCycleCost.toFixed(3);
+            document.getElementById('cpk-result-energy').textContent = totalEnergy.toFixed(0);
+        }
+
+        document.getElementById('cpk-chemistry').addEventListener('change', updateCPK);
+        document.getElementById('cpk-capacity').addEventListener('input', updateCPK);
+        document.getElementById('cpk-price').addEventListener('input', updateCPK);
+        document.getElementById('cpk-dod').addEventListener('input', () => {
+            document.getElementById('cpk-dod-val').textContent = document.getElementById('cpk-dod').value + '%';
+            updateCPK();
+        });
+        document.getElementById('cpk-cycles').addEventListener('input', updateCPK);
+        document.getElementById('cpk-elec').addEventListener('input', updateCPK);
+
+        // Degradation controls
+        function updateDegradation() {
+            const chemKey = document.getElementById('deg-chemistry').value;
+            const temp = parseFloat(document.getElementById('deg-temp').value);
+            const soc = parseFloat(document.getElementById('deg-soc').value);
+            const cycles = parseFloat(document.getElementById('deg-cycles').value) || 1000;
+            const calendar = parseFloat(document.getElementById('deg-calendar').value);
+            const c = chemistryData[chemKey];
+
+            // Update display values
+            document.getElementById('deg-temp-val').textContent = temp + '°C';
+            document.getElementById('deg-soc-val').textContent = soc + '%';
+            document.getElementById('deg-calendar-val').textContent = calendar + ' years';
+
+            // Temperature acceleration factor
+            const tempFactor = Math.exp(Math.log(2) * (temp - 25) / 10);
+            // SOC stress factor (high SOC accelerates)
+            const socFactor = 1 + Math.max(0, (soc - 50) / 100);
+
+            const currentSOH = 100 * Math.exp(-c.calendarRate * tempFactor * socFactor * calendar - c.cycleRate * cycles);
+            const yearsToEOL = Math.log(0.80) / (-c.calendarRate * tempFactor * socFactor);
+
+            document.getElementById('deg-soh-current').textContent = currentSOH.toFixed(1) + '%';
+            document.getElementById('deg-eol-date').textContent = (2026 + yearsToEOL).toFixed(0);
+
+            // Risk meter position
+            let riskPos;
+            if (currentSOH > 90) riskPos = 5;
+            else if (currentSOH > 80) riskPos = 25;
+            else if (currentSOH > 70) riskPos = 50;
+            else if (currentSOH > 60) riskPos = 75;
+            else riskPos = 95;
+
+            const meter = document.getElementById('deg-risk-meter');
+            meter.style.setProperty('--risk-pos', riskPos + '%');
+            const riskIndicator = document.createElement('div');
+            riskIndicator.style.cssText = `position: absolute; top: -4px; left: calc(${riskPos}% - 10px); width: 20px; height: 20px; border-radius: 50%; background: white; box-shadow: 0 0 8px rgba(0,0,0,0.5);`;
+
+            // Update charts
+            if (charts.soh) {
+                const years = Array.from({ length: 21 }, (_, i) => i);
+                charts.soh.data.datasets[0].data = years.map(y => Math.max(50, 100 * Math.exp(-c.calendarRate * tempFactor * socFactor * y - c.cycleRate * y * 200)));
+                charts.soh.update();
+            }
+
+            if (charts.capacityFade) {
+                const years = Array.from({ length: 21 }, (_, i) => i);
+                charts.capacityFade.data.datasets[0].data = years.map(y => Math.max(50, 100 * Math.exp(-c.calendarRate * tempFactor * socFactor * y - c.cycleRate * y * 200)));
+                charts.capacityFade.data.datasets[1].data = years.map(y => Math.max(50, 100 * Math.exp(-c.calendarRate * 1.1 * 1.1 * y - c.cycleRate * 1.1 * y * 200)));
+                charts.capacityFade.data.datasets[2].data = years.map(y => Math.max(50, 100 * Math.exp(-c.calendarRate * 0.8 * 0.8 * y - c.cycleRate * 0.8 * y * 200)));
+                charts.capacityFade.update();
+            }
+        }
+
+        document.getElementById('deg-chemistry').addEventListener('change', updateDegradation);
+        document.getElementById('deg-temp').addEventListener('input', updateDegradation);
+        document.getElementById('deg-soc').addEventListener('input', updateDegradation);
+        document.getElementById('deg-cycles').addEventListener('input', updateDegradation);
+        document.getElementById('deg-calendar').addEventListener('input', updateDegradation);
+
+        // TCO controls
+        document.getElementById('tco-usecase').addEventListener('change', initTCOCharts);
+        document.getElementById('tco-chemistry').addEventListener('change', initTCOCharts);
+        document.getElementById('tco-size').addEventListener('input', initTCOCharts);
+        document.getElementById('tco-years').addEventListener('input', () => {
+            document.getElementById('tco-years-val').textContent = document.getElementById('tco-years').value + ' years';
+            initTCOCharts();
+        });
+        document.getElementById('tco-discount').addEventListener('input', () => {
+            document.getElementById('tco-discount-val').textContent = parseFloat(document.getElementById('tco-discount').value).toFixed(1) + '%';
+            initTCOCharts();
+        });
+
+        // Insurance controls
+        document.getElementById('ins-chemistry').addEventListener('change', initInsuranceCharts);
+        document.getElementById('ins-age').addEventListener('input', () => {
+            document.getElementById('ins-age-val').textContent = document.getElementById('ins-age').value + ' years';
+            initInsuranceCharts();
+        });
+        document.getElementById('ins-soh').addEventListener('input', () => {
+            document.getElementById('ins-soh-val').textContent = document.getElementById('ins-soh').value + '%';
+            initInsuranceCharts();
+        });
+        document.getElementById('ins-application').addEventListener('change', initInsuranceCharts);
+
+        // ==============================================
+        // INIT
+        // ==============================================
+        setTimeout(initCharts, 100);
+        setTimeout(updateCPK, 200);
+        setTimeout(updateDegradation, 200);
+    </script>
+</body>
+</html>
