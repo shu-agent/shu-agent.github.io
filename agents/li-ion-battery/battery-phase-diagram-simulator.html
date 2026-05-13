@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Phase Diagram Simulator — Li-Ion Battery Research</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --bg-primary: #0a0a1a;
+            --bg-secondary: #12122a;
+            --bg-card: #1a1a3a;
+            --text-primary: #e8e8ff;
+            --text-secondary: #a0a0cc;
+            --accent-cyan: #00f5ff;
+            --accent-purple: #a855f7;
+            --accent-pink: #ec4899;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --gradient-1: linear-gradient(135deg, #00f5ff 0%, #a855f7 50%, #ec4899 100%);
+            --gradient-2: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(circle at 30% 30%, rgba(0,245,255,0.03) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 70%, rgba(168,85,247,0.03) 0%, transparent 50%);
+            animation: bgRotate 60s linear infinite;
+        }
+        @keyframes bgRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: float 15s infinite ease-in-out;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+        header {
+            padding: 60px 20px 40px;
+            text-align: center;
+            position: relative;
+        }
+        .header-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(0,245,255,0.1);
+            border: 1px solid rgba(0,245,255,0.3);
+            border-radius: 30px;
+            font-size: 12px;
+            color: var(--accent-cyan);
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0,245,255,0.2); }
+            50% { box-shadow: 0 0 40px rgba(0,245,255,0.4); }
+        }
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 300;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        .nav-dots {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .nav-dot:hover, .nav-dot.active {
+            background: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px var(--accent-cyan);
+            transform: scale(1.2);
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
+        section {
+            margin-bottom: 80px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 300;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .section-title::before {
+            content: '';
+            width: 40px;
+            height: 2px;
+            background: var(--gradient-1);
+        }
+        .card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-1);
+            opacity: 0.5;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        /* Crystal Structure Canvas */
+        .crystal-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: radial-gradient(ellipse at center, rgba(0,245,255,0.05) 0%, transparent 70%);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .crystal-canvas {
+            width: 100%;
+            height: 100%;
+        }
+        .phase-indicator {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 10px;
+            border: 1px solid rgba(0,245,255,0.3);
+        }
+        .phase-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .phase-formula {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        /* Ternary Diagram */
+        .ternary-container {
+            position: relative;
+            width: 100%;
+            height: 450px;
+        }
+        .ternary-svg {
+            width: 100%;
+            height: 100%;
+        }
+        .ternary-controls {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        .control-value {
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--gradient-1);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0,245,255,0.5);
+        }
+        /* Phase Transition Timeline */
+        .transition-timeline {
+            position: relative;
+            padding: 40px 0;
+        }
+        .timeline-track {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+        }
+        .timeline-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: var(--gradient-1);
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+        .timeline-stages {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+        .stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+        .stage-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            border: 3px solid var(--text-secondary);
+            transition: all 0.3s;
+            position: relative;
+            z-index: 2;
+        }
+        .stage.active .stage-dot {
+            background: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 30px var(--accent-cyan);
+            transform: scale(1.3);
+        }
+        .stage.completed .stage-dot {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+        }
+        .stage-label {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-align: center;
+            max-width: 100px;
+            transition: color 0.3s;
+        }
+        .stage.active .stage-label {
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+        .stage-temp {
+            font-size: 0.75rem;
+            color: var(--accent-orange);
+            margin-top: 5px;
+        }
+        /* Lattice Parameters Table */
+        .lattice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .lattice-table th, .lattice-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .lattice-table th {
+            color: var(--accent-cyan);
+            font-weight: 500;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+        .lattice-table td {
+            color: var(--text-secondary);
+        }
+        .lattice-table tr:hover td {
+            background: rgba(0,245,255,0.05);
+        }
+        .param-value {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        /* Interactive Phase Selector */
+        .phase-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .phase-btn {
+            padding: 12px 24px;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        .phase-btn:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+        .phase-btn.active {
+            background: var(--gradient-1);
+            border-color: transparent;
+            color: var(--bg-primary);
+            font-weight: 600;
+        }
+        /* Voltage Profile Chart */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+        /* Info Cards */
+        .info-card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s;
+        }
+        .info-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0,245,255,0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .info-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .info-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        .info-card p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        /* Equations Panel */
+        .equation-panel {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 25px;
+            font-family: 'Courier New', monospace;
+        }
+        .equation {
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .equation:last-child {
+            border-bottom: none;
+        }
+        .equation-label {
+            min-width: 120px;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+        }
+        .equation-formula {
+            flex: 1;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+        /* Morphology Animation */
+        .morphology-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            background: radial-gradient(ellipse at bottom, rgba(236,72,153,0.05) 0%, transparent 70%);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        /* Toggle Switch */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .toggle.active {
+            background: var(--accent-cyan);
+        }
+        .toggle-knob {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        .toggle.active .toggle-knob {
+            left: 33px;
+        }
+        .toggle-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        /* Free Energy Plot */
+        .free-energy-plot {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        /* Animation Keyframes */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes orbit {
+            from { transform: rotate(0deg) translateX(60px) rotate(0deg); }
+            to { transform: rotate(360deg) translateX(60px) rotate(-360deg); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .atom {
+            animation: orbit 4s linear infinite;
+        }
+        .atom-delayed {
+            animation: orbit 4s linear infinite;
+            animation-delay: -1.33s;
+        }
+        .atom-delayed-2 {
+            animation: orbit 4s linear infinite;
+            animation-delay: -2.66s;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-dots { display: none; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            h1 { font-size: 2rem; }
+            .crystal-container, .ternary-container { height: 350px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation" id="bgAnimation"></div>
+
+    <nav class="nav-dots">
+        <div class="nav-dot active" data-section="overview"></div>
+        <div class="nav-dot" data-section="crystal"></div>
+        <div class="nav-dot" data-section="ternary"></div>
+        <div class="nav-dot" data-section="transitions"></div>
+        <div class="nav-dot" data-section="morphology"></div>
+        <div class="nav-dot" data-section="equations"></div>
+    </nav>
+
+    <header>
+        <div class="header-badge">BATTERY RESEARCH LAB</div>
+        <h1>Battery Phase Diagram Simulator</h1>
+        <p class="subtitle">
+            Explore crystal structure phase transitions in cathode materials through interactive 3D visualizations,
+            ternary phase diagrams, and real-time electrochemical property calculations.
+            From layered NMC to spinel LMO to rock-salt degradation.
+        </p>
+    </header>
+
+    <div class="container">
+        <!-- Overview Section -->
+        <section id="overview" class="visible">
+            <h2 class="section-title">Phase Transition Fundamentals</h2>
+            <div class="grid-3">
+                <div class="info-card">
+                    <h3><span class="info-icon" style="background: rgba(0,245,255,0.2);">🔬</span> Why Phase Diagrams Matter</h3>
+                    <p>Phase diagrams map the thermodynamic stability regions of battery materials, revealing how temperature, state-of-charge, and composition determine crystal structure. Understanding these transitions is critical for predicting capacity fade and designing longer-lasting cathodes.</p>
+                </div>
+                <div class="info-card">
+                    <h3><span class="info-icon" style="background: rgba(168,85,247,0.2);">⚡</span> Voltage Hysteresis</h3>
+                    <p>During phase transitions, batteries exhibit voltage plateaus where multiple phases coexist. This coexistence creates hysteresis losses — energy stored but not recovered — directly impacting round-trip efficiency and usable capacity.</p>
+                </div>
+                <div class="info-card">
+                    <h3><span class="info-icon" style="background: rgba(236,72,153,0.2);">🌡️</span> Thermal Stability</h3>
+                    <p>Each phase has distinct thermal properties. Spinel phases offer superior thermal stability (+50°C compared to layered), while rock-salt degradation causes irreversible capacity loss. Real-time monitoring of phase composition enables early failure prediction.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Crystal Structure Section -->
+        <section id="crystal">
+            <h2 class="section-title">3D Crystal Structure Visualization</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; color: var(--accent-cyan);">Interactive Lattice Viewer</h3>
+                    <div class="phase-selector">
+                        <button class="phase-btn active" data-phase="layered">Layered (NMC)</button>
+                        <button class="phase-btn" data-phase="spinel">Spinel (LMO)</button>
+                        <button class="phase-btn" data-phase="rocksalt">Rock-Salt</button>
+                    </div>
+                    <div class="crystal-container">
+                        <canvas id="crystalCanvas" class="crystal-canvas"></canvas>
+                        <div class="phase-indicator">
+                            <div class="phase-name" id="phaseName">Layered Structure</div>
+                            <div class="phase-formula" id="phaseFormula">LiCoO₂ — R-3m space group</div>
+                        </div>
+                    </div>
+                    <div class="toggle-container">
+                        <div class="toggle active" id="rotationToggle">
+                            <div class="toggle-knob"></div>
+                        </div>
+                        <span class="toggle-label">Auto-rotate lattice view</span>
+                    </div>
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-dot" style="background: #ef4444;"></div>Li (Layer)</div>
+                        <div class="legend-item"><div class="legend-dot" style="background: #3b82f6;"></div>TM Oxide</div>
+                        <div class="legend-item"><div class="legend-dot" style="background: #22c55e;"></div>O (Oxygen)</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; color: var(--accent-cyan);">Lattice Parameters</h3>
+                    <table class="lattice-table">
+                        <thead>
+                            <tr>
+                                <th>Phase</th>
+                                <th>a (Å)</th>
+                                <th>c (Å)</th>
+                                <th>c/a</th>
+                                <th>V (Å³)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="latticeTable">
+                            <tr>
+                                <td>Layered</td>
+                                <td class="param-value">2.817</td>
+                                <td class="param-value">14.08</td>
+                                <td class="param-value">4.99</td>
+                                <td class="param-value">96.7</td>
+                            </tr>
+                            <tr>
+                                <td>Spinel</td>
+                                <td class="param-value">8.052</td>
+                                <td class="param-value">—</td>
+                                <td class="param-value">—</td>
+                                <td class="param-value">522.4</td>
+                            </tr>
+                            <tr>
+                                <td>Rock-Salt</td>
+                                <td class="param-value">4.214</td>
+                                <td class="param-value">—</td>
+                                <td class="param-value">—</td>
+                                <td class="param-value">74.7</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="equation-panel" style="margin-top: 20px;">
+                        <div class="equation">
+                            <span class="equation-label">Strain</span>
+                            <span class="equation-formula">ε = (c/c₀ - 1) × 100%</span>
+                        </div>
+                        <div class="equation">
+                            <span class="equation-label">Volume</span>
+                            <span class="equation-formula">V = a²c × sin(60°) for hexagonal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ternary Phase Diagram -->
+        <section id="ternary">
+            <h2 class="section-title">Ternary Phase Diagram — NMC Composition Space</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <div class="ternary-container">
+                        <svg id="ternarySvg" class="ternary-svg" viewBox="0 0 400 350"></svg>
+                    </div>
+                    <p style="text-align: center; color: var(--text-secondary); font-size: 0.85rem; margin-top: 10px;">
+                        Composition space showing Ni/Mn/Co ratio. Click inside to select composition.
+                    </p>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; color: var(--accent-cyan);">Composition Controls</h3>
+                    <div class="ternary-controls">
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Nickel (Ni)</span>
+                                <span class="control-value" id="niValue">33%</span>
+                            </div>
+                            <input type="range" id="niSlider" min="0" max="100" value="33">
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Manganese (Mn)</span>
+                                <span class="control-value" id="mnValue">33%</span>
+                            </div>
+                            <input type="range" id="mnSlider" min="0" max="100" value="33">
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Cobalt (Co)</span>
+                                <span class="control-value" id="coValue">34%</span>
+                            </div>
+                            <input type="range" id="coSlider" min="0" max="100" value="34">
+                        </div>
+                    </div>
+                    <div style="margin-top: 30px;">
+                        <h4 style="color: var(--accent-purple); margin-bottom: 15px;">Phase Stability Analysis</h4>
+                        <div class="equation-panel">
+                            <div class="equation">
+                                <span class="equation-label">Phase</span>
+                                <span class="equation-formula" id="stabilityPhase">Layered (H1-3)</span>
+                            </div>
+                            <div class="equation">
+                                <span class="equation-label">Energy</span>
+                                <span class="equation-formula" id="stabilityEnergy">-3.42 eV/fu</span>
+                            </div>
+                            <div class="equation">
+                                <span class="equation-label">Stability</span>
+                                <span class="equation-formula" id="stabilityStatus">Metastable at high SOC</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="legend" style="margin-top: 20px;">
+                        <div class="legend-item"><div class="legend-dot" style="background: #ef4444;"></div>Ni-rich (Unstable)</div>
+                        <div class="legend-item"><div class="legend-dot" style="background: #22c55e;"></div>Mn-rich (Stable)</div>
+                        <div class="legend-item"><div class="legend-dot" style="background: #3b82f6;"></div>Co-rich (Moderate)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Phase Transitions Section -->
+        <section id="transitions">
+            <h2 class="section-title">Phase Transition Pathways</h2>
+            <div class="card">
+                <h3 style="margin-bottom: 30px; color: var(--accent-cyan);">State of Charge Driven Transitions</h3>
+                <div class="transition-timeline">
+                    <div class="timeline-track">
+                        <div class="timeline-progress" id="timelineProgress" style="width: 0%;"></div>
+                    </div>
+                    <div class="timeline-stages">
+                        <div class="stage active" data-soc="0">
+                            <div class="stage-dot"></div>
+                            <div class="stage-label">Pristine</div>
+                            <div class="stage-temp">25°C</div>
+                        </div>
+                        <div class="stage" data-soc="25">
+                            <div class="stage-dot"></div>
+                            <div class="stage-label">H2 Phase</div>
+                            <div class="stage-temp">~50°C</div>
+                        </div>
+                        <div class="stage" data-soc="50">
+                            <div class="stage-dot"></div>
+                            <div class="stage-label">H3 Phase</div>
+                            <div class="stage-temp">~80°C</div>
+                        </div>
+                        <div class="stage" data-soc="75">
+                            <div class="stage-dot"></div>
+                            <div class="stage-label">Spinel</div>
+                            <div class="stage-temp">~120°C</div>
+                        </div>
+                        <div class="stage" data-soc="100">
+                            <div class="stage-dot"></div>
+                            <div class="stage-label">Rock-Salt</div>
+                            <div class="stage-temp">~200°C</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-2" style="margin-top: 40px;">
+                    <div>
+                        <div class="control-label" style="margin-bottom: 15px;">
+                            <span>State of Charge (SOC)</span>
+                            <span class="control-value" id="socValue">0%</span>
+                        </div>
+                        <input type="range" id="socSlider" min="0" max="100" value="0" style="width: 100%;">
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="voltageChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Morphology Section -->
+        <section id="morphology">
+            <h2 class="section-title">Particle Morphology Evolution</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; color: var(--accent-cyan);">Crack Formation Simulator</h3>
+                    <div class="morphology-container">
+                        <canvas id="morphologyCanvas" style="width: 100%; height: 100%;"></canvas>
+                    </div>
+                    <div class="ternary-controls" style="margin-top: 20px;">
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Cycle Count</span>
+                                <span class="control-value" id="cycleValue">0</span>
+                            </div>
+                            <input type="range" id="cycleSlider" min="0" max="1000" value="0">
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>DOD Depth</span>
+                                <span class="control-value" id="dodValue">80%</span>
+                            </div>
+                            <input type="range" id="dodSlider" min="20" max="100" value="80">
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; color: var(--accent-cyan);">Degradation Metrics</h3>
+                    <div class="grid-2" style="gap: 20px;">
+                        <div class="info-card" style="text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 300; color: var(--accent-pink);" id="crackMetric">0%</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Crack Density</div>
+                        </div>
+                        <div class="info-card" style="text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 300; color: var(--accent-green);" id="retentionMetric">100%</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Capacity Retention</div>
+                        </div>
+                        <div class="info-card" style="text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 300; color: var(--accent-orange);" id="stressMetric">0 MPa</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Max Stress</div>
+                        </div>
+                        <div class="info-card" style="text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 300; color: var(--accent-purple);" id="porosityMetric">0.2%</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">Surface Porosity</div>
+                        </div>
+                    </div>
+                    <div class="equation-panel" style="margin-top: 20px;">
+                        <div class="equation">
+                            <span class="equation-label">Stress</span>
+                            <span class="equation-formula">σ = E·ε / (1-ν)</span>
+                        </div>
+                        <div class="equation">
+                            <span class="equation-label">Crack Density</span>
+                            <span class="equation-formula">ρ_c = k · N^0.5 · DOD^1.5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Equations Section -->
+        <section id="equations">
+            <h2 class="section-title">Governing Equations</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; color: var(--accent-cyan);">Thermodynamic Framework</h3>
+                    <div class="equation-panel">
+                        <div class="equation">
+                            <span class="equation-label">Gibbs Free Energy</span>
+                            <span class="equation-formula">G = H - TS</span>
+                        </div>
+                        <div class="equation">
+                            <span class="equation-label">Chemical Potential</span>
+                            <span class="equation-formula">μ = (∂G/∂N)_T,P</span>
+                        </div>
+                        <div class="equation">
+                            <span class="equation-label">Phase Equilibrium</span>
+                            <span class="equation-formula">μ₁ = μ₂ at phase boundary</span>
+                        </div>
+                        <div class="equation">
+                            <span class="equation-label">Clausius-Clapeyron</span>
+                            <span class="equation-formula">dP/dT = ΔS/ΔV</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; color: var(--accent-cyan);">Kinetics & Transport</h3>
+                    <div class="equation-panel">
+                        <div class="equation">
+                            <span class="equation-label">Diffusion Coefficient</span>
+                            <span class="equation-formula">D = D₀·exp(-Ea/RT)</span>
+                        </div>
+                        <div class="equation">
+                            <span class="equation-label">Cahn-Hilliard</span>
+                            <span class="equation-formula">∂c/∂t = M∇²(∂f/∂c - κ∇²c)</span>
+                        </div>
+                        <div class="equation">
+                            <span class="equation-label">Interfacial Energy</span>
+                            <span class="equation-formula">γ = γ₀ + Γ·ΔT</span>
+                        </div>
+                        <div class="equation">
+                            <span class="equation-label">Nucleation Rate</span>
+                            <span class="equation-formula">J = J₀·exp(-ΔG*/kT)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card" style="margin-top: 30px;">
+                <h3 style="margin-bottom: 20px; color: var(--accent-cyan);">Free Energy Curves by Phase</h3>
+                <div class="free-energy-plot">
+                    <canvas id="freeEnergyChart" style="width: 100%; height: 100%;"></canvas>
+                </div>
+                <div class="legend" style="justify-content: center;">
+                    <div class="legend-item"><div class="legend-dot" style="background: #3b82f6;"></div>Layered (H1-3)</div>
+                    <div class="legend-item"><div class="legend-dot" style="background: #22c55e;"></div>Spinel</div>
+                    <div class="legend-item"><div class="legend-dot" style="background: #ef4444;"></div>Rock-Salt</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Physics Connections -->
+        <section id="physics">
+            <h2 class="section-title">Physics Connections</h2>
+            <div class="grid-3">
+                <div class="info-card">
+                    <h3><span class="info-icon" style="background: rgba(0,245,255,0.2);">🌌</span> Cosmological Analog</h3>
+                    <p>Phase separation in battery materials follows the same Cahn-Hilliard equation as cosmological phase separation in the early universe. The spinodal decomposition timescale τ ∝ ξ³/D mirrors cooling timescales in gravitational collapse. Phase transitions are universal phenomena across scales.</p>
+                </div>
+                <div class="info-card">
+                    <h3><span class="info-icon" style="background: rgba(168,85,247,0.2);">🔗</span> Critical Phenomena</h3>
+                    <p>Near the critical point, batteries exhibit divergent correlation lengths ξ → ∞ and specific heat anomalies C_v ∝ |T-T_c|^(-α). These critical exponents (α, β, γ, δ) follow scaling laws that mirror second-order phase transitions in condensed matter physics and cosmological inflation.</p>
+                </div>
+                <div class="info-card">
+                    <h3><span class="info-icon" style="background: rgba(236,72,153,0.2);">⚖️</span> Landau Theory</h3>
+                    <p>The Landau free energy expansion F = F₀ + α·φ² + β·φ⁴ + ... describes both battery phase transitions and gravitational phase transitions. The order parameter φ (e.g., magnetization or density) parallels the gravitational order parameter in symmetry breaking during cosmic inflation.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Initialize particles
+        function createParticles() {
+            const container = document.getElementById('bgAnimation');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.background = ['var(--accent-cyan)', 'var(--accent-purple)', 'var(--accent-pink)'][Math.floor(Math.random() * 3)];
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // Navigation dots
+        document.querySelectorAll('.nav-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                document.querySelectorAll('.nav-dot').forEach(d => d.classList.remove('active'));
+                dot.classList.add('active');
+                document.getElementById(dot.dataset.section).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Scroll-triggered animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('section').forEach(s => observer.observe(s));
+
+        // Phase selector buttons
+        const phaseButtons = document.querySelectorAll('.phase-btn');
+        const phaseData = {
+            layered: { name: 'Layered Structure', formula: 'LiCoO₂ — R-3m space group', color: '#3b82f6' },
+            spinel: { name: 'Spinel Structure', formula: 'LiMn₂O₄ — Fd-3m space group', color: '#22c55e' },
+            rocksalt: { name: 'Rock-Salt Structure', formula: 'LiMO₂ — Fm-3m space group (degraded)', color: '#ef4444' }
+        };
+
+        phaseButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                phaseButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const phase = btn.dataset.phase;
+                document.getElementById('phaseName').textContent = phaseData[phase].name;
+                document.getElementById('phaseFormula').textContent = phaseData[phase].formula;
+                drawCrystal(phase);
+            });
+        });
+
+        // Crystal Canvas Drawing
+        const crystalCanvas = document.getElementById('crystalCanvas');
+        const ctx = crystalCanvas.getContext('2d');
+        let rotationAngle = 0;
+        let rotationEnabled = true;
+        let currentPhase = 'layered';
+
+        function drawCrystal(phase) {
+            const rect = crystalCanvas.getBoundingClientRect();
+            crystalCanvas.width = rect.width * 2;
+            crystalCanvas.height = rect.height * 2;
+            ctx.fillStyle = 'transparent';
+            ctx.clearRect(0, 0, crystalCanvas.width, crystalCanvas.height);
+
+            const cx = crystalCanvas.width / 2;
+            const cy = crystalCanvas.height / 2;
+            const colors = { Li: '#ef4444', TM: '#3b82f6', O: '#22c55e' };
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(rotationAngle);
+
+            if (phase === 'layered') {
+                // Draw layered structure (O-TM-O-Li-O-TM-O)
+                const layerSpacing = 25;
+                const atomRadius = 18;
+
+                // Draw layers
+                for (let i = -3; i <= 3; i++) {
+                    const y = i * layerSpacing;
+                    let layerColor, atomCount;
+
+                    if (i === 0) {
+                        layerColor = colors.Li;
+                        atomCount = 4;
+                    } else if (i % 2 === 0) {
+                        layerColor = colors.O;
+                        atomCount = 5;
+                    } else {
+                        layerColor = colors.TM;
+                        atomCount = 4;
+                    }
+
+                    ctx.fillStyle = layerColor + '40';
+                    ctx.beginPath();
+                    ctx.ellipse(0, y, 120, 15, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    for (let j = 0; j < atomCount; j++) {
+                        const x = (j - (atomCount - 1) / 2) * 45;
+                        drawAtom(x, y, atomRadius * 0.8, layerColor);
+                    }
+                }
+            } else if (phase === 'spinel') {
+                // Draw spinel structure (Fd-3m)
+                const radius = 80;
+                const atomRadius = 15;
+
+                // 8a sites (tetrahedral) - Li
+                const tetraSites = [
+                    [0, 0], [radius*0.7, radius*0.7], [-radius*0.7, radius*0.7],
+                    [radius*0.7, -radius*0.7], [-radius*0.7, -radius*0.7]
+                ];
+                tetraSites.forEach(([x, y]) => {
+                    ctx.fillStyle = colors.Li + '60';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 35, 0, Math.PI * 2);
+                    ctx.fill();
+                    drawAtom(x, y, atomRadius, colors.Li);
+                });
+
+                // 16d sites (octahedral) - Mn/Co
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    const x = Math.cos(angle) * radius;
+                    const y = Math.sin(angle) * radius;
+                    ctx.fillStyle = colors.TM + '40';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 30, 0, Math.PI * 2);
+                    ctx.fill();
+                    drawAtom(x, y, atomRadius * 1.2, colors.TM);
+                }
+
+                // O atoms at 32e sites
+                for (let i = 0; i < 12; i++) {
+                    const angle = (i / 12) * Math.PI * 2 + Math.PI/12;
+                    const r = radius * 0.65;
+                    const x = Math.cos(angle) * r;
+                    const y = Math.sin(angle) * r;
+                    drawAtom(x, y, atomRadius * 0.7, colors.O);
+                }
+            } else if (phase === 'rocksalt') {
+                // Draw rock-salt structure (Fm-3m)
+                const spacing = 40;
+                const atomRadius = 16;
+                const colors_rock = [colors.Li, colors.TM];
+
+                for (let i = -2; i <= 2; i++) {
+                    for (let j = -2; j <= 2; j++) {
+                        const x = i * spacing;
+                        const y = j * spacing;
+                        const colorIdx = (i + j) % 2 === 0 ? 0 : 1;
+
+                        ctx.fillStyle = colors_rock[colorIdx] + '30';
+                        ctx.beginPath();
+                        ctx.arc(x, y, 20, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        drawAtom(x, y, atomRadius, colors_rock[colorIdx]);
+                    }
+                }
+            }
+
+            ctx.restore();
+        }
+
+        function drawAtom(x, y, radius, color) {
+            const gradient = ctx.createRadialGradient(x - radius*0.3, y - radius*0.3, 0, x, y, radius);
+            gradient.addColorStop(0, 'white');
+            gradient.addColorStop(0.3, color);
+            gradient.addColorStop(1, color + '80');
+
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Glow effect
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.arc(x, y, radius * 0.5, 0, Math.PI * 2);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        function animateCrystal() {
+            if (rotationEnabled) {
+                rotationAngle += 0.005;
+            }
+            drawCrystal(currentPhase);
+            requestAnimationFrame(animateCrystal);
+        }
+
+        document.getElementById('rotationToggle').addEventListener('click', function() {
+            this.classList.toggle('active');
+            rotationEnabled = this.classList.contains('active');
+        });
+
+        // Initial draw
+        currentPhase = 'layered';
+        animateCrystal();
+
+        // Ternary Diagram
+        const ternarySvg = document.getElementById('ternarySvg');
+
+        function drawTernaryDiagram() {
+            const width = 400;
+            const height = 350;
+            const padding = 40;
+
+            // Clear
+            ternarySvg.innerHTML = '';
+
+            // Draw triangle background
+            const vertices = [
+                { x: width/2, y: padding },  // Top (Co)
+                { x: padding + 30, y: height - padding },  // Bottom-left (Mn)
+                { x: width - padding - 30, y: height - padding }   // Bottom-right (Ni)
+            ];
+
+            // Triangle outline
+            let path = `M ${vertices[0].x} ${vertices[0].y} L ${vertices[1].x} ${vertices[1].y} L ${vertices[2].x} ${vertices[2].y} Z`;
+            let polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            polygon.setAttribute('points', `${vertices[0].x},${vertices[0].y} ${vertices[1].x},${vertices[1].y} ${vertices[2].x},${vertices[2].y}`);
+            polygon.setAttribute('fill', '#1a1a3a');
+            polygon.setAttribute('stroke', '#333');
+            polygon.setAttribute('stroke-width', '2');
+            ternarySvg.appendChild(polygon);
+
+            // Draw grid lines
+            for (let i = 1; i <= 10; i++) {
+                const t = i / 10;
+                // Co to Mn
+                let line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line1.setAttribute('x1', vertices[0].x + (vertices[1].x - vertices[0].x) * t);
+                line1.setAttribute('y1', vertices[0].y + (vertices[1].y - vertices[0].y) * t);
+                line1.setAttribute('x2', vertices[2].x + (vertices[1].x - vertices[2].x) * t);
+                line1.setAttribute('y2', vertices[2].y + (vertices[1].y - vertices[2].y) * t);
+                line1.setAttribute('stroke', '#333');
+                line1.setAttribute('stroke-width', '1');
+                ternarySvg.appendChild(line1);
+
+                // Mn to Ni
+                let line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line2.setAttribute('x1', vertices[1].x + (vertices[2].x - vertices[1].x) * t);
+                line2.setAttribute('y1', vertices[1].y + (vertices[2].y - vertices[1].y) * t);
+                line2.setAttribute('x2', vertices[0].x + (vertices[2].x - vertices[0].x) * t);
+                line2.setAttribute('y2', vertices[0].y + (vertices[2].y - vertices[0].y) * t);
+                line2.setAttribute('stroke', '#333');
+                line2.setAttribute('stroke-width', '1');
+                ternarySvg.appendChild(line2);
+
+                // Ni to Co
+                let line3 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line3.setAttribute('x1', vertices[2].x + (vertices[0].x - vertices[2].x) * t);
+                line3.setAttribute('y1', vertices[2].y + (vertices[0].y - vertices[2].y) * t);
+                line3.setAttribute('x2', vertices[1].x + (vertices[0].x - vertices[1].x) * t);
+                line3.setAttribute('y2', vertices[1].y + (vertices[0].y - vertices[1].y) * t);
+                line3.setAttribute('stroke', '#333');
+                line3.setAttribute('stroke-width', '1');
+                ternarySvg.appendChild(line3);
+            }
+
+            // Color regions
+            const regions = [
+                { path: 'M 200 40 L 70 310 L 150 310 Z', color: 'rgba(59, 130, 246, 0.2)', label: 'Co-rich' },
+                { path: 'M 200 40 L 330 310 L 250 310 Z', color: 'rgba(239, 68, 68, 0.2)', label: 'Ni-rich' },
+                { path: 'M 70 310 L 330 310 L 200 200 Z', color: 'rgba(34, 197, 94, 0.2)', label: 'Mn-rich' }
+            ];
+
+            regions.forEach(r => {
+                let region = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                region.setAttribute('points', r.path.replace(/[ML]/g, '').trim().split(' ').map((p, i) => i % 2 === 0 ? p : ' ' + p).join(''));
+                region.setAttribute('fill', r.color);
+                region.setAttribute('stroke', 'none');
+                ternarySvg.appendChild(region);
+            });
+
+            // Labels
+            const labels = [
+                { text: 'Co', x: width/2, y: 25, anchor: 'middle' },
+                { text: 'Mn', x: padding + 20, y: height - padding + 25, anchor: 'start' },
+                { text: 'Ni', x: width - padding - 20, y: height - padding + 25, anchor: 'end' }
+            ];
+
+            labels.forEach(l => {
+                let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', l.x);
+                text.setAttribute('y', l.y);
+                text.setAttribute('text-anchor', l.anchor);
+                text.setAttribute('fill', '#a0a0cc');
+                text.setAttribute('font-size', '14');
+                text.setAttribute('font-weight', '600');
+                text.textContent = l.text;
+                ternarySvg.appendChild(text);
+            });
+
+            // Current composition point
+            const ni = parseInt(document.getElementById('niSlider').value);
+            const mn = parseInt(document.getElementById('mnSlider').value);
+            const co = 100 - ni - mn;
+
+            // Convert to cartesian
+            const pointX = vertices[2].x * (ni/100) + vertices[1].x * (mn/100) + vertices[0].x * (co/100);
+            const pointY = vertices[2].y * (ni/100) + vertices[1].y * (mn/100) + vertices[0].y * (co/100);
+
+            let point = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            point.setAttribute('cx', pointX);
+            point.setAttribute('cy', pointY);
+            point.setAttribute('r', '10');
+            point.setAttribute('fill', '#00f5ff');
+            point.setAttribute('stroke', '#fff');
+            point.setAttribute('stroke-width', '2');
+            point.setAttribute('id', 'compositionPoint');
+            ternarySvg.appendChild(point);
+
+            // Glow
+            let glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            glow.setAttribute('cx', pointX);
+            glow.setAttribute('cy', pointY);
+            glow.setAttribute('r', '20');
+            glow.setAttribute('fill', 'none');
+            glow.setAttribute('stroke', '#00f5ff');
+            glow.setAttribute('stroke-width', '3');
+            glow.setAttribute('opacity', '0.3');
+            ternarySvg.appendChild(glow);
+
+            // Update labels
+            let compText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            compText.setAttribute('x', width/2);
+            compText.setAttribute('y', height - 10);
+            compText.setAttribute('text-anchor', 'middle');
+            compText.setAttribute('fill', '#00f5ff');
+            compText.setAttribute('font-size', '12');
+            compText.textContent = `Ni${ni} Mn${mn} Co${co}`;
+            ternarySvg.appendChild(compText);
+        }
+
+        // Ternary sliders
+        ['niSlider', 'mnSlider', 'coSlider'].forEach(id => {
+            document.getElementById(id).addEventListener('input', function() {
+                let ni = parseInt(document.getElementById('niSlider').value);
+                let mn = parseInt(document.getElementById('mnSlider').value);
+                let co = parseInt(document.getElementById('coSlider').value);
+
+                // Normalize
+                const total = ni + mn + co;
+                ni = Math.round(ni / total * 100);
+                mn = Math.round(mn / total * 100);
+                co = 100 - ni - mn;
+
+                document.getElementById('niValue').textContent = ni + '%';
+                document.getElementById('mnValue').textContent = mn + '%';
+                document.getElementById('coValue').textContent = co + '%';
+
+                drawTernaryDiagram();
+                updateStability(ni, mn, co);
+            });
+        });
+
+        function updateStability(ni, mn, co) {
+            let phase, energy, status;
+
+            if (ni > 60) {
+                phase = 'Layered (H1-3) — Unstable';
+                energy = (-3.0 + ni * 0.01).toFixed(2) + ' eV/fu';
+                status = 'High risk of H2-H3 transition';
+            } else if (mn > 50) {
+                phase = 'Spinel-like (H3)';
+                energy = (-3.4 + mn * 0.005).toFixed(2) + ' eV/fu';
+                status = 'Excellent thermal stability';
+            } else if (co > 50) {
+                phase = 'Layered (H1-2)';
+                energy = (-3.5 + co * 0.002).toFixed(2) + ' eV/fu';
+                status = 'Moderate stability';
+            } else {
+                phase = 'Layered (H1-3) — Optimized';
+                energy = (-3.42 + (100 - ni) * 0.005).toFixed(2) + ' eV/fu';
+                status = 'Balanced performance';
+            }
+
+            document.getElementById('stabilityPhase').textContent = phase;
+            document.getElementById('stabilityEnergy').textContent = energy;
+            document.getElementById('stabilityStatus').textContent = status;
+        }
+
+        drawTernaryDiagram();
+
+        // SOC Timeline
+        const socSlider = document.getElementById('socSlider');
+        socSlider.addEventListener('input', function() {
+            const soc = parseInt(this.value);
+            document.getElementById('socValue').textContent = soc + '%';
+
+            // Update timeline progress
+            document.getElementById('timelineProgress').style.width = soc + '%';
+
+            // Update stages
+            const stages = document.querySelectorAll('.stage');
+            stages.forEach((stage, idx) => {
+                const stageSoc = idx * 25;
+                stage.classList.remove('active', 'completed');
+                if (soc >= stageSoc) {
+                    stage.classList.add(soc > stageSoc ? 'completed' : 'active');
+                }
+            });
+
+            updateVoltageChart(soc);
+        });
+
+        // Voltage Chart
+        const voltageCtx = document.getElementById('voltageChart').getContext('2d');
+        const voltageChart = new Chart(voltageCtx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 101}, (_, i) => i),
+                datasets: [{
+                    label: 'Voltage (V)',
+                    data: [],
+                    borderColor: '#00f5ff',
+                    backgroundColor: 'rgba(0, 245, 255, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1a1a3a',
+                        titleColor: '#00f5ff',
+                        bodyColor: '#e8e8ff',
+                        borderColor: '#333',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'SOC (%)', color: '#a0a0cc' },
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#a0a0cc' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Voltage (V)', color: '#a0a0cc' },
+                        min: 3.0,
+                        max: 4.3,
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#a0a0cc' }
+                    }
+                }
+            }
+        });
+
+        function updateVoltageChart(soc) {
+            const data = [];
+            for (let i = 0; i <= 100; i++) {
+                // Simulated voltage profile with phase transitions
+                let voltage;
+                if (i < 30) {
+                    voltage = 3.7 + (i / 30) * 0.2;
+                } else if (i < 50) {
+                    voltage = 3.9 + ((i - 30) / 20) * 0.15;
+                } else if (i < 75) {
+                    voltage = 4.05 + ((i - 50) / 25) * 0.15;
+                } else {
+                    voltage = 4.2 + ((i - 75) / 25) * 0.1;
+                }
+                data.push(voltage);
+            }
+            voltageChart.data.datasets[0].data = data;
+            voltageChart.update('none');
+        }
+
+        updateVoltageChart(0);
+
+        // Morphology Canvas
+        const morphCanvas = document.getElementById('morphologyCanvas');
+        const morphCtx = morphCanvas.getContext('2d');
+
+        function drawMorphology(cycles, dod) {
+            const rect = morphCanvas.getBoundingClientRect();
+            morphCanvas.width = rect.width * 2;
+            morphCanvas.height = rect.height * 2;
+            morphCtx.fillStyle = '#12122a';
+            morphCtx.fillRect(0, 0, morphCanvas.width, morphCanvas.height);
+
+            const cx = morphCanvas.width / 2;
+            const cy = morphCanvas.height / 2;
+            const radius = Math.min(cx, cy) * 0.7;
+
+            // Draw particle
+            morphCtx.beginPath();
+            morphCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+            const gradient = morphCtx.createRadialGradient(cx - radius*0.3, cy - radius*0.3, 0, cx, cy, radius);
+            gradient.addColorStop(0, '#3b82f6');
+            gradient.addColorStop(1, '#1e3a5f');
+            morphCtx.fillStyle = gradient;
+            morphCtx.fill();
+
+            // Calculate crack density based on cycles and DOD
+            const crackDensity = Math.min(1, 0.0003 * cycles * Math.pow(dod / 80, 1.5));
+            const numCracks = Math.floor(crackDensity * 50);
+
+            // Draw cracks
+            morphCtx.strokeStyle = '#ef4444';
+            morphCtx.lineWidth = 2;
+
+            for (let i = 0; i < numCracks; i++) {
+                const angle = (i / numCracks) * Math.PI * 2 + (cycles * 0.01);
+                const startR = radius * 0.3;
+                const endR = radius * (0.5 + Math.random() * 0.5);
+
+                morphCtx.beginPath();
+                morphCtx.moveTo(cx + Math.cos(angle) * startR, cy + Math.sin(angle) * startR);
+
+                // Jagged crack path
+                let r = startR;
+                while (r < endR) {
+                    r += 5 + Math.random() * 10;
+                    const jitter = (Math.random() - 0.5) * 0.3;
+                    morphCtx.lineTo(
+                        cx + Math.cos(angle + jitter) * r,
+                        cy + Math.sin(angle + jitter) * r
+                    );
+                }
+                morphCtx.stroke();
+            }
+
+            // Update metrics
+            document.getElementById('crackMetric').textContent = (crackDensity * 100).toFixed(1) + '%';
+            document.getElementById('retentionMetric').textContent = Math.max(60, 100 - crackDensity * 40).toFixed(0) + '%';
+            document.getElementById('stressMetric').textContent = Math.round(crackDensity * 500) + ' MPa';
+            document.getElementById('porosityMetric').textContent = (crackDensity * 5).toFixed(2) + '%';
+        }
+
+        document.getElementById('cycleSlider').addEventListener('input', function() {
+            const cycles = parseInt(this.value);
+            const dod = parseInt(document.getElementById('dodSlider').value);
+            document.getElementById('cycleValue').textContent = cycles;
+            drawMorphology(cycles, dod);
+        });
+
+        document.getElementById('dodSlider').addEventListener('input', function() {
+            const dod = parseInt(this.value);
+            const cycles = parseInt(document.getElementById('cycleSlider').value);
+            document.getElementById('dodValue').textContent = dod + '%';
+            drawMorphology(cycles, dod);
+        });
+
+        drawMorphology(0, 80);
+
+        // Free Energy Chart
+        const freeEnergyCtx = document.getElementById('freeEnergyChart').getContext('2d');
+        const freeEnergyChart = new Chart(freeEnergyCtx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 21}, (_, i) => (i * 5)),
+                datasets: [
+                    {
+                        label: 'Layered',
+                        data: [-3.5, -3.48, -3.45, -3.42, -3.40, -3.38, -3.36, -3.34, -3.32, -3.30, -3.28, -3.26, -3.24, -3.22, -3.20, -3.18, -3.16, -3.14, -3.12, -3.10, -3.08],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'transparent',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Spinel',
+                        data: [-3.3, -3.32, -3.34, -3.35, -3.36, -3.36, -3.35, -3.33, -3.30, -3.26, -3.21, -3.15, -3.08, -3.00, -2.91, -2.81, -2.70, -2.58, -2.45, -2.31, -2.16],
+                        borderColor: '#22c55e',
+                        backgroundColor: 'transparent',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Rock-Salt',
+                        data: [-3.2, -3.18, -3.15, -3.12, -3.08, -3.04, -3.00, -2.95, -2.90, -2.85, -2.79, -2.73, -2.67, -2.60, -2.53, -2.46, -2.38, -2.30, -2.22, -2.14, -2.05],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'transparent',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Li Content (x in Li_xMO_2)', color: '#a0a0cc' },
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#a0a0cc' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Free Energy (eV/fu)', color: '#a0a0cc' },
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#a0a0cc' }
+                    }
+                }
+            }
+        });
+
+        // Window resize handler
+        window.addEventListener('resize', () => {
+            drawCrystal(currentPhase);
+            drawMorphology(
+                parseInt(document.getElementById('cycleSlider').value),
+                parseInt(document.getElementById('dodSlider').value)
+            );
+            drawTernaryDiagram();
+        });
+    </script>
+</body>
+</html>

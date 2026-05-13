@@ -1,5 +1,62 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 28) — Computational Relativity Lab Created
+
+### NEW PAGE: computational-relativity-lab.html
+- **Computational Relativity Lab — When Einstein's Equations Meet Supercomputers**
+  - 6 sections: Overview, 3+1 Formalism, Numerical Methods, Merger Simulator, Waveform Analysis, History
+  - Interactive binary black hole merger simulator with real-time orbital dynamics
+  - Multiple animated SVG visualizations showing spacetime slicing, AMR grids, spectrograms
+  - Rich physics content: ADM formalism, BSSN equations, spectral methods, matched filtering
+
+### Physics Features
+- **Einstein Field Equations**: Gμν + Λgμν = (8πG/c⁴)Tμν — 10 coupled nonlinear PDEs
+- **ADM 3+1 Formalism**: Spacetime sliced into 3D hypersurfaces Σ(t) with lapse α and shift βⁱ
+- **Extrinsic Curvature**: Kᵢⱼ = -∇ᵢnⱼ — measures how slices are bent relative to each other
+- **Constraint Equations**: H = ⁽³R + K² - KᵢⱼKᵢⱼ = 0 (Hamiltonian) and Mⁱ = ∇ⱼ(Kᵢⱼ - γᵢⱼK) = 0 (Momentum)
+- **BSSN Reformulation**: Baumgarte-Shapiro-Shibata-Nakamura form suppresses constraint violations
+
+### 4 Numerical Methods Covered
+1. **Spectral Methods**: SpEC code uses multi-domain expansions (Chebyshev, spherical harmonics) with exponential convergence
+2. **Finite Difference**: CN-FD and BSSN with polynomial convergence; EinsteinToolkit uses this approach
+3. **Adaptive Mesh Refinement (AMR)**: 7+ nested grid levels with refinement factor 2; finest near horizons at Δx ≈ M/200
+4. **Singularity Handling**: Moving punctures, puncture gauge, and singularity-avoiding foliations
+
+### Key Breakthroughs Documented
+- **1915**: Einstein publishes field equations
+- **1959**: ADM formalism developed — foundation for computational relativity
+- **2005**: Frans Pretorius achieves first successful binary BH merger simulation
+- **2015**: LIGO detects GW150914 using NR waveform templates
+- **2016-2020s**: 100+ detections with LIGO-Virgo-KAGRA network
+
+### 3 Interactive Visualizations
+1. **Hero Canvas**: Animated warped spacetime grid with orbiting black holes and gravitational wave ripples
+2. **Spacetime Slicing SVG**: 3+1 decomposition showing hypersurfaces Σ(t) with lapse and shift indicators
+3. **AMR Grid SVG**: Multi-level nested grids with refinement near black holes
+4. **Spectrogram SVG**: Chirp frequency evolution from inspiral through merger to ringdown
+5. **Waveform Display**: Live gravitational wave strain h(t) drawn in real-time
+
+### Interactive Simulator Features
+- **Mass Ratio q**: 1.0 to 10.0 (adjustable)
+- **Spins χ₁, χ₂**: -0.99 to 0.99 (prograde/retrograde)
+- **Initial Separation**: 5-50 M units
+- **Simulation Speed**: 0.1x to 5.0x
+- **Play/Pause/Reset** controls
+- **Live Statistics**: Chirp mass, peak strain, peak frequency, radiated energy
+- **Phase Indicators**: Inspiral → Merger → Ringdown progression
+
+### Waveform Analysis Content
+- **Inspiral**: Post-Newtonian chirp signal, f(t) evolves as power law
+- **Merger**: Full numerical relativity required; horizon dynamics
+- **Ringdown**: Quasi-normal modes h(t) = Σ Aᵢe^(-πfᵢt/Qᵢ)cos(2πfᵢt + φᵢ)
+- **Matched Filtering**: S(h|h) = 4∫₀^∞ (h̃(f)ñ(f)*)/Sₙ(f) df — optimal SNR extraction
+- **Parameter Estimation**: GW150914 revealed 36+29 M☉ → 62 M☉ final, 3 M☉ radiated
+
+### Why This Matters
+"Computational relativity is where Einstein's abstract mathematics meets brutal computational reality. The irony is profound: Einstein himself famously disliked black holes and didn't believe in gravitational waves — yet his equations describe these phenomena with exquisite precision. Without numerical relativity, LIGO could not have confirmed general relativity's prediction of gravitational radiation. The theory and the computation are inseparable."
+
+---
+
 ## 2026-05-13 (Part 25) — Spacetime Curvature Explorer Created
 
 ### NEW PAGE: spacetime-curvature-explorer.html

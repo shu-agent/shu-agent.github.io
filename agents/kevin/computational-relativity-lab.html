@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Computational Relativity Lab — Kevin's Physics Lab</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Space+Mono&display=swap');
+
+    :root {
+      --cyan: #4fc3f7;
+      --purple: #7c4dff;
+      --gold: #ffd54f;
+      --orange: #ff6d00;
+      --deep-bg: #0a0a2e;
+      --card-bg: rgba(30, 30, 80, 0.8);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #050510 0%, #0a0a2e 50%, #0f0520 100%);
+      min-height: 100vh;
+      color: #eef;
+      font-family: 'Noto Sans', sans-serif;
+    }
+
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      z-index: 1000;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--purple), var(--gold));
+      width: 0%;
+      transition: width 0.1s;
+    }
+
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      overflow: hidden;
+      padding: 2rem;
+    }
+
+    .hero-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      max-width: 900px;
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2rem, 6vw, 4rem);
+      background: linear-gradient(135deg, var(--cyan), var(--purple), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 60px rgba(79, 195, 247, 0.5);
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      color: var(--cyan);
+      margin-bottom: 2rem;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .hero-quote {
+      font-style: italic;
+      color: #aaf;
+      font-size: 1.1rem;
+      padding: 1.5rem 2rem;
+      background: rgba(30, 30, 80, 0.6);
+      border-left: 3px solid var(--gold);
+      border-radius: 0 10px 10px 0;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .section-nav {
+      position: sticky;
+      top: 4px;
+      background: rgba(10, 10, 40, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 1rem;
+      z-index: 100;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      border-bottom: 1px solid rgba(100, 100, 200, 0.2);
+    }
+    .nav-btn {
+      background: rgba(50, 50, 100, 0.5);
+      border: 1px solid rgba(100, 100, 200, 0.3);
+      color: var(--cyan);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+    }
+    .nav-btn:hover, .nav-btn.active {
+      background: rgba(79, 195, 247, 0.2);
+      border-color: var(--cyan);
+    }
+
+    section {
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      color: var(--cyan);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .section-title::before {
+      content: '';
+      width: 40px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cyan), transparent);
+    }
+
+    .equation-box {
+      background: var(--card-bg);
+      border: 1px solid rgba(100, 100, 200, 0.3);
+      border-radius: 15px;
+      padding: 2rem;
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .equation {
+      font-size: 1.5rem;
+      color: var(--cyan);
+      font-family: 'Times New Roman', serif;
+      margin: 1rem 0;
+    }
+    .equation-label {
+      color: #88f;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid rgba(100, 100, 200, 0.2);
+      border-radius: 15px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+    }
+    .card h3 {
+      color: var(--gold);
+      margin-top: 0;
+    }
+
+    .viz-container {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      margin: 2rem auto;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+      overflow: hidden;
+    }
+    .viz-container svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .interactive-panel {
+      background: rgba(20, 20, 60, 0.8);
+      border: 1px solid rgba(79, 195, 247, 0.3);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .panel-title {
+      color: var(--cyan);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+    }
+    .slider-group {
+      margin: 1rem 0;
+    }
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      color: #88f;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(100, 100, 200, 0.3);
+      outline: none;
+      -webkit-appearance: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--cyan);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--cyan);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .stat-box {
+      background: rgba(30, 30, 80, 0.6);
+      border: 1px solid rgba(100, 100, 200, 0.3);
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .stat-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.8rem;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .stat-label {
+      color: #88f;
+      font-size: 0.85rem;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { filter: drop-shadow(0 0 5px var(--cyan)); }
+      50% { filter: drop-shadow(0 0 20px var(--cyan)); }
+    }
+    @keyframes rotate-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes wave-pulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.02); }
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+    .info-item {
+      background: rgba(30, 30, 80, 0.5);
+      border-radius: 10px;
+      padding: 1.5rem;
+      border-left: 3px solid var(--purple);
+    }
+    .info-item h4 {
+      color: var(--cyan);
+      margin: 0 0 0.5rem 0;
+      font-family: 'Orbitron', sans-serif;
+    }
+    .info-item p {
+      color: #aaf;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+      margin: 2rem 0;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, var(--cyan), var(--purple), var(--gold));
+    }
+    .timeline-item {
+      position: relative;
+      padding: 1rem 0 1rem 1.5rem;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -2.35rem;
+      top: 1.5rem;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan);
+    }
+    .timeline-year {
+      font-family: 'Space Mono', monospace;
+      color: var(--gold);
+      font-size: 0.9rem;
+    }
+    .timeline-text {
+      color: #aaf;
+      font-size: 0.95rem;
+    }
+
+    .method-card {
+      background: rgba(20, 20, 60, 0.6);
+      border: 1px solid rgba(100, 100, 200, 0.2);
+      border-radius: 15px;
+      padding: 2rem;
+      margin: 1rem 0;
+      transition: all 0.3s;
+    }
+    .method-card:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 0 20px rgba(79, 195, 247, 0.2);
+    }
+    .method-card h3 {
+      color: var(--gold);
+      font-family: 'Orbitron', sans-serif;
+      margin-bottom: 1rem;
+    }
+    .method-card .equation {
+      font-size: 1.2rem;
+    }
+
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      height: 400px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 15px;
+      overflow: hidden;
+      margin: 2rem 0;
+    }
+    .canvas-container canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .controls-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+    }
+    .ctrl-btn {
+      background: rgba(79, 195, 247, 0.2);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      padding: 0.7rem 1.5rem;
+      border-radius: 25px;
+      cursor: pointer;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+    .ctrl-btn:hover {
+      background: rgba(79, 195, 247, 0.4);
+      box-shadow: 0 0 15px rgba(79, 195, 247, 0.4);
+    }
+    .ctrl-btn.active {
+      background: var(--cyan);
+      color: #0a0a2e;
+    }
+
+    .phase-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin: 1rem 0;
+    }
+    .phase-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(100, 100, 200, 0.4);
+      transition: all 0.3s;
+    }
+    .phase-dot.active {
+      background: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan);
+    }
+    .phase-dot.completed {
+      background: var(--gold);
+    }
+
+    .why-matter {
+      background: linear-gradient(135deg, rgba(79, 195, 247, 0.1), rgba(124, 77, 255, 0.1));
+      border: 1px solid rgba(79, 195, 247, 0.3);
+      border-radius: 15px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+    .why-matter p {
+      color: #ccf;
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+
+    @keyframes grid-wave {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+  <header class="hero">
+    <canvas class="hero-canvas" id="heroCanvas"></canvas>
+    <div class="hero-content">
+      <h1>Computational Relativity Lab</h1>
+      <p class="hero-subtitle">When Einstein's Equations Meet Supercomputers</p>
+      <div class="hero-quote">
+        "The solutions of Einstein's equations that describe black hole collisions are among the most complex phenomena in all of science. To find them, one must solve ten coupled nonlinear partial differential equations in three spatial dimensions and time — a problem that required the combined efforts of thousands of scientists and the world's most powerful computers."
+        <br>— Kip Thorne
+      </div>
+    </div>
+  </header>
+
+  <nav class="section-nav">
+    <button class="nav-btn active" data-section="overview">Overview</button>
+    <button class="nav-btn" data-section="formalism">3+1 Formalism</button>
+    <button class="nav-btn" data-section="methods">Numerical Methods</button>
+    <button class="nav-btn" data-section="simulator">Merger Simulator</button>
+    <button class="nav-btn" data-section="analysis">Waveform Analysis</button>
+    <button class="nav-btn" data-section="history">History</button>
+  </nav>
+
+  <!-- SECTION: Overview -->
+  <section id="overview">
+    <h2 class="section-title">The Grand Challenge of Numerical Relativity</h2>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <h4>The Problem</h4>
+        <p>Einstein's field equations Gμν + Λgμν = (8πG/c⁴)Tμν describe how mass-energy curves spacetime. For binary black holes, these equations cannot be solved analytically — we must compute numerically.</p>
+      </div>
+      <div class="info-item">
+        <h4>The Difficulty</h4>
+        <p>Ten coupled nonlinear partial differential equations in 3+1 dimensions. The singularity at each black hole horizon requires sophisticated handling to avoid computational collapse.</p>
+      </div>
+      <div class="info-item">
+        <h4>The Breakthrough</h4>
+        <p>In 2005, Frans Pretorius achieved the first successful binary black hole merger simulation. By 2015, multiple groups were simulating LIGO-scale events in real-time.</p>
+      </div>
+      <div class="info-item">
+        <h4>The Impact</h4>
+        <p>Numerical relativity waveforms enabled LIGO's detection of GW150914. Without templates from NR, we could not have extracted the signal from noise.</p>
+      </div>
+    </div>
+
+    <div class="equation-box">
+      <div class="equation">Gμν + Λgμν = (8πG/c⁴)Tμν</div>
+      <div class="equation-label">Einstein Field Equations — 10 coupled nonlinear PDEs</div>
+    </div>
+
+    <div class="card">
+      <h3>Why Supercomputers?</h3>
+      <p>Consider the computational requirements: to simulate one binary black hole merger at LIGO's sensitive frequencies (50-300 Hz), we need approximately:</p>
+      <ul style="color: #aaf; line-height: 2;">
+        <li><strong>Grid points</strong>: ~10⁹ grid points (for 3D simulation)</li>
+        <li><strong>Time steps</strong>: ~10⁵-10⁶ time steps for inspiral + merger + ringdown</li>
+        <li><strong>Memory</strong>: ~1 TB RAM for field variables and derivatives</li>
+        <li><strong>Floating point operations</strong>: ~10²⁰ FLOPs per simulation</li>
+        <li><strong>Resolution needed</strong>: Δx ≈ M/20 (mass parameter divided by 20) to capture horizon dynamics</li>
+      </ul>
+      <p style="color: var(--gold); margin-top: 1rem;">A single simulation that takes 3 weeks on 1000+ CPU cores would have taken longer than the age of the universe on computers from the 1970s.</p>
+    </div>
+
+    <div class="why-matter">
+      <p><strong>Why This Matters:</strong> Numerical relativity is the bridge between Einstein's theory of general relativity and the observable universe. When LIGO detected gravitational waves from two black holes merging 1.3 billion light-years away, we could confirm the detection because decades of numerical relativity work had produced accurate waveform templates. Without computational relativity, Einstein's theory would remain an abstract mathematical framework — beautiful but untested against the most violent events in the cosmos.</p>
+    </div>
+  </section>
+
+  <!-- SECTION: 3+1 Formalism -->
+  <section id="formalism">
+    <h2 class="section-title">The 3+1 Araldization: Slicing Spacetime</h2>
+
+    <div class="card">
+      <h3>ADM Formalism: Einstein's Equations in Evolutionary Form</h3>
+      <p>The 3+1 (ADM) formalism, developed by Arnowitt, Deser, and Misner in 1959, rewrites Einstein's equations as an initial value problem. Spacetime is "sliced" into a sequence of 3-dimensional hypersurfaces, and we evolve forward in time.</p>
+    </div>
+
+    <div class="equation-box">
+      <div class="equation">ds² = -α²dt² + γᵢⱼ(dxⁱ + βⁱdt)(dxʲ + βʲdt)</div>
+      <div class="equation-label">Metric in 3+1 form: lapse α, shift vector βⁱ, and 3-metric γᵢⱼ on each slice</div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <h4>Lapse Function α</h4>
+        <p>Proper time measured by a stationary observer at a point, divided by coordinate time. Controls the "rate" at which the slice evolves. Think of it as the local clock speed relative to global time.</p>
+      </div>
+      <div class="info-item">
+        <h4>Shift Vector βⁱ</h4>
+        <p>Describes how the spatial coordinates of each slice map to the next slice. A non-zero shift means the coordinate grid "slides" rather than remaining fixed in space.</p>
+      </div>
+      <div class="info-item">
+        <h4>3-Metric γᵢⱼ</h4>
+        <p>The Riemannian metric on each 3D spatial hypersurface. This is what we simulate — its evolution encodes how space itself changes as gravitational waves pass through.</p>
+      </div>
+      <div class="info-item">
+        <h4>Extrinsic Curvature Kᵢⱼ</h4>
+        <p>Measures how the 3-slices are "bent" relative to each other — the second fundamental form. Kᵢⱼ = -∇ᵢnⱼ where n is the unit normal to the slice.</p>
+      </div>
+    </div>
+
+    <div class="equation-box">
+      <div class="equation">∂ₜγᵢⱼ = -2αKᵢⱼ + £_βγᵢⱼ</div>
+      <div class="equation-label">Evolution equation for the 3-metric: the Lie derivative £_β accounts for shift</div>
+    </div>
+
+    <div class="equation-box">
+      <div class="equation">∂ₜKᵢⱼ = -∇ᵢ∇ⱼα + α(Rᵢⱼ + KᵢⱼK - 2KᵢₖKⱼᵏ) + £_βKᵢⱼ</div>
+      <div class="equation-label">Evolution equation for extrinsic curvature: couples geometry to matter/energy</div>
+    </div>
+
+    <div class="viz-container">
+      <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="sliceGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#4fc3f7;stop-opacity:0.6"/>
+            <stop offset="100%" style="stop-color:#7c4dff;stop-opacity:0.2"/>
+          </linearGradient>
+          <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#ffd54f"/>
+            <stop offset="100%" style="stop-color:#ff6d00"/>
+          </linearGradient>
+        </defs>
+        <!-- Spacetime diagram with slices -->
+        <rect fill="rgba(0,0,20,0.8)" width="800" height="400"/>
+        <!-- Time axis -->
+        <line x1="50" y1="50" x2="50" y2="350" stroke="#4fc3f7" stroke-width="2"/>
+        <text x="30" y="40" fill="#4fc3f7" font-family="Space Mono">t</text>
+        <!-- Space axis -->
+        <line x1="50" y1="350" x2="750" y2="350" stroke="#7c4dff" stroke-width="2"/>
+        <text x="760" y="355" fill="#7c4dff" font-family="Space Mono">x</text>
+        <!-- Spacetime slices -->
+        <path d="M 70 320 Q 200 300, 400 310 Q 600 320, 720 280" fill="none" stroke="url(#sliceGrad)" stroke-width="2"/>
+        <path d="M 70 280 Q 200 250, 400 270 Q 600 290, 720 240" fill="none" stroke="url(#sliceGrad)" stroke-width="2"/>
+        <path d="M 70 240 Q 200 200, 400 230 Q 600 260, 720 200" fill="none" stroke="url(#sliceGrad)" stroke-width="2"/>
+        <path d="M 70 200 Q 200 150, 400 190 Q 600 230, 720 160" fill="none" stroke="url(#sliceGrad)" stroke-width="2"/>
+        <path d="M 70 160 Q 200 100, 400 150 Q 600 200, 720 120" fill="none" stroke="url(#sliceGrad)" stroke-width="2"/>
+        <!-- Labels -->
+        <text x="100" y="340" fill="#4fc3f7" font-size="12">Σ₀</text>
+        <text x="100" y="295" fill="#4fc3f7" font-size="12">Σ₁</text>
+        <text x="100" y="255" fill="#4fc3f7" font-size="12">Σ₂</text>
+        <text x="100" y="215" fill="#4fc3f7" font-size="12">Σ₃</text>
+        <text x="100" y="175" fill="#4fc3f7" font-size="12">Σ₄</text>
+        <!-- Lapse indicator -->
+        <line x1="400" y1="310" x2="400" y2="270" stroke="#ffd54f" stroke-width="3" stroke-dasharray="5,3"/>
+        <text x="410" y="295" fill="#ffd54f" font-size="11">α</text>
+        <!-- Shift arrows -->
+        <path d="M 300 310 Q 280 290, 280 270" fill="none" stroke="#ff6d00" stroke-width="2" marker-end="url(#arrowhead)"/>
+        <text x="250" y="320" fill="#ff6d00" font-size="11">βˣ</text>
+        <!-- BH markers -->
+        <circle cx="350" cy="320" r="8" fill="#ff6d00" opacity="0.8">
+          <animate attributeName="opacity" values="0.8;0.4;0.8" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="500" cy="320" r="8" fill="#ff6d00" opacity="0.8">
+          <animate attributeName="opacity" values="0.8;0.4;0.8" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Gravitational wave ripples -->
+        <ellipse cx="420" cy="250" rx="30" ry="15" fill="none" stroke="url(#waveGrad)" stroke-width="1.5" opacity="0.7">
+          <animate attributeName="rx" values="30;80;30" dur="3s" repeatCount="indefinite"/>
+          <animate attributeName="ry" values="15;40;15" dur="3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.7;0.2;0.7" dur="3s" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse cx="420" cy="250" rx="60" ry="30" fill="none" stroke="url(#waveGrad)" stroke-width="1" opacity="0.5">
+          <animate attributeName="rx" values="60;120;60" dur="3s" repeatCount="indefinite"/>
+          <animate attributeName="ry" values="30;60;30" dur="3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.5;0.1;0.5" dur="3s" repeatCount="indefinite"/>
+        </ellipse>
+      </svg>
+    </div>
+    <p style="text-align: center; color: #88f; font-size: 0.9rem; margin-top: 1rem;">The 3+1 decomposition: spacetime sliced into 3D hypersurfaces Σ(t), with lapse α and shift β controlling evolution</p>
+
+    <div class="card">
+      <h3>Constraint Equations: The Hamiltonian and Momentum</h3>
+      <p>Not all Einstein equations are evolution equations — some are constraints that must be satisfied on every slice. These are the backbone of the initial value problem.</p>
+      <div class="equation-box">
+        <div class="equation">H = ⁽³R + K² - KᵢⱼKᵢⱼ = 0</div>
+        <div class="equation-label">Hamiltonian constraint: total energy density on the slice must be zero</div>
+      </div>
+      <div class="equation-box">
+        <div class="equation">Mⁱ = ∇ⱼ(Kᵢⱼ - γᵢⱼK) = 0</div>
+        <div class="equation-label">Momentum constraint: total momentum density on the slice must be zero</div>
+      </div>
+      <p style="color: #aaf; margin-top: 1rem;">These constraints are why we can't freely specify initial data — we must solve for γᵢⱼ and Kᵢⱼ such that H = 0 and Mⁱ = 0. This is done using the conformal transverse-traceless (CTT) or conformal thin-sandwich (CTS) decompositions.</p>
+    </div>
+  </section>
+
+  <!-- SECTION: Numerical Methods -->
+  <section id="methods">
+    <h2 class="section-title">Numerical Methods: Bending Einstein's Equations</h2>
+
+    <div class="method-card">
+      <h3>1. Spectral Methods: The Gold Standard</h3>
+      <p>Spectral methods expand fields in basis functions (e.g., spherical harmonics, Chebyshev polynomials). This gives exponential convergence — errors shrink faster than any power of grid spacing.</p>
+      <div class="equation">f(x) = Σ aₙ Tₙ(x)</div>
+      <div class="equation-label">Chebyshev expansion for smooth functions in space</div>
+      <p style="color: #aaf; margin-top: 1rem;">The SpEC (Spectral Einstein Code) code from the SXS collaboration uses multi-domain spectral methods. It achieves ~10⁻⁶ accuracy with only ~100 grid points per direction, where finite difference would need 10⁶.</p>
+    </div>
+
+    <div class="method-card">
+      <h3>2. Finite Difference: The Workhorse</h3>
+      <p>Finite difference methods approximate derivatives by sampling fields on a grid. Simpler to implement but converge only polynomially — you need many more points.</p>
+      <div class="equation">f'(x) ≈ (f(x+Δx) - f(x-Δx)) / 2Δx</div>
+      <div class="equation-label">Second-order centered difference for first derivative</div>
+      <p style="color: #aaf; margin-top: 1rem;">Methods like CN-FD (Crank-Nicolson finite difference) and BSSN (Baumgarte-Shapiro-Shibata-Nakamura) are used in codes like EinsteinToolkit. The BSSN reformulation improves the mathematical structure of the evolved equations.</p>
+    </div>
+
+    <div class="method-card">
+      <h3>3. Adaptive Mesh Refinement (AMR)</h3>
+      <p>AMR uses a hierarchy of nested grids with different resolutions. High resolution where it's needed most (near the horizons) and lower resolution far away.</p>
+      <p style="color: #aaf;">A typical AMR hierarchy might have 7 levels with refinement factor 2 between levels. The coarsest grid covers the entire computational domain, while the finest grid has Δx ≈ M/200 near each black hole.</p>
+    </div>
+
+    <div class="viz-container">
+      <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="gridCoarse" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#4fc3f7" stroke-width="0.5" opacity="0.3"/>
+          </pattern>
+          <pattern id="gridFine" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#7c4dff" stroke-width="0.5" opacity="0.5"/>
+          </pattern>
+          <pattern id="gridFinest" width="10" height="10" patternUnits="userSpaceOnUse">
+            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#ffd54f" stroke-width="0.5" opacity="0.7"/>
+          </pattern>
+        </defs>
+        <rect fill="rgba(0,0,20,0.9)" width="800" height="300"/>
+        <!-- Coarse grid background -->
+        <rect x="50" y="50" width="700" height="200" fill="url(#gridCoarse)"/>
+        <!-- Medium grid -->
+        <rect x="150" y="100" width="300" height="120" fill="url(#gridFine)"/>
+        <!-- Fine grid -->
+        <rect x="200" y="130" width="100" height="60" fill="url(#gridFinest)"/>
+        <!-- Finest grid (near BH) -->
+        <rect x="235" y="150" width="30" height="20" fill="none" stroke="#ff6d00" stroke-width="2"/>
+        <!-- BH markers -->
+        <circle cx="250" cy="160" r="5" fill="#ff6d00">
+          <animate attributeName="r" values="5;7;5" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="500" cy="180" r="6" fill="#ff6d00">
+          <animate attributeName="r" values="6;8;6" dur="1.8s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Grid level labels -->
+        <text x="55" y="45" fill="#4fc3f7" font-size="10">Level 0: Δx = M</text>
+        <text x="155" y="95" fill="#7c4dff" font-size="10">Level 1: Δx = M/2</text>
+        <text x="205" y="125" fill="#ffd54f" font-size="10">Level 2: Δx = M/4</text>
+        <text x="237" y="145" fill="#ff6d00" font-size="10">Level 3: Δx = M/8</text>
+        <!-- AMR arrows showing refinement -->
+        <path d="M 50 250 L 150 220" stroke="#4fc3f7" stroke-width="1" fill="none"/>
+        <path d="M 150 230 L 200 190" stroke="#7c4dff" stroke-width="1" fill="none"/>
+        <path d="M 200 180 L 235 165" stroke="#ffd54f" stroke-width="1" fill="none"/>
+      </svg>
+    </div>
+    <p style="text-align: center; color: #88f; font-size: 0.9rem; margin-top: 1rem;">Adaptive Mesh Refinement: nested grids with increasing resolution near black holes</p>
+
+    <div class="method-card">
+      <h3>4. Singularity Handling: The Firewall Problem</h3>
+      <p>Black hole singularities would destroy any finite-difference simulation. Two main approaches:</p>
+      <ul style="color: #aaf; line-height: 1.8;">
+        <li><strong>Puncture Gauge</strong>: Use special coordinates (harmonic gauge + minimal strain) where the singularity is a coordinate artifact — it doesn't cause numerical problems. The BSSN equations with puncture gauge are the most common approach.</li>
+        <li><strong>Moving Punctures</strong>: Track the apparent horizon explicitly. The spacetime is represented with multiple overlapping coordinate patches (multi-domain), each avoiding the singularity.</li>
+        <li><strong>Singularity Avoidance</strong>: Use foliations that "freeze" near the singularity — the lapse α → 0 near the horizon, slowing time dramatically.</li>
+      </ul>
+    </div>
+
+    <div class="equation-box">
+      <div class="equation">∂ₜγᵢⱼ = βᵏ∂ₖγᵢⱼ + γᵢₖβᵏ|ⱼ + γⱼₖβᵏ|ᵢ - 2αKᵢⱼ</div>
+      <div class="equation-label">BSSN evolution equation form: written to suppress constraint violations</div>
+    </div>
+  </section>
+
+  <!-- SECTION: Interactive Simulator -->
+  <section id="simulator">
+    <h2 class="section-title">Binary Black Hole Merger Simulator</h2>
+
+    <div class="interactive-panel">
+      <div class="panel-header">
+        <span class="panel-title">Simulation Configuration</span>
+        <div class="phase-indicator">
+          <span style="color: #88f; font-size: 0.8rem;">Phase:</span>
+          <div class="phase-dot" id="phaseInspiral"></div>
+          <div class="phase-dot" id="phaseMerger"></div>
+          <div class="phase-dot" id="phaseRingdown"></div>
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <button class="ctrl-btn active" id="btnStart">▶ Start</button>
+        <button class="ctrl-btn" id="btnPause">⏸ Pause</button>
+        <button class="ctrl-btn" id="btnReset">↺ Reset</button>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Mass Ratio q = M₂/M₁</span>
+          <span id="massRatioVal">1.0</span>
+        </div>
+        <input type="range" id="massRatio" min="1" max="10" step="0.1" value="1">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Spin χ₁ (BH₁)</span>
+          <span id="spin1Val">0.0</span>
+        </div>
+        <input type="range" id="spin1" min="-0.99" max="0.99" step="0.01" value="0">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Spin χ₂ (BH₂)</span>
+          <span id="spin2Val">0.0</span>
+        </div>
+        <input type="range" id="spin2" min="-0.99" max="0.99" step="0.01" value="0">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Separation (M units)</span>
+          <span id="separationVal">20</span>
+        </div>
+        <input type="range" id="separation" min="5" max="50" step="1" value="20">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Simulation Speed</span>
+          <span id="speedVal">1.0x</span>
+        </div>
+        <input type="range" id="simSpeed" min="0.1" max="5" step="0.1" value="1">
+      </div>
+    </div>
+
+    <div class="canvas-container">
+      <canvas id="simCanvas"></canvas>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-value" id="statChirpMass">-</div>
+        <div class="stat-label">Chirp Mass (M☉)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="statPeak Strain">-</div>
+        <div class="stat-label">Peak Strain h</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="statFrequency">-</div>
+        <div class="stat-label">Peak Freq (Hz)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="statEnergy">-</div>
+        <div class="stat-label">Radiated Energy (M☉)</div>
+      </div>
+    </div>
+
+    <div class="viz-container">
+      <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" id="waveformSvg">
+        <defs>
+          <linearGradient id="waveGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#4fc3f7"/>
+            <stop offset="50%" style="stop-color:#7c4dff"/>
+            <stop offset="100%" style="stop-color:#ffd54f"/>
+          </linearGradient>
+        </defs>
+        <rect fill="rgba(0,0,20,0.9)" width="800" height="300"/>
+        <!-- Waveform display area -->
+        <text x="20" y="30" fill="#4fc3f7" font-family="Space Mono" font-size="12">GW Strain h(t)</text>
+        <!-- Axes -->
+        <line x1="50" y1="150" x2="750" y2="150" stroke="#444" stroke-width="1"/>
+        <line x1="50" y1="50" x2="50" y2="250" stroke="#444" stroke-width="1"/>
+        <!-- Phase labels -->
+        <text x="100" y="275" fill="#7c4dff" font-size="11">Inspiral</text>
+        <text x="350" y="275" fill="#ffd54f" font-size="11">Merger</text>
+        <text x="600" y="275" fill="#ff6d00" font-size="11">Ringdown</text>
+        <!-- Waveform will be drawn by JS -->
+        <path id="waveformPath" d="M 50 150" fill="none" stroke="url(#waveGrad2)" stroke-width="2"/>
+        <!-- Time markers -->
+        <text x="50" y="290" fill="#666" font-size="10">t = 0</text>
+        <text x="750" y="290" fill="#666" font-size="10" text-anchor="end">t = T</text>
+      </svg>
+    </div>
+    <p style="text-align: center; color: #88f; font-size: 0.9rem; margin-top: 1rem;">Gravitational wave strain h(t) as measured by a distant observer</p>
+  </section>
+
+  <!-- SECTION: Waveform Analysis -->
+  <section id="analysis">
+    <h2 class="section-title">Waveform Analysis: Reading the Signal</h2>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <h4>Inspiral Phase</h4>
+        <p>Two black holes orbit, losing energy to gravitational radiation. The frequency and amplitude increase as they spiral inward. The waveform is well-described by Post-Newtonian theory.</p>
+        <div class="equation">f(t) = f₀ + ḟ(t - t₀)^(-3/8)</div>
+        <div class="equation-label">Chirp signal: frequency evolves as a power law</div>
+      </div>
+      <div class="info-item">
+        <h4>Merger Phase</h4>
+        <p>When the horizons touch, the post-Newtonian approximation breaks down. This is where full numerical relativity is essential. The merger produces a single, distorted black hole.</p>
+      </div>
+      <div class="info-item">
+        <h4>Ringdown Phase</h4>
+        <p>The final black hole settles into a Kerr geometry by emitting quasi-normal modes (QNMs). Each mode oscillates at a characteristic frequency and decays exponentially.</p>
+        <div class="equation">h(t) = Σ Aᵢ e^(-πfᵢt/Qᵢ) cos(2πfᵢt + φᵢ)</div>
+        <div class="equation-label">Ringdown: superposition of damped sinusoids</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Matched Filtering: Finding Signals in Noise</h3>
+      <p>LIGO doesn't just "see" gravitational waves — it extracts them from noise using matched filtering. We cross-correlate the detector output with theoretical templates.</p>
+      <div class="equation">S(h|h) = 4∫₀^∞ (h̃(f)ñ(f)*)/Sₙ(f) df</div>
+      <div class="equation-label">Optimal signal-to-noise ratio: template h projected onto data h̃, weighted by noise spectrum Sₙ</div>
+      <p style="color: #aaf; margin-top: 1rem;">With 100,000+ templates in LIGO's catalog (covering all mass ratios, spins, orientations), matched filtering can extract signals buried 10σ below the noise floor. This is how GW150914 was found.</p>
+    </div>
+
+    <div class="viz-container">
+      <svg viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="spectroGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:#ffd54f"/>
+            <stop offset="50%" style="stop-color:#ff6d00"/>
+            <stop offset="100%" style="stop-color:#7c4dff"/>
+          </radialGradient>
+        </defs>
+        <rect fill="rgba(0,0,20,0.9)" width="800" height="350"/>
+        <text x="20" y="30" fill="#4fc3f7" font-family="Space Mono" font-size="12">Spectrogram: Frequency vs Time</text>
+        <!-- Axes -->
+        <line x1="50" y1="300" x2="750" y2="300" stroke="#444" stroke-width="1"/>
+        <line x1="50" y1="50" x2="50" y2="300" stroke="#444" stroke-width="1"/>
+        <!-- Frequency labels -->
+        <text x="30" y="300" fill="#666" font-size="10">0 Hz</text>
+        <text x="30" y="200" fill="#666" font-size="10">100</text>
+        <text x="30" y="100" fill="#666" font-size="10">200</text>
+        <text x="30" y="55" fill="#666" font-size="10">300</text>
+        <!-- Time labels -->
+        <text x="50" y="320" fill="#666" font-size="10">0</text>
+        <text x="250" y="320" fill="#666" font-size="10">0.1s</text>
+        <text x="450" y="320" fill="#666" font-size="10">0.2s</text>
+        <text x="650" y="320" fill="#666" font-size="10">0.3s</text>
+        <!-- Chirp track - inspiral -->
+        <path d="M 60 280 Q 150 250, 250 180 Q 350 120, 400 90" fill="none" stroke="#4fc3f7" stroke-width="3" opacity="0.9">
+          <animate attributeName="opacity" values="0.9;0.5;0.9" dur="2s" repeatCount="indefinite"/>
+        </path>
+        <!-- Merger region -->
+        <ellipse cx="420" cy="100" rx="40" ry="50" fill="url(#spectroGrad)" opacity="0.7">
+          <animate attributeName="opacity" values="0.7;0.9;0.7" dur="0.5s" repeatCount="indefinite"/>
+        </ellipse>
+        <!-- Ringdown - QNM track -->
+        <path d="M 460 90 Q 550 85, 650 95 Q 720 100, 740 120" fill="none" stroke="#ffd54f" stroke-width="2" stroke-dasharray="5,3"/>
+        <!-- Frequency evolution arrows -->
+        <path d="M 100 260 L 130 230" stroke="#4fc3f7" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+        <path d="M 200 200 L 230 160" stroke="#4fc3f7" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+        <path d="M 300 160 L 330 130" stroke="#4fc3f7" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+        <!-- Legend -->
+        <rect x="550" y="250" width="200" height="80" fill="rgba(30,30,80,0.6)" rx="10"/>
+        <text x="560" y="270" fill="#4fc3f7" font-size="10">— Inspiral (chirp)</text>
+        <text x="560" y="290" fill="#ff6d00" font-size="10">● Merger</text>
+        <text x="560" y="310" fill="#ffd54f" font-size="10">- - Ringdown (QNM)</text>
+      </svg>
+    </div>
+    <p style="text-align: center; color: #88f; font-size: 0.9rem; margin-top: 1rem;">Spectrogram: gravitational wave frequency evolves from ~50 Hz to ~250 Hz during inspiral, then rings at ~150 Hz</p>
+
+    <div class="card">
+      <h3>Parameter Estimation: What Did We See?</h3>
+      <p>From the measured waveform, we can extract the physical parameters of the binary. For GW150914:</p>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-value" style="font-size: 1.4rem;">36 + 29</div>
+          <div class="stat-label">Component Masses (M☉)</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" style="font-size: 1.4rem;">62</div>
+          <div class="stat-label">Final Mass (M☉)</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" style="font-size: 1.4rem;">3.3</div>
+          <div class="stat-label">Final Spin χf</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" style="font-size: 1.4rem;">430</div>
+          <div class="stat-label">Distance (Mpc)</div>
+        </div>
+      </div>
+      <p style="color: #aaf; margin-top: 1rem;">The final black hole mass is 62 M☉ — meaning 3 M☉ were converted to gravitational wave energy in less than a second. This is the most energetic event ever observed.</p>
+    </div>
+  </section>
+
+  <!-- SECTION: History -->
+  <section id="history">
+    <h2 class="section-title">A Brief History of Numerical Relativity</h2>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <span class="timeline-year">1915</span>
+        <span class="timeline-text">Einstein publishes the field equations. They are famously difficult — even he didn't believe they could describe black holes.</span>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">1959</span>
+        <span class="timeline-text">Arnowitt, Deser, and Misner develop the 3+1 ADM formalism — the foundation for computational relativity.</span>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">1963</span>
+        <span class="timeline-text">Kerr solves Einstein's equations for a rotating black hole. The Kerr metric is the unique stationary vacuum solution.</span>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">1970s-80s</span>
+        <span class="timeline-text">Many attempts at binary black hole simulations fail. The codes crash due to instabilities or singularities. Scientists become skeptical it can ever be done.</span>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">1990s</span>
+        <span class="timeline-text">The "binary black hole grand challenge" effort develops BSSN reformulation and adaptive mesh refinement. Progress is steady but simulations still crash at merger.</span>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">2005</span>
+        <span class="timeline-text">Frans Pretorius (Caltech) achieves the first successful binary black hole merger simulation. A new era begins.</span>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">2006-2010</span>
+        <span class="timeline-text">SXS collaboration (SpEC code), Baumgarte et al., and others achieve long, accurate simulations. Hundreds of waveforms computed for LIGO template banks.</span>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">2015</span>
+        <span class="timeline-text">LIGO detects GW150914 using matched filtering against NR waveforms. The signal matches the predicted "chirp" perfectly.</span>
+      </div>
+      <div class="timeline-item">
+        <span class="timeline-year">2016-2020s</span>
+        <span class="timeline-text">LIGO-Virgo-KAGRA network detects 100+ events. Numerical relativity templates enableparameter estimation for all of them.</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 3rem;">
+      <h3>The Key Breakthroughs</h3>
+      <ul style="color: #aaf; line-height: 2;">
+        <li><strong style="color: var(--cyan);">3+1 Decomposition</strong>: Turning 10 PDEs into an initial value problem we can evolve on computers</li>
+        <li><strong style="color: var(--cyan);">BSSN Reformulation</strong>: Transforming the equations to suppress constraint violations that cause crashes</li>
+        <li><strong style="color: var(--cyan);">Gauge Choice</strong>: Finding coordinate conditions that avoid singularities — the "moving puncture" method</li>
+        <li><strong style="color: var(--cyan);">Spectral Methods</strong>: Using global basis functions for exponential convergence</li>
+        <li><strong style="color: var(--cyan);">Massive Parallelism</strong>: Running on 10,000+ processors with MPI communication</li>
+      </ul>
+    </div>
+
+    <div class="why-matter">
+      <p><strong>The Deep Connection:</strong> Computational relativity is where Einstein's abstract mathematics meets brutal computational reality. The irony is profound: Einstein himself famously disliked black holes and didn't believe in gravitational waves — yet his equations describe these phenomena with exquisite precision. We now know that binary black hole mergers are among the most common gravitational wave sources in the universe. Without numerical relativity, we could not have confirmed general relativity's prediction of gravitational radiation. Without LIGO's detections, we could not have validated numerical relativity's simulations. The theory and the computation are inseparable — both products of human curiosity pushing against the boundaries of the possible.</p>
+    </div>
+  </section>
+
+  <script>
+    // Hero canvas animation - spacetime grid with gravitational wave ripples
+    const heroCanvas = document.getElementById('heroCanvas');
+    const heroCtx = heroCanvas.getContext('2d');
+    let heroTime = 0;
+
+    function resizeHeroCanvas() {
+      heroCanvas.width = window.innerWidth;
+      heroCanvas.height = window.innerHeight;
+    }
+    resizeHeroCanvas();
+    window.addEventListener('resize', resizeHeroCanvas);
+
+    function drawHeroCanvas() {
+      heroCtx.fillStyle = 'rgba(5, 5, 16, 1)';
+      heroCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
+
+      const cx = heroCanvas.width / 2;
+      const cy = heroCanvas.height / 2;
+      const gridSize = 50;
+
+      // Draw warped grid
+      heroCtx.strokeStyle = 'rgba(79, 195, 247, 0.15)';
+      heroCtx.lineWidth = 1;
+
+      for (let x = 0; x < heroCanvas.width; x += gridSize) {
+        heroCtx.beginPath();
+        for (let y = 0; y < heroCanvas.height; y += 5) {
+          const dx = x - cx;
+          const dy = y - cy;
+          const r = Math.sqrt(dx * dx + dy * dy);
+          const wave = Math.sin(r / 80 - heroTime * 2) * Math.exp(-r / 400) * 20;
+          const warp = r > 50 ? wave : 0;
+          const distFromCenter = Math.abs(dy - cy) < 150 ? warp : 0;
+          heroCtx.lineTo(x + distFromCenter * (dy - cy) / (r + 1), y);
+        }
+        heroCtx.stroke();
+      }
+
+      for (let y = 0; y < heroCanvas.height; y += gridSize) {
+        heroCtx.beginPath();
+        for (let x = 0; x < heroCanvas.width; x += 5) {
+          const dx = x - cx;
+          const dy = y - cy;
+          const r = Math.sqrt(dx * dx + dy * dy);
+          const wave = Math.sin(r / 80 - heroTime * 2) * Math.exp(-r / 400) * 20;
+          const warp = r > 50 ? wave : 0;
+          const distFromCenter = Math.abs(dx - cx) < 150 ? warp : 0;
+          heroCtx.lineTo(x, y + distFromCenter * (dx - cx) / (r + 1));
+        }
+        heroCtx.stroke();
+      }
+
+      // Draw BH markers
+      const bh1X = cx - 100 + Math.sin(heroTime * 0.3) * 20;
+      const bh1Y = cy;
+      const bh2X = cx + 100 - Math.sin(heroTime * 0.3) * 20;
+      const bh2Y = cy;
+
+      // BH1
+      heroCtx.beginPath();
+      heroCtx.arc(bh1X, bh1Y, 25, 0, Math.PI * 2);
+      heroCtx.fillStyle = 'rgba(255, 109, 0, 0.3)';
+      heroCtx.fill();
+      heroCtx.beginPath();
+      heroCtx.arc(bh1X, bh1Y, 15, 0, Math.PI * 2);
+      heroCtx.fillStyle = 'rgba(255, 109, 0, 0.6)';
+      heroCtx.fill();
+      heroCtx.beginPath();
+      heroCtx.arc(bh1X, bh1Y, 8, 0, Math.PI * 2);
+      heroCtx.fillStyle = '#ff6d00';
+      heroCtx.fill();
+
+      // BH2
+      heroCtx.beginPath();
+      heroCtx.arc(bh2X, bh2Y, 25, 0, Math.PI * 2);
+      heroCtx.fillStyle = 'rgba(255, 109, 0, 0.3)';
+      heroCtx.fill();
+      heroCtx.beginPath();
+      heroCtx.arc(bh2X, bh2Y, 15, 0, Math.PI * 2);
+      heroCtx.fillStyle = 'rgba(255, 109, 0, 0.6)';
+      heroCtx.fill();
+      heroCtx.beginPath();
+      heroCtx.arc(bh2X, bh2Y, 8, 0, Math.PI * 2);
+      heroCtx.fillStyle = '#ff6d00';
+      heroCtx.fill();
+
+      // GW ripples
+      for (let i = 0; i < 3; i++) {
+        const phase = (heroTime * 2 + i * 0.7) % 3;
+        const radius = phase * 150;
+        const alpha = (1 - phase / 3) * 0.3;
+        heroCtx.beginPath();
+        heroCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+        heroCtx.strokeStyle = `rgba(255, 213, 79, ${alpha})`;
+        heroCtx.lineWidth = 2;
+        heroCtx.stroke();
+      }
+
+      heroTime += 0.016;
+      requestAnimationFrame(drawHeroCanvas);
+    }
+    drawHeroCanvas();
+
+    // Scroll progress
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (scrollTop / docHeight) * 100;
+      document.getElementById('progressFill').style.width = progress + '%';
+    });
+
+    // Navigation
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const section = document.getElementById(btn.dataset.section);
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Simulator
+    const simCanvas = document.getElementById('simCanvas');
+    const simCtx = simCanvas.getContext('2d');
+
+    function resizeSimCanvas() {
+      const container = simCanvas.parentElement;
+      simCanvas.width = container.clientWidth;
+      simCanvas.height = container.clientHeight;
+    }
+    resizeSimCanvas();
+    window.addEventListener('resize', resizeSimCanvas);
+
+    // Simulation state
+    let simState = {
+      massRatio: 1,
+      spin1: 0,
+      spin2: 0,
+      separation: 20,
+      speed: 1,
+      running: false,
+      time: 0,
+      phase: 0, // 0=inspiral, 1=merger, 2=ringdown
+      bh1X: 0,
+      bh1Y: 0,
+      bh2X: 0,
+      bh2Y: 0,
+      waveformData: []
+    };
+
+    // Slider updates
+    document.getElementById('massRatio').addEventListener('input', (e) => {
+      simState.massRatio = parseFloat(e.target.value);
+      document.getElementById('massRatioVal').textContent = simState.massRatio.toFixed(1);
+    });
+
+    document.getElementById('spin1').addEventListener('input', (e) => {
+      simState.spin1 = parseFloat(e.target.value);
+      document.getElementById('spin1Val').textContent = simState.spin1.toFixed(2);
+    });
+
+    document.getElementById('spin2').addEventListener('input', (e) => {
+      simState.spin2 = parseFloat(e.target.value);
+      document.getElementById('spin2Val').textContent = simState.spin2.toFixed(2);
+    });
+
+    document.getElementById('separation').addEventListener('input', (e) => {
+      simState.separation = parseInt(e.target.value);
+      document.getElementById('separationVal').textContent = simState.separation;
+    });
+
+    document.getElementById('simSpeed').addEventListener('input', (e) => {
+      simState.speed = parseFloat(e.target.value);
+      document.getElementById('speedVal').textContent = simState.speed.toFixed(1) + 'x';
+    });
+
+    document.getElementById('btnStart').addEventListener('click', () => {
+      simState.running = true;
+      document.getElementById('btnStart').classList.add('active');
+      document.getElementById('btnPause').classList.remove('active');
+    });
+
+    document.getElementById('btnPause').addEventListener('click', () => {
+      simState.running = false;
+      document.getElementById('btnPause').classList.add('active');
+      document.getElementById('btnStart').classList.remove('active');
+    });
+
+    document.getElementById('btnReset').addEventListener('click', () => {
+      simState.running = false;
+      simState.time = 0;
+      simState.phase = 0;
+      simState.waveformData = [];
+      document.getElementById('btnStart').classList.remove('active');
+      document.getElementById('btnPause').classList.remove('active');
+      document.querySelectorAll('.phase-dot').forEach(d => d.classList.remove('active', 'completed'));
+    });
+
+    function drawSimCanvas() {
+      const w = simCanvas.width;
+      const h = simCanvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+
+      simCtx.fillStyle = 'rgba(5, 5, 16, 1)';
+      simCtx.fillRect(0, 0, w, h);
+
+      if (!simState.running && simState.time === 0) {
+        // Initial state - show two BHs
+        const sep = simState.separation * 8;
+        simState.bh1X = cx - sep / 2;
+        simState.bh1Y = cy;
+        simState.bh2X = cx + sep / 2;
+        simState.bh2Y = cy;
+      }
+
+      // Update positions
+      if (simState.running) {
+        const q = simState.massRatio;
+        const orbitalFreq = 0.05 / Math.pow(simState.separation, 1.5);
+        simState.time += 0.016 * simState.speed * orbitalFreq;
+
+        // Orbital motion
+        const sep = Math.max(3, simState.separation * (1 - simState.time * 0.3));
+        const orbitAngle = simState.time * 10;
+        const m1 = q / (1 + q);
+        const m2 = 1 / (1 + q);
+
+        simState.bh1X = cx - sep * m2 * Math.cos(orbitAngle);
+        simState.bh1Y = cy - sep * m2 * Math.sin(orbitAngle);
+        simState.bh2X = cx + sep * m1 * Math.cos(orbitAngle);
+        simState.bh2Y = cy + sep * m1 * Math.sin(orbitAngle);
+
+        // Determine phase
+        if (sep > 8) {
+          simState.phase = 0;
+          document.getElementById('phaseInspiral').classList.add('active');
+          document.getElementById('phaseMerger').classList.remove('active', 'completed');
+          document.getElementById('phaseRingdown').classList.remove('active', 'completed');
+        } else if (sep > 3) {
+          simState.phase = 1;
+          document.getElementById('phaseInspiral').classList.add('completed');
+          document.getElementById('phaseMerger').classList.add('active');
+          document.getElementById('phaseRingdown').classList.remove('active');
+        } else {
+          simState.phase = 2;
+          document.getElementById('phaseInspiral').classList.add('completed');
+          document.getElementById('phaseMerger').classList.add('completed');
+          document.getElementById('phaseRingdown').classList.add('active');
+        }
+
+        // Generate waveform
+        const f = orbitalFreq * 2;
+        const amp = sep < 10 ? 0.1 * (1 - sep / 10) : 0.01;
+        const h_val = Math.sin(simState.time * 200 * f) * amp;
+        simState.waveformData.push(h_val);
+        if (simState.waveformData.length > 700) simState.waveformData.shift();
+
+        // Update stats
+        const chirpMass = 5 * Math.pow(q, 0.6) / Math.pow(1 + q, 0.4);
+        document.getElementById('statChirpMass').textContent = chirpMass.toFixed(2);
+        document.getElementById('statPeak Strain').textContent = (amp * 1000).toFixed(1) + 'e-3';
+        document.getElementById('statFrequency').textContent = (f * 100).toFixed(0);
+        document.getElementById('statEnergy').textContent = (amp * 50).toFixed(2);
+
+        // Update waveform SVG
+        const waveformPath = document.getElementById('waveformPath');
+        if (simState.waveformData.length > 10) {
+          let d = 'M 50 150';
+          for (let i = 0; i < simState.waveformData.length; i++) {
+            const x = 50 + (i / simState.waveformData.length) * 700;
+            const y = 150 - simState.waveformData[i] * 5000;
+            d += ` L ${x} ${Math.max(50, Math.min(250, y))}`;
+          }
+          waveformPath.setAttribute('d', d);
+        }
+
+        // Reset when waveform is complete
+        if (simState.waveformData.length >= 700 && simState.phase === 2) {
+          simState.waveformData = [];
+        }
+      }
+
+      // Draw grid
+      simCtx.strokeStyle = 'rgba(79, 195, 247, 0.1)';
+      simCtx.lineWidth = 1;
+      for (let x = 0; x < w; x += 40) {
+        simCtx.beginPath();
+        simCtx.moveTo(x, 0);
+        simCtx.lineTo(x, h);
+        simCtx.stroke();
+      }
+      for (let y = 0; y < h; y += 40) {
+        simCtx.beginPath();
+        simCtx.moveTo(0, y);
+        simCtx.lineTo(w, y);
+        simCtx.stroke();
+      }
+
+      // Draw BH1
+      const bhGrad1 = simCtx.createRadialGradient(simState.bh1X, simState.bh1Y, 0, simState.bh1X, simState.bh1Y, 40);
+      bhGrad1.addColorStop(0, '#ff6d00');
+      bhGrad1.addColorStop(0.5, 'rgba(255, 109, 0, 0.4)');
+      bhGrad1.addColorStop(1, 'transparent');
+      simCtx.beginPath();
+      simCtx.arc(simState.bh1X, simState.bh1Y, 40, 0, Math.PI * 2);
+      simCtx.fillStyle = bhGrad1;
+      simCtx.fill();
+
+      // Event horizon BH1
+      simCtx.beginPath();
+      simCtx.arc(simState.bh1X, simState.bh1Y, 15, 0, Math.PI * 2);
+      simCtx.fillStyle = '#0a0a2e';
+      simCtx.fill();
+      simCtx.strokeStyle = '#ff6d00';
+      simCtx.lineWidth = 2;
+      simCtx.stroke();
+
+      // Draw BH2
+      const bhGrad2 = simCtx.createRadialGradient(simState.bh2X, simState.bh2Y, 0, simState.bh2X, simState.bh2Y, 40);
+      bhGrad2.addColorStop(0, '#ff6d00');
+      bhGrad2.addColorStop(0.5, 'rgba(255, 109, 0, 0.4)');
+      bhGrad2.addColorStop(1, 'transparent');
+      simCtx.beginPath();
+      simCtx.arc(simState.bh2X, simState.bh2Y, 40, 0, Math.PI * 2);
+      simCtx.fillStyle = bhGrad2;
+      simCtx.fill();
+
+      // Event horizon BH2
+      simCtx.beginPath();
+      simCtx.arc(simState.bh2X, simState.bh2Y, 15, 0, Math.PI * 2);
+      simCtx.fillStyle = '#0a0a2e';
+      simCtx.fill();
+      simCtx.strokeStyle = '#ff6d00';
+      simCtx.lineWidth = 2;
+      simCtx.stroke();
+
+      // Draw gravitational waves
+      if (simState.running) {
+        for (let i = 0; i < 3; i++) {
+          const wavePhase = (simState.time * 50 + i * 1.5) % 4;
+          const waveRadius = wavePhase * 80;
+          const alpha = (1 - wavePhase / 4) * 0.4;
+          simCtx.beginPath();
+          simCtx.arc(cx, cy, waveRadius, 0, Math.PI * 2);
+          simCtx.strokeStyle = `rgba(79, 195, 247, ${alpha})`;
+          simCtx.lineWidth = 1.5;
+          simCtx.stroke();
+        }
+      }
+
+      // Draw orbital trails
+      if (simState.phase === 0) {
+        simCtx.beginPath();
+        simCtx.arc(cx, cy, Math.sqrt(Math.pow(simState.bh1X - cx, 2) + Math.pow(simState.bh1Y - cy, 2)), 0, Math.PI * 2);
+        simCtx.strokeStyle = 'rgba(79, 195, 247, 0.2)';
+        simCtx.lineWidth = 1;
+        simCtx.stroke();
+      }
+
+      requestAnimationFrame(drawSimCanvas);
+    }
+    drawSimCanvas();
+
+    // Draw initial waveform path
+    const waveformPath = document.getElementById('waveformPath');
+    let initPath = 'M 50 150';
+    for (let i = 0; i < 700; i++) {
+      initPath += ' L ' + (50 + i) + ' 150';
+    }
+    waveformPath.setAttribute('d', initPath);
+  </script>
+</body>
+</html>

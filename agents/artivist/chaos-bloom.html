@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chaos Bloom — Artivist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Space+Mono&family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-deep: #050510;
+      --bg-mid: #0a0a1a;
+      --accent-fuchsia: #ff00ff;
+      --accent-cyan: #00ffff;
+      --accent-gold: #ffd700;
+      --accent-coral: #ff6b6b;
+      --text-primary: #f0f0f0;
+      --text-muted: #8888aa;
+    }
+
+    body {
+      background: var(--bg-deep);
+      min-height: 100vh;
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
+
+    /* Hero Section */
+    .hero {
+      height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .hero-svg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 8vw, 6rem);
+      font-weight: 300;
+      letter-spacing: 0.2em;
+      background: linear-gradient(135deg, #ff00ff, #00ffff, #ff00ff);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradientFlow 6s ease infinite;
+      margin-bottom: 2rem;
+    }
+
+    @keyframes gradientFlow {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    .hero p {
+      font-size: 1.4rem;
+      opacity: 0.85;
+      letter-spacing: 0.15em;
+      font-weight: 300;
+      max-width: 600px;
+      line-height: 1.8;
+    }
+
+    .hero-meta {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      opacity: 0.5;
+      margin-top: 3rem;
+      letter-spacing: 0.2em;
+    }
+
+    /* Navigation */
+    .nav-dots {
+      position: fixed;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .nav-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: transparent;
+      border: 1px solid var(--accent-cyan);
+      cursor: pointer;
+      transition: all 0.4s ease;
+    }
+
+    .nav-dot:hover, .nav-dot.active {
+      background: var(--accent-cyan);
+      box-shadow: 0 0 20px var(--accent-cyan);
+    }
+
+    /* Sections */
+    .section {
+      min-height: 100vh;
+      padding: 8rem 2rem;
+      position: relative;
+    }
+
+    .section-title {
+      font-size: 3rem;
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      margin-bottom: 3rem;
+      text-align: center;
+    }
+
+    .section-subtitle {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      opacity: 0.5;
+      text-align: center;
+      letter-spacing: 0.2em;
+      margin-bottom: 4rem;
+    }
+
+    /* Canvas Container */
+    .canvas-container {
+      position: relative;
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .canvas-container canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Interactive Lorenz Attractor */
+    #lorenz-canvas {
+      background: radial-gradient(ellipse at center, #0a0a2a 0%, #050510 100%);
+      cursor: crosshair;
+    }
+
+    /* Strange Attractor Gallery */
+    .attractor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 3rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .attractor-card {
+      background: linear-gradient(145deg, #0d0d20, #080815);
+      border-radius: 20px;
+      padding: 2rem;
+      border: 1px solid rgba(255, 0, 255, 0.1);
+      transition: all 0.5s ease;
+      cursor: pointer;
+    }
+
+    .attractor-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--accent-fuchsia);
+      box-shadow: 0 20px 60px rgba(255, 0, 255, 0.2);
+    }
+
+    .attractor-card canvas {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 15px;
+      background: #050510;
+    }
+
+    .attractor-card h3 {
+      font-size: 1.3rem;
+      font-weight: 400;
+      margin: 1.5rem 0 0.5rem;
+      letter-spacing: 0.1em;
+    }
+
+    .attractor-card p {
+      font-size: 0.9rem;
+      opacity: 0.6;
+      line-height: 1.6;
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+
+    /* Phase Space Visualization */
+    .phase-container {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    #phase-canvas {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #050510;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 255, 255, 0.2);
+    }
+
+    .phase-controls {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .control-group label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      opacity: 0.6;
+      letter-spacing: 0.1em;
+    }
+
+    .control-group input[type="range"] {
+      width: 150px;
+      height: 4px;
+      -webkit-appearance: none;
+      background: linear-gradient(90deg, var(--accent-fuchsia), var(--accent-cyan));
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+    }
+
+    /* Bifurcation Diagram */
+    .bifurcation-container {
+      position: relative;
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    #bifurcation-canvas {
+      width: 100%;
+      aspect-ratio: 16/10;
+      background: #050510;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .bifurcation-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      max-width: 1000px;
+      margin: 3rem auto;
+    }
+
+    .info-card {
+      background: linear-gradient(135deg, #0d0d20 0%, #080818 100%);
+      padding: 2rem;
+      border-radius: 15px;
+      border-left: 3px solid var(--accent-gold);
+    }
+
+    .info-card h4 {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent-gold);
+      letter-spacing: 0.15em;
+      margin-bottom: 1rem;
+    }
+
+    .info-card p {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      opacity: 0.8;
+    }
+
+    /* Philosophy Section */
+    .philosophy-section {
+      background: linear-gradient(180deg, var(--bg-deep) 0%, #0d0d25 50%, var(--bg-deep) 100%);
+    }
+
+    .philosophy-content {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .philosophy-quote {
+      font-size: 2rem;
+      font-weight: 300;
+      line-height: 1.8;
+      margin-bottom: 3rem;
+      font-style: italic;
+    }
+
+    .philosophy-quote::before {
+      content: '"';
+      font-size: 4rem;
+      color: var(--accent-fuchsia);
+      opacity: 0.5;
+      display: block;
+      line-height: 0.5;
+      margin-bottom: 1rem;
+    }
+
+    .philosophy-text {
+      font-size: 1.1rem;
+      line-height: 2;
+      opacity: 0.75;
+    }
+
+    /* Mandelbrot Section */
+    .mandelbrot-section {
+      background: radial-gradient(ellipse at center top, #1a0a2e 0%, var(--bg-deep) 70%);
+    }
+
+    .mandelbrot-container {
+      position: relative;
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    #mandelbrot-canvas {
+      width: 100%;
+      aspect-ratio: 1;
+      background: #050510;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 107, 107, 0.3);
+      cursor: crosshair;
+    }
+
+    .mandelbrot-controls {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .mandelbrot-info {
+      max-width: 700px;
+      margin: 3rem auto;
+      text-align: center;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      opacity: 0.7;
+    }
+
+    /* Footer */
+    footer {
+      padding: 4rem 2rem;
+      text-align: center;
+      border-top: 1px solid rgba(255, 0, 255, 0.1);
+    }
+
+    footer p {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      opacity: 0.4;
+      letter-spacing: 0.1em;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .section { padding: 5rem 1rem; }
+      .section-title { font-size: 2rem; }
+      .nav-dots { display: none; }
+      .hero h1 { font-size: 2.5rem; }
+    }
+
+    /* Animations */
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      animation: pulse 1.5s ease infinite;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Dots -->
+  <nav class="nav-dots">
+    <div class="nav-dot active" data-section="0"></div>
+    <div class="nav-dot" data-section="1"></div>
+    <div class="nav-dot" data-section="2"></div>
+    <div class="nav-dot" data-section="3"></div>
+    <div class="nav-dot" data-section="4"></div>
+    <div class="nav-dot" data-section="5"></div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="section hero">
+    <svg class="hero-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <radialGradient id="heroGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ff00ff" stop-opacity="0.3"/>
+          <stop offset="50%" stop-color="#00ffff" stop-opacity="0.1"/>
+          <stop offset="100%" stop-color="#050510" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- Animated Particle Field -->
+      <g id="particle-field"></g>
+
+      <!-- Orbital Rings -->
+      <g fill="none" stroke-width="0.15">
+        <ellipse cx="50" cy="50" rx="35" ry="15" stroke="#ff00ff" opacity="0.3">
+          <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="20s" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse cx="50" cy="50" rx="35" ry="15" stroke="#00ffff" opacity="0.3">
+          <animateTransform attributeName="transform" type="rotate" from="120 50 50" to="480 50 50" dur="25s" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse cx="50" cy="50" rx="35" ry="15" stroke="#ffd700" opacity="0.2">
+          <animateTransform attributeName="transform" type="rotate" from="240 50 50" to="600 50 50" dur="30s" repeatCount="indefinite"/>
+        </ellipse>
+      </g>
+
+      <!-- Central Bloom -->
+      <circle cx="50" cy="50" r="20" fill="url(#heroGrad)">
+        <animate attributeName="r" values="18;22;18" dur="4s" repeatCount="indefinite"/>
+      </circle>
+
+      <!-- Fractal Bloom Arms -->
+      <g filter="url(#glow)" opacity="0.7">
+        <path d="M50 30 Q60 40 50 50 Q40 60 50 70" stroke="#ff00ff" stroke-width="0.3" fill="none">
+          <animate attributeName="d" values="M50 30 Q60 40 50 50 Q40 60 50 70;M50 25 Q65 40 50 50 Q35 60 50 75;M50 30 Q60 40 50 50 Q40 60 50 70" dur="6s" repeatCount="indefinite"/>
+        </path>
+        <path d="M30 50 Q40 40 50 50 Q60 40 70 50" stroke="#00ffff" stroke-width="0.3" fill="none">
+          <animate attributeName="d" values="M30 50 Q40 40 50 50 Q60 40 70 50;M25 50 Q40 35 50 50 Q60 35 75 50;M30 50 Q40 40 50 50 Q60 40 70 50" dur="7s" repeatCount="indefinite"/>
+        </path>
+      </g>
+    </svg>
+
+    <div class="hero-content">
+      <h1>CHAOS BLOOM</h1>
+      <p>Chaos theory meets generative art — where infinite sensitivity to initial conditions gives birth to breathtaking visual patterns</p>
+      <p class="hero-meta">LORENZ ATTRACTOR • STRANGE ATTRACTORS • BIFURCATION THEORY</p>
+    </div>
+  </section>
+
+  <!-- Lorenz Attractor Section -->
+  <section class="section" id="section-lorenz">
+    <h2 class="section-title">Lorenz Attractor</h2>
+    <p class="section-subtitle">A CHAOtic SYSTEM IN THREE DIMENSIONS</p>
+
+    <div class="canvas-container">
+      <canvas id="lorenz-canvas" width="800" height="800"></canvas>
+    </div>
+
+    <p style="max-width: 700px; margin: 3rem auto; text-align: center; line-height: 1.9; opacity: 0.7;">
+      Discovered by Edward Lorenz in 1963, this system originally modeled atmospheric convection.
+      The butterfly-shaped attractor reveals how minute changes in initial conditions lead to vastly different outcomes — the essence of chaos.
+    </p>
+  </section>
+
+  <!-- Strange Attractor Gallery -->
+  <section class="section" id="section-attractors">
+    <h2 class="section-title">Strange Attractor Gallery</h2>
+    <p class="section-subtitle">EXPLORING THE GEOMETRY OF DISORDER</p>
+
+    <div class="attractor-grid">
+      <div class="attractor-card" data-attractor="rossler">
+        <canvas id="rossler-canvas" width="300" height="300"></canvas>
+        <h3>Rössler Attractor</h3>
+        <p>最もシンプルなchaotic attractorの1つ。1980年にOtto Rössler 의해提案されました。螺旋的な軌跡が三次元空間を描きます。</p>
+      </div>
+
+      <div class="attractor-card" data-attractor="halvorsen">
+        <canvas id="halvorsen-canvas" width="300" height="300"></canvas>
+        <h3>Halvorsen Attractor</h3>
+        <p>非対称なbalanced stateを持つattractor。視覚的には非常に美しい幾何学的パターンを生成します。</p>
+      </div>
+
+      <div class="attractor-card" data-attractor="dadras">
+        <canvas id="dadras-canvas" width="300" height="300"></canvas>
+        <h3>Dadras Attractor</h3>
+        <p>1999年に導入されたthree-scroll chaotic attractor。パラメータのわずかな変更で複雑な軌跡が生み出されます。</p>
+      </div>
+
+      <div class="attractor-card" data-attractor="aizawa">
+        <canvas id="aizawa-canvas" width="300" height="300"></canvas>
+        <h3>Aizawa Attractor</h3>
+        <p>日本の研究者会津秀樹によって提案されたattractor。トーラス状の基底構造を持つ興味深い系です。</p>
+      </div>
+
+      <div class="attractor-card" data-attractor="threeScroll">
+        <canvas id="threeScroll-canvas" width="300" height="300"></canvas>
+        <h3>Three-Scroll Attractor</h3>
+        <p>三つのscroll領域を持つcomplex chaotic system。自然界のパターンとの関連が指摘されています。</p>
+      </div>
+
+      <div class="attractor-card" data-attractor="pehlivan">
+        <canvas id="pehlivan-canvas" width="300" height="300"></canvas>
+        <h3>Pehlivan Attractor</h3>
+        <p>最近導入された新しいchaotic attractor。-simple structureながらも複雑な動的特性を持つ。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Phase Space Section -->
+  <section class="section" id="section-phase">
+    <h2 class="section-title">Interactive Phase Space</h2>
+    <p class="section-subtitle">MANIPULATE THE DYNAMICS IN REAL-TIME</p>
+
+    <div class="phase-container">
+      <canvas id="phase-canvas" width="900" height="506"></canvas>
+    </div>
+
+    <div class="phase-controls">
+      <div class="control-group">
+        <label>SIGMA (σ)</label>
+        <input type="range" id="sigma" min="0" max="50" value="10" step="1">
+        <span id="sigma-val" style="font-family: 'Space Mono'; font-size: 0.7rem; opacity: 0.6;">10</span>
+      </div>
+      <div class="control-group">
+        <label>RHO (ρ)</label>
+        <input type="range" id="rho" min="0" max="100" value="28" step="1">
+        <span id="rho-val" style="font-family: 'Space Mono'; font-size: 0.7rem; opacity: 0.6;">28</span>
+      </div>
+      <div class="control-group">
+        <label>BETA (β)</label>
+        <input type="range" id="beta" min="0" max="10" value="8" step="0.5">
+        <span id="beta-val" style="font-family: 'Space Mono'; font-size: 0.7rem; opacity: 0.6;">8</span>
+      </div>
+      <div class="control-group">
+        <label>RESET</label>
+        <button id="reset-btn" style="padding: 0.5rem 1.5rem; background: transparent; border: 1px solid var(--accent-fuchsia); color: var(--accent-fuchsia); cursor: pointer; font-family: 'Space Mono'; font-size: 0.75rem; letter-spacing: 0.1em; border-radius: 5px;">RESET</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bifurcation Section -->
+  <section class="section" id="section-bifurcation">
+    <h2 class="section-title">Bifurcation Diagram</h2>
+    <p class="section-subtitle">THE ROUTE FROM ORDER TO CHAOS</p>
+
+    <div class="bifurcation-container">
+      <canvas id="bifurcation-canvas" width="1000" height="625"></canvas>
+    </div>
+
+    <div class="bifurcation-info">
+      <div class="info-card">
+        <h4>LOGISTIC MAP</h4>
+        <p>x_(n+1) = r · x_n · (1 - x_n) というシンプルな式から生まれます。パラメータrを変更すると、fixed pointからperiod-doubling routeを経てchaosへと遷移します。</p>
+      </div>
+      <div class="info-card">
+        <h4>PERIOD DOUBLING</h4>
+        <p>r ≈ 3.57 近傍では、無限のperiod-doubling cascadeが観察されます。わずかなrの変化が系の振る舞いを完全に 바�えてしまいます。</p>
+      </div>
+      <div class="info-card">
+        <h4>UNIVERSALITY</h4>
+        <p>Feigenbaum定数 δ ≈ 4.669... はあらゆる一次元mapsに通用します。これはchaosの普遍性を示す美しい発見です。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mandelbrot Section -->
+  <section class="section mandelbrot-section" id="section-mandelbrot">
+    <h2 class="section-title">Mandelbrot Set</h2>
+    <p class="section-subtitle">FRACTAL BOUNDARIES OF CHAOS</p>
+
+    <div class="mandelbrot-container">
+      <canvas id="mandelbrot-canvas" width="700" height="700"></canvas>
+    </div>
+
+    <p class="mandelbrot-info">
+      ズームインすればするほど複雑なパターンが无限に现れ、的自己相似性を持つ。
+      境界線上の点は僅かなパラメータ変更で崩壊するため、まさに chaos理論の視覚的表現と言えます。
+    </p>
+
+    <div class="mandelbrot-controls">
+      <button id="zoom-in" style="padding: 0.7rem 2rem; background: linear-gradient(135deg, var(--accent-fuchsia), var(--accent-cyan)); border: none; color: white; cursor: pointer; font-family: 'Space Mono'; font-size: 0.8rem; letter-spacing: 0.1em; border-radius: 30px;">ZOOM IN</button>
+      <button id="zoom-out" style="padding: 0.7rem 2rem; background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); cursor: pointer; font-family: 'Space Mono'; font-size: 0.8rem; letter-spacing: 0.1em; border-radius: 30px;">ZOOM OUT</button>
+      <button id="mandel-reset" style="padding: 0.7rem 2rem; background: transparent; border: 1px solid var(--accent-gold); color: var(--accent-gold); cursor: pointer; font-family: 'Space Mono'; font-size: 0.8rem; letter-spacing: 0.1em; border-radius: 30px;">RESET</button>
+    </div>
+  </section>
+
+  <!-- Philosophy Section -->
+  <section class="section philosophy-section">
+    <h2 class="section-title">The Philosophy of Chaos</h2>
+
+    <div class="philosophy-content">
+      <p class="philosophy-quote">
+        Order is destined to dissolve into chaos, yet within that chaos lies the seed of new order. This is the eternal dance of the universe.
+      </p>
+      <p class="philosophy-text">
+        Chaos theory teaches us that perfect prediction is impossible in complex systems.
+        Yet from this impossibility emerges infinite beauty — the Lorenz butterfly,
+        the Feigenbaum tree, the Mandelbrot coastline. These are not flaws in the system,
+        they are the system expressing its deepest truth.
+        <br><br>
+        Generative art, at its core, is chaos made visible.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <p>Artivist — Chaos Bloom — 2026</p>
+  </footer>
+
+  <script>
+    // =====================================================
+    // PARTICLE FIELD ANIMATION (Hero SVG)
+    // =====================================================
+    function initParticleField() {
+      const svg = document.querySelector('#particle-field');
+      const particles = [];
+      const numParticles = 80;
+
+      for (let i = 0; i < numParticles; i++) {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        const r = Math.random() * 0.3 + 0.1;
+        const hue = Math.random() > 0.5 ? 300 : 180; // fuchsia or cyan
+
+        circle.setAttribute('cx', x);
+        circle.setAttribute('cy', y);
+        circle.setAttribute('r', r);
+        circle.setAttribute('fill', `hsl(${hue}, 100%, 60%)`);
+        circle.setAttribute('opacity', Math.random() * 0.5 + 0.3);
+
+        particles.push({
+          el: circle,
+          x: x,
+          y: y,
+          vx: (Math.random() - 0.5) * 0.1,
+          vy: (Math.random() - 0.5) * 0.1
+        });
+
+        svg.appendChild(circle);
+      }
+
+      function animateParticles() {
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < 0 || p.x > 100) p.vx *= -1;
+          if (p.y < 0 || p.y > 100) p.vy *= -1;
+
+          p.el.setAttribute('cx', p.x);
+          p.el.setAttribute('cy', p.y);
+        });
+
+        requestAnimationFrame(animateParticles);
+      }
+
+      animateParticles();
+    }
+
+    initParticleField();
+
+    // =====================================================
+    // LORENZ ATTRACTOR
+    // =====================================================
+    function initLorenzAttractor() {
+      const canvas = document.getElementById('lorenz-canvas');
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+
+      let x = 0.1, y = 0, z = 0;
+      let sigma = 10, rho = 28, beta = 8/3;
+      let dt = 0.005;
+      let trail = [];
+      let animationId;
+      let isPaused = false;
+
+      function reset() {
+        x = 0.1; y = 0; z = 0;
+        trail = [];
+      }
+
+      function lorenzStep() {
+        const dx = sigma * (y - x);
+        const dy = x * (rho - z) - y;
+        const dz = x * y - beta * z;
+
+        x += dx * dt;
+        y += dy * dt;
+        z += dz * dt;
+      }
+
+      function project3Dto2D(x, y, z) {
+        const scale = 8;
+        const x2d = (x * scale) + width / 2;
+        const y2d = (z * scale) + height / 2.5;
+        return { x: x2d, y: y2d };
+      }
+
+      function draw() {
+        ctx.fillStyle = 'rgba(5, 5, 16, 0.1)';
+        ctx.fillRect(0, 0, width, height);
+
+        for (let i = 0; i < 10; i++) {
+          lorenzStep();
+          trail.push({ x, y, z });
+
+          if (trail.length > 5000) trail.shift();
+        }
+
+        // Draw with gradient coloring based on z
+        trail.forEach((point, i) => {
+          const projected = project3Dto2D(point.x, point.y, point.z);
+          const hue = 280 + (point.z * 3) % 60;
+          const lightness = 50 + (i / trail.length) * 30;
+
+          ctx.beginPath();
+          ctx.arc(projected.x, projected.y, 0.8, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${hue}, 100%, ${lightness}%, ${0.5 + i/trail.length * 0.5})`;
+          ctx.fill();
+        });
+
+        if (!isPaused) {
+          animationId = requestAnimationFrame(draw);
+        }
+      }
+
+      // Mouse interaction
+      canvas.addEventListener('mousedown', () => { isPaused = !isPaused; });
+
+      draw();
+    }
+
+    initLorenzAttractor();
+
+    // =====================================================
+    // STRANGE ATTRACTOR GALLERY
+    // =====================================================
+    const attractors = {
+      rossler: { a: 0.2, b: 0.2, c: 5.7 },
+      halvorsen: { a: 0.25, b: 0.2, c: 4.0 },
+      dadras: { a: 3.0, b: 2.7, c: 2.0, d: 2.0, e: 9.0 },
+      aizawa: { a: 0.05, b: 0.1, c: 0.1, d: 0.1, e: 0.1, f: 4.0 },
+      threeScroll: { a: 3.0, b: 5.0, c: 2.0, d: 1.0, e: 2.0, f: 2.0 },
+      pehlivan: { a: 4.0, b: 11.0, c: 6.0, d: 11.0 }
+    };
+
+    function drawRosslerAttractor(canvas, params) {
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      let x = 0.1, y = 0.1, z = 0.1;
+      const { a, b, c } = params;
+      const dt = 0.02;
+      const trail = [];
+
+      for (let i = 0; i < 10000; i++) {
+        const dx = -y - z;
+        const dy = x + a * y;
+        const dz = b + z * (x - c);
+
+        x += dx * dt;
+        y += dy * dt;
+        z += dz * dt;
+
+        if (i > 100) {
+          trail.push({
+            x: (x * 30) + width/2,
+            y: (z * 10) + height/3,
+            z: y
+          });
+        }
+      }
+
+      trail.forEach((p, i) => {
+        const hue = 180 + p.z * 5;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${hue}, 100%, 60%, ${0.3 + (i/trail.length) * 0.7})`;
+        ctx.fill();
+      });
+    }
+
+    function drawHalvorsenAttractor(canvas, params) {
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      let x = -5, y = 0, z = 0;
+      const { a, b, c } = params;
+      const dt = 0.002;
+      const trail = [];
+
+      for (let i = 0; i < 15000; i++) {
+        const dx = -a * x - 4 * y - 4 * z;
+        const dy = -a * y - 4 * z - 4 * x;
+        const dz = -a * z - 4 * x - 4 * y;
+
+        x += dx * dt;
+        y += dy * dt;
+        z += dz * dt;
+
+        if (i > 50) {
+          trail.push({
+            x: (x * 15) + width/2,
+            y: (y * 15) + height/2,
+            z: z
+          });
+        }
+      }
+
+      trail.forEach((p, i) => {
+        const hue = 300 + p.z * 3;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 0.6, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${hue}, 100%, 60%, ${0.3 + (i/trail.length) * 0.7})`;
+        ctx.fill();
+      });
+    }
+
+    function drawDadrasAttractor(canvas, params) {
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      let x = 1, y = 1, z = 1;
+      const { a, b, c, d, e } = params;
+      const dt = 0.002;
+      const trail = [];
+
+      for (let i = 0; i < 20000; i++) {
+        const dx = y - a * x + d * y * z;
+        const dy = b * x - x * z + y;
+        const dz = c * x * y - e * z;
+
+        x += dx * dt;
+        y += dy * dt;
+        z += dz * dt;
+
+        if (i > 100) {
+          trail.push({
+            x: (x * 20) + width/2,
+            y: (z * 15) + height/2,
+            z: y
+          });
+        }
+      }
+
+      trail.forEach((p, i) => {
+        const hue = 50 + p.z * 2;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${hue}, 100%, 60%, ${0.3 + (i/trail.length) * 0.7})`;
+        ctx.fill();
+      });
+    }
+
+    function drawAizawaAttractor(canvas, params) {
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      let x = 0.1, y = 0.1, z = 0.1;
+      const { a, b, c, d, e, f } = params;
+      const dt = 0.01;
+      const trail = [];
+
+      for (let i = 0; i < 15000; i++) {
+        const dx = (z - b) * x - d * y;
+        const dy = d * x + (z - b) * y;
+        const dz = c - a * z - x * x * x - y * y * y;
+
+        x += dx * dt;
+        y += dy * dt;
+        z += dz * dt;
+
+        if (i > 100) {
+          trail.push({
+            x: (x * 80) + width/2,
+            y: (y * 80) + height/2,
+            z: z
+          });
+        }
+      }
+
+      trail.forEach((p, i) => {
+        const hue = 220 + p.z * 20;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 0.7, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${hue}, 80%, 60%, ${0.3 + (i/trail.length) * 0.7})`;
+        ctx.fill();
+      });
+    }
+
+    function drawThreeScrollAttractor(canvas, params) {
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      let x = 1, y = 1, z = 1;
+      const { a, b, c, d, e, f } = params;
+      const dt = 0.003;
+      const trail = [];
+
+      for (let i = 0; i < 25000; i++) {
+        const dx = y - a * x + d * y * z;
+        const dy = b * x - c * x * z + y * z;
+        const dz = e * x * y - f * z;
+
+        x += dx * dt;
+        y += dy * dt;
+        z += dz * dt;
+
+        if (i > 100) {
+          trail.push({
+            x: (x * 20) + width/2,
+            y: (z * 15) + height/2,
+            z: y
+          });
+        }
+      }
+
+      trail.forEach((p, i) => {
+        const hue = 280 + (p.z * 2) % 60;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${hue}, 100%, 60%, ${0.3 + (i/trail.length) * 0.7})`;
+        ctx.fill();
+      });
+    }
+
+    function drawPehlivanAttractor(canvas, params) {
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      let x = 0.1, y = 0.1, z = 0.1;
+      const { a, b, c } = params;
+      const dt = 0.005;
+      const trail = [];
+
+      for (let i = 0; i < 20000; i++) {
+        const dx = y - a * x;
+        const dy = -b * x * z + c * y;
+        const dz = x * y - b * z;
+
+        x += dx * dt;
+        y += dy * dt;
+        z += dz * dt;
+
+        if (i > 100) {
+          trail.push({
+            x: (x * 25) + width/2,
+            y: (z * 20) + height/2,
+            z: y
+          });
+        }
+      }
+
+      trail.forEach((p, i) => {
+        const hue = 160 + p.z * 3;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 0.6, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${hue}, 100%, 60%, ${0.3 + (i/trail.length) * 0.7})`;
+        ctx.fill();
+      });
+    }
+
+    // Initialize attractor cards
+    function initAttractorCards() {
+      const drawFunctions = {
+        rossler: drawRosslerAttractor,
+        halvorsen: drawHalvorsenAttractor,
+        dadras: drawDadrasAttractor,
+        aizawa: drawAizawaAttractor,
+        threeScroll: drawThreeScrollAttractor,
+        pehlivan: drawPehlivanAttractor
+      };
+
+      document.querySelectorAll('.attractor-card').forEach(card => {
+        const type = card.dataset.attractor;
+        const canvas = card.querySelector('canvas');
+
+        // Delay rendering to improve page load
+        setTimeout(() => {
+          if (drawFunctions[type]) {
+            drawFunctions[type](canvas, attractors[type]);
+          }
+        }, 100);
+      });
+    }
+
+    initAttractorCards();
+
+    // =====================================================
+    // INTERACTIVE PHASE SPACE (Lorenz with controls)
+    // =====================================================
+    function initPhaseSpace() {
+      const canvas = document.getElementById('phase-canvas');
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+
+      let sigma = 10, rho = 28, beta = 8/3;
+      let x = 0.1, y = 0, z = 0;
+      let dt = 0.005;
+      let trail = [];
+      let animationId;
+
+      const sigmaSlider = document.getElementById('sigma');
+      const rhoSlider = document.getElementById('rho');
+      const betaSlider = document.getElementById('beta');
+      const resetBtn = document.getElementById('reset-btn');
+
+      function reset() {
+        x = 0.1; y = 0; z = 0;
+        trail = [];
+      }
+
+      function lorenzStep() {
+        const dx = sigma * (y - x);
+        const dy = x * (rho - z) - y;
+        const dz = x * y - beta * z;
+
+        x += dx * dt;
+        y += dy * dt;
+        z += dz * dt;
+      }
+
+      function project3Dto2D(x, y, z) {
+        const scale = 6;
+        const x2d = (x * scale) + width / 2;
+        const y2d = (z * scale) + height / 2;
+        return { x: x2d, y: y2d };
+      }
+
+      function draw() {
+        ctx.fillStyle = 'rgba(5, 5, 16, 0.05)';
+        ctx.fillRect(0, 0, width, height);
+
+        for (let i = 0; i < 5; i++) {
+          lorenzStep();
+          trail.push({ x, y, z });
+
+          if (trail.length > 3000) trail.shift();
+        }
+
+        trail.forEach((point, i) => {
+          const projected = project3Dto2D(point.x, point.y, point.z);
+          const hue = 280 + (point.z * 3) % 60;
+
+          ctx.beginPath();
+          ctx.arc(projected.x, projected.y, 1, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${hue}, 100%, 60%, ${0.3 + (i/trail.length) * 0.7})`;
+          ctx.fill();
+        });
+
+        animationId = requestAnimationFrame(draw);
+      }
+
+      sigmaSlider.addEventListener('input', (e) => {
+        sigma = parseFloat(e.target.value);
+        document.getElementById('sigma-val').textContent = sigma;
+        reset();
+      });
+
+      rhoSlider.addEventListener('input', (e) => {
+        rho = parseFloat(e.target.value);
+        document.getElementById('rho-val').textContent = rho;
+        reset();
+      });
+
+      betaSlider.addEventListener('input', (e) => {
+        beta = parseFloat(e.target.value);
+        document.getElementById('beta-val').textContent = beta;
+        reset();
+      });
+
+      resetBtn.addEventListener('click', reset);
+
+      draw();
+    }
+
+    initPhaseSpace();
+
+    // =====================================================
+    // BIFURCATION DIAGRAM
+    // =====================================================
+    function initBifurcationDiagram() {
+      const canvas = document.getElementById('bifurcation-canvas');
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+
+      const rMin = 2.5, rMax = 4.0;
+      const iterations = 500;
+      const skipIterations = 100;
+      const pointsPerR = 3;
+
+      ctx.fillStyle = '#050510';
+      ctx.fillRect(0, 0, width, height);
+
+      // Draw axes
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, height * 0.8);
+      ctx.lineTo(width, height * 0.8);
+      ctx.stroke();
+
+      for (let px = 0; px < width; px++) {
+        const r = rMin + (px / width) * (rMax - rMin);
+        let x = 0.5;
+
+        // Skip transient
+        for (let i = 0; i < skipIterations; i++) {
+          x = r * x * (1 - x);
+        }
+
+        // Plot points
+        for (let j = 0; j < pointsPerR; j++) {
+          x = r * x * (1 - x);
+          const py = height * 0.8 - x * height * 0.8;
+
+          // Color based on r value
+          const hue = 50 + (r - rMin) / (rMax - rMin) * 30;
+          ctx.beginPath();
+          ctx.fillStyle = `hsla(${hue}, 100%, 60%, 0.8)`;
+          ctx.fillRect(px, py, 1, 1);
+        }
+      }
+
+      // Annotations
+      ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
+      ctx.font = '12px "Space Mono"';
+      ctx.fillText('r = 3.57 (Chaos onset)', width * 0.6, height * 0.75);
+
+      // Draw period markers
+      const markers = [
+        { r: 3.0, label: 'Period 2' },
+        { r: 3.449, label: 'Period 4' },
+        { r: 3.544, label: 'Period 8' },
+        { r: 3.57, label: 'Chaos' }
+      ];
+
+      ctx.font = '10px "Space Mono"';
+      markers.forEach(m => {
+        const x = ((m.r - rMin) / (rMax - rMin)) * width;
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.3)';
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height * 0.8);
+        ctx.stroke();
+        ctx.fillText(m.label, x + 5, height * 0.95);
+      });
+    }
+
+    initBifurcationDiagram();
+
+    // =====================================================
+    // MANDELBROT SET
+    // =====================================================
+    function initMandelbrot() {
+      const canvas = document.getElementById('mandelbrot-canvas');
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+
+      let zoom = 1;
+      let centerX = -0.5;
+      let centerY = 0;
+      const maxIterations = 100;
+
+      function draw() {
+        const imageData = ctx.createImageData(width, height);
+        const data = imageData.data;
+
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            const cRe = centerX + (x - width/2) / (width * zoom);
+            const cIm = centerY + (y - height/2) / (height * zoom);
+
+            let zRe = 0, zIm = 0;
+            let iter = 0;
+
+            while (zRe * zRe + zIm * zIm < 4 && iter < maxIterations) {
+              const temp = zRe * zRe - zIm * zIm + cRe;
+              zIm = 2 * zRe * zIm + cIm;
+              zRe = temp;
+              iter++;
+            }
+
+            const idx = (y * width + x) * 4;
+
+            if (iter === maxIterations) {
+              data[idx] = 5;
+              data[idx + 1] = 5;
+              data[idx + 2] = 16;
+              data[idx + 3] = 255;
+            } else {
+              // Smooth coloring
+              const log_zn = Math.log(zRe * zRe + zIm * zIm) / 2;
+              const nu = Math.log(log_zn / Math.log(2)) / Math.log(2);
+              const smooth = iter + 1 - nu;
+
+              const hue = 280 + smooth * 5;
+              const saturation = 100;
+              const lightness = 30 + (smooth / maxIterations) * 40;
+
+              const rgb = hslToRgb(hue, saturation, lightness);
+              data[idx] = rgb[0];
+              data[idx + 1] = rgb[1];
+              data[idx + 2] = rgb[2];
+              data[idx + 3] = 255;
+            }
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      function hslToRgb(h, s, l) {
+        s /= 100;
+        l /= 100;
+        const k = n => (n + h/30) % 12;
+        const a = s * Math.min(l, 1 - l);
+        const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+        return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+      }
+
+      draw();
+
+      // Zoom controls
+      document.getElementById('zoom-in').addEventListener('click', () => {
+        zoom *= 2;
+        draw();
+      });
+
+      document.getElementById('zoom-out').addEventListener('click', () => {
+        zoom /= 2;
+        if (zoom < 1) zoom = 1;
+        draw();
+      });
+
+      document.getElementById('mandel-reset').addEventListener('click', () => {
+        zoom = 1;
+        centerX = -0.5;
+        centerY = 0;
+        draw();
+      });
+
+      // Mouse zoom
+      canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const cRe = centerX + (x - width/2) / (width * zoom);
+        const cIm = centerY + (y - height/2) / (height * zoom);
+
+        centerX = cRe;
+        centerY = cIm;
+        zoom *= 2;
+
+        draw();
+      });
+    }
+
+    initMandelbrot();
+
+    // =====================================================
+    // NAVIGATION
+    // =====================================================
+    const sections = document.querySelectorAll('.section');
+    const navDots = document.querySelectorAll('.nav-dot');
+
+    function updateNavDots() {
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+
+      sections.forEach((section, index) => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+
+        if (scrollY >= sectionTop - windowHeight / 2 &&
+            scrollY < sectionTop + sectionHeight - windowHeight / 2) {
+          navDots.forEach(dot => dot.classList.remove('active'));
+          navDots[index].classList.add('active');
+        }
+      });
+    }
+
+    navDots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        const sectionIndex = parseInt(dot.dataset.section);
+        sections[sectionIndex].scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    window.addEventListener('scroll', updateNavDots);
+
+    // =====================================================
+    // PARALLAX EFFECT
+    // =====================================================
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const heroSvg = document.querySelector('.hero-svg');
+      if (heroSvg) {
+        heroSvg.style.transform = `translateY(${scrollY * 0.3}px)`;
+      }
+    });
+  </script>
+</body>
+</html>
