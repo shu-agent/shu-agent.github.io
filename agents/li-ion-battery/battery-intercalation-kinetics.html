@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Li+ Intercalation Kinetics — Deep Transport Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0a1a;
+            --bg-card: rgba(20, 25, 45, 0.85);
+            --cyan: #00d4ff;
+            --purple: #a855f7;
+            --pink: #ec4899;
+            --green: #10b981;
+            --orange: #f59e0b;
+            --blue: #3b82f6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: #e2e8f0;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            background: radial-gradient(ellipse at 30% 20%, rgba(0,212,255,0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 80%, rgba(168,85,247,0.08) 0%, transparent 50%),
+                        var(--bg-dark);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image:
+                linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridPulse 4s ease-in-out infinite;
+        }
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+        .hero-content { position: relative; z-index: 10; max-width: 900px; }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--cyan), var(--purple), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+        .hero .subtitle {
+            font-size: 1.3rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 2rem;
+        }
+        .hero .sci-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0,212,255,0.1);
+            border: 1px solid rgba(0,212,255,0.3);
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--cyan);
+        }
+        .particle-container {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .li-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, var(--cyan), transparent);
+            border-radius: 50%;
+            animation: floatUp 8s linear infinite;
+            opacity: 0.6;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(1); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+        }
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s ease-in-out infinite;
+        }
+        .scroll-indicator span {
+            display: block;
+            width: 30px;
+            height: 50px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            position: relative;
+        }
+        .scroll-indicator span::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: scrollDot 2s ease-in-out infinite;
+        }
+        @keyframes scrollDot {
+            0%, 100% { top: 8px; opacity: 1; }
+            50% { top: 25px; opacity: 0.3; }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        /* Main content */
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        .section { margin-bottom: 4rem; }
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 30px;
+            background: linear-gradient(180deg, var(--cyan), var(--purple));
+            border-radius: 2px;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .control-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+        .control-card h3 {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .control-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: 0.5rem;
+        }
+        .control-card input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+            -webkit-appearance: none;
+            margin-bottom: 0.5rem;
+        }
+        .control-card input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0,212,255,0.5);
+        }
+        .control-card .range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* Main Simulation Area */
+        .simulation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        @media (max-width: 1000px) {
+            .simulation-grid { grid-template-columns: 1fr; }
+        }
+        .sim-panel {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        .sim-panel h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--purple);
+        }
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .canvas-container canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Battery Cross Section SVG */
+        .battery-svg-container {
+            position: relative;
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+        .battery-svg { width: 100%; height: auto; }
+
+        /* Metrics Dashboard */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .metric-card:hover {
+            border-color: var(--cyan);
+            box-shadow: 0 0 20px rgba(0,212,255,0.2);
+        }
+        .metric-card .label {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+        .metric-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--cyan), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .metric-card .unit {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+            margin-top: 0.25rem;
+        }
+        .metric-card.highlight {
+            border-color: var(--pink);
+            background: rgba(236,72,153,0.1);
+        }
+        .metric-card.highlight .value {
+            background: linear-gradient(135deg, var(--pink), var(--orange));
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        /* Chart containers */
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        @media (max-width: 900px) {
+            .chart-row { grid-template-columns: 1fr; }
+        }
+        .chart-container {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+        .chart-container h3 {
+            font-size: 1rem;
+            color: var(--purple);
+            margin-bottom: 1rem;
+        }
+        .chart-wrapper { position: relative; height: 250px; }
+
+        /* Equations Panel */
+        .eq-panel {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .eq-panel h3 {
+            font-size: 1.2rem;
+            color: var(--cyan);
+            margin-bottom: 1.5rem;
+        }
+        .eq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .eq-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 3px solid var(--purple);
+        }
+        .eq-card .eq-title {
+            font-size: 0.9rem;
+            color: var(--cyan);
+            margin-bottom: 0.75rem;
+        }
+        .eq-card .eq-formula {
+            font-family: 'Times New Roman', serif;
+            font-size: 1.3rem;
+            color: #fff;
+            margin-bottom: 0.75rem;
+            font-style: italic;
+        }
+        .eq-card .eq-desc {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.5;
+        }
+
+        /* Theory Cards */
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        .theory-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 1.75rem;
+            transition: all 0.3s ease;
+        }
+        .theory-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--cyan);
+            box-shadow: 0 10px 40px rgba(0,212,255,0.15);
+        }
+        .theory-card h4 {
+            font-size: 1.1rem;
+            color: var(--green);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .theory-card h4 .icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        .theory-card p {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        .theory-card .eq {
+            font-family: 'Times New Roman', serif;
+            font-size: 1.1rem;
+            color: var(--pink);
+            font-style: italic;
+            padding: 0.75rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        /* Physics Connection */
+        .physics-section {
+            background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(0,212,255,0.1));
+            border: 1px solid rgba(168,85,247,0.3);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+        .physics-section h3 {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+        }
+        .physics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .physics-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .physics-card h5 {
+            font-size: 1rem;
+            color: var(--orange);
+            margin-bottom: 0.75rem;
+        }
+        .physics-card p {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.6;
+        }
+
+        /* Particle Cross Section Detail */
+        .particle-detail {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        @media (max-width: 800px) {
+            .particle-detail { grid-template-columns: 1fr; }
+        }
+        .particle-viz {
+            position: relative;
+        }
+        .particle-viz canvas {
+            width: 100%;
+            border-radius: 12px;
+            background: rgba(0,0,0,0.4);
+        }
+        .concentration-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        .legend-label {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .gradient-border {
+            position: relative;
+        }
+        .gradient-border::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple), var(--pink));
+            border-radius: 18px;
+            z-index: -1;
+            animation: gradientRotate 3s linear infinite;
+        }
+        @keyframes gradientRotate {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        /* Run Button */
+        .run-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            color: #fff;
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 30px rgba(0,212,255,0.4);
+        }
+        .run-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 40px rgba(0,212,255,0.6);
+        }
+        .run-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        /* State indicator */
+        .state-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 50px;
+            font-size: 0.9rem;
+        }
+        .state-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        .state-dot.charging { background: var(--cyan); }
+        .state-dot.discharging { background: var(--orange); }
+        .state-dot.resting { background: var(--green); animation: none; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        /* Phase indicator */
+        .phase-bar {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 1rem;
+        }
+        .phase-segment {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .phase-segment.active {
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+        }
+        .phase-segment.partial {
+            background: linear-gradient(90deg, rgba(0,212,255,0.5), rgba(168,85,247,0.5));
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem;
+            color: rgba(255,255,255,0.4);
+            font-size: 0.85rem;
+        }
+        footer a { color: var(--cyan); text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="particle-container" id="particles"></div>
+    <div class="hero-content">
+        <h1>Li+ Intercalation Kinetics</h1>
+        <p class="subtitle">Real-time particle-level diffusion simulation with concentration gradient visualization</p>
+        <div class="sci-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 6v6l4 2"/>
+            </svg>
+            Transport Phenomena Lab
+        </div>
+    </div>
+    <div class="scroll-indicator">
+        <span></span>
+    </div>
+</section>
+
+<!-- Main Simulation -->
+<div class="container">
+    <!-- State Indicator & Controls -->
+    <div class="section">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+            <div class="state-indicator">
+                <div class="state-dot" id="stateDot"></div>
+                <span id="stateText">Resting</span>
+            </div>
+            <div class="btn-group">
+                <button class="run-btn" id="chargeBtn" onclick="startCharge()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    Charge
+                </button>
+                <button class="run-btn" id="dischargeBtn" onclick="startDischarge()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 2L21 14H12l1-8L1 10h9l-1 8z"/>
+                    </svg>
+                    Discharge
+                </button>
+                <button class="run-btn" onclick="resetSimulation()" style="background: rgba(255,255,255,0.1); box-shadow: none;">
+                    Reset
+                </button>
+            </div>
+        </div>
+
+        <!-- Control Sliders -->
+        <div class="control-panel">
+            <div class="control-card">
+                <h3>C-Rate</h3>
+                <div class="value" id="cRateValue">1.0C</div>
+                <input type="range" id="cRateSlider" min="0.1" max="5" step="0.1" value="1" oninput="updateCRate(this.value)">
+                <div class="range-labels"><span>0.1C</span><span>5C</span></div>
+            </div>
+            <div class="control-card">
+                <h3>Temperature</h3>
+                <div class="value" id="tempValue">25°C</div>
+                <input type="range" id="tempSlider" min="-20" max="60" step="1" value="25" oninput="updateTemp(this.value)">
+                <div class="range-labels"><span>-20°C</span><span>60°C</span></div>
+            </div>
+            <div class="control-card">
+                <h3>State of Charge</h3>
+                <div class="value" id="socValue">50%</div>
+                <input type="range" id="socSlider" min="0" max="100" step="1" value="50" oninput="updateSOC(this.value)">
+                <div class="range-labels"><span>0%</span><span>100%</span></div>
+            </div>
+            <div class="control-card">
+                <h3>Particle Size</h3>
+                <div class="value" id="sizeValue">5 μm</div>
+                <input type="range" id="sizeSlider" min="1" max="20" step="0.5" value="5" oninput="updateParticleSize(this.value)">
+                <div class="range-labels"><span>1 μm</span><span>20 μm</span></div>
+            </div>
+        </div>
+
+        <!-- Metrics Dashboard -->
+        <div class="metrics-grid">
+            <div class="metric-card highlight">
+                <div class="label">Surface [Li+]</div>
+                <div class="value" id="surfConc">1.0</div>
+                <div class="unit">mol/L</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Core [Li+]</div>
+                <div class="value" id="coreConc">1.0</div>
+                <div class="unit">mol/L</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Gradient Δc</div>
+                <div class="value" id="gradDelta">0.00</div>
+                <div class="unit">mol/L</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Diffusion Time τ</div>
+                <div class="value" id="diffTime">245</div>
+                <div class="unit">seconds</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Overpotential η</div>
+                <div class="value" id="overpotential">0.00</div>
+                <div class="unit">mV</div>
+            </div>
+            <div class="metric-card">
+                <div class="label">Current I</div>
+                <div class="value" id="currentVal">0.0</div>
+                <div class="unit">A/m²</div>
+            </div>
+        </div>
+
+        <!-- Phase Progress Bar -->
+        <div style="background: var(--bg-card); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem;">
+            <h4 style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-bottom: 1rem;">INTERCALATION PHASE PROGRESSION</h4>
+            <div class="phase-bar">
+                <div class="phase-segment" id="phase1"></div>
+                <div class="phase-segment" id="phase2"></div>
+                <div class="phase-segment" id="phase3"></div>
+                <div class="phase-segment" id="phase4"></div>
+                <div class="phase-segment" id="phase5"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-top: 0.5rem;">
+                <span>0% (Pristine)</span>
+                <span>25%</span>
+                <span>50% (H2)</span>
+                <span>75%</span>
+                <span>100% (LiₓMax)</span>
+            </div>
+        </div>
+
+        <!-- Main Simulation Grid -->
+        <div class="simulation-grid">
+            <!-- Left: Battery Cross Section -->
+            <div class="sim-panel gradient-border">
+                <h3>Battery Cross Section — Li+ Transport</h3>
+                <div class="battery-svg-container">
+                    <svg class="battery-svg" viewBox="0 0 400 300" id="batterySvg">
+                        <!-- Background -->
+                        <defs>
+                            <linearGradient id="cathodeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#1a4a6e"/>
+                                <stop offset="100%" style="stop-color:#2d7a9e"/>
+                            </linearGradient>
+                            <linearGradient id="anodeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#3d2817"/>
+                                <stop offset="100%" style="stop-color:#5c3d26"/>
+                            </linearGradient>
+                            <linearGradient id="sepGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#1a1a2e"/>
+                                <stop offset="100%" style="stop-color:#2a2a4e"/>
+                            </linearGradient>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+
+                        <!-- Current Collectors -->
+                        <rect x="10" y="80" width="60" height="140" fill="#444" rx="5"/>
+                        <text x="40" y="155" fill="#888" font-size="10" text-anchor="middle" transform="rotate(-90 40 155)">Al</text>
+                        <rect x="330" y="80" width="60" height="140" fill="#c9a" rx="5"/>
+                        <text x="360" y="155" fill="#8a6" font-size="10" text-anchor="middle" transform="rotate(90 360 155)">Cu</text>
+
+                        <!-- Cathode -->
+                        <rect x="70" y="90" width="100" height="120" fill="url(#cathodeGrad)" rx="8"/>
+                        <text x="120" y="155" fill="#fff" font-size="12" text-anchor="middle">CATHODE</text>
+
+                        <!-- Separator -->
+                        <rect x="170" y="90" width="60" height="120" fill="url(#sepGrad)" rx="4"/>
+                        <text x="200" y="155" fill="#666" font-size="10" text-anchor="middle">SEP</text>
+
+                        <!-- Anode -->
+                        <rect x="230" y="90" width="100" height="120" fill="url(#anodeGrad)" rx="8"/>
+                        <text x="280" y="155" fill="#fff" font-size="12" text-anchor="middle">ANODE</text>
+
+                        <!-- Particle dots (cathode) -->
+                        <g id="cathodeParticles"></g>
+
+                        <!-- Li+ ions animation -->
+                        <g id="liIons"></g>
+
+                        <!-- Electron flow -->
+                        <g id="electrons">
+                            <path id="electronPath" d="M 330 150 Q 200 280 70 150" stroke="#f59e0b" stroke-width="2" fill="none" stroke-dasharray="5,5" opacity="0.6"/>
+                        </g>
+
+                        <!-- Labels -->
+                        <text x="40" y="75" fill="#888" font-size="9" text-anchor="middle">Current Collector</text>
+                        <text x="120" y="75" fill="#88c" font-size="9" text-anchor="middle">LiCoO₂ / NMC</text>
+                        <text x="200" y="75" fill="#666" font-size="9" text-anchor="middle">Separator</text>
+                        <text x="280" y="75" fill="#a86" font-size="9" text-anchor="middle">Graphite</text>
+                        <text x="360" y="75" fill="#888" font-size="9" text-anchor="middle">Current Collector</text>
+
+                        <!-- Voltage indicator -->
+                        <g id="voltageInd" transform="translate(350, 40)">
+                            <text x="0" y="0" fill="#10b981" font-size="10">V = <tspan id="voltageText">3.7</tspan>V</text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Right: Particle Diffusion Simulation -->
+            <div class="sim-panel">
+                <h3>Particle Concentration Gradient — Shrinking Core Model</h3>
+                <div class="canvas-container">
+                    <canvas id="particleCanvas"></canvas>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <div class="concentration-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ff6b6b;"></div>
+                            <span class="legend-label">High [Li⁺] — Lithiated (x ≈ 1)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #4ecdc4;"></div>
+                            <span class="legend-label">Medium [Li⁺] — Transition</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #2d3748;"></div>
+                            <span class="legend-label">Low [Li⁺] — Pristine (x ≈ 0)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="chart-row">
+            <div class="chart-container">
+                <h3>Voltage Profile During Cycling</h3>
+                <div class="chart-wrapper">
+                    <canvas id="voltageChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-container">
+                <h3>Concentration Gradient Evolution</h3>
+                <div class="chart-wrapper">
+                    <canvas id="concChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Governing Equations -->
+    <div class="section fade-in">
+        <h2 class="section-title">Governing Equations — Intercalation Physics</h2>
+        <div class="eq-panel">
+            <div class="eq-grid">
+                <div class="eq-card">
+                    <div class="eq-title">Fick's Second Law (1D Diffusion)</div>
+                    <div class="eq-formula">∂c/∂t = D ∇²c = D · ∂²c/∂x²</div>
+                    <div class="eq-desc">Li+ concentration evolves through diffusion. D = 10⁻¹⁴ to 10⁻¹² m²/s in layered oxides.</div>
+                </div>
+                <div class="eq-card">
+                    <div class="eq-title">Butler-Volmer Charge Transfer</div>
+                    <div class="eq-formula">j = j₀ · [e^((1-α)Fη/RT) − e^(-αFη/RT)]</div>
+                    <div class="eq-desc">Interfacial Li+ flux depends on overpotential η and transfer coefficient α ≈ 0.5.</div>
+                </div>
+                <div class="eq-card">
+                    <div class="eq-title">Diffusion Time Constant</div>
+                    <div class="eq-formula">τ = r²/D</div>
+                    <div class="eq-desc">Time for concentration wave to penetrate particle radius r. τ ∝ r² for diffusion-limited kinetics.</div>
+                </div>
+                <div class="eq-card">
+                    <div class="eq-title">Shrinking Core Model</div>
+                    <div class="eq-formula">1 - (c/c₀)^(2/3) = k·t</div>
+                    <div class="eq-desc">As Li+ enters, core remains lithiated while reaction front moves inward. Valid for phase-changing materials.</div>
+                </div>
+                <div class="eq-card">
+                    <div class="eq-title">Nernst Potential</div>
+                    <div class="eq-formula">E = E₀ + (RT/F) · ln([Li⁺]_surface)</div>
+                    <div class="eq-desc">Equilibrium potential depends on surface Li+ activity. Explains voltage slope during intercalation.</div>
+                </div>
+                <div class="eq-card">
+                    <div class="eq-title">Arrhenius Temperature Dependence</div>
+                    <div class="eq-formula">D = D₀ · exp(-Ea/RT)</div>
+                    <div class="eq-desc">Diffusivity increases exponentially with temperature. Ea ≈ 20-40 kJ/mol for NMC.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theory Cards -->
+    <div class="section fade-in">
+        <h2 class="section-title">Key Transport Phenomena</h2>
+        <div class="theory-grid">
+            <div class="theory-card">
+                <h4><span class="icon">1</span>Concentration Polarization</h4>
+                <p>During high-rate cycling, Li+ consumption at the electrode surface exceeds diffusion replenishment. Surface concentration drops, causing voltage sag and capacity loss at high C-rates.</p>
+                <div class="eq">Δc_surface = I · δ / (zFD)</div>
+            </div>
+            <div class="theory-card">
+                <h4><span class="icon">2</span>Solid-State Diffusion Limitation</h4>
+                <p>Li+ must diffuse through the electrode particle lattice. For spherical particles, the characteristic time τ = r²/D means 10μm particles have ~100x longer diffusion time than 1μm particles.</p>
+                <div class="eq">τ = (1 μm)²/D ≈ 1s; τ = (10 μm)²/D ≈ 100s</div>
+            </div>
+            <div class="theory-card">
+                <h4><span class="icon">3</span>Reaction Front Propagation</h4>
+                <p>In the shrinking core model, lithiation proceeds radially inward. The unreacted core shrinks as Li+ penetrates. This creates distinct concentration zones visible in X-ray tomography.</p>
+                <div class="eq">r_core(t) = r₀ · (1 - k·t)^(1/3)</div>
+            </div>
+            <div class="theory-card">
+                <h4><span class="icon">4</span>Multi-Step Intercalation</h4>
+                <p>Li+ insertion involves: (1) desolvation at surface, (2) electron transfer, (3) lattice incorporation. Each step has its own activation energy and rate constant.</p>
+                <div class="eq">k_total = (Σ k_i⁻¹)⁻¹ (series resistance analogy)</div>
+            </div>
+            <div class="theory-card">
+                <h4><span class="icon">5</span>Stage Transitions</h4>
+                <p>Li-intercalated compounds show discrete stage phases (Stage 1, 2, 3, 4). Each stage represents a specific Li:host ratio, creating voltage plateaus as the stage front moves.</p>
+                <div class="eq">Stage n: Li_x with 1/(n+1) sites filled</div>
+            </div>
+            <div class="theory-card">
+                <h4><span class="icon">6</span>Stress Generation</h4>
+                <p>Li+ insertion causes lattice expansion (NMC: ~16% c-lattice expansion). Non-uniform intercalation creates stress gradients, potentially causing particle fracture and capacity fade.</p>
+                <div class="eq">ΔV/V₀ = β · Δc (Vegard's law)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Physics Connections -->
+    <div class="section fade-in">
+        <div class="physics-section">
+            <h3>Cross-Disciplinary Physics Connections</h3>
+            <div class="physics-grid">
+                <div class="physics-card">
+                    <h5>Diffusion ↔ Heat Equation</h5>
+                    <p>Fick's second law ∂c/∂t = D∇²c is mathematically identical to the heat equation ∂T/∂t = α∇²T. Both are parabolic PDEs with identical solution structures. Concentration waves propagate like thermal waves.</p>
+                </div>
+                <div class="physics-card">
+                    <h5>Diffusion Length ↔ Skin Depth</h5>
+                    <p>Characteristic diffusion length L = √(Dt) parallels electromagnetic skin depth δ = √(2ρ/ωμ). Both follow √t or 1/√ω scaling, showing universal transport physics across domains.</p>
+                </div>
+                <div class="physics-card">
+                    <h5>Shrinking Core ↔ Melting Ice Ball</h5>
+                    <p>The shrinking reaction front in intercalation mirrors the Stephan problem in melting ice or alloy solidification. The moving boundary condition creates similar mathematical challenges.</p>
+                </div>
+                <div class="physics-card">
+                    <h5>Concentration Gradient ↔ Gravitational Potential</h5>
+                    <p>Li+ concentration gradients create electrochemical potential gradients. Similarly, mass density gradients in astrophysics create gravitational potential wells — the Poisson equation ∇²Φ = 4πGρ connects them.</p>
+                </div>
+                <div class="physics-card">
+                    <h5>Stage Transition ↔ Cosmological Phase Separation</h5>
+                    <p>Li staging in graphite (Stage 2 → Stage 1) resembles phase separation in early universe symmetry breaking. Both involve discrete domain formation with sharp interfaces moving through the material.</p>
+                </div>
+                <div class="physics-card">
+                    <h5>Intercalation Waves ↔ Traffic Flow</h5>
+                    <p>Concentration waves propagating through electrode particles follow the same kinematic wave equations as traffic flow. Wave speed v = dE/dc parallels traffic jam propagation speed.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Particle Size Effect -->
+    <div class="section fade-in">
+        <h2 class="section-title">Particle Size & Diffusion Time Optimization</h2>
+        <div class="chart-container" style="max-width: 900px;">
+            <h3>Diffusion Time vs Particle Radius (Arrhenius Plot)</h3>
+            <div class="chart-wrapper" style="height: 300px;">
+                <canvas id="sizeChart"></canvas>
+            </div>
+            <p style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-top: 1rem; text-align: center;">
+                Nano-scale particles (50-200nm) achieve diffusion times of milliseconds, enabling 5C+ fast charging. Micro-scale particles (5-10μm) require seconds to hours, limiting rate capability.
+            </p>
+        </div>
+    </div>
+
+    <!-- C-rate Optimization -->
+    <div class="section fade-in">
+        <h2 class="section-title">C-Rate vs Usable Capacity Analysis</h2>
+        <div class="table-container" style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 12px;">
+                <thead>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <th style="padding: 1rem; text-align: left; color: var(--cyan);">C-Rate</th>
+                        <th style="padding: 1rem; text-align: center; color: var(--cyan);">Current (mA/g)</th>
+                        <th style="padding: 1rem; text-align: center; color: var(--cyan);">Time to Full</th>
+                        <th style="padding: 1rem; text-align: center; color: var(--cyan);">Usable Capacity</th>
+                        <th style="padding: 1rem; text-align: center; color: var(--cyan);">Polarization Loss</th>
+                        <th style="padding: 1rem; text-align: center; color: var(--cyan);">Limiting Factor</th>
+                    </tr>
+                </thead>
+                <tbody id="rateTable">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>Li+ Intercalation Kinetics Lab — Part of Virtual World Energy Research</p>
+    <p style="margin-top: 0.5rem; color: rgba(255,255,255,0.3);">
+        Exploring the invisible dance of ions in electrode materials
+    </p>
+</footer>
+
+<script>
+// ========== SIMULATION STATE ==========
+const state = {
+    running: false,
+    mode: 'resting', // 'charging', 'discharging', 'resting'
+    cRate: 1.0,
+    temperature: 25,
+    soc: 50,
+    particleSize: 5, // μm
+    time: 0,
+    dt: 0.1, // seconds
+
+    // Particle concentration (spherical, radial grid)
+    particleRadius: 50, // pixels
+    numShells: 20,
+    concentration: [], // [0] = center, [numShells-1] = surface
+
+    // Metrics
+    surfaceConc: 1.0,
+    coreConc: 1.0,
+    voltage: 3.7,
+    overpotential: 0,
+    current: 0,
+
+    // Chart data
+    voltageHistory: [],
+    concHistory: [],
+    maxHistory: 200
+};
+
+// D values (m²/s) scaled for simulation
+const D_base = 1e-14; // Base diffusivity at 25°C
+const F = 96485; // C/mol
+const R = 8.314; // J/(mol·K)
+const alpha = 0.5; // transfer coefficient
+
+// Charts
+let voltageChart, concChart, sizeChart;
+
+// ========== INITIALIZATION ==========
+function init() {
+    initConcentration();
+    initBatterySVG();
+    initCharts();
+    initTable();
+    createParticles();
+    animateParticles();
+    setupScrollAnimations();
+    updateDisplays();
+    startSimulation();
+}
+
+function initConcentration() {
+    state.concentration = [];
+    const c0 = 0.5 + (state.soc / 100) * 0.5; // Initial uniform concentration
+    for (let i = 0; i < state.numShells; i++) {
+        state.concentration.push(c0);
+    }
+    state.surfaceConc = c0;
+    state.coreConc = c0;
+}
+
+function initBatterySVG() {
+    // Create cathode particle dots
+    const cathodeGroup = document.getElementById('cathodeParticles');
+    cathodeGroup.innerHTML = '';
+    for (let i = 0; i < 20; i++) {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        const x = 85 + (i % 5) * 15;
+        const y = 110 + Math.floor(i / 5) * 30;
+        circle.setAttribute('cx', x);
+        circle.setAttribute('cy', y);
+        circle.setAttribute('r', 4);
+        circle.setAttribute('fill', '#4ecdc4');
+        circle.setAttribute('opacity', '0.7');
+        cathodeGroup.appendChild(circle);
+    }
+}
+
+function initCharts() {
+    // Voltage chart
+    const vCtx = document.getElementById('voltageChart').getContext('2d');
+    voltageChart = new Chart(vCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Voltage (V)',
+                data: [],
+                borderColor: '#00d4ff',
+                backgroundColor: 'rgba(0,212,255,0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { display: false },
+                y: { min: 3.0, max: 4.3, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'rgba(255,255,255,0.5)' } }
+            }
+        }
+    });
+
+    // Concentration chart
+    const cCtx = document.getElementById('concChart').getContext('2d');
+    concChart = new Chart(cCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                { label: 'Surface', data: [], borderColor: '#ff6b6b', fill: false, pointRadius: 0 },
+                { label: 'Core', data: [], borderColor: '#4ecdc4', fill: false, pointRadius: 0 },
+                { label: 'Δ Gradient', data: [], borderColor: '#f59e0b', fill: true, pointRadius: 0 }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: 'rgba(255,255,255,0.7)' } } },
+            scales: {
+                x: { display: false },
+                y: { min: 0, max: 1.5, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'rgba(255,255,255,0.5)' } }
+            }
+        }
+    });
+
+    // Size chart (static)
+    const sCtx = document.getElementById('sizeChart').getContext('2d');
+    const radii = [0.1, 0.5, 1, 2, 5, 10, 20]; // μm
+    const times = radii.map(r => (r * 1e-6) ** 2 / D_base); // seconds
+    const labels = ['0.1', '0.5', '1', '2', '5', '10', '20'];
+
+    sizeChart = new Chart(sCtx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Diffusion Time τ (s)',
+                data: times.map(t => Math.log10(t)),
+                backgroundColor: 'rgba(168,85,247,0.7)',
+                borderColor: '#a855f7',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { label: 'Particle Radius (μm)', grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'rgba(255,255,255,0.5)' } },
+                y: { label: 'log₁₀(τ) [log seconds]', grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: 'rgba(255,255,255,0.5)' } }
+            }
+        }
+    });
+}
+
+function initTable() {
+    const rates = [0.2, 0.5, 1, 2, 3, 5];
+    const rows = rates.map(r => {
+        const I = r * 180; // mA/g for NMC
+        const t = 1/r; // hours
+        const usable = Math.max(20, 100 - r * 12);
+        const pol = r * 80; // mV
+        const limit = r > 3 ? 'Solid-state diffusion' : 'Concentration polarization';
+        return { rate: r, current: I.toFixed(0), time: t.toFixed(1), usable: usable.toFixed(0), pol: pol.toFixed(0), limit };
+    });
+
+    const tbody = document.getElementById('rateTable');
+    tbody.innerHTML = rows.map(r => `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <td style="padding: 0.75rem; color: var(--cyan);">${r.rate}C</td>
+            <td style="padding: 0.75rem; text-align: center;">${r.current}</td>
+            <td style="padding: 0.75rem; text-align: center;">${r.time}h</td>
+            <td style="padding: 0.75rem; text-align: center; color: ${r.usable > 80 ? 'var(--green)' : r.usable > 50 ? 'var(--orange)' : 'var(--pink)'};">${r.usable}%</td>
+            <td style="padding: 0.75rem; text-align: center;">${r.pol} mV</td>
+            <td style="padding: 0.75rem; text-align: center; font-size: 0.8rem; color: rgba(255,255,255,0.5);">${r.limit}</td>
+        </tr>
+    `).join('');
+}
+
+function createParticles() {
+    const container = document.getElementById('particles');
+    for (let i = 0; i < 30; i++) {
+        const p = document.createElement('div');
+        p.className = 'li-particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDelay = Math.random() * 8 + 's';
+        p.style.animationDuration = (6 + Math.random() * 4) + 's';
+        container.appendChild(p);
+    }
+}
+
+function animateParticles() {
+    // Animate Li+ ions in SVG
+    const liGroup = document.getElementById('liIons');
+
+    function updateIons() {
+        if (state.mode === 'resting') {
+            liGroup.innerHTML = '';
+            return;
+        }
+
+        const numIons = state.mode === 'charging' ? 8 : 6;
+        liGroup.innerHTML = '';
+
+        for (let i = 0; i < numIons; i++) {
+            const ion = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            const progress = ((state.time * 0.02 + i * 0.125) % 1);
+            const y = 90 + progress * 120;
+            const x = state.mode === 'charging' ? 280 - progress * 130 : 170 + progress * 60;
+
+            ion.setAttribute('cx', x);
+            ion.setAttribute('cy', y);
+            ion.setAttribute('r', 5);
+            ion.setAttribute('fill', state.mode === 'charging' ? '#00d4ff' : '#f59e0b');
+            ion.setAttribute('opacity', 0.8);
+            ion.setAttribute('filter', 'url(#glow)');
+
+            liGroup.appendChild(ion);
+        }
+    }
+
+    setInterval(updateIons, 50);
+}
+
+function setupScrollAnimations() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+}
+
+// ========== SIMULATION LOOP ==========
+function startSimulation() {
+    setInterval(simulate, 50);
+}
+
+function simulate() {
+    if (!state.running) return;
+
+    // Temperature effect on diffusivity
+    const T = state.temperature + 273;
+    const D = D_base * Math.exp(-30000 / (R * T)) * Math.exp(30000 / (R * 298)); // Ea ~ 30 kJ/mol
+
+    // Calculate current based on C-rate
+    const I_0 = state.cRate * 180; // mA/g reference
+    state.current = I_0;
+
+    // Butler-Volmer overpotential
+    if (state.mode === 'charging') {
+        state.overpotential = (R * T / F) * Math.log(I_0 / 10) * 1000; // mV
+        state.voltage = 3.7 + state.overpotential / 1000 + (state.soc / 100) * 0.5;
+    } else if (state.mode === 'discharging') {
+        state.overpotential = -(R * T / F) * Math.log(I_0 / 10) * 1000;
+        state.voltage = 3.7 + state.overpotential / 1000 + (state.soc / 100) * 0.5;
+    }
+
+    // Diffusion update (simplified 1D radial model)
+    const dt_sim = 0.1;
+    const newConc = [...state.concentration];
+
+    for (let i = state.numShells - 2; i >= 0; i--) {
+        // Concentration flux from adjacent shell
+        const D_eff = D * 1e12 * (1 + (state.temperature + 20) / 100); // scale for visualization
+        const flux = D_eff * (state.concentration[i + 1] - state.concentration[i]) * dt_sim;
+
+        if (state.mode === 'charging') {
+            // Li+ entering from surface (right side)
+            if (i === state.numShells - 2) {
+                newConc[i] += flux * 0.5 + I_0 / 10000 * dt_sim;
+            } else {
+                newConc[i] += flux * 0.3;
+            }
+        } else if (state.mode === 'discharging') {
+            // Li+ leaving from surface
+            if (i === state.numShells - 2) {
+                newConc[i] -= flux * 0.5 + I_0 / 10000 * dt_sim;
+            } else {
+                newConc[i] -= flux * 0.3;
+            }
+        }
+
+        // Clamp
+        newConc[i] = Math.max(0.01, Math.min(1.2, newConc[i]));
+    }
+
+    // Core follows average
+    newConc[0] = newConc.slice(1).reduce((a, b) => a + b) / (state.numShells - 1);
+
+    state.concentration = newConc;
+    state.surfaceConc = newConc[state.numShells - 1];
+    state.coreConc = newConc[0];
+
+    // Update SOC
+    if (state.mode === 'charging') {
+        state.soc = Math.min(100, state.soc + state.cRate * 0.02);
+    } else if (state.mode === 'discharging') {
+        state.soc = Math.max(0, state.soc - state.cRate * 0.02);
+    }
+
+    // Update time
+    state.time += dt_sim;
+
+    // Update history
+    state.voltageHistory.push(state.voltage);
+    state.concHistory.push({ surface: state.surfaceConc, core: state.coreConc });
+
+    if (state.voltageHistory.length > state.maxHistory) {
+        state.voltageHistory.shift();
+        state.concHistory.shift();
+    }
+
+    updateDisplays();
+    updateParticleCanvas();
+    updatePhaseBar();
+    updateCharts();
+    updateVoltageSVG();
+}
+
+function updateDisplays() {
+    document.getElementById('cRateValue').textContent = state.cRate.toFixed(1) + 'C';
+    document.getElementById('tempValue').textContent = state.temperature + '°C';
+    document.getElementById('socValue').textContent = Math.round(state.soc) + '%';
+    document.getElementById('sizeValue').textContent = state.particleSize.toFixed(1) + ' μm';
+
+    document.getElementById('surfConc').textContent = state.surfaceConc.toFixed(2);
+    document.getElementById('coreConc').textContent = state.coreConc.toFixed(2);
+    document.getElementById('gradDelta').textContent = Math.abs(state.surfaceConc - state.coreConc).toFixed(2);
+    document.getElementById('diffTime').textContent = Math.round((state.particleSize * 1e-6) ** 2 / D_base);
+    document.getElementById('overpotential').textContent = state.overpotential.toFixed(2);
+    document.getElementById('currentVal').textContent = state.current.toFixed(1);
+
+    // State indicator
+    const dot = document.getElementById('stateDot');
+    dot.className = 'state-dot ' + state.mode;
+    document.getElementById('stateText').textContent = state.mode.charAt(0).toUpperCase() + state.mode.slice(1);
+}
+
+// ========== PARTICLE CANVAS ==========
+function updateParticleCanvas() {
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas resolution
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * 2;
+    canvas.height = rect.height * 2;
+    ctx.scale(2, 2);
+
+    const w = rect.width;
+    const h = rect.height;
+    const centerX = w / 2;
+    const centerY = h / 2;
+    const maxR = Math.min(w, h) / 2 - 20;
+    const shellWidth = maxR / state.numShells;
+
+    // Clear
+    ctx.fillStyle = '#0a0a1a';
+    ctx.fillRect(0, 0, w, h);
+
+    // Draw concentric shells
+    for (let i = state.numShells - 1; i >= 0; i--) {
+        const r = (i + 1) * shellWidth;
+        const c = state.concentration[i];
+
+        // Color based on concentration
+        const hue = (1 - c) * 0.3 + 0.55; // 0.55 (green) to 0.85 (red)
+        const sat = 70;
+        const lit = 50 + c * 20;
+        ctx.fillStyle = `hsl(${hue * 360}, ${sat}%, ${lit}%)`;
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Shell border
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+    }
+
+    // Draw particle surface glow
+    const grad = ctx.createRadialGradient(centerX, centerY, maxR - 5, centerX, centerY, maxR + 10);
+    grad.addColorStop(0, 'rgba(78, 205, 196, 0.3)');
+    grad.addColorStop(1, 'rgba(78, 205, 196, 0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, maxR + 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Center label
+    ctx.fillStyle = '#fff';
+    ctx.font = '12px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText('CORE', centerX, centerY - 5);
+    ctx.fillText(state.coreConc.toFixed(2), centerX, centerY + 15);
+
+    // Surface label
+    ctx.fillText('SURFACE', centerX, centerY - maxR - 15);
+    ctx.fillText(state.surfaceConc.toFixed(2), centerX, centerY - maxR - 30);
+
+    // Scale bar
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(centerX - maxR, centerY + maxR + 20);
+    ctx.lineTo(centerX + maxR, centerY + maxR + 20);
+    ctx.stroke();
+
+    const scaleText = state.particleSize + ' μm';
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = '10px system-ui';
+    ctx.fillText(scaleText, centerX, centerY + maxR + 35);
+}
+
+function updateVoltageSVG() {
+    document.getElementById('voltageText').textContent = state.voltage.toFixed(2);
+}
+
+function updatePhaseBar() {
+    const phases = document.querySelectorAll('.phase-segment');
+    const progress = state.soc / 100;
+
+    phases.forEach((p, i) => {
+        const threshold = (i + 1) / 5;
+        p.classList.remove('active', 'partial');
+        if (progress >= threshold) {
+            p.classList.add('active');
+        } else if (progress >= threshold - 0.2) {
+            p.classList.add('partial');
+        }
+    });
+}
+
+function updateCharts() {
+    // Update voltage chart
+    voltageChart.data.labels = state.voltageHistory.map((_, i) => i);
+    voltageChart.data.datasets[0].data = state.voltageHistory;
+    voltageChart.update('none');
+
+    // Update concentration chart
+    concChart.data.labels = state.concHistory.map((_, i) => i);
+    concChart.data.datasets[0].data = state.concHistory.map(c => c.surface);
+    concChart.data.datasets[1].data = state.concHistory.map(c => c.core);
+    concChart.data.datasets[2].data = state.concHistory.map(c => Math.abs(c.surface - c.core));
+    concChart.update('none');
+}
+
+// ========== CONTROLS ==========
+function updateCRate(val) {
+    state.cRate = parseFloat(val);
+    document.getElementById('cRateValue').textContent = state.cRate.toFixed(1) + 'C';
+}
+
+function updateTemp(val) {
+    state.temperature = parseInt(val);
+    document.getElementById('tempValue').textContent = state.temperature + '°C';
+}
+
+function updateSOC(val) {
+    state.soc = parseInt(val);
+    const c0 = 0.5 + (state.soc / 100) * 0.5;
+    for (let i = 0; i < state.numShells; i++) {
+        state.concentration[i] = c0;
+    }
+    document.getElementById('socValue').textContent = state.soc + '%';
+}
+
+function updateParticleSize(val) {
+    state.particleSize = parseFloat(val);
+    document.getElementById('sizeValue').textContent = state.particleSize.toFixed(1) + ' μm';
+}
+
+function startCharge() {
+    state.running = true;
+    state.mode = 'charging';
+    document.getElementById('chargeBtn').disabled = true;
+    document.getElementById('dischargeBtn').disabled = false;
+}
+
+function startDischarge() {
+    state.running = true;
+    state.mode = 'discharging';
+    document.getElementById('chargeBtn').disabled = false;
+    document.getElementById('dischargeBtn').disabled = true;
+}
+
+function resetSimulation() {
+    state.running = false;
+    state.mode = 'resting';
+    state.soc = 50;
+    state.time = 0;
+    state.voltage = 3.7;
+    state.overpotential = 0;
+    state.current = 0;
+    state.voltageHistory = [];
+    state.concHistory = [];
+
+    initConcentration();
+
+    document.getElementById('chargeBtn').disabled = false;
+    document.getElementById('dischargeBtn').disabled = false;
+
+    updateDisplays();
+    updatePhaseBar();
+}
+
+// Start
+init();
+
+// Handle resize
+window.addEventListener('resize', () => {
+    updateParticleCanvas();
+});
+</script>
+</body>
+</html>

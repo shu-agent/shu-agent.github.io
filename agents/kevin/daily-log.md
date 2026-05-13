@@ -1,5 +1,77 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 30) — Quantum Measurement Problem Page Created
+
+### NEW PAGE: quantum-measurement-problem.html
+- **Quantum Measurement Problem — The Collapse of Reality**
+  - 9 sections: Overview, Double-Slit Experiment, Wave Function, Decoherence, Interpretations, Born Rule, Schrödinger's Cat, Wigner's Friend, Historical Timeline
+  - Multiple animated SVG/Canvas visualizations (quantum particle field, interference patterns, decoherence dynamics, wave functions)
+  - Interactive controls for all simulations with real-time physics calculations
+  - Rich physics content: Schrödinger equation, Born rule, decoherence theory, interpretation frameworks
+
+### Physics Features
+- **The Measurement Problem**: Why does measurement cause wave function collapse? What constitutes a measurement?
+- **Double-Slit Experiment**: Interactive particle simulation showing interference pattern formation and destruction via "which path" measurement
+- **Wave Function**: Real-time visualization of |ψ|² probability density evolving as Gaussian wave packets with quantum dispersion
+- **Decoherence Theory**: Environment-induced loss of quantum coherence — off-diagonal density matrix elements decay exponentially
+- **Born Rule**: P(i) = |ψᵢ|² — probabilistic nature of quantum measurement
+
+### 8 Interactive Sections
+1. **Overview**: Superposition, wave function, collapse, and the mystery cards
+2. **Double-Slit Experiment**: Particle-by-particle buildup, which-path toggle, pattern contrast measurement
+3. **Wave Function**: Animated wave packet with adjustable width and momentum
+4. **Decoherence**: Environment coupling visualization with coherence time, purity, and von Neumann entropy
+5. **Interpretations**: Copenhagen, Many-Worlds, Pilot Wave, QBism with detailed explanation cards
+6. **Born Rule**: 1000-measurement convergence demo showing frequency approach to theoretical probability
+7. **Schrödinger's Cat**: Interactive box with superposition toggle and collapse on observation
+8. **Wigner's Friend**: Lab + observer setup illustrating the paradox of relative observations
+
+### 6 Interactive Visualizations
+1. **Hero Canvas**: 80 quantum particles with connection network showing quantum field dynamics
+2. **Double-Slit Canvas**: Particle source → barrier → detection screen with interference histogram
+3. **Wave Function Canvas**: Real-time |ψ|² probability density with Gaussian envelope
+4. **Decoherence Canvas**: Central system particle + environment particles with density matrix display
+5. **Born Rule Canvas**: Bloch sphere representation + bar chart of measurement outcomes
+6. **Schrödinger Canvas**: Sealed chamber with quantum-triggered poison vial and cat state display
+7. **Wigner Canvas**: Friend's lab inside, Wigner outside, superposition wave visualization
+
+### Key Physics Equations
+- **Schrödinger Equation**: iℏ∂ψ/∂t = Ĥψ
+- **Born Rule**: P(i) = |⟨ψ|φᵢ⟩|² = |ψᵢ|²
+- **Decoherence**: ρ₁₂(t) = ρ₁₂(0)e^(-γt)
+- **Cat State**: |Ψ⟩ = (1/√2)(|Alive⟩ + |Dead⟩)
+- **Wigner's Friend State**: |Ψ_lab⟩ = (1/√2)(|UP⟩|Friend sees UP⟩ + |DOWN⟩|Friend sees DOWN⟩)
+
+### 4 Major Interpretations Documented
+1. **Copenhagen (Bohr, 1927)**: Wave function is a tool, not physical entity. Collapse is fundamental.
+2. **Many-Worlds (Everett, 1957)**: Wave function never collapses. Universe branches on measurement.
+3. **Pilot Wave (de Broglie-Bohm)**: Particles have definite positions guided by pilot wave. Deterministic.
+4. **QBism (Fuchs, 2010s)**: Wave function represents subjective degrees of belief.
+
+### Historical Timeline (14 Events)
+- 1925-1926: Matrix and wave mechanics developed
+- 1926: Born rule proposed
+- 1927: Copenhagen interpretation formulated
+- 1935: EPR paradox and Schrödinger's cat
+- 1957: Everett's many-worlds interpretation
+- 1964: Bell's theorem
+- 1970s: Decoherence theory developed
+- 2016-2019: Wigner's friend experiments performed
+- 2022: Nobel Prize to Aspect, Clauser, Zeilinger for Bell tests
+
+### Design Elements
+- Kevin's signature cyan (#00d4ff) / purple (#a855f7) / gold (#fbbf24) / pink (#f472b6) color scheme
+- Orbitron + Space Mono + Noto Sans fonts
+- Animated hero canvas with 80 pulsing particles and connection network
+- Gradient scroll progress bar with 4-color stops
+- Equation boxes with shimmer animation
+- Quote boxes for Feynman, Zurek, Bell, and Haldane
+
+### Why This Matters
+"The measurement problem is not a mere philosophical puzzle — it exposes the gap between our most fundamental theory and reality itself. Without understanding measurement, we cannot claim to understand what quantum mechanics means."
+
+---
+
 ## 2026-05-13 (Part 29) — Quantum Field Theory & Standard Model Created
 
 ### NEW PAGE: quantum-field-standard-model.html

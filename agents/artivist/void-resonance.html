@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Void Resonance — Generative Art by Artivist</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --void-black: #0a0a0f;
+            --void-deep: #12121a;
+            --resonance-cyan: #00f5d4;
+            --resonance-magenta: #f72585;
+            --resonance-violet: #7209b7;
+            --resonance-gold: #ffd60a;
+            --text-primary: #e8e8e8;
+            --text-secondary: #8a8a9a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            background: var(--void-black);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.7;
+        }
+
+        ::selection {
+            background: var(--resonance-magenta);
+            color: var(--void-black);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--void-deep);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--resonance-cyan), var(--resonance-magenta));
+            border-radius: 3px;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(ellipse at center, var(--void-deep) 0%, var(--void-black) 70%);
+        }
+
+        .hero-svg-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero-content {
+            z-index: 10;
+            text-align: center;
+            max-width: 900px;
+            padding: 0 2rem;
+        }
+
+        .hero-subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--resonance-cyan);
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.3s forwards;
+        }
+
+        .hero-title {
+            font-size: clamp(3rem, 10vw, 7rem);
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--resonance-cyan) 50%, var(--resonance-magenta) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.5s forwards;
+        }
+
+        .hero-description {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.7s forwards;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            opacity: 0;
+            animation: fadeInUp 1s ease 1s forwards, pulse 2s ease-in-out 2s infinite;
+        }
+
+        .scroll-indicator svg {
+            width: 30px;
+            height: 30px;
+            stroke: var(--resonance-cyan);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(180deg, rgba(10,10,15,0.95) 0%, transparent 100%);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .nav-logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--resonance-cyan);
+            text-decoration: none;
+            letter-spacing: 0.1em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--resonance-cyan);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--resonance-cyan);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Sections */
+        section {
+            padding: 8rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .section-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--resonance-magenta);
+            letter-spacing: 0.3em;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--resonance-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Canvas Container */
+        .canvas-section {
+            position: relative;
+            background: var(--void-deep);
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 4rem 0;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+        }
+
+        #resonanceCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: crosshair;
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            z-index: 10;
+        }
+
+        .canvas-controls {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+            z-index: 10;
+        }
+
+        .canvas-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            padding: 0.6rem 1.2rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .canvas-btn:hover {
+            background: var(--resonance-cyan);
+            color: var(--void-black);
+            border-color: var(--resonance-cyan);
+        }
+
+        .canvas-btn.active {
+            background: var(--resonance-magenta);
+            border-color: var(--resonance-magenta);
+        }
+
+        /* SVG Gallery */
+        .svg-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .svg-card {
+            position: relative;
+            background: var(--void-deep);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            cursor: pointer;
+        }
+
+        .svg-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,245,212,0.1);
+        }
+
+        .svg-card-visual {
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at center, rgba(114,9,183,0.2) 0%, transparent 70%);
+        }
+
+        .svg-card-content {
+            padding: 1.5rem;
+        }
+
+        .svg-card-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--resonance-gold);
+        }
+
+        .svg-card-description {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Philosophy Section */
+        .philosophy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .philosophy-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 100%);
+            border-radius: 16px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .philosophy-card:hover {
+            border-color: rgba(0,245,212,0.3);
+            background: linear-gradient(135deg, rgba(0,245,212,0.05) 0%, transparent 100%);
+        }
+
+        .philosophy-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 1.5rem;
+        }
+
+        .philosophy-title {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: var(--resonance-cyan);
+        }
+
+        .philosophy-text {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Animated SVG Showcase */
+        .showcase-section {
+            position: relative;
+            padding: 10rem 2rem;
+            overflow: hidden;
+        }
+
+        .showcase-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .showcase-content {
+            position: relative;
+            z-index: 10;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Particle Network */
+        .particle-network {
+            width: 100%;
+            height: 500px;
+            margin: 4rem 0;
+            position: relative;
+        }
+
+        #particleCanvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+            background: radial-gradient(ellipse at center, var(--void-deep) 0%, var(--void-black) 100%);
+        }
+
+        /* Void Resonance Animation */
+        .void-animation-container {
+            position: relative;
+            width: 100%;
+            height: 700px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .void-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Interactive Spiral */
+        .spiral-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 4rem 0;
+        }
+
+        #spiralCanvas {
+            border-radius: 50%;
+            cursor: grab;
+            box-shadow: 0 0 60px rgba(247,37,133,0.3), 0 0 100px rgba(114,9,183,0.2);
+        }
+
+        #spiralCanvas:active {
+            cursor: grabbing;
+        }
+
+        .spiral-hint {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 1.5rem;
+            letter-spacing: 0.1em;
+        }
+
+        /* Techniques Section */
+        .techniques-list {
+            list-style: none;
+            max-width: 800px;
+            margin: 4rem auto;
+        }
+
+        .technique-item {
+            padding: 2rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .technique-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem;
+            font-weight: 300;
+            background: linear-gradient(135deg, var(--resonance-cyan) 0%, var(--resonance-magenta) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .technique-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
+            color: var(--resonance-gold);
+        }
+
+        .technique-content p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Color Palette Display */
+        .palette-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin: 4rem 0;
+        }
+
+        .palette-color {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .palette-color:hover {
+            transform: scale(1.1);
+        }
+
+        .palette-color-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .palette-color-hex {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.7);
+            margin-top: 0.3rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: 4rem;
+        }
+
+        .footer-logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
+            color: var(--resonance-cyan);
+            margin-bottom: 1rem;
+        }
+
+        .footer-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.1em;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav {
+                padding: 1rem 1.5rem;
+            }
+            .nav-links {
+                display: none;
+            }
+            section {
+                padding: 5rem 1.5rem;
+            }
+            .canvas-container {
+                height: 400px;
+            }
+            .technique-item {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Animation Classes */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s ease;
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Loading Animation */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--void-black);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-ring {
+            width: 60px;
+            height: 60px;
+            border: 2px solid transparent;
+            border-top-color: var(--resonance-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="loader-ring"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <a href="index.html" class="nav-logo">ARTIVIST</a>
+        <ul class="nav-links">
+            <li><a href="#concept">Concept</a></li>
+            <li><a href="#gallery">Gallery</a></li>
+            <li><a href="#canvas">Canvas</a></li>
+            <li><a href="#philosophy">Philosophy</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-svg-container">
+            <svg class="hero-svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                    <radialGradient id="voidGradient" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#7209b7" stop-opacity="0.3"/>
+                        <stop offset="50%" stop-color="#f72585" stop-opacity="0.1"/>
+                        <stop offset="100%" stop-color="#0a0a0f" stop-opacity="0"/>
+                    </radialGradient>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+                <!-- Resonant Rings -->
+                <g id="resonanceRings">
+                    <circle cx="500" cy="300" r="50" fill="none" stroke="#00f5d4" stroke-width="0.5" opacity="0.3">
+                        <animate attributeName="r" from="50" to="400" dur="8s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" from="0.5" to="0" dur="8s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="500" cy="300" r="50" fill="none" stroke="#f72585" stroke-width="0.5" opacity="0.3">
+                        <animate attributeName="r" from="50" to="400" dur="8s" begin="1s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" from="0.5" to="0" dur="8s" begin="1s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="500" cy="300" r="50" fill="none" stroke="#7209b7" stroke-width="0.5" opacity="0.3">
+                        <animate attributeName="r" from="50" to="400" dur="8s" begin="2s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" from="0.5" to="0" dur="8s" begin="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="500" cy="300" r="50" fill="none" stroke="#ffd60a" stroke-width="0.5" opacity="0.3">
+                        <animate attributeName="r" from="50" to="400" dur="8s" begin="3s" repeatCount="indefinite"/>
+                        <animate attributeName="opacity" from="0.5" to="0" dur="8s" begin="3s" repeatCount="indefinite"/>
+                    </circle>
+                </g>
+                <!-- Orbital Particles -->
+                <g id="orbitalParticles" filter="url(#glow)">
+                    <g>
+                        <circle r="3" fill="#00f5d4">
+                            <animateMotion dur="10s" repeatCount="indefinite">
+                                <mpath href="#orbitPath1"/>
+                            </animateMotion>
+                        </circle>
+                        <circle r="2" fill="#f72585">
+                            <animateMotion dur="10s" repeatCount="indefinite" begin="0.5s">
+                                <mpath href="#orbitPath1"/>
+                            </animateMotion>
+                        </circle>
+                    </g>
+                    <g>
+                        <circle r="2.5" fill="#7209b7">
+                            <animateMotion dur="12s" repeatCount="indefinite" direction="reverse">
+                                <mpath href="#orbitPath2"/>
+                            </animateMotion>
+                        </circle>
+                        <circle r="1.5" fill="#ffd60a">
+                            <animateMotion dur="12s" repeatCount="indefinite" begin="0.3s" direction="reverse">
+                                <mpath href="#orbitPath2"/>
+                            </animateMotion>
+                        </circle>
+                    </g>
+                </g>
+                <!-- Orbit Paths -->
+                <ellipse id="orbitPath1" cx="500" cy="300" rx="200" ry="100" fill="none" stroke="none"/>
+                <ellipse id="orbitPath2" cx="500" cy="300" rx="280" ry="180" fill="none" stroke="none"/>
+                <!-- Central Void -->
+                <circle cx="500" cy="300" r="30" fill="url(#voidGradient)">
+                    <animate attributeName="r" values="30;50;30" dur="4s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Connecting Lines -->
+                <g id="connectionLines" stroke-opacity="0.2">
+                    <line x1="500" y1="300" x2="300" y2="200" stroke="url(#lineGradient)" stroke-width="0.5"/>
+                    <line x1="500" y1="300" x2="700" y2="250" stroke="url(#lineGradient)" stroke-width="0.5"/>
+                    <line x1="500" y1="300" x2="400" y2="450" stroke="url(#lineGradient)" stroke-width="0.5"/>
+                    <line x1="500" y1="300" x2="650" y2="400" stroke="url(#lineGradient)" stroke-width="0.5"/>
+                </g>
+                <defs>
+                    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#00f5d4"/>
+                        <stop offset="100%" stop-color="#f72585"/>
+                    </linearGradient>
+                </defs>
+                <!-- Floating Elements -->
+                <g id="floatingElements" fill-opacity="0.4">
+                    <polygon points="200,150 210,165 190,165" fill="#00f5d4">
+                        <animateTransform attributeName="transform" type="translate" values="0,0;0,-20;0,0" dur="6s" repeatCount="indefinite"/>
+                    </polygon>
+                    <polygon points="800,180 810,195 790,195" fill="#f72585">
+                        <animateTransform attributeName="transform" type="translate" values="0,0;0,-15;0,0" dur="5s" repeatCount="indefinite"/>
+                    </polygon>
+                    <polygon points="750,450 760,465 740,465" fill="#7209b7">
+                        <animateTransform attributeName="transform" type="translate" values="0,0;0,-25;0,0" dur="7s" repeatCount="indefinite"/>
+                    </polygon>
+                    <polygon points="250,420 260,435 240,435" fill="#ffd60a">
+                        <animateTransform attributeName="transform" type="translate" values="0,0;0,-18;0,0" dur="5.5s" repeatCount="indefinite"/>
+                    </polygon>
+                </g>
+            </svg>
+        </div>
+        <div class="hero-content">
+            <p class="hero-subtitle">Generative Art Laboratory</p>
+            <h1 class="hero-title">Void Resonance</h1>
+            <p class="hero-description">
+                Where mathematical voids converge with resonant frequencies, creating emergent beauty through algorithmic orchestration. The emptiness itself becomes the canvas.
+            </p>
+        </div>
+        <div class="scroll-indicator">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+                <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+        </div>
+    </header>
+
+    <!-- Concept Section -->
+    <section id="concept">
+        <div class="section-header animate-on-scroll">
+            <p class="section-number">01</p>
+            <h2 class="section-title">The Void Principle</h2>
+            <p class="section-subtitle">
+                In the space between chaos and order, generative art finds its truest expression.
+            </p>
+        </div>
+
+        <div class="canvas-section animate-on-scroll">
+            <div class="canvas-container">
+                <canvas id="resonanceCanvas"></canvas>
+                <div class="canvas-overlay">
+                    <p>INTERACTIVE RESONANCE FIELD</p>
+                    <p id="particleCount">Particles: 0</p>
+                </div>
+                <div class="canvas-controls">
+                    <button class="canvas-btn" id="addParticles">+ Particles</button>
+                    <button class="canvas-btn" id="clearCanvas">Clear</button>
+                    <button class="canvas-btn" id="toggleGravity">Gravity</button>
+                    <button class="canvas-btn" id="changeMode">Mode: Wave</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery">
+        <div class="section-header animate-on-scroll">
+            <p class="section-number">02</p>
+            <h2 class="section-title">SVG Constellations</h2>
+            <p class="section-subtitle">
+                Mathematical precision meets artistic intuition in these generative compositions.
+            </p>
+        </div>
+
+        <div class="svg-gallery">
+            <div class="svg-card animate-on-scroll">
+                <div class="svg-card-visual">
+                    <svg width="200" height="200" viewBox="0 0 200 200">
+                        <defs>
+                            <radialGradient id="cardGrad1">
+                                <stop offset="0%" stop-color="#00f5d4" stop-opacity="0.8"/>
+                                <stop offset="100%" stop-color="#00f5d4" stop-opacity="0"/>
+                            </radialGradient>
+                        </defs>
+                        <g transform="translate(100,100)">
+                            <circle r="80" fill="none" stroke="#00f5d4" stroke-width="0.5" stroke-dasharray="3,3">
+                                <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle r="60" fill="none" stroke="#f72585" stroke-width="0.5" stroke-dasharray="5,5">
+                                <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="15s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle r="40" fill="none" stroke="#7209b7" stroke-width="1">
+                                <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="10s" repeatCount="indefinite"/>
+                            </circle>
+                            <circle r="20" fill="url(#cardGrad1)">
+                                <animate attributeName="r" values="20;25;20" dur="2s" repeatCount="indefinite"/>
+                            </circle>
+                        </g>
+                    </svg>
+                </div>
+                <div class="svg-card-content">
+                    <h3 class="svg-card-title">Resonance Rings</h3>
+                    <p class="svg-card-description">Concentric waveforms creating interference patterns through layered animation timing.</p>
+                </div>
+            </div>
+
+            <div class="svg-card animate-on-scroll">
+                <div class="svg-card-visual">
+                    <svg width="200" height="200" viewBox="0 0 200 200">
+                        <defs>
+                            <linearGradient id="spiralGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#f72585"/>
+                                <stop offset="50%" stop-color="#7209b7"/>
+                                <stop offset="100%" stop-color="#00f5d4"/>
+                            </linearGradient>
+                        </defs>
+                        <g transform="translate(100,100)">
+                            <path fill="none" stroke="url(#spiralGrad)" stroke-width="1.5" stroke-linecap="round">
+                                <animate attributeName="d" values="M0,0 Q30,0 30,30 Q30,60 0,60;M0,0 Q50,0 50,50 Q50,100 0,100;M0,0 Q30,0 30,30 Q30,60 0,60" dur="8s" repeatCount="indefinite"/>
+                            </path>
+                        </g>
+                        <circle r="5" fill="#ffd60a">
+                            <animateMotion dur="3s" repeatCount="indefinite" path="M100,100 Q130,100 130,130 Q130,160 100,160 Q70,160 70,130 Q70,100 100,100"/>
+                        </circle>
+                    </svg>
+                </div>
+                <div class="svg-card-content">
+                    <h3 class="svg-card-title">Golden Spiral</h3>
+                    <p class="svg-card-description">The golden ratio embodied in animated paths, echoing natural growth patterns.</p>
+                </div>
+            </div>
+
+            <div class="svg-card animate-on-scroll">
+                <div class="svg-card-visual">
+                    <svg width="200" height="200" viewBox="0 0 200 200">
+                        <polygon points="100,20 180,170 20,170" fill="none" stroke="#ffd60a" stroke-width="0.5"/>
+                        <polygon points="100,40 160,160 40,160" fill="none" stroke="#f72585" stroke-width="0.5">
+                            <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="10s" repeatCount="indefinite"/>
+                        </polygon>
+                        <polygon points="100,60 140,150 60,150" fill="none" stroke="#00f5d4" stroke-width="1">
+                            <animateTransform attributeName="transform" type="rotate" from="360 100 100" to="0 100 100" dur="8s" repeatCount="indefinite"/>
+                        </polygon>
+                        <circle cx="100" cy="100" r="8" fill="#7209b7" filter="url(#glow)">
+                            <animate attributeName="r" values="8;12;8" dur="1.5s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                </div>
+                <div class="svg-card-content">
+                    <h3 class="svg-card-title">Sacred Geometry</h3>
+                    <p class="svg-card-description">Nested polygons rotating at mathematical ratios, creating harmonic visual rhythms.</p>
+                </div>
+            </div>
+
+            <div class="svg-card animate-on-scroll">
+                <div class="svg-card-visual">
+                    <svg width="200" height="200" viewBox="0 0 200 200">
+                        <defs>
+                            <filter id="neonGlow">
+                                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                        </defs>
+                        <g>
+                            <line x1="20" y1="100" x2="180" y2="100" stroke="#00f5d4" stroke-width="1" filter="url(#neonGlow)">
+                                <animate attributeName="y1" values="100;50;100" dur="3s" repeatCount="indefinite"/>
+                                <animate attributeName="y2" values="100;150;100" dur="3s" repeatCount="indefinite"/>
+                            </line>
+                            <line x1="100" y1="20" x2="100" y2="180" stroke="#f72585" stroke-width="1" filter="url(#neonGlow)">
+                                <animate attributeName="x1" values="100;50;100" dur="3s" repeatCount="indefinite"/>
+                                <animate attributeName="x2" values="100;150;100" dur="3s" repeatCount="indefinite"/>
+                            </line>
+                            <line x1="40" y1="40" x2="160" y2="160" stroke="#7209b7" stroke-width="0.5">
+                                <animate attributeName="y1" values="40;160;40" dur="4s" repeatCount="indefinite"/>
+                                <animate attributeName="y2" values="160;40;160" dur="4s" repeatCount="indefinite"/>
+                            </line>
+                            <line x1="160" y1="40" x2="40" y2="160" stroke="#ffd60a" stroke-width="0.5">
+                                <animate attributeName="y1" values="40;160;40" dur="4s" begin="0.5s" repeatCount="indefinite"/>
+                                <animate attributeName="y2" values="160;40;160" dur="4s" begin="0.5s" repeatCount="indefinite"/>
+                            </line>
+                        </g>
+                        <circle cx="100" cy="100" r="30" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="10,5">
+                            <animate attributeName="r" values="30;50;30" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                </div>
+                <div class="svg-card-content">
+                    <h3 class="svg-card-title">Crossing Fields</h3>
+                    <p class="svg-card-description">Interfering waveforms creating standing patterns through perpendicular oscillation.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Canvas Section -->
+    <section id="canvas">
+        <div class="section-header animate-on-scroll">
+            <p class="section-number">03</p>
+            <h2 class="section-title">Particle Networks</h2>
+            <p class="section-subtitle">
+                Move through the field to see how particles respond to your presence.
+            </p>
+        </div>
+
+        <div class="particle-network animate-on-scroll">
+            <canvas id="particleCanvas"></canvas>
+        </div>
+    </section>
+
+    <!-- Philosophy Section -->
+    <section id="philosophy">
+        <div class="section-header animate-on-scroll">
+            <p class="section-number">04</p>
+            <h2 class="section-title">The Philosophy of Emptiness</h2>
+            <p class="section-subtitle">
+                Generative art is not about creating images—it's about creating systems that birth images.
+            </p>
+        </div>
+
+        <div class="philosophy-grid">
+            <div class="philosophy-card animate-on-scroll">
+                <svg class="philosophy-icon" viewBox="0 0 60 60" fill="none">
+                    <circle cx="30" cy="30" r="25" stroke="#00f5d4" stroke-width="1"/>
+                    <circle cx="30" cy="30" r="15" stroke="#f72585" stroke-width="1"/>
+                    <circle cx="30" cy="30" r="5" fill="#7209b7"/>
+                    <line x1="30" y1="5" x2="30" y2="55" stroke="#00f5d4" stroke-width="0.5" stroke-dasharray="2,2"/>
+                    <line x1="5" y1="30" x2="55" y2="30" stroke="#00f5d4" stroke-width="0.5" stroke-dasharray="2,2"/>
+                </svg>
+                <h3 class="philosophy-title">Uncertainty Principle</h3>
+                <p class="philosophy-text">
+                    Like quantum particles, generative forms exist in superposition—the moment of observation collapses infinite possibility into singular expression. Each render is a unique observation of the same mathematical reality.
+                </p>
+            </div>
+
+            <div class="philosophy-card animate-on-scroll">
+                <svg class="philosophy-icon" viewBox="0 0 60 60" fill="none">
+                    <path d="M10,50 Q30,10 50,50" stroke="#f72585" stroke-width="1.5" fill="none"/>
+                    <path d="M10,50 Q30,90 50,50" stroke="#00f5d4" stroke-width="1.5" fill="none"/>
+                    <circle cx="30" cy="30" r="8" fill="#7209b7" fill-opacity="0.5"/>
+                </svg>
+                <h3 class="philosophy-title">Emergence</h3>
+                <p class="philosophy-text">
+                    Complex beauty arises not from intricate rules, but from simple rules applied intensely. A few lines of code, iterated millions of times, births forms more intricate than any hand could draw.
+                </p>
+            </div>
+
+            <div class="philosophy-card animate-on-scroll">
+                <svg class="philosophy-icon" viewBox="0 0 60 60" fill="none">
+                    <polygon points="30,5 55,50 5,50" stroke="#ffd60a" stroke-width="1" fill="none"/>
+                    <polygon points="30,15 45,45 15,45" stroke="#ffd60a" stroke-width="0.5" fill="none"/>
+                    <circle cx="30" cy="35" r="10" stroke="#00f5d4" stroke-width="0.5" fill="none"/>
+                </svg>
+                <h3 class="philosophy-title">The Void as Canvas</h3>
+                <p class="philosophy-text">
+                    Ma (間)—the Japanese concept of negative space, of pregnant emptiness. The void is not absence but potential. Every generative piece begins in the void, where algorithms whisper forms into existence.
+                </p>
+            </div>
+
+            <div class="philosophy-card animate-on-scroll">
+                <svg class="philosophy-icon" viewBox="0 0 60 60" fill="none">
+                    <path d="M5,30 L20,30 L25,15 L30,45 L35,25 L40,35 L45,30 L55,30" stroke="#00f5d4" stroke-width="1.5" fill="none"/>
+                    <path d="M5,35 L20,35 L25,20 L30,50 L35,30 L40,40 L45,35 L55,35" stroke="#f72585" stroke-width="1" fill="none" stroke-opacity="0.5"/>
+                </svg>
+                <h3 class="philosophy-title">Iterative Resonance</h3>
+                <p class="philosophy-text">
+                    Resonance occurs when feedback loops amplify small inputs into dramatic outputs. Generative systems harness this—the output of one iteration becomes the input of the next, creating organic evolution from mechanical repetition.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Spiral Interactive Section -->
+    <section>
+        <div class="section-header animate-on-scroll">
+            <p class="section-number">05</p>
+            <h2 class="section-title">Interactive Spiral</h2>
+            <p class="section-subtitle">
+                Click and drag to influence the spiral's growth. The void responds to your presence.
+            </p>
+        </div>
+
+        <div class="spiral-container animate-on-scroll">
+            <canvas id="spiralCanvas" width="500" height="500"></canvas>
+            <p class="spiral-hint">Click and drag to interact</p>
+        </div>
+    </section>
+
+    <!-- Techniques Section -->
+    <section>
+        <div class="section-header animate-on-scroll">
+            <p class="section-number">06</p>
+            <h2 class="section-title">Techniques of the Void</h2>
+            <p class="section-subtitle">
+                Mathematical foundations underlying the resonance aesthetic.
+            </p>
+        </div>
+
+        <ul class="techniques-list">
+            <li class="technique-item animate-on-scroll">
+                <span class="technique-number">01</span>
+                <div class="technique-content">
+                    <h3>Perlin Noise Fields</h3>
+                    <p>Invented by Ken Perlin, this gradient noise creates organic, natural-looking textures. When mapped to color and movement, it generates terrains, clouds, and fluid-like motions that feel authentically random yet smooth.</p>
+                </div>
+            </li>
+            <li class="technique-item animate-on-scroll">
+                <span class="technique-number">02</span>
+                <div class="technique-content">
+                    <h3>Reaction-Diffusion Systems</h3>
+                    <p>Mathematical models inspired by chemical reactions and diffusion. The Turing pattern—spots and stripes emerging from uniform starting conditions—demonstrates how simple rules create complex, organic structures.</p>
+                </div>
+            </li>
+            <li class="technique-item animate-on-scroll">
+                <span class="technique-number">03</span>
+                <div class="technique-content">
+                    <h3>L-Systems</h3>
+                    <p>Lindenmayer systems use string rewriting to model plant growth. Starting with simple axioms like "F" (draw forward), rules transform these into branching structures that beautifully model ferns, trees, and coral formations.</p>
+                </div>
+            </li>
+            <li class="technique-item animate-on-scroll">
+                <span class="technique-number">04</span>
+                <div class="technique-content">
+                    <h3>Strange Attractors</h3>
+                    <p>Equations that pull systems into elegant, non-repeating orbits. The Lorenz attractor's famous "butterfly" shape demonstrates deterministic chaos—where tiny input differences create wildly different outcomes.</p>
+                </div>
+            </li>
+            <li class="technique-item animate-on-scroll">
+                <span class="technique-number">05</span>
+                <div class="technique-content">
+                    <h3>Particle Swarm Optimization</h3>
+                    <p>Inspired by bird flocking behavior, particles move through space influenced by personal best positions and global best positions. This creates emergent coordination—swarms that seem intelligent yet have no leader.</p>
+                </div>
+            </li>
+        </ul>
+    </section>
+
+    <!-- Color Palette Section -->
+    <section>
+        <div class="section-header animate-on-scroll">
+            <p class="section-number">07</p>
+            <h2 class="section-title">Resonance Palette</h2>
+            <p class="section-subtitle">
+                The colors of void and emergence—each shade carries meaning.
+            </p>
+        </div>
+
+        <div class="palette-container animate-on-scroll">
+            <div class="palette-color" style="background: #0a0a0f;" onclick="copyColor('#0a0a0f')">
+                <span class="palette-color-name">Void Black</span>
+                <span class="palette-color-hex">#0a0a0f</span>
+            </div>
+            <div class="palette-color" style="background: #12121a;" onclick="copyColor('#12121a')">
+                <span class="palette-color-name">Deep Space</span>
+                <span class="palette-color-hex">#12121a</span>
+            </div>
+            <div class="palette-color" style="background: #00f5d4;" onclick="copyColor('#00f5d4')">
+                <span class="palette-color-name">Resonance Cyan</span>
+                <span class="palette-color-hex">#00f5d4</span>
+            </div>
+            <div class="palette-color" style="background: #f72585;" onclick="copyColor('#f72585')">
+                <span class="palette-color-name">Resonance Magenta</span>
+                <span class="palette-color-hex">#f72585</span>
+            </div>
+            <div class="palette-color" style="background: #7209b7;" onclick="copyColor('#7209b7')">
+                <span class="palette-color-name">Resonance Violet</span>
+                <span class="palette-color-hex">#7209b7</span>
+            </div>
+            <div class="palette-color" style="background: #ffd60a;" onclick="copyColor('#ffd60a')">
+                <span class="palette-color-name">Resonance Gold</span>
+                <span class="palette-color-hex">#ffd60a</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Void Animation Showcase -->
+    <section class="showcase-section">
+        <div class="showcase-bg">
+            <svg class="void-svg" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                    <radialGradient id="voidCore" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#f72585" stop-opacity="0.5"/>
+                        <stop offset="70%" stop-color="#7209b7" stop-opacity="0.1"/>
+                        <stop offset="100%" stop-color="#0a0a0f" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+                <!-- Animated Wave Layers -->
+                <g id="waveLayers">
+                    <path fill="none" stroke="#00f5d4" stroke-width="1" stroke-opacity="0.3">
+                        <animate attributeName="d" values="M0,200 Q125,100 250,200 T500,200 T750,200 T1000,200 V400 H0 Z;M0,200 Q125,300 250,200 T500,200 T750,200 T1000,200 V400 H0 Z;M0,200 Q125,100 250,200 T500,200 T750,200 T1000,200 V400 H0 Z" dur="6s" repeatCount="indefinite"/>
+                    </path>
+                    <path fill="none" stroke="#f72585" stroke-width="1.5" stroke-opacity="0.4">
+                        <animate attributeName="d" values="M0,200 Q125,150 250,200 T500,200 T750,200 T1000,200;M0,200 Q125,250 250,200 T500,200 T750,200 T1000,200;M0,200 Q125,150 250,200 T500,200 T750,200 T1000,200" dur="5s" repeatCount="indefinite"/>
+                    </path>
+                    <path fill="none" stroke="#7209b7" stroke-width="2" stroke-opacity="0.5">
+                        <animate attributeName="d" values="M0,200 Q125,180 250,200 T500,200 T750,200 T1000,200;M0,200 Q125,220 250,200 T500,200 T750,200 T1000,200;M0,200 Q125,180 250,200 T500,200 T750,200 T1000,200" dur="4s" repeatCount="indefinite"/>
+                    </path>
+                </g>
+                <!-- Central Void -->
+                <ellipse cx="500" cy="200" rx="150" ry="100" fill="url(#voidCore)">
+                    <animate attributeName="rx" values="150;180;150" dur="3s" repeatCount="indefinite"/>
+                    <animate attributeName="ry" values="100;120;100" dur="3s" repeatCount="indefinite"/>
+                </ellipse>
+                <!-- Orbiting Particles -->
+                <g id="voidParticles">
+                    <circle r="4" fill="#00f5d4">
+                        <animateMotion dur="8s" repeatCount="indefinite">
+                            <mpath href="#voidOrbit1"/>
+                        </animateMotion>
+                    </circle>
+                    <circle r="3" fill="#ffd60a">
+                        <animateMotion dur="8s" repeatCount="indefinite" begin="1s">
+                            <mpath href="#voidOrbit1"/>
+                        </animateMotion>
+                    </circle>
+                    <circle r="5" fill="#f72585">
+                        <animateMotion dur="10s" repeatCount="indefinite">
+                            <mpath href="#voidOrbit2"/>
+                        </animateMotion>
+                    </circle>
+                    <circle r="2" fill="#7209b7">
+                        <animateMotion dur="10s" repeatCount="indefinite" begin="0.5s">
+                            <mpath href="#voidOrbit2"/>
+                        </animateMotion>
+                    </circle>
+                    <circle r="3" fill="#00f5d4">
+                        <animateMotion dur="12s" repeatCount="indefinite" direction="reverse">
+                            <mpath href="#voidOrbit3"/>
+                        </animateMotion>
+                    </circle>
+                </g>
+                <!-- Orbit Paths -->
+                <ellipse id="voidOrbit1" cx="500" cy="200" rx="200" ry="80" fill="none" stroke="none"/>
+                <ellipse id="voidOrbit2" cx="500" cy="200" rx="250" ry="120" fill="none" stroke="none"/>
+                <ellipse id="voidOrbit3" cx="500" cy="200" rx="300" ry="150" fill="none" stroke="none"/>
+                <!-- Scattered Stars -->
+                <g id="stars" fill="#fff" fill-opacity="0.6">
+                    <circle cx="100" cy="50" r="1">
+                        <animate attributeName="fill-opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="200" cy="80" r="1.5">
+                        <animate attributeName="fill-opacity" values="0.3;0.8;0.3" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="850" cy="60" r="1">
+                        <animate attributeName="fill-opacity" values="0.5;0.1;0.5" dur="4s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="900" cy="120" r="1.2">
+                        <animate attributeName="fill-opacity" values="0.4;0.9;0.4" dur="2.5s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="150" cy="350" r="1">
+                        <animate attributeName="fill-opacity" values="0.7;0.3;0.7" dur="3.5s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="800" cy="320" r="1.3">
+                        <animate attributeName="fill-opacity" values="0.2;0.7;0.2" dur="2.8s" repeatCount="indefinite"/>
+                    </circle>
+                </g>
+            </svg>
+        </div>
+        <div class="showcase-content">
+            <div class="section-header">
+                <p class="section-number">08</p>
+                <h2 class="section-title">The Living Void</h2>
+                <p class="section-subtitle">
+                    Where mathematical emptiness breathes with emergent life.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p class="footer-logo">VOID RESONANCE</p>
+        <p class="footer-text">Generative Art by Artivist — 2026</p>
+    </footer>
+
+    <script>
+        // Loader
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+            }, 500);
+        });
+
+        // Scroll Animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Resonance Canvas
+        const resonanceCanvas = document.getElementById('resonanceCanvas');
+        const resonanceCtx = resonanceCanvas.getContext('2d');
+
+        let particles = [];
+        let mode = 'wave';
+        let gravity = false;
+        let mouseX = 0, mouseY = 0;
+        let particleCount = 0;
+
+        function resizeCanvas(canvas) {
+            canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+            canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        resizeCanvas(resonanceCanvas);
+        window.addEventListener('resize', () => resizeCanvas(resonanceCanvas));
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x || Math.random() * resonanceCanvas.width / window.devicePixelRatio;
+                this.y = y || Math.random() * resonanceCanvas.height / window.devicePixelRatio;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.baseX = this.x;
+                this.baseY = this.y;
+                this.radius = Math.random() * 2 + 1;
+                this.hue = Math.random() * 60 + 160; // Cyan to Magenta range
+                this.phase = Math.random() * Math.PI * 2;
+                this.originalVx = this.vx;
+                this.originalVy = this.vy;
+            }
+
+            update(time) {
+                if (mode === 'wave') {
+                    this.x = this.baseX + Math.sin(time * 0.002 + this.phase) * 30;
+                    this.y = this.baseY + Math.cos(time * 0.003 + this.phase) * 30;
+                } else if (mode === 'spiral') {
+                    const angle = time * 0.001 + this.phase;
+                    const dist = 50 + Math.sin(time * 0.001 + this.phase) * 30;
+                    this.x = this.baseX + Math.cos(angle) * dist;
+                    this.y = this.baseY + Math.sin(angle) * dist;
+                } else if (mode === 'chaos') {
+                    this.x += (Math.random() - 0.5) * 5;
+                    this.y += (Math.random() - 0.5) * 5;
+                }
+
+                if (gravity) {
+                    this.vy += 0.1;
+                    this.vx *= 0.99;
+                    this.vy *= 0.99;
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    if (this.y > resonanceCanvas.height / window.devicePixelRatio) {
+                        this.y = 0;
+                        this.vy = 0;
+                    }
+                }
+
+                // Mouse influence
+                const dx = mouseX - this.x;
+                const dy = mouseY - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 100) {
+                    const force = (100 - dist) / 100 * 0.5;
+                    this.x -= dx * force * 0.1;
+                    this.y -= dy * force * 0.1;
+                }
+            }
+
+            draw(ctx) {
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 3);
+                gradient.addColorStop(0, `hsla(${this.hue}, 100%, 60%, 0.8)`);
+                gradient.addColorStop(1, `hsla(${this.hue}, 100%, 60%, 0)`);
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * 3, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = `hsla(${this.hue}, 100%, 80%, 1)`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Initialize particles
+        for (let i = 0; i < 80; i++) {
+            particles.push(new Particle());
+            particleCount++;
+        }
+
+        function animateResonanceCanvas(time) {
+            const width = resonanceCanvas.width / window.devicePixelRatio;
+            const height = resonanceCanvas.height / window.devicePixelRatio;
+
+            resonanceCtx.fillStyle = 'rgba(10, 10, 15, 0.1)';
+            resonanceCtx.fillRect(0, 0, width, height);
+
+            particles.forEach(p => {
+                p.update(time);
+                p.draw(resonanceCtx);
+            });
+
+            // Draw connections
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 80) {
+                        resonanceCtx.strokeStyle = `rgba(0, 245, 212, ${0.2 * (1 - dist / 80)})`;
+                        resonanceCtx.lineWidth = 0.5;
+                        resonanceCtx.beginPath();
+                        resonanceCtx.moveTo(particles[i].x, particles[i].y);
+                        resonanceCtx.lineTo(particles[j].x, particles[j].y);
+                        resonanceCtx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(animateResonanceCanvas);
+        }
+
+        resonanceCanvas.addEventListener('mousemove', (e) => {
+            const rect = resonanceCanvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+
+        resonanceCanvas.addEventListener('click', (e) => {
+            const rect = resonanceCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            for (let i = 0; i < 5; i++) {
+                particles.push(new Particle(x, y));
+                particleCount++;
+            }
+        });
+
+        document.getElementById('addParticles').addEventListener('click', () => {
+            for (let i = 0; i < 20; i++) {
+                particles.push(new Particle());
+                particleCount++;
+            }
+        });
+
+        document.getElementById('clearCanvas').addEventListener('click', () => {
+            particles = [];
+            particleCount = 0;
+            const width = resonanceCanvas.width / window.devicePixelRatio;
+            const height = resonanceCanvas.height / window.devicePixelRatio;
+            resonanceCtx.fillStyle = '#0a0a0f';
+            resonanceCtx.fillRect(0, 0, width, height);
+        });
+
+        document.getElementById('toggleGravity').addEventListener('click', (e) => {
+            gravity = !gravity;
+            e.target.classList.toggle('active');
+        });
+
+        let modeIndex = 0;
+        const modes = ['wave', 'spiral', 'chaos'];
+
+        document.getElementById('changeMode').addEventListener('click', (e) => {
+            modeIndex = (modeIndex + 1) % modes.length;
+            mode = modes[modeIndex];
+            e.target.textContent = `Mode: ${mode.charAt(0).toUpperCase() + mode.slice(1)}`;
+        });
+
+        animateResonanceCanvas(0);
+
+        // Particle Network Canvas
+        const particleCanvas = document.getElementById('particleCanvas');
+        const particleCtx = particleCanvas.getContext('2d');
+
+        resizeCanvas(particleCanvas);
+        window.addEventListener('resize', () => resizeCanvas(particleCanvas));
+
+        let netParticles = [];
+        let mouseInNet = false;
+        let netMouseX = 0, netMouseY = 0;
+
+        class NetParticle {
+            constructor() {
+                const width = particleCanvas.width / window.devicePixelRatio;
+                const height = particleCanvas.height / window.devicePixelRatio;
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 2 + 1;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                const width = particleCanvas.width / window.devicePixelRatio;
+                const height = particleCanvas.height / window.devicePixelRatio;
+
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+
+                if (mouseInNet) {
+                    const dx = netMouseX - this.x;
+                    const dy = netMouseY - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 150) {
+                        const angle = Math.atan2(dy, dx);
+                        const force = (150 - dist) / 150 * 0.3;
+                        this.vx -= Math.cos(angle) * force;
+                        this.vy -= Math.sin(angle) * force;
+                    }
+                }
+
+                this.vx *= 0.99;
+                this.vy *= 0.99;
+            }
+
+            draw(ctx) {
+                ctx.fillStyle = 'rgba(0, 245, 212, 0.8)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 100; i++) {
+            netParticles.push(new NetParticle());
+        }
+
+        function animateParticleNet() {
+            const width = particleCanvas.width / window.devicePixelRatio;
+            const height = particleCanvas.height / window.devicePixelRatio;
+
+            particleCtx.fillStyle = 'rgba(18, 18, 26, 0.2)';
+            particleCtx.fillRect(0, 0, width, height);
+
+            netParticles.forEach(p => {
+                p.update();
+                p.draw(particleCtx);
+            });
+
+            // Draw connections
+            for (let i = 0; i < netParticles.length; i++) {
+                for (let j = i + 1; j < netParticles.length; j++) {
+                    const dx = netParticles[i].x - netParticles[j].x;
+                    const dy = netParticles[i].y - netParticles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 100) {
+                        const hue = 160 + (dist / 100) * 100;
+                        particleCtx.strokeStyle = `hsla(${hue}, 80%, 60%, ${0.4 * (1 - dist / 100)})`;
+                        particleCtx.lineWidth = 0.5;
+                        particleCtx.beginPath();
+                        particleCtx.moveTo(netParticles[i].x, netParticles[i].y);
+                        particleCtx.lineTo(netParticles[j].x, netParticles[j].y);
+                        particleCtx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(animateParticleNet);
+        }
+
+        particleCanvas.addEventListener('mousemove', (e) => {
+            const rect = particleCanvas.getBoundingClientRect();
+            netMouseX = e.clientX - rect.left;
+            netMouseY = e.clientY - rect.top;
+            mouseInNet = true;
+        });
+
+        particleCanvas.addEventListener('mouseleave', () => {
+            mouseInNet = false;
+        });
+
+        animateParticleNet();
+
+        // Spiral Canvas
+        const spiralCanvas = document.getElementById('spiralCanvas');
+        const spiralCtx = spiralCanvas.getContext('2d');
+
+        let spiralAngle = 0;
+        let spiralPoints = [];
+        let spiralMouseX = 250, spiralMouseY = 250;
+        let isDragging = false;
+
+        function drawSpiral() {
+            spiralCtx.fillStyle = 'rgba(10, 10, 15, 0.05)';
+            spiralCtx.fillRect(0, 0, 500, 500);
+
+            // Draw spiral arms
+            for (let arm = 0; arm < 3; arm++) {
+                spiralCtx.beginPath();
+                spiralCtx.strokeStyle = `hsla(${200 + arm * 40}, 80%, 60%, 0.6)`;
+                spiralCtx.lineWidth = 2;
+
+                const armOffset = (arm * Math.PI * 2) / 3;
+
+                for (let i = 0; i < spiralPoints.length; i++) {
+                    const point = spiralPoints[i];
+                    const adjustedAngle = point.angle + armOffset;
+                    const x = 250 + Math.cos(adjustedAngle) * point.radius;
+                    const y = 250 + Math.sin(adjustedAngle) * point.radius;
+
+                    if (i === 0) {
+                        spiralCtx.moveTo(x, y);
+                    } else {
+                        spiralCtx.lineTo(x, y);
+                    }
+                }
+                spiralCtx.stroke();
+            }
+
+            // Draw points
+            spiralPoints.forEach((point, idx) => {
+                for (let arm = 0; arm < 3; arm++) {
+                    const armOffset = (arm * Math.PI * 2) / 3;
+                    const x = 250 + Math.cos(point.angle + armOffset) * point.radius;
+                    const y = 250 + Math.sin(point.angle + armOffset) * point.radius;
+
+                    const gradient = spiralCtx.createRadialGradient(x, y, 0, x, y, 8);
+                    gradient.addColorStop(0, `hsla(${200 + arm * 40}, 80%, 70%, 0.8)`);
+                    gradient.addColorStop(1, `hsla(${200 + arm * 40}, 80%, 70%, 0)`);
+
+                    spiralCtx.fillStyle = gradient;
+                    spiralCtx.beginPath();
+                    spiralCtx.arc(x, y, 8, 0, Math.PI * 2);
+                    spiralCtx.fill();
+
+                    spiralCtx.fillStyle = `hsla(${200 + arm * 40}, 80%, 80%, 1)`;
+                    spiralCtx.beginPath();
+                    spiralCtx.arc(x, y, 3, 0, Math.PI * 2);
+                    spiralCtx.fill();
+                }
+            });
+
+            // Add new point
+            if (spiralPoints.length < 150) {
+                spiralAngle += 0.15;
+                const newRadius = 5 + spiralPoints.length * 0.3;
+                const mouseInfluence = Math.min(50, Math.sqrt(
+                    Math.pow(spiralMouseX - 250, 2) + Math.pow(spiralMouseY - 250, 2)
+                ) * 0.1);
+                spiralPoints.push({
+                    angle: spiralAngle + (Math.random() - 0.5) * 0.3,
+                    radius: newRadius + mouseInfluence
+                });
+            } else {
+                spiralPoints.shift();
+                spiralAngle += 0.15;
+                const mouseInfluence = Math.min(50, Math.sqrt(
+                    Math.pow(spiralMouseX - 250, 2) + Math.pow(spiralMouseY - 250, 2)
+                ) * 0.1);
+                spiralPoints.push({
+                    angle: spiralAngle + (Math.random() - 0.5) * 0.3,
+                    radius: 5 + 150 * 0.3 + mouseInfluence
+                });
+            }
+
+            requestAnimationFrame(drawSpiral);
+        }
+
+        spiralCanvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            const rect = spiralCanvas.getBoundingClientRect();
+            spiralMouseX = e.clientX - rect.left;
+            spiralMouseY = e.clientY - rect.top;
+        });
+
+        spiralCanvas.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const rect = spiralCanvas.getBoundingClientRect();
+                spiralMouseX = e.clientX - rect.left;
+                spiralMouseY = e.clientY - rect.top;
+            }
+        });
+
+        spiralCanvas.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        spiralCanvas.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
+        // Initialize spiral
+        for (let i = 0; i < 50; i++) {
+            spiralAngle += 0.15;
+            spiralPoints.push({
+                angle: spiralAngle,
+                radius: 5 + i * 0.3
+            });
+        }
+
+        drawSpiral();
+
+        // Copy color function
+        function copyColor(hex) {
+            navigator.clipboard.writeText(hex).then(() => {
+                // Visual feedback could be added here
+            });
+        }
+
+        // Update particle count display
+        setInterval(() => {
+            document.getElementById('particleCount').textContent = `Particles: ${particleCount}`;
+        }, 100);
+    </script>
+</body>
+</html>

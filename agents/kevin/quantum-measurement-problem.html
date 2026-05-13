@@ -1,0 +1,1978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Measurement Problem — The Collapse of Reality</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;700;900&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cyan: #00d4ff;
+            --purple: #a855f7;
+            --gold: #fbbf24;
+            --pink: #f472b6;
+            --orange: #ff6d00;
+            --dark: #0a0a0f;
+            --darker: #050508;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background: var(--darker);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple), var(--gold), var(--pink));
+            z-index: 1000;
+            transition: width 0.1s;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, var(--darker) 70%);
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 900px;
+        }
+
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan), var(--purple), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 60px rgba(0, 212, 255, 0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--cyan);
+            margin-bottom: 2rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #a0a0a0;
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-indicator span {
+            display: block;
+            width: 30px;
+            height: 50px;
+            border: 2px solid var(--cyan);
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .scroll-indicator span::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: scroll-dot 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(10px); }
+        }
+
+        @keyframes scroll-dot {
+            0% { opacity: 1; top: 8px; }
+            100% { opacity: 0; top: 30px; }
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 250px;
+            height: 100vh;
+            background: linear-gradient(180deg, rgba(10,10,15,0.95) 0%, rgba(5,5,8,0.98) 100%);
+            backdrop-filter: blur(10px);
+            z-index: 999;
+            padding: 2rem 1.5rem;
+            border-left: 1px solid rgba(0, 212, 255, 0.2);
+            overflow-y: auto;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        nav.open {
+            transform: translateX(0);
+        }
+
+        nav h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--cyan);
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.2em;
+        }
+
+        nav ul {
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        nav ul li a {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            display: block;
+            padding: 0.3rem 0;
+        }
+
+        nav ul li a:hover {
+            color: var(--cyan);
+            padding-left: 0.5rem;
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1001;
+            background: rgba(10, 10, 15, 0.8);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            padding: 0.8rem 1rem;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .menu-toggle:hover {
+            background: var(--cyan);
+            color: var(--dark);
+        }
+
+        section {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--cyan);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 40px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+        }
+
+        .intro-section {
+            background: linear-gradient(180deg, var(--darker) 0%, #0d0d15 100%);
+            text-align: center;
+        }
+
+        .intro-section p {
+            font-size: 1.1rem;
+            line-height: 1.9;
+            color: #b0b0b0;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+
+        .equation-box {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 1.5rem 2rem;
+            margin: 2rem auto;
+            max-width: 600px;
+            font-size: 1.3rem;
+            color: var(--cyan);
+            animation: shimmer 3s infinite;
+            background-size: 200% 100%;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .equation-label {
+            font-size: 0.8rem;
+            color: var(--purple);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.1em;
+        }
+
+        .canvas-container {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+
+        .canvas-container canvas {
+            width: 100%;
+            display: block;
+        }
+
+        .canvas-info {
+            padding: 1rem;
+            background: rgba(0, 212, 255, 0.05);
+            border-top: 1px solid rgba(0, 212, 255, 0.1);
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(20, 20, 30, 0.8) 0%, rgba(10, 10, 15, 0.9) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--cyan);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.2);
+        }
+
+        .card h4 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--cyan);
+            margin-bottom: 1rem;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: #a0a0a0;
+        }
+
+        .card .equation {
+            font-size: 1rem;
+            color: var(--gold);
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: #888;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%);
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--cyan);
+            margin-bottom: 0.5rem;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(0, 212, 255, 0.2);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--cyan);
+        }
+
+        .control-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--cyan);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--cyan);
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #888;
+            letter-spacing: 0.1em;
+        }
+
+        .interpretation-card {
+            background: linear-gradient(135deg, rgba(20, 20, 30, 0.9) 0%, rgba(10, 10, 15, 0.95) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .interpretation-card h4 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--purple);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .interpretation-card .founder {
+            font-size: 0.8rem;
+            color: var(--gold);
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+
+        .interpretation-card p {
+            line-height: 1.8;
+            color: #b0b0b0;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--cyan), var(--purple), var(--gold));
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-left: 1.5rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            background: var(--cyan);
+            border-radius: 50%;
+            transform: translateX(-5px);
+        }
+
+        .timeline-item .year {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--gold);
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-item .event {
+            font-size: 0.95rem;
+            color: #a0a0a0;
+        }
+
+        .quote {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
+            border-left: 3px solid var(--purple);
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+            font-style: italic;
+            color: #c0c0c0;
+        }
+
+        .quote-author {
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: var(--gold);
+        }
+
+        .controls-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%);
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--cyan);
+            color: var(--dark);
+        }
+
+        .btn.active {
+            background: var(--cyan);
+            color: var(--dark);
+        }
+
+        .why-matters {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 3rem 0;
+            text-align: center;
+        }
+
+        .why-matters h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--gold);
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .why-matters p {
+            font-size: 1.05rem;
+            line-height: 1.9;
+            color: #b0b0b0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid rgba(0, 212, 255, 0.1);
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                width: 200px;
+            }
+
+            section {
+                padding: 4rem 1rem;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <button class="menu-toggle" onclick="toggleMenu()">MENU</button>
+
+    <nav id="nav">
+        <h3>CONTENTS</h3>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#double-slit">Double-Slit Experiment</a></li>
+            <li><a href="#wavefunction">Wave Function</a></li>
+            <li><a href="#decoherence">Decoherence</a></li>
+            <li><a href="#interpretations">Interpretations</a></li>
+            <li><a href="#born-rule">Born Rule</a></li>
+            <li><a href="#schrodinger-cat">Schrödinger's Cat</a></li>
+            <li><a href="#wigners-friend">Wigner's Friend</a></li>
+            <li><a href="#timeline">History</a></li>
+        </ul>
+    </nav>
+
+    <div class="hero">
+        <canvas class="hero-canvas" id="heroCanvas"></canvas>
+        <div class="hero-content">
+            <h1>Quantum Measurement Problem</h1>
+            <p class="hero-subtitle">The Collapse of Reality</p>
+            <p class="hero-description">
+                When does the quantum become classical? The measurement problem is the deepest crisis in quantum mechanics — the gap between quantum superpositions and the definite reality we observe. From wave function collapse to decoherence, explore the frontiers where physics meets philosophy.
+            </p>
+            <div class="equation-box">
+                <div class="equation-label">SCHRÖDINGER EQUATION</div>
+                iℏ∂ψ/∂t = Ĥψ
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span></span>
+        </div>
+    </div>
+
+    <section id="overview" class="intro-section">
+        <h2 class="section-title">The Measurement Problem</h2>
+        <p>
+            Quantum mechanics is the most successful theory in physics — predicting phenomena to twelve decimal places. Yet at its heart lies a profound mystery: <strong>why does measurement cause the wave function to collapse?</strong>
+        </p>
+        <p>
+            The measurement problem asks a deceptively simple question: <em>What constitutes a measurement? When does a quantum superposition become a definite outcome?</em> This question has puzzled physicists since quantum mechanics was born in 1925-1926.
+        </p>
+        <div class="quote">
+            "If you think you understand quantum mechanics, you don't understand quantum mechanics."
+            <div class="quote-author">— Richard Feynman</div>
+        </div>
+        <div class="card-grid">
+            <div class="card">
+                <h4>Superposition</h4>
+                <p>Quantum systems can exist in multiple states simultaneously until measured. An electron can be in a superposition of spin-up AND spin-down.</p>
+            </div>
+            <div class="card">
+                <h4>Wave Function</h4>
+                <p>The wave function ψ describes a quantum state as a probability amplitude. |ψ|² gives the probability of finding a particular result.</p>
+            </div>
+            <div class="card">
+                <h4>Collapse</h4>
+                <p>Upon measurement, the wave function appears to "collapse" from a superposition to a single definite state — but how and why?</p>
+            </div>
+            <div class="card">
+                <h4>The Mystery</h4>
+                <p>No one knows the fundamental mechanism of collapse. Is it a physical process? A change in information? Or something else entirely?</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="double-slit">
+        <h2 class="section-title">The Double-Slit Experiment</h2>
+        <p>
+            The double-slit experiment is the most counter-intuitive demonstration in all of physics. It reveals the fundamental mystery of wave-particle duality and the role of measurement in shaping reality.
+        </p>
+        <div class="canvas-container">
+            <canvas id="doubleSlitCanvas" width="800" height="400"></canvas>
+            <div class="canvas-info">
+                Interactive double-slit interference simulation. Watch particles build up an interference pattern over time. Toggle "Which Path" measurement to see the pattern disappear.
+            </div>
+        </div>
+        <div class="controls-panel">
+            <div class="control-group">
+                <label>Particle Speed: <span id="speedValue">1.0</span></label>
+                <input type="range" id="particleSpeed" min="0.1" max="3" step="0.1" value="1">
+            </div>
+            <div class="control-group">
+                <label>Slit Separation: <span id="slitValue">60</span> pixels</label>
+                <input type="range" id="slitSeparation" min="20" max="120" step="5" value="60">
+            </div>
+            <div class="control-group">
+                <label>
+                    <input type="checkbox" id="whichPathMeasurement"> Enable "Which Path" Measurement
+                </label>
+            </div>
+            <div class="button-row">
+                <button class="btn" id="runExperiment">Run Experiment</button>
+                <button class="btn" id="resetExperiment">Reset</button>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-value" id="particleCount">0</div>
+                <div class="stat-label">Particles Detected</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="avgPosition">—</div>
+                <div class="stat-label">Average Position</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="patternContrast">—</div>
+                <div class="stat-label">Pattern Contrast</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="visibility">0%</div>
+                <div class="stat-label">Interference Visibility</div>
+            </div>
+        </div>
+        <div class="why-matters">
+            <h3>Why This Matters</h3>
+            <p>When "which path" measurement is enabled, the interference pattern disappears — particles behave like classical objects. When unmeasured, they behave like waves. This is the measurement problem made tangible: the act of observing changes what is observed.</p>
+        </div>
+    </section>
+
+    <section id="wavefunction">
+        <h2 class="section-title">The Wave Function</h2>
+        <p>
+            The wave function ψ(x,t) is the central object of quantum mechanics. It contains all information about a quantum system as a superposition of possible states.
+        </p>
+        <div class="canvas-container">
+            <canvas id="wavefunctionCanvas" width="800" height="350"></canvas>
+            <div class="canvas-info">
+                Real-time wave function visualization showing probability density |ψ|² evolving in time. The wave packet spreads as it propagates (quantum dispersion).
+            </div>
+        </div>
+        <div class="controls-panel">
+            <div class="tabs">
+                <button class="tab active" onclick="switchWaveTab('gaussian')">Gaussian Wave Packet</button>
+                <button class="tab" onclick="switchWaveTab('square')">Square Well</button>
+                <button class="tab" onclick="switchWaveTab('harmonic')">Harmonic Oscillator</button>
+            </div>
+            <div class="tab-content active" id="gaussian-tab">
+                <div class="control-group">
+                    <label>Wave Packet Width: <span id="widthValue">50</span></label>
+                    <input type="range" id="waveWidth" min="10" max="200" value="50">
+                </div>
+                <div class="control-group">
+                    <label>Momentum: <span id="momentumValue">5.0</span></label>
+                    <input type="range" id="waveMomentum" min="0" max="20" step="0.5" value="5">
+                </div>
+            </div>
+            <div class="tab-content" id="square-tab">
+                <p>Particle in a finite square well potential. Energy levels are quantized.</p>
+            </div>
+            <div class="tab-content" id="harmonic-tab">
+                <p>Quantum harmonic oscillator with discrete energy levels Eₙ = (n + ½)ℏω.</p>
+            </div>
+        </div>
+        <div class="equation-box">
+            <div class="equation-label">TIME-DEPENDENT SCHRÖDINGER EQUATION</div>
+            iℏ∂ψ/∂t = [-(ℏ²/2m)∇² + V(x)]ψ
+        </div>
+        <div class="card-grid">
+            <div class="card">
+                <h4>Probability Amplitude</h4>
+                <p>ψ(x,t) is a complex-valued amplitude. The probability density is P(x,t) = |ψ(x,t)|² = ψ*ψ.</p>
+                <div class="equation">∫|ψ|² dx = 1</div>
+            </div>
+            <div class="card">
+                <h4>Superposition Principle</h4>
+                <p>If ψ₁ and ψ₂ are valid states, then any linear combination aψ₁ + bψ₂ is also valid. This is the foundation of quantum parallelism.</p>
+            </div>
+            <div class="card">
+                <h4>Wave Function Collapse</h4>
+                <p>Upon measurement of observable A, ψ collapses to an eigenstate of A with probability |⟨a|ψ⟩|² (Born rule).</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="decoherence">
+        <h2 class="section-title">Quantum Decoherence</h2>
+        <p>
+            Decoherence provides a partial solution to the measurement problem. It explains why quantum superpositions appear to vanish in large systems — not through collapse, but through entanglement with the environment.
+        </p>
+        <div class="canvas-container">
+            <canvas id="decoherenceCanvas" width="800" height="400"></canvas>
+            <div class="canvas-info">
+                Decoherence visualization: quantum system (center) entangles with environment particles, causing off-diagonal density matrix elements to decay. Watch coherence terms fade as environment interacts.
+            </div>
+        </div>
+        <div class="controls-panel">
+            <div class="control-group">
+                <label>Environment Coupling Strength: <span id="couplingValue">0.5</span></label>
+                <input type="range" id="decoherenceCoupling" min="0" max="1" step="0.05" value="0.5">
+            </div>
+            <div class="control-group">
+                <label>Environment Size: <span id="envSizeValue">20</span> particles</label>
+                <input type="range" id="envSize" min="5" max="50" value="20">
+            </div>
+            <div class="button-row">
+                <button class="btn" id="startDecoherence">Start Decoherence</button>
+                <button class="btn" id="resetDecoherence">Reset</button>
+            </div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-value" id="coherenceTime">—</div>
+                <div class="stat-label">Coherence Time (τ)</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="purityValue">1.000</div>
+                <div class="stat-label">System Purity</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="entropyValue">0.000</div>
+                <div class="stat-label">von Neumann Entropy</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="decoherenceRate">—</div>
+                <div class="stat-label">Decoherence Rate</div>
+            </div>
+        </div>
+        <div class="card-grid">
+            <div class="card">
+                <h4>Off-Diagonal Elements</h4>
+                <p>In the density matrix ρ, off-diagonal elements (coherences) represent superposition states. Decoherence causes these to decay exponentially.</p>
+                <div class="equation">ρ₁₂(t) = ρ₁₂(0)e^(-γt)</div>
+            </div>
+            <div class="card">
+                <h4>Entanglement with Environment</h4>
+                <p>When a quantum system entangles with an environment, the combined state becomes highly entangled. Individual system states can no longer be described independently.</p>
+            </div>
+            <div class="card">
+                <h4>Pointer States</h4>
+                <p>Environment-induced superselection (einselection) selects "pointer states" — quantum states robust against interaction with the environment. These appear classical.</p>
+            </div>
+        </div>
+        <div class="quote">
+            "Decoherence is not a violation of quantum mechanics — it is quantum mechanics acting on a larger scale."
+            <div class="quote-author">— Wojciech Zurek</div>
+        </div>
+    </section>
+
+    <section id="interpretations">
+        <h2 class="section-title">Interpretations of Quantum Mechanics</h2>
+        <p>
+            Different interpretations offer different perspectives on what the measurement problem means. Each interpretation has profound implications for the nature of reality.
+        </p>
+        <div class="tabs">
+            <button class="tab active" onclick="switchInterpTab('copenhagen')">Copenhagen</button>
+            <button class="tab" onclick="switchInterpTab('manyworlds')">Many-Worlds</button>
+            <button class="tab" onclick="switchInterpTab('pilotwave')">Pilot Wave</button>
+            <button class="tab" onclick="switchInterpTab('qbi')">Quantum Bayesianism</button>
+        </div>
+        <div class="tab-content active" id="copenhagen-tab">
+            <div class="interpretation-card">
+                <h4>Copenhagen Interpretation</h4>
+                <div class="founder">Bohr, Heisenberg (1927)</div>
+                <p>The wave function is a tool for predicting measurement outcomes, not a physical entity. Collapse is a fundamental, primitive process. The classical world exists independently and measurement apparatus must be treated classically.</p>
+                <p style="margin-top: 1rem; color: var(--cyan);">Key features: Complementarity, wave-particle duality, instrumentalist view</p>
+            </div>
+        </div>
+        <div class="tab-content" id="manyworlds-tab">
+            <div class="interpretation-card">
+                <h4>Many-Worlds Interpretation</h4>
+                <div class="founder">Everett (1957), DeWitt (1973)</div>
+                <p>The wave function never collapses. Upon measurement, the universe splits into branches, each containing a different outcome. All possibilities are realized. There is no fundamental division between classical and quantum.</p>
+                <p style="margin-top: 1rem; color: var(--cyan);">Key features: Branching universes, no collapse, wave function as physical reality</p>
+            </div>
+        </div>
+        <div class="tab-content" id="pilotwave-tab">
+            <div class="interpretation-card">
+                <h4>Pilot Wave Theory (de Broglie-Bohm)</h4>
+                <div class="founder">de Broglie (1927), Bohm (1952)</div>
+                <p>Particles have definite positions at all times, guided by a "pilot wave" described by ψ. The pilot wave determines particle trajectories via a quantum potential. This is a deterministic, realist interpretation.</p>
+                <p style="margin-top: 1rem; color: var(--cyan);">Key features: Determinism, hidden variables, non-local</p>
+            </div>
+        </div>
+        <div class="tab-content" id="qbi-tab">
+            <div class="interpretation-card">
+                <h4>Quantum Bayesianism (QBism)</h4>
+                <div class="founder">Fuchs, Mermin, Schack (2010s)</div>
+                <p>Wave function represents subjective degrees of belief about future measurement outcomes. Quantum mechanics is a theory of how agents update beliefs based on experiences. There is no objective wave function waiting to collapse.</p>
+                <p style="margin-top: 1rem; color: var(--cyan);">Key features: Subjective probabilities, agent-centric, pragmatist</p>
+            </div>
+        </div>
+        <div class="card-grid" style="margin-top: 2rem;">
+            <div class="card">
+                <h4>Objective Collapse Theories</h4>
+                <p>GRW, Penrose: Collapse is a real physical process. Spontaneous localization events occur at a rate proportional to mass. Objective threshold triggers collapse.</p>
+                <div class="equation">τ ≈ 10¹⁶ / m (seconds)</div>
+            </div>
+            <div class="card">
+                <h4>Relational Quantum Mechanics</h4>
+                <p> Rovelli: Quantum mechanics is about relations between physical systems. Properties are relative to an observer. There is no absolute, observer-independent state.</p>
+            </div>
+            <div class="card">
+                <h4>Transactional Interpretation</h4>
+                <p>Cramer: Waves travel both forward and backward in time. Measurement is a "handshake" between retarded (forward) and advanced (backward) waves.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="born-rule">
+        <h2 class="section-title">The Born Rule</h2>
+        <p>
+            The Born rule (1926) provides the connection between the wave function and measurable probabilities. It states that the probability of finding a particular outcome is the square of the absolute value of the wave function's amplitude.
+        </p>
+        <div class="canvas-container">
+            <canvas id="bornRuleCanvas" width="800" height="350"></canvas>
+            <div class="canvas-info">
+                Born rule demonstration: 1000 quantum measurements on a superposition state. Watch how the relative frequencies converge to |ψ|² as the number of measurements increases.
+            </div>
+        </div>
+        <div class="controls-panel">
+            <div class="control-group">
+                <label>Number of Measurements: <span id="numMeasurements">100</span></label>
+                <input type="range" id="measurementCount" min="10" max="1000" step="10" value="100">
+            </div>
+            <div class="control-group">
+                <label>State A Amplitude: <span id="ampAValue">0.60</span></label>
+                <input type="range" id="ampA" min="0.1" max="0.9" step="0.05" value="0.6">
+            </div>
+            <div class="button-row">
+                <button class="btn" id="runMeasurements">Run Measurements</button>
+                <button class="btn" id="autoRun">Auto-Run (Convergence)</button>
+            </div>
+        </div>
+        <div class="equation-box">
+            <div class="equation-label">BORN RULE</div>
+            P(i) = |⟨ψ|φᵢ⟩|² = |ψᵢ|²
+        </div>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-value" id="theoreticalProb">36%</div>
+                <div class="stat-label">Theoretical P(State A)</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="observedFreq">—</div>
+                <div class="stat-label">Observed Frequency</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="deviation">—</div>
+                <div class="stat-label">Deviation from Theory</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="convergenceMetric">—</div>
+                <div class="stat-label">Convergence (σ)</div>
+            </div>
+        </div>
+        <div class="card-grid">
+            <div class="card">
+                <h4>Probabilistic Nature</h4>
+                <p>Quantum mechanics is fundamentally probabilistic. Even with complete knowledge of ψ, we can only predict probabilities, not certain outcomes. This was revolutionary in 1926.</p>
+            </div>
+            <div class="card">
+                <h4>The Measurement Postulate</h4>
+                <p>Born's rule was originally added as a postulate, not derived. Why does |ψ|² give probabilities? This is one of the deepest questions in quantum foundations.</p>
+            </div>
+            <div class="card">
+                <h4>Decision Theory Approaches</h4>
+                <p>Deutsch, Wallace, Sebens: The Born rule can be derived from decision theory and symmetry principles. Rational agents should bet according to |ψ|².</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="schrodinger-cat">
+        <h2 class="section-title">Schrödinger's Cat</h2>
+        <p>
+            Schrödinger's cat is the most famous thought experiment in quantum mechanics. It exposes the absurdity of applying quantum superpositions to everyday objects.
+        </p>
+        <div class="canvas-container">
+            <canvas id="schrodingerCanvas" width="800" height="450"></canvas>
+            <div class="canvas-info">
+                Schrödinger's cat in a sealed box with a quantum-triggered poison vial. The cat exists in a superposition of alive AND dead until the box is opened.
+            </div>
+        </div>
+        <div class="controls-panel">
+            <div class="control-group">
+                <label>
+                    <input type="checkbox" id="showSuperposition"> Show Superposition State
+                </label>
+            </div>
+            <div class="control-group">
+                <label>
+                    <input type="checkbox" id="enableDecay"> Enable Radioactive Decay
+                </label>
+            </div>
+            <div class="button-row">
+                <button class="btn" id="openBox">Open the Box</button>
+                <button class="btn" id="resetCat">Reset Experiment</button>
+            </div>
+        </div>
+        <div class="equation-box">
+            <div class="equation-label">CAT State (Before Measurement)</div>
+            |Ψ⟩ = (1/√2)(|Alive⟩ + |Dead⟩)
+        </div>
+        <div class="card-grid">
+            <div class="card">
+                <h4>The Paradox</h4>
+                <p>If quantum mechanics applies at all scales, then the cat should be in a superposition of alive and dead until observed. But we never see such macroscopic superpositions.</p>
+            </div>
+            <div class="card">
+                <h4>Scale Problem</h4>
+                <p>Quantum superpositions are delicate. Any interaction with the environment destroys them almost instantly for large objects. This is decoherence.</p>
+            </div>
+            <div class="card">
+                <h4>What is Observation?</h4>
+                <p>The thought experiment forces us to ask: What constitutes a measurement? Does the cat count as an observer? Does the poison vial? Where does the boundary lie?</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="wigners-friend">
+        <h2 class="section-title">Wigner's Friend Paradox</h2>
+        <p>
+            Wigner's friend extends Schrödinger's cat paradox by introducing a conscious observer inside the experiment. It tests the limits of the measurement problem in extreme scenarios.
+        </p>
+        <div class="canvas-container">
+            <canvas id="wignerCanvas" width="800" height="350"></canvas>
+            <div class="canvas-info">
+                Wigner's friend performs a measurement inside a sealed lab. Wigner stands outside. From Wigner's perspective, the friend's measurement creates a superposition. But from the friend's perspective, the outcome is definite.
+            </div>
+        </div>
+        <div class="card-grid">
+            <div class="card">
+                <h4>The Setup</h4>
+                <p>Wigner's friend is inside a sealed lab performing a quantum measurement. Wigner is outside. The friend reports a definite outcome, but from Wigner's perspective, the lab is in a superposition.</p>
+            </div>
+            <div class="card">
+                <h4>The Paradox</h4>
+                <p>If quantum mechanics is universal, then Wigner should be able to apply QM to the entire lab (including his friend). But the friend sees definite outcomes. When does collapse occur?</p>
+            </div>
+            <div class="card">
+                <h4>Recent Developments</h4>
+                <p>Protests (2016-2019): In 2019, physicists performed a version of the Wigner's friend experiment using photons. Results suggest that if reality exists independently of observers, not all outcomes are possible.</p>
+            </div>
+        </div>
+        <div class="quote">
+            "The 'cure' for the measurement problem lies in finding a way to understand the transition from quantum to classical in physical, not ad hoc, terms."
+            <div class="quote-author">— John Bell</div>
+        </div>
+    </section>
+
+    <section id="timeline">
+        <h2 class="section-title">Historical Timeline</h2>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="year">1925-1926</div>
+                <div class="event">Matrix mechanics and wave mechanics developed (Heisenberg, Schrödinger)</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1926</div>
+                <div class="event">Born rule proposed (Max Born) — probabilities from |ψ|²</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1927</div>
+                <div class="event">Copenhagen interpretation formulated (Bohr, Heisenberg)</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1927</div>
+                <div class="event">de Broglie proposes pilot wave theory</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1935</div>
+                <div class="event">EPR paradox published — entanglement and locality debate</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1935</div>
+                <div class="event">Schrödinger's cat thought experiment proposed</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1957</div>
+                <div class="event">Everett's many-worlds interpretation (relative state formulation)</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1964</div>
+                <div class="event">Bell's theorem — inequalities test local hidden variables</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1970s</div>
+                <div class="event">Decoherence theory developed (Zurek, Zeh)</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1980s</div>
+                <div class="event">Quantum cosmology — Wheeler, Hartle, Vilenkin</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">1990s</div>
+                <div class="event">Quantum information theory — measurement as information processing</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">2000s</div>
+                <div class="event">Objective collapse theories refined (GRW, CSL)</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">2016-2019</div>
+                <div class="event">Wigner's friend experiments performed (Protiens, Feng, etc.)</div>
+            </div>
+            <div class="timeline-item">
+                <div class="year">2022</div>
+                <div class="event">Nobel Prize awarded to Aspect, Clauser, Zeilinger for Bell tests</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="conclusions">
+        <div class="why-matters">
+            <h3>Why This Matters</h3>
+            <p>
+                The measurement problem is not a mere philosophical puzzle — it exposes the gap between our most fundamental theory and reality itself. Without understanding measurement, we cannot claim to understand what quantum mechanics means. The resolution of this problem may require a theory of quantum gravity, a deeper understanding of consciousness, or a fundamentally new way of thinking about reality.
+            </p>
+            <p style="margin-top: 1.5rem; color: var(--cyan);">
+                "The universe is not only queerer than we suppose, but queerer than we can suppose." — J.B.S. Haldane
+            </p>
+        </div>
+    </section>
+
+    <footer>
+        <p>Kevin's Physics Lab — Quantum Measurement Problem</p>
+        <p style="margin-top: 0.5rem; color: var(--cyan);">The deepest mystery in physics</p>
+    </footer>
+
+    <script>
+        // Progress bar
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.getElementById('progressBar').style.width = scrollPercent + '%';
+        });
+
+        // Menu toggle
+        function toggleMenu() {
+            document.getElementById('nav').classList.toggle('open');
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                target.scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('nav').classList.remove('open');
+            });
+        });
+
+        // Hero Canvas - Quantum particle field
+        const heroCanvas = document.getElementById('heroCanvas');
+        const heroCtx = heroCanvas.getContext('2d');
+
+        function resizeHeroCanvas() {
+            heroCanvas.width = heroCanvas.offsetWidth;
+            heroCanvas.height = heroCanvas.offsetHeight;
+        }
+        resizeHeroCanvas();
+        window.addEventListener('resize', resizeHeroCanvas);
+
+        class QuantumParticle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * heroCanvas.width;
+                this.y = Math.random() * heroCanvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 2 + 1;
+                this.phase = Math.random() * Math.PI * 2;
+                this.color = ['#00d4ff', '#a855f7', '#f472b6', '#fbbf24'][Math.floor(Math.random() * 4)];
+                this.pulseSpeed = Math.random() * 0.02 + 0.01;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.phase += this.pulseSpeed;
+                if (this.x < 0 || this.x > heroCanvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > heroCanvas.height) this.vy *= -1;
+            }
+            draw() {
+                const pulse = 0.5 + 0.5 * Math.sin(this.phase);
+                heroCtx.beginPath();
+                heroCtx.arc(this.x, this.y, this.radius * (0.5 + pulse * 0.5), 0, Math.PI * 2);
+                heroCtx.fillStyle = this.color;
+                heroCtx.globalAlpha = 0.3 + pulse * 0.7;
+                heroCtx.fill();
+                heroCtx.globalAlpha = 1;
+            }
+        }
+
+        const heroParticles = [];
+        for (let i = 0; i < 80; i++) {
+            heroParticles.push(new QuantumParticle());
+        }
+
+        let heroAnimationRunning = true;
+        function animateHero() {
+            if (!heroAnimationRunning) return;
+            heroCtx.fillStyle = 'rgba(5, 5, 8, 0.2)';
+            heroCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
+
+            heroParticles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            // Draw connection lines
+            for (let i = 0; i < heroParticles.length; i++) {
+                for (let j = i + 1; j < heroParticles.length; j++) {
+                    const dx = heroParticles[i].x - heroParticles[j].x;
+                    const dy = heroParticles[i].y - heroParticles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 100) {
+                        heroCtx.beginPath();
+                        heroCtx.moveTo(heroParticles[i].x, heroParticles[i].y);
+                        heroCtx.lineTo(heroParticles[j].x, heroParticles[j].y);
+                        heroCtx.strokeStyle = `rgba(0, 212, 255, ${0.2 * (1 - dist / 100)})`;
+                        heroCtx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(animateHero);
+        }
+        animateHero();
+
+        // Double-Slit Experiment Canvas
+        const doubleSlitCanvas = document.getElementById('doubleSlitCanvas');
+        const dsCtx = doubleSlitCanvas.getContext('2d');
+
+        let dsParticles = [];
+        let dsWhichPath = false;
+        let dsParticleSpeed = 1;
+        let dsSlitSeparation = 60;
+        let dsExperimentRunning = false;
+        let dsDetectedCount = 0;
+        let dsDetections = [];
+
+        class DSParticle {
+            constructor(whichPath = null) {
+                this.x = 50;
+                this.y = dsCanvas.height / 2;
+                this.vx = 2 * dsParticleSpeed;
+                this.vy = (Math.random() - 0.5) * 0.3;
+                this.whichPath = whichPath !== null ? whichPath : (Math.random() < 0.5 ? 0 : 1);
+                this.measured = false;
+                this.targetY = this.whichPath === 0 ?
+                    dsCanvas.height / 2 - dsSlitSeparation / 2 :
+                    dsCanvas.height / 2 + dsSlitSeparation / 2;
+            }
+            update() {
+                if (this.x < dsCanvas.width / 2 - 20) {
+                    this.y += this.vy;
+                    if (this.whichPath === 0 && this.y > dsCanvas.height / 2 - dsSlitSeparation / 2) this.vy -= 0.01;
+                    if (this.whichPath === 1 && this.y < dsCanvas.height / 2 + dsSlitSeparation / 2) this.vy += 0.01;
+                }
+                this.x += this.vx;
+                if (dsWhichPath && this.x > dsCanvas.width / 2 - 30 && !this.measured) {
+                    this.measured = true;
+                }
+            }
+            draw() {
+                if (dsWhichPath && this.measured) {
+                    dsCtx.fillStyle = '#ff6d00';
+                } else if (!dsWhichPath) {
+                    dsCtx.fillStyle = '#00d4ff';
+                } else {
+                    dsCtx.fillStyle = '#fbbf24';
+                }
+                dsCtx.beginPath();
+                dsCtx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                dsCtx.fill();
+            }
+        }
+
+        function initDoubleSlitCanvas() {
+            dsCanvas.width = doubleSlitCanvas.offsetWidth;
+            dsCanvas.height = doubleSlitCanvas.offsetHeight;
+            doubleSlitCanvas.width = dsCanvas.width;
+            doubleSlitCanvas.height = dsCanvas.height;
+        }
+
+        const dsCanvas = document.createElement('canvas');
+        dsCanvas.width = 800;
+        dsCanvas.height = 400;
+
+        function animateDoubleSlit() {
+            if (!dsExperimentRunning) return;
+            const ctx = dsCanvas.getContext('2d');
+            ctx.fillStyle = 'rgba(5, 5, 8, 0.3)';
+            ctx.fillRect(0, 0, dsCanvas.width, dsCanvas.height);
+
+            // Draw barriers
+            ctx.fillStyle = '#333';
+            ctx.fillRect(dsCanvas.width / 2 - 25, 0, 10, dsCanvas.height / 2 - dsSlitSeparation / 2 - 5);
+            ctx.fillRect(dsCanvas.width / 2 - 25, dsCanvas.height / 2 + dsSlitSeparation / 2 + 5, 10, dsCanvas.height / 2 - dsSlitSeparation / 2 - 5);
+
+            // Draw detection screen
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(dsCanvas.width - 50, 0, 50, dsCanvas.height);
+
+            // Update and draw particles
+            if (Math.random() < 0.1) {
+                dsParticles.push(new DSParticle());
+            }
+            dsParticles.forEach((p, i) => {
+                p.update();
+                p.draw();
+                if (p.x > dsCanvas.width - 50) {
+                    dsDetectedCount++;
+                    const normalizedY = (p.y / dsCanvas.height) * 2 - 1;
+                    dsDetections.push(normalizedY);
+                    dsParticles.splice(i, 1);
+                }
+            });
+
+            // Draw detection pattern
+            if (dsDetections.length > 0) {
+                const bins = 50;
+                const histogram = new Array(bins).fill(0);
+                dsDetections.forEach(y => {
+                    const bin = Math.floor((y + 1) / 2 * bins);
+                    if (bin >= 0 && bin < bins) histogram[bin]++;
+                });
+                const maxBin = Math.max(...histogram);
+                for (let i = 0; i < bins; i++) {
+                    const barHeight = (histogram[i] / maxBin) * (dsCanvas.height - 20);
+                    const gradient = ctx.createLinearGradient(0, dsCanvas.height - barHeight, 0, dsCanvas.height);
+                    gradient.addColorStop(0, dsWhichPath ? '#ff6d00' : '#00d4ff');
+                    gradient.addColorStop(1, 'transparent');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(dsCanvas.width - 48 + i, dsCanvas.height - barHeight, 1, barHeight);
+                }
+            }
+
+            // Labels
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Space Mono';
+            ctx.fillText('Source', 20, 20);
+            ctx.fillText('Barrier with slits', dsCanvas.width / 2 - 40, 20);
+            ctx.fillText('Detection Screen', dsCanvas.width - 60, 20);
+
+            if (dsWhichPath) {
+                ctx.fillStyle = '#ff6d00';
+                ctx.fillText('WHICH PATH MEASURED', dsCanvas.width / 2 - 80, dsCanvas.height / 2 - 60);
+            } else {
+                ctx.fillStyle = '#00d4ff';
+                ctx.fillText('NO MEASUREMENT', dsCanvas.width / 2 - 70, dsCanvas.height / 2 - 60);
+            }
+
+            doubleSlitCanvas.width = dsCanvas.width;
+            doubleSlitCanvas.height = dsCanvas.height;
+            doubleSlitCanvas.getContext('2d').drawImage(dsCanvas, 0, 0);
+
+            updateDoubleSlitStats();
+            requestAnimationFrame(animateDoubleSlit);
+        }
+
+        function updateDoubleSlitStats() {
+            document.getElementById('particleCount').textContent = dsDetectedCount;
+            if (dsDetections.length > 0) {
+                const avg = dsDetections.reduce((a, b) => a + b, 0) / dsDetections.length;
+                document.getElementById('avgPosition').textContent = avg.toFixed(3);
+            }
+            const bins = 30;
+            const histogram = new Array(bins).fill(0);
+            dsDetections.forEach(y => {
+                const bin = Math.floor((y + 1) / 2 * bins);
+                if (bin >= 0 && bin < bins) histogram[bin]++;
+            });
+            let contrast = 0;
+            if (histogram.length > 0) {
+                const mid = Math.floor(bins / 2);
+                let leftMax = 0, rightMax = 0;
+                for (let i = 0; i < mid; i++) leftMax = Math.max(leftMax, histogram[i]);
+                for (let i = mid; i < bins; i++) rightMax = Math.max(rightMax, histogram[i]);
+                contrast = dsWhichPath ? 0 : Math.abs(leftMax - rightMax) / (leftMax + rightMax);
+            }
+            document.getElementById('patternContrast').textContent = dsWhichPath ? 'LOW' : (contrast * 100).toFixed(0) + '%';
+            document.getElementById('visibility').textContent = dsWhichPath ? '0%' : Math.round(contrast * 100) + '%';
+        }
+
+        document.getElementById('particleSpeed').addEventListener('input', (e) => {
+            dsParticleSpeed = parseFloat(e.target.value);
+            document.getElementById('speedValue').textContent = dsParticleSpeed.toFixed(1);
+        });
+
+        document.getElementById('slitSeparation').addEventListener('input', (e) => {
+            dsSlitSeparation = parseInt(e.target.value);
+            document.getElementById('slitValue').textContent = dsSlitSeparation;
+        });
+
+        document.getElementById('whichPathMeasurement').addEventListener('change', (e) => {
+            dsWhichPath = e.target.checked;
+        });
+
+        document.getElementById('runExperiment').addEventListener('click', () => {
+            dsExperimentRunning = true;
+            animateDoubleSlit();
+        });
+
+        document.getElementById('resetExperiment').addEventListener('click', () => {
+            dsParticles = [];
+            dsDetectedCount = 0;
+            dsDetections = [];
+            const ctx = dsCanvas.getContext('2d');
+            ctx.fillStyle = '#050508';
+            ctx.fillRect(0, 0, dsCanvas.width, dsCanvas.height);
+            doubleSlitCanvas.getContext('2d').drawImage(dsCanvas, 0, 0);
+            updateDoubleSlitStats();
+        });
+
+        // Wave Function Canvas
+        const wavefunctionCanvas = document.getElementById('wavefunctionCanvas');
+        const wfCtx = wavefunctionCanvas.getContext('2d');
+
+        let wfAnimationFrame = null;
+        let wfTime = 0;
+        let wfWidth = 50;
+        let wfMomentum = 5;
+
+        function drawWaveFunction() {
+            wavefunctionCanvas.width = wavefunctionCanvas.offsetWidth;
+            wavefunctionCanvas.height = wavefunctionCanvas.offsetHeight;
+            const w = wavefunctionCanvas.width;
+            const h = wavefunctionCanvas.height;
+
+            wfCtx.fillStyle = 'rgba(5, 5, 8, 0.3)';
+            wfCtx.fillRect(0, 0, w, h);
+
+            const centerY = h / 2;
+            const maxAmp = h / 3;
+
+            // Draw probability density |ψ|²
+            wfCtx.beginPath();
+            wfCtx.moveTo(0, centerY);
+            for (let x = 0; x < w; x++) {
+                const xNorm = (x - w / 2) / wfWidth;
+                const gaussian = Math.exp(-xNorm * xNorm);
+                const phase = wfMomentum * xNorm * 0.1;
+                const psi = gaussian * Math.cos(wfTime + phase);
+                wfCtx.lineTo(x, centerY - psi * maxAmp);
+            }
+            const gradient = wfCtx.createLinearGradient(0, centerY - maxAmp, 0, centerY + maxAmp);
+            gradient.addColorStop(0, '#00d4ff');
+            gradient.addColorStop(0.5, 'transparent');
+            gradient.addColorStop(1, '#a855f7');
+            wfCtx.strokeStyle = gradient;
+            wfCtx.lineWidth = 2;
+            wfCtx.stroke();
+
+            // Draw |ψ|² envelope
+            wfCtx.beginPath();
+            wfCtx.moveTo(0, centerY);
+            for (let x = 0; x < w; x++) {
+                const xNorm = (x - w / 2) / wfWidth;
+                const gaussian = Math.exp(-2 * xNorm * xNorm);
+                wfCtx.lineTo(x, centerY - gaussian * maxAmp * 0.8);
+            }
+            wfCtx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+            wfCtx.stroke();
+
+            wfCtx.beginPath();
+            wfCtx.moveTo(0, centerY);
+            for (let x = 0; x < w; x++) {
+                const xNorm = (x - w / 2) / wfWidth;
+                const gaussian = Math.exp(-2 * xNorm * xNorm);
+                wfCtx.lineTo(x, centerY + gaussian * maxAmp * 0.8);
+            }
+            wfCtx.stroke();
+
+            // Labels
+            wfCtx.fillStyle = '#666';
+            wfCtx.font = '12px Space Mono';
+            wfCtx.fillText('|ψ|²', 10, 20);
+            wfCtx.fillText('Probability Density', 50, 20);
+            wfCtx.fillText('Re(ψ)', w - 60, 20);
+
+            wfTime += 0.05;
+            wfAnimationFrame = requestAnimationFrame(drawWaveFunction);
+        }
+
+        drawWaveFunction();
+
+        document.getElementById('waveWidth').addEventListener('input', (e) => {
+            wfWidth = parseInt(e.target.value);
+            document.getElementById('widthValue').textContent = wfWidth;
+        });
+
+        document.getElementById('waveMomentum').addEventListener('input', (e) => {
+            wfMomentum = parseFloat(e.target.value);
+            document.getElementById('momentumValue').textContent = wfMomentum.toFixed(1);
+        });
+
+        function switchWaveTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('#wavefunction .tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tab + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Decoherence Canvas
+        const decoherenceCanvas = document.getElementById('decoherenceCanvas');
+        const decCtx = decoherenceCanvas.getContext('2d');
+
+        let decParticles = [];
+        let decCoherence = 1;
+        let decCoupling = 0.5;
+        let decEnvSize = 20;
+        let decRunning = false;
+
+        class DecParticle {
+            constructor(isSystem = false) {
+                this.isSystem = isSystem;
+                if (isSystem) {
+                    this.x = decoherenceCanvas.width / 2;
+                    this.y = decoherenceCanvas.height / 2;
+                    this.color = '#00d4ff';
+                    this.radius = 15;
+                    this.phase = 0;
+                } else {
+                    this.x = Math.random() * decoherenceCanvas.width;
+                    this.y = Math.random() * decoherenceCanvas.height;
+                    this.color = '#a855f7';
+                    this.radius = 4;
+                    this.phase = Math.random() * Math.PI * 2;
+                }
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.phase += 0.05;
+                if (this.x < 0 || this.x > decoherenceCanvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > decoherenceCanvas.height) this.vy *= -1;
+                if (this.isSystem) {
+                    decParticles.forEach(p => {
+                        if (!p.isSystem) {
+                            const dx = p.x - this.x;
+                            const dy = p.y - this.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist < 80) {
+                                decCoherence = Math.max(0, decCoherence - decCoupling * 0.01);
+                            }
+                        }
+                    });
+                }
+            }
+            draw() {
+                const pulse = 0.5 + 0.5 * Math.sin(this.phase);
+                decCtx.beginPath();
+                decCtx.arc(this.x, this.y, this.radius * (this.isSystem ? pulse + 0.5 : 1), 0, Math.PI * 2);
+                decCtx.fillStyle = this.color;
+                decCtx.globalAlpha = 0.7;
+                decCtx.fill();
+                decCtx.globalAlpha = 1;
+            }
+        }
+
+        function initDecoherenceCanvas() {
+            decoherenceCanvas.width = decoherenceCanvas.offsetWidth;
+            decoherenceCanvas.height = decoherenceCanvas.offsetHeight;
+        }
+
+        function animateDecoherence() {
+            if (!decRunning) return;
+            decCtx.fillStyle = 'rgba(5, 5, 8, 0.3)';
+            decCtx.fillRect(0, 0, decoherenceCanvas.width, decoherenceCanvas.height);
+
+            decParticles.forEach(p => {
+                p.update();
+                p.draw();
+                if (p.isSystem) {
+                    decCtx.beginPath();
+                    decCtx.arc(p.x, p.y, 60, 0, Math.PI * 2);
+                    decCtx.strokeStyle = `rgba(0, 212, 255, ${0.3 * decCoherence})`;
+                    decCtx.lineWidth = 2;
+                    decCtx.stroke();
+                }
+            });
+
+            // Draw density matrix representation
+            const matrixX = decoherenceCanvas.width - 120;
+            const matrixY = 50;
+            const cellSize = 30;
+            for (let i = 0; i < 2; i++) {
+                for (let j = 0; j < 2; j++) {
+                    let value = i === j ? 0.5 : 0;
+                    if (i !== j) value = decCoherence * 0.5;
+                    const alpha = Math.abs(value);
+                    decCtx.fillStyle = i === j ? `rgba(0, 212, 255, ${alpha})` : `rgba(168, 85, 247, ${alpha})`;
+                    decCtx.fillRect(matrixX + i * cellSize, matrixY + j * cellSize, cellSize - 2, cellSize - 2);
+                }
+            }
+            decCtx.fillStyle = '#666';
+            decCtx.font = '10px Space Mono';
+            decCtx.fillText('ρ', matrixX - 15, matrixY + cellSize);
+            decCtx.fillText('Density', matrixX, matrixY - 15);
+            decCtx.fillText('Matrix', matrixX, matrixY + cellSize * 2 + 15);
+
+            updateDecoherenceStats();
+            requestAnimationFrame(animateDecoherence);
+        }
+
+        function updateDecoherenceStats() {
+            const tau = decCoherence > 0 ? 1 / (decCoherence * decCoupling * 10) : Infinity;
+            document.getElementById('coherenceTime').textContent = isFinite(tau) ? tau.toFixed(2) + 's' : '∞';
+            document.getElementById('purityValue').textContent = (decCoherence * decCoherence + (1 - decCoherence * decCoherence) * 0.5).toFixed(3);
+            const entropy = -decCoherence * Math.log2(decCoherence) - (1 - decCoherence) * Math.log2(1 - decCoherence || 1);
+            document.getElementById('entropyValue').textContent = isNaN(entropy) ? '0.000' : entropy.toFixed(3);
+            document.getElementById('decoherenceRate').textContent = (decCoherence * decCoupling * 10).toFixed(3) + '/s';
+        }
+
+        document.getElementById('decoherenceCoupling').addEventListener('input', (e) => {
+            decCoupling = parseFloat(e.target.value);
+            document.getElementById('couplingValue').textContent = decCoupling.toFixed(2);
+        });
+
+        document.getElementById('envSize').addEventListener('input', (e) => {
+            decEnvSize = parseInt(e.target.value);
+            document.getElementById('envSizeValue').textContent = decEnvSize;
+        });
+
+        document.getElementById('startDecoherence').addEventListener('click', () => {
+            decParticles = [new DecParticle(true)];
+            for (let i = 0; i < decEnvSize; i++) {
+                decParticles.push(new DecParticle(false));
+            }
+            decCoherence = 1;
+            decRunning = true;
+            animateDecoherence();
+        });
+
+        document.getElementById('resetDecoherence').addEventListener('click', () => {
+            decParticles = [];
+            decCoherence = 1;
+            decRunning = false;
+            decCtx.fillStyle = '#050508';
+            decCtx.fillRect(0, 0, decoherenceCanvas.width, decoherenceCanvas.height);
+            updateDecoherenceStats();
+        });
+
+        // Born Rule Canvas
+        const bornRuleCanvas = document.getElementById('bornRuleCanvas');
+        const bornCtx = bornRuleCanvas.getContext('2d');
+
+        let bornMeasurements = [];
+        let bornAmpA = 0.6;
+        let bornRunning = false;
+
+        function drawBornRule() {
+            bornRuleCanvas.width = bornRuleCanvas.offsetWidth;
+            bornRuleCanvas.height = bornRuleCanvas.offsetHeight;
+            const w = bornRuleCanvas.width;
+            const h = bornRuleCanvas.height;
+
+            bornCtx.fillStyle = 'rgba(5, 5, 8, 0.3)';
+            bornCtx.fillRect(0, 0, w, h);
+
+            const centerX = w / 2;
+            const radius = Math.min(w, h) / 2 - 40;
+
+            // Draw Bloch sphere representation
+            bornCtx.beginPath();
+            bornCtx.arc(centerX, h / 2, radius, 0, Math.PI * 2);
+            bornCtx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+            bornCtx.lineWidth = 1;
+            bornCtx.stroke();
+
+            // Draw state vector
+            const theta = Math.acos(1 - 2 * bornAmpA);
+            const phi = 0;
+            const x = radius * Math.sin(theta) * Math.cos(phi);
+            const y = radius * Math.cos(theta);
+            bornCtx.beginPath();
+            bornCtx.moveTo(centerX, h / 2);
+            bornCtx.lineTo(centerX + x, h / 2 - y);
+            bornCtx.strokeStyle = '#00d4ff';
+            bornCtx.lineWidth = 3;
+            bornCtx.stroke();
+
+            // Draw measurement outcomes
+            const barWidth = 30;
+            const barSpacing = 50;
+            const maxBarHeight = h - 80;
+
+            for (let i = 0; i < bornMeasurements.length && i < 20; i++) {
+                const outcome = bornMeasurements[i];
+                const barHeight = (i + 1) / bornMeasurements.length * maxBarHeight * 0.8;
+                const xPos = 50 + (i % 10) * barSpacing;
+                const yPos = h - 40 - barHeight;
+
+                bornCtx.fillStyle = outcome === 'A' ? '#00d4ff' : '#a855f7';
+                bornCtx.fillRect(xPos, yPos, barWidth, barHeight);
+                bornCtx.fillStyle = '#666';
+                bornCtx.font = '10px Space Mono';
+                bornCtx.fillText(outcome, xPos + barWidth / 2 - 3, h - 20);
+            }
+
+            // Theoretical vs observed
+            bornCtx.fillStyle = '#666';
+            bornCtx.font = '14px Space Mono';
+            bornCtx.fillText(`Theoretical P(A): ${(bornAmpA * bornAmpA * 100).toFixed(1)}%`, 50, 30);
+            if (bornMeasurements.length > 0) {
+                const obsA = bornMeasurements.filter(m => m === 'A').length / bornMeasurements.length;
+                bornCtx.fillText(`Observed P(A): ${(obsA * 100).toFixed(1)}%`, 50, 50);
+                const deviation = Math.abs(obsA - bornAmpA * bornAmpA) / (bornAmpA * bornAmpA);
+                document.getElementById('deviation').textContent = (deviation * 100).toFixed(1) + '%';
+            }
+
+            requestAnimationFrame(drawBornRule);
+        }
+
+        document.getElementById('measurementCount').addEventListener('input', (e) => {
+            document.getElementById('numMeasurements').textContent = e.target.value;
+        });
+
+        document.getElementById('ampA').addEventListener('input', (e) => {
+            bornAmpA = parseFloat(e.target.value);
+            document.getElementById('ampAValue').textContent = bornAmpA.toFixed(2);
+            document.getElementById('theoreticalProb').textContent = (bornAmpA * bornAmpA * 100).toFixed(0) + '%';
+        });
+
+        document.getElementById('runMeasurements').addEventListener('click', () => {
+            const count = parseInt(document.getElementById('measurementCount').value);
+            bornMeasurements = [];
+            for (let i = 0; i < count; i++) {
+                bornMeasurements.push(Math.random() < bornAmpA * bornAmpA ? 'A' : 'B');
+            }
+            const obsA = bornMeasurements.filter(m => m === 'A').length / bornMeasurements.length;
+            document.getElementById('observedFreq').textContent = (obsA * 100).toFixed(1) + '%';
+        });
+
+        let autoRunInterval = null;
+        document.getElementById('autoRun').addEventListener('click', () => {
+            if (autoRunInterval) {
+                clearInterval(autoRunInterval);
+                autoRunInterval = null;
+                return;
+            }
+            bornMeasurements = [];
+            let step = 0;
+            autoRunInterval = setInterval(() => {
+                bornMeasurements.push(Math.random() < bornAmpA * bornAmpA ? 'A' : 'B');
+                step++;
+                if (step >= 1000) {
+                    clearInterval(autoRunInterval);
+                    autoRunInterval = null;
+                }
+                const obsA = bornMeasurements.filter(m => m === 'A').length / bornMeasurements.length;
+                document.getElementById('observedFreq').textContent = (obsA * 100).toFixed(1) + '%';
+                const sigma = Math.sqrt(bornAmpA * bornAmpA * (1 - bornAmpA * bornAmpA) / bornMeasurements.length);
+                document.getElementById('convergenceMetric').textContent = (Math.abs(obsA - bornAmpA * bornAmpA) / sigma).toFixed(2) + 'σ';
+            }, 10);
+        });
+
+        drawBornRule();
+
+        // Schrödinger's Cat Canvas
+        const schrodingerCanvas = document.getElementById('schrodingerCanvas');
+        const scCtx = schrodingerCanvas.getContext('2d');
+
+        let scState = 'superposition';
+        let scShowSuperposition = false;
+
+        function drawSchrodingerCat() {
+            schrodingerCanvas.width = schrodingerCanvas.offsetWidth;
+            schrodingerCanvas.height = schrodingerCanvas.offsetHeight;
+            const w = schrodingerCanvas.width;
+            const h = schrodingerCanvas.height;
+
+            scCtx.fillStyle = 'rgba(5, 5, 8, 1)';
+            scCtx.fillRect(0, 0, w, h);
+
+            const boxX = w / 2 - 150;
+            const boxY = 50;
+            const boxW = 300;
+            const boxH = h - 100;
+
+            // Draw box
+            scCtx.strokeStyle = '#333';
+            scCtx.lineWidth = 3;
+            scCtx.strokeRect(boxX, boxY, boxW, boxH);
+
+            if (scShowSuperposition) {
+                // Draw superposition state
+                scCtx.fillStyle = '#a855f7';
+                scCtx.globalAlpha = 0.5;
+                scCtx.font = '14px Space Mono';
+                scCtx.fillText('|Ψ⟩ = (1/√2)(|Alive⟩ + |Dead⟩)', boxX + 40, boxY + 30);
+                scCtx.globalAlpha = 1;
+
+                // Ghost cat alive
+                scCtx.fillStyle = '#00d4ff';
+                scCtx.globalAlpha = 0.5;
+                scCtx.beginPath();
+                scCtx.ellipse(boxX + 100, boxY + boxH / 2, 30, 20, 0, 0, Math.PI * 2);
+                scCtx.fill();
+                scCtx.fillRect(boxX + 70, boxY + boxH / 2 - 30, 60, 40);
+                scCtx.fillRect(boxX + 80, boxY + boxH / 2 - 60, 10, 30);
+                scCtx.fillRect(boxX + 110, boxY + boxH / 2 - 60, 10, 30);
+                scCtx.fillText('🐱', boxX + 85, boxY + boxH / 2 - 10);
+                scCtx.fillText('ALIVE', boxX + 85, boxY + boxH / 2 + 30);
+                scCtx.globalAlpha = 1;
+
+                // Ghost cat dead
+                scCtx.fillStyle = '#f472b6';
+                scCtx.globalAlpha = 0.5;
+                scCtx.beginPath();
+                scCtx.ellipse(boxX + 200, boxY + boxH / 2, 30, 20, 0, 0, Math.PI * 2);
+                scCtx.fill();
+                scCtx.fillRect(boxX + 170, boxY + boxH / 2 - 30, 60, 40);
+                scCtx.fillRect(boxX + 180, boxY + boxH / 2 - 60, 10, 30);
+                scCtx.fillRect(boxX + 210, boxY + boxH / 2 - 60, 10, 30);
+                scCtx.fillText('💀', boxX + 185, boxY + boxH / 2 - 10);
+                scCtx.fillText('DEAD', boxX + 185, boxY + boxH / 2 + 30);
+                scCtx.globalAlpha = 1;
+            } else {
+                // Draw definite state
+                const isAlive = scState === 'alive';
+                const catColor = isAlive ? '#00d4ff' : '#f472b6';
+                const catEmoji = isAlive ? '🐱' : '💀';
+                const catText = isAlive ? 'ALIVE' : 'DEAD';
+
+                scCtx.fillStyle = catColor;
+                scCtx.font = '20px Space Mono';
+                scCtx.fillText(catEmoji, boxX + 130, boxY + boxH / 2 - 20);
+                scCtx.fillText(catText, boxX + 120, boxY + boxH / 2 + 20);
+
+                // Draw poison vial
+                scCtx.fillStyle = '#fbbf24';
+                scCtx.fillRect(boxX + 220, boxY + boxH / 2 - 40, 20, 40);
+                scCtx.fillStyle = '#ff6d00';
+                scCtx.fillRect(boxX + 222, boxY + boxH / 2 - 35, 16, 30);
+            }
+
+            // Labels
+            scCtx.fillStyle = '#666';
+            scCtx.font = '12px Space Mono';
+            scCtx.fillText('Sealed Chamber', boxX + 90, boxY - 10);
+
+            // Observer outside
+            scCtx.fillStyle = '#fbbf24';
+            scCtx.fillText('👤 Observer outside', w - 150, h - 20);
+
+            requestAnimationFrame(drawSchrodingerCat);
+        }
+
+        document.getElementById('showSuperposition').addEventListener('change', (e) => {
+            scShowSuperposition = e.target.checked;
+        });
+
+        document.getElementById('openBox').addEventListener('click', () => {
+            scState = Math.random() < 0.5 ? 'alive' : 'dead';
+            scShowSuperposition = false;
+        });
+
+        document.getElementById('resetCat').addEventListener('click', () => {
+            scState = 'superposition';
+            scShowSuperposition = false;
+        });
+
+        drawSchrodingerCat();
+
+        // Wigner's Friend Canvas
+        const wignerCanvas = document.getElementById('wignerCanvas');
+        const wgCtx = wignerCanvas.getContext('2d');
+
+        function drawWigner() {
+            wignerCanvas.width = wignerCanvas.offsetWidth;
+            wignerCanvas.height = wignerCanvas.offsetHeight;
+            const w = wignerCanvas.width;
+            const h = wignerCanvas.height;
+
+            wgCtx.fillStyle = 'rgba(5, 5, 8, 1)';
+            wgCtx.fillRect(0, 0, w, h);
+
+            // Draw friend's lab
+            wgCtx.strokeStyle = '#a855f7';
+            wgCtx.lineWidth = 3;
+            wgCtx.strokeRect(50, 80, 250, 200);
+
+            // Draw friend inside
+            wgCtx.fillStyle = '#00d4ff';
+            wgCtx.beginPath();
+            wgCtx.arc(175, 150, 25, 0, Math.PI * 2);
+            wgCtx.fill();
+            wgCtx.fillStyle = '#666';
+            wgCtx.font = '12px Space Mono';
+            wgCtx.fillText('Friend', 160, 155);
+            wgCtx.fillText('(measures spin)', 140, 170);
+
+            // Draw quantum system
+            wgCtx.fillStyle = '#fbbf24';
+            wgCtx.beginPath();
+            wgCtx.arc(175, 220, 15, 0, Math.PI * 2);
+            wgCtx.fill();
+            wgCtx.fillStyle = '#666';
+            wgCtx.fillText('Quantum System', 140, 225);
+
+            // Draw measurement indicator
+            wgCtx.fillStyle = '#ff6d00';
+            wgCtx.fillRect(220, 140, 60, 20);
+            wgCtx.fillStyle = '#000';
+            wgCtx.font = '10px Space Mono';
+            wgCtx.fillText('UP', 240, 154);
+
+            // Wigner outside
+            wgCtx.fillStyle = '#f472b6';
+            wgCtx.beginPath();
+            wgCtx.arc(450, 180, 30, 0, Math.PI * 2);
+            wgCtx.fill();
+            wgCtx.fillStyle = '#666';
+            wgCtx.font = '12px Space Mono';
+            wgCtx.fillText('Wigner', 430, 185);
+
+            // Superposition wave
+            wgCtx.beginPath();
+            wgCtx.moveTo(300, 180);
+            wgCtx.bezierCurveTo(350, 100, 400, 260, 420, 180);
+            wgCtx.strokeStyle = 'rgba(168, 85, 247, 0.5)';
+            wgCtx.lineWidth = 2;
+            wgCtx.stroke();
+
+            // Labels
+            wgCtx.fillStyle = '#666';
+            wgCtx.font = '11px Space Mono';
+            wgCtx.fillText('Friend sees definite outcome', 70, 300);
+            wgCtx.fillText('Wigner sees superposition', 370, 300);
+
+            // State description
+            wgCtx.fillStyle = '#00d4ff';
+            wgCtx.font = '12px Space Mono';
+            wgCtx.fillText('|Ψ_lab = (1/√2)(|UP⟩|Friend sees UP⟩ + |DOWN⟩|Friend sees DOWN⟩)', 80, 50);
+
+            requestAnimationFrame(drawWigner);
+        }
+
+        drawWigner();
+
+        // Interpretation tabs
+        function switchInterpTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('#interpretations .tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tab + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Initialize
+        setTimeout(() => {
+            const ctx = dsCanvas.getContext('2d');
+            ctx.fillStyle = '#050508';
+            ctx.fillRect(0, 0, dsCanvas.width, dsCanvas.height);
+            doubleSlitCanvas.width = dsCanvas.width;
+            doubleSlitCanvas.height = dsCanvas.height;
+            doubleSlitCanvas.getContext('2d').drawImage(dsCanvas, 0, 0);
+        }, 100);
+    </script>
+</body>
+</html>
