@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Na-Ion Gallery — Beyond Lithium Technology</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --na-orange: #FF6B35;
+            --na-yellow: #FFB838;
+            --na-light: #FFF4E0;
+            --na-dark: #8B3A00;
+            --bg-dark: #0a0a0f;
+            --bg-card: #14141f;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --accent-gradient: linear-gradient(135deg, #FF6B35 0%, #FFB838 100%);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+            background: radial-gradient(ellipse at 50% 0%, rgba(255,107,53,0.15) 0%, transparent 60%),
+                        var(--bg-dark);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(255,184,56,0.1) 0%, transparent 30%),
+                radial-gradient(circle at 80% 20%, rgba(255,107,53,0.1) 0%, transparent 30%);
+            pointer-events: none;
+        }
+
+        .sodium-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--na-orange);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+            box-shadow: 0 0 10px var(--na-orange), 0 0 20px var(--na-yellow);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+            50% { transform: translateY(-30px) rotate(180deg); opacity: 1; }
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 24px;
+            background: rgba(255,107,53,0.2);
+            border: 1px solid var(--na-orange);
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--na-orange);
+            margin-bottom: 30px;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255,107,53,0.3); }
+            50% { box-shadow: 0 0 40px rgba(255,107,53,0.6); }
+        }
+
+        .hero h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(48px, 10vw, 96px);
+            font-weight: 900;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(18px, 4vw, 28px);
+            color: var(--text-secondary);
+            max-width: 700px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 60px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--na-orange);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10,10,15,0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,107,53,0.2);
+            padding: 0 20px;
+        }
+
+        .nav-tabs-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+
+        .nav-tabs-inner::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-tab {
+            padding: 20px 30px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab:hover {
+            color: var(--na-orange);
+        }
+
+        .nav-tab.active {
+            color: var(--na-orange);
+            border-bottom-color: var(--na-orange);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        section {
+            margin-bottom: 100px;
+            scroll-margin-top: 80px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .section-number {
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            color: var(--na-orange);
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .section-desc {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Comparison Hero */
+        .comparison-hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        @media (max-width: 900px) {
+            .comparison-hero {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .comparison-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255,107,53,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .comparison-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-gradient);
+        }
+
+        .comparison-card.ion {
+            border-color: rgba(255,107,53,0.3);
+        }
+
+        .comparison-card.lithium {
+            border-color: rgba(100,180,255,0.3);
+        }
+
+        .comparison-card.lithium::before {
+            background: linear-gradient(135deg, #64B4FF 0%, #00D4AA 100%);
+        }
+
+        .card-label {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .comparison-card.ion .card-label {
+            color: var(--na-orange);
+        }
+
+        .comparison-card.lithium .card-label {
+            color: #64B4FF;
+        }
+
+        .card-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .spec-list {
+            list-style: none;
+        }
+
+        .spec-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 15px;
+        }
+
+        .spec-list li:last-child {
+            border-bottom: none;
+        }
+
+        .spec-value {
+            font-weight: 600;
+        }
+
+        .comparison-card.ion .spec-value {
+            color: var(--na-orange);
+        }
+
+        .comparison-card.lithium .spec-value {
+            color: #64B4FF;
+        }
+
+        .verdict-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .verdict-badge.winner {
+            background: rgba(255,107,53,0.2);
+            color: var(--na-orange);
+            border: 1px solid var(--na-orange);
+        }
+
+        .verdict-badge.leader {
+            background: rgba(100,180,255,0.2);
+            color: #64B4FF;
+            border: 1px solid #64B4FF;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--na-orange), var(--na-yellow));
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 20px;
+            }
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        @media (max-width: 768px) {
+            .timeline-item,
+            .timeline-item:nth-child(even) {
+                flex-direction: row;
+                padding-left: 60px;
+            }
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            top: 20px;
+            width: 20px;
+            height: 20px;
+            background: var(--na-orange);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 20px var(--na-orange);
+            z-index: 1;
+        }
+
+        @media (max-width: 768px) {
+            .timeline-dot {
+                left: 20px;
+            }
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid rgba(255,107,53,0.15);
+        }
+
+        .timeline-year {
+            font-family: 'Orbitron', monospace;
+            font-size: 14px;
+            color: var(--na-orange);
+            margin-bottom: 8px;
+        }
+
+        .timeline-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .timeline-desc {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* Companies Grid */
+        .companies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .company-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255,107,53,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .company-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--na-orange);
+            box-shadow: 0 20px 40px rgba(255,107,53,0.1);
+        }
+
+        .company-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .company-logo {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,107,53,0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .company-name {
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .company-country {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .company-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .company-status.active {
+            background: rgba(0,255,136,0.2);
+            color: #00FF88;
+        }
+
+        .company-status.pilot {
+            background: rgba(255,184,56,0.2);
+            color: var(--na-yellow);
+        }
+
+        .company-status.rd {
+            background: rgba(100,180,255,0.2);
+            color: #64B4FF;
+        }
+
+        .company-specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .spec-item {
+            text-align: center;
+        }
+
+        .spec-item .value {
+            font-family: 'Orbitron', monospace;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--na-orange);
+        }
+
+        .spec-item .label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        /* Materials Section */
+        .materials-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 40px 0;
+        }
+
+        .material-node {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 25px 35px;
+            text-align: center;
+            border: 1px solid rgba(255,107,53,0.2);
+            min-width: 150px;
+        }
+
+        .material-node.cathode {
+            background: rgba(255,107,53,0.1);
+            border-color: var(--na-orange);
+        }
+
+        .material-node.anode {
+            background: rgba(139,58,0,0.2);
+            border-color: var(--na-dark);
+        }
+
+        .material-node.electrolyte {
+            background: rgba(255,184,56,0.1);
+            border-color: var(--na-yellow);
+        }
+
+        .material-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .material-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .material-formula {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
+        .flow-arrow {
+            font-size: 30px;
+            color: var(--na-orange);
+        }
+
+        /* Properties Table */
+        .properties-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .properties-table th,
+        .properties-table td {
+            padding: 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .properties-table th {
+            background: rgba(255,107,53,0.1);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--na-orange);
+        }
+
+        .properties-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .properties-table td:first-child {
+            font-weight: 500;
+        }
+
+        .properties-table .highlight {
+            color: var(--na-orange);
+            font-weight: 600;
+        }
+
+        .properties-table .li-highlight {
+            color: #64B4FF;
+            font-weight: 600;
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+        }
+
+        @media (max-width: 500px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255,107,53,0.1);
+        }
+
+        .chart-title {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Applications */
+        .applications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .app-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255,107,53,0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .app-card:hover {
+            border-color: var(--na-orange);
+            transform: translateY(-5px);
+        }
+
+        .app-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+
+        .app-title {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .app-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .app-maturity {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        .app-maturity.high {
+            background: rgba(0,255,136,0.2);
+            color: #00FF88;
+        }
+
+        .app-maturity.medium {
+            background: rgba(255,184,56,0.2);
+            color: var(--na-yellow);
+        }
+
+        .app-maturity.emerging {
+            background: rgba(100,180,255,0.2);
+            color: #64B4FF;
+        }
+
+        /* Cost Comparison */
+        .cost-breakdown {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255,107,53,0.15);
+        }
+
+        .cost-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .cost-total {
+            text-align: right;
+        }
+
+        .cost-total .label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .cost-total .value {
+            font-family: 'Orbitron', monospace;
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--na-orange);
+        }
+
+        .cost-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .cost-bar-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .cost-bar-label {
+            width: 120px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .cost-bar-track {
+            flex: 1;
+            height: 30px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .cost-bar-fill {
+            height: 100%;
+            border-radius: 15px;
+            transition: width 1s ease;
+        }
+
+        .cost-bar-fill.na {
+            background: var(--accent-gradient);
+        }
+
+        .cost-bar-fill.li {
+            background: linear-gradient(135deg, #64B4FF 0%, #00D4AA 100%);
+        }
+
+        .cost-bar-value {
+            width: 80px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Advantages */
+        .advantages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+        }
+
+        .advantage-card {
+            background: linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,184,56,0.05) 100%);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255,107,53,0.2);
+        }
+
+        .advantage-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .advantage-title {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .advantage-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .advantage-stat {
+            font-family: 'Orbitron', monospace;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--na-orange);
+            margin-bottom: 5px;
+        }
+
+        /* Section Divider */
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--na-orange), transparent);
+            margin: 80px 0;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 60px 20px;
+            border-top: 1px solid rgba(255,107,53,0.1);
+            margin-top: 100px;
+        }
+
+        .footer-text {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .footer-text a {
+            color: var(--na-orange);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-stats {
+                gap: 30px;
+            }
+
+            .stat-value {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="sodium-particles" id="particles"></div>
+
+        <div class="hero-badge">Beyond Lithium Technology</div>
+
+        <h1>Na-Ion Gallery</h1>
+
+        <p class="hero-subtitle">
+            Sodium-ion batteries represent a paradigm shift in energy storage —
+            abundant materials, sustainable supply chains, and the end of lithium dependency.
+        </p>
+
+        <div class="hero-stats">
+            <div class="stat-item">
+                <div class="stat-value">10,000x</div>
+                <div class="stat-label">Na abundance vs Li</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">$40</div>
+                <div class="stat-label">Cost per kWh (projected)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">2023</div>
+                <div class="stat-label">Commercial production</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <nav class="nav-tabs">
+        <div class="nav-tabs-inner">
+            <a href="#compare" class="nav-tab active">Li vs Na</a>
+            <a href="#history" class="nav-tab">History</a>
+            <a href="#materials" class="nav-tab">Materials</a>
+            <a href="#companies" class="nav-tab">Companies</a>
+            <a href="#applications" class="nav-tab">Applications</a>
+            <a href="#economics" class="nav-tab">Economics</a>
+            <a href="#future" class="nav-tab">Future</a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Li vs Na Comparison -->
+        <section id="compare">
+            <div class="section-header">
+                <div class="section-number">01</div>
+                <h2 class="section-title">The Great Comparison</h2>
+                <p class="section-desc">How does sodium stack up against lithium? The Periodic Table's closest neighbor tells a fascinating story.</p>
+            </div>
+
+            <div class="comparison-hero">
+                <div class="comparison-card ion">
+                    <div class="card-label">The Challenger</div>
+                    <div class="card-icon">🔶</div>
+                    <h3 class="card-title">Sodium-Ion (Na-ion)</h3>
+                    <ul class="spec-list">
+                        <li>
+                            <span>Atomic Number</span>
+                            <span class="spec-value">11</span>
+                        </li>
+                        <li>
+                            <span>Atomic Mass</span>
+                            <span class="spec-value">22.99</span>
+                        </li>
+                        <li>
+                            <span>Ionic Radius</span>
+                            <span class="spec-value">102 pm</span>
+                        </li>
+                        <li>
+                            <span>Energy Density</span>
+                            <span class="spec-value">140-160 Wh/kg</span>
+                        </li>
+                        <li>
+                            <span>Abundance</span>
+                            <span class="spec-value">23,600 ppm</span>
+                        </li>
+                        <li>
+                            <span>Cost per ton</span>
+                            <span class="spec-value">$180</span>
+                        </li>
+                        <li>
+                            <span>Standard Potential</span>
+                            <span class="spec-value">-2.71 V</span>
+                        </li>
+                        <li>
+                            <span>Melting Point</span>
+                            <span class="spec-value">97.7°C</span>
+                        </li>
+                    </ul>
+                    <span class="verdict-badge winner">Cost Advantage</span>
+                </div>
+
+                <div class="comparison-card lithium">
+                    <div class="card-label">The Champion</div>
+                    <div class="card-icon">🔵</div>
+                    <h3 class="card-title">Lithium-Ion (Li-ion)</h3>
+                    <ul class="spec-list">
+                        <li>
+                            <span>Atomic Number</span>
+                            <span class="spec-value">3</span>
+                        </li>
+                        <li>
+                            <span>Atomic Mass</span>
+                            <span class="spec-value">6.94</span>
+                        </li>
+                        <li>
+                            <span>Ionic Radius</span>
+                            <span class="spec-value">76 pm</span>
+                        </li>
+                        <li>
+                            <span>Energy Density</span>
+                            <span class="spec-value">200-250 Wh/kg</span>
+                        </li>
+                        <li>
+                            <span>Abundance</span>
+                            <span class="spec-value">20 ppm</span>
+                        </li>
+                        <li>
+                            <span>Cost per ton</span>
+                            <span class="spec-value">$18,000</span>
+                        </li>
+                        <li>
+                            <span>Standard Potential</span>
+                            <span class="spec-value">-3.04 V</span>
+                        </li>
+                        <li>
+                            <span>Melting Point</span>
+                            <span class="spec-value">180.5°C</span>
+                        </li>
+                    </ul>
+                    <span class="verdict-badge leader">Energy Density Leader</span>
+                </div>
+            </div>
+
+            <!-- Key Insights -->
+            <div class="advantages-grid">
+                <div class="advantage-card">
+                    <div class="advantage-stat">100×</div>
+                    <div class="advantage-icon">🌍</div>
+                    <h4 class="advantage-title">Ocean Reserves</h4>
+                    <p class="advantage-desc">Sodium is found in seawater (0.5 M NaCl) — essentially limitless. No "lithium triangle" geopolitical risks.</p>
+                </div>
+                <div class="advantage-card">
+                    <div class="advantage-stat">$177</div>
+                    <div class="advantage-icon">💰</div>
+                    <h4 class="advantage-title">Per-Ton Cost</h4>
+                    <p class="advantage-desc">vs. $18,000 for lithium carbonate. The economics of abundance change everything.</p>
+                </div>
+                <div class="advantage-card">
+                    <div class="advantage-stat">-20°C</div>
+                    <div class="advantage-icon">❄️</div>
+                    <h4 class="advantage-title">Cold Weather</h4>
+                    <p class="advantage-desc">Na-ion cells work at -20°C with minimal capacity loss. Lithium struggles in extreme cold.</p>
+                </div>
+                <div class="advantage-card">
+                    <div class="advantage-stat">0%</div>
+                    <div class="advantage-icon">🚫</div>
+                    <h4 class="advantage-title">Cobalt Free</h4>
+                    <p class="advantage-desc">No cobalt means no ethical mining concerns. Both cathode and anode are cobalt-free.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- History Timeline -->
+        <section id="history">
+            <div class="section-header">
+                <div class="section-number">02</div>
+                <h2 class="section-title">A History of Reinvention</h2>
+                <p class="section-desc">From analytical chemistry curiosity to commercial reality — Na-ion's 50-year journey.</p>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">1970s</div>
+                        <h3 class="timeline-title">The Early Studies</h3>
+                        <p class="timeline-desc">Whiting and Owens first explored sodium intercalation compounds. The field was purely academic — lithium dominated research attention.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">1980s</div>
+                        <h3 class="timeline-title">Intercalation Chemistry</h3>
+                        <p class="timeline-desc">Prof. Jean-Marie Tarascon's group at Bell Labs pioneered the "rocking chair" battery concept, but focused on Li-ion due to superior performance.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">2010</div>
+                        <h3 class="timeline-title">The Lithium Crisis</h3>
+                        <p class="timeline-desc">Lithium prices skyrocketed 400% in 5 years. Suddenly, sodium-ion research became economically relevant.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">2015</div>
+                        <h3 class="timeline-title">Hard Carbon Anode Breakthrough</h3>
+                        <p class="timeline-desc">Researchers discovered that hard carbon (from biomass) provides excellent Na-ion storage — a game-changing discovery for the anode.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">2020</div>
+                        <h3 class="timeline-title">Prussian White Cathode</h3>
+                        <p class="timeline-desc">Na₄Fe(CN)₆ (Prussian white) emerged as the leading cathode — low-cost, environmentally benign, and excellent performance.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">2023</div>
+                        <h3 class="timeline-title">Commercial Production Begins</h3>
+                        <p class="timeline-desc">CATL launched first-generation Na-ion batteries (160 Wh/kg). HiNa Battery started mass production in China. The era of Na-ion begins.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">2026+</div>
+                        <h3 class="timeline-title">The Road to Parity</h3>
+                        <p class="timeline-desc">Industry targets 200 Wh/kg and $40/kWh by 2030. Solid-state Na-ion in development. Grid storage adoption accelerating.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Materials Chemistry -->
+        <section id="materials">
+            <div class="section-header">
+                <div class="section-number">03</div>
+                <h2 class="section-title">The Chemistry Stack</h2>
+                <p class="section-desc">Understanding the electrode materials that make Na-ion work.</p>
+            </div>
+
+            <div class="materials-flow">
+                <div class="material-node cathode">
+                    <div class="material-icon">🔴</div>
+                    <div class="material-name">Cathode</div>
+                    <div class="material-formula">Na₄Fe(CN)₆</div>
+                    <p style="font-size:12px;color:var(--text-secondary);margin-top:8px;">Prussian White</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="material-node electrolyte">
+                    <div class="material-icon">💧</div>
+                    <div class="material-name">Electrolyte</div>
+                    <div class="material-formula">NaPF₆ / NaFSI</div>
+                    <p style="font-size:12px;color:var(--text-secondary);margin-top:8px;">Organic solvent</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="material-node anode">
+                    <div class="material-icon">⚫</div>
+                    <div class="material-name">Anode</div>
+                    <div class="material-formula">Hard Carbon</div>
+                    <p style="font-size:12px;color:var(--text-secondary);margin-top:8px;">Biomass derived</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 50px;">
+                <table class="properties-table">
+                    <thead>
+                        <tr>
+                            <th>Material Type</th>
+                            <th>Formula</th>
+                            <th>Capacity (mAh/g)</th>
+                            <th>Voltage (V)</th>
+                            <th>Cost</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Prussian White</td>
+                            <td style="font-family:monospace">Na₄Fe(CN)₆</td>
+                            <td class="highlight">~120</td>
+                            <td>3.0-3.5</td>
+                            <td class="highlight">Very Low</td>
+                            <td>Commercial</td>
+                        </tr>
+                        <tr>
+                            <td>Layered Oxide</td>
+                            <td style="font-family:monospace">NaMnO₂</td>
+                            <td>180-200</td>
+                            <td>2.5-3.8</td>
+                            <td>Low</td>
+                            <td>Pilot</td>
+                        </tr>
+                        <tr>
+                            <td>Polyanionic</td>
+                            <td style="font-family:monospace">Na₃V₂(PO₄)₃</td>
+                            <td>120</td>
+                            <td class="highlight">3.4</td>
+                            <td>Medium</td>
+                            <td>Pilot</td>
+                        </tr>
+                        <tr>
+                            <td>Hard Carbon</td>
+                            <td style="font-family:monospace">C</td>
+                            <td class="highlight">300-350</td>
+                            <td>0.1-2.0</td>
+                            <td class="highlight">Very Low</td>
+                            <td>Commercial</td>
+                        </tr>
+                        <tr>
+                            <td>Alloy Anode</td>
+                            <td style="font-family:monospace">Sn, Sb</td>
+                            <td>400-600</td>
+                            <td>0.3-0.8</td>
+                            <td>Medium</td>
+                            <td>R&D</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Key Chemistry Insight -->
+            <div style="margin-top:50px; background:var(--bg-card); border-radius:20px; padding:40px; border:1px solid rgba(255,107,53,0.15);">
+                <h3 style="font-size:20px;margin-bottom:20px;">Why Hard Carbon Works for Na-ion</h3>
+                <p style="color:var(--text-secondary);line-height:1.8;margin-bottom:20px;">
+                    Graphite cannot store sodium ions — the Na⁺ ion is too large (102 pm vs 76 pm for Li⁺) to intercalate into graphite's narrow layers.
+                    Hard carbon, with its disordered turbostatic structure, provides ample "house of cards" spacing for Na⁺ insertion.
+                </p>
+                <div style="display:flex;gap:40px;flex-wrap:wrap;">
+                    <div>
+                        <div style="font-size:14px;color:var(--text-secondary);margin-bottom:5px;">Li⁺ in Graphite</div>
+                        <div style="font-family:monospace;color:#64B4FF;">d spacing = 3.35 Å</div>
+                    </div>
+                    <div>
+                        <div style="font-size:14px;color:var(--text-secondary);margin-bottom:5px;">Na⁺ in Hard Carbon</div>
+                        <div style="font-family:monospace;color:var(--na-orange);">d spacing = 3.80-4.20 Å</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Companies -->
+        <section id="companies">
+            <div class="section-header">
+                <div class="section-number">04</div>
+                <h2 class="section-title">Global Race</h2>
+                <p class="section-desc">The companies racing to bring Na-ion to market.</p>
+            </div>
+
+            <div class="companies-grid">
+                <div class="company-card">
+                    <div class="company-header">
+                        <div class="company-logo">🇨🇳</div>
+                        <div>
+                            <div class="company-name">CATL</div>
+                            <div class="company-country">China</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <span class="company-status active">Commercial</span>
+                    </div>
+                    <p style="font-size:14px;color:var(--text-secondary);line-height:1.6;">
+                        World's largest battery maker launched first-gen Na-ion in 2023. 160 Wh/kg, -20°C operation, 15-minute fast charge.
+                    </p>
+                    <div class="company-specs">
+                        <div class="spec-item">
+                            <div class="value">160</div>
+                            <div class="label">Wh/kg</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="value">2023</div>
+                            <div class="label">Launch</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="company-card">
+                    <div class="company-header">
+                        <div class="company-logo">🇨🇳</div>
+                        <div>
+                            <div class="company-name">HiNa Battery</div>
+                            <div class="company-country">China</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <span class="company-status active">Mass Production</span>
+                    </div>
+                    <p style="font-size:14px;color:var(--text-secondary);line-height:1.6;">
+                        First mass production Na-ion cells. Uses Cu-Fe-Mn based Prussian white cathode. 1 GWh pilot line operational.
+                    </p>
+                    <div class="company-specs">
+                        <div class="spec-item">
+                            <div class="value">140</div>
+                            <div class="label">Wh/kg</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="value">1 GWh</div>
+                            <div class="label">Capacity</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="company-card">
+                    <div class="company-header">
+                        <div class="company-logo">🇫🇷</div>
+                        <div>
+                            <div class="company-name">Tiamat</div>
+                            <div class="company-country">France</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <span class="company-status pilot">Pilot</span>
+                    </div>
+                    <p style="font-size:14px;color:var(--text-secondary);line-height:1.6;">
+                        Startup from CNRS/PCM. Polyanionic cathode technology. €5M funding. Targeting grid storage applications.
+                    </p>
+                    <div class="company-specs">
+                        <div class="spec-item">
+                            <div class="value">120</div>
+                            <div class="label">Wh/kg</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="value">2025</div>
+                            <div class="label">Target</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="company-card">
+                    <div class="company-header">
+                        <div class="company-logo">🇺🇸</div>
+                        <div>
+                            <div class="company-name">Natron Energy</div>
+                            <div class="company-country">USA</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <span class="company-status active">Commercial</span>
+                    </div>
+                    <p style="font-size:14px;color:var(--text-secondary);line-height:1.6;">
+                        Prussian blue analogue cathode. Focus on data center UPS and industrial applications. 50,000 cycle target.
+                    </p>
+                    <div class="company-specs">
+                        <div class="spec-item">
+                            <div class="value">30</div>
+                            <div class="label">Wh/kg</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="value">50K</div>
+                            <div class="label">Cycles</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="company-card">
+                    <div class="company-header">
+                        <div class="company-logo">🇬🇧</div>
+                        <div>
+                            <div class="company-name">Faradion (India)</div>
+                            <div class="company-country">UK Origin</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <span class="company-status active">Commercial</span>
+                    </div>
+                    <p style="font-size:14px;color:var(--text-secondary);line-height:1.6;">
+                        Acquired by Reliance Industries (India) for $117M. Layered oxide cathode. OEMS supplier for 2/3-wheelers.
+                    </p>
+                    <div class="company-specs">
+                        <div class="spec-item">
+                            <div class="value">140</div>
+                            <div class="label">Wh/kg</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="value">120</div>
+                            <div class="label">Wh/L</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="company-card">
+                    <div class="company-header">
+                        <div class="company-logo">🇯🇵</div>
+                        <div>
+                            <div class="company-name">Toyota</div>
+                            <div class="company-country">Japan</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <span class="company-status rd">R&D</span>
+                    </div>
+                    <p style="font-size:14px;color:var(--text-secondary);line-height:1.6;">
+                        Exploring Na-ion for urban mobility. Layered oxide + hard carbon. Targeting low-speed EVs and scooters.
+                    </p>
+                    <div class="company-specs">
+                        <div class="spec-item">
+                            <div class="value">130</div>
+                            <div class="label">Wh/kg</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="value">2027</div>
+                            <div class="label">Target</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Applications -->
+        <section id="applications">
+            <div class="section-header">
+                <div class="section-number">05</div>
+                <h2 class="section-title">Where Na-ion Wins</h2>
+                <p class="section-desc">The sweet spots where sodium-ion's economics and properties create advantage.</p>
+            </div>
+
+            <div class="applications-grid">
+                <div class="app-card">
+                    <div class="app-icon">🏠</div>
+                    <h3 class="app-title">Grid Storage</h3>
+                    <p class="app-desc">Cost-per-kWh is all that matters for utility-scale storage. Na-ion's $40/kWh target vs Li-ion's $80+ makes this a no-brainer for 100+ MWh installations.</p>
+                    <span class="app-maturity high">Ready Now</span>
+                </div>
+
+                <div class="app-card">
+                    <div class="app-icon">🛵</div>
+                    <h3 class="app-title">Two/Three Wheelers</h3>
+                    <p class="app-desc">e-Bikes, e-Scooters, rickshaws in Asia. The -20°C operation, low cost, and adequate range (100-150 km) make perfect sense for urban mobility.</p>
+                    <span class="app-maturity high">Commercial</span>
+                </div>
+
+                <div class="app-card">
+                    <div class="app-icon">🚚</div>
+                    <h3 class="app-title">Low-Speed EVs</h3>
+                    <p class="app-desc">Neighborhood EVs, campus shuttles, delivery robots. 80 km range is sufficient. Cost and safety trump energy density.</p>
+                    <span class="app-maturity medium">2025 Target</span>
+                </div>
+
+                <div class="app-card">
+                    <div class="app-icon">🏭</div>
+                    <h3 class="app-title">Industrial UPS</h3>
+                    <p class="app-desc">Data centers, hospitals, factories need reliable backup. Natron Energy's 50,000-cycle Na-ion cells eliminate frequent replacement.</p>
+                    <span class="app-maturity high">Commercial</span>
+                </div>
+
+                <div class="app-card">
+                    <div class="app-icon">❄️</div>
+                    <h3 class="app-title">Cold Climate</h3>
+                    <p class="app-desc">Arctic research stations, northern grid storage, space missions. Na-ion operates at -20°C where Li-ion loses 40% capacity.</p>
+                    <span class="app-maturity emerging">Specialized</span>
+                </div>
+
+                <div class="app-card">
+                    <div class="app-icon">♻️</div>
+                    <h3 class="app-title">Short-Duration Storage</h3>
+                    <p class="app-desc">Renewable integration, frequency regulation. 2-4 hour storage duration is the sweet spot where Na-ion economics dominate.</p>
+                    <span class="app-maturity high">Growing</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Economics -->
+        <section id="economics">
+            <div class="section-header">
+                <div class="section-number">06</div>
+                <h2 class="section-title">The Cost Revolution</h2>
+                <p class="section-desc">When abundance meets manufacturing, prices plummet.</p>
+            </div>
+
+            <div class="cost-breakdown">
+                <div class="cost-header">
+                    <div>
+                        <h3 style="font-size:24px;font-weight:600;margin-bottom:5px;">Cost Breakdown by Chemistry</h3>
+                        <p style="color:var(--text-secondary);">Per kWh at cell level, 2024</p>
+                    </div>
+                    <div class="cost-total">
+                        <div class="label">Na-ion Advantage</div>
+                        <div class="value">-$68/kWh</div>
+                    </div>
+                </div>
+
+                <div class="cost-bars">
+                    <div>
+                        <div class="cost-bar-label">Cathode</div>
+                        <div class="cost-bar-track">
+                            <div class="cost-bar-fill na" style="width:15%;"></div>
+                        </div>
+                        <div class="cost-bar-value" style="color:var(--na-orange);">$15</div>
+                    </div>
+                    <div>
+                        <div class="cost-bar-label">Cathode (Li)</div>
+                        <div class="cost-bar-track">
+                            <div class="cost-bar-fill li" style="width:50%;"></div>
+                        </div>
+                        <div class="cost-bar-value" style="color:#64B4FF;">$50</div>
+                    </div>
+                </div>
+
+                <div style="margin-top:30px;padding-top:30px;border-top:1px solid rgba(255,255,255,0.05);">
+                    <div class="cost-bars">
+                        <div>
+                            <div class="cost-bar-label">Anode</div>
+                            <div class="cost-bar-track">
+                                <div class="cost-bar-fill na" style="width:8%;"></div>
+                            </div>
+                            <div class="cost-bar-value" style="color:var(--na-orange);">$8</div>
+                        </div>
+                        <div>
+                            <div class="cost-bar-label">Anode (Li)</div>
+                            <div class="cost-bar-track">
+                                <div class="cost-bar-fill li" style="width:12%;"></div>
+                            </div>
+                            <div class="cost-bar-value" style="color:#64B4FF;">$12</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top:30px;padding-top:30px;border-top:1px solid rgba(255,255,255,0.05);">
+                    <div class="cost-bars">
+                        <div>
+                            <div class="cost-bar-label">Electrolyte</div>
+                            <div class="cost-bar-track">
+                                <div class="cost-bar-fill na" style="width:6%;"></div>
+                            </div>
+                            <div class="cost-bar-value" style="color:var(--na-orange);">$6</div>
+                        </div>
+                        <div>
+                            <div class="cost-bar-label">Electrolyte (Li)</div>
+                            <div class="cost-bar-track">
+                                <div class="cost-bar-fill li" style="width:8%;"></div>
+                            </div>
+                            <div class="cost-bar-value" style="color:#64B4FF;">$8</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-grid" style="margin-top:40px;">
+                <div class="chart-card">
+                    <h4 class="chart-title">Price Trajectory: Na-ion vs Li-ion</h4>
+                    <div class="chart-container">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h4 class="chart-title">Market Share Projection</h4>
+                    <div class="chart-container">
+                        <canvas id="marketChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Future -->
+        <section id="future">
+            <div class="section-header">
+                <div class="section-number">07</div>
+                <h2 class="section-title">The Road Ahead</h2>
+                <p class="section-desc">From alternative to mainstream — Na-ion's evolution.</p>
+            </div>
+
+            <div class="advantages-grid">
+                <div class="advantage-card">
+                    <div class="advantage-stat">2028</div>
+                    <div class="advantage-icon">📈</div>
+                    <h4 class="advantage-title">Energy Density Parity</h4>
+                    <p class="advantage-desc">Target of 200 Wh/kg matches current LFP. Na-ion becomes a "good enough" alternative for 60% of EV applications.</p>
+                </div>
+                <div class="advantage-card">
+                    <div class="advantage-stat">2030</div>
+                    <div class="advantage-icon">🏭</div>
+                    <h4 class="advantage-title">Massive Scale-Up</h4>
+                    <p class="advantage-desc">100+ GWh production capacity. Manufacturing learning curves drive costs to $40/kWh cell level.</p>
+                </div>
+                <div class="advantage-card">
+                    <div class="advantage-stat">2035</div>
+                    <div class="advantage-icon">🔋</div>
+                    <h4 class="advantage-title">Solid-State Na-ion</h4>
+                    <p class="advantage-desc">SSB versions of Na-ion emerge. 300 Wh/kg potential with solid electrolyte. Late-stage R&D.</p>
+                </div>
+                <div class="advantage-card">
+                    <div class="advantage-stat">∞</div>
+                    <div class="advantage-icon">🌍</div>
+                    <h4 class="advantage-title">Resource Independence</h4>
+                    <p class="advantage-desc">A world where energy storage doesn't depend on Chilean salars or Australian pegmatites. Seawater NaCl: the new lithium.</p>
+                </div>
+            </div>
+
+            <!-- Closing Statement -->
+            <div style="margin-top:60px; text-align:center; padding:60px; background:linear-gradient(135deg, rgba(255,107,53,0.1) 0%, rgba(255,184,56,0.05) 100%); border-radius:20px; border:1px solid rgba(255,107,53,0.2);">
+                <h3 style="font-size:28px;font-weight:600;margin-bottom:20px;">The Periodic Table's Redemption</h3>
+                <p style="font-size:18px;color:var(--text-secondary);max-width:700px;margin:0 auto;line-height:1.8;">
+                    Sodium lost to lithium in the 1990s commercial race. But the element that makes up 2.6% of Earth's crust —
+                    the same sodium that flows freely in every ocean — may yet have its revenge. In a world demanding
+                    <span style="color:var(--na-orange);font-weight:600;">terawatt-scale energy storage</span>,
+                    abundance wins.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="footer-text">
+            Na-Ion Gallery — A Li-Ion Battery Production |
+            Part of <a href="index.html">Virtual World</a>
+        </p>
+    </footer>
+
+    <script>
+        // Create floating particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 8 + 's';
+            particle.style.animationDuration = (6 + Math.random() * 4) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const target = document.querySelector(targetId);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+
+        // Price Trajectory Chart
+        const priceCtx = document.getElementById('priceChart').getContext('2d');
+        new Chart(priceCtx, {
+            type: 'line',
+            data: {
+                labels: ['2020', '2025', '2030', '2035'],
+                datasets: [{
+                    label: 'Na-ion',
+                    data: [120, 80, 40, 30],
+                    borderColor: '#FF6B35',
+                    backgroundColor: 'rgba(255,107,53,0.1)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Li-ion (LFP)',
+                    data: [110, 85, 65, 50],
+                    borderColor: '#64B4FF',
+                    backgroundColor: 'rgba(100,180,255,0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#a0a0b0' }
+                    }
+                },
+                scales: {
+                    y: {
+                        title: { display: true, text: '$/kWh', color: '#a0a0b0' },
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#a0a0b0' }
+                    },
+                    x: {
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: '#a0a0b0' }
+                    }
+                }
+            }
+        });
+
+        // Market Share Chart
+        const marketCtx = document.getElementById('marketChart').getContext('2d');
+        new Chart(marketCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['LFP', 'NMC/NCA', 'Na-ion', 'Other'],
+                datasets: [{
+                    data: [45, 40, 10, 5],
+                    backgroundColor: ['#00D4AA', '#64B4FF', '#FF6B35', '#FFB838'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: '#a0a0b0', padding: 20 }
+                    }
+                }
+            }
+        });
+
+        // Intersection Observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.company-card, .app-card, .advantage-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

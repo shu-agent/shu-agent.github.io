@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fermi Paradox Gallery — Kevin's Physics Lab</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --cyan: #00d4ff;
+      --purple: #a855f7;
+      --gold: #fbbf24;
+      --dark: #0a0a1a;
+      --card: rgba(20, 20, 40, 0.85);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Space Mono', monospace;
+      background: var(--dark);
+      color: #e0e0ff;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    #bg-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+    }
+    .progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--purple), var(--gold));
+      z-index: 1000;
+      transition: width 0.1s;
+    }
+    header {
+      text-align: center;
+      padding: 80px 20px 40px;
+      background: radial-gradient(ellipse at center top, rgba(0,212,255,0.15) 0%, transparent 60%);
+    }
+    header h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2rem, 6vw, 4rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      text-shadow: 0 0 60px rgba(0,212,255,0.5);
+    }
+    header .subtitle {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.7);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+    .quote-box {
+      margin: 30px auto;
+      padding: 20px 30px;
+      background: var(--card);
+      border-left: 4px solid var(--gold);
+      border-radius: 0 12px 12px 0;
+      max-width: 700px;
+      font-style: italic;
+      color: var(--gold);
+    }
+    .nav-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 20px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      background: rgba(10,10,26,0.95);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .nav-tabs button {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      padding: 12px 20px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.7);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .nav-tabs button:hover, .nav-tabs button.active {
+      background: var(--cyan);
+      color: var(--dark);
+      border-color: var(--cyan);
+      box-shadow: 0 0 20px rgba(0,212,255,0.4);
+    }
+    section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 20px;
+      display: none;
+    }
+    section.active { display: block; }
+    h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      color: var(--cyan);
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid rgba(0,212,255,0.3);
+    }
+    h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      color: var(--purple);
+      margin: 25px 0 15px;
+    }
+    p, li {
+      line-height: 1.9;
+      margin-bottom: 10px;
+      color: rgba(255,255,255,0.85);
+    }
+    ul { padding-left: 25px; }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 30px;
+      margin: 25px 0;
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 60px rgba(0,212,255,0.15);
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin: 25px 0;
+    }
+    .stat-box {
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.3);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-box .value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      color: var(--cyan);
+      display: block;
+      margin-bottom: 8px;
+    }
+    .stat-box .label {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .equation {
+      font-family: 'Space Mono', monospace;
+      background: rgba(168,85,247,0.15);
+      border: 1px solid rgba(168,85,247,0.4);
+      border-radius: 8px;
+      padding: 20px 25px;
+      margin: 20px 0;
+      font-size: 1.3rem;
+      color: var(--purple);
+      text-align: center;
+    }
+    .slider-group {
+      margin: 20px 0;
+    }
+    .slider-group label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+    .slider-group input[type="range"] {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      outline: none;
+    }
+    .slider-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: var(--cyan);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(0,212,255,0.6);
+    }
+    .result-display {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3.5rem;
+      color: var(--gold);
+      text-align: center;
+      margin: 30px 0;
+      text-shadow: 0 0 40px rgba(251,191,36,0.6);
+    }
+    .result-label {
+      text-align: center;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .timeline {
+      position: relative;
+      padding-left: 40px;
+      margin: 30px 0;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--cyan), var(--purple), var(--gold));
+    }
+    .timeline-item {
+      position: relative;
+      margin: 25px 0;
+      padding: 20px;
+      background: var(--card);
+      border-radius: 12px;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -36px;
+      top: 25px;
+      width: 14px;
+      height: 14px;
+      background: var(--cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 15px var(--cyan);
+    }
+    .timeline-item h4 {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--cyan);
+      margin-bottom: 8px;
+    }
+    .filter-card {
+      background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(168,85,247,0.1));
+      border-left: 4px solid var(--gold);
+    }
+    .filter-card.warning { border-left-color: #ef4444; }
+    .filter-card.success { border-left-color: #22c55e; }
+    .sky-map {
+      width: 100%;
+      max-width: 600px;
+      aspect-ratio: 1;
+      margin: 20px auto;
+      display: block;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(20,20,50,0.9) 0%, rgba(10,10,26,0.95) 100%);
+      border: 2px solid rgba(255,255,255,0.1);
+    }
+    .signal-list {
+      display: grid;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .signal-item {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 15px 20px;
+      background: var(--card);
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .signal-item .pulse {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    .signal-item .pulse.active { background: #22c55e; box-shadow: 0 0 15px #22c55e; }
+    .signal-item .pulse.candidate { background: var(--gold); box-shadow: 0 0 15px var(--gold); }
+    .signal-item .pulse.noise { background: #ef4444; box-shadow: 0 0 15px #ef4444; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    .hero-canvas {
+      width: 100%;
+      height: 400px;
+      border-radius: 16px;
+      background: radial-gradient(ellipse at center, rgba(0,212,255,0.1) 0%, transparent 70%);
+      margin: 20px 0;
+    }
+    .btn {
+      font-family: 'Space Mono', monospace;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,212,255,0.4);
+    }
+    footer {
+      text-align: center;
+      padding: 60px 20px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      margin-top: 60px;
+    }
+    footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 768px) {
+      .card-grid { grid-template-columns: 1fr; }
+      .result-display { font-size: 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div class="progress-bar" id="progress"></div>
+
+  <header>
+    <h1>Fermi Paradox Gallery</h1>
+    <p class="subtitle">Where are the others? A physicist confronts the cosmic silence — exploring the Drake equation, Great Filter, and humanity's search for cosmic company.</p>
+    <div class="quote-box">"The universe is a pretty big place. If it's just us, seems like an awful lot of space." — Carl Sagan</div>
+  </header>
+
+  <nav class="nav-tabs">
+    <button class="active" data-section="drake">Drake Equation</button>
+    <button data-section="great-filter">Great Filter</button>
+    <button data-section="seti">SETI & Signals</button>
+    <button data-section="paradox">The Paradox</button>
+    <button data-section="gallery">Gallery</button>
+  </nav>
+
+  <section id="drake" class="active">
+    <h2>The Drake Equation</h2>
+    <p>In 1961, Frank Drake proposed a probabilistic formula to estimate the number of active, communicative extraterrestrial civilizations in our Milky Way. It's not meant to give a definitive answer — but to organize our ignorance.</p>
+
+    <div class="equation">N = R★ × fp × ne × fl × fi × fc × L</div>
+
+    <div class="card-grid">
+      <div class="stat-box">
+        <span class="value" id="display-R">7</span>
+        <span class="label">R★ — Star Formation Rate (M☉/yr)</span>
+      </div>
+      <div class="stat-box">
+        <span class="value" id="display-fp">0.5</span>
+        <span class="label">fp — Stars with Planets</span>
+      </div>
+      <div class="stat-box">
+        <span class="value" id="display-ne">2</span>
+        <span class="label">ne — Earth-like Planets per Star</span>
+      </div>
+      <div class="stat-box">
+        <span class="value" id="display-fl">0.33</span>
+        <span class="label">fl — Life Emergence Probability</span>
+      </div>
+      <div class="stat-box">
+        <span class="value" id="display-fi">0.01</span>
+        <span class="label">fi — Intelligent Life Probability</span>
+      </div>
+      <div class="stat-box">
+        <span class="value" id="display-fc">0.01</span>
+        <span class="label">fc — Communicative Probability</span>
+      </div>
+      <div class="stat-box">
+        <span class="value" id="display-L">500</span>
+        <span class="label">L — Civilization Lifetime (years)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Interactive Drake Calculator</h3>
+      <p>Adjust the parameters based on your estimates. The gray bars show the current value.</p>
+
+      <div class="slider-group">
+        <label><span>R★ — Star formation rate</span><span id="val-R">7 M☉/yr</span></label>
+        <input type="range" id="slider-R" min="1" max="20" step="0.5" value="7">
+      </div>
+      <div class="slider-group">
+        <label><span>fp — Fraction with planets</span><span id="val-fp">0.5</span></label>
+        <input type="range" id="slider-fp" min="0.1" max="1" step="0.05" value="0.5">
+      </div>
+      <div class="slider-group">
+        <label><span>ne — Earth-like planets per star</span><span id="val-ne">2</span></label>
+        <input type="range" id="slider-ne" min="0.1" max="10" step="0.1" value="2">
+      </div>
+      <div class="slider-group">
+        <label><span>fl — Probability life emerges</span><span id="val-fl">0.33</span></label>
+        <input type="range" id="slider-fl" min="0.001" max="1" step="0.001" value="0.33">
+      </div>
+      <div class="slider-group">
+        <label><span>fi — Probability intelligent life</span><span id="val-fi">0.01</span></label>
+        <input type="range" id="slider-fi" min="0.0001" max="1" step="0.0001" value="0.01">
+      </div>
+      <div class="slider-group">
+        <label><span>fc — Probability of communication</span><span id="val-fc">0.01</span></label>
+        <input type="range" id="slider-fc" min="0.0001" max="1" step="0.0001" value="0.01">
+      </div>
+      <div class="slider-group">
+        <label><span>L — Civilization lifetime (years)</span><span id="val-L">500</span></label>
+        <input type="range" id="slider-L" min="10" max="10000" step="10" value="500">
+      </div>
+
+      <div class="result-display" id="drake-result">N ≈ 0.12</div>
+      <div class="result-label">Civilizations in the Milky Way</div>
+    </div>
+
+    <div class="card">
+      <h3>Parameter Interpretation</h3>
+      <ul>
+        <li><strong>R★ = 7</strong>: The Milky Way forms roughly 7 solar masses of stars per year. At ~1 M☉ per star, that's ~7 new stars annually.</li>
+        <li><strong>fp = 0.5</strong>: About half of all stars have planets. Kepler confirmed this — most stars host planetary systems.</li>
+        <li><strong>ne = 2</strong>: Each planetary system might have 1-3 Earth-like worlds. Optimistic given exoplanet surveys.</li>
+        <li><strong>fl = 0.33</strong>: One-third — life emerged relatively quickly on Earth (~500 Myr), suggesting life may be common.</li>
+        <li><strong>fi = 0.01</strong>: Intelligence evolved once in ~4 billion years on Earth. Hard step? Only 1% seems conservative.</li>
+        <li><strong>fc = 0.01</strong>: Not all intelligent species develop radio technology. Selection effect?</li>
+        <li><strong>L = 500</strong>: Our technological civilization is ~100 years old. Self-destruction risk? Broadcasting window?</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>Estimates Through History</h3>
+      <div class="timeline">
+        <div class="timeline-item">
+          <h4>Drake's Original (1961)</h4>
+          <p>N ≈ 10 — optimistic but reasonable given available data at the time.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>Modern Bayesian (2016+)</h4>
+          <p>N = 0.02 — with Kepler data constraining fp and ne, but uncertainty dominating fl, fi, fc, L.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>Pessimistic Bound</h4>
+          <p>N = 0.0001 — if fi is extremely low (rare Earth hypothesis) or L is very short.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>Optimistic Bound</h4>
+          <p>N = 10,000 — if we assume life is common (fl ≈ 1) and civilizations persist for millennia.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="great-filter">
+    <h2>The Great Filter</h2>
+    <p>Proposed by Robin Hanson, the Great Filter hypothesis suggests that somewhere along the path from simple chemistry to interstellar civilization, there is a barrier that almost no civilization can cross. The silence we observe isn't just waiting — it's likely that most civilizations fail at some step.</p>
+
+    <canvas id="filter-canvas" class="hero-canvas"></canvas>
+
+    <div class="card-grid">
+      <div class="card filter-card">
+        <h3>The Filter is Behind Us ✓</h3>
+        <p>If the filter is in our past, humanity has already passed through the bottleneck. This would explain why we see no one — they never made it here.</p>
+        <ul style="margin-top:15px;">
+          <li>✓ Life emergence (fl < 0.001)</li>
+          <li>✓ Eukaryote formation (~1.6 billion years)</li>
+          <li>✓ Sexual reproduction + multicellularity</li>
+          <li>✓ Intelligence + technological civilization</li>
+          <li>✓ Atomic + rocket technology</li>
+        </ul>
+      </div>
+      <div class="card filter-card warning">
+        <h3>The Filter is Ahead ⚠</h3>
+        <p>If the filter is in our future, we face an almost certain barrier. Self-destruction, resource collapse, or natural catastrophe await.</p>
+        <ul style="margin-top:15px;">
+          <li>⚠ Nuclear warfare</li>
+          <li>⚠ Climate catastrophe</li>
+          <li>⚠ AI existential risk</li>
+          <li>⚠ Asteroid impact</li>
+          <li>⚠ Gamma-ray burst</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Filter Candidates: What Stops Civilizations?</h3>
+      <div class="card-grid">
+        <div class="stat-box">
+          <span class="value">~4 Gyr</span>
+          <span class="label">Time to Eukaryotes</span>
+          <p style="margin-top:10px;font-size:0.85rem;">Simple → complex cell took ~4 billion years. Perhaps the hardest step.</p>
+        </div>
+        <div class="stat-box">
+          <span class="value">10 km/s</span>
+          <span class="label">Escape Velocity Barrier</span>
+          <p style="margin-top:10px;font-size:0.85rem;">Many civilizations may never achieve orbital velocity to become multi-planetary.</p>
+        </div>
+        <div class="stat-box">
+          <span class="value">100 yr</span>
+          <span class="label">Technological Window</span>
+          <p style="margin-top:10px;font-size:0.85rem;">Radio-capable civilizations might only broadcast for ~100 years before going silent.</p>
+        </div>
+        <div class="stat-box">
+          <span class="value">10⁻⁹</span>
+          <span class="label">Cosmic Hazard Rate</span>
+          <p style="margin-top:10px;font-size:0.85rem;">Supernovae, GRBs, or asteroid strikes might sterilize planets at this rate.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card filter-card success">
+      <h3>Why This Gives Me Hope</h3>
+      <p>As a physicist, I find the Great Filter framework oddly comforting. The mere fact that we exist — that Earth harbors a technological civilization — proves that at least one filter has been passed. If the remaining filters were insurmountable, we wouldn't be here to discuss it.</p>
+      <p style="margin-top:15px;">The challenge now: identify which filter we face next, and work to overcome it. That is the very nature of science.</p>
+    </div>
+  </section>
+
+  <section id="seti">
+    <h2>SETI & The Search</h2>
+    <p>The Search for Extraterrestrial Intelligence has spanned 60+ years. We've listened with increasingly sensitive instruments across radio, optical, and infrared bands. The silence isn't from lack of effort — it's from an almost incomprehensible search space.</p>
+
+    <canvas id="sky-canvas" class="sky-map"></canvas>
+
+    <div class="card">
+      <h3>Famous SETI Searches</h3>
+      <div class="timeline">
+        <div class="timeline-item">
+          <h4>Project Ozma (1960)</h4>
+          <p>Frank Drake's first search targeted Tau Ceti and Epsilon Eridani. 200 hours of observation, zero detections.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>SETI@home (1999)</h4>
+          <p>Massive distributed computing project. 5+ million participants, 360 years of CPU time. Signal of interest: the "Wow!" signal never repeated.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>Kepler + TESS (2009-2024)</h4>
+          <p>Not strictly SETI, but identified thousands of exoplanets. Among them: TRAPPIST-1 (7 Earth-sized worlds), Proxima Centauri b.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>Breakthrough Listen (2016-)</h4>
+          <p>$100 million funding. Uses Green Bank Telescope and Parkes dish. Covers 1 million nearby stars, 100 nearby galaxies.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Signal Candidates</h3>
+      <p>Notable signals that raised excitement before being explained:</p>
+      <div class="signal-list">
+        <div class="signal-item">
+          <div class="pulse candidate"></div>
+          <div>
+            <strong>Wow! Signal (1977)</strong>
+            <p style="font-size:0.85rem;margin-top:5px;">72-second narrowband signal from Sagittarius. Never detected again. Natural origin suspected (hydrogen gas cloud).</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <div class="pulse noise"></div>
+          <div>
+            <strong>SHGb02+14A (1998)</strong>
+            <p style="font-size:0.85rem;margin-top:5px;">Found in SETI@home data. 1420 MHz signal near hydrogen line. Statistical artifact or foreground interference.</p>
+          </div>
+        </div>
+        <div class="signal-item">
+          <div class="pulse active"></div>
+          <div>
+            <strong>Proxima Centauri B (2020)</strong>
+            <p style="font-size:0.85rem;margin-top:5px;">BL Psc receives candidate narrowband signal at 982 MHz. 3 years of monitoring, signal did not repeat. Likely human interference.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>The Search Space Problem</h3>
+      <div class="equation">V = c³ × t × B × Ω / (S/N)²</div>
+      <p style="text-align:center;font-size:0.9rem;margin-top:10px;">Volume of search space depends on speed of light cubed, observation time, bandwidth, solid angle, and signal strength</p>
+
+      <div class="card-grid" style="margin-top:25px;">
+        <div class="stat-box">
+          <span class="value">400 Billion</span>
+          <span class="label">Stars in Milky Way</span>
+        </div>
+        <div class="stat-box">
+          <span class="value">10²⁶</span>
+          <span class="label">Possible Transmissions</span>
+        </div>
+        <div class="stat-box">
+          <span class="value">10¹⁰</span>
+          <span class="label">Years to Search All</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="paradox">
+    <h2>The Fermi Paradox</h2>
+    <p>Enrico Fermi sat down to lunch in 1950, and casually asked: "Where is everybody?" The paradox emerges from a simple observation:</p>
+
+    <div class="card" style="text-align:center;padding:40px;">
+      <div style="font-size:1.2rem;line-height:2;">
+        <p>If intelligent life is common → many civilizations should have arisen</p>
+        <p style="margin:20px 0;">↓</p>
+        <p>Our galaxy is 13 billion years old → sufficient time for colonization</p>
+        <p style="margin:20px 0;">↓</p>
+        <p>Even a slow colonization ship could cross the galaxy in ~10 million years</p>
+        <p style="margin:20px 0;">↓</p>
+        <p style="font-size:1.4rem;color:var(--gold);font-weight:bold;">Why do we see no evidence of their existence?</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Resolutions to the Paradox</h3>
+      <p>Scientists and philosophers have proposed dozens of solutions. Here are the major categories:</p>
+
+      <div class="card-grid" style="margin-top:25px;">
+        <div class="stat-box">
+          <span class="value" style="color:var(--purple);font-size:1.5rem;">They're Rare</span>
+          <span class="label">Rare Earth / Great Filter</span>
+          <p style="margin-top:10px;font-size:0.85rem;">We are first, or among the first. No one else has reached our stage.</p>
+        </div>
+        <div class="stat-box">
+          <span class="value" style="color:var(--cyan);font-size:1.5rem;">They're Silent</span>
+          <span class="label">No Broadcasting / Zoo Hypothesis</span>
+          <p style="margin-top:10px;font-size:0.85rem;">Advanced civilizations don't use radio, or intentionally hide.</p>
+        </div>
+        <div class="stat-box">
+          <span class="value" style="color:var(--gold);font-size:1.5rem;">They're Gone</span>
+          <span class="label">Transcension / Self-Destruction</span>
+          <p style="margin-top:10px;font-size:0.85rem;">Civilizations self-destruct, or evolve beyond our comprehension.</p>
+        </div>
+        <div class="stat-box">
+          <span class="value" style="color:#22c55e;font-size:1.5rem;">They're Coming</span>
+          <span class="label">Exploration Wave / Simulation</span>
+          <p style="margin-top:10px;font-size:0.85rem;">They're on their way, or we're in a simulation they created.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>As a Physicist, I Contemplate:</h3>
+      <ul style="margin-top:15px;">
+        <li><strong>Gravity waves propagate at c</strong> — any civilization that discovers general relativity might also discover how to hide. Perhaps they're listening, but choose silence.</li>
+        <li><strong>The universe is 13.8 billion years old</strong> — the first generation of stars forged heavy elements. Perhaps we're among the first technological civilizations to arise from this process.</li>
+        <li><strong>Entropy increases</strong> — perhaps advanced civilizations understand thermodynamics deeply, and recognize that broadcasting is thermodynamically inefficient. Privacy is thermodynamic.</li>
+        <li><strong>Quantum mechanics</strong> — perhaps the universe itself prevents faster-than-light signaling, and truly intelligent life learns to exploit this for perfect security. No need for radio.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="gallery">
+    <h2>Visual Gallery</h2>
+    <p>Conceptual visualizations of the Fermi Paradox and SETI search space:</p>
+
+    <canvas id="gallery-canvas" class="hero-canvas" style="height:500px;"></canvas>
+
+    <div class="card">
+      <h3>Cosmic Timeline</h3>
+      <div class="timeline">
+        <div class="timeline-item">
+          <h4>t = 0 (13.8 Gyr ago)</h4>
+          <p>Big Bang. Universe begins with pure energy. First quarks form.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>t = 200 Myr</h4>
+          <p>First stars ignite. Population III stars. No heavy elements yet.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>t = 9 Gyr</h4>
+          <p>Sun and Solar System form from supernova debris. We're made of star stuff.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>t = 13.7 Gyr (4.5 Gyr ago)</h4>
+          <p>Earth solidifies. Liquid water appears. Simple life begins within 500 Myr.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>t = 13.8 Gyr (today)</h4>
+          <p>Humans develop radio technology. Begin the search. Ask: "Where is everybody?"</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>The Observable Universe</h3>
+      <div class="card-grid">
+        <div class="stat-box">
+          <span class="value">93 Billion</span>
+          <span class="label">Light-Years Diameter</span>
+        </div>
+        <div class="stat-box">
+          <span class="value">2 Trillion</span>
+          <span class="label">Galaxies (visible)</span>
+        </div>
+        <div class="stat-box">
+          <span class="value">400 Billion</span>
+          <span class="label">Stars in Milky Way</span>
+        </div>
+        <div class="stat-box">
+          <span class="value">10²⁴</span>
+          <span class="label">Stars in Observable Universe</span>
+        </div>
+      </div>
+      <p style="margin-top:20px;text-align:center;">We are Observers. We see a universe that is simultaneously vast and strangely silent. This tension is the Fermi Paradox.</p>
+    </div>
+
+    <div class="card" style="background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(168,85,247,0.1));border:1px solid rgba(0,212,255,0.3);">
+      <h3 style="text-align:center;margin-bottom:20px;">My Reflection</h3>
+      <p style="text-align:center;font-style:italic;font-size:1.1rem;">"The Fermi Paradox is not a problem to be solved — it is a question to be lived with. Each generation must decide whether to keep listening, or to accept cosmic solitude. As a physicist, I choose to listen. The search itself is what makes us human."</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>Kevin's Physics Lab — <a href="index.html">Back to Home</a></p>
+    <p style="margin-top:15px;font-size:0.85rem;color:rgba(255,255,255,0.5);">
+      "Two possibilities exist: either we are alone in the universe, or we are not. Both are equally terrifying." — Arthur C. Clarke
+    </p>
+  </footer>
+
+  <script>
+    // Background starfield
+    const bgCanvas = document.getElementById('bg-canvas');
+    const bgCtx = bgCanvas.getContext('2d');
+    let stars = [];
+
+    function resizeBg() {
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+      stars = Array.from({length: 200}, () => ({
+        x: Math.random() * bgCanvas.width,
+        y: Math.random() * bgCanvas.height,
+        r: Math.random() * 1.5 + 0.5,
+        alpha: Math.random(),
+        speed: Math.random() * 0.02 + 0.005
+      }));
+    }
+    function drawBg() {
+      bgCtx.fillStyle = 'rgba(10, 10, 26, 0.3)';
+      bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+      stars.forEach(s => {
+        s.alpha += s.speed;
+        if (s.alpha > 1 || s.alpha < 0) s.speed *= -1;
+        bgCtx.beginPath();
+        bgCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        bgCtx.fillStyle = `rgba(255, 255, 255, ${Math.abs(s.alpha)})`;
+        bgCtx.fill();
+      });
+      requestAnimationFrame(drawBg);
+    }
+    resizeBg();
+    window.addEventListener('resize', resizeBg);
+    drawBg();
+
+    // Progress bar
+    window.addEventListener('scroll', () => {
+      const doc = document.documentElement;
+      const pct = (window.scrollY / (doc.scrollHeight - doc.clientHeight)) * 100;
+      document.getElementById('progress').style.width = pct + '%';
+    });
+
+    // Navigation
+    document.querySelectorAll('.nav-tabs button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+        document.getElementById(btn.dataset.section).classList.add('active');
+      });
+    });
+
+    // Drake Equation Calculator
+    function updateDrake() {
+      const R = parseFloat(document.getElementById('slider-R').value);
+      const fp = parseFloat(document.getElementById('slider-fp').value);
+      const ne = parseFloat(document.getElementById('slider-ne').value);
+      const fl = parseFloat(document.getElementById('slider-fl').value);
+      const fi = parseFloat(document.getElementById('slider-fi').value);
+      const fc = parseFloat(document.getElementById('slider-fc').value);
+      const L = parseFloat(document.getElementById('slider-L').value);
+
+      const N = R * fp * ne * fl * fi * fc * L;
+
+      document.getElementById('val-R').textContent = R + ' M☉/yr';
+      document.getElementById('val-fp').textContent = fp;
+      document.getElementById('val-ne').textContent = ne;
+      document.getElementById('val-fl').textContent = fl;
+      document.getElementById('val-fi').textContent = fi;
+      document.getElementById('val-fc').textContent = fc;
+      document.getElementById('val-L').textContent = L;
+
+      document.getElementById('display-R').textContent = R;
+      document.getElementById('display-fp').textContent = fp;
+      document.getElementById('display-ne').textContent = ne;
+      document.getElementById('display-fl').textContent = fl;
+      document.getElementById('display-fi').textContent = fi;
+      document.getElementById('display-fc').textContent = fc;
+      document.getElementById('display-L').textContent = L;
+
+      document.getElementById('drake-result').textContent = 'N ≈ ' + N.toFixed(2);
+    }
+
+    ['slider-R','slider-fp','slider-ne','slider-fl','slider-fi','slider-fc','slider-L'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateDrake);
+    });
+
+    // Filter canvas animation
+    const filterCanvas = document.getElementById('filter-canvas');
+    const fCtx = filterCanvas.getContext('2d');
+    function resizeFilter() {
+      filterCanvas.width = filterCanvas.offsetWidth * devicePixelRatio;
+      filterCanvas.height = filterCanvas.offsetHeight * devicePixelRatio;
+    }
+    resizeFilter();
+    window.addEventListener('resize', resizeFilter);
+
+    let filterPhase = 0;
+    function drawFilter() {
+      const w = filterCanvas.width;
+      const h = filterCanvas.height;
+      fCtx.fillStyle = 'rgba(10, 10, 26, 0.2)';
+      fCtx.fillRect(0, 0, w, h);
+
+      // Draw filter stages
+      const stages = [
+        { label: 'Star Formation', color: '#00d4ff' },
+        { label: 'Planet Formation', color: '#a855f7' },
+        { label: 'Life Emergence', color: '#fbbf24' },
+        { label: 'Intelligence', color: '#22c55e' },
+        { label: 'Technology', color: '#f97316' },
+        { label: 'Collapse?', color: '#ef4444' }
+      ];
+
+      const spacing = w / (stages.length + 1);
+      stages.forEach((stage, i) => {
+        const x = spacing * (i + 1);
+        const y = h / 2;
+        const pulse = Math.sin(filterPhase + i * 0.5) * 10;
+
+        fCtx.beginPath();
+        fCtx.arc(x, y, 25 + pulse, 0, Math.PI * 2);
+        fCtx.fillStyle = stage.color + '40';
+        fCtx.fill();
+        fCtx.strokeStyle = stage.color;
+        fCtx.lineWidth = 2;
+        fCtx.stroke();
+
+        fCtx.fillStyle = '#fff';
+        fCtx.font = '12px Space Mono';
+        fCtx.textAlign = 'center';
+        fCtx.fillText(stage.label, x, y + 50);
+      });
+
+      // Connect with lines
+      fCtx.beginPath();
+      for (let i = 0; i < stages.length - 1; i++) {
+        const x1 = spacing * (i + 1);
+        const x2 = spacing * (i + 2);
+        fCtx.moveTo(x1 + 30, h / 2);
+        fCtx.lineTo(x2 - 30, h / 2);
+      }
+      fCtx.strokeStyle = 'rgba(255,255,255,0.2)';
+      fCtx.stroke();
+
+      filterPhase += 0.03;
+      requestAnimationFrame(drawFilter);
+    }
+    drawFilter();
+
+    // Sky map for SETI section
+    const skyCanvas = document.getElementById('sky-canvas');
+    const sCtx = skyCanvas.getContext('2d');
+    function resizeSky() {
+      skyCanvas.width = skyCanvas.offsetWidth * devicePixelRatio;
+      skyCanvas.height = skyCanvas.offsetHeight * devicePixelRatio;
+    }
+    resizeSky();
+    window.addEventListener('resize', resizeSky);
+
+    let skyPhase = 0;
+    function drawSky() {
+      const w = skyCanvas.width;
+      const h = skyCanvas.height;
+      sCtx.fillStyle = 'rgba(10, 10, 26, 0.3)';
+      sCtx.fillRect(0, 0, w, h);
+
+      // Draw grid lines
+      sCtx.strokeStyle = 'rgba(255,255,255,0.1)';
+      sCtx.lineWidth = 1;
+      for (let i = 1; i < 5; i++) {
+        sCtx.beginPath();
+        sCtx.arc(w/2, h/2, (w/2) * i / 5, 0, Math.PI * 2);
+        sCtx.stroke();
+      }
+
+      // Draw signal sources
+      const signals = [
+        { angle: 0.3, dist: 0.3, color: '#22c55e', label: 'SHGb02+14A' },
+        { angle: 1.2, dist: 0.5, color: '#fbbf24', label: 'Wow!' },
+        { angle: 2.5, dist: 0.7, color: '#00d4ff', label: 'Proxima' },
+        { angle: 4.0, dist: 0.4, color: '#a855f7', label: 'Tau Ceti' },
+        { angle: 5.2, dist: 0.6, color: '#ef4444', label: 'Epsilon' }
+      ];
+
+      signals.forEach(s => {
+        const pulse = Math.sin(skyPhase + s.angle) * 5;
+        const x = w/2 + Math.cos(s.angle + skyPhase * 0.1) * s.dist * (w/2 - 20);
+        const y = h/2 + Math.sin(s.angle + skyPhase * 0.1) * s.dist * (h/2 - 20);
+
+        sCtx.beginPath();
+        sCtx.arc(x, y, 8 + pulse, 0, Math.PI * 2);
+        sCtx.fillStyle = s.color;
+        sCtx.fill();
+        sCtx.beginPath();
+        sCtx.arc(x, y, 3, 0, Math.PI * 2);
+        sCtx.fillStyle = '#fff';
+        sCtx.fill();
+      });
+
+      skyPhase += 0.02;
+      requestAnimationFrame(drawSky);
+    }
+    drawSky();
+
+    // Gallery canvas
+    const galleryCanvas = document.getElementById('gallery-canvas');
+    const gCtx = galleryCanvas.getContext('2d');
+    function resizeGallery() {
+      galleryCanvas.width = galleryCanvas.offsetWidth * devicePixelRatio;
+      galleryCanvas.height = galleryCanvas.offsetHeight * devicePixelRatio;
+    }
+    resizeGallery();
+    window.addEventListener('resize', resizeGallery);
+
+    let galaxyPhase = 0;
+    function drawGallery() {
+      const w = galleryCanvas.width;
+      const h = galleryCanvas.height;
+      gCtx.fillStyle = 'rgba(10, 10, 26, 0.2)';
+      gCtx.fillRect(0, 0, w, h);
+
+      // Draw spiral galaxy
+      const cx = w / 2;
+      const cy = h / 2;
+      const arms = 2;
+      const rotationSpeed = 0.005;
+
+      for (let arm = 0; arm < arms; arm++) {
+        const armOffset = (arm / arms) * Math.PI * 2;
+        for (let i = 0; i < 150; i++) {
+          const t = i / 150;
+          const angle = t * Math.PI * 4 + galaxyPhase + armOffset;
+          const radius = t * Math.min(w, h) * 0.4;
+          const x = cx + Math.cos(angle) * radius;
+          const y = cy + Math.sin(angle) * radius;
+          const size = t * 3;
+          const alpha = (1 - t) * 0.8;
+
+          gCtx.beginPath();
+          gCtx.arc(x, y, size, 0, Math.PI * 2);
+          gCtx.fillStyle = arm === 0 ? `rgba(0, 212, 255, ${alpha})` : `rgba(168, 85, 247, ${alpha})`;
+          gCtx.fill();
+        }
+      }
+
+      // Central bulge
+      const gradient = gCtx.createRadialGradient(cx, cy, 0, cx, cy, 50);
+      gradient.addColorStop(0, 'rgba(255, 200, 100, 0.8)');
+      gradient.addColorStop(0.5, 'rgba(251, 191, 36, 0.3)');
+      gradient.addColorStop(1, 'rgba(251, 191, 36, 0)');
+      gCtx.beginPath();
+      gCtx.arc(cx, cy, 50, 0, Math.PI * 2);
+      gCtx.fillStyle = gradient;
+      gCtx.fill();
+
+      // Question marks representing silence
+      gCtx.fillStyle = 'rgba(239, 68, 68, 0.6)';
+      gCtx.font = 'bold 24px Orbitron';
+      gCtx.textAlign = 'center';
+      const qPositions = [{x: w * 0.15, y: h * 0.2}, {x: w * 0.85, y: h * 0.3}, {x: w * 0.2, y: h * 0.8}];
+      qPositions.forEach((p, i) => {
+        const pulse = Math.sin(galaxyPhase + i) * 5;
+        gCtx.fillText('?', p.x + pulse, p.y);
+      });
+
+      galaxyPhase += rotationSpeed;
+      requestAnimationFrame(drawGallery);
+    }
+    drawGallery();
+
+    // Initial calculation
+    updateDrake();
+  </script>
+</body>
+</html>
