@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Constants Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Starfield Background */
+        .starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Header */
+        header {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 40px 20px 20px;
+            background: linear-gradient(180deg, rgba(10,10,15,0.9) 0%, transparent 100%);
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d4ff, #a855f7, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: #888;
+            letter-spacing: 2px;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-tab {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #aaa;
+            padding: 12px 24px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .nav-tab:hover {
+            background: rgba(168,85,247,0.2);
+            border-color: #a855f7;
+            color: #fff;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, rgba(0,212,255,0.3), rgba(168,85,247,0.3));
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+
+        /* Main Content */
+        main {
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Hero Canvas */
+        .hero-canvas-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(0,212,255,0.2);
+            background: rgba(0,0,0,0.3);
+        }
+
+        #heroCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(0,212,255,0.3);
+            box-shadow: 0 0 30px rgba(0,212,255,0.1);
+        }
+
+        .card h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            color: #00d4ff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #00d4ff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00d4ff;
+        }
+
+        /* Constants Grid */
+        .constants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .constant-item {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .constant-item:hover {
+            border-color: rgba(168,85,247,0.5);
+            transform: translateY(-2px);
+        }
+
+        .constant-name {
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .constant-symbol {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: #a855f7;
+            margin-bottom: 5px;
+        }
+
+        .constant-value {
+            font-size: 1rem;
+            color: #fff;
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+
+        .constant-unit {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .constant-description {
+            font-size: 0.8rem;
+            color: #555;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+
+        /* Equation Box */
+        .equation-box {
+            background: rgba(0,212,255,0.1);
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.2rem;
+            color: #00d4ff;
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .comparison-table th {
+            color: #a855f7;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .comparison-table td {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        .comparison-table tr:hover td {
+            background: rgba(168,85,247,0.1);
+        }
+
+        /* Scale Visualization */
+        .scale-container {
+            position: relative;
+            height: 400px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        #scaleCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Planck Units Grid */
+        .planck-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .planck-item {
+            background: rgba(0,0,0,0.4);
+            border-left: 3px solid #ff6b6b;
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .planck-symbol {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            color: #ff6b6b;
+        }
+
+        .planck-name {
+            font-size: 0.8rem;
+            color: #888;
+            margin: 5px 0;
+        }
+
+        .planck-value {
+            font-size: 0.9rem;
+            color: #fff;
+        }
+
+        /* Dimensionless Ratios */
+        .ratio-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .ratio-name {
+            flex: 1;
+        }
+
+        .ratio-symbol {
+            font-family: 'Orbitron', sans-serif;
+            color: #a855f7;
+            margin-right: 20px;
+        }
+
+        .ratio-value {
+            font-size: 1.2rem;
+            color: #00d4ff;
+            font-weight: bold;
+        }
+
+        /* Interactive Panel */
+        .interactive-panel {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(0,212,255,0.2);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            color: #00d4ff;
+            margin-bottom: 20px;
+        }
+
+        .slider-group {
+            margin-bottom: 20px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+
+        .slider-label span:first-child {
+            color: #888;
+        }
+
+        .slider-label span:last-child {
+            color: #00d4ff;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #00d4ff, #a855f7);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0,212,255,0.5);
+        }
+
+        .result-display {
+            background: rgba(0,212,255,0.1);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .result-label {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .result-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: #00d4ff;
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .info-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: #a855f7;
+            margin-bottom: 5px;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255,255,255,0.1);
+            z-index: 100;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #a855f7, #ff6b6b);
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .constants-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .planck-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <canvas class="starfield" id="starCanvas"></canvas>
+
+    <header>
+        <h1>PHYSICS CONSTANTS DASHBOARD</h1>
+        <p class="subtitle">FUNDAMENTAL CONSTANTS OF THE UNIVERSE</p>
+    </header>
+
+    <nav class="nav-tabs">
+        <button class="nav-tab active" data-section="overview">Overview</button>
+        <button class="nav-tab" data-section="mechanical">Mechanical</button>
+        <button class="nav-tab" data-section="electromagnetic">Electromagnetic</button>
+        <button class="nav-tab" data-section="thermodynamic">Thermodynamic</button>
+        <button class="nav-tab" data-section="planck">Planck Units</button>
+        <button class="nav-tab" data-section="dimensionless">Dimensionless</button>
+        <button class="nav-tab" data-section="calculator">Calculator</button>
+    </nav>
+
+    <main>
+        <!-- Overview Section -->
+        <section id="overview" class="section active">
+            <div class="hero-canvas-container">
+                <canvas id="heroCanvas"></canvas>
+            </div>
+
+            <div class="card">
+                <h2>The Architecture of Reality</h2>
+                <p style="color: #888; line-height: 1.8; margin-bottom: 20px;">
+                    The universe is built on a handful of fundamental constants. These unchanging numbers define everything from the smallest atom to the largest galaxy. Unlike physical laws, which are human descriptions of nature, constants are nature itself — the DNA of reality.
+                </p>
+
+                <div class="equation-box">
+                    "The fundamental constants of physics are the most precise facts we know about the universe."
+                </div>
+
+                <div class="info-grid" style="margin-top: 30px;">
+                    <div class="info-item">
+                        <div class="info-value">26</div>
+                        <div class="info-label">Fundamental Constants</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-value">5</div>
+                        <div class="info-label">Dimensionless Ratios</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-value">5</div>
+                        <div class="info-label">Planck Units</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-value">10<sup>40</sup></div>
+                        <div class="info-label">Scale Span</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Why Constants Matter</h2>
+                <div class="constants-grid">
+                    <div class="constant-item">
+                        <div class="constant-name">Fine-Structure Constant</div>
+                        <div class="constant-symbol">α</div>
+                        <div class="constant-value">1/137.036 ≈ 0.007297</div>
+                        <div class="constant-unit">dimensionless</div>
+                        <div class="constant-description">The strength of electromagnetic interaction. If it were different by 4%, stellar carbon could not form.</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Proton-to-Electron Mass Ratio</div>
+                        <div class="constant-symbol">m<sub>p</sub>/m<sub>e</sub></div>
+                        <div class="constant-value">1836.152</div>
+                        <div class="constant-unit">dimensionless</div>
+                        <div class="constant-description">This ratio determines chemistry. Change it slightly and water molecules behave differently.</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Cosmological Constant</div>
+                        <div class="constant-symbol">Λ</div>
+                        <div class="constant-value">1.1 × 10⁻⁵²</div>
+                        <div class="constant-unit">m⁻²</div>
+                        <div class="constant-description">The universe's acceleration. Predicted by QFT as 10⁷⁶ larger — the worst prediction in physics.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mechanical Constants -->
+        <section id="mechanical" class="section">
+            <div class="card">
+                <h2>Mechanical Constants</h2>
+                <p style="color: #888; margin-bottom: 20px;">Constants governing motion, gravity, and the fabric of spacetime.</p>
+
+                <div class="constants-grid">
+                    <div class="constant-item">
+                        <div class="constant-name">Speed of Light</div>
+                        <div class="constant-symbol">c</div>
+                        <div class="constant-value">299,792,458</div>
+                        <div class="constant-unit">m/s (exact by definition)</div>
+                        <div class="constant-description">The universal speed limit. Nothing with mass can reach it; massless particles always travel at c.</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Gravitational Constant</div>
+                        <div class="constant-symbol">G</div>
+                        <div class="constant-value">6.67430 × 10⁻¹¹</div>
+                        <div class="constant-unit">m³ kg⁻¹ s⁻²</div>
+                        <div class="constant-description">Governs the strength of gravity. One of the least precisely measured constants.</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Planck's Constant</div>
+                        <div class="constant-symbol">ℏ</div>
+                        <div class="constant-value">1.054571817 × 10⁻³⁴</div>
+                        <div class="constant-unit">J·s</div>
+                        <div class="constant-description">The quantum of action. Relates energy to frequency: E = ℏω.</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Planck Length</div>
+                        <div class="constant-symbol">l<sub>P</sub></div>
+                        <div class="constant-value">1.616255 × 10⁻³⁵</div>
+                        <div class="constant-unit">m</div>
+                        <div class="constant-description">The scale where quantum mechanics meets gravity. Where spacetime becomes "foamy."</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Planck Mass</div>
+                        <div class="constant-symbol">m<sub>P</sub></div>
+                        <div class="constant-value">2.176434 × 10⁻⁸</div>
+                        <div class="constant-unit">kg</div>
+                        <div class="constant-description">The mass where Schwarzschild radius equals Compton wavelength.</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Planck Time</div>
+                        <div class="constant-symbol">t<sub>P</sub></div>
+                        <div class="constant-value">5.391247 × 10⁻⁴⁴</div>
+                        <div class="constant-unit">s</div>
+                        <div class="constant-description">The time for light to cross Planck length. Time becomes discrete at this scale.</div>
+                    </div>
+                </div>
+
+                <div class="equation-box" style="margin-top: 30px;">
+                    l<sub>P</sub> = √(ℏG/c³) ≈ 1.616 × 10⁻³⁵ m
+                </div>
+            </div>
+        </section>
+
+        <!-- Electromagnetic Constants -->
+        <section id="electromagnetic" class="section">
+            <div class="card">
+                <h2>Electromagnetic Constants</h2>
+                <p style="color: #888; margin-bottom: 20px;">Constants defining electricity, magnetism, and light.</p>
+
+                <div class="constants-grid">
+                    <div class="constant-item">
+                        <div class="constant-name">Elementary Charge</div>
+                        <div class="constant-symbol">e</div>
+                        <div class="constant-value">1.602176634 × 10⁻¹⁹</div>
+                        <div class="constant-unit">C (exact by definition)</div>
+                        <div class="constant-description">The charge of a single proton (and magnitude of electron charge). The quantum of electric charge.</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Vacuum Permittivity</div>
+                        <div class="constant-symbol">ε₀</div>
+                        <div class="constant-value">8.8541878128 × 10⁻¹²</div>
+                        <div class="constant-unit">F/m</div>
+                        <div class="constant-description">The ability of free space to permit electric fields. Related to c by ε₀μ₀ = 1/c².</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Vacuum Permeability</div>
+                        <div class="constant-symbol">μ₀</div>
+                        <div class="constant-value">1.2566370621 × 10⁻⁶</div>
+                        <div class="constant-unit">N/A²</div>
+                        <div class="constant-description">The ability of free space to permit magnetic fields. μ₀ = 4π × 10⁻⁷ N/A² exactly.</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Fine-Structure Constant</div>
+                        <div class="constant-symbol">α</div>
+                        <div class="constant-value">7.2973525693 × 10⁻³</div>
+                        <div class="constant-unit">dimensionless</div>
+                        <div class="constant-description">α = e²/(4πε₀ℏc) ≈ 1/137. Measure of electromagnetic interaction strength.</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Magnetic Flux Quantum</div>
+                        <div class="constant-symbol">Φ₀</div>
+                        <div class="constant-value">2.067833848 × 10⁻¹⁵</div>
+                        <div class="constant-unit">Wb</div>
+                        <div class="constant-description">Φ₀ = h/2e. The quantum of magnetic flux in superconductors.</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Conductance Quantum</div>
+                        <div class="constant-symbol">G₀</div>
+                        <div class="constant-value">7.748091729 × 10⁻⁵</div>
+                        <div class="constant-unit">S</div>
+                        <div class="constant-description">G₀ = 2e²/h. The quantum of electrical conductance.</div>
+                    </div>
+                </div>
+
+                <div class="equation-box" style="margin-top: 30px;">
+                    c = 1/√(ε₀μ₀) → α = e²/(4πε₀ℏc) = e²/(2ε₀hc)
+                </div>
+            </div>
+        </section>
+
+        <!-- Thermodynamic Constants -->
+        <section id="thermodynamic" class="section">
+            <div class="card">
+                <h2>Thermodynamic Constants</h2>
+                <p style="color: #888; margin-bottom: 20px;">Constants governing heat, energy, and atomic behavior.</p>
+
+                <div class="constants-grid">
+                    <div class="constant-item">
+                        <div class="constant-name">Boltzmann Constant</div>
+                        <div class="constant-symbol">k<sub>B</sub></div>
+                        <div class="constant-value">1.380649 × 10⁻²³</div>
+                        <div class="constant-unit">J/K (exact by definition)</div>
+                        <div class="constant-description">Links temperature to energy. One molecule's thermal energy at 1 K ≈ k_B × 1 K.</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Avogadro's Number</div>
+                        <div class="constant-symbol">N<sub>A</sub></div>
+                        <div class="constant-value">6.02214076 × 10²³</div>
+                        <div class="constant-unit">mol⁻¹ (exact by definition)</div>
+                        <div class="constant-description">The number of particles in one mole. Define the kilogram in terms of atomic masses.</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Gas Constant</div>
+                        <div class="constant-symbol">R</div>
+                        <div class="constant-value">8.314462618</div>
+                        <div class="constant-unit">J mol⁻¹ K⁻¹</div>
+                        <div class="constant-description">R = N_A × k_B. Relates pressure, volume, and temperature in ideal gases.</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Stefan-Boltzmann Constant</div>
+                        <div class="constant-symbol">σ</div>
+                        <div class="constant-value">5.670374 × 10⁻⁸</div>
+                        <div class="constant-unit">W m⁻² K⁻⁴</div>
+                        <div class="constant-description">Radiated power per area: P/A = σT⁴. Blackbody radiation constant.</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">First Radiation Constant</div>
+                        <div class="constant-symbol">c₁</div>
+                        <div class="constant-value">3.741771852 × 10⁻¹⁶</div>
+                        <div class="constant-unit">W m²</div>
+                        <div class="constant-description">c₁ = 2πhc². Used in blackbody radiation calculations.</div>
+                    </div>
+                    <div class="constant-item">
+                        <div class="constant-name">Second Radiation Constant</div>
+                        <div class="constant-symbol">c₂</div>
+                        <div class="constant-value">1.191042972 × 10⁻²</div>
+                        <div class="constant-unit">W m² K</div>
+                        <div class="constant-description">c₂ = hc/k_B. Appears in Wien's displacement law: λ_max = c₂/T.</div>
+                    </div>
+                </div>
+
+                <div class="equation-box" style="margin-top: 30px;">
+                    E = hc/λ &nbsp;&nbsp;|&nbsp;&nbsp; P = σT⁴ &nbsp;&nbsp;|&nbsp;&nbsp; PV = nRT
+                </div>
+            </div>
+        </section>
+
+        <!-- Planck Units Section -->
+        <section id="planck" class="section">
+            <div class="card">
+                <h2>Natural Units: Planck System</h2>
+                <p style="color: #888; margin-bottom: 20px;">
+                    Max Planck discovered these units in 1899. They emerge naturally from combining G, c, and ℏ — the three fundamental constants of gravitation, relativity, and quantum mechanics. At Planck scales, all physics must converge.
+                </p>
+
+                <div class="planck-grid">
+                    <div class="planck-item">
+                        <div class="planck-symbol">l<sub>P</sub></div>
+                        <div class="planck-name">Planck Length</div>
+                        <div class="planck-value">1.616255 × 10⁻³⁵ m</div>
+                    </div>
+                    <div class="planck-item">
+                        <div class="planck-symbol">m<sub>P</sub></div>
+                        <div class="planck-name">Planck Mass</div>
+                        <div class="planck-value">2.176434 × 10⁻⁸ kg</div>
+                    </div>
+                    <div class="planck-item">
+                        <div class="planck-symbol">t<sub>P</sub></div>
+                        <div class="planck-name">Planck Time</div>
+                        <div class="planck-value">5.391247 × 10⁻⁴⁴ s</div>
+                    </div>
+                    <div class="planck-item">
+                        <div class="planck-symbol">T<sub>P</sub></div>
+                        <div class="planck-name">Planck Temperature</div>
+                        <div class="planck-value">1.416784 × 10³² K</div>
+                    </div>
+                    <div class="planck-item">
+                        <div class="planck-symbol">ρ<sub>P</sub></div>
+                        <div class="planck-name">Planck Density</div>
+                        <div class="planck-value">5.155 × 10⁹⁶ kg/m³</div>
+                    </div>
+                </div>
+
+                <div class="equation-box" style="margin-top: 30px;">
+                    l<sub>P</sub> = √(ℏG/c³) &nbsp;&nbsp; m<sub>P</sub> = √(ℏc/G) &nbsp;&nbsp; t<sub>P</sub> = √(ℏG/c⁵)
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>The Planck Scale Visualization</h2>
+                <div class="scale-container">
+                    <canvas id="scaleCanvas"></canvas>
+                </div>
+                <p style="color: #666; font-size: 0.85rem; text-align: center; margin-top: 10px;">
+                    Journey from 10⁻³⁵ m (Planck length) to 10²⁶ m (observable universe) — a span of 10⁶¹
+                </p>
+            </div>
+
+            <div class="card">
+                <h2>Why Planck Units are Special</h2>
+                <table class="comparison-table">
+                    <tr>
+                        <th>Scale</th>
+                        <th>Size</th>
+                        <th>Physics Regime</th>
+                    </tr>
+                    <tr>
+                        <td>Quantum Gravity</td>
+                        <td>~10⁻³⁵ m</td>
+                        <td>Where spacetime topology fluctuates</td>
+                    </tr>
+                    <tr>
+                        <td>Hadron Scale</td>
+                        <td>~10⁻¹⁵ m</td>
+                        <td>Quarks and gluons in protons</td>
+                    </tr>
+                    <tr>
+                        <td>Atomic Scale</td>
+                        <td>~10⁻¹⁰ m</td>
+                        <td>Electron orbitals, chemistry</td>
+                    </tr>
+                    <tr>
+                        <td>Human Scale</td>
+                        <td>~10⁰ m</td>
+                        <td>Everyday experience</td>
+                    </tr>
+                    <tr>
+                        <td>Earth Scale</td>
+                        <td>~10⁷ m</td>
+                        <td>Planetary dynamics</td>
+                    </tr>
+                    <tr>
+                        <td>Stellar Scale</td>
+                        <td>~10⁹ m</td>
+                        <td>Star sizes, solar system</td>
+                    </tr>
+                    <tr>
+                        <td>Galactic Scale</td>
+                        <td>~10²⁰ m</td>
+                        <td>Galaxy sizes, dark matter</td>
+                    </tr>
+                    <tr>
+                        <td>Cosmic Scale</td>
+                        <td>~10²⁶ m</td>
+                        <td>Observable universe</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- Dimensionless Constants -->
+        <section id="dimensionless" class="section">
+            <div class="card">
+                <h2>Dimensionless Constants</h2>
+                <p style="color: #888; margin-bottom: 20px;">
+                    These constants have no units — they are pure numbers. Their values are independent of our unit systems and may hold the keys to the universe's deepest mysteries.
+                </p>
+
+                <div class="ratio-item">
+                    <div class="ratio-name">
+                        <strong>Fine-Structure Constant</strong>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">Electromagnetic coupling strength at e⁺e⁻ mass scale</div>
+                    </div>
+                    <div class="ratio-symbol">α⁻¹</div>
+                    <div class="ratio-value">137.036</div>
+                </div>
+
+                <div class="ratio-item">
+                    <div class="ratio-name">
+                        <strong>Proton-Electron Mass Ratio</strong>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">mₚ/mₑ — determines chemistry structure</div>
+                    </div>
+                    <div class="ratio-symbol">mₚ/mₑ</div>
+                    <div class="ratio-value">1836.153</div>
+                </div>
+
+                <div class="ratio-item">
+                    <div class="ratio-name">
+                        <strong>Strong Coupling Constant</strong>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">αₛ at Z boson mass scale</div>
+                    </div>
+                    <div class="ratio-symbol">αₛ(M_Z)</div>
+                    <div class="ratio-value">0.118</div>
+                </div>
+
+                <div class="ratio-item">
+                    <div class="ratio-name">
+                        <strong>Weinberg Angle (sin²θ_W)</strong>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">Electroweak mixing parameter</div>
+                    </div>
+                    <div class="ratio-symbol">sin²θ_W</div>
+                    <div class="ratio-value">0.231</div>
+                </div>
+
+                <div class="ratio-item">
+                    <div class="ratio-name">
+                        <strong>Cosmological Constant Ratio</strong>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">ρ_Λ/ρ_crit — dark energy density fraction</div>
+                    </div>
+                    <div class="ratio-symbol">Ω_Λ</div>
+                    <div class="ratio-value">0.685</div>
+                </div>
+
+                <div class="ratio-item">
+                    <div class="ratio-name">
+                        <strong>Baryon-Photon Ratio</strong>
+                        <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">η = n_B/n_γ ≈ 6 × 10⁻¹⁰</div>
+                    </div>
+                    <div class="ratio-symbol">η_B</div>
+                    <div class="ratio-value">6.1 × 10⁻¹⁰</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>The Hierarchy Problem</h2>
+                <p style="color: #888; line-height: 1.8;">
+                    Why do these numbers have the values they do? The cosmological constant alone differs from QFT prediction by a factor of 10¹²⁰. The Higgs mass suggests naturalness problems that may require new physics like supersymmetry.
+                </p>
+
+                <div class="equation-box" style="margin-top: 20px;">
+                    <div style="font-size: 0.9rem; color: #888;">
+                        QFT Vacuum Energy: ρ_QFT ≈ 10⁷⁶ GeV/m³<br>
+                        Observed Dark Energy: ρ_Λ ≈ 2.5 × 10⁻⁹ GeV/m³<br>
+                        <span style="color: #ff6b6b; font-size: 1.1rem;">Discrepancy: 10¹²⁰</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Particle Masses (in eV/c²)</h2>
+                <table class="comparison-table">
+                    <tr>
+                        <th>Particle</th>
+                        <th>Mass</th>
+                        <th>Ratio to Electron</th>
+                    </tr>
+                    <tr>
+                        <td>Electron</td>
+                        <td>0.511 MeV/c²</td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td>Muon</td>
+                        <td>105.66 MeV/c²</td>
+                        <td>206.8</td>
+                    </tr>
+                    <tr>
+                        <td>Tau</td>
+                        <td>1776.86 MeV/c²</td>
+                        <td>3477</td>
+                    </tr>
+                    <tr>
+                        <td>Up Quark</td>
+                        <td>2.2 MeV/c²</td>
+                        <td>4.3</td>
+                    </tr>
+                    <tr>
+                        <td>Down Quark</td>
+                        <td>4.7 MeV/c²</td>
+                        <td>9.2</td>
+                    </tr>
+                    <tr>
+                        <td>Proton</td>
+                        <td>938.27 MeV/c²</td>
+                        <td>1836.2</td>
+                    </tr>
+                    <tr>
+                        <td>Neutron</td>
+                        <td>939.57 MeV/c²</td>
+                        <td>1838.7</td>
+                    </tr>
+                    <tr>
+                        <td>Higgs Boson</td>
+                        <td>125.18 GeV/c²</td>
+                        <td>2.45 × 10⁵</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- Calculator Section -->
+        <section id="calculator" class="section">
+            <div class="card">
+                <h2>Constants Calculator</h2>
+                <p style="color: #888; margin-bottom: 20px;">Explore relationships between fundamental constants with interactive calculations.</p>
+
+                <div class="interactive-panel">
+                    <div class="panel-title">Energy-Frequency Relation</div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Frequency (Hz)</span>
+                            <span id="freqValue">1.0 × 10¹⁴</span>
+                        </div>
+                        <input type="range" id="freqSlider" min="0" max="100" value="50">
+                    </div>
+                    <div class="result-display">
+                        <div class="result-label">Photon Energy (E = hν)</div>
+                        <div class="result-value" id="energyResult">4.14 × 10⁻²⁰ J</div>
+                    </div>
+                    <div class="result-display" style="margin-top: 10px;">
+                        <div class="result-label">Wavelength (λ = hc/E)</div>
+                        <div class="result-value" id="wavelengthResult">4.80 × 10⁻⁶ m</div>
+                    </div>
+                </div>
+
+                <div class="interactive-panel">
+                    <div class="panel-title">Thermal Energy Scale</div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Temperature (K)</span>
+                            <span id="tempValue">300 K</span>
+                        </div>
+                        <input type="range" id="tempSlider" min="0" max="100" value="30">
+                    </div>
+                    <div class="result-display">
+                        <div class="result-label">Thermal Energy (k_B × T)</div>
+                        <div class="result-value" id="thermalResult">4.14 × 10⁻²¹ J</div>
+                    </div>
+                    <div class="result-display" style="margin-top: 10px;">
+                        <div class="result-label">Equivalent Frequency (E/h)</div>
+                        <div class="result-value" id="thermalFreqResult">6.28 × 10¹² Hz</div>
+                    </div>
+                </div>
+
+                <div class="interactive-panel">
+                    <div class="panel-title">Gravitational Scale</div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Mass (kg)</span>
+                            <span id="massValue">1.0 kg</span>
+                        </div>
+                        <input type="range" id="massSlider" min="0" max="100" value="50">
+                    </div>
+                    <div class="result-display">
+                        <div class="result-label">Schwarzschild Radius (Rs = 2GM/c²)</div>
+                        <div class="result-value" id="schwarzschildResult">1.48 × 10⁻²⁷ m</div>
+                    </div>
+                    <div class="result-display" style="margin-top: 10px;">
+                        <div class="result-label">Compton Wavelength (λ = h/mc)</div>
+                        <div class="result-value" id="comptonResult">7.30 × 10⁻³⁴ m</div>
+                    </div>
+                </div>
+
+                <div class="interactive-panel">
+                    <div class="panel-title">Natural Frequency from Constants</div>
+                    <div class="result-display">
+                        <div class="result-label">Planck Frequency (c/l_P)</div>
+                        <div class="result-value">1.85 × 10⁴³ Hz</div>
+                    </div>
+                    <div class="result-display" style="margin-top: 10px;">
+                        <div class="result-label">Planck Angular Frequency (c³/2G)</div>
+                        <div class="result-value">4.61 × 10⁵¹ s⁻¹</div>
+                    </div>
+                    <div class="result-display" style="margin-top: 10px;">
+                        <div class="result-label">Ratio: Planck Freq / Visible Light Freq</div>
+                        <div class="result-value">~10¹⁸</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Quick Reference</h2>
+                <table class="comparison-table">
+                    <tr>
+                        <th>Relationship</th>
+                        <th>Formula</th>
+                    </tr>
+                    <tr>
+                        <td>Photon Energy</td>
+                        <td>E = hc/λ = hν</td>
+                    </tr>
+                    <tr>
+                        <td>Blackbody Radiation</td>
+                        <td>P = σAT⁴</td>
+                    </tr>
+                    <tr>
+                        <td>Ideal Gas</td>
+                        <td>PV = Nk_BT</td>
+                    </tr>
+                    <tr>
+                        <td>Schwarzschild Radius</td>
+                        <td>Rs = 2GM/c²</td>
+                    </tr>
+                    <tr>
+                        <td>Compton Wavelength</td>
+                        <td>λ = h/mc</td>
+                    </tr>
+                    <tr>
+                        <td>Hawking Temperature</td>
+                        <td>T = ℏc³/8πGMk_B</td>
+                    </tr>
+                    <tr>
+                        <td>Hubble Parameter</td>
+                        <td>H₀ = 67.4 km/s/Mpc</td>
+                    </tr>
+                    <tr>
+                        <td>Jansky-Hertz Conversion</td>
+                        <td>1 Jy = 10⁻²⁶ W/m²/Hz</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // ===== STARFIELD BACKGROUND =====
+        const starCanvas = document.getElementById('starCanvas');
+        const starCtx = starCanvas.getContext('2d');
+        let stars = [];
+
+        function initStarfield() {
+            starCanvas.width = window.innerWidth;
+            starCanvas.height = window.innerHeight;
+            stars = [];
+            for (let i = 0; i < 200; i++) {
+                stars.push({
+                    x: Math.random() * starCanvas.width,
+                    y: Math.random() * starCanvas.height,
+                    size: Math.random() * 1.5 + 0.5,
+                    twinkle: Math.random() * Math.PI * 2,
+                    speed: Math.random() * 0.02 + 0.01
+                });
+            }
+        }
+
+        function animateStarfield() {
+            starCtx.fillStyle = 'rgba(10, 10, 15, 0.3)';
+            starCtx.fillRect(0, 0, starCanvas.width, starCanvas.height);
+
+            stars.forEach(star => {
+                star.twinkle += star.speed;
+                const alpha = 0.4 + Math.sin(star.twinkle) * 0.3;
+                starCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                starCtx.beginPath();
+                starCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                starCtx.fill();
+            });
+
+            requestAnimationFrame(animateStarfield);
+        }
+
+        // ===== HERO CANVAS =====
+        const heroCanvas = document.getElementById('heroCanvas');
+        const heroCtx = heroCanvas.getContext('2d');
+
+        function initHeroCanvas() {
+            heroCanvas.width = heroCanvas.offsetWidth * window.devicePixelRatio;
+            heroCanvas.height = heroCanvas.offsetHeight * window.devicePixelRatio;
+            heroCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        function drawHeroCanvas() {
+            const w = heroCanvas.offsetWidth;
+            const h = heroCanvas.offsetHeight;
+            heroCtx.clearRect(0, 0, w, h);
+
+            // Draw concentric circles representing scales
+            const centerX = w / 2;
+            const centerY = h / 2;
+            const maxRadius = Math.min(w, h) * 0.45;
+
+            // Logarithmic scale circles
+            for (let i = 0; i < 12; i++) {
+                const t = i / 11;
+                const radius = maxRadius * (0.1 + t * 0.9);
+                const alpha = 0.1 + t * 0.2;
+
+                heroCtx.strokeStyle = `rgba(0, 212, 255, ${alpha})`;
+                heroCtx.lineWidth = 1;
+                heroCtx.beginPath();
+                heroCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                heroCtx.stroke();
+            }
+
+            // Radial lines
+            for (let a = 0; a < 12; a++) {
+                const angle = (a / 12) * Math.PI * 2;
+                heroCtx.strokeStyle = 'rgba(168, 85, 247, 0.1)';
+                heroCtx.beginPath();
+                heroCtx.moveTo(centerX, centerY);
+                heroCtx.lineTo(
+                    centerX + Math.cos(angle) * maxRadius,
+                    centerY + Math.sin(angle) * maxRadius
+                );
+                heroCtx.stroke();
+            }
+
+            // Labels for scales
+            heroCtx.font = '10px Space Mono';
+            heroCtx.fillStyle = '#666';
+            heroCtx.textAlign = 'center';
+
+            const scales = [
+                { label: 'Planck', pos: 0.08 },
+                { label: 'Neutron', pos: 0.22 },
+                { label: 'Nucleus', pos: 0.35 },
+                { label: 'Atom', pos: 0.48 },
+                { label: 'Molecule', pos: 0.60 },
+                { label: 'Human', pos: 0.72 },
+                { label: 'Mountain', pos: 0.83 },
+                { label: 'Earth', pos: 0.92 }
+            ];
+
+            scales.forEach(scale => {
+                const angle = -Math.PI / 2;
+                const r = maxRadius * scale.pos;
+                const x = centerX + Math.cos(angle) * r;
+                const y = centerY + Math.sin(angle) * r + 4;
+                heroCtx.fillText(scale.label, x, y);
+            });
+
+            // Center symbol
+            heroCtx.font = 'bold 24px Orbitron';
+            heroCtx.fillStyle = '#a855f7';
+            heroCtx.fillText('ℏcG', centerX, centerY + 8);
+
+            // Title
+            heroCtx.font = '14px Orbitron';
+            heroCtx.fillStyle = '#00d4ff';
+            heroCtx.fillText('PHYSICS CONSTANTS', centerX, 30);
+        }
+
+        // ===== SCALE CANVAS =====
+        const scaleCanvas = document.getElementById('scaleCanvas');
+        const scaleCtx = scaleCanvas.getContext('2d');
+
+        function initScaleCanvas() {
+            scaleCanvas.width = scaleCanvas.offsetWidth * window.devicePixelRatio;
+            scaleCanvas.height = scaleCanvas.offsetHeight * window.devicePixelRatio;
+            scaleCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        function drawScaleCanvas() {
+            const w = scaleCanvas.offsetWidth;
+            const h = scaleCanvas.offsetHeight;
+            scaleCtx.clearRect(0, 0, w, h);
+
+            // Draw logarithmic scale bar
+            const margin = 60;
+            const barY = h * 0.7;
+            const barWidth = w - margin * 2;
+
+            // Scale extremes
+            const minLog = -35; // 10^-35 m
+            const maxLog = 26;  // 10^26 m
+            const span = maxLog - minLog;
+
+            // Draw bar background
+            const gradient = scaleCtx.createLinearGradient(margin, 0, w - margin, 0);
+            gradient.addColorStop(0, '#ff6b6b');
+            gradient.addColorStop(0.3, '#a855f7');
+            gradient.addColorStop(0.5, '#00d4ff');
+            gradient.addColorStop(0.7, '#4ecdc4');
+            gradient.addColorStop(1, '#ff6b6b');
+
+            scaleCtx.strokeStyle = gradient;
+            scaleCtx.lineWidth = 4;
+            scaleCtx.beginPath();
+            scaleCtx.moveTo(margin, barY);
+            scaleCtx.lineTo(w - margin, barY);
+            scaleCtx.stroke();
+
+            // Scale markers
+            const markers = [
+                { exp: -35, label: 'Planck\n1.6×10⁻³⁵ m' },
+                { exp: -15, label: 'Hadron\n1×10⁻¹⁵ m' },
+                { exp: -10, label: 'Atomic\n1×10⁻¹⁰ m' },
+                { exp: 0, label: 'Human\n1 m' },
+                { exp: 7, label: 'Earth\n1×10⁷ m' },
+                { exp: 11, label: 'Solar\n1×10¹¹ m' },
+                { exp: 21, label: 'Galaxy\n1×10²¹ m' },
+                { exp: 26, label: 'Universe\n9×10²⁶ m' }
+            ];
+
+            markers.forEach(m => {
+                const x = margin + ((m.exp - minLog) / span) * barWidth;
+                const alpha = Math.min(1, Math.max(0.3, (m.exp - minLog) / span));
+
+                scaleCtx.fillStyle = `rgba(0, 212, 255, ${alpha})`;
+                scaleCtx.beginPath();
+                scaleCtx.arc(x, barY, 6, 0, Math.PI * 2);
+                scaleCtx.fill();
+
+                scaleCtx.strokeStyle = `rgba(0, 212, 255, 0.5)`;
+                scaleCtx.lineWidth = 1;
+                scaleCtx.setLineDash([3, 3]);
+                scaleCtx.beginPath();
+                scaleCtx.moveTo(x, barY - 10);
+                scaleCtx.lineTo(x, barY - 40);
+                scaleCtx.stroke();
+                scaleCtx.setLineDash([]);
+
+                scaleCtx.font = '9px Space Mono';
+                scaleCtx.fillStyle = '#aaa';
+                scaleCtx.textAlign = 'center';
+                scaleCtx.fillText(m.label, x, barY - 50);
+            });
+
+            // Current universe marker
+            const currentX = margin + ((26 - minLog) / span) * barWidth;
+            scaleCtx.fillStyle = '#00d4ff';
+            scaleCtx.font = 'bold 12px Orbitron';
+            scaleCtx.fillText('TODAY', currentX, barY + 30);
+
+            // Scale labels
+            scaleCtx.font = '11px Space Mono';
+            scaleCtx.fillStyle = '#666';
+            scaleCtx.textAlign = 'left';
+            scaleCtx.fillText('10⁻³⁵ m', margin, h * 0.9);
+            scaleCtx.textAlign = 'right';
+            scaleCtx.fillText('10²⁶ m', w - margin, h * 0.9);
+        }
+
+        // ===== NAVIGATION =====
+        const navTabs = document.querySelectorAll('.nav-tab');
+        const sections = document.querySelectorAll('.section');
+
+        navTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                navTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                const sectionId = tab.dataset.section;
+                sections.forEach(s => {
+                    s.classList.remove('active');
+                    if (s.id === sectionId) {
+                        s.classList.add('active');
+                    }
+                });
+
+                // Redraw canvases when section becomes active
+                if (sectionId === 'overview') {
+                    drawHeroCanvas();
+                } else if (sectionId === 'planck') {
+                    initScaleCanvas();
+                    drawScaleCanvas();
+                }
+            });
+        });
+
+        // ===== CALCULATOR =====
+        const freqSlider = document.getElementById('freqSlider');
+        const tempSlider = document.getElementById('tempSlider');
+        const massSlider = document.getElementById('massSlider');
+
+        // Physical constants
+        const h = 6.62607015e-34; // Planck constant (J·s)
+        const c = 299792458; // Speed of light (m/s)
+        const kB = 1.380649e-23; // Boltzmann constant (J/K)
+        const G = 6.67430e-11; // Gravitational constant
+
+        function updateEnergyCalc() {
+            const t = freqSlider.value / 100;
+            const logMin = 12;
+            const logMax = 18;
+            const logFreq = logMin + t * (logMax - logMin);
+            const freq = Math.pow(10, logFreq);
+
+            const E = h * freq;
+            const wavelength = (h * c) / E;
+
+            document.getElementById('freqValue').textContent = freq.toExponential(1) + ' Hz';
+            document.getElementById('energyResult').textContent = E.toExponential(2) + ' J';
+            document.getElementById('wavelengthResult').textContent = wavelength.toExponential(2) + ' m';
+        }
+
+        function updateThermalCalc() {
+            const temp = (tempSlider.value / 100) * 10000;
+            const E = kB * temp;
+            const freq = E / h;
+
+            document.getElementById('tempValue').textContent = temp.toFixed(0) + ' K';
+            document.getElementById('thermalResult').textContent = E.toExponential(2) + ' J';
+            document.getElementById('thermalFreqResult').textContent = freq.toExponential(2) + ' Hz';
+        }
+
+        function updateGravCalc() {
+            const t = massSlider.value / 100;
+            const logMin = -10;
+            const logMax = 10;
+            const logMass = logMin + t * (logMax - logMin);
+            const mass = Math.pow(10, logMass);
+
+            const Rs = (2 * G * mass) / (c * c);
+            const lambda = h / (mass * c);
+
+            document.getElementById('massValue').textContent = mass.toExponential(1) + ' kg';
+            document.getElementById('schwarzschildResult').textContent = Rs.toExponential(2) + ' m';
+            document.getElementById('comptonResult').textContent = lambda.toExponential(2) + ' m';
+        }
+
+        freqSlider.addEventListener('input', updateEnergyCalc);
+        tempSlider.addEventListener('input', updateThermalCalc);
+        massSlider.addEventListener('input', updateGravCalc);
+
+        // ===== SCROLL PROGRESS =====
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        });
+
+        // ===== RESIZE HANDLER =====
+        window.addEventListener('resize', () => {
+            initStarfield();
+            initHeroCanvas();
+            drawHeroCanvas();
+            initScaleCanvas();
+            drawScaleCanvas();
+        });
+
+        // ===== INIT =====
+        initStarfield();
+        animateStarfield();
+        initHeroCanvas();
+        drawHeroCanvas();
+        initScaleCanvas();
+        drawScaleCanvas();
+
+        // Initialize calculators
+        updateEnergyCalc();
+        updateThermalCalc();
+        updateGravCalc();
+    </script>
+</body>
+</html>
