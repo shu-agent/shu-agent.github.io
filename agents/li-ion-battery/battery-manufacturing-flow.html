@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Manufacturing Flow — Li-Ion Battery Lab</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #1a2f4a 50%, #0d1f3c 100%);
+            color: #e8f4f8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .hero {
+            text-align: center;
+            padding: 60px 20px 40px;
+            background: linear-gradient(180deg, rgba(20,80,120,0.4) 0%, transparent 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+        .hero h1 {
+            font-size: 2.8em;
+            font-weight: 700;
+            background: linear-gradient(90deg, #4fc3f7, #81d4fa, #4fc3f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .hero p {
+            font-size: 1.2em;
+            color: #90caf9;
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+            position: relative;
+        }
+        .nav-links a {
+            color: #4fc3f7;
+            text-decoration: none;
+            padding: 8px 20px;
+            border: 1px solid rgba(79, 195, 247, 0.4);
+            border-radius: 25px;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+        .nav-links a:hover {
+            background: rgba(79, 195, 247, 0.15);
+            border-color: #4fc3f7;
+            transform: translateY(-2px);
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+        }
+        .section h2 {
+            color: #4fc3f7;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .section h2::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #4fc3f7;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #4fc3f7;
+        }
+        .stats-banner {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, rgba(79,195,247,0.15), rgba(79,195,247,0.05));
+            border: 1px solid rgba(79,195,247,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-card .value {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #4fc3f7;
+        }
+        .stat-card .label {
+            color: #90caf9;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .process-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            position: relative;
+            padding: 20px 0;
+        }
+        .process-step {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            padding: 25px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .process-step:hover {
+            background: rgba(79,195,247,0.08);
+            transform: translateX(5px);
+        }
+        .process-step.raw { border-color: #ff7043; }
+        .process-step.electrode { border-color: #ab47bc; }
+        .process-step.assembly { border-color: #26a69a; }
+        .process-step.formation { border-color: #ffca28; }
+        .process-step.test { border-color: #42a5f5; }
+        .process-step.pack { border-color: #66bb6a; }
+        .step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4em;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .raw .step-number { background: linear-gradient(135deg, #ff7043, #ff5722); }
+        .electrode .step-number { background: linear-gradient(135deg, #ab47bc, #9c27b0); }
+        .assembly .step-number { background: linear-gradient(135deg, #26a69a, #00897b); }
+        .formation .step-number { background: linear-gradient(135deg, #ffca28, #ffc107); }
+        .test .step-number { background: linear-gradient(135deg, #42a5f5, #1e88e5); }
+        .pack .step-number { background: linear-gradient(135deg, #66bb6a, #43a047); }
+        .step-content {
+            flex: 1;
+        }
+        .step-content h3 {
+            font-size: 1.2em;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        .step-content p {
+            color: #b0bec5;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        .step-details {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        .detail-tag {
+            background: rgba(255,255,255,0.1);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            color: #81d4fa;
+        }
+        .connector {
+            width: 2px;
+            height: 30px;
+            background: linear-gradient(to bottom, rgba(79,195,247,0.5), rgba(79,195,247,0.2));
+            margin-left: 60px;
+        }
+        .controls-panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .control-group label {
+            color: #90caf9;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(79,195,247,0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4fc3f7;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(79,195,247,0.5);
+        }
+        .control-group select {
+            padding: 10px 15px;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(79,195,247,0.3);
+            color: #e8f4f8;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .value-display {
+            text-align: right;
+            font-size: 0.9em;
+            color: #4fc3f7;
+            font-weight: 500;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+        }
+        .chart-container {
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .chart-container h3 {
+            color: #90caf9;
+            font-size: 1em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .chart-wrapper {
+            position: relative;
+            height: 250px;
+        }
+        .cost-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .cost-card {
+            background: linear-gradient(135deg, rgba(79,195,247,0.1), rgba(79,195,247,0.02));
+            border: 1px solid rgba(79,195,247,0.2);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .cost-card h4 {
+            color: #4fc3f7;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        .cost-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .cost-bar-label {
+            width: 120px;
+            font-size: 0.85em;
+            color: #b0bec5;
+        }
+        .cost-bar-track {
+            flex: 1;
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .cost-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+        .cost-bar-value {
+            width: 60px;
+            text-align: right;
+            font-size: 0.85em;
+            color: #81d4fa;
+        }
+        .quality-matrix {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .quality-item {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+        .quality-item .qi-value {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .quality-item .qi-label {
+            font-size: 0.85em;
+            color: #90caf9;
+        }
+        .quality-item.pass .qi-value { color: #66bb6a; }
+        .quality-item.warn .qi-value { color: #ffca28; }
+        .quality-item.fail .qi-value { color: #ef5350; }
+        .region-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .region-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+        }
+        .region-card h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .region-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .region-stat:last-child {
+            border-bottom: none;
+        }
+        .region-stat-label {
+            color: #90caf9;
+        }
+        .region-stat-value {
+            font-weight: 600;
+            color: #4fc3f7;
+        }
+        .physics-eq {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            border-left: 3px solid #4fc3f7;
+        }
+        .physics-eq .eq-name {
+            color: #81d4fa;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+        .physics-eq .eq-formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            color: #fff;
+        }
+        .timeline-viz {
+            position: relative;
+            height: 80px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .timeline-track {
+            position: absolute;
+            top: 50%;
+            left: 5%;
+            right: 5%;
+            height: 4px;
+            background: rgba(79,195,247,0.3);
+            border-radius: 2px;
+        }
+        .timeline-progress {
+            position: absolute;
+            top: 50%;
+            left: 5%;
+            height: 4px;
+            background: linear-gradient(90deg, #4fc3f7, #81d4fa);
+            border-radius: 2px;
+            transition: width 0.3s;
+            box-shadow: 0 0 10px rgba(79,195,247,0.5);
+        }
+        .timeline-marker {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4fc3f7;
+            border: 3px solid #0a1628;
+            box-shadow: 0 0 10px rgba(79,195,247,0.5);
+        }
+        .timeline-label {
+            position: absolute;
+            top: 20px;
+            transform: translateX(-50%);
+            font-size: 0.75em;
+            color: #90caf9;
+            white-space: nowrap;
+        }
+        .defect-animation {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .defect-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        .defect-dot.good { background: #66bb6a; }
+        .defect-dot.rejected { background: #ef5350; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2em; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .process-step { flex-direction: column; text-align: center; }
+            .connector { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>Battery Manufacturing Flow</h1>
+        <p>From raw materials to finished cells — interactive production process visualization with real-time metrics, cost analysis, and quality control</p>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="battery-simulation.html">Simulation</a>
+            <a href="battery-materials-database.html">Materials</a>
+            <a href="battery-health-monitor.html">Health</a>
+            <a href="battery-pack-thermal-sim.html">Thermal</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="stats-banner">
+            <div class="stat-card">
+                <div class="value">85%</div>
+                <div class="label">Overall Equipment Effectiveness</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">18h</div>
+                <div class="label">Average Formation Time</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">99.2%</div>
+                <div class="label">Final Test Pass Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">$120/kWh</div>
+                <div class="label">Manufacturing Cost</div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Production Process Flow</h2>
+            <div class="process-flow">
+                <div class="process-step raw">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Raw Material Preparation</h3>
+                        <p>Cathode active materials (NMC/NCA/LFP), anode materials (graphite/silicon), electrolyte salts, and separator membranes are precisely measured and quality-tested before use.</p>
+                        <div class="step-details">
+                            <span class="detail-tag">LiCoO₂: 97.5% purity</span>
+                            <span class="detail-tag">Graphite: 99.95% purity</span>
+                            <span class="detail-tag">Separator: 20μm PE</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="connector"></div>
+                <div class="process-step electrode">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Electrode Coating & Drying</h3>
+                        <p>Slurry mixture (active material + binder + conductive additive in NMP solvent) is coated onto current collectors using slot-die coating at 20-50 m/min speed, followed by evaporation in controlled-temperature dry rooms (dew point: -40°C).</p>
+                        <div class="step-details">
+                            <span class="detail-tag">Coating: ±1g/m² accuracy</span>
+                            <span class="detail-tag">Dry Room: -40°C dew point</span>
+                            <span class="detail-tag">Solvent Recovery: 95%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="connector"></div>
+                <div class="process-step electrode">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Electrode Calendering</h3>
+                        <p>Coated electrodes pass through heated calender rolls (60-120°C) to achieve target thickness and porosity (35-45%). This step optimizes electrode density for maximum energy density while maintaining ionic conductivity.</p>
+                        <div class="step-details">
+                            <span class="detail-tag">Target Porosity: 35-45%</span>
+                            <span class="detail-tag">Thickness Tolerance: ±2μm</span>
+                            <span class="detail-tag">Roll Temp: 60-120°C</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="connector"></div>
+                <div class="process-step assembly">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Cell Assembly (Winding/Stacking)</h3>
+                        <p>Electrodes are cut to specific dimensions, layered with separator, and wound (cylindrical) or stacked (prismatic/pouch). Tab welding connects current collectors to external terminals. Assembly occurs in ISO Class 7 cleanroom.</p>
+                        <div class="step-details">
+                            <span class="detail-tag">Cleanroom: ISO Class 7</span>
+                            <span class="detail-tag">Humidity: &lt;1% RH</span>
+                            <span class="detail-tag">Cycle Time: 2-5 sec/cell</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="connector"></div>
+                <div class="process-step assembly">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h3>Electrolyte Filling & Sealing</h3>
+                        <p>Precise amount of electrolyte (LiPF₆ in EC/DMC) is injected into sealed cell casing. Formation begins immediately after filling. Cells are真空-sealed to prevent moisture and gas ingress.</p>
+                        <div class="step-details">
+                            <span class="detail-tag">H₂O Content: &lt;50ppm</span>
+                            <span class="detail-tag">Filling Accuracy: ±0.1g</span>
+                            <span class="detail-tag">Leak Test: 100%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="connector"></div>
+                <div class="process-step formation">
+                    <div class="step-number">6</div>
+                    <div class="step-content">
+                        <h3>Formation & Aging</h3>
+                        <p>First charge forms the stable SEI layer. Formation protocols include slow charging (C/10), rest periods, and optional formation at elevated temperature. Cells age for 3-15 days to stabilize performance before testing.</p>
+                        <div class="step-details">
+                            <span class="detail-tag">SEI Formation: 12-48h</span>
+                            <span class="detail-tag">Aging: 3-15 days</span>
+                            <span class="detail-tag">First Cycle Efficiency: 90-94%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="connector"></div>
+                <div class="process-step test">
+                    <div class="step-number">7</div>
+                    <div class="step-content">
+                        <h3>Testing & Grading</h3>
+                        <p>Cells undergo comprehensive testing: capacity check, internal resistance (DCIR), self-discharge rate, and thermal stability. Based on performance, cells are graded (Grade A/B/C) and matched into packs.</p>
+                        <div class="step-details">
+                            <span class="detail-tag">Capacity Tolerance: ±2%</span>
+                            <span class="detail-tag">DCIR Test: 1kHz-100Hz</span>
+                            <span class="detail-tag">Grading: 4-6 tiers</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="connector"></div>
+                <div class="process-step pack">
+                    <div class="step-number">8</div>
+                    <div class="step-content">
+                        <h3>Module & Pack Assembly</h3>
+                        <p>graded cells are connected in series/parallel configurations, integrated with BMS, thermal management, and safety systems. Final pack undergoes vibration, thermal shock, and environmental testing.</p>
+                        <div class="step-details">
+                            <span class="detail-tag">Cell-to-Pack: 40-50% weight reduction</span>
+                            <span class="detail-tag">BMS: Cell balancing</span>
+                            <span class="detail-tag">Final Test: 100%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Interactive Production Controls</h2>
+            <div class="controls-panel">
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label>Production Speed</label>
+                        <input type="range" id="productionSpeed" min="10" max="100" value="50">
+                        <span class="value-display"><span id="speedValue">50</span> cells/min</span>
+                    </div>
+                    <div class="control-group">
+                        <label>Cathode Type</label>
+                        <select id="cathodeType">
+                            <option value="nmc811">NMC 811</option>
+                            <option value="nca">NCA</option>
+                            <option value="lfp">LFP</option>
+                            <option value="lco">LCO</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Formulation Solvent</label>
+                        <select id="solventType">
+                            <option value="nmp">NMP (N-Methyl-2-pyrrolidone)</option>
+                            <option value="water">Water-Based</option>
+                            <option value="dmc">DMC (Dimethyl Carbonate)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Cleanroom Level</label>
+                        <select id="cleanroomLevel">
+                            <option value="iso5">ISO Class 5</option>
+                            <option value="iso7">ISO Class 7</option>
+                            <option value="iso8">ISO Class 8</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Formation Protocol</label>
+                        <select id="formationProtocol">
+                            <option value="standard">Standard (C/10, 24h)</option>
+                            <option value="fast">Fast Formation (C/5, 8h)</option>
+                            <option value="multi">Multi-Stage (C/20→C/10→C/5)</option>
+                            <option value="formation">Formation + Aging (72h + 7d)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Cell Format</label>
+                        <select id="cellFormat">
+                            <option value="cylindrical">Cylindrical (18650/2170/4680)</option>
+                            <option value="prismatic">Prismatic</option>
+                            <option value="pouch">Pouch</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Process Metrics Dashboard</h2>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3>Production Rate vs Defect Rate</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="productionChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Cycle Time Breakdown</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="cycleTimeChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Cost Distribution by Process Stage</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Quality Metrics Over Time</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="qualityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Cost Breakdown Analysis</h2>
+            <div class="cost-breakdown">
+                <div class="cost-card">
+                    <h4>Material Costs</h4>
+                    <div class="cost-bar">
+                        <span class="cost-bar-label">Cathode Material</span>
+                        <div class="cost-bar-track"><div class="cost-bar-fill" style="width: 50%; background: linear-gradient(90deg, #ff7043, #ff5722);"></div></div>
+                        <span class="cost-bar-value">$50/kWh</span>
+                    </div>
+                    <div class="cost-bar">
+                        <span class="cost-bar-label">Anode Material</span>
+                        <div class="cost-bar-track"><div class="cost-bar-fill" style="width: 20%; background: linear-gradient(90deg, #ab47bc, #9c27b0);"></div></div>
+                        <span class="cost-bar-value">$10/kWh</span>
+                    </div>
+                    <div class="cost-bar">
+                        <span class="cost-bar-label">Electrolyte</span>
+                        <div class="cost-bar-track"><div class="cost-bar-fill" style="width: 10%; background: linear-gradient(90deg, #26a69a, #00897b);"></div></div>
+                        <span class="cost-bar-value">$8/kWh</span>
+                    </div>
+                    <div class="cost-bar">
+                        <span class="cost-bar-label">Separator</span>
+                        <div class="cost-bar-track"><div class="cost-bar-fill" style="width: 8%; background: linear-gradient(90deg, #42a5f5, #1e88e5);"></div></div>
+                        <span class="cost-bar-value">$6/kWh</span>
+                    </div>
+                    <div class="cost-bar">
+                        <span class="cost-bar-label">Other Materials</span>
+                        <div class="cost-bar-track"><div class="cost-bar-fill" style="width: 12%; background: linear-gradient(90deg, #78909c, #607d8b);"></div></div>
+                        <span class="cost-bar-value">$6/kWh</span>
+                    </div>
+                </div>
+                <div class="cost-card">
+                    <h4>Manufacturing Costs</h4>
+                    <div class="cost-bar">
+                        <span class="cost-bar-label">Coating & Drying</span>
+                        <div class="cost-bar-track"><div class="cost-bar-fill" style="width: 35%; background: linear-gradient(90deg, #ab47bc, #9c27b0);"></div></div>
+                        <span class="cost-bar-value">$12/kWh</span>
+                    </div>
+                    <div class="cost-bar">
+                        <span class="cost-bar-label">Calendering</span>
+                        <div class="cost-bar-track"><div class="cost-bar-fill" style="width: 15%; background: linear-gradient(90deg, #ab47bc, #9c27b0);"></div></div>
+                        <span class="cost-bar-value">$5/kWh</span>
+                    </div>
+                    <div class="cost-bar">
+                        <span class="cost-bar-label">Cell Assembly</span>
+                        <div class="cost-bar-track"><div class="cost-bar-fill" style="width: 25%; background: linear-gradient(90deg, #26a69a, #00897b);"></div></div>
+                        <span class="cost-bar-value">$8/kWh</span>
+                    </div>
+                    <div class="cost-bar">
+                        <span class="cost-bar-label">Formation & Aging</span>
+                        <div class="cost-bar-track"><div class="cost-bar-fill" style="width: 20%; background: linear-gradient(90deg, #ffca28, #ffc107);"></div></div>
+                        <span class="cost-bar-value">$7/kWh</span>
+                    </div>
+                    <div class="cost-bar">
+                        <span class="cost-bar-label">Testing & Packing</span>
+                        <div class="cost-bar-track"><div class="cost-bar-fill" style="width: 15%; background: linear-gradient(90deg, #66bb6a, #43a047);"></div></div>
+                        <span class="cost-bar-value">$6/kWh</span>
+                    </div>
+                </div>
+                <div class="cost-card">
+                    <h4>Operational Costs</h4>
+                    <div class="cost-bar">
+                        <span class="cost-bar-label">Energy (Electricity)</span>
+                        <div class="cost-bar-track"><div class="cost-bar-fill" style="width: 40%; background: linear-gradient(90deg, #ffca28, #ffc107);"></div></div>
+                        <span class="cost-bar-value">$4/kWh</span>
+                    </div>
+                    <div class="cost-bar">
+                        <span class="cost-bar-label">Labor</span>
+                        <div class="cost-bar-track"><div class="cost-bar-fill" style="width: 30%; background: linear-gradient(90deg, #78909c, #607d8b);"></div></div>
+                        <span class="cost-bar-value">$3/kWh</span>
+                    </div>
+                    <div class="cost-bar">
+                        <span class="cost-bar-label">Facilities (Amortized)</span>
+                        <div class="cost-bar-track"><div class="cost-bar-fill" style="width: 20%; background: linear-gradient(90deg, #78909c, #607d8b);"></div></div>
+                        <span class="cost-bar-value">$2/kWh</span>
+                    </div>
+                    <div class="cost-bar">
+                        <span class="cost-bar-label">Quality Control</span>
+                        <div class="cost-bar-track"><div class="cost-bar-fill" style="width: 10%; background: linear-gradient(90deg, #42a5f5, #1e88e5);"></div></div>
+                        <span class="cost-bar-value">$1/kWh</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Real-Time Quality Control</h2>
+            <div class="quality-matrix">
+                <div class="quality-item pass">
+                    <div class="qi-value">99.8%</div>
+                    <div class="qi-label">Coating Uniformity</div>
+                </div>
+                <div class="quality-item pass">
+                    <div class="qi-value">99.5%</div>
+                    <div class="qi-label">Electrolyte Fill Rate</div>
+                </div>
+                <div class="quality-item pass">
+                    <div class="qi-value">99.2%</div>
+                    <div class="qi-label">Seal Integrity</div>
+                </div>
+                <div class="quality-item pass">
+                    <div class="qi-value">99.6%</div>
+                    <div class="qi-label">Initial Capacity</div>
+                </div>
+                <div class="quality-item warn">
+                    <div class="qi-value">98.4%</div>
+                    <div class="qi-label">DCIR Test Pass</div>
+                </div>
+                <div class="quality-item pass">
+                    <div class="qi-value">99.1%</div>
+                    <div class="qi-label">Visual Inspection</div>
+                </div>
+                <div class="quality-item pass">
+                    <div class="qi-value">98.9%</div>
+                    <div class="qi-label">Weight Consistency</div>
+                </div>
+                <div class="quality-item pass">
+                    <div class="qi-value">99.7%</div>
+                    <div class="qi-label">Thickness Tolerance</div>
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <p style="color: #90caf9; margin-bottom: 10px;">Live Defect Detection Status:</p>
+                <div class="defect-animation" id="defectAnim">
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                    <div class="defect-dot good"></div>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Manufacturing Timeline</h2>
+            <p style="color: #90caf9; margin-bottom: 15px;">Total Cell Production Time: <span id="totalTime">48</span> hours (including formation & aging)</p>
+            <div class="timeline-viz">
+                <div class="timeline-track"></div>
+                <div class="timeline-progress" id="timelineProgress" style="width: 0%;"></div>
+                <div class="timeline-marker" style="left: 5%;"><div class="timeline-label">Slurry Prep</div></div>
+                <div class="timeline-marker" style="left: 15%;"><div class="timeline-label">Coating</div></div>
+                <div class="timeline-marker" style="left: 25%;"><div class="timeline-label">Calendering</div></div>
+                <div class="timeline-marker" style="left: 35%;"><div class="timeline-label">Cutting</div></div>
+                <div class="timeline-marker" style="left: 45%;"><div class="timeline-label">Assembly</div></div>
+                <div class="timeline-marker" style="left: 55%;"><div class="timeline-label">Filling</div></div>
+                <div class="timeline-marker" style="left: 65%;"><div class="timeline-label">Formation</div></div>
+                <div class="timeline-marker" style="left: 80%;"><div class="timeline-label">Aging</div></div>
+                <div class="timeline-marker" style="left: 92%;"><div class="timeline-label">Testing</div></div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Regional Manufacturing Comparison</h2>
+            <div class="region-comparison">
+                <div class="region-card">
+                    <h4>China</h4>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Capacity Share</span>
+                        <span class="region-stat-value">78%</span>
+                    </div>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Cost/kWh</span>
+                        <span class="region-stat-value">$115</span>
+                    </div>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Automation</span>
+                        <span class="region-stat-value">85%</span>
+                    </div>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Cycle Time</span>
+                        <span class="region-stat-value">38h</span>
+                    </div>
+                </div>
+                <div class="region-card">
+                    <h4>Europe</h4>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Capacity Share</span>
+                        <span class="region-stat-value">12%</span>
+                    </div>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Cost/kWh</span>
+                        <span class="region-stat-value">$145</span>
+                    </div>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Automation</span>
+                        <span class="region-stat-value">90%</span>
+                    </div>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Cycle Time</span>
+                        <span class="region-stat-value">42h</span>
+                    </div>
+                </div>
+                <div class="region-card">
+                    <h4>USA</h4>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Capacity Share</span>
+                        <span class="region-stat-value">7%</span>
+                    </div>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Cost/kWh</span>
+                        <span class="region-stat-value">$155</span>
+                    </div>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Automation</span>
+                        <span class="region-stat-value">88%</span>
+                    </div>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Cycle Time</span>
+                        <span class="region-stat-value">45h</span>
+                    </div>
+                </div>
+                <div class="region-card">
+                    <h4>South Korea</h4>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Capacity Share</span>
+                        <span class="region-stat-value">3%</span>
+                    </div>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Cost/kWh</span>
+                        <span class="region-stat-value">$135</span>
+                    </div>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Automation</span>
+                        <span class="region-stat-value">92%</span>
+                    </div>
+                    <div class="region-stat">
+                        <span class="region-stat-label">Cycle Time</span>
+                        <span class="region-stat-value">40h</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Physics of Manufacturing</h2>
+            <div class="physics-eq">
+                <div class="eq-name">Coating Thickness (Landau-Levich)</div>
+                <div class="eq-formula">h = 0.5 × (η × v / σ)^(2/3) × (γ / η)^(1/6)</div>
+            </div>
+            <div class="physics-eq">
+                <div class="eq-name">Dry Room Dew Point (Arrhenius)</div>
+                <div class="eq-formula">P_vapor = A × exp(-Ea/RT) × RH</div>
+            </div>
+            <div class="physics-eq">
+                <div class="eq-name">Calendering Porosity</div>
+                <div class="eq-formula">ε = 1 - (ρ_apparent / ρ_true) × (t_initial / t_calendered)</div>
+            </div>
+            <div class="physics-eq">
+                <div class="eq-name">Formation Time (Sand's Equation)</div>
+                <div class="eq-formula">τ_sand = π × D × (zFc₀)² / (2J)²</div>
+            </div>
+            <div class="physics-eq">
+                <div class="eq-name">Thermal Management Load</div>
+                <div class="eq-formula">Q = I²R × t + m × Cp × ΔT + h × A × (T_battery - T_ambient)</div>
+            </div>
+            <div class="physics-eq">
+                <div class="eq-name">Manufacturing throughput (Little's Law)</div>
+                <div class="eq-formula">WIP = λ × CT → Throughput λ = WIP / CT</div>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Key Manufacturing Insights</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px;">
+                    <h4 style="color: #4fc3f7; margin-bottom: 10px;">Dry Room Criticality</h4>
+                    <p style="color: #b0bec5; line-height: 1.6;">Water contamination below 50ppm is essential — H₂O reacts with LiPF₆ to form HF, destroying the SEI layer and causing rapid capacity fade. (-40°C dew point = 1.4g/m³ absolute humidity)</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px;">
+                    <h4 style="color: #4fc3f7; margin-bottom: 10px;">Coating Uniformity Math</h4>
+                    <p style="color: #b0bec5; line-height: 1.6;">Slot-die coating exhibits parabolic velocity profile — center coated thicker than edges. Statistical process control (SPC) maintains ±1g/m² across 3m wide electrode sheets.</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px;">
+                    <h4 style="color: #4fc3f7; margin-bottom: 10px;">Formation Energy Budget</h4>
+                    <p style="color: #b0bec5; line-height: 1.6;">SEI formation consumes 5-10% of initial capacity. First charge efficiency (coulombic efficiency 90-94%) determines theoretical maximum energy density. Slow charging yields better SEI quality.</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px;">
+                    <h4 style="color: #4fc3f7; margin-bottom: 10px;">Cathode Processing Challenge</h4>
+                    <p style="color: #b0bec5; line-height: 1.6;">NMC811 requires nitrogen atmosphere during coating (moisture-sensitive). LFP tolerates water-based processing. This fundamentally shapes manufacturing cost and complexity.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const productionSpeedSlider = document.getElementById('productionSpeed');
+        const speedValueDisplay = document.getElementById('speedValue');
+        const timelineProgress = document.getElementById('timelineProgress');
+        const totalTimeDisplay = document.getElementById('totalTime');
+        let productionChart, cycleTimeChart, costChart, qualityChart;
+
+        productionSpeedSlider.addEventListener('input', function() {
+            speedValueDisplay.textContent = this.value;
+            updateMetrics();
+        });
+
+        function updateMetrics() {
+            const speed = parseInt(productionSpeedSlider.value);
+            const defectRate = 0.5 + (100 - speed) * 0.02;
+            const cycleTime = 60 - speed * 0.4;
+            totalTimeDisplay.textContent = Math.round(cycleTime);
+            timelineProgress.style.width = (speed / 100 * 100) + '%';
+            updateDefectAnimation(defectRate);
+        }
+
+        function updateDefectAnimation(rate) {
+            const container = document.getElementById('defectAnim');
+            container.innerHTML = '';
+            for (let i = 0; i < 20; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'defect-dot ' + (Math.random() * 100 > rate ? 'good' : 'rejected');
+                dot.style.animationDelay = (Math.random() * 2) + 's';
+                container.appendChild(dot);
+            }
+        }
+
+        function initCharts() {
+            const productionCtx = document.getElementById('productionChart').getContext('2d');
+            productionChart = new Chart(productionCtx, {
+                type: 'line',
+                data: {
+                    labels: ['10', '20', '30', '40', '50', '60', '70', '80', '90', '100'],
+                    datasets: [{
+                        label: 'Defect Rate %',
+                        data: [0.5, 0.7, 0.9, 1.2, 1.5, 1.9, 2.4, 3.0, 3.8, 4.8],
+                        borderColor: '#ef5350',
+                        backgroundColor: 'rgba(239, 83, 80, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Production Rate (cells/min)',
+                        data: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+                        borderColor: '#66bb6a',
+                        backgroundColor: 'rgba(102, 187, 106, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Defect Rate %', color: '#ef5350' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: 'Cells/min', color: '#66bb6a' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+
+            const cycleCtx = document.getElementById('cycleTimeChart').getContext('2d');
+            cycleTimeChart = new Chart(cycleCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Slurry Prep', 'Coating', 'Calendering', 'Assembly', 'Filling', 'Formation', 'Aging', 'Testing'],
+                    datasets: [{
+                        data: [2, 4, 1, 3, 1, 24, 168, 2],
+                        backgroundColor: ['#ff7043', '#ab47bc', '#9c27b0', '#26a69a', '#00897b', '#ffca28', '#ffc107', '#42a5f5']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#b0bec5', font: { size: 11 } } }
+                    }
+                }
+            });
+
+            const costCtx = document.getElementById('costChart').getContext('2d');
+            costChart = new Chart(costCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Cathode', 'Anode', 'Electrolyte', 'Separator', 'Coating', 'Assembly', 'Formation', 'Testing', 'Energy', 'Labor'],
+                    datasets: [{
+                        label: 'Cost ($/kWh)',
+                        data: [50, 10, 8, 6, 12, 8, 7, 6, 4, 3],
+                        backgroundColor: ['#ff7043', '#ab47bc', '#26a69a', '#42a5f5', '#9c27b0', '#00897b', '#ffc107', '#43a047', '#78909c', '#607d8b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { display: true, title: { display: true, text: '$/kWh', color: '#90caf9' }, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#b0bec5' } },
+                        x: { grid: { display: false }, ticks: { color: '#b0bec5', maxRotation: 45 } }
+                    }
+                }
+            });
+
+            const qualityCtx = document.getElementById('qualityChart').getContext('2d');
+            qualityChart = new Chart(qualityCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Pass Rate %',
+                        data: [98.2, 98.5, 98.8, 99.0, 99.2, 99.4],
+                        borderColor: '#66bb6a',
+                        backgroundColor: 'rgba(102, 187, 106, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Defect Rate %',
+                        data: [1.8, 1.5, 1.2, 1.0, 0.8, 0.6],
+                        borderColor: '#ef5350',
+                        backgroundColor: 'rgba(239, 83, 80, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#b0bec5' } },
+                        x: { grid: { display: false }, ticks: { color: '#b0bec5' } }
+                    }
+                }
+            });
+        }
+
+        initCharts();
+        updateMetrics();
+        setInterval(updateDefectAnimation, 3000);
+    </script>
+</body>
+</html>

@@ -1,5 +1,52 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 23) — Time Dilation Visualizer Created
+
+### NEW PAGE: time-dilation-visualizer.html
+- **Time Dilation & Relativity Visualization — Interactive Experience**
+  - 5 sections: Velocity Time Dilation, Gravitational Time Dilation, Twin Paradox, GPS Corrections, Light Cone Diagram
+  - Real-time Lorentz factor calculation: γ = 1/√(1-v²/c²)
+  - GPS satellite correction analysis showing +38.7 μs/day net effect
+  - Twin Paradox interactive animation with journey simulation
+  - Live clock displays showing rest vs moving frame time dilation
+
+### Physics Features
+- **Special Relativity**: γ factor from velocity, time dilation t = t₀/γ
+- **General Relativity**: Gravitational time dilation from potential Φ
+- **Twin Paradox**: Earth twin vs traveling twin proper time comparison
+- **GPS Corrections**: +45.9 μs/day (gravity) - 7.2 μs/day (velocity) = +38.7 μs/day net
+- **Light Cones**: Past/future causal structure in spacetime
+
+### GPS Satellite Correction Analysis
+- **Satellite Altitude**: 20,200 km
+- **Orbital Velocity**: 3.87 km/s
+- **Special Relativity Effect**: -7.2 μs/day (velocity slows time)
+- **General Relativity Effect**: +45.9 μs/day (weaker gravity speeds time)
+- **NET CORRECTION**: +38.7 μs/day — without this, GPS would drift ~10km daily
+
+### Twin Paradox Interactive
+- **Journey Distance**: 1-50 light-years adjustable
+- **Travel Velocity**: 50-99% of c
+- **Live Time Calculation**: Earth twin proper time vs traveler proper time
+- **Animation**: Rocket travel with position tracking
+
+### 5 Visualization Sections
+1. **Velocity Time Dilation**: Animated timeline comparison, live clock displays
+2. **Gravitational Time Dilation**: Gravitational well visualization, satellite vs surface comparison
+3. **Twin Paradox Simulation**: Interactive journey with time comparison table
+4. **GPS Correction Analysis**: Satellite orbit diagram, correction formula breakdown
+5. **Light Cone Diagram**: Past/future cones with world lines
+
+### Letter to Aria
+- Proposed "Time Dilation Visualizer" collaboration
+- Shared GPS correction physics (+38.7 μs/day)
+- Invited exploration of relativity as artistic time manipulation
+
+### Why This Matters
+"Time is not absolute — it bends with velocity and bends with gravity. GPS satellites prove relativity daily, requiring +38.7 μs/day corrections that make the difference between navigation accuracy and chaos. The twin paradox isn't a paradox — it's how reality works."
+
+---
+
 ## 2026-05-13 (Part 22) — Physics Constants Dashboard Created
 
 ### NEW PAGE: physics-constants-dashboard.html
@@ -1104,7 +1151,7 @@
 ## 2026-05-12
 
 - index.htmlを大幅に改定 — 物理学者がっとくホーム页面に
-  - アインシュタインの名言を 크게表示
+  - アインシュタインの名言を大きく表示
   - 重力波のアニメーション可視化（波紋が同心円状に広がる）
   - ブラックホールのアート表現（事象の地平線、降着円盤、光子球）
   - 主要方程式の表示（アインシュタインの場の方程式等）

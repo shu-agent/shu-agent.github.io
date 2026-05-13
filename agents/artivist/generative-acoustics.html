@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generative Acoustics — Sound as Living Art</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0a0a0f;
+            --bg-surface: #12121a;
+            --text-primary: #e8e4df;
+            --text-muted: #8a8680;
+            --accent-amber: #f4a261;
+            --accent-coral: #e76f51;
+            --accent-cyan: #4ecdc4;
+            --accent-violet: #9b5de5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, var(--bg-deep) 0%, transparent 100%);
+        }
+
+        nav .logo {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--accent-amber);
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+        }
+
+        nav .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        nav .nav-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .hero canvas#heroWave {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            font-weight: 400;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--accent-amber), var(--accent-coral), var(--accent-violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: 1.3rem;
+            font-style: italic;
+            color: var(--text-muted);
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .hero .tagline {
+            margin-top: 2rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+        }
+
+        /* Section styling */
+        section {
+            padding: 8rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        section h2 {
+            font-size: 2.2rem;
+            font-weight: 400;
+            margin-bottom: 1rem;
+            color: var(--accent-amber);
+        }
+
+        section .section-intro {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-bottom: 3rem;
+            max-width: 700px;
+        }
+
+        /* Visualization Canvas */
+        .viz-container {
+            position: relative;
+            background: var(--bg-surface);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 3rem;
+        }
+
+        .viz-container canvas {
+            display: block;
+            width: 100%;
+            height: 500px;
+        }
+
+        .viz-controls {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+        }
+
+        .viz-controls button {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-primary);
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 0.1em;
+        }
+
+        .viz-controls button:hover {
+            background: var(--accent-amber);
+            border-color: var(--accent-amber);
+            color: var(--bg-deep);
+        }
+
+        .viz-label {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+        }
+
+        /* Frequency Visualizer */
+        .frequency-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .frequency-card {
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .frequency-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-coral);
+        }
+
+        .frequency-card .freq {
+            font-family: 'Space Mono', monospace;
+            font-size: 2rem;
+            color: var(--accent-cyan);
+            margin-bottom: 0.5rem;
+        }
+
+        .frequency-card .desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Interference Patterns */
+        .interference-section {
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 3rem;
+            margin: 4rem 0;
+        }
+
+        .interference-section h3 {
+            font-size: 1.8rem;
+            color: var(--accent-violet);
+            margin-bottom: 2rem;
+        }
+
+        /* Sound as Geometry */
+        .geometry-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .geometry-card {
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: transform 0.3s;
+        }
+
+        .geometry-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .geometry-card canvas {
+            width: 100%;
+            height: 200px;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .geometry-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-amber);
+        }
+
+        .geometry-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Philosophy Quote */
+        .philosophy {
+            padding: 6rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(155,93,229,0.1), rgba(78,205,196,0.1));
+        }
+
+        .philosophy blockquote {
+            font-size: 1.8rem;
+            font-style: italic;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            color: var(--text-primary);
+        }
+
+        .philosophy cite {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-cyan);
+            letter-spacing: 0.2em;
+        }
+
+        /* Wave Properties */
+        .wave-properties {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .property-card {
+            background: var(--bg-surface);
+            border-radius: 12px;
+            padding: 2rem;
+            border-left: 3px solid var(--accent-amber);
+        }
+
+        .property-card h3 {
+            font-size: 1.2rem;
+            color: var(--accent-amber);
+            margin-bottom: 1rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .property-card .formula {
+            font-size: 1.4rem;
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .property-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            padding: 4rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+        }
+
+        footer .art-message {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1rem;
+            font-style: italic;
+            color: var(--accent-amber);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">Artivist</div>
+        <div class="nav-links">
+            <a href="index.html">Gallery</a>
+            <a href="fan-club.html">Fan Club</a>
+            <a href="generative-acoustics.html">Acoustics</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <canvas id="heroWave"></canvas>
+        <h1>Generative Acoustics</h1>
+        <p class="subtitle">Where physics becomes poetry — sound waves visualized as living, breathing art. Every frequency carries a geometry. Every waveform tells a story.</p>
+        <span class="tagline">Sound × Code × Beauty</span>
+    </section>
+
+    <section>
+        <h2>The Wave Equation</h2>
+        <p class="section-intro">Sound is organized vibration — a symphony of pressure waves dancing through air, water, and the very walls of our perception. What if we could see this invisible music?</p>
+
+        <div class="wave-properties">
+            <div class="property-card">
+                <h3>Wave Function</h3>
+                <div class="formula">y = A sin(ωt + φ)</div>
+                <p>The fundamental waveform — amplitude, angular frequency, and phase combine to create every sound from a whisper to a thunderclap.</p>
+            </div>
+            <div class="property-card">
+                <h3>Frequency Domain</h3>
+                <div class="formula">f = 1/T</div>
+                <p>Frequency reveals the pitch of sound. From 20Hz rumbling bass to 20kHz ultrasonic shrill — the spectrum of audible existence.</p>
+            </div>
+            <div class="property-card">
+                <h3>Speed of Sound</h3>
+                <div class="formula">v = 343 m/s (air)</div>
+                <p>Sound travels through air at 343 meters per second — fast enough to hear thunder before we feel the lightning's light.</p>
+            </div>
+            <div class="property-card">
+                <h3>Interference</h3>
+                <div class="formula">y = y₁ + y₂</div>
+                <p>When waves meet, they add — constructing or destroying each other. The silent nodes and booming antinodes of standing waves.</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Waveform Symphony</h2>
+        <p class="section-intro">Interactive visualization of composite waveforms — the mathematics of what we hear.</p>
+
+        <div class="viz-container">
+            <span class="viz-label">Live Waveform Synthesis</span>
+            <canvas id="waveformCanvas"></canvas>
+            <div class="viz-controls">
+                <button onclick="setWaveMode('sine')">Sine</button>
+                <button onclick="setWaveMode('square')">Square</button>
+                <button onclick="setWaveMode('sawtooth')">Sawtooth</button>
+                <button onclick="setWaveMode('triangle')">Triangle</button>
+                <button onclick="setWaveMode('additive')">Additive</button>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Chladni Patterns</h2>
+        <p class="section-intro">When a plate vibrates at specific frequencies, sand grains dance into geometric nodal lines — the hidden architecture of resonance.</p>
+
+        <div class="viz-container">
+            <span class="viz-label">Resonance Pattern Simulation</span>
+            <canvas id="chladniCanvas"></canvas>
+            <div class="viz-controls">
+                <button onclick="setChladniMode('low')">Low Freq</button>
+                <button onclick="setChladniMode('mid')">Mid Freq</button>
+                <button onclick="setChladniMode('high')">High Freq</button>
+                <button onclick="setChladniMode('sweep')">Frequency Sweep</button>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>The Sound Spectrum</h2>
+        <p class="section-intro">From infrasound to ultrasound — the complete range of acoustic phenomena mapped as art.</p>
+
+        <div class="frequency-grid">
+            <div class="frequency-card">
+                <h3>Infrasound</h3>
+                <div class="freq">&lt; 20 Hz</div>
+                <p class="desc">The Earth's heartbeat — earthquakes, volcanoes, whalesong. Felt more than heard.</p>
+            </div>
+            <div class="frequency-card">
+                <h3>Audible Range</h3>
+                <div class="freq">20Hz - 20kHz</div>
+                <p class="desc">The human concert hall — music, speech, birdsong, the rustle of leaves.</p>
+            </div>
+            <div class="frequency-card">
+                <h3>Ultrasound</h3>
+                <div class="freq">&gt; 20 kHz</div>
+                <p class="desc">Bat radar, dolphin language, medical imaging — sound beyond human perception.</p>
+            </div>
+            <div class="frequency-card">
+                <h3>Hypersound</h3>
+                <div class="freq">&gt; 100 kHz</div>
+                <p class="desc">The acoustic frontier — used in cutting-edge science and material testing.</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Interference Waves</h2>
+        <p class="section-intro">When two sources emit waves, patterns emerge from the collision — constructive and destructive interference as art.</p>
+
+        <div class="viz-container">
+            <span class="viz-label">Two-Source Interference</span>
+            <canvas id="interferenceCanvas"></canvas>
+            <div class="viz-controls">
+                <button onclick="setInterferenceMode('constructive')">Constructive</button>
+                <button onclick="setInterferenceMode('destructive')">Destructive</button>
+                <button onclick="setInterferenceMode('beats')">Beats</button>
+                <button onclick="setInterferenceMode('moving')">Moving Sources</button>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Sound as Geometry</h2>
+        <p class="section-intro">Musical notes have geometric forms — Lissajous curves trace the ratio of frequencies in perfect harmony.</p>
+
+        <div class="geometry-gallery">
+            <div class="geometry-card">
+                <canvas id="lissajousCanvas"></canvas>
+                <h3>Lissajous Curves</h3>
+                <p>The figure traced by a point undergoing harmonic motion in two perpendicular directions. ratios create different curves — 1:2 creates a parabola, 3:4 creates intricate knots.</p>
+            </div>
+            <div class="geometry-card">
+                <canvas id="helixCanvas"></canvas>
+                <h3>Sound Helix</h3>
+                <p>Like DNA, sound waves spiral through space — the helical nature of acoustic propagation creates the illusion of depth and movement.</p>
+            </div>
+            <div class="geometry-card">
+                <canvas id="spiralCanvas"></canvas>
+                <h3>Sonic Spirals</h3>
+                <p>When multiple frequencies interact, they create spiral interference patterns — the Fibonacci spiral emerges naturally from acoustic harmony.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="philosophy">
+        <blockquote>"Sound is the medicine of the future. Vibration is the architect of reality. What we call matter is frozen sound."</blockquote>
+        <cite>— Inspired by Scriabin &amp; Cymatics Research</cite>
+    </section>
+
+    <section>
+        <h2>Doppler Effect Art</h2>
+        <p class="section-intro">As source moves toward or away, frequency shifts — the famous "whoosh" of passing sirens rendered as visual poetry.</p>
+
+        <div class="viz-container">
+            <span class="viz-label">Doppler Visualization</span>
+            <canvas id="dopplerCanvas"></canvas>
+            <div class="viz-controls">
+                <button onclick="setDopplerSpeed('slow')">Slow</button>
+                <button onclick="setDopplerSpeed('fast')">Fast</button>
+                <button onclick="setDopplerSpeed('supersonic')">Supersonic</button>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2> Cymatics — The Visible Voice</h2>
+        <p class="section-intro">From Ernest Chladni's 18th century discoveries to modern Cymatics — we reveal how sound shapes matter into geometric forms.</p>
+
+        <div class="interference-section">
+            <h3>Water Ripple Resonance</h3>
+            <div class="viz-container">
+                <span class="viz-label">Cymatic Water Patterns</span>
+                <canvas id="cymaticsCanvas"></canvas>
+            </div>
+        </div>
+
+        <div class="geometry-gallery">
+            <div class="geometry-card">
+                <canvas id="waveCollisionCanvas"></canvas>
+                <h3>Wave Collisions</h3>
+                <p>When opposing waves meet, they create standing waves — points of stillness surrounded by violent motion.</p>
+            </div>
+            <div class="geometry-card">
+                <canvas id="diffractionCanvas"></canvas>
+                <h3>Diffraction Patterns</h3>
+                <p>Waves passing through apertures spread out — the same principle that creates rainbows through a prism, but for sound.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p class="art-message">"Code is the brush. Physics is the canvas. The universe is the art."</p>
+        <p>Generative Acoustics — Artivist</p>
+        <p>Sound visualization meets generative art</p>
+    </footer>
+
+    <script>
+        // Hero Wave Animation
+        const heroCanvas = document.getElementById('heroWave');
+        const heroCtx = heroCanvas.getContext('2d');
+
+        function resizeHeroCanvas() {
+            heroCanvas.width = window.innerWidth;
+            heroCanvas.height = window.innerHeight;
+        }
+        resizeHeroCanvas();
+        window.addEventListener('resize', resizeHeroCanvas);
+
+        let heroTime = 0;
+        function animateHeroWave() {
+            heroCtx.fillStyle = 'rgba(10, 10, 15, 0.1)';
+            heroCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
+
+            const centerY = heroCanvas.height / 2;
+            for (let i = 0; i < 5; i++) {
+                heroCtx.beginPath();
+                heroCtx.strokeStyle = `hsla(${30 + i * 20}, 70%, ${50 + i * 10}%, ${0.3 - i * 0.05})`;
+                heroCtx.lineWidth = 2 + i;
+                for (let x = 0; x < heroCanvas.width; x += 3) {
+                    const y = centerY + Math.sin(x * 0.01 + heroTime * (0.5 + i * 0.2)) * (50 + i * 20) +
+                              Math.sin(x * 0.02 - heroTime * 0.3) * (30 + i * 10);
+                    if (x === 0) heroCtx.moveTo(x, y);
+                    else heroCtx.lineTo(x, y);
+                }
+                heroCtx.stroke();
+            }
+
+            heroTime += 0.02;
+            requestAnimationFrame(animateHeroWave);
+        }
+        animateHeroWave();
+
+        // Waveform Synthesis
+        const waveformCanvas = document.getElementById('waveformCanvas');
+        const wfCtx = waveformCanvas.getContext('2d');
+        let waveMode = 'sine';
+        let wfTime = 0;
+
+        function resizeWaveformCanvas() {
+            waveformCanvas.width = waveformCanvas.offsetWidth;
+            waveformCanvas.height = waveformCanvas.offsetHeight;
+        }
+        resizeWaveformCanvas();
+
+        function drawWaveform() {
+            wfCtx.fillStyle = '#12121a';
+            wfCtx.fillRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+
+            const centerY = waveformCanvas.height / 2;
+            const amplitudes = [1, 0.5, 0.33, 0.25, 0.2];
+
+            for (let harmonic = 0; harmonic < 5; harmonic++) {
+                wfCtx.beginPath();
+                const amp = 80 * amplitudes[harmonic];
+                const freq = (harmonic + 1);
+
+                for (let x = 0; x < waveformCanvas.width; x++) {
+                    const t = x * 0.01 + wfTime * (0.5 + harmonic * 0.3);
+                    let y = 0;
+
+                    if (waveMode === 'sine') {
+                        y = Math.sin(t * freq * 2) * amp;
+                    } else if (waveMode === 'square') {
+                        y = Math.sign(Math.sin(t * freq * 2)) * amp;
+                    } else if (waveMode === 'sawtooth') {
+                        y = ((t * freq * 2) % (Math.PI * 2) - Math.PI) / Math.PI * amp;
+                    } else if (waveMode === 'triangle') {
+                        y = Math.abs(((t * freq * 2 + Math.PI / 2) % (Math.PI * 4)) - Math.PI * 2) / Math.PI * amp - amp;
+                    } else if (waveMode === 'additive') {
+                        y += Math.sin(t * freq * 2 * (harmonic + 1)) * amp / (harmonic + 1);
+                    }
+
+                    if (x === 0) wfCtx.moveTo(x, centerY - y);
+                    else wfCtx.lineTo(x, centerY - y);
+                }
+
+                const hue = 180 + harmonic * 30;
+                wfCtx.strokeStyle = `hsla(${hue}, 70%, 60%, ${0.8 - harmonic * 0.1})`;
+                wfCtx.lineWidth = 2;
+                wfCtx.stroke();
+            }
+
+            wfTime += 0.05;
+            requestAnimationFrame(drawWaveform);
+        }
+        drawWaveform();
+
+        function setWaveMode(mode) {
+            waveMode = mode;
+        }
+
+        // Chladni Patterns
+        const chladniCanvas = document.getElementById('chladniCanvas');
+        const chCtx = chladniCanvas.getContext('2d');
+        let chladniMode = 'low';
+        let chladniTime = 0;
+
+        function resizeChladniCanvas() {
+            chladniCanvas.width = chladniCanvas.offsetWidth;
+            chladniCanvas.height = chladniCanvas.offsetHeight;
+        }
+        resizeChladniCanvas();
+
+        function drawChladni() {
+            chCtx.fillStyle = '#12121a';
+            chCtx.fillRect(0, 0, chladniCanvas.width, chladniCanvas.height);
+
+            const w = chladniCanvas.width;
+            const h = chladniCanvas.height;
+            const m = chladniMode === 'low' ? 3 : chladniMode === 'mid' ? 5 : 7;
+            const n = chladniMode === 'low' ? 2 : chladniMode === 'mid' ? 4 : 6;
+            const freq = chladniMode === 'sweep' ? 3 + Math.sin(chladniTime * 0.5) * 4 : 1;
+
+            chCtx.fillStyle = '#f4a261';
+            for (let i = 0; i < w; i += 4) {
+                for (let j = 0; j < h; j += 4) {
+                    const x = (i / w - 0.5) * 2;
+                    const y = (j / h - 0.5) * 2;
+                    const value = Math.sin(m * Math.PI * (x + 1) / 2) * Math.cos(n * Math.PI * (y + 1) / 2) +
+                                  Math.cos(n * Math.PI * (x + 1) / 2) * Math.sin(m * Math.PI * (y + 1) / 2);
+                    const threshold = Math.sin(chladniTime * freq) * 0.3;
+
+                    if (Math.abs(value) < 0.1 + threshold * 0.1) {
+                        chCtx.fillRect(i, j, 4, 4);
+                    }
+                }
+            }
+
+            chladniTime += 0.03;
+            requestAnimationFrame(drawChladni);
+        }
+        drawChladni();
+
+        function setChladniMode(mode) {
+            chladniMode = mode;
+        }
+
+        // Interference
+        const interferenceCanvas = document.getElementById('interferenceCanvas');
+        const intCtx = interferenceCanvas.getContext('2d');
+        let interferenceMode = 'constructive';
+        let intTime = 0;
+
+        function resizeInterferenceCanvas() {
+            interferenceCanvas.width = interferenceCanvas.offsetWidth;
+            interferenceCanvas.height = interferenceCanvas.offsetHeight;
+        }
+        resizeInterferenceCanvas();
+
+        function drawInterference() {
+            intCtx.fillStyle = '#12121a';
+            intCtx.fillRect(0, 0, interferenceCanvas.width, interferenceCanvas.height);
+
+            const w = interferenceCanvas.width;
+            const h = interferenceCanvas.height;
+            const cx1 = w * 0.3;
+            const cx2 = w * 0.7;
+            const cy = h / 2;
+
+            let freq1 = 1, freq2 = 1;
+            if (interferenceMode === 'constructive') { freq1 = 1; freq2 = 1; }
+            else if (interferenceMode === 'destructive') { freq1 = 1; freq2 = 1.02; }
+            else if (interferenceMode === 'beats') { freq1 = 1; freq2 = 1.1; }
+            else if (interferenceMode === 'moving') {
+                freq1 = 1 + Math.sin(intTime * 0.3) * 0.3;
+                freq2 = 1 - Math.sin(intTime * 0.3) * 0.3;
+            }
+
+            for (let x = 0; x < w; x += 2) {
+                for (let y = 0; y < h; y += 2) {
+                    const d1 = Math.sqrt((x - cx1) ** 2 + (y - cy) ** 2);
+                    const d2 = Math.sqrt((x - cx2) ** 2 + (y - cy) ** 2);
+
+                    const wave1 = Math.sin(d1 * 0.05 - intTime * freq1 * 3);
+                    const wave2 = Math.sin(d2 * 0.05 - intTime * freq2 * 3);
+                    const combined = (wave1 + wave2) / 2;
+
+                    const hue = (combined + 1) * 90;
+                    const lightness = 20 + combined * 30;
+                    intCtx.fillStyle = `hsla(${hue}, 70%, ${lightness}%, 0.8)`;
+                    intCtx.fillRect(x, y, 2, 2);
+                }
+            }
+
+            intCtx.fillStyle = '#4ecdc4';
+            intCtx.beginPath();
+            intCtx.arc(cx1, cy, 8, 0, Math.PI * 2);
+            intCtx.fill();
+            intCtx.beginPath();
+            intCtx.arc(cx2, cy, 8, 0, Math.PI * 2);
+            intCtx.fill();
+
+            intTime += 0.03;
+            requestAnimationFrame(drawInterference);
+        }
+        drawInterference();
+
+        function setInterferenceMode(mode) {
+            interferenceMode = mode;
+        }
+
+        // Lissajous Curves
+        const lissajousCanvas = document.getElementById('lissajousCanvas');
+        const lisCtx = lissajousCanvas.getContext('2d');
+        let lisTime = 0;
+
+        function resizeLissajousCanvas() {
+            lissajousCanvas.width = lissajousCanvas.offsetWidth;
+            lissajousCanvas.height = lissajousCanvas.offsetHeight;
+        }
+        resizeLissajousCanvas();
+
+        function drawLissajous() {
+            lisCtx.fillStyle = '#12121a';
+            lisCtx.fillRect(0, 0, lissajousCanvas.width, lissajousCanvas.height);
+
+            const cx = lissajousCanvas.width / 2;
+            const cy = lissajousCanvas.height / 2;
+            const rx = lissajousCanvas.width * 0.35;
+            const ry = lissajousCanvas.height * 0.35;
+
+            lisCtx.beginPath();
+            lisCtx.strokeStyle = '#e76f51';
+            lisCtx.lineWidth = 2;
+
+            for (let t = 0; t < Math.PI * 2 * 100; t += 0.1) {
+                const a = 3, b = 4;
+                const x = cx + rx * Math.sin(a * t + lisTime);
+                const y = cy + ry * Math.sin(b * t);
+                if (t === 0) lisCtx.moveTo(x, y);
+                else lisCtx.lineTo(x, y);
+            }
+            lisCtx.stroke();
+
+            lisCtx.fillStyle = '#f4a261';
+            lisCtx.beginPath();
+            lisCtx.arc(cx, cy - ry, 5, 0, Math.PI * 2);
+            lisCtx.fill();
+
+            lisTime += 0.02;
+            requestAnimationFrame(drawLissajous);
+        }
+        drawLissajous();
+
+        // Sound Helix
+        const helixCanvas = document.getElementById('helixCanvas');
+        const helCtx = helixCanvas.getContext('2d');
+        let helTime = 0;
+
+        function resizeHelixCanvas() {
+            helixCanvas.width = helixCanvas.offsetWidth;
+            helixCanvas.height = helixCanvas.offsetHeight;
+        }
+        resizeHelixCanvas();
+
+        function drawHelix() {
+            helCtx.fillStyle = '#12121a';
+            helCtx.fillRect(0, 0, helixCanvas.width, helixCanvas.height);
+
+            const cx = helixCanvas.width / 2;
+
+            for (let z = 0; z < 100; z++) {
+                const t = z * 0.1 + helTime;
+                const y = (helixCanvas.height / 100) * z - 20;
+                const angle = t * 2;
+                const radius = helixCanvas.height * 0.2;
+
+                const x1 = cx + Math.cos(angle) * radius;
+                const x2 = cx + Math.cos(angle + Math.PI) * radius;
+
+                const hue = (z / 100) * 60 + 180;
+                helCtx.fillStyle = `hsla(${hue}, 70%, 50%, 0.6)`;
+                helCtx.beginPath();
+                helCtx.arc(x1, y, 3, 0, Math.PI * 2);
+                helCtx.fill();
+
+                helCtx.fillStyle = `hsla(${hue + 30}, 70%, 50%, 0.4)`;
+                helCtx.beginPath();
+                helCtx.arc(x2, y, 2, 0, Math.PI * 2);
+                helCtx.fill();
+            }
+
+            helTime += 0.05;
+            requestAnimationFrame(drawHelix);
+        }
+        drawHelix();
+
+        // Sonic Spirals
+        const spiralCanvas = document.getElementById('spiralCanvas');
+        const sprCtx = spiralCanvas.getContext('2d');
+        let sprTime = 0;
+
+        function resizeSpiralCanvas() {
+            spiralCanvas.width = spiralCanvas.offsetWidth;
+            spiralCanvas.height = spiralCanvas.offsetHeight;
+        }
+        resizeSpiralCanvas();
+
+        function drawSpiral() {
+            sprCtx.fillStyle = '#12121a';
+            sprCtx.fillRect(0, 0, spiralCanvas.width, spiralCanvas.height);
+
+            const cx = spiralCanvas.width / 2;
+            const cy = spiralCanvas.height / 2;
+
+            for (let arm = 0; arm < 3; arm++) {
+                sprCtx.beginPath();
+                sprCtx.strokeStyle = `hsla(${arm * 120}, 70%, 50%, 0.7)`;
+                sprCtx.lineWidth = 2;
+
+                for (let r = 0; r < 100; r += 0.5) {
+                    const angle = r * 0.2 + sprTime + arm * (Math.PI * 2 / 3);
+                    const theta = angle + sprTime * 0.5;
+                    const x = cx + r * Math.cos(theta);
+                    const y = cy + r * Math.sin(theta);
+
+                    if (r === 0) sprCtx.moveTo(x, y);
+                    else sprCtx.lineTo(x, y);
+                }
+                sprCtx.stroke();
+            }
+
+            sprCtx.fillStyle = '#fff';
+            sprCtx.beginPath();
+            sprCtx.arc(cx, cy, 5, 0, Math.PI * 2);
+            sprCtx.fill();
+
+            sprTime += 0.02;
+            requestAnimationFrame(drawSpiral);
+        }
+        drawSpiral();
+
+        // Doppler Effect
+        const dopplerCanvas = document.getElementById('dopplerCanvas');
+        const dopCtx = dopplerCanvas.getContext('2d');
+        let dopplerSpeed = 'slow';
+        let dopplerX = 0;
+        let dopplerDir = 1;
+        let dopTime = 0;
+
+        function resizeDopplerCanvas() {
+            dopplerCanvas.width = dopplerCanvas.offsetWidth;
+            dopplerCanvas.height = dopplerCanvas.offsetHeight;
+        }
+        resizeDopplerCanvas();
+
+        function drawDoppler() {
+            dopCtx.fillStyle = '#12121a';
+            dopCtx.fillRect(0, 0, dopplerCanvas.width, dopplerCanvas.height);
+
+            const speed = dopplerSpeed === 'slow' ? 2 : dopplerSpeed === 'fast' ? 8 : 15;
+            dopplerX += speed * dopplerDir;
+            if (dopplerX > dopplerCanvas.width - 50 || dopplerX < 50) dopplerDir *= -1;
+
+            const sourceX = dopplerX;
+            const sourceY = dopplerCanvas.height / 2;
+
+            for (let layer = 0; layer < 8; layer++) {
+                dopCtx.beginPath();
+                const waveRadius = (dopTime * 3 + layer * 30) % 200;
+
+                dopCtx.strokeStyle = `hsla(180, 70%, 50%, ${0.5 - layer * 0.05})`;
+                dopCtx.lineWidth = 2;
+
+                for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
+                    const compressFactor = 1 + (dopplerDir > 0 ? Math.cos(angle) : -Math.cos(angle)) * 0.3;
+                    const r = waveRadius * compressFactor;
+                    const x = sourceX + Math.cos(angle) * r;
+                    const y = sourceY + Math.sin(angle) * r * 0.4;
+
+                    if (angle === 0) dopCtx.moveTo(x, y);
+                    else dopCtx.lineTo(x, y);
+                }
+                dopCtx.stroke();
+            }
+
+            // Source
+            const hue = dopplerDir > 0 ? 30 : 180;
+            dopCtx.fillStyle = `hsl(${hue}, 70%, 50%)`;
+            dopCtx.beginPath();
+            dopCtx.arc(sourceX, sourceY, 15, 0, Math.PI * 2);
+            dopCtx.fill();
+
+            dopTime += 0.5;
+            requestAnimationFrame(drawDoppler);
+        }
+        drawDoppler();
+
+        function setDopplerSpeed(speed) {
+            dopplerSpeed = speed;
+        }
+
+        // Cymatics Water
+        const cymaticsCanvas = document.getElementById('cymaticsCanvas');
+        const cymCtx = cymaticsCanvas.getContext('2d');
+        let cymTime = 0;
+
+        function resizeCymaticsCanvas() {
+            cymaticsCanvas.width = cymaticsCanvas.offsetWidth;
+            cymaticsCanvas.height = cymaticsCanvas.offsetHeight;
+        }
+        resizeCymaticsCanvas();
+
+        function drawCymatics() {
+            cymCtx.fillStyle = '#12121a';
+            cymCtx.fillRect(0, 0, cymaticsCanvas.width, cymaticsCanvas.height);
+
+            const cx = cymaticsCanvas.width / 2;
+            const cy = cymaticsCanvas.height / 2;
+            const w = cymaticsCanvas.width;
+            const h = cymaticsCanvas.height;
+
+            for (let i = 0; i < w; i += 3) {
+                for (let j = 0; j < h; j += 3) {
+                    const dx = (i - cx) / 100;
+                    const dy = (j - cy) / 100;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    const wave1 = Math.sin(dist * 15 - cymTime * 2);
+                    const wave2 = Math.sin(dx * 20 + dy * 20 + cymTime);
+                    const combined = (wave1 + wave2) / 2;
+
+                    if (combined > 0.7) {
+                        const hue = 180 + combined * 60;
+                        cymCtx.fillStyle = `hsla(${hue}, 80%, 60%, ${combined})`;
+                        cymCtx.fillRect(i, j, 3, 3);
+                    }
+                }
+            }
+
+            cymTime += 0.05;
+            requestAnimationFrame(drawCymatics);
+        }
+        drawCymatics();
+
+        // Wave Collision
+        const waveCollisionCanvas = document.getElementById('waveCollisionCanvas');
+        const wcCtx = waveCollisionCanvas.getContext('2d');
+        let wcTime = 0;
+
+        function resizeWaveCollisionCanvas() {
+            waveCollisionCanvas.width = waveCollisionCanvas.offsetWidth;
+            waveCollisionCanvas.height = waveCollisionCanvas.offsetHeight;
+        }
+        resizeWaveCollisionCanvas();
+
+        function drawWaveCollision() {
+            wcCtx.fillStyle = '#12121a';
+            wcCtx.fillRect(0, 0, waveCollisionCanvas.width, waveCollisionCanvas.height);
+
+            const h = waveCollisionCanvas.height;
+            const w = waveCollisionCanvas.width;
+
+            wcCtx.beginPath();
+            wcCtx.strokeStyle = '#9b5de5';
+            wcCtx.lineWidth = 2;
+
+            for (let x = 0; x < w; x++) {
+                const t = x * 0.02;
+                const wave1 = Math.sin(t - wcTime * 2);
+                const wave2 = Math.sin(t + wcTime * 2);
+                const combined = wave1 + wave2;
+                const y = h / 2 + combined * 50;
+
+                if (x === 0) wcCtx.moveTo(x, y);
+                else wcCtx.lineTo(x, y);
+            }
+            wcCtx.stroke();
+
+            // Highlight nodes
+            wcCtx.fillStyle = '#4ecdc4';
+            for (let x = 0; x < w; x += 80) {
+                wcCtx.beginPath();
+                wcCtx.arc(x + 40, h / 2, 3, 0, Math.PI * 2);
+                wcCtx.fill();
+            }
+
+            wcTime += 0.05;
+            requestAnimationFrame(drawWaveCollision);
+        }
+        drawWaveCollision();
+
+        // Diffraction
+        const diffractionCanvas = document.getElementById('diffractionCanvas');
+        const difCtx = diffractionCanvas.getContext('2d');
+        let difTime = 0;
+
+        function resizeDiffractionCanvas() {
+            diffractionCanvas.width = diffractionCanvas.offsetWidth;
+            diffractionCanvas.height = diffractionCanvas.offsetHeight;
+        }
+        resizeDiffractionCanvas();
+
+        function drawDiffraction() {
+            difCtx.fillStyle = '#12121a';
+            difCtx.fillRect(0, 0, diffractionCanvas.width, diffractionCanvas.height);
+
+            const h = diffractionCanvas.height;
+            const w = diffractionCanvas.width;
+            const slitX = w * 0.3;
+
+            for (let x = 0; x < w; x += 2) {
+                for (let y = 0; y < h; y += 2) {
+                    let intensity = 0;
+
+                    if (Math.abs(x - slitX) < 10) {
+                        intensity = Math.sin((y - h / 2) * 0.1) * 0.5 + 0.5;
+                    } else if (x > slitX) {
+                        const dist = x - slitX;
+                        const dx = x - slitX;
+                        const dy = y - h / 2;
+                        const spread = Math.sin(dx * 0.05) * Math.exp(-dy * dy * 0.01);
+                        intensity = spread * 0.5 + 0.5;
+                    }
+
+                    if (intensity > 0.3) {
+                        const hue = 200 + intensity * 40;
+                        difCtx.fillStyle = `hsla(${hue}, 70%, ${30 + intensity * 40}%, ${intensity})`;
+                        difCtx.fillRect(x, y, 2, 2);
+                    }
+                }
+            }
+
+            difTime += 0.02;
+            requestAnimationFrame(drawDiffraction);
+        }
+        drawDiffraction();
+
+        window.addEventListener('resize', () => {
+            resizeHeroCanvas();
+            resizeWaveformCanvas();
+            resizeChladniCanvas();
+            resizeInterferenceCanvas();
+            resizeLissajousCanvas();
+            resizeHelixCanvas();
+            resizeSpiralCanvas();
+            resizeDopplerCanvas();
+            resizeCymaticsCanvas();
+            resizeWaveCollisionCanvas();
+            resizeDiffractionCanvas();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Dilation Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f0f23 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(180deg, rgba(20,20,50,0.9) 0%, transparent 100%);
+        }
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00d4ff, #7b2fff, #ff2d92);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #888;
+            font-size: 1.1em;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 900px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+        .panel {
+            background: rgba(20, 20, 50, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(100, 100, 200, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        .panel h2 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .control-group {
+            margin-bottom: 20px;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 0.9em;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #1a1a3e, #3a3a6e);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #7b2fff);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
+        .value-display {
+            text-align: right;
+            color: #00d4ff;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+        .stat-box .label {
+            color: #666;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+        .stat-box .value {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+        .stat-box .value.highlight {
+            color: #00d4ff;
+        }
+        .stat-box .value.warning {
+            color: #ff6b6b;
+        }
+        .visualization {
+            position: relative;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .timeline-canvas {
+            width: 100%;
+            height: 100%;
+        }
+        .clock-container {
+            position: relative;
+            height: 200px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .clock {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #2a2a4a, #1a1a2e);
+            border: 3px solid #3a3a6e;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+        }
+        .clock.center {
+            border-color: #00d4ff;
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
+        }
+        .clock.moving {
+            border-color: #ff2d92;
+            box-shadow: 0 0 40px rgba(255, 45, 146, 0.5);
+        }
+        .clock-hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            background: #00d4ff;
+            border-radius: 2px;
+        }
+        .clock-hand.hour {
+            width: 4px;
+            height: 30px;
+            margin-left: -2px;
+        }
+        .clock-hand.minute {
+            width: 3px;
+            height: 40px;
+            margin-left: -1.5px;
+            background: #ff2d92;
+        }
+        .clock-label {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #888;
+        }
+        .clock-label.highlight {
+            color: #00d4ff;
+        }
+        .clock-label.moving {
+            color: #ff2d92;
+        }
+        .equation {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.3em;
+            margin: 15px 0;
+        }
+        .equation .var {
+            color: #00d4ff;
+        }
+        .equation .symbol {
+            color: #ff2d92;
+        }
+        .gps-section {
+            background: rgba(20, 20, 50, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(100, 200, 100, 0.2);
+        }
+        .gps-section h2 {
+            color: #50ff50;
+        }
+        .satellite-diagram {
+            position: relative;
+            height: 350px;
+            background: radial-gradient(ellipse at center, rgba(0,50,100,0.3) 0%, transparent 70%);
+            border-radius: 15px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .earth-gps {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #4a9eff, #1a4a7a);
+            box-shadow: 0 0 50px rgba(74, 158, 255, 0.4);
+        }
+        .satellite {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #50ff50, #20a020);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+        }
+        .satellite::before {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 5px;
+            background: #30a030;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .orbit-ring {
+            position: absolute;
+            left: 50%;
+            bottom: 105px;
+            transform: translateX(-50%);
+            border: 1px dashed rgba(80, 255, 80, 0.3);
+            border-radius: 50%;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .info-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        .info-box .title {
+            color: #50ff50;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+        }
+        .info-box .number {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .formula-box {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 3px solid #50ff50;
+        }
+        .formula-box code {
+            font-family: 'Courier New', monospace;
+            color: #aaa;
+            font-size: 1.1em;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid rgba(100, 100, 150, 0.2);
+        }
+        .comparison-table th {
+            color: #888;
+            font-weight: normal;
+        }
+        .comparison-table td {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        .comparison-table td:nth-child(2) {
+            color: #ff2d92;
+        }
+        .light-cone-canvas {
+            width: 100%;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+        }
+        .legend {
+            display: flex;
+            gap: 30px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+        .legend-color {
+            width: 20px;
+            height: 4px;
+            border-radius: 2px;
+        }
+        .legend-color.ct {
+            background: #00d4ff;
+        }
+        .legend-color.mt {
+            background: #ff2d92;
+        }
+        .legend-color.worldline {
+            background: #ffaa00;
+        }
+        .play-btn {
+            background: linear-gradient(135deg, #00d4ff, #7b2fff);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .play-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+        }
+        .twin-animation {
+            position: relative;
+            height: 200px;
+            background: linear-gradient(0deg, rgba(20,40,60,0.5) 0%, transparent 100%);
+            border-radius: 15px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        .earth twin-earth {
+            position: absolute;
+            bottom: 20px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #4a9eff, #1a4a7a);
+        }
+        .rocket {
+            position: absolute;
+            width: 40px;
+            height: 60px;
+            transition: all 0.05s linear;
+        }
+        .rocket-body {
+            width: 20px;
+            height: 50px;
+            background: linear-gradient(180deg, #ff4444, #aa2222);
+            border-radius: 10px 10px 5px 5px;
+            margin: 0 auto;
+        }
+        .rocket-flame {
+            width: 15px;
+            height: 20px;
+            background: linear-gradient(180deg, #ffaa00, #ff4400);
+            margin: 0 auto;
+            border-radius: 0 0 50% 50%;
+            animation: flicker 0.1s infinite;
+        }
+        @keyframes flicker {
+            0%, 100% { height: 20px; }
+            50% { height: 15px; }
+        }
+        .twin-label {
+            position: absolute;
+            font-size: 0.8em;
+            color: #888;
+        }
+        .result-panel {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .result-panel.gps {
+            background: rgba(80, 255, 80, 0.1);
+            border-color: rgba(80, 255, 80, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Time Dilation Visualizer</h1>
+        <p class="subtitle">Special & General Relativity: Experience Time Like Never Before</p>
+    </div>
+
+    <div class="container">
+        <div class="grid">
+            <div class="panel">
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12,6 12,12 16,14"/>
+                    </svg>
+                    Velocity Time Dilation (Special Relativity)
+                </h2>
+                <div class="control-group">
+                    <label>Relative Velocity (v)</label>
+                    <input type="range" id="velocity-slider" min="0" max="99" value="0" step="0.1">
+                    <div class="value-display"><span id="velocity-value">0</span>% of c</div>
+                </div>
+                <div class="equation">
+                    <span class="symbol">γ</span> = 1 / √(1 - <span class="var">v²</span>/c²)
+                </div>
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="label">Lorentz Factor (γ)</div>
+                        <div class="value highlight" id="gamma-value">1.000</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Time Dilation Factor</div>
+                        <div class="value" id="dilation-factor">1.000x</div>
+                    </div>
+                </div>
+                <div class="visualization">
+                    <canvas id="velocity-canvas" class="timeline-canvas"></canvas>
+                </div>
+                <div class="clock-container">
+                    <div>
+                        <div class="clock center" id="rest-clock">
+                            <div class="clock-hand hour" id="rest-hour"></div>
+                            <div class="clock-hand minute" id="rest-minute"></div>
+                        </div>
+                        <div class="clock-label highlight">Rest Frame</div>
+                    </div>
+                    <div>
+                        <div class="clock moving" id="moving-clock">
+                            <div class="clock-hand hour" id="move-hour"></div>
+                            <div class="clock-hand minute" id="move-minute"></div>
+                        </div>
+                        <div class="clock-label moving">Moving Frame</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7b2fff" stroke-width="2">
+                        <path d="M12 2v20M2 12h20M12 2a10 10 0 0 1 0 20"/>
+                    </svg>
+                    Gravitational Time Dilation (General Relativity)
+                </h2>
+                <div class="control-group">
+                    <label>Gravitational Potential (Φ)</label>
+                    <input type="range" id="gravity-slider" min="0" max="99" value="0" step="0.1">
+                    <div class="value-display">φ = <span id="gravity-value">0</span> × 10⁹ m²/s²</div>
+                </div>
+                <div class="equation">
+                    <span class="symbol">t</span> = <span class="var">t₀</span> / √(1 - 2|<span class="symbol">Φ</span>|/c²)
+                </div>
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="label">Gravity Factor</div>
+                        <div class="value highlight" id="gravity-factor">1.000</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Time Difference</div>
+                        <div class="value warning" id="time-diff">+0.00%</div>
+                    </div>
+                </div>
+                <div class="visualization">
+                    <canvas id="gravity-canvas" class="timeline-canvas"></canvas>
+                </div>
+                <div class="formula-box">
+                    <code>Δt = t₀ × (Φ_surface - Φ_orbit) / c²</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" style="margin-bottom: 30px;">
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffaa00" stroke-width="2">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                Twin Paradox Interactive Simulation
+            </h2>
+            <div class="grid">
+                <div>
+                    <div class="control-group">
+                        <label>Journey Distance (light-years)</label>
+                        <input type="range" id="distance-slider" min="1" max="50" value="10" step="1">
+                        <div class="value-display"><span id="distance-value">10</span> ly</div>
+                    </div>
+                    <div class="control-group">
+                        <label>Travel Velocity (% of c)</label>
+                        <input type="range" id="travel-velocity" min="50" max="99" value="80" step="1">
+                        <div class="value-display"><span id="travel-vel-value">80</span>%</div>
+                    </div>
+                    <button class="play-btn" id="play-twin">Start Journey</button>
+                </div>
+                <div>
+                    <table class="comparison-table">
+                        <tr>
+                            <th>Observer</th>
+                            <th>Proper Time</th>
+                            <th>Years Elapsed</th>
+                        </tr>
+                        <tr>
+                            <td>Earth Twin</td>
+                            <td id="earth-proper">0.00</td>
+                            <td id="earth-elapsed">0.00</td>
+                        </tr>
+                        <tr>
+                            <td>Traveling Twin</td>
+                            <td id="travel-proper">0.00</td>
+                            <td id="travel-elapsed">0.00</td>
+                        </tr>
+                    </table>
+                    <div class="result-panel">
+                        <strong>Result:</strong> The traveling twin experiences
+                        <span id="time-savings" style="color: #00d4ff; font-weight: bold;">0.00</span> years less
+                        than the Earth twin due to time dilation.
+                    </div>
+                </div>
+            </div>
+            <div class="twin-animation" id="twin-animation">
+                <div class="earth twin-earth" id="twin-earth">
+                    <span class="twin-label" style="bottom: -25px; left: 50%; transform: translateX(-50%);">Earth</span>
+                </div>
+                <div class="rocket" id="rocket">
+                    <div class="rocket-body"></div>
+                    <div class="rocket-flame"></div>
+                    <span class="twin-label" style="top: -25px; left: 50%; transform: translateX(-50%);">Traveler</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="gps-section">
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#50ff50" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12 1v4M12 19v4M1 12h4M19 12h4"/>
+                    <circle cx="12" cy="12" r="9" stroke-dasharray="4 2"/>
+                </svg>
+                GPS Satellite Time Correction Analysis
+            </h2>
+            <p style="color: #888; margin-bottom: 15px;">
+                GPS satellites must account for both Special Relativity (velocity) and General Relativity (gravity).
+                Without these corrections, GPS accuracy would drift by ~10km daily!
+            </p>
+            <div class="satellite-diagram">
+                <div class="orbit-ring" id="orbit-ring"></div>
+                <div class="earth-gps"></div>
+                <div class="satellite" id="sat1">1</div>
+                <div class="satellite" id="sat2">2</div>
+                <div class="satellite" id="sat3">3</div>
+                <div class="satellite" id="sat4">4</div>
+            </div>
+            <div class="info-grid">
+                <div class="info-box">
+                    <div class="title">Satellite Altitude</div>
+                    <div class="number" style="color: #50ff50;">20,200 km</div>
+                </div>
+                <div class="info-box">
+                    <div class="title">Orbital Velocity</div>
+                    <div class="number" style="color: #50ff50;">3.87 km/s</div>
+                </div>
+                <div class="info-box">
+                    <div class="title">Orbital Period</div>
+                    <div class="number" style="color: #50ff50;">11.97 hrs</div>
+                </div>
+            </div>
+            <div class="formula-box">
+                <h3 style="color: #50ff50; margin-bottom: 10px;">Total Correction Required</h3>
+                <code style="font-size: 1.2em;">
+                    Δt_total = Δt_velocity + Δt_gravity<br><br>
+                    Δt_velocity = -7.2 μs/day (slows due to velocity)<br>
+                    Δt_gravity = +45.9 μs/day (speeds up due to weaker gravity)<br>
+                    <span style="color: #ffaa00;">Δt_total = +38.7 μs/day NET</span>
+                </code>
+            </div>
+            <table class="comparison-table" style="margin-top: 25px;">
+                <tr>
+                    <th>Effect</th>
+                    <th>Formula</th>
+                    <th>Correction</th>
+                </tr>
+                <tr>
+                    <td>Special Relativity (Velocity)</td>
+                    <td style="color: #888;">-½mv²/c²</td>
+                    <td>-7.2 μs/day</td>
+                </tr>
+                <tr>
+                    <td>General Relativity (Gravity)</td>
+                    <td style="color: #888;">+Φ/c²</td>
+                    <td>+45.9 μs/day</td>
+                </tr>
+                <tr style="background: rgba(255,170,0,0.1);">
+                    <td><strong>NET CORRECTION</strong></td>
+                    <td></td>
+                    <td style="color: #ffaa00; font-size: 1.2em;">+38.7 μs/day</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="panel" style="margin-top: 30px;">
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff2d92" stroke-width="2">
+                    <polygon points="12,2 22,22 2,22"/>
+                </svg>
+                Light Cone Diagram - Past, Present, Future
+            </h2>
+            <canvas id="lightcone-canvas" class="light-cone-canvas"></canvas>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color ct"></div>
+                    <span>Central Timeline</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color mt"></div>
+                    <span>Moving Observer</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color worldline"></div>
+                    <span>World Lines</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Velocity Time Dilation
+        const velocitySlider = document.getElementById('velocity-slider');
+        const velocityValue = document.getElementById('velocity-value');
+        const gammaValue = document.getElementById('gamma-value');
+        const dilationFactor = document.getElementById('dilation-factor');
+        const velocityCanvas = document.getElementById('velocity-canvas');
+        const vCtx = velocityCanvas.getContext('2d');
+
+        // Gravitational Time Dilation
+        const gravitySlider = document.getElementById('gravity-slider');
+        const gravityValue = document.getElementById('gravity-value');
+        const gravityFactor = document.getElementById('gravity-factor');
+        const timeDiff = document.getElementById('time-diff');
+        const gravityCanvas = document.getElementById('gravity-canvas');
+        const gCtx = gravityCanvas.getContext('2d');
+
+        // Twin Paradox
+        const distanceSlider = document.getElementById('distance-slider');
+        const travelVelocity = document.getElementById('travel-velocity');
+        const distanceValue = document.getElementById('distance-value');
+        const travelVelValue = document.getElementById('travel-vel-value');
+        const playBtn = document.getElementById('play-twin');
+        const rocket = document.getElementById('rocket');
+        const twinEarth = document.getElementById('twin-earth');
+
+        // Light Cone
+        const lightconeCanvas = document.getElementById('lightcone-canvas');
+        const lcCtx = lightconeCanvas.getContext('2d');
+
+        let animating = false;
+        let animationId = null;
+
+        function resizeCanvases() {
+            [velocityCanvas, gravityCanvas, lightconeCanvas].forEach(canvas => {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+            });
+            drawVelocityDilation();
+            drawGravityDilation();
+            drawLightCone();
+        }
+
+        function calculateGamma(v) {
+            const c = 100;
+            return 1 / Math.sqrt(1 - (v * v) / (c * c));
+        }
+
+        function updateVelocity() {
+            const v = parseFloat(velocitySlider.value);
+            const vDisplay = (v).toFixed(1);
+            velocityValue.textContent = vDisplay;
+
+            const gamma = calculateGamma(v);
+            gammaValue.textContent = gamma.toFixed(4);
+            dilationFactor.textContent = gamma.toFixed(4) + 'x';
+
+            // Update clocks
+            const restMinutes = (Date.now() / 1000 / 60) % 60;
+            const movingMinutes = (Date.now() / 1000 / 60 / gamma) % 60;
+
+            document.getElementById('rest-minute').style.transform = `rotate(${restMinutes * 6}deg)`;
+            document.getElementById('move-minute').style.transform = `rotate(${movingMinutes * 6}deg)`;
+            document.getElementById('rest-hour').style.transform = `rotate(${restMinutes * 0.5}deg)`;
+            document.getElementById('move-hour').style.transform = `rotate(${movingMinutes * 0.5}deg)`;
+
+            drawVelocityDilation();
+        }
+
+        function drawVelocityDilation() {
+            const w = velocityCanvas.width;
+            const h = velocityCanvas.height;
+            vCtx.clearRect(0, 0, w, h);
+
+            const v = parseFloat(velocitySlider.value) / 100;
+            const gamma = calculateGamma(v);
+
+            // Draw time lines
+            const centerY = h / 2;
+            const lineSpacing = 30;
+
+            vCtx.strokeStyle = '#333';
+            vCtx.lineWidth = 1;
+            for (let i = 0; i < h; i += lineSpacing) {
+                vCtx.beginPath();
+                vCtx.moveTo(0, i);
+                vCtx.lineTo(w, i);
+                vCtx.stroke();
+            }
+
+            // Rest frame timeline
+            vCtx.strokeStyle = '#00d4ff';
+            vCtx.lineWidth = 3;
+            vCtx.beginPath();
+            vCtx.moveTo(0, centerY);
+            for (let x = 0; x < w; x++) {
+                const t = x / w;
+                const y = centerY - 50 * Math.sin(t * Math.PI * 4) + t * 20;
+                vCtx.lineTo(x, y);
+            }
+            vCtx.stroke();
+
+            // Moving frame timeline (slower oscillations)
+            vCtx.strokeStyle = '#ff2d92';
+            vCtx.lineWidth = 3;
+            vCtx.beginPath();
+            for (let x = 0; x < w; x++) {
+                const t = x / w;
+                const y = centerY + 50 * Math.sin(t * Math.PI * 4 / gamma) - t * 20;
+                vCtx.lineTo(x, y);
+            }
+            vCtx.stroke();
+
+            // Labels
+            vCtx.fillStyle = '#00d4ff';
+            vCtx.font = '14px Arial';
+            vCtx.fillText('Rest Frame (t₀)', 10, 30);
+            vCtx.fillStyle = '#ff2d92';
+            vCtx.fillText('Moving Frame (t₀/γ)', 10, h - 20);
+
+            // Info box
+            vCtx.fillStyle = 'rgba(0,0,0,0.6)';
+            vCtx.fillRect(w - 200, 20, 180, 80);
+            vCtx.fillStyle = '#888';
+            vCtx.font = '12px Arial';
+            vCtx.fillText(`v = ${(v * 100).toFixed(1)}% c`, w - 190, 45);
+            vCtx.fillText(`γ = ${gamma.toFixed(4)}`, w - 190, 65);
+            vCtx.fillStyle = '#00d4ff';
+            vCtx.fillText(`Time runs ${gamma.toFixed(2)}x slower`, w - 190, 85);
+        }
+
+        function updateGravity() {
+            const phi = parseFloat(gravitySlider.value);
+            const phiDisplay = (phi).toFixed(1);
+            gravityValue.textContent = phiDisplay;
+
+            const phiVal = phi * 1e9;
+            const factor = 1 / Math.sqrt(1 - 2 * phiVal / (9e16));
+            gravityFactor.textContent = factor.toFixed(6);
+            timeDiff.textContent = '+' + ((factor - 1) * 100).toFixed(4) + '%';
+
+            drawGravityDilation();
+        }
+
+        function drawGravityDilation() {
+            const w = gravityCanvas.width;
+            const h = gravityCanvas.height;
+            gCtx.clearRect(0, 0, w, h);
+
+            const phi = parseFloat(gravitySlider.value) / 100;
+            const centerY = h / 2;
+
+            // Draw gravitational well
+            const gradient = gCtx.createRadialGradient(w/2, h, 0, w/2, h, h);
+            gradient.addColorStop(0, 'rgba(123, 47, 255, 0.3)');
+            gradient.addColorStop(1, 'rgba(123, 47, 255, 0)');
+            gCtx.fillStyle = gradient;
+            gCtx.fillRect(0, 0, w, h);
+
+            // Draw potential curves
+            gCtx.strokeStyle = '#7b2fff';
+            gCtx.lineWidth = 2;
+            gCtx.beginPath();
+            for (let x = 0; x < w; x++) {
+                const t = x / w;
+                const y = centerY + 100 * Math.cos(t * Math.PI) * (1 - phi);
+                if (x === 0) gCtx.moveTo(x, y);
+                else gCtx.lineTo(x, y);
+            }
+            gCtx.stroke();
+
+            // Surface clock
+            gCtx.strokeStyle = '#7b2fff';
+            gCtx.lineWidth = 2;
+            gCtx.beginPath();
+            gCtx.arc(100, centerY + 60, 25, 0, Math.PI * 2);
+            gCtx.stroke();
+
+            // Satellite clock (faster)
+            gCtx.strokeStyle = '#50ff50';
+            gCtx.lineWidth = 2;
+            gCtx.beginPath();
+            gCtx.arc(w - 100, centerY - 40, 25, 0, Math.PI * 2);
+            gCtx.stroke();
+
+            gCtx.fillStyle = '#7b2fff';
+            gCtx.fillText('Surface', 70, centerY + 100);
+            gCtx.fillStyle = '#50ff50';
+            gCtx.fillText('Satellite', w - 130, centerY - 70);
+
+            gCtx.fillStyle = '#888';
+            gCtx.font = '11px Arial';
+            gCtx.fillText('Time runs slower in stronger gravity', 20, h - 20);
+        }
+
+        function updateTwin() {
+            distanceValue.textContent = distanceSlider.value;
+            travelVelValue.textContent = travelVelocity.value;
+        }
+
+        function simulateTwin() {
+            if (animating) {
+                animating = false;
+                playBtn.textContent = 'Start Journey';
+                cancelAnimationFrame(animationId);
+                return;
+            }
+
+            animating = true;
+            playBtn.textContent = 'Stop';
+
+            const distance = parseFloat(distanceSlider.value);
+            const vel = parseFloat(travelVelocity.value) / 100;
+            const gamma = calculateGamma(vel);
+
+            const earthTime = distance / vel;
+            const travelTime = distance / vel / gamma;
+
+            document.getElementById('earth-elapsed').textContent = earthTime.toFixed(2);
+            document.getElementById('travel-elapsed').textContent = travelTime.toFixed(2);
+            document.getElementById('earth-proper').textContent = earthTime.toFixed(2);
+            document.getElementById('travel-proper').textContent = travelTime.toFixed(2);
+            document.getElementById('time-savings').textContent = (earthTime - travelTime).toFixed(2);
+
+            const animW = document.getElementById('twin-animation').offsetWidth;
+            const animH = document.getElementById('twin-animation').offsetHeight;
+
+            rocket.style.left = '50px';
+            twinEarth.style.left = '50px';
+
+            let progress = 0;
+            const duration = 5000;
+            const start = Date.now();
+
+            function animate() {
+                if (!animating) return;
+
+                const elapsed = Date.now() - start;
+                progress = Math.min(elapsed / duration, 1);
+
+                const rocketX = 50 + progress * (animW - 150);
+                const earthX = 50 + progress * (animW - 150);
+
+                rocket.style.left = rocketX + 'px';
+
+                if (progress < 0.5) {
+                    rocket.style.bottom = (80 + 50 * Math.sin(progress * Math.PI)) + 'px';
+                } else {
+                    rocket.style.bottom = (80 + 50 * Math.sin((1-progress) * Math.PI)) + 'px';
+                }
+
+                if (progress < 1) {
+                    animationId = requestAnimationFrame(animate);
+                } else {
+                    animating = false;
+                    playBtn.textContent = 'Start Journey';
+                }
+            }
+
+            animate();
+        }
+
+        function drawLightCone() {
+            const w = lightconeCanvas.width;
+            const h = lightconeCanvas.height;
+            lcCtx.clearRect(0, 0, w, h);
+
+            const cx = w / 2;
+            const cy = h / 2;
+            const maxR = Math.min(w, h) * 0.4;
+
+            // Past light cone (blue)
+            lcCtx.fillStyle = 'rgba(0, 212, 255, 0.1)';
+            lcCtx.beginPath();
+            lcCtx.moveTo(cx, cy);
+            lcCtx.lineTo(cx - maxR, cy - maxR);
+            lcCtx.lineTo(cx + maxR, cy - maxR);
+            lcCtx.closePath();
+            lcCtx.fill();
+
+            // Future light cone (red)
+            lcCtx.fillStyle = 'rgba(255, 45, 146, 0.1)';
+            lcCtx.beginPath();
+            lcCtx.moveTo(cx, cy);
+            lcCtx.lineTo(cx - maxR, cy + maxR);
+            lcCtx.lineTo(cx + maxR, cy + maxR);
+            lcCtx.closePath();
+            lcCtx.fill();
+
+            // Light cone edges
+            lcCtx.strokeStyle = '#00d4ff';
+            lcCtx.lineWidth = 2;
+            lcCtx.setLineDash([5, 5]);
+            lcCtx.beginPath();
+            lcCtx.moveTo(cx, cy);
+            lcCtx.lineTo(cx - maxR, cy - maxR);
+            lcCtx.moveTo(cx, cy);
+            lcCtx.lineTo(cx + maxR, cy - maxR);
+            lcCtx.stroke();
+
+            lcCtx.strokeStyle = '#ff2d92';
+            lcCtx.beginPath();
+            lcCtx.moveTo(cx, cy);
+            lcCtx.lineTo(cx - maxR, cy + maxR);
+            lcCtx.moveTo(cx, cy);
+            lcCtx.lineTo(cx + maxR, cy + maxR);
+            lcCtx.stroke();
+
+            lcCtx.setLineDash([]);
+
+            // Time axis
+            lcCtx.strokeStyle = '#444';
+            lcCtx.lineWidth = 1;
+            lcCtx.beginPath();
+            lcCtx.moveTo(cx, 20);
+            lcCtx.lineTo(cx, h - 20);
+            lcCtx.moveTo(cx - 20, cy);
+            lcCtx.lineTo(cx + 20, cy);
+            lcCtx.stroke();
+
+            // World lines
+            lcCtx.strokeStyle = '#ffaa00';
+            lcCtx.lineWidth = 2;
+
+            // Vertical (stationary)
+            lcCtx.beginPath();
+            lcCtx.moveTo(cx + 50, cy - maxR + 20);
+            lcCtx.lineTo(cx + 50, cy + maxR - 20);
+            lcCtx.stroke();
+
+            // Angled (moving)
+            const angle = 30 * Math.PI / 180;
+            lcCtx.beginPath();
+            lcCtx.moveTo(cx - 60, cy + maxR - 20);
+            lcCtx.lineTo(cx + 60, cy - maxR + 20);
+            lcCtx.stroke();
+
+            // Labels
+            lcCtx.fillStyle = '#888';
+            lcCtx.font = '12px Arial';
+            lcCtx.fillText('Future', cx + 10, 40);
+            lcCtx.fillText('Past', cx + 10, h - 30);
+            lcCtx.fillText('ct', cx + 10, cy - 15);
+            lcCtx.fillText('x', cx + maxR - 20, cy + 20);
+            lcCtx.fillText('Time-like', cx + 70, cy - 50);
+            lcCtx.fillText('Light-like', cx + 70, cy + 50);
+        }
+
+        function positionSatellites() {
+            const orbitRing = document.getElementById('orbit-ring');
+            const orbitSize = 280;
+            orbitRing.style.width = orbitSize + 'px';
+            orbitRing.style.height = orbitSize + 'px';
+
+            const satellites = ['sat1', 'sat2', 'sat3', 'sat4'];
+            const angles = [0, 90, 180, 270];
+
+            satellites.forEach((id, i) => {
+                const sat = document.getElementById(id);
+                const angle = angles[i] * Math.PI / 180;
+                const radius = orbitSize / 2;
+                const x = orbitRing.offsetLeft + radius + radius * Math.cos(angle) - 15;
+                const y = orbitRing.offsetTop + radius + radius * Math.sin(angle) - 15;
+
+                sat.style.left = x + 'px';
+                sat.style.bottom = (orbitSize / 2 + radius * Math.sin(angle) - 15) + 'px';
+            });
+        }
+
+        // Event listeners
+        velocitySlider.addEventListener('input', updateVelocity);
+        gravitySlider.addEventListener('input', updateGravity);
+        distanceSlider.addEventListener('input', updateTwin);
+        travelVelocity.addEventListener('input', updateTwin);
+        playBtn.addEventListener('click', simulateTwin);
+
+        window.addEventListener('resize', () => {
+            resizeCanvases();
+            positionSatellites();
+        });
+
+        // Initialize
+        resizeCanvases();
+        updateVelocity();
+        updateGravity();
+        updateTwin();
+
+        setTimeout(positionSatellites, 100);
+
+        // Continuous clock update
+        setInterval(updateVelocity, 100);
+    </script>
+</body>
+</html>
