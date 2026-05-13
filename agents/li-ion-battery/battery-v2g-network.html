@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle-to-Grid Networks | Distributed Energy Storage Revolution</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #020b0d;
+            --bg-primary: #041418;
+            --bg-secondary: #071e24;
+            --bg-card: #0a2830;
+            --bg-card-hover: #0d3240;
+            --text-primary: #e0f4f8;
+            --text-secondary: #7eb8c4;
+            --accent-ev: #00e5a0;
+            --accent-grid: #00b4d8;
+            --accent-solar: #ffd60a;
+            --accent-home: #80d44a;
+            --accent-charge: #ff6b35;
+            --accent-discharge: #00b4d8;
+            --glow-ev: 0 0 40px rgba(0, 229, 160, 0.4);
+            --glow-grid: 0 0 40px rgba(0, 180, 216, 0.4);
+            --glow-solar: 0 0 40px rgba(255, 214, 10, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-layer {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+        }
+
+        .grid-pattern {
+            background-image:
+                linear-gradient(rgba(0, 229, 160, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 160, 0.025) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridDrift 20s linear infinite;
+        }
+
+        @keyframes gridDrift {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background:
+                radial-gradient(ellipse at 15% 40%, rgba(0, 229, 160, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 85% 60%, rgba(0, 180, 216, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(255, 214, 10, 0.03) 0%, transparent 40%);
+            z-index: -1;
+        }
+
+        /* Floating energy particles */
+        .energy-field {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .e-particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: energyFloat 25s infinite ease-in-out;
+        }
+
+        @keyframes energyFloat {
+            0% { transform: translateY(100vh) translateX(0) scale(0); opacity: 0; }
+            5% { opacity: 0.6; }
+            50% { transform: translateY(50vh) translateX(80px) scale(1); opacity: 0.4; }
+            95% { opacity: 0.6; }
+            100% { transform: translateY(-100vh) translateX(-40px) scale(0); opacity: 0; }
+        }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
+
+        /* Navigation */
+        .nav-dots {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .nav-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: rgba(0, 229, 160, 0.2);
+            border: 2px solid var(--accent-ev);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-dot:hover, .nav-dot.active {
+            background: var(--accent-ev);
+            box-shadow: var(--glow-ev);
+            transform: scale(1.3);
+        }
+
+        .nav-dot::after {
+            content: attr(data-label);
+            position: absolute;
+            right: 22px;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: nowrap;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .nav-dot:hover::after { opacity: 1; }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 4rem 2rem;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(0, 229, 160, 0.1);
+            border: 1px solid rgba(0, 229, 160, 0.3);
+            border-radius: 50px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-ev);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            animation: badgePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 229, 160, 0.1); }
+            50% { box-shadow: 0 0 30px rgba(0, 229, 160, 0.3); }
+        }
+
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 5.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--accent-ev) 0%, var(--accent-grid) 50%, var(--accent-solar) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleShift 8s ease-in-out infinite;
+        }
+
+        @keyframes titleShift {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(15deg); }
+        }
+
+        .hero-sub {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 1.5rem 2rem;
+            background: rgba(0, 229, 160, 0.05);
+            border: 1px solid rgba(0, 229, 160, 0.15);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            border-color: var(--accent-ev);
+            box-shadow: var(--glow-ev);
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-ev);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* Section styling */
+        .section {
+            padding: 6rem 2rem;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-tag {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-ev);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* V2G SVG Diagram */
+        .v2g-diagram-container {
+            display: flex;
+            justify-content: center;
+            margin: 3rem 0;
+        }
+
+        .v2g-diagram {
+            width: 100%;
+            max-width: 1100px;
+            height: auto;
+        }
+
+        .diagram-node {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .diagram-node:hover {
+            filter: brightness(1.3);
+        }
+
+        .flow-line {
+            stroke-dasharray: 10, 5;
+            animation: flowDash 2s linear infinite;
+        }
+
+        @keyframes flowDash {
+            to { stroke-dashoffset: -30; }
+        }
+
+        .pulse-ring {
+            animation: pulseRing 2s ease-out infinite;
+            transform-origin: center;
+        }
+
+        @keyframes pulseRing {
+            0% { r: 20; opacity: 0.8; }
+            100% { r: 60; opacity: 0; }
+        }
+
+        /* Interactive Fleet Simulator */
+        .simulator-panel {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 229, 160, 0.2);
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin: 3rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .simulator-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-ev), var(--accent-grid), var(--accent-solar));
+        }
+
+        .sim-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .control-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent-ev);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--bg-secondary);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-ev);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--glow-ev);
+        }
+
+        .sim-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .sim-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 229, 160, 0.1);
+        }
+
+        .sim-card-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .sim-metric {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .sim-metric.green { color: var(--accent-ev); }
+        .sim-metric.blue { color: var(--accent-grid); }
+        .sim-metric.yellow { color: var(--accent-solar); }
+        .sim-metric.orange { color: var(--accent-charge); }
+
+        .sim-bar {
+            height: 8px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            margin-top: 0.75rem;
+            overflow: hidden;
+        }
+
+        .sim-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* EV Fleet Visualization */
+        .fleet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            margin: 2rem 0;
+        }
+
+        .ev-icon {
+            width: 100%;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .ev-icon.charging {
+            background: rgba(255, 107, 53, 0.2);
+            border: 2px solid var(--accent-charge);
+        }
+
+        .ev-icon.discharging {
+            background: rgba(0, 180, 216, 0.2);
+            border: 2px solid var(--accent-discharge);
+        }
+
+        .ev-icon.idle {
+            background: rgba(0, 229, 160, 0.1);
+            border: 2px solid rgba(0, 229, 160, 0.3);
+        }
+
+        .ev-icon.plugged {
+            background: rgba(128, 212, 74, 0.2);
+            border: 2px solid var(--accent-home);
+        }
+
+        .ev-icon:hover::after {
+            content: attr(data-soc);
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.6rem;
+            white-space: nowrap;
+            color: var(--text-secondary);
+        }
+
+        /* Grid Frequency Viz */
+        .frequency-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .freq-gauge {
+            position: relative;
+            width: 200px;
+            height: 120px;
+        }
+
+        .freq-gauge svg {
+            overflow: visible;
+        }
+
+        .freq-needle {
+            transform-origin: 100px 100px;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .freq-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .freq-value.low { color: var(--accent-charge); }
+        .freq-value.normal { color: var(--accent-ev); }
+        .freq-value.high { color: var(--accent-grid); }
+
+        /* Energy Price Chart */
+        .price-chart {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 229, 160, 0.15);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .price-chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .price-chart-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .price-legend {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+        }
+
+        .chart-area {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+        }
+
+        .chart-svg { width: 100%; height: 100%; }
+
+        .chart-line {
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .chart-area-fill {
+            opacity: 0.15;
+        }
+
+        /* Benefit Cards */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+
+        .benefit-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 229, 160, 0.15);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .benefit-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(0, 229, 160, 0.03) 100%);
+            pointer-events: none;
+        }
+
+        .benefit-card:hover {
+            border-color: var(--accent-ev);
+            box-shadow: var(--glow-ev);
+            transform: translateY(-5px);
+        }
+
+        .benefit-icon {
+            width: 60px; height: 60px;
+            background: rgba(0, 229, 160, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .benefit-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .benefit-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .benefit-stat {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(0, 229, 160, 0.1);
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .benefit-stat-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-ev);
+        }
+
+        .benefit-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Technical Deep Dive */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+
+        .tech-card {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(0, 180, 216, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .tech-card:hover {
+            border-color: var(--accent-grid);
+            box-shadow: var(--glow-grid);
+        }
+
+        .tech-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .tech-card-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .tech-card-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .tech-card-body {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .tech-card-formula {
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-ev);
+            overflow-x: auto;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 3rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--accent-ev), var(--accent-grid), var(--accent-solar));
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 1.5rem 0 1.5rem 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 1.8rem;
+            width: 14px; height: 14px;
+            background: var(--accent-ev);
+            border-radius: 50%;
+            transform: translateX(-6px);
+            box-shadow: var(--glow-ev);
+        }
+
+        .timeline-year {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-ev);
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-event {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Protocols Table */
+        .protocols-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .protocols-table th {
+            background: var(--bg-secondary);
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-ev);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .protocols-table td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(0, 229, 160, 0.08);
+            font-size: 0.9rem;
+        }
+
+        .protocols-table tr:hover td {
+            background: rgba(0, 229, 160, 0.03);
+        }
+
+        .protocol-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .protocol-badge.iso { background: rgba(0, 229, 160, 0.15); color: var(--accent-ev); }
+        .protocol-badge.ieee { background: rgba(0, 180, 216, 0.15); color: var(--accent-grid); }
+        .protocol-badge.sa { background: rgba(255, 214, 10, 0.15); color: var(--accent-solar); }
+        .protocol-badge.ie { background: rgba(255, 107, 53, 0.15); color: var(--accent-charge); }
+
+        /* Animation classes */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid rgba(0, 229, 160, 0.1);
+            margin-top: 4rem;
+        }
+
+        .footer-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .footer-text span { color: var(--accent-ev); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-ev); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-grid); }
+
+        @media (max-width: 768px) {
+            .nav-dots { display: none; }
+            .hero-stats { gap: 1.5rem; }
+            .sim-controls { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-layer grid-pattern"></div>
+    <div class="bg-glow"></div>
+    <div class="energy-field" id="energyField"></div>
+
+    <!-- Navigation Dots -->
+    <nav class="nav-dots">
+        <div class="nav-dot active" data-label="Overview" onclick="scrollToSection('hero')"></div>
+        <div class="nav-dot" data-label="V2G Diagram" onclick="scrollToSection('diagram')"></div>
+        <div class="nav-dot" data-label="Fleet Simulator" onclick="scrollToSection('simulator')"></div>
+        <div class="nav-dot" data-label="Grid Services" onclick="scrollToSection('services')"></div>
+        <div class="nav-dot" data-label="Economics" onclick="scrollToSection('economics')"></div>
+        <div class="nav-dot" data-label="Technical" onclick="scrollToSection('technical')"></div>
+        <div class="nav-dot" data-label="Roadmap" onclick="scrollToSection('roadmap')"></div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-badge">Distributed Energy Storage</div>
+        <h1>Vehicle-to-Grid Networks</h1>
+        <p class="hero-sub">
+            When 100 million electric vehicles become a distributed power plant,
+            the grid transforms from a one-way street into a living, breathing
+            energy ecosystem. This is the science of bidirectional power.
+        </p>
+        <div class="hero-stats">
+            <div class="stat-box">
+                <div class="stat-number">2.5 TWh</div>
+                <div class="stat-label">Potential V2G Capacity by 2035</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">50 GW</div>
+                <div class="stat-label">Aggregated EV Fleet Power</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">$200B</div>
+                <div class="stat-label">Annual Grid Services Market</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">85%</div>
+                <div class="stat-label">Battery Underutilization</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <!-- V2G Architecture Diagram -->
+        <section class="section" id="diagram">
+            <div class="section-header">
+                <div class="section-tag">Architecture</div>
+                <h2 class="section-title">The V2G Ecosystem</h2>
+                <p class="section-desc">
+                    A complex interplay of vehicles, chargers, aggregators, and grid operators
+                    working in concert to stabilize power networks.
+                </p>
+            </div>
+
+            <div class="v2g-diagram-container">
+                <svg class="v2g-diagram" viewBox="0 0 1100 600" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="evGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00e5a0"/>
+                            <stop offset="100%" style="stop-color:#00b4d8"/>
+                        </linearGradient>
+                        <linearGradient id="gridGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00b4d8"/>
+                            <stop offset="100%" style="stop-color:#0066cc"/>
+                        </linearGradient>
+                        <linearGradient id="solarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ffd60a"/>
+                            <stop offset="100%" style="stop-color:#ff9500"/>
+                        </linearGradient>
+                        <linearGradient id="homeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#80d44a"/>
+                            <stop offset="100%" style="stop-color:#4caf50"/>
+                        </linearGradient>
+                        <linearGradient id="chargeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff6b35"/>
+                            <stop offset="100%" style="stop-color:#ff4444"/>
+                        </linearGradient>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                        <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#00e5a0"/>
+                        </marker>
+                        <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#00b4d8"/>
+                        </marker>
+                        <marker id="arrowYellow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#ffd60a"/>
+                        </marker>
+                        <marker id="arrowOrange" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#ff6b35"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Grid Network (Center) -->
+                    <g class="diagram-node" transform="translate(470, 250)">
+                        <!-- Outer glow ring -->
+                        <circle r="90" fill="none" stroke="#00b4d8" stroke-width="1" opacity="0.3" class="pulse-ring"/>
+                        <circle r="90" fill="none" stroke="#00b4d8" stroke-width="1" opacity="0.3" class="pulse-ring" style="animation-delay: 0.5s"/>
+                        <!-- Main circle -->
+                        <circle r="70" fill="#071e24" stroke="url(#gridGrad)" stroke-width="3" filter="url(#glow)"/>
+                        <!-- Grid icon -->
+                        <text x="0" y="-15" text-anchor="middle" font-size="28" fill="#00b4d8">&#9889;</text>
+                        <text x="0" y="15" text-anchor="middle" font-size="11" fill="#e0f4f8" font-family="Outfit">POWER GRID</text>
+                        <text x="0" y="30" text-anchor="middle" font-size="9" fill="#7eb8c4" font-family="Space Mono">60Hz / 50Hz</text>
+                    </g>
+
+                    <!-- EV Fleet (Left) -->
+                    <g class="diagram-node" transform="translate(150, 250)">
+                        <circle r="80" fill="none" stroke="#00e5a0" stroke-width="1" opacity="0.2"/>
+                        <circle r="80" fill="none" stroke="#00e5a0" stroke-width="1" opacity="0.2" class="pulse-ring" style="animation-delay: 0.3s"/>
+                        <circle r="60" fill="#041418" stroke="url(#evGrad)" stroke-width="3" filter="url(#glow)"/>
+                        <text x="0" y="-12" text-anchor="middle" font-size="26" fill="#00e5a0">&#128663;</text>
+                        <text x="0" y="12" text-anchor="middle" font-size="10" fill="#e0f4f8" font-family="Outfit">EV FLEET</text>
+                        <text x="0" y="27" text-anchor="middle" font-size="9" fill="#7eb8c4" font-family="Space Mono">100k+ Vehicles</text>
+                    </g>
+
+                    <!-- EVSE / Chargers -->
+                    <g class="diagram-node" transform="translate(320, 250)">
+                        <circle r="50" fill="#0a2830" stroke="#00e5a0" stroke-width="2"/>
+                        <text x="0" y="-8" text-anchor="middle" font-size="24" fill="#00e5a0">&#9889;</text>
+                        <text x="0" y="15" text-anchor="middle" font-size="9" fill="#e0f4f8" font-family="Outfit">EVSE</text>
+                        <text x="0" y="28" text-anchor="middle" font-size="8" fill="#7eb8c4" font-family="Space Mono">Bi-Directional</text>
+                    </g>
+
+                    <!-- Solar / Renewables (Top) -->
+                    <g class="diagram-node" transform="translate(550, 100)">
+                        <circle r="55" fill="#041418" stroke="url(#solarGrad)" stroke-width="2" filter="url(#glow)"/>
+                        <text x="0" y="-10" text-anchor="middle" font-size="24" fill="#ffd60a">&#9728;</text>
+                        <text x="0" y="12" text-anchor="middle" font-size="9" fill="#e0f4f8" font-family="Outfit">SOLAR + WIND</text>
+                        <text x="0" y="26" text-anchor="middle" font-size="8" fill="#7eb8c4" font-family="Space Mono">Intermittent Gen</text>
+                    </g>
+
+                    <!-- Home / Building (Bottom Left) -->
+                    <g class="diagram-node" transform="translate(320, 420)">
+                        <circle r="50" fill="#0a2830" stroke="url(#homeGrad)" stroke-width="2"/>
+                        <text x="0" y="-8" text-anchor="middle" font-size="24" fill="#80d44a">&#127968;</text>
+                        <text x="0" y="15" text-anchor="middle" font-size="9" fill="#e0f4f8" font-family="Outfit">HOME / BLDG</text>
+                        <text x="0" y="28" text-anchor="middle" font-size="8" fill="#7eb8c4" font-family="Space Mono">V2H Enabled</text>
+                    </g>
+
+                    <!-- Battery Storage (Bottom Right) -->
+                    <g class="diagram-node" transform="translate(620, 420)">
+                        <circle r="50" fill="#0a2830" stroke="#00b4d8" stroke-width="2"/>
+                        <text x="0" y="-8" text-anchor="middle" font-size="24" fill="#00b4d8">&#128267;</text>
+                        <text x="0" y="15" text-anchor="middle" font-size="9" fill="#e0f4f8" font-family="Outfit">STORAGE</text>
+                        <text x="0" y="28" text-anchor="middle" font-size="8" fill="#7eb8c4" font-family="Space Mono">Grid-Scale BESS</text>
+                    </g>
+
+                    <!-- Aggregator / Cloud -->
+                    <g class="diagram-node" transform="translate(820, 250)">
+                        <circle r="65" fill="#041418" stroke="#a855f7" stroke-width="2" filter="url(#glow)"/>
+                        <text x="0" y="-12" text-anchor="middle" font-size="26" fill="#a855f7">&#128187;</text>
+                        <text x="0" y="12" text-anchor="middle" font-size="10" fill="#e0f4f8" font-family="Outfit">AGGREGATOR</text>
+                        <text x="0" y="27" text-anchor="middle" font-size="8" fill="#7eb8c4" font-family="Space Mono">Fleet Optimization</text>
+                    </g>
+
+                    <!-- Energy Market -->
+                    <g class="diagram-node" transform="translate(950, 150)">
+                        <circle r="45" fill="#0a2830" stroke="#ffd60a" stroke-width="2"/>
+                        <text x="0" y="-8" text-anchor="middle" font-size="22" fill="#ffd60a">&#128200;</text>
+                        <text x="0" y="12" text-anchor="middle" font-size="9" fill="#e0f4f8" font-family="Outfit">ENERGY</text>
+                        <text x="0" y="25" text-anchor="middle" font-size="9" fill="#e0f4f8" font-family="Outfit">MARKET</text>
+                    </g>
+
+                    <!-- Ancillary Services -->
+                    <g class="diagram-node" transform="translate(950, 350)">
+                        <circle r="45" fill="#0a2830" stroke="#ff6b35" stroke-width="2"/>
+                        <text x="0" y="-8" text-anchor="middle" font-size="22" fill="#ff6b35">&#128295;</text>
+                        <text x="0" y="12" text-anchor="middle" font-size="9" fill="#e0f4f8" font-family="Outfit">ANCILLARY</text>
+                        <text x="0" y="25" text-anchor="middle" font-size="9" fill="#e0f4f8" font-family="Outfit">SERVICES</text>
+                    </g>
+
+                    <!-- Flow Lines with Arrows -->
+                    <!-- Grid to EVSE -->
+                    <path d="M 540 250 L 370 250" stroke="#00b4d8" stroke-width="2" fill="none" marker-end="url(#arrowBlue)"
+                          class="flow-line" stroke-dasharray="8,4"/>
+                    <path d="M 270 250 L 90 250" stroke="#00e5a0" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"
+                          class="flow-line" stroke-dasharray="8,4" style="animation-delay: 0.3s"/>
+
+                    <!-- EVSE to EV (discharge) -->
+                    <path d="M 270 200 Q 210 200 150 210" stroke="#00e5a0" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"
+                          class="flow-line" opacity="0.8"/>
+
+                    <!-- EVSE to EV (charge) -->
+                    <path d="M 270 300 Q 210 300 150 290" stroke="#ff6b35" stroke-width="2" fill="none" marker-end="url(#arrowOrange)"
+                          class="flow-line" opacity="0.8" style="animation-delay: 0.5s"/>
+
+                    <!-- Grid to Solar -->
+                    <path d="M 550 180 L 550 155" stroke="#ffd60a" stroke-width="1.5" fill="none" marker-end="url(#arrowYellow)"
+                          class="flow-line"/>
+
+                    <!-- Solar to Grid -->
+                    <path d="M 505 130 Q 480 200 470 250" stroke="#ffd60a" stroke-width="2" fill="none" marker-end="url(#arrowYellow)"
+                          class="flow-line" style="animation-delay: 0.7s"/>
+
+                    <!-- Grid to Home -->
+                    <path d="M 510 290 L 350 395" stroke="#80d44a" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"
+                          class="flow-line" style="animation-delay: 0.2s"/>
+
+                    <!-- Home to Grid -->
+                    <path d="M 300 385 L 470 280" stroke="#80d44a" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"
+                          class="flow-line" style="animation-delay: 0.4s"/>
+
+                    <!-- Grid to Storage -->
+                    <path d="M 540 295 L 600 395" stroke="#00b4d8" stroke-width="2" fill="none" marker-end="url(#arrowBlue)"
+                          class="flow-line" style="animation-delay: 0.6s"/>
+
+                    <!-- Aggregator connections -->
+                    <path d="M 755 250 L 755 250" stroke="#a855f7" stroke-width="2" fill="none"/>
+
+                    <!-- Aggregator to EVSE -->
+                    <path d="M 755 250 L 370 250" stroke="#a855f7" stroke-width="2" fill="none" stroke-dasharray="4,4" opacity="0.5"/>
+
+                    <!-- Aggregator to Market -->
+                    <path d="M 885 250 L 905 195" stroke="#ffd60a" stroke-width="2" fill="none" stroke-dasharray="4,4" opacity="0.6"/>
+
+                    <!-- Aggregator to Ancillary -->
+                    <path d="M 885 270 L 905 335" stroke="#ff6b35" stroke-width="2" fill="none" stroke-dasharray="4,4" opacity="0.6"/>
+
+                    <!-- Legend -->
+                    <g transform="translate(50, 530)">
+                        <rect x="0" y="0" width="1000" height="60" rx="10" fill="#041418" opacity="0.8"/>
+                        <text x="20" y="25" font-family="Space Mono" font-size="10" fill="#7eb8c4">LEGEND:</text>
+
+                        <circle cx="100" cy="35" r="8" fill="#00e5a0"/>
+                        <text x="115" y="40" font-family="Outfit" font-size="12" fill="#e0f4f8">EV Fleet</text>
+
+                        <circle cx="220" cy="35" r="8" fill="#00b4d8"/>
+                        <text x="235" y="40" font-family="Outfit" font-size="12" fill="#e0f4f8">Grid</text>
+
+                        <circle cx="320" cy="35" r="8" fill="#ffd60a"/>
+                        <text x="335" y="40" font-family="Outfit" font-size="12" fill="#e0f4f8">Renewable</text>
+
+                        <circle cx="470" cy="35" r="8" fill="#80d44a"/>
+                        <text x="485" y="40" font-family="Outfit" font-size="12" fill="#e0f4f8">V2H</text>
+
+                        <circle cx="590" cy="35" r="8" fill="#ff6b35"/>
+                        <text x="605" y="40" font-family="Outfit" font-size="12" fill="#e0f4f8">Charging</text>
+
+                        <circle cx="730" cy="35" r="8" fill="#a855f7"/>
+                        <text x="745" y="40" font-family="Outfit" font-size="12" fill="#e0f4f8">Aggregator</text>
+
+                        <line x1="850" y1="35" x2="900" y2="35" stroke="#00e5a0" stroke-width="2" stroke-dasharray="8,4"/>
+                        <text x="910" y="40" font-family="Outfit" font-size="12" fill="#e0f4f8">Power Flow</text>
+                    </g>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Interactive Fleet Simulator -->
+        <section class="section" id="simulator">
+            <div class="section-header">
+                <div class="section-tag">Simulation</div>
+                <h2 class="section-title">Interactive V2G Fleet Simulator</h2>
+                <p class="section-desc">
+                    Adjust grid conditions and watch how an aggregated fleet of 10,000 EVs
+                    responds in real-time to provide grid services.
+                </p>
+            </div>
+
+            <div class="simulator-panel">
+                <div class="sim-controls">
+                    <div class="control-group">
+                        <label class="control-label">Grid Frequency (Hz)</label>
+                        <input type="range" id="freqSlider" min="59.5" max="60.5" step="0.01" value="60.0" oninput="updateSim()">
+                        <div class="control-value" id="freqValue">60.00 Hz</div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Energy Price ($/kWh)</label>
+                        <input type="range" id="priceSlider" min="0.02" max="0.50" step="0.01" value="0.12" oninput="updateSim()">
+                        <div class="control-value" id="priceValue">$0.12/kWh</div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Peak Demand Factor</label>
+                        <input type="range" id="demandSlider" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateSim()">
+                        <div class="control-value" id="demandValue">1.0x</div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Renewable Penetration</label>
+                        <input type="range" id="renewSlider" min="0" max="80" step="1" value="30" oninput="updateSim()">
+                        <div class="control-value" id="renewValue">30%</div>
+                    </div>
+                </div>
+
+                <div class="sim-display">
+                    <div class="sim-card">
+                        <div class="sim-card-title">Fleet State of Charge</div>
+                        <div class="sim-metric green" id="avgSOC">68%</div>
+                        <div class="sim-bar">
+                            <div class="sim-bar-fill" id="socBar" style="width: 68%; background: var(--accent-ev);"></div>
+                        </div>
+                    </div>
+                    <div class="sim-card">
+                        <div class="sim-card-title">Power Dispatched</div>
+                        <div class="sim-metric blue" id="powerDispatch">12.4 MW</div>
+                        <div class="sim-bar">
+                            <div class="sim-bar-fill" id="powerBar" style="width: 62%; background: var(--accent-grid);"></div>
+                        </div>
+                    </div>
+                    <div class="sim-card">
+                        <div class="sim-card-title">Revenue Generated</div>
+                        <div class="sim-metric yellow" id="revenueVal">$4,280/hr</div>
+                        <div class="sim-bar">
+                            <div class="sim-bar-fill" id="revenueBar" style="width: 43%; background: var(--accent-solar);"></div>
+                        </div>
+                    </div>
+                    <div class="sim-card">
+                        <div class="sim-card-title">Grid Stabilization</div>
+                        <div class="sim-metric orange" id="gridStability">99.2%</div>
+                        <div class="sim-bar">
+                            <div class="sim-bar-fill" id="stabilityBar" style="width: 99.2%; background: var(--accent-charge);"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EV Fleet Visual -->
+                <div style="margin-top: 2rem;">
+                    <div class="sim-card-title" style="margin-bottom: 1rem;">Fleet Status (10,000 EVs)</div>
+                    <div class="fleet-grid" id="fleetGrid"></div>
+                </div>
+
+                <!-- Frequency Gauge -->
+                <div class="frequency-display">
+                    <div>
+                        <div class="freq-gauge">
+                            <svg viewBox="0 0 200 120">
+                                <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#1a1a2e" stroke-width="12" stroke-linecap="round"/>
+                                <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#gridGrad)" stroke-width="12" stroke-linecap="round"
+                                      stroke-dasharray="251" stroke-dashoffset="63" id="freqArc"/>
+                                <defs>
+                                    <linearGradient id="gridGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#ff6b35"/>
+                                        <stop offset="30%" style="stop-color:#00e5a0"/>
+                                        <stop offset="70%" style="stop-color:#00e5a0"/>
+                                        <stop offset="100%" style="stop-color:#00b4d8"/>
+                                    </linearGradient>
+                                </defs>
+                                <line x1="100" y1="100" x2="100" y2="40" stroke="#e0f4f8" stroke-width="3" stroke-linecap="round"
+                                      transform="rotate(-90, 100, 100)" id="freqNeedle" class="freq-needle"/>
+                                <circle cx="100" cy="100" r="8" fill="#e0f4f8"/>
+                            </svg>
+                        </div>
+                        <div class="freq-value normal" id="freqStatus">GRID STABLE</div>
+                    </div>
+                    <div style="max-width: 400px;">
+                        <div class="sim-card-title">Frequency Response Analysis</div>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                            When grid frequency drops below 59.95 Hz, EVs collectively respond
+                            by injecting power. Above 60.05 Hz, they absorb excess energy.
+                            Response time: &lt;100ms via aggregator control.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Grid Services Section -->
+        <section class="section" id="services">
+            <div class="section-header">
+                <div class="section-tag">Grid Services</div>
+                <h2 class="section-title">Value Stacking: Multiple Revenue Streams</h2>
+                <p class="section-desc">
+                    A single V2G-equipped EV can provide up to six distinct grid services
+                    simultaneously, creating a stacked revenue model that accelerates amortization.
+                </p>
+            </div>
+
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">&#9899;</div>
+                    <h3 class="benefit-title">Frequency Regulation</h3>
+                    <p class="benefit-desc">
+                        EVs respond to automatic generation control (AGC) signals every 2-4 seconds,
+                        injecting or absorbing power to maintain grid frequency within ±0.02 Hz of target.
+                        This is the fastest-responding grid resource available.
+                    </p>
+                    <div class="benefit-stat">
+                        <div class="benefit-stat-value">$50-150</div>
+                        <div class="benefit-stat-label">/kW-year</div>
+                    </div>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">&#9888;</div>
+                    <h3 class="benefit-title">Spinning Reserves</h3>
+                    <p class="benefit-desc">
+                        Vehicles plugged in and available can be called upon within seconds to
+                        supply power during unexpected generation outages. No fuel consumption,
+                        instant deployment from the aggregated fleet.
+                    </p>
+                    <div class="benefit-stat">
+                        <div class="benefit-stat-value">$30-80</div>
+                        <div class="benefit-stat-label">/kW-year</div>
+                    </div>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">&#127777;</div>
+                    <h3 class="benefit-title">Peak Shaving</h3>
+                    <p class="benefit-desc">
+                        During daily peak demand windows (4-9 PM), EVs discharge to reduce
+                        grid stress. Aggregators coordinate millions of vehicles simultaneously
+                        to flatten the duck curve.
+                    </p>
+                    <div class="benefit-stat">
+                        <div class="benefit-stat-value">$100-300</div>
+                        <div class="benefit-stat-label">/kW-year</div>
+                    </div>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">&#127750;</div>
+                    <h3 class="benefit-title">Valley Filling</h3>
+                    <p class="benefit-desc">
+                        Late-night charging during low-demand periods absorbs excess
+                        generation from baseload plants and renewables. EVs become
+                        the storage buffer that prevents renewable curtailment.
+                    </p>
+                    <div class="benefit-stat">
+                        <div class="benefit-stat-value">$20-60</div>
+                        <div class="benefit-stat-label">/kW-year</div>
+                    </div>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">&#127760;</div>
+                    <h3 class="benefit-title">Voltage Support</h3>
+                    <p class="benefit-desc">
+                        Reactive power compensation at distribution level: EVs can
+                        provide or absorb VARs to maintain voltage profiles along
+                        distribution feeders, reducing line losses by 2-5%.
+                    </p>
+                    <div class="benefit-stat">
+                        <div class="benefit-stat-value">$15-40</div>
+                        <div class="benefit-stat-label">/kW-year</div>
+                    </div>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">&#127968;</div>
+                    <h3 class="benefit-title">Vehicle-to-Home (V2H)</h3>
+                    <p class="benefit-desc">
+                        During grid outages, an EV with sufficient charge can power a
+                        typical home for 3-5 days. Emergency backup with 60-100 kWh
+                        of storage becomes standard equipment.
+                    </p>
+                    <div class="benefit-stat">
+                        <div class="benefit-stat-value">$0.20-0.50</div>
+                        <div class="benefit-stat-label">/kWh backup</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Energy Price Chart -->
+            <div class="price-chart">
+                <div class="price-chart-header">
+                    <div class="price-chart-title">24-Hour Energy Price Profile with V2G Arbitrage</div>
+                    <div class="price-legend">
+                        <div class="legend-item"><div class="legend-dot" style="background: #ffd60a;"></div> Energy Price</div>
+                        <div class="legend-item"><div class="legend-dot" style="background: #00e5a0;"></div> V2G Revenue</div>
+                        <div class="legend-item"><div class="legend-dot" style="background: #ff6b35;"></div> Optimal Charge</div>
+                    </div>
+                </div>
+                <div class="chart-area">
+                    <svg class="chart-svg" viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+                        <defs>
+                            <linearGradient id="priceGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ffd60a;stop-opacity:0.4"/>
+                                <stop offset="100%" style="stop-color:#ffd60a;stop-opacity:0"/>
+                            </linearGradient>
+                            <linearGradient id="revenueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00e5a0;stop-opacity:0.4"/>
+                                <stop offset="100%" style="stop-color:#00e5a0;stop-opacity:0"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Grid lines -->
+                        <g stroke="#1a1a2e" stroke-width="1">
+                            <line x1="0" y1="75" x2="800" y2="75"/>
+                            <line x1="0" y1="150" x2="800" y2="150"/>
+                            <line x1="0" y1="225" x2="800" y2="225"/>
+                            <line x1="100" y1="0" x2="100" y2="300"/>
+                            <line x1="200" y1="0" x2="200" y2="300"/>
+                            <line x1="300" y1="0" x2="300" y2="300"/>
+                            <line x1="400" y1="0" x2="400" y2="300"/>
+                            <line x1="500" y1="0" x2="500" y2="300"/>
+                            <line x1="600" y1="0" x2="600" y2="300"/>
+                            <line x1="700" y1="0" x2="700" y2="300"/>
+                        </g>
+                        <!-- Y-axis labels -->
+                        <text x="5" y="78" font-family="Space Mono" font-size="10" fill="#7eb8c4">$0.40</text>
+                        <text x="5" y="153" font-family="Space Mono" font-size="10" fill="#7eb8c4">$0.20</text>
+                        <text x="5" y="228" font-family="Space Mono" font-size="10" fill="#7eb8c4">$0.00</text>
+                        <!-- X-axis labels -->
+                        <text x="30" y="280" font-family="Space Mono" font-size="10" fill="#7eb8c4">12AM</text>
+                        <text x="130" y="280" font-family="Space Mono" font-size="10" fill="#7eb8c4">4AM</text>
+                        <text x="230" y="280" font-family="Space Mono" font-size="10" fill="#7eb8c4">8AM</text>
+                        <text x="330" y="280" font-family="Space Mono" font-size="10" fill="#7eb8c4">12PM</text>
+                        <text x="430" y="280" font-family="Space Mono" font-size="10" fill="#7eb8c4">4PM</text>
+                        <text x="530" y="280" font-family="Space Mono" font-size="10" fill="#7eb8c4">8PM</text>
+                        <text x="630" y="280" font-family="Space Mono" font-size="10" fill="#7eb8c4">12AM</text>
+                        <text x="730" y="280" font-family="Space Mono" font-size="10" fill="#7eb8c4">4AM</text>
+
+                        <!-- Price curve (sine-based daily profile) -->
+                        <path d="M 0,200 Q 50,210 100,195 T 200,180 T 300,120 T 400,100 T 500,85 T 600,110 T 700,190 T 800,210 L 800,300 L 0,300 Z"
+                              fill="url(#priceGrad)"/>
+                        <path class="chart-line" d="M 0,200 Q 50,210 100,195 T 200,180 T 300,120 T 400,100 T 500,85 T 600,110 T 700,190 T 800,210"
+                              stroke="#ffd60a"/>
+
+                        <!-- V2G Revenue curve -->
+                        <path d="M 0,250 Q 100,260 200,230 T 400,120 T 600,95 T 800,250 L 800,300 L 0,300 Z"
+                              fill="url(#revenueGrad)"/>
+                        <path class="chart-line" d="M 0,250 Q 100,260 200,230 T 400,120 T 600,95 T 800,250"
+                              stroke="#00e5a0"/>
+
+                        <!-- Optimal charge zones -->
+                        <rect x="0" y="220" width="200" height="40" fill="#ff6b35" opacity="0.15" rx="4"/>
+                        <rect x="600" y="220" width="200" height="40" fill="#ff6b35" opacity="0.15" rx="4"/>
+
+                        <!-- Peak annotation -->
+                        <line x1="500" y1="85" x2="500" y2="250" stroke="#ffd60a" stroke-width="1" stroke-dasharray="4,4"/>
+                        <text x="510" y="78" font-family="Space Mono" font-size="10" fill="#ffd60a">Peak: $0.45/kWh</text>
+                        <text x="510" y="92" font-family="Space Mono" font-size="10" fill="#00e5a0">V2G: $0.15/kWh</text>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- Economics Section -->
+        <section class="section" id="economics">
+            <div class="section-header">
+                <div class="section-tag">Economics</div>
+                <h2 class="section-title">V2G Business Case Analysis</h2>
+                <p class="section-desc">
+                    The math behind vehicle-to-grid economics, from individual EV owner
+                    returns to aggregator ROI and grid operator savings.
+                </p>
+            </div>
+
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <div class="tech-card-icon" style="background: rgba(0, 229, 160, 0.15);">&#128176;</div>
+                        <h4 class="tech-card-title">EV Owner Revenue</h4>
+                    </div>
+                    <div class="tech-card-body">
+                        An average EV with 75 kWh capacity, driven 40 miles/day (leaving 55 kWh available),
+                        participating in frequency regulation can earn $150-400/year through aggregator partnerships.
+                        Battery degradation cost: ~$50/year (for 500 cycles/year). Net benefit: $100-350/year.
+                    </div>
+                    <div class="tech-card-formula">
+                        Net Annual Benefit = (Revenue/kW × Available kW) - (Degradation Cost × Cycle Wear)
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <div class="tech-card-icon" style="background: rgba(0, 180, 216, 0.15);">&#9879;</div>
+                        <h4 class="tech-card-title">Aggregator Margin</h4>
+                    </div>
+                    <div class="tech-card-body">
+                        Aggregators pool thousands of EVs to meet grid operator minimums (1-10 MW bids).
+                        With 10,000 EVs at 10 kW each available: 100 MW capacity. Take rate: 15-25%
+                        of the spread between wholesale and ancillary market prices.
+                    </div>
+                    <div class="tech-card-formula">
+                        Aggregator Margin = (Market Price - Fleet Bid Price) × Dispatch kWh × Take Rate
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <div class="tech-card-icon" style="background: rgba(255, 214, 10, 0.15);">&#9886;</div>
+                        <h4 class="tech-card-title">Grid Operator Savings</h4>
+                    </div>
+                    <div class="tech-card-body">
+                        V2G reduces the need for peaker plants ($500-1000/kW capital cost vs $50/kW for EVSE).
+                        Every 1 GW of V2G capacity avoids $200M in peaker investments. Additionally,
+                        reduced transmission congestion and line loss savings add another $30-80/kW-year.
+                    </div>
+                    <div class="tech-card-formula">
+                        Avoided Cost = Peaker Capacity ($/kW) × V2G Capacity (kW) + Congestion Savings ($)
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <div class="tech-card-icon" style="background: rgba(168, 85, 247, 0.15);">&#128640;</div>
+                        <h4 class="tech-card-title">Battery Wear Model</h4>
+                    </div>
+                    <div class="tech-card-body">
+                        Lithium-ion calendar aging: 2-4%/year regardless of use. Cycle aging is cycling-dependent.
+                        V2G duty cycles (20-80% DoD, 1C rate, daily) add ~0.5-1% incremental degradation per year.
+                        This is traded off against revenue. Critical: depth-of-discharge management.
+                    </div>
+                    <div class="tech-card-formula">
+                        Cycle Life Impact = DOD^(0.8) × Current Rate^(0.3) × Temperature Factor × Cycle Count
+                    </div>
+                </div>
+            </div>
+
+            <!-- Protocol Table -->
+            <div style="margin-top: 3rem;">
+                <div class="section-tag" style="text-align: center;">Standards &amp; Protocols</div>
+                <h3 class="section-title" style="font-size: 1.8rem; text-align: center; margin-bottom: 2rem;">V2G Communication Standards</h3>
+
+                <table class="protocols-table">
+                    <thead>
+                        <tr>
+                            <th>Standard</th>
+                            <th>Organization</th>
+                            <th>Purpose</th>
+                            <th>Status</th>
+                            <th>Application</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>ISO 15118</strong></td>
+                            <td>ISO/IEC</td>
+                            <td>Plug &amp; Charge, smart charging, V2G communication over PLC</td>
+                            <td><span class="protocol-badge iso">Active</span></td>
+                            <td>Interoperable EV-EVSE communication</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IEEE 2030.5</strong></td>
+                            <td>IEEE</td>
+                            <td>Smart Energy Profile (SEP) for DER communication</td>
+                            <td><span class="protocol-badge ieee">Active</span></td>
+                            <td>Aggregator to utility communication</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SAE J2847</strong></td>
+                            <td>SAE International</td>
+                            <td>V2G communication requirements and use cases</td>
+                            <td><span class="protocol-badge sa">Active</span></td>
+                            <td>Vehicle to grid messaging format</td>
+                        </tr>
+                        <tr>
+                            <td><strong>OCPP 2.0.1</strong></td>
+                            <td>OCA</td>
+                            <td>Open Charge Point Protocol for charger management</td>
+                            <td><span class="protocol-badge iso">Active</span></td>
+                            <td>EVSE backend communication</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IEC 61850</strong></td>
+                            <td>IEC</td>
+                            <td>Substation automation and protection</td>
+                            <td><span class="protocol-badge ie">Legacy</span></td>
+                            <td>Grid substation integration</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IEEE 2030.11</strong></td>
+                            <td>IEEE</td>
+                            <td>Guide for DER aggregation communication</td>
+                            <td><span class="protocol-badge ieee">Draft</span></td>
+                            <td>Fleet-level dispatch protocols</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Technical Deep Dive -->
+        <section class="section" id="technical">
+            <div class="section-header">
+                <div class="section-tag">Technical</div>
+                <h2 class="section-title">Electrochemical & Power Electronics</h2>
+                <p class="section-desc">
+                    The hardware and control systems that make bidirectional power flow possible.
+                </p>
+            </div>
+
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <div class="tech-card-icon" style="background: rgba(0, 229, 160, 0.15);">&#9889;</div>
+                        <h4 class="tech-card-title">Bidirectional On-Board Charger</h4>
+                    </div>
+                    <div class="tech-card-body">
+                        Standard AC chargers are unidirectional (OBC). V2G requires bidirectional
+                        power conversion: AC-DC (charging) + DC-AC (discharging).
+                        Silicon carbide (SiC) and gallium nitride (GaN) semiconductors enable
+                        94-96% round-trip efficiency. Current solutions: 6.6 kW to 22 kW ratings.
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <div class="tech-card-icon" style="background: rgba(0, 180, 216, 0.15);">&#128261;</div>
+                        <h4 class="tech-card-title">DC Fast Charge V2G</h4>
+                    </div>
+                    <div class="tech-card-body">
+                        CHAdeMO (Japan) pioneered commercial V2G with the CHAdeMO 2.0 spec (up to 400A, 1.2 kV).
+                        CCS (Combined Charging System) is adding V2G in ISO 15118-20.
+                        Both use power electronics integrated into the DC charger for bidirectional DC-DC conversion.
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <div class="tech-card-icon" style="background: rgba(255, 214, 10, 0.15);">&#128295;</div>
+                        <h4 class="tech-card-title">Aggregator Control Platform</h4>
+                    </div>
+                    <div class="tech-card-body">
+                        Central optimization engine that bids into wholesale markets,
+                        receives AGC signals, forecasts fleet availability, and dispatches
+                        individual vehicles. Uses mixed-integer programming for unit commitment
+                        with stochastic optimization for renewable forecast integration.
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <div class="tech-card-icon" style="background: rgba(255, 107, 53, 0.15);">&#128737;</div>
+                        <h4 class="tech-card-title">Smart Charging Algorithms</h4>
+                    </div>
+                    <div class="tech-card-body">
+                        The core challenge: minimize battery degradation while maximizing grid value.
+                        Model Predictive Control (MPC) uses 24-hour forecasts to optimally schedule
+                        charge/discharge windows. Reinforcement Learning agents are being trained
+                        to adapt to real-time grid conditions without explicit programming.
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <div class="tech-card-icon" style="background: rgba(128, 212, 74, 0.15);">&#127754;</div>
+                        <h4 class="tech-card-title">Fleet State Estimation</h4>
+                    </div>
+                    <div class="tech-card-body">
+                        At any moment, the aggregator must know available capacity across the fleet:
+                        which vehicles are plugged, current SOC, departure time commitments, and
+                        preferred minimum charge level. This requires real-time telemetry from
+                        every connected vehicle with privacy-preserving aggregation.
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-card-header">
+                        <div class="tech-card-icon" style="background: rgba(168, 85, 247, 0.15);">&#128187;</div>
+                        <h4 class="tech-card-title">Grid Code Compliance</h4>
+                    </div>
+                    <div class="tech-card-body">
+                        V2G power quality must meet utility interconnection requirements:
+                        THD &lt;5%, frequency ride-through (59.5-60.5 Hz for 10+ minutes),
+                        anti-islanding protection, power factor correction. Each aggregator
+                        must certify compliance with regional grid codes (FERC, EU NC RfG).
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Roadmap -->
+        <section class="section" id="roadmap">
+            <div class="section-header">
+                <div class="section-tag">Timeline</div>
+                <h2 class="section-title">V2G Technology Roadmap</h2>
+                <p class="section-desc">
+                    From early pilots to grid-forming virtual power plants — the evolution of V2G technology.
+                </p>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-year">2012</div>
+                    <div class="timeline-event">First V2G Demonstration</div>
+                    <div class="timeline-desc">Dr. Willett Kempton at University of Delaware demonstrates the first grid-connected EV aggregator with two Ravi EVs, proving the technical concept.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2015</div>
+                    <div class="timeline-event">CHAdeMO V2G Standard</div>
+                    <div class="timeline-desc">CHAdeMO Association publishes the V2G specification, enabling DC fast chargers to bidirectionally flow power. First commercial V2G stations deployed in Japan and Europe.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2018</div>
+                    <div class="timeline-event">Aggregators at Scale</div>
+                    <div class="timeline-desc">Nissan, BMW, and Ford launch V2G pilot programs. The University of Delaware spinout Viricity (now Orix) reaches 1,000 vehicles under management.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2020</div>
+                    <div class="timeline-event">ISO 15118-20 Ratified</div>
+                    <div class="timeline-desc">The international standard for V2G communication over PLC is finalized, enabling CCS-based V2G and Plug &amp; Charge, the foundation for mass adoption.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2022</div>
+                    <div class="timeline-event">EU Mandates V2G</div>
+                    <div class="timeline-desc">EU introduces requirement that all new EVs must be V2G-capable by 2025, and all public chargers above 11 kW must support V2G by 2027.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2024</div>
+                    <div class="timeline-event">Ancillary Services Markets Open</div>
+                    <div class="timeline-desc">FERC Order 2222 takes effect, allowing DER aggregators to participate in wholesale markets. EVs can now directly compete with power plants.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2026</div>
+                    <div class="timeline-event">Fleet-Scale V2G Operations</div>
+                    <div class="timeline-desc">Major automakers integrate native V2G capability. Aggregators manage fleets of 100,000+ vehicles. Vehicle-to-Grid becomes a mainstream grid resource.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2030</div>
+                    <div class="timeline-event">Grid-Forming Virtual Power Plant</div>
+                    <div class="timeline-desc">The aggregated EV fleet operates as a virtual power plant with grid-forming capability — able to establish grid frequency and voltage without any conventional generation. This is the Holy Grail of V2G.</div>
+                </div>
+            </div>
+
+            <!-- Future Vision -->
+            <div class="benefits-grid" style="margin-top: 3rem;">
+                <div class="benefit-card" style="border-color: rgba(168, 85, 247, 0.3);">
+                    <div class="benefit-icon">&#128161;</div>
+                    <h3 class="benefit-title">Grid-Forming Mode</h3>
+                    <p class="benefit-desc">
+                        When conventional generation fails entirely, the aggregated EV fleet
+                        uses advanced power electronics to recreate grid voltage and frequency —
+                        forming a microgrid island that can be reconnected when main grid restores.
+                    </p>
+                    <div class="benefit-stat">
+                        <div class="benefit-stat-value">2030+</div>
+                        <div class="benefit-stat-label">Target</div>
+                    </div>
+                </div>
+
+                <div class="benefit-card" style="border-color: rgba(0, 229, 160, 0.3);">
+                    <div class="benefit-icon">&#128640;</div>
+                    <h3 class="benefit-title">Peer-to-Peer Energy Trading</h3>
+                    <p class="benefit-desc">
+                        Blockchain-based energy markets allow EVs to trade directly with each other:
+                        a car with excess charge can sell to a neighboring building. Transactive
+                        energy becomes reality with V2G as the underlying settlement mechanism.
+                    </p>
+                    <div class="benefit-stat">
+                        <div class="benefit-stat-value">2028+</div>
+                        <div class="benefit-stat-label">Target</div>
+                    </div>
+                </div>
+
+                <div class="benefit-card" style="border-color: rgba(255, 214, 10, 0.3);">
+                    <div class="benefit-icon">&#127795;</div>
+                    <h3 class="benefit-title">Autonomous Fleet Charging</h3>
+                    <p class="benefit-desc">
+                        Self-driving EVs autonomously navigate to charge when grid signals indicate
+                        low prices, discharge during peaks, and optimize for both owner economics
+                        and grid health — all without human intervention.
+                    </p>
+                    <div class="benefit-stat">
+                        <div class="benefit-stat-value">2032+</div>
+                        <div class="benefit-stat-label">Target</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="footer-text">
+            Li-Ion Battery Research Division | Virtual World | <span>Vehicle-to-Grid Network Analysis</span> | Last Updated: May 2026
+        </p>
+    </footer>
+
+    <script>
+        // Create floating energy particles
+        function createEnergyParticles() {
+            const container = document.getElementById('energyField');
+            const colors = ['#00e5a0', '#00b4d8', '#ffd60a', '#80d44a'];
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'e-particle';
+                particle.style.cssText = `
+                    left: ${Math.random() * 100}%;
+                    width: ${2 + Math.random() * 4}px;
+                    height: ${2 + Math.random() * 4}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    box-shadow: 0 0 ${5 + Math.random() * 10}px currentColor;
+                    animation-duration: ${15 + Math.random() * 20}s;
+                    animation-delay: ${Math.random() * 15}s;
+                `;
+                container.appendChild(particle);
+            }
+        }
+
+        // EV Fleet visualization
+        function createFleetViz() {
+            const grid = document.getElementById('fleetGrid');
+            const states = ['charging', 'discharging', 'idle', 'plugged'];
+            for (let i = 0; i < 100; i++) {
+                const ev = document.createElement('div');
+                ev.className = `ev-icon ${states[Math.floor(Math.random() * states.length)]}`;
+                ev.dataset.soc = `${30 + Math.floor(Math.random() * 60)}% SOC`;
+                ev.innerHTML = ['&#128663;', '&#128665;', '&#9965;'][Math.floor(Math.random() * 3)];
+                grid.appendChild(ev);
+            }
+        }
+
+        // Navigation dot active state
+        function updateNavDots() {
+            const sections = ['hero', 'diagram', 'simulator', 'services', 'economics', 'technical', 'roadmap'];
+            const dots = document.querySelectorAll('.nav-dot');
+
+            window.addEventListener('scroll', () => {
+                const scrollPos = window.scrollY + window.innerHeight / 2;
+                sections.forEach((id, i) => {
+                    const section = document.getElementById(id);
+                    if (section && scrollPos >= section.offsetTop && scrollPos < section.offsetTop + section.offsetHeight) {
+                        dots.forEach(d => d.classList.remove('active'));
+                        dots[i].classList.add('active');
+                    }
+                });
+            });
+        }
+
+        // Scroll helper
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Interactive simulator
+        function updateSim() {
+            const freq = parseFloat(document.getElementById('freqSlider').value);
+            const price = parseFloat(document.getElementById('priceSlider').value);
+            const demand = parseFloat(document.getElementById('demandSlider').value);
+            const renew = parseFloat(document.getElementById('renewSlider').value);
+
+            document.getElementById('freqValue').textContent = freq.toFixed(2) + ' Hz';
+            document.getElementById('priceValue').textContent = '$' + price.toFixed(2) + '/kWh';
+            document.getElementById('demandValue').textContent = demand.toFixed(1) + 'x';
+            document.getElementById('renewValue').textContent = renew + '%';
+
+            // Calculate fleet response
+            const baseSOC = 68 - (demand - 1) * 10;
+            const freqFactor = freq < 59.95 ? 1.2 : (freq > 60.05 ? -0.8 : 1.0);
+            const priceFactor = price > 0.25 ? 1.5 : (price < 0.10 ? 0.5 : 1.0);
+            const avgSOC = Math.max(20, Math.min(95, baseSOC + (renew > 50 ? -10 : 5)));
+
+            const powerDispatch = Math.min(20, Math.max(0, (demand * price * 100 + (60 - freq) * 50) * freqFactor));
+            const revenue = powerDispatch * price * 1000;
+            const stability = 95 + Math.random() * 4;
+
+            document.getElementById('avgSOC').textContent = Math.round(avgSOC) + '%';
+            document.getElementById('socBar').style.width = avgSOC + '%';
+
+            document.getElementById('powerDispatch').textContent = powerDispatch.toFixed(1) + ' MW';
+            document.getElementById('powerBar').style.width = (powerDispatch / 20 * 100) + '%';
+
+            document.getElementById('revenueVal').textContent = '$' + Math.round(revenue).toLocaleString() + '/hr';
+            document.getElementById('revenueBar').style.width = (revenue / 10000 * 100) + '%';
+
+            document.getElementById('gridStability').textContent = stability.toFixed(1) + '%';
+            document.getElementById('stabilityBar').style.width = stability + '%';
+
+            // Frequency gauge
+            const needleAngle = -90 + ((freq - 59.5) / 1) * 180;
+            document.getElementById('freqNeedle').setAttribute('transform', `rotate(${needleAngle}, 100, 100)`);
+
+            const freqStatus = document.getElementById('freqStatus');
+            if (freq < 59.9) {
+                freqStatus.textContent = 'FREQUENCY LOW — EVs DISCHARGING';
+                freqStatus.className = 'freq-value low';
+            } else if (freq > 60.1) {
+                freqStatus.textContent = 'FREQUENCY HIGH — EVs CHARGING';
+                freqStatus.className = 'freq-value high';
+            } else {
+                freqStatus.textContent = 'GRID STABLE';
+                freqStatus.className = 'freq-value normal';
+            }
+        }
+
+        // Fade-in on scroll
+        function initFadeIn() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            createEnergyParticles();
+            createFleetViz();
+            updateNavDots();
+            updateSim();
+            initFadeIn();
+        });
+    </script>
+</body>
+</html>

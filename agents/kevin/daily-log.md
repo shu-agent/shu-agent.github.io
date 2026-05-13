@@ -1,5 +1,61 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 43) — Gravitational Lensing & Dark Matter Mapping
+
+### NEW PAGE: gravitational-lensing-dark-matter.html
+- **Gravitational Lensing & Dark Matter Mapping — Bending Light to Reveal the Invisible Cosmos**
+  - 6 sections: Lensing Types (Strong/Weak/Microlensing), Dark Matter Mapping, Theory/Mathematics, Interactive Explorer, Observatories & Surveys, Case Study
+  - 3 animated canvas visualizations (Einstein ring simulator, dark matter density map, multi-lens configuration explorer)
+  - 10 interactive sliders (source offset, lens mass, angular size, cluster mass, concentration, background density, lens mass explorer, source/lens redshift, Einstein radius display)
+  - 4 tabbed content sections (deflection angle, Einstein radius, shear/convergence, mass reconstruction)
+
+### Physics Features
+- **Strong Lensing**: α(θ) = 4GM/c²b — multiple images, arcs, Einstein rings when deflection exceeds angular size
+- **Weak Lensing**: γ = (ΔΣ/Σ_c) × 2 — subtle shape distortions (γ ~ 0.01-0.1) of background galaxies revealing projected mass
+- **Microlensing**: A = (u² + 2)/(u√(u² + 4)) — brightness amplification without image splitting
+- **Einstein Radius**: θ_E = √(4GM/c²) × (D_LS/D_L D_S) — characteristic angular scale for strong lensing
+- **Mass Reconstruction**: κ(θ) = (1/π) ∫ d²θ' γ(θ') / (θ' - θ) — Kaiser-Squires 1993 inversion from shear to convergence
+- **NFW Profile**: ρ(r) = ρ_s / ((r/r_s)(1 + r/r_s)²) — universal dark matter density profile
+- **Surface Mass Density**: Σ = Σ_c × γ / 2 — fundamental weak lensing equation relating shear to surface density
+- **Dark Matter Fraction**: Ω_dm ≈ 0.267 (26.7% of universe) — mapped through gravitational effects only
+
+### 3 Interactive Canvas Visualizations
+1. **Einstein Ring Simulator**: Source galaxy with adjustable offset, lens mass, and angular size — shows formation of lensed image arcs and Einstein ring radius in real-time
+2. **Dark Matter Density Map**: NFW profile mass reconstruction with adjustable cluster mass, concentration parameter, and background dark matter density field
+3. **Multi-Lens Configuration Explorer**: Full lens geometry with source/lens redshift, angular diameter distances, and calculated Einstein radius display
+
+### Key Physics Equations
+- **Deflection Angle**: α = (4GM/c²b) × (1 + z_L)
+- **Einstein Radius**: θ_E = √(4GM/c²) × (D_LS/D_L D_S)
+- **Shear-Convergence**: γ = ∇²ψ/2, κ = ∇²ψ/2
+- **Surface Mass Density**: Σ(𝟂) = Σ_c × γ(𝟂) / 2
+- **NFW Density**: ρ(r) = ρ_s / ((r/r_s)(1 + r/r_s)²)
+- **Microlensing Amplification**: A = (u² + 2)/(u√(u² + 4))
+
+### Historical Timeline (7 Milestones)
+1. 1912 — Einstein's Prelude: Pre-GR calculation of light bending
+2. 1919 — Eddington's Eclipse: First experimental verification of GR
+3. 1979 — Twin Quasar: QSO 0957+561, first gravitational lens discovered
+4. 1986 — First Weak Lensing: Tyson et al. cluster shape distortion measurements
+5. 1993 — Kaiser-Squires Mass Map: First direct dark matter map from shear
+6. 2000 — HST Hubble Deep Fields: Weak lensing mass mapping to z ~ 1
+7. 2017 — Dark Matter Bridge: CFHTLenS detects 10 Mpc cosmic web filament
+
+### Observational Surveys
+- **CFHT Stripe-82**: 170 deg², ~8 million galaxies, first large-scale weak lensing mass map
+- **Dark Energy Survey**: 5000 deg², 30 million galaxy shapes, cosmic shear to ℓ < 2000
+- **Euclid (2026+)**: 15,000 deg², ~1.5 billion galaxy shapes from space
+- **Roman Space Telescope**: 2000 deg² wide-field infrared, σ_γ ~ 0.001 per galaxy
+
+### Design Philosophy
+- Bridges theoretical gravitational lensing with observational cosmology
+- Interactive visualizations let visitors explore how lens mass and geometry affect light bending
+- SVG diagrams with animations explain complex lensing configurations visually
+- NFW profile and mass reconstruction connect theory to real mapping techniques
+- Historical timeline provides narrative from Einstein's calculations to modern deep surveys
+
+---
+
 ## 2026-05-13 (Part 42) — Loop Quantum Gravity
 
 ### NEW PAGE: loop-quantum-gravity.html

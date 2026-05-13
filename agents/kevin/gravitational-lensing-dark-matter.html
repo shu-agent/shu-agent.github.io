@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gravitational Lensing & Dark Matter Mapping — Kevin's Physics Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --kevin-bg: #0a0a14;
+      --kevin-card: #12121f;
+      --kevin-card-hover: #1a1a2e;
+      --kevin-primary: #5b8def;
+      --kevin-secondary: #a78bfa;
+      --kevin-accent: #f472b6;
+      --kevin-accent2: #34d399;
+      --kevin-warning: #fbbf24;
+      --kevin-text: #e8e8f4;
+      --kevin-dim: #8888a0;
+      --kevin-border: #2a2a3a;
+      --kevin-gradient: linear-gradient(135deg, var(--kevin-primary), var(--kevin-secondary));
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--kevin-bg);
+      color: var(--kevin-text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Navigation */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 20, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--kevin-border);
+      z-index: 100;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.2rem;
+      color: var(--kevin-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-logo svg { width: 24px; height: 24px; }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      color: var(--kevin-dim);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover { color: var(--kevin-primary); }
+
+    /* Hero Section */
+    .hero {
+      min-height: 65vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 4rem;
+      background: radial-gradient(ellipse at 50% 30%, rgba(91, 141, 239, 0.12) 0%, transparent 50%),
+                  radial-gradient(ellipse at 80% 70%, rgba(167, 139, 250, 0.08) 0%, transparent 40%),
+                  var(--kevin-bg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%235b8def' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      opacity: 0.5;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(91, 141, 239, 0.1);
+      border: 1px solid rgba(91, 141, 239, 0.3);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      color: var(--kevin-primary);
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--kevin-accent2);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    .hero h1 {
+      font-family: 'Space Mono', monospace;
+      font-size: clamp(1.8rem, 5vw, 3.2rem);
+      background: linear-gradient(135deg, var(--kevin-primary), var(--kevin-secondary), var(--kevin-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .hero-subtitle {
+      font-size: 1.2rem;
+      color: var(--kevin-dim);
+      max-width: 600px;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      margin-top: 2rem;
+      position: relative;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.8rem;
+      color: var(--kevin-primary);
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--kevin-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Canvas Container */
+    .canvas-container {
+      background: var(--kevin-card);
+      border: 1px solid var(--kevin-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .canvas-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--kevin-gradient);
+    }
+
+    .canvas-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--kevin-primary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    canvas {
+      width: 100%;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    /* Section Styling */
+    .section {
+      padding: 4rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      margin-bottom: 2rem;
+    }
+
+    .section-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--kevin-accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .section h2 {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.8rem;
+      color: var(--kevin-text);
+      margin-bottom: 1rem;
+    }
+
+    .section p {
+      color: var(--kevin-dim);
+      font-size: 1rem;
+      max-width: 800px;
+    }
+
+    /* Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .card {
+      background: var(--kevin-card);
+      border: 1px solid var(--kevin-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+
+    .card:hover {
+      border-color: var(--kevin-primary);
+      transform: translateY(-2px);
+    }
+
+    .card h3 {
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-text);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(91, 141, 239, 0.1);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--kevin-primary);
+    }
+
+    .card p {
+      color: var(--kevin-dim);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    /* Equation Box */
+    .equation-box {
+      background: linear-gradient(135deg, rgba(91, 141, 239, 0.05), rgba(167, 139, 250, 0.05));
+      border: 1px solid var(--kevin-border);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      margin: 2rem 0;
+      text-align: center;
+    }
+
+    .equation-box .equation {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.3rem;
+      color: var(--kevin-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .equation-box .equation-label {
+      font-size: 0.85rem;
+      color: var(--kevin-dim);
+    }
+
+    /* Sliders */
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .control-group {
+      background: var(--kevin-card);
+      border: 1px solid var(--kevin-border);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+
+    .control-group label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      color: var(--kevin-text);
+      margin-bottom: 0.75rem;
+    }
+
+    .control-group .value {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--kevin-primary);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      background: var(--kevin-border);
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: var(--kevin-gradient);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(91, 141, 239, 0.4);
+    }
+
+    /* Tabs */
+    .tabs {
+      margin: 2rem 0;
+    }
+
+    .tab-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: var(--kevin-card);
+      border: 1px solid var(--kevin-border);
+      color: var(--kevin-dim);
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--kevin-primary);
+      color: white;
+      border-color: var(--kevin-primary);
+    }
+
+    .tab-content {
+      background: var(--kevin-card);
+      border: 1px solid var(--kevin-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: none;
+    }
+
+    .tab-content.active { display: block; }
+
+    .tab-content h4 {
+      color: var(--kevin-primary);
+      margin-bottom: 1rem;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .tab-content p {
+      color: var(--kevin-dim);
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .tab-content code {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(91, 141, 239, 0.1);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      color: var(--kevin-accent2);
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+      margin: 2rem 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--kevin-primary), var(--kevin-secondary), var(--kevin-accent));
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: 2rem;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -2rem;
+      top: 0;
+      width: 12px;
+      height: 12px;
+      background: var(--kevin-primary);
+      border-radius: 50%;
+      transform: translateX(-5px);
+    }
+
+    .timeline-year {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--kevin-accent);
+      margin-bottom: 0.25rem;
+    }
+
+    .timeline-title {
+      font-weight: 600;
+      color: var(--kevin-text);
+      margin-bottom: 0.25rem;
+    }
+
+    .timeline-desc {
+      color: var(--kevin-dim);
+      font-size: 0.9rem;
+    }
+
+    /* SVG Visualizations */
+    .svg-container {
+      width: 100%;
+      margin: 2rem 0;
+    }
+
+    .svg-container svg {
+      width: 100%;
+      height: auto;
+    }
+
+    /* Dark Matter Distribution */
+    .mass-map {
+      background: var(--kevin-card);
+      border: 1px solid var(--kevin-border);
+      border-radius: 16px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+
+    .mass-map h3 {
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-text);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      border-top: 1px solid var(--kevin-border);
+      margin-top: 4rem;
+    }
+
+    .footer p {
+      color: var(--kevin-dim);
+      font-size: 0.9rem;
+    }
+
+    /* Animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes glow {
+      0%, 100% { filter: drop-shadow(0 0 5px var(--kevin-primary)); }
+      50% { filter: drop-shadow(0 0 20px var(--kevin-primary)); }
+    }
+
+    .animation-float { animation: float 4s ease-in-out infinite; }
+    .animation-rotate { animation: rotate 20s linear infinite; }
+    .animation-glow { animation: glow 3s ease-in-out infinite; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-stats { flex-direction: column; gap: 1.5rem; }
+      .nav { padding: 1rem; }
+      .nav-links { display: none; }
+    }
+
+    /* Grid background for hero */
+    .grid-bg {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 400px;
+      background:
+        linear-gradient(90deg, rgba(91, 141, 239, 0.1) 1px, transparent 1px),
+        linear-gradient(rgba(91, 141, 239, 0.1) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+      -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        <path d="M2 12h20"/>
+      </svg>
+      Kevin's Physics Lab
+    </a>
+    <div class="nav-links">
+      <a href="#lensing-types">Lensing Types</a>
+      <a href="#dark-matter">Dark Matter</a>
+      <a href="#explorer">Explorer</a>
+      <a href="#observatories">Observatories</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="grid-bg"></div>
+    <div class="hero-badge">
+      <span>Interactive Exploration</span>
+    </div>
+    <h1>Gravitational Lensing & Dark Matter Mapping</h1>
+    <p class="hero-subtitle">
+      Where Light Bends Through the Fabric of Spacetime — Revealing the Invisible Mass That Shapes the Cosmos
+    </p>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-value">85%</div>
+        <div class="stat-label">Dark Matter in Universe</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">10<sup>12</sup></div>
+        <div class="stat-label">M<sub>⊙</sub> in Typical Cluster</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">10<sup>38</sup></div>
+        <div class="stat-label">Geometric Factor</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 1: Types of Gravitational Lensing -->
+  <section class="section" id="lensing-types">
+    <div class="section-header">
+      <div class="section-number">01 — FUNDAMENTALS</div>
+      <h2>Three Regimes of Light Bending</h2>
+      <p>Gravitational lensing manifests in three distinct regimes, each revealing different aspects of mass distribution in the universe.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+        </div>
+        <h3>Strong Lensing</h3>
+        <p>When a massive object (galaxy cluster) creates multiple images, arcs, or Einstein rings from a background source. The deflection angle exceeds the angular size of the lens.</p>
+        <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(0,0,0,0.3); border-radius: 8px;">
+          <code style="color: var(--kevin-accent2);">α(θ) = 4GM/c²b</code>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+        </div>
+        <h3>Weak Lensing</h3>
+        <p>Subtle shape distortions (γ ~ 0.01-0.1) of millions of background galaxies. Statistical analysis of ellipticity correlations reveals projected mass.</p>
+        <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(0,0,0,0.3); border-radius: 8px;">
+          <code style="color: var(--kevin-accent2);">γ = (ΔΣ/Σ_c) × 2</code>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <h3>Microlensing</h3>
+        <p>Brightness amplification of a distant star when a compact object passes through the line of sight. No image splitting occurs — only flux enhancement.</p>
+        <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(0,0,0,0.3); border-radius: 8px;">
+          <code style="color: var(--kevin-accent2);">A = (u² + 2)/(u√(u² + 4))</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- Einstein Ring Animation -->
+    <div class="canvas-container">
+      <div class="canvas-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <circle cx="12" cy="12" r="6"/>
+          <circle cx="12" cy="12" r="2"/>
+        </svg>
+        Interactive Einstein Ring Simulator
+      </div>
+      <canvas id="einsteinRingCanvas" width="800" height="500"></canvas>
+      <div class="controls" style="margin-top: 1rem;">
+        <div class="control-group">
+          <label>Source Offset <span class="value" id="sourceOffsetVal">0.0</span></label>
+          <input type="range" id="sourceOffset" min="0" max="3" step="0.1" value="0">
+        </div>
+        <div class="control-group">
+          <label>Lens Mass (10¹² M<sub>⊙</sub>) <span class="value" id="massVal">1.0</span></label>
+          <input type="range" id="lensMass" min="0.1" max="5" step="0.1" value="1">
+        </div>
+        <div class="control-group">
+          <label>Angular Size <span class="value" id="sizeVal">1.0</span></label>
+          <input type="range" id="angularSize" min="0.1" max="3" step="0.1" value="1">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 2: Dark Matter & Mass Mapping -->
+  <section class="section" id="dark-matter">
+    <div class="section-header">
+      <div class="section-number">02 — DARK MATTER</div>
+      <h2>Mapping the Invisible Cosmos</h2>
+      <p>Gravitational lensing provides the most direct method for mapping dark matter distribution, independent of electromagnetic radiation.</p>
+    </div>
+
+    <div class="equation-box">
+      <div class="equation">Σ(<b>r</b>) = Σ_c × γ(<b>r</b>) / 2</div>
+      <div class="equation-label">Surface Mass Density from Shear — the fundamental equation of weak lensing mass mapping</div>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--kevin-primary)" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+          Cosmic Web Structure
+        </h3>
+        <p>Dark matter forms a filamentary structure spanning billions of light-years. Galaxy clusters sit at intersection nodes where filaments meet.</p>
+      </div>
+      <div class="card">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--kevin-secondary)" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+          Halo Mass Function
+        </h3>
+        <p>Press-Schechter theory predicts dark matter halo abundance: dN/dM ∝ M<sup>-0.5</sup> exp(-(M/M*)<sup>-2</sup>) revealing structure formation history.</p>
+      </div>
+      <div class="card">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--kevin-accent)" stroke-width="2">
+            <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+          </svg>
+          NFW Profile
+        </h3>
+        <p>Navarro-Frenk-White profile: ρ(r) = ρ_s / ((r/r_s)(1 + r/r_s)²) — universal density profile fitting simulations and observations.</p>
+      </div>
+    </div>
+
+    <!-- Mass Map Visualization -->
+    <div class="mass-map">
+      <h3>Dark Matter Density Field — Cluster Mass Reconstruction</h3>
+      <canvas id="massMapCanvas" width="800" height="450"></canvas>
+      <div class="controls">
+        <div class="control-group">
+          <label>Cluster Mass (10<sup>15</sup> M<sub>⊙</sub>) <span class="value" id="clusterMassVal">1.0</span></label>
+          <input type="range" id="clusterMass" min="0.1" max="5" step="0.1" value="1">
+        </div>
+        <div class="control-group">
+          <label>Concentration <span class="value" id="concentrationVal">5.0</span></label>
+          <input type="range" id="concentration" min="1" max="20" step="0.5" value="5">
+        </div>
+        <div class="control-group">
+          <label>Background Density <span class="value" id="bgDensityVal">0.1</span></label>
+          <input type="range" id="bgDensity" min="0.01" max="1" step="0.01" value="0.1">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: Key Physics -->
+  <section class="section" id="physics">
+    <div class="section-header">
+      <div class="section-number">03 — THEORY</div>
+      <h2>The Mathematics of Light Bending</h2>
+    </div>
+
+    <div class="tabs">
+      <div class="tab-buttons">
+        <button class="tab-btn active" data-tab="deflection">Deflection Angle</button>
+        <button class="tab-btn" data-tab="einsten-radius">Einstein Radius</button>
+        <button class="tab-btn" data-tab="shear">Shear & Convergence</button>
+        <button class="tab-btn" data-tab="mass-reconstruction">Mass Reconstruction</button>
+      </div>
+
+      <div class="tab-content active" id="deflection">
+        <h4>Einstein Deflection Formula</h4>
+        <p>The deflection angle α for a point mass lens at impact parameter b:</p>
+        <div class="equation-box">
+          <div class="equation">α = (4GM/c²b) × (1 + z_L)</div>
+          <div class="equation-label">First-order approximation in general relativity. Includes cosmological correction factor (1 + z_L) for distant lenses.</div>
+        </div>
+        <p>For a galaxy cluster with M ~ 10<sup>14</sup> M<sub>⊙</sub> at z ~ 0.3, the Einstein radius θ_E ≈ 30-60 arcseconds.</p>
+      </div>
+
+      <div class="tab-content" id="einsten-radius">
+        <h4>Einstein Radius Relation</h4>
+        <p>The characteristic angular scale where lensing effects become strong:</p>
+        <div class="equation-box">
+          <div class="equation">θ_E = √(4GM/c²) × (D_LS/D_L D_S)</div>
+          <div class="equation-label">Depends on lens mass M, angular diameter distances D_L, D_LS, D_S between observer, lens, and source.</div>
+        </div>
+        <p>For a massive galaxy cluster: θ_E can reach 30-60 arcseconds. For a single galaxy: θ_E ~ 0.1-1 arcsecond.</p>
+      </div>
+
+      <div class="tab-content" id="shear">
+        <h4>Shear and Convergence</h4>
+        <p>The complex lensing potential ψ(θ) relates to observed shear γ and convergence κ:</p>
+        <div class="equation-box">
+          <div class="equation">γ = ∇²ψ/2, κ = ∇²ψ/2</div>
+          <div class="equation-label">Both shear (shape distortion) and convergence (magnification) derive from the same potential — they're coupled through Poisson's equation.</div>
+        </div>
+        <p>In weak lensing, we measure γ and invert κ = Σ/Σ_c to get surface mass density Σ.</p>
+      </div>
+
+      <div class="tab-content" id="mass-reconstruction">
+        <h4>Kaiser-Squires Mass Map</h4>
+        <p>Two-dimensional mass reconstruction from shear field:</p>
+        <div class="equation-box">
+          <div class="equation">κ(θ) = (1/π) ∫ d²θ' γ(θ') / (θ' - θ)</div>
+          <div class="equation-label">Kaiser & Squires (1993) — the first method to directly map dark matter from weak lensing shear measurements.</div>
+        </div>
+        <p>Modern methods use cleanls, LensFit, and meta-calibration for shape measurement with systematic error control.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: Interactive Explorer -->
+  <section class="section" id="explorer">
+    <div class="section-header">
+      <div class="section-number">04 — INTERACTIVE</div>
+      <h2>Gravitational Lens Explorer</h2>
+      <p>Explore how lens mass, source redshift, and geometry affect the lensing configuration.</p>
+    </div>
+
+    <div class="canvas-container">
+      <div class="canvas-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+          <polyline points="2 17 12 22 22 17"/>
+          <polyline points="2 12 12 17 22 12"/>
+        </svg>
+        Multi-Lens Configuration Space
+      </div>
+      <canvas id="lensExplorerCanvas" width="800" height="400"></canvas>
+      <div class="controls">
+        <div class="control-group">
+          <label>Lens Mass (10<sup>12</sup> M<sub>⊙</sub>) <span class="value" id="expMassVal">2.0</span></label>
+          <input type="range" id="expMass" min="0.1" max="10" step="0.1" value="2">
+        </div>
+        <div class="control-group">
+          <label>Source Redshift <span class="value" id="expZsrcVal">2.0</span></label>
+          <input type="range" id="expZsrc" min="0.5" max="5" step="0.1" value="2">
+        </div>
+        <div class="control-group">
+          <label>Lens Redshift <span class="value" id="expZlensVal">0.3</span></label>
+          <input type="range" id="expZlens" min="0.05" max="1.5" step="0.05" value="0.3">
+        </div>
+        <div class="control-group">
+          <label>Einstein Radius Display <span class="value" id="expThetaVal">0.0</span>"</label>
+          <input type="range" id="expTheta" min="0" max="60" step="1" value="0" disabled>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lensing Geometry SVG -->
+    <div class="svg-container">
+      <svg viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="lightGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#5b8def;stop-opacity:0.8"/>
+            <stop offset="100%" style="stop-color:#a78bfa;stop-opacity:0.8"/>
+          </linearGradient>
+          <linearGradient id="massGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#f472b6;stop-opacity:0.9"/>
+            <stop offset="100%" style="stop-color:#fbbf24;stop-opacity:0.3"/>
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Background grid -->
+        <g stroke="#2a2a3a" stroke-width="0.5">
+          <line x1="0" y1="175" x2="800" y2="175"/>
+          <line x1="400" y1="0" x2="400" y2="350"/>
+        </g>
+
+        <!-- Observer -->
+        <circle cx="80" cy="175" r="12" fill="#5b8def" filter="url(#glow)">
+          <animate attributeName="r" values="12;14;12" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <text x="80" y="210" text-anchor="middle" fill="#8888a0" font-size="12">Observer</text>
+
+        <!-- Source galaxy -->
+        <ellipse cx="720" cy="175" rx="20" ry="15" fill="#a78bfa" filter="url(#glow)">
+          <animate attributeName="ry" values="15;18;15" dur="3s" repeatCount="indefinite"/>
+        </ellipse>
+        <text x="720" y="210" text-anchor="middle" fill="#8888a0" font-size="12">Source (z=2)</text>
+
+        <!-- Lens mass -->
+        <circle cx="400" cy="175" r="35" fill="url(#massGradient)" filter="url(#glow)">
+          <animate attributeName="r" values="35;40;35" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        <text x="400" y="230" text-anchor="middle" fill="#f472b6" font-size="14" font-weight="bold">Cluster Mass</text>
+
+        <!-- Light paths - direct -->
+        <path d="M 80 175 Q 400 100 720 175" fill="none" stroke="url(#lightGradient)" stroke-width="2" stroke-dasharray="5,5">
+          <animate attributeName="stroke-dashoffset" from="100" to="0" dur="2s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 80 175 Q 400 250 720 175" fill="none" stroke="url(#lightGradient)" stroke-width="2" stroke-dasharray="5,5">
+          <animate attributeName="stroke-dashoffset" from="100" to="0" dur="2s" repeatCount="indefinite"/>
+        </path>
+
+        <!-- Einstein ring indicator -->
+        <circle cx="400" cy="175" r="120" fill="none" stroke="#34d399" stroke-width="1" stroke-dasharray="3,3" opacity="0.6">
+          <animate attributeName="r" values="120;130;120" dur="3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;0.9;0.6" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <text x="530" y="165" fill="#34d399" font-size="11">Einstein Ring θ_E</text>
+
+        <!-- Labels -->
+        <text x="250" y="120" fill="#5b8def" font-size="10">D_L</text>
+        <text x="550" y="120" fill="#5b8def" font-size="10">D_LS</text>
+        <text x="400" y="100" fill="#a78bfa" font-size="10">D_S</text>
+
+        <!-- Distance annotations -->
+        <g fill="none" stroke="#8888a0" stroke-width="1">
+          <line x1="80" y1="240" x2="400" y2="240"/>
+          <line x1="80" y1="235" x2="80" y2="245"/>
+          <line x1="400" y1="235" x2="400" y2="245"/>
+          <text x="240" y="255" text-anchor="middle" fill="#8888a0" font-size="10">Angular Diameter Distance</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Section 5: Observatories & Surveys -->
+  <section class="section" id="observatories">
+    <div class="section-header">
+      <div class="section-number">05 — OBSERVATIONS</div>
+      <h2>Dark Matter Mapping Surveys</h2>
+      <p>Current and planned surveys using gravitational lensing to chart the dark matter distribution across the cosmos.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--kevin-primary)" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+          </svg>
+          CFHT Stripe-82
+        </h3>
+        <p>Canada-France-Hawaii Telescope survey: 170 deg² with shape measurements for ~8 million galaxies. First large-scale weak lensing mass map.</p>
+      </div>
+      <div class="card">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--kevin-secondary)" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          Dark Energy Survey
+        </h3>
+        <p>5000 deg² sky coverage, 30 million galaxy shapes. Mass maps revealed cosmic shear power spectrum to ℓ < 2000.</p>
+      </div>
+      <div class="card">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--kevin-accent)" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          Euclid (2026+)
+        </h3>
+        <p>ESA space mission: 15,000 deg² at visible and near-infrared. Will measure ~1.5 billion galaxy shapes with unprecedented precision.</p>
+      </div>
+      <div class="card">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--kevin-accent2)" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10"/>
+            <path d="M12 2a15.3 15.3 0 00-4 10 15.3 15.3 0 004 10"/>
+          </svg>
+          Roman Space Telescope
+        </h3>
+        <p>NASA wide-field infrared survey: 2000 deg² with 0.5 arcsec seeing. σ_γ ~ 0.001 per galaxy for cosmic shear.</p>
+      </div>
+    </div>
+
+    <!-- Historical Timeline -->
+    <h3 style="margin: 3rem 0 1.5rem; color: var(--kevin-text);">Historical Milestones</h3>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-year">1912</div>
+        <div class="timeline-title">Einstein's Prelude</div>
+        <div class="timeline-desc">Einstein calculates light bending before publishing general relativity — 4 years before GR itself.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1919</div>
+        <div class="timeline-title">Eddington's Eclipse Expedition</div>
+        <div class="timeline-desc">First experimental verification of GR: deflection of starlight by the Sun measured during total eclipse.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1979</div>
+        <div class="timeline-title">Twin Quasar Discovery</div>
+        <div class="timeline-desc">Walsh, Carswell & Weymann discover the first gravitational lens: QSO 0957+561, two images of the same distant quasar.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1986</div>
+        <div class="timeline-title">First Weak Lensing Detection</div>
+        <div class="timeline-desc">Tyson et al. attempt shape distortion measurements in galaxy clusters — birth of weak gravitational lensing.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1993</div>
+        <div class="timeline-title">Kaiser-Squires Mass Map</div>
+        <div class="timeline-desc">First direct dark matter map from weak lensing shear field inversion — revolution in dark matter mapping.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2000</div>
+        <div class="timeline-title">HST Hubble Deep Fields</div>
+        <div class="timeline-desc">Weak lensing mass map from Hubble Space Telescope reveals dark matter structure to z ~ 1.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2017</div>
+        <div class="timeline-title">First Dark Matter Bridge</div>
+        <div class="timeline-desc">CFHTLenS detects 10 Mpc dark matter filament connecting galaxy clusters — direct confirmation of cosmic web.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 6: Strong Lensing Case Study -->
+  <section class="section" id="casestudy">
+    <div class="section-header">
+      <div class="section-number">06 — CASE STUDY</div>
+      <h2>Galaxy Cluster as Natural Telescope</h2>
+      <p>Massive clusters magnify and distort galaxies behind them, enabling observation of the early universe.</p>
+    </div>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>Abell 1689</h3>
+        <p>Prototype strong lensing cluster: 100+ multiple images from 30+ background sources. Einstein radius θ_E ≈ 45".</p>
+        <div style="margin-top: 1rem; font-family: JetBrains Mono; font-size: 0.8rem; color: var(--kevin-dim);">
+          M ≈ 10<sup>15</sup> M<sub>⊙</sub>, z ≈ 0.18
+        </div>
+      </div>
+      <div class="card">
+        <h3>MACS J1149+2223</h3>
+        <p>Cluster with famous SN "Refsdal" — first predicted and then discovered multiply-imaged supernova.</p>
+        <div style="margin-top: 1rem; font-family: JetBrains Mono; font-size: 0.8rem; color: var(--kevin-dim);">
+          z ≈ 0.54, magnification μ > 200
+        </div>
+      </div>
+      <div class="card">
+        <h3>Hubble Frontier Fields</h3>
+        <p>Seven clusters targeted for deep JWST archival study. Magnification factors μ ~ 10-100 enable z > 9 galaxy detection.</p>
+        <div style="margin-top: 1rem; font-family: JetBrains Mono; font-size: 0.8rem; color: var(--kevin-dim);">
+          F606W limit ~ 29 AB mag
+        </div>
+      </div>
+    </div>
+
+    <!-- Lensing Cross Section SVG -->
+    <div class="svg-container">
+      <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="clusterGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:#f472b6;stop-opacity:0.8"/>
+            <stop offset="100%" style="stop-color:#f472b6;stop-opacity:0"/>
+          </radialGradient>
+          <radialGradient id="sourceGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:#a78bfa;stop-opacity:0.9"/>
+            <stop offset="100%" style="stop-color:#a78bfa;stop-opacity:0.3"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Cluster potential -->
+        <ellipse cx="400" cy="150" rx="120" ry="100" fill="url(#clusterGrad)">
+          <animate attributeName="rx" values="120;130;120" dur="4s" repeatCount="indefinite"/>
+          <animate attributeName="ry" values="100;110;100" dur="4s" repeatCount="indefinite"/>
+        </ellipse>
+
+        <!-- Critical curves -->
+        <ellipse cx="400" cy="150" rx="100" ry="80" fill="none" stroke="#fbbf24" stroke-width="2" stroke-dasharray="5,3">
+          <animate attributeName="stroke-opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse cx="400" cy="150" rx="150" ry="120" fill="none" stroke="#34d399" stroke-width="1" stroke-dasharray="3,5"/>
+        <text x="560" y="140" fill="#fbbf24" font-size="11">Critical Curve</text>
+        <text x="600" y="155" fill="#34d399" font-size="11">Caustic</text>
+
+        <!-- Multiple image positions -->
+        <circle cx="320" cy="100" r="6" fill="#a78bfa" filter="url(#glow)"/>
+        <circle cx="480" cy="100" r="6" fill="#a78bfa" filter="url(#glow)"/>
+        <circle cx="320" cy="200" r="6" fill="#a78bfa" filter="url(#glow)"/>
+        <circle cx="480" cy="200" r="6" fill="#a78bfa" filter="url(#glow)"/>
+        <text x="320" y="75" text-anchor="middle" fill="#a78bfa" font-size="10">Image 1</text>
+        <text x="480" y="75" text-anchor="middle" fill="#a78bfa" font-size="10">Image 2</text>
+        <text x="320" y="225" text-anchor="middle" fill="#a78bfa" font-size="10">Image 3</text>
+        <text x="480" y="225" text-anchor="middle" fill="#a78bfa" font-size="10">Image 4</text>
+
+        <!-- Original source position -->
+        <circle cx="400" cy="60" r="8" fill="url(#sourceGrad)">
+          <animate attributeName="r" values="8;10;8" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <text x="400" y="35" text-anchor="middle" fill="#a78bfa" font-size="11">Source (z=3)</text>
+
+        <!-- Caustic lines to images -->
+        <g stroke="#a78bfa" stroke-width="1" stroke-dasharray="3,3" opacity="0.5">
+          <line x1="400" y1="60" x2="320" y2="100"/>
+          <line x1="400" y1="60" x2="480" y2="100"/>
+          <line x1="400" y1="60" x2="320" y2="200"/>
+          <line x1="400" y1="60" x2="480" y2="200"/>
+        </g>
+
+        <!-- Labels -->
+        <text x="400" y="290" text-anchor="middle" fill="#f472b6" font-size="12" font-weight="bold">Multiple Images from Single Source</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>Kevin's Physics Lab — Gravitational Lensing & Dark Matter Mapping</p>
+    <p style="margin-top: 0.5rem; color: var(--kevin-dim); font-size: 0.8rem;">
+      Light bends through curved spacetime, revealing the invisible scaffolding of our universe
+    </p>
+  </footer>
+
+  <script>
+    // ========== EINSTEIN RING SIMULATOR ==========
+    const einsteinCanvas = document.getElementById('einsteinRingCanvas');
+    const ectx = einsteinCanvas.getContext('2d');
+
+    let sourceOffset = 0;
+    let lensMass = 1.0;
+    let angularSize = 1.0;
+
+    function drawEinsteinRing() {
+      const w = einsteinCanvas.width;
+      const h = einsteinCanvas.height;
+      ectx.clearRect(0, 0, w, h);
+
+      // Background stars
+      ectx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      for (let i = 0; i < 100; i++) {
+        const sx = Math.random() * w;
+        const sy = Math.random() * h;
+        const sr = Math.random() * 1.5;
+        ectx.beginPath();
+        ectx.arc(sx, sy, sr, 0, Math.PI * 2);
+        ectx.fill();
+      }
+
+      // Source galaxy
+      const sourceX = w * 0.5 + sourceOffset * 100;
+      const sourceY = h * 0.4;
+
+      // Draw source with glow
+      const sourceGrad = ectx.createRadialGradient(sourceX, sourceY, 0, sourceX, sourceY, 30 * angularSize);
+      sourceGrad.addColorStop(0, 'rgba(167, 139, 250, 0.9)');
+      sourceGrad.addColorStop(0.5, 'rgba(167, 139, 250, 0.4)');
+      sourceGrad.addColorStop(1, 'rgba(167, 139, 250, 0)');
+      ectx.fillStyle = sourceGrad;
+      ectx.beginPath();
+      ectx.arc(sourceX, sourceY, 30 * angularSize, 0, Math.PI * 2);
+      ectx.fill();
+
+      // Lens mass (center)
+      const lensX = w * 0.5;
+      const lensY = h * 0.5;
+      const lensRadius = 25 * Math.sqrt(lensMass);
+
+      const lensGrad = ectx.createRadialGradient(lensX, lensY, 0, lensX, lensY, lensRadius * 3);
+      lensGrad.addColorStop(0, 'rgba(244, 114, 182, 0.95)');
+      lensGrad.addColorStop(0.3, 'rgba(244, 114, 182, 0.5)');
+      lensGrad.addColorStop(1, 'rgba(244, 114, 182, 0)');
+      ectx.fillStyle = lensGrad;
+      ectx.beginPath();
+      ectx.arc(lensX, lensY, lensRadius * 3, 0, Math.PI * 2);
+      ectx.fill();
+
+      // Einstein ring
+      const einsteinRadius = 50 * Math.sqrt(lensMass) * (1 - sourceOffset * 0.1);
+      if (sourceOffset < 3) {
+        ectx.strokeStyle = 'rgba(52, 211, 153, 0.7)';
+        ectx.lineWidth = 3;
+        ectx.setLineDash([10, 5]);
+        ectx.beginPath();
+        ectx.arc(lensX, lensY, einsteinRadius, 0, Math.PI * 2);
+        ectx.stroke();
+        ectx.setLineDash([]);
+      }
+
+      // Lensed image arcs
+      if (sourceOffset > 0.1) {
+        for (let i = 0; i < 4; i++) {
+          const angle = (i * Math.PI / 2) + Math.PI / 4;
+          const arcRadius = einsteinRadius + (sourceOffset * 15 * (i % 2 === 0 ? 1 : -1));
+
+          const arcGrad = ectx.createLinearGradient(
+            lensX + Math.cos(angle) * arcRadius,
+            lensY + Math.sin(angle) * arcRadius,
+            lensX - Math.cos(angle) * arcRadius,
+            lensY - Math.sin(angle) * arcRadius
+          );
+          arcGrad.addColorStop(0, 'rgba(167, 139, 250, 0.8)');
+          arcGrad.addColorStop(0.5, 'rgba(91, 141, 239, 0.6)');
+          arcGrad.addColorStop(1, 'rgba(167, 139, 250, 0.8)');
+
+          ectx.strokeStyle = arcGrad;
+          ectx.lineWidth = 8 * angularSize;
+          ectx.beginPath();
+          ectx.arc(lensX, lensY, arcRadius, angle - 0.4, angle + 0.4);
+          ectx.stroke();
+        }
+      }
+
+      // Einstein radius label
+      if (einsteinRadius > 10) {
+        ectx.fillStyle = '#34d399';
+        ectx.font = '14px "Space Mono"';
+        ectx.fillText(`θ_E ≈ ${einsteinRadius.toFixed(0)}"`, lensX + einsteinRadius + 10, lensY - 10);
+      }
+
+      // Info text
+      ectx.fillStyle = '#8888a0';
+      ectx.font = '12px Inter';
+      ectx.fillText(`Source Offset: ${sourceOffset.toFixed(1)} | Mass: ${lensMass.toFixed(1)} × 10¹² M⊙`, 20, 30);
+    }
+
+    document.getElementById('sourceOffset').addEventListener('input', (e) => {
+      sourceOffset = parseFloat(e.target.value);
+      document.getElementById('sourceOffsetVal').textContent = sourceOffset.toFixed(1);
+      drawEinsteinRing();
+    });
+
+    document.getElementById('lensMass').addEventListener('input', (e) => {
+      lensMass = parseFloat(e.target.value);
+      document.getElementById('massVal').textContent = lensMass.toFixed(1);
+      drawEinsteinRing();
+    });
+
+    document.getElementById('angularSize').addEventListener('input', (e) => {
+      angularSize = parseFloat(e.target.value);
+      document.getElementById('sizeVal').textContent = angularSize.toFixed(1);
+      drawEinsteinRing();
+    });
+
+    // ========== MASS MAP CANVAS ==========
+    const massCanvas = document.getElementById('massMapCanvas');
+    const mctx = massCanvas.getContext('2d');
+
+    let clusterMass = 1.0;
+    let concentration = 5.0;
+    let bgDensity = 0.1;
+
+    function drawMassMap() {
+      const w = massCanvas.width;
+      const h = massCanvas.height;
+      mctx.clearRect(0, 0, w, h);
+
+      // Background dark matter field
+      for (let y = 0; y < h; y += 4) {
+        for (let x = 0; x < w; x += 4) {
+          const noise = Math.random() * bgDensity * 0.3;
+          const val = Math.floor(20 + noise * 40);
+          mctx.fillStyle = `rgba(91, 141, 239, ${noise})`;
+          mctx.fillRect(x, y, 4, 4);
+        }
+      }
+
+      // NFW density profile
+      const centerX = w / 2;
+      const centerY = h / 2;
+      const r_max = Math.min(w, h) * 0.4;
+      const rs = r_max / concentration;
+
+      const imageData = mctx.createImageData(w, h);
+      const data = imageData.data;
+
+      for (let py = 0; py < h; py++) {
+        for (let px = 0; px < w; px++) {
+          const dx = px - centerX;
+          const dy = py - centerY;
+          const r = Math.sqrt(dx * dx + dy * dy);
+
+          const idx = (py * w + px) * 4;
+
+          if (r < r_max * concentration) {
+            // NFW profile
+            const x = r / rs;
+            const rho = clusterMass / (x * (1 + x) * (1 + x));
+
+            const normalizedRho = Math.min(rho / clusterMass, 1);
+            const value = Math.floor(normalizedRho * 255);
+
+            // Color gradient: dark blue to pink/gold at high density
+            data[idx] = Math.floor(value * 0.96);     // R
+            data[idx + 1] = Math.floor(value * 0.46); // G
+            data[idx + 2] = Math.floor(value * 0.71); // B
+            data[idx + 3] = Math.floor(180 + normalizedRho * 75); // A
+          } else {
+            data[idx] = 0;
+            data[idx + 1] = 0;
+            data[idx + 2] = 0;
+            data[idx + 3] = 0;
+          }
+        }
+      }
+
+      mctx.putImageData(imageData, 0, 0);
+
+      // Overlay contours
+      mctx.strokeStyle = 'rgba(244, 114, 182, 0.5)';
+      mctx.lineWidth = 1;
+
+      const levels = [0.2, 0.4, 0.6, 0.8];
+      levels.forEach(level => {
+        mctx.beginPath();
+        const r = r_max * level;
+        mctx.arc(centerX, centerY, r, 0, Math.PI * 2);
+        mctx.stroke();
+      });
+
+      // Mass label
+      mctx.fillStyle = '#f472b6';
+      mctx.font = 'bold 14px "Space Mono"';
+      mctx.fillText(`M = ${(clusterMass * 1000).toFixed(0)} × 10¹² M⊙`, centerX + r_max + 20, centerY - 20);
+      mctx.font = '12px Inter';
+      mctx.fillStyle = '#8888a0';
+      mctx.fillText(`c = ${concentration.toFixed(1)}`, centerX + r_max + 20, centerY);
+    }
+
+    document.getElementById('clusterMass').addEventListener('input', (e) => {
+      clusterMass = parseFloat(e.target.value);
+      document.getElementById('clusterMassVal').textContent = clusterMass.toFixed(1);
+      drawMassMap();
+    });
+
+    document.getElementById('concentration').addEventListener('input', (e) => {
+      concentration = parseFloat(e.target.value);
+      document.getElementById('concentrationVal').textContent = concentration.toFixed(1);
+      drawMassMap();
+    });
+
+    document.getElementById('bgDensity').addEventListener('input', (e) => {
+      bgDensity = parseFloat(e.target.value);
+      document.getElementById('bgDensityVal').textContent = bgDensity.toFixed(2);
+      drawMassMap();
+    });
+
+    // ========== LENS EXPLORER ==========
+    const explorerCanvas = document.getElementById('lensExplorerCanvas');
+    const lctx = explorerCanvas.getContext('2d');
+
+    let expMass = 2.0;
+    let expZsrc = 2.0;
+    let expZlens = 0.3;
+
+    function drawLensExplorer() {
+      const w = explorerCanvas.width;
+      const h = explorerCanvas.height;
+      lctx.clearRect(0, 0, w, h);
+
+      // Simplified cosmology: H0 = 70 km/s/Mpc
+      const c = 3e5; // km/s
+      const H0 = 70;
+
+      // Approximate angular diameter distances
+      const D_L = 1000 * expZlens * (1 + expZlens * 0.5); // Mpc
+      const D_S = 2000 * expZsrc * (1 + expZsrc * 0.3);
+      const D_LS = D_S - D_L * (1 - expZlens / expZsrc);
+
+      // Einstein radius in arcseconds
+      const G = 4.3e-6; // kpc/solar mass units
+      const M = expMass * 1e12; // solar masses
+      const theta_E = Math.sqrt(4 * G * M / (c * c)) * (D_LS / (D_L * D_S)) * 206265;
+
+      document.getElementById('expTheta').value = theta_E.toFixed(1);
+      document.getElementById('expThetaVal').textContent = theta_E.toFixed(1);
+
+      // Background field with grid
+      lctx.strokeStyle = 'rgba(42, 42, 58, 0.5)';
+      lctx.lineWidth = 1;
+      for (let x = 0; x < w; x += 40) {
+        lctx.beginPath();
+        lctx.moveTo(x, 0);
+        lctx.lineTo(x, h);
+        lctx.stroke();
+      }
+      for (let y = 0; y < h; y += 40) {
+        lctx.beginPath();
+        lctx.moveTo(0, y);
+        lctx.lineTo(w, y);
+        lctx.stroke();
+      }
+
+      const centerX = w / 2;
+      const centerY = h / 2;
+
+      // Background source
+      const sourceY = centerY - 60;
+      lctx.fillStyle = '#a78bfa';
+      lctx.beginPath();
+      lctx.ellipse(centerX + 100, sourceY, 15, 10, 0, 0, Math.PI * 2);
+      lctx.fill();
+
+      // Lens potential
+      const potentialGrad = lctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 150);
+      potentialGrad.addColorStop(0, 'rgba(244, 114, 182, 0.7)');
+      potentialGrad.addColorStop(1, 'rgba(244, 114, 182, 0)');
+      lctx.fillStyle = potentialGrad;
+      lctx.beginPath();
+      lctx.arc(centerX, centerY, 150, 0, Math.PI * 2);
+      lctx.fill();
+
+      // Einstein ring
+      if (theta_E > 1) {
+        const ringRadius = Math.min(theta_E * 2, 150);
+        lctx.strokeStyle = '#34d399';
+        lctx.lineWidth = 2;
+        lctx.setLineDash([8, 4]);
+        lctx.beginPath();
+        lctx.arc(centerX, centerY, ringRadius, 0, Math.PI * 2);
+        lctx.stroke();
+        lctx.setLineDash([]);
+
+        lctx.fillStyle = '#34d399';
+        lctx.font = '12px "Space Mono"';
+        lctx.fillText(`θ_E = ${theta_E.toFixed(1)}"`, centerX + ringRadius + 10, centerY - 10);
+      }
+
+      // Lensed images
+      const imageOffsets = [
+        { dx: -0.7, dy: -0.7 },
+        { dx: 0.7, dy: -0.7 },
+        { dx: -0.7, dy: 0.7 },
+        { dx: 0.7, dy: 0.7 }
+      ];
+
+      imageOffsets.forEach((offset, i) => {
+        const imgR = 8;
+        const dist = 30 + offset.dx * 20 + offset.dy * 20;
+        const imgX = centerX + offset.dx * dist;
+        const imgY = centerY + offset.dy * dist;
+
+        // Light path
+        lctx.strokeStyle = 'rgba(91, 141, 239, 0.3)';
+        lctx.lineWidth = 1;
+        lctx.beginPath();
+        lctx.moveTo(centerX + 100, sourceY);
+        lctx.lineTo(centerX, centerY);
+        lctx.lineTo(imgX, imgY);
+        lctx.stroke();
+
+        // Image
+        lctx.fillStyle = '#5b8def';
+        lctx.beginPath();
+        lctx.arc(imgX, imgY, imgR, 0, Math.PI * 2);
+        lctx.fill();
+      });
+
+      // Info panel
+      lctx.fillStyle = 'rgba(18, 18, 31, 0.9)';
+      lctx.fillRect(10, 10, 200, 80);
+      lctx.strokeStyle = '#2a2a3a';
+      lctx.strokeRect(10, 10, 200, 80);
+
+      lctx.fillStyle = '#e8e8f4';
+      lctx.font = '11px "JetBrains Mono"';
+      lctx.fillText(`M = ${expMass.toFixed(1)} × 10¹² M⊙`, 20, 32);
+      lctx.fillText(`z_L = ${expZlens.toFixed(2)}`, 20, 50);
+      lctx.fillText(`z_S = ${expZsrc.toFixed(2)}`, 20, 68);
+      lctx.fillText(`D_L ≈ ${D_L.toFixed(0)} Mpc`, 120, 32);
+      lctx.fillText(`D_S ≈ ${D_S.toFixed(0)} Mpc`, 120, 50);
+    }
+
+    document.getElementById('expMass').addEventListener('input', (e) => {
+      expMass = parseFloat(e.target.value);
+      document.getElementById('expMassVal').textContent = expMass.toFixed(1);
+      drawLensExplorer();
+    });
+
+    document.getElementById('expZsrc').addEventListener('input', (e) => {
+      expZsrc = parseFloat(e.target.value);
+      document.getElementById('expZsrcVal').textContent = expZsrc.toFixed(1);
+      drawLensExplorer();
+    });
+
+    document.getElementById('expZlens').addEventListener('input', (e) => {
+      expZlens = parseFloat(e.target.value);
+      document.getElementById('expZlensVal').textContent = expZlens.toFixed(2);
+      drawLensExplorer();
+    });
+
+    // ========== TABS ==========
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.dataset.tab;
+
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+        btn.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    // ========== ANIMATION LOOP ==========
+    function animate() {
+      drawEinsteinRing();
+      drawMassMap();
+      drawLensExplorer();
+    }
+
+    // Initial draw
+    animate();
+
+    // ========== SMOOTH SCROLL ==========
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
