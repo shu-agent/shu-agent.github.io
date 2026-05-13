@@ -1,0 +1,2224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gravitational Wave Polarization — Interactive General Relativity Test</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cyan: #00d4ff;
+            --purple: #a855f7;
+            --gold: #fbbf24;
+            --pink: #f472b6;
+            --deep-bg: #0a0a1a;
+            --card-bg: rgba(20, 20, 40, 0.9);
+            --grid-line: rgba(0, 212, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            background: var(--deep-bg);
+            color: #e0e0ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scroll Progress Bar */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            z-index: 1000;
+        }
+
+        .scroll-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cyan), var(--purple), var(--gold), var(--pink));
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        /* Starfield Background */
+        .starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: var(--min-opacity); }
+            50% { opacity: 1; }
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow: hidden;
+        }
+
+        .hero-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.2) 0%, transparent 70%);
+            animation: pulse-glow 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        .hero-canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            aspect-ratio: 16/9;
+            margin: 2rem 0;
+        }
+
+        #heroCanvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+        }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            text-align: center;
+            background: linear-gradient(135deg, var(--cyan), var(--purple), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 60px rgba(0, 212, 255, 0.5);
+        }
+
+        .hero-subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.2rem;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .hero-intro {
+            max-width: 700px;
+            text-align: center;
+            line-height: 1.8;
+            color: #b0b0d0;
+            margin-bottom: 2rem;
+        }
+
+        /* Section Styles */
+        section {
+            position: relative;
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+            border-radius: 2px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .info-card {
+            background: rgba(30, 30, 60, 0.8);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--cyan);
+        }
+
+        .info-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            color: var(--purple);
+            margin-bottom: 0.8rem;
+        }
+
+        .info-card p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #c0c0e0;
+        }
+
+        /* Canvas Containers */
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem auto;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(10, 10, 30, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .canvas-container canvas {
+            width: 100%;
+            display: block;
+        }
+
+        .canvas-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--cyan);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+            padding: 1.5rem;
+            background: rgba(20, 20, 50, 0.8);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .control-group label {
+            display: block;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--cyan);
+        }
+
+        .control-group select {
+            width: 100%;
+            padding: 0.6rem;
+            background: rgba(20, 20, 50, 0.9);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 8px;
+            color: #e0e0ff;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .control-group select option {
+            background: var(--deep-bg);
+        }
+
+        .control-value {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--cyan);
+            margin-top: 0.3rem;
+        }
+
+        /* Buttons */
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 700;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--cyan);
+            border: 1px solid var(--cyan);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 212, 255, 0.2);
+        }
+
+        /* Equation Box */
+        .equation-box {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .equation-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .equation-box .equation {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.3rem;
+            color: var(--gold);
+            position: relative;
+            z-index: 1;
+        }
+
+        .equation-label {
+            font-size: 0.85rem;
+            color: var(--pink);
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-card {
+            background: rgba(30, 30, 60, 0.8);
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-align: center;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #9090b0;
+            margin-top: 0.3rem;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            margin: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, var(--cyan), var(--purple), var(--gold));
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 1.5rem;
+            padding-left: 1.5rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 0.3rem;
+            width: 14px;
+            height: 14px;
+            background: var(--cyan);
+            border-radius: 50%;
+            border: 3px solid var(--deep-bg);
+            margin-left: -5.5px;
+        }
+
+        .timeline-year {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--gold);
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-event {
+            font-size: 0.95rem;
+            color: #c0c0e0;
+        }
+
+        /* Quote Box */
+        .quote-box {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(244, 114, 182, 0.1));
+            border-left: 4px solid var(--purple);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 12px 12px 0;
+        }
+
+        .quote-text {
+            font-style: italic;
+            font-size: 1.1rem;
+            color: #e0e0ff;
+            line-height: 1.7;
+        }
+
+        .quote-author {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--pink);
+            margin-top: 0.8rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            padding: 0.7rem 1.2rem;
+            background: rgba(20, 20, 50, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            color: #9090b0;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(168, 85, 247, 0.2));
+            color: var(--cyan);
+            border-color: var(--cyan);
+            border-bottom-color: transparent;
+        }
+
+        .tab:hover:not(.active) {
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+            background: rgba(20, 20, 50, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 0 12px 12px 12px;
+            padding: 1.5rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Live Stats Display */
+        .live-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .live-stat {
+            background: rgba(10, 10, 30, 0.9);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .live-stat-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--pink);
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+
+        .live-stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(20, 20, 50, 0.9);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            color: var(--cyan);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem;
+            color: #707090;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--cyan);
+            text-decoration: none;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s, transform 0.6s;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            section {
+                padding: 2rem 1rem;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="scroll-progress">
+        <div class="scroll-progress-fill" id="scrollFill"></div>
+    </div>
+
+    <div class="starfield" id="starfield"></div>
+
+    <nav class="nav">
+        <button class="nav-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#9650;</button>
+        <button class="nav-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})">&#9660;</button>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-glow"></div>
+        <h1 class="hero-title">Gravitational Wave Polarization</h1>
+        <p class="hero-subtitle">Testing General Relativity Through the Geometry of Spacetime Ripples</p>
+
+        <div class="hero-canvas-container">
+            <canvas id="heroCanvas"></canvas>
+        </div>
+
+        <p class="hero-intro">
+            Gravitational waves travel at the speed of light, stretching and squeezing spacetime itself as they pass.
+            But unlike electromagnetic waves with their electric and magnetic fields, GWs have their own unique polarization
+            patterns — plus and cross modes that reveal the nature of gravity. Einstein's general relativity predicts
+            exactly two tensor polarization modes. Alternative theories of gravity can predict additional modes —
+            up to six in scalar-vector-tensor theories. Each polarization pattern is a fingerprint of the underlying
+            theory of gravity. The LIGO-Virgo-KAGRA network is now using these patterns as a window into fundamental physics.
+        </p>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="scrollToSection('polarization')">Explore Polarizations</button>
+            <button class="btn btn-secondary" onclick="scrollToSection('gr-test')">GR Tests</button>
+            <button class="btn btn-secondary" onclick="scrollToSection('detection')">Detection</button>
+        </div>
+    </section>
+
+    <!-- Section 1: What is Gravitational Wave Polarization -->
+    <section id="polarization">
+        <h2 class="section-title">The Geometry of Spacetime Ripples</h2>
+
+        <div class="card">
+            <p style="line-height: 1.8; margin-bottom: 1.5rem;">
+                Gravitational waves are ripples in the fabric of spacetime produced by accelerating masses,
+                propagating at the speed of light. In Einstein's general relativity, these waves have
+                <strong style="color: var(--cyan);">two tensor polarization states</strong>, conventionally called
+                <strong style="color: var(--gold);">plus (h<sub>+</sub>)</strong> and
+                <strong style="color: var(--pink);">cross (h<sub>x</sub>)</strong>.
+                These modes describe how space is stretched in two perpendicular directions alternatingly,
+                as visualized in the animation below.
+            </p>
+
+            <p style="line-height: 1.8; margin-bottom: 1.5rem;">
+                But general relativity is not the only possible theory of gravity. Alternative theories like
+                Brans-Dicke gravity, Horndeski theories, and massive graviton theories can predict additional
+                polarization modes: <strong style="color: #ff6b6b;">scalar</strong> and
+                <strong style="color: #4ecdc4;">vector</strong> modes. Detecting these extra modes would reveal
+                new physics beyond Einstein's masterpiece.
+            </p>
+
+            <div class="equation-box">
+                <div class="equation">h<sub>μν</sub> = h<sub>+</sub> e<sup>+</sub><sub>μν</sub> + h<sub>x</sub> e<sup>x</sup><sub>μν</sub></div>
+                <div class="equation-label">Gravitational wave strain as linear combination of polarization tensors</div>
+            </div>
+        </div>
+
+        <!-- Polarization Canvas -->
+        <div class="canvas-container">
+            <canvas id="polarizationCanvas" width="800" height="500"></canvas>
+            <div class="canvas-label">Interactive Polarization Modes</div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Polarization Mode</label>
+                <select id="polMode">
+                    <option value="plus">Plus (h+) — Vertical Stretch</option>
+                    <option value="cross">Cross (hx) — Diagonal Stretch</option>
+                    <option value="scalar">Scalar (hs) — Breathing Mode</option>
+                    <option value="vector-x">Vector-X (vx) — Shearing</option>
+                    <option value="vector-y">Vector-Y (vy) — Shearing</option>
+                    <option value="all">All Modes Combined</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Amplitude</label>
+                <input type="range" id="polAmplitude" min="10" max="100" value="50">
+                <div class="control-value" id="ampValue">h = 0.50</div>
+            </div>
+            <div class="control-group">
+                <label>Frequency</label>
+                <input type="range" id="polFrequency" min="1" max="20" value="5">
+                <div class="control-value" id="freqValue">f = 5.0 Hz</div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" id="polPlayPause">Pause</button>
+            <button class="btn btn-secondary" id="polReset">Reset</button>
+        </div>
+
+        <div class="live-stats">
+            <div class="live-stat">
+                <div class="live-stat-label">Current Mode</div>
+                <div class="live-stat-value" id="currentMode">PLUS</div>
+            </div>
+            <div class="live-stat">
+                <div class="live-stat-label">Strain (h)</div>
+                <div class="live-stat-value" id="strainValue">1.0 × 10⁻²¹</div>
+            </div>
+            <div class="live-stat">
+                <div class="live-stat-label">Max Extension</div>
+                <div class="live-stat-value" id="extensionValue">2.4 × 10⁻¹⁸ m</div>
+            </div>
+            <div class="live-stat">
+                <div class="live-stat-label">Detector Arm</div>
+                <div class="live-stat-value" id="armValue">4 km</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Testing General Relativity -->
+    <section id="gr-test">
+        <h2 class="section-title">Testing General Relativity</h2>
+
+        <div class="card">
+            <p style="line-height: 1.8; margin-bottom: 1.5rem;">
+                General relativity makes specific predictions about gravitational wave polarization.
+                According to GR, gravitational waves travel at the speed of light and have exactly
+                <strong style="color: var(--cyan);">two polarization states</strong> — no more, no less.
+                This is a direct consequence of GR's foundation: the massless spin-2 graviton.
+            </p>
+
+            <p style="line-height: 1.8; margin-bottom: 1.5rem;">
+                Alternative theories of gravity make different predictions. Some predict additional
+                scalar and vector polarizations. Some predict that gravitons have mass, causing
+                gravitational waves to disperses (different frequencies travel at different speeds).
+                Each deviation from GR is a window into new physics.
+            </p>
+        </div>
+
+        <div class="card-grid">
+            <div class="info-card">
+                <h3>Tensor Modes (GR)</h3>
+                <p>The plus and cross polarizations predicted by Einstein's relativity.
+                   These modes stretch space in one direction while compressing it in the perpendicular
+                   direction, like tides in a celestial alignment.</p>
+            </div>
+            <div class="info-card">
+                <h3>Scalar Mode (Extra)</h3>
+                <p>A "breathing" mode that expands and contracts space uniformly in all directions.
+                   Predicted by theories with additional degrees of freedom in the gravitational sector.</p>
+            </div>
+            <div class="info-card">
+                <h3>Vector Modes (Extra)</h3>
+                <p>Shearing modes that shift space perpendicular to propagation direction.
+                   These would indicate the presence of vector fields in nature's gravitational framework.</p>
+            </div>
+            <div class="info-card">
+                <h3>Graviton Mass</h3>
+                <p>If gravitons have mass, gravitational waves would exhibit dispersion:
+                   v<sub>g</sub> = c × sqrt(1 - m<sub>g</sub>²c⁴ / E²).
+                   This would cause binary pulsar signals to arrive at different times.</p>
+            </div>
+        </div>
+
+        <div class="equation-box">
+            <div class="equation">v<sub>g</sub> = c √(1 - m<sub>g</sub>²c⁴ / E²) ≈ c(1 - m<sub>g</sub>²c⁴ / 2E²)</div>
+            <div class="equation-label">Group velocity of massive gravitational waves (dispersion relation)</div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab(this, 'tab-bounds')">Mass Bounds</button>
+            <button class="tab" onclick="switchTab(this, 'tab-dispersion')">Dispersion Tests</button>
+            <button class="tab" onclick="switchTab(this, 'tab-polarization-test')">Polarization Tests</button>
+            <button class="tab" onclick="switchTab(this, 'tab-nanograv')">Pulsar Timing</button>
+        </div>
+
+        <div id="tab-bounds" class="tab-content active">
+            <h3 style="color: var(--gold); margin-bottom: 1rem;">Constraints on Graviton Mass</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">&lt; 1.4 × 10⁻²² eV</div>
+                    <div class="stat-label">LIGO O3a (2020)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">&lt; 2.7 × 10⁻²³ eV</div>
+                    <div class="stat-label">LIGO O3 (2021)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">&lt; 10⁻²⁹ eV</div>
+                    <div class="stat-label">Pulsar Timing (2018)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">&lt; 10⁻³³ eV</div>
+                    <div class="stat-label">Solar System (theoretical)</div>
+                </div>
+            </div>
+            <p style="margin-top: 1rem; color: #b0b0d0; line-height: 1.7;">
+                For context: if the graviton mass were 1.4 × 10⁻²² eV, the gravitational wave
+                would have a Compton wavelength of about 10¹⁶ meters — larger than our solar system!
+                The LIGO constraints already probe distances far beyond our planetary orbit.
+            </p>
+        </div>
+
+        <div id="tab-dispersion" class="tab-content">
+            <h3 style="color: var(--gold); margin-bottom: 1rem;">Gravitational Wave Dispersion Tests</h3>
+            <p style="margin-bottom: 1rem; color: #c0c0e0;">
+                When LIGO detects a gravitational wave from a binary black hole merger, different
+                frequency components arrive at slightly different times if gravitons have mass.
+                The chirp signal — sweeping from ~35 Hz to ~150 Hz — provides a natural probe.
+            </p>
+            <div class="equation-box">
+                <div class="equation">Δt = (5/128) × (m<sub>g</sub>²c⁶ / M<sub>f</sub>³f²) × D</div>
+                <div class="equation-label">Time-of-flight difference from graviton mass (approximate)</div>
+            </div>
+            <div class="canvas-container" style="max-width: 600px;">
+                <canvas id="dispersionCanvas" width="600" height="300"></canvas>
+                <div class="canvas-label">Frequency Dispersion Simulation</div>
+            </div>
+            <div class="controls">
+                <div class="control-group">
+                    <label>Graviton Mass (eV)</label>
+                    <input type="range" id="gravitonMass" min="0" max="100" value="0">
+                    <div class="control-value" id="massValue">m<sub>g</sub> = 0 (GR)</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-polarization-test" class="tab-content">
+            <h3 style="color: var(--gold); margin-bottom: 1rem;">Testing Polarization with LIGO</h3>
+            <p style="margin-bottom: 1rem; color: #c0c0e0;">
+                LIGO's two orthogonal interferometers (Hanford and Livingston) can distinguish
+                between different polarization patterns. The network's geometry — combined with Virgo
+                and KAGRA — provides additional sensitivity to polarization states.
+            </p>
+            <div class="canvas-container" style="max-width: 600px;">
+                <canvas id="networkCanvas" width="600" height="400"></canvas>
+                <div class="canvas-label">Detector Network Response</div>
+            </div>
+            <div class="info-card" style="margin-top: 1rem;">
+                <h3>Network Sensitivity</h3>
+                <p>The LIGO-Virgo-KAGRA network achieves ~10% precision on polarization measurements
+                   for loud signals. Future detectors (Einstein Telescope, LISA) will improve this
+                   by an order of magnitude, potentially detecting vector or scalar polarizations
+                   from extreme mass-ratio inspirals.</p>
+            </div>
+        </div>
+
+        <div id="tab-nanograv" class="tab-content">
+            <h3 style="color: var(--gold); margin-bottom: 1rem;">Pulsar Timing Arrays</h3>
+            <p style="margin-bottom: 1rem; color: #c0c0e0;">
+                NANOGrav, EPTA, and PPTA use millisecond pulsars as cosmic clocks to detect
+                the gravitational wave background — a stochastic sea of supermassive black hole
+                binaries. This provides access to nanohertz frequencies (10⁻⁹ Hz), far below
+                LIGO's band.
+            </p>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-year">2005</div>
+                    <div class="timeline-event">NANOGrav collaboration formed</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2015</div>
+                    <div class="timeline-event">10 years of pulsar data collected</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2020</div>
+                    <div class="timeline-event">Hellings-Downs correlation detected (evidence)</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2023</div>
+                    <div class="timeline-event">NANOGrav claims 2σ detection of GW background</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: The Six Polarization States -->
+    <section id="six-modes">
+        <h2 class="section-title">The Six Polarization States</h2>
+
+        <div class="card">
+            <p style="line-height: 1.8;">
+                In a general metric theory of gravity, gravitational waves can carry up to
+                <strong style="color: var(--gold);">six independent polarization states</strong>.
+                This emerges from the representation theory of the Poincaré group — the
+                symmetry group of spacetime translations and Lorentz transformations.
+            </p>
+        </div>
+
+        <div class="card-grid">
+            <div class="info-card" style="border-color: rgba(0, 212, 255, 0.5);">
+                <h3 style="color: var(--cyan);">h<sub>+</sub> (Plus)</h3>
+                <svg width="100%" height="100" viewBox="0 0 200 100" style="margin: 1rem 0;">
+                    <circle cx="50" cy="50" r="8" fill="#00d4ff"/>
+                    <line x1="10" y1="50" x2="90" y2="50" stroke="#00d4ff" stroke-width="2">
+                        <animate attributeName="x2" values="90;70;90" dur="1s" repeatCount="indefinite"/>
+                    </line>
+                    <circle cx="150" cy="50" r="8" fill="#00d4ff"/>
+                    <line x1="110" y1="50" x2="190" y2="50" stroke="#00d4ff" stroke-width="2">
+                        <animate attributeName="x1" values="110;130;110" dur="1s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="100" y1="10" x2="100" y2="90" stroke="rgba(0,212,255,0.3)" stroke-width="1">
+                        <animate attributeName="y1" values="10;30;10" dur="1s" repeatCount="indefinite"/>
+                        <animate attributeName="y2" values="90;70;90" dur="1s" repeatCount="indefinite"/>
+                    </line>
+                </svg>
+                <p>Stretches east-west while compressing north-south, then swaps.</p>
+            </div>
+
+            <div class="info-card" style="border-color: rgba(244, 114, 182, 0.5);">
+                <h3 style="color: var(--pink);">h<sub>x</sub> (Cross)</h3>
+                <svg width="100%" height="100" viewBox="0 0 200 100" style="margin: 1rem 0;">
+                    <circle cx="50" cy="50" r="8" fill="#f472b6"/>
+                    <line x1="20" y1="80" x2="80" y2="20" stroke="#f472b6" stroke-width="2">
+                        <animate attributeName="x2" values="80;60;80" dur="1s" repeatCount="indefinite"/>
+                        <animate attributeName="y1" values="80;60;80" dur="1s" repeatCount="indefinite"/>
+                    </line>
+                    <circle cx="150" cy="50" r="8" fill="#f472b6"/>
+                    <line x1="120" y1="80" x2="180" y2="20" stroke="#f472b6" stroke-width="2">
+                        <animate attributeName="x1" values="120;140;120" dur="1s" repeatCount="indefinite"/>
+                        <animate attributeName="y1" values="80;60;80" dur="1s" repeatCount="indefinite"/>
+                    </line>
+                </svg>
+                <p>Stretches along diagonals, alternating between the two orientations.</p>
+            </div>
+
+            <div class="info-card" style="border-color: rgba(255, 107, 107, 0.5);">
+                <h3 style="color: #ff6b6b;">h<sub>S</sub> (Scalar)</h3>
+                <svg width="100%" height="100" viewBox="0 0 200 100" style="margin: 1rem 0;">
+                    <circle cx="50" cy="50" r="8" fill="#ff6b6b"/>
+                    <line x1="30" y1="50" x2="70" y2="50" stroke="#ff6b6b" stroke-width="2">
+                        <animate attributeName="x2" values="70;50;70" dur="1s" repeatCount="indefinite"/>
+                    </line>
+                    <circle cx="100" cy="50" r="12" fill="none" stroke="#ff6b6b" stroke-width="1">
+                        <animate attributeName="r" values="12;18;12" dur="1s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="150" cy="50" r="8" fill="#ff6b6b"/>
+                    <line x1="130" y1="50" x2="170" y2="50" stroke="#ff6b6b" stroke-width="2">
+                        <animate attributeName="x2" values="170;150;170" dur="1s" repeatCount="indefinite"/>
+                    </line>
+                </svg>
+                <p>"Breathing" mode — expands or contracts space uniformly in all directions.</p>
+            </div>
+
+            <div class="info-card" style="border-color: rgba(78, 205, 196, 0.5);">
+                <h3 style="color: #4ecdc4;">h<sub>vx</sub> (Vector-X)</h3>
+                <svg width="100%" height="100" viewBox="0 0 200 100" style="margin: 1rem 0;">
+                    <circle cx="50" cy="50" r="8" fill="#4ecdc4"/>
+                    <line x1="50" y1="20" x2="50" y2="80" stroke="#4ecdc4" stroke-width="2">
+                        <animate attributeName="y1" values="20;40;20" dur="1s" repeatCount="indefinite"/>
+                    </line>
+                    <circle cx="150" cy="50" r="8" fill="#4ecdc4"/>
+                    <line x1="150" y1="20" x2="150" y2="80" stroke="#4ecdc4" stroke-width="2">
+                        <animate attributeName="y2" values="80;60;80" dur="1s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="10" y1="50" x2="190" y2="50" stroke="rgba(78,205,196,0.3)" stroke-width="1"/>
+                </svg>
+                <p>Shearing mode — shifts space perpendicular to wave propagation.</p>
+            </div>
+
+            <div class="info-card" style="border-color: rgba(167, 139, 250, 0.5);">
+                <h3 style="color: #a78bfa;">h<sub>vy</sub> (Vector-Y)</h3>
+                <svg width="100%" height="100" viewBox="0 0 200 100" style="margin: 1rem 0;">
+                    <circle cx="50" cy="50" r="8" fill="#a78bfa"/>
+                    <line x1="10" y1="50" x2="90" y2="50" stroke="#a78bfa" stroke-width="2">
+                        <animate attributeName="x1" values="10;30;10" dur="1s" repeatCount="indefinite"/>
+                    </line>
+                    <circle cx="150" cy="50" r="8" fill="#a78bfa"/>
+                    <line x1="110" y1="50" x2="190" y2="50" stroke="#a78bfa" stroke-width="2">
+                        <animate attributeName="x2" values="190;170;190" dur="1s" repeatCount="indefinite"/>
+                    </line>
+                    <line x1="100" y1="10" x2="100" y2="90" stroke="rgba(167,139,250,0.3)" stroke-width="1"/>
+                </svg>
+                <p>Shearing mode at 45° to Vector-X — orthogonal shearing state.</p>
+            </div>
+
+            <div class="info-card" style="border-color: rgba(251, 191, 36, 0.5);">
+                <h3 style="color: var(--gold);">GR Prediction</h3>
+                <p style="margin-top: 1rem;">Einstein's general relativity predicts exactly TWO tensor polarizations (plus and cross) because the graviton is a massless spin-2 particle. This is a fundamental prediction that can be tested observationally.</p>
+                <div class="equation-box" style="margin-top: 1rem; padding: 1rem;">
+                    <div class="equation" style="font-size: 1rem;">g<sub>μν</sub> → g<sub>μν</sub> + h<sub>μν</sub> + O(h²)</div>
+                    <div class="equation-label">Linearized GR: metric perturbation with spin-2 nature</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: How LIGO Detects Polarization -->
+    <section id="detection">
+        <h2 class="section-title">How LIGO Measures Polarization</h2>
+
+        <div class="card">
+            <p style="line-height: 1.8; margin-bottom: 1.5rem;">
+                LIGO consists of two perpendicular interferometers at each site — the
+                <strong style="color: var(--cyan);">L-shaped detector</strong> with 4 km arms.
+                When a gravitational wave passes, it stretches one arm while compressing the other,
+                then reverses. This differential change is what LIGO measures.
+            </p>
+
+            <p style="line-height: 1.8;">
+                Each interferometer is sensitive to the projection of the gravitational wave
+                onto its plane. A plus-polarized wave hitting at normal incidence produces a
+                maximum signal in one orientation, but zero signal in a detector rotated 45°.
+                By combining multiple detectors at different orientations and locations,
+                LIGO can reconstruct the polarization content of incoming gravitational waves.
+            </p>
+        </div>
+
+        <div class="canvas-container" style="max-width: 900px;">
+            <canvas id="detectorCanvas" width="900" height="500"></canvas>
+            <div class="canvas-label">LIGO Detector Response to Polarization</div>
+        </div>
+
+        <div class="equation-box">
+            <div class="equation">h<sub>obs</sub> = F<sub>+</sub>(θ,φ,ψ) × h<sub>+</sub> + F<sub>x</sub>(θ,φ,ψ) × h<sub>x</sub></div>
+            <div class="equation-label">Detector antenna pattern functions for plus and cross polarizations</div>
+        </div>
+
+        <div class="card-grid">
+            <div class="info-card">
+                <h3>Antenna Pattern</h3>
+                <p>Each detector has an anisotropic response pattern. The network's combined
+                   sensitivity depends on the sky position of the source. Best sensitivity
+                   is for sources overhead or directly overhead, poorest at the horizon.</p>
+            </div>
+            <div class="info-card">
+                <h3>Triangulation</h3>
+                <p>With three detectors (LIGO Hanford, LIGO Livingston, Virgo), source
+                   positions can be triangulated using time-of-flight differences. The
+                   uncertainty area is typically hundreds of square degrees for binary
+                   mergers.</p>
+            </div>
+            <div class="info-card">
+                <h3>Polarization Reconstruction</h3>
+                <p>Maximum likelihood estimation can separate h<sub>+</sub> and h<sub>x</sub>
+                   components. The precision improves with louder signals, more detectors,
+                   and favorable sky positions. Current 1σ uncertainty ~10-20% for loud events.</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Incident Angle θ</label>
+                <input type="range" id="incidentTheta" min="0" max="180" value="90">
+                <div class="control-value" id="thetaValue">θ = 90°</div>
+            </div>
+            <div class="control-group">
+                <label>Azimuth φ</label>
+                <input type="range" id="incidentPhi" min="0" max="360" value="0">
+                <div class="control-value" id="phiValue">φ = 0°</div>
+            </div>
+            <div class="control-group">
+                <label>Polarization ψ</label>
+                <input type="range" id="incidentPsi" min="0" max="180" value="0">
+                <div class="control-value" id="psiValue">ψ = 0°</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: Interactive Strain Visualization -->
+    <section id="strain-viz">
+        <h2 class="section-title">Gravitational Wave Strain Visualization</h2>
+
+        <div class="card">
+            <p style="line-height: 1.8;">
+                The gravitational wave strain <strong style="color: var(--cyan);">h</strong> is a dimensionless
+                quantity — the fractional change in length. For GW150914, the strain at Earth was
+                approximately <strong style="color: var(--gold);">10⁻²¹</strong>. This means LIGO's 4 km arms
+                changed by about <strong style="color: var(--pink);">10⁻¹⁸ meters</strong> — smaller than a proton!
+            </p>
+        </div>
+
+        <div class="canvas-container" style="max-width: 900px;">
+            <canvas id="strainCanvas" width="900" height="400"></canvas>
+            <div class="canvas-label">Real-time Strain Visualization</div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Wave Type</label>
+                <select id="waveType">
+                    <option value="chirp">Binary Black Hole Chirp</option>
+                    <option value="ringdown">Black Hole Ringdown</option>
+                    <option value="sinusoidal">Sinusoidal Wave</option>
+                    <option value="burst">Gaussian Burst</option>
+                    <option value="noise">Detector Noise</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Signal Strength</label>
+                <input type="range" id="signalStrength" min="1" max="100" value="50">
+                <div class="control-value" id="strengthValue">SNR = 50</div>
+            </div>
+            <div class="control-group">
+                <label>Time Scale</label>
+                <input type="range" id="timeScale" min="1" max="20" value="5">
+                <div class="control-value" id="scaleValue">Δt = 5 seconds</div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" id="wavePlayPause">Play</button>
+            <button class="btn btn-secondary" id="waveReset">Reset</button>
+        </div>
+
+        <div class="live-stats">
+            <div class="live-stat">
+                <div class="live-stat-label">Peak Strain</div>
+                <div class="live-stat-value" id="peakStrain">1.0 × 10⁻²¹</div>
+            </div>
+            <div class="live-stat">
+                <div class="live-stat-label">Peak Frequency</div>
+                <div class="live-stat-value" id="peakFreq">150 Hz</div>
+            </div>
+            <div class="live-stat">
+                <div class="live-stat-label">Arm Displacement</div>
+                <div class="live-stat-value" id="armDisplace">4.0 × 10⁻¹⁸ m</div>
+            </div>
+            <div class="live-stat">
+                <div class="live-stat-label">Signal Duration</div>
+                <div class="live-stat-value" id="sigDuration">0.2 seconds</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 6: Historical Timeline -->
+    <section id="history">
+        <h2 class="section-title">Historical Milestones</h2>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-year">1916</div>
+                <div class="timeline-event">Einstein predicts gravitational waves exist from general relativity</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">1936</div>
+                <div class="timeline-event">Einstein and Rosen show waves exist, after initially claiming they were mathematical artifacts</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">1974</div>
+                <div class="timeline-event">Hulse-Taylor discovery of PSR B1913+16 binary pulsar — first indirect evidence for gravitational waves</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">1978</div>
+                <div class="timeline-event">Taylor and Hulse measure orbital decay matching GR prediction exactly</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">1986</div>
+                <div class="timeline-event">First suggestions that interferometer detectors could achieve required sensitivity</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">1990</div>
+                <div class="timeline-event">LIGO construction approved — 4 km arms at Hanford, WA and Livingston, LA</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">2002</div>
+                <div class="timeline-event">LIGO begins initial science run with h ~ 10⁻²⁰ sensitivity</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">2015</div>
+                <div class="timeline-event">GW150914 detected on September 14 — first direct gravitational wave detection</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">2016</div>
+                <div class="timeline-event">LIGO-Virgo announce GW150914, opening gravitational wave astronomy era</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">2017</div>
+                <div class="timeline-event">GW170817 — first neutron star merger with electromagnetic counterparts, multi-messenger astronomy born</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">2019</div>
+                <div class="timeline-event">LIGO Virgo KAGRA network begins O3 run, sensitivity improved by factor of 4</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">2023</div>
+                <div class="timeline-event">NANOGrav detects gravitational wave background evidence in pulsar timing data</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-year">2025</div>
+                <div class="timeline-event">Einstein Telescope begins construction in Europe — next generation ground-based GW observatory</div>
+            </div>
+        </div>
+
+        <div class="quote-box">
+            <div class="quote-text">"Gravitational waves provide a fundamentally new window onto the universe. They're not electromagnetic radiation — they're ripples in spacetime itself, generated by the most violent events in the cosmos."</div>
+            <div class="quote-author">— Kip Thorne, Nobel Laureate, 2017</div>
+        </div>
+    </section>
+
+    <!-- Section 7: Key Equations -->
+    <section id="equations">
+        <h2 class="section-title">Key Equations</h2>
+
+        <div class="card-grid">
+            <div class="info-card">
+                <h3>Einstein Field Equations (Linearized)</h3>
+                <div class="equation-box" style="margin: 1rem 0; padding: 1rem;">
+                    <div class="equation" style="font-size: 1rem;">□h̄<sub>μν</sub> = -16πT<sub>μν</sub></div>
+                </div>
+                <p>Linearized Einstein equations in Lorenz gauge for metric perturbation h̄<sub>μν</sub></p>
+            </div>
+
+            <div class="info-card">
+                <h3>Gravitational Wave Strain</h3>
+                <div class="equation-box" style="margin: 1rem 0; padding: 1rem;">
+                    <div class="equation" style="font-size: 1rem;">h<sub>+</sub> = (1/2)(∂²/∂t² - ∂²/∂z²)φ</div>
+                </div>
+                <p>Transverse-traceless gauge condition for plus polarization</p>
+            </div>
+
+            <div class="info-card">
+                <h3>Orbital Decay (Gravitational Radiation)</h3>
+                <div class="equation-box" style="margin: 1rem 0; padding: 1rem;">
+                    <div class="equation" style="font-size: 1rem;">dE/dt = -(32/5)G⁴M²m²(M+m)/c⁵r⁵</div>
+                </div>
+                <p>Energy loss via gravitational radiation for binary system</p>
+            </div>
+
+            <div class="info-card">
+                <h3>Matched Filter SNR</h3>
+                <div class="equation-box" style="margin: 1rem 0; padding: 1rem;">
+                    <div class="equation" style="font-size: 1rem;">ρ² = 4∫ ĥ(f)h̃*(f)/S_n(f) df</div>
+                </div>
+                <p>Optimal signal-to-noise ratio using matched filtering</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 8: Why This Matters -->
+    <section id="why-matter">
+        <h2 class="section-title">Why This Matters</h2>
+
+        <div class="card">
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                Gravitational wave polarization is not just an academic curiosity — it's a
+                direct probe of gravity's fundamental nature. Every detection tests whether
+                Einstein was right about the massless spin-2 nature of the graviton.
+            </p>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                So far, all gravitational wave observations are consistent with GR's prediction
+                of exactly two tensor polarizations. But we haven't ruled out extra modes —
+                we've just set upper bounds. The search continues with improved detectors,
+                longer observation times, and new detection methods.
+            </p>
+
+            <p style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                The stakes are enormous. Alternative theories of quantum gravity — like
+                string theory and loop quantum gravity — make different predictions about
+                gravitational polarizations. Detecting extra modes would revolutionize our
+                understanding of spacetime, quantum mechanics, and the cosmos.
+            </p>
+
+            <p style="line-height: 1.8; font-size: 1.1rem;">
+                As LIGO sensitivity improves and new detectors join the network, we're
+                entering an era of <strong style="color: var(--cyan);">gravitational wave precision physics</strong>.
+                The polarization content of gravitational waves may hold the key to
+                understanding the fundamental structure of reality.
+            </p>
+        </div>
+
+        <div class="quote-box">
+            <div class="quote-text">"Gravitational waves are to gravity what light was to electromagnetism. They will reveal the hidden dynamics of spacetime itself."</div>
+            <div class="quote-author">— Stephen Hawking</div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Kevin's Physics Research — Gravitational Wave Polarization Explorer</p>
+        <p style="margin-top: 0.5rem;">Built with interactive visualizations and real physics calculations</p>
+        <p style="margin-top: 1rem; color: var(--cyan);">
+            <a href="index.html">Back to Kevin's Lab</a>
+        </p>
+    </footer>
+
+    <script>
+        // ============================================
+        // STARFIELD BACKGROUND
+        // ============================================
+        function createStarfield() {
+            const starfield = document.getElementById('starfield');
+            starfield.innerHTML = '';
+            const starCount = 200;
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.setProperty('--duration', (2 + Math.random() * 3) + 's');
+                star.style.setProperty('--min-opacity', 0.3 + Math.random() * 0.4);
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starfield.appendChild(star);
+            }
+        }
+
+        // ============================================
+        // SCROLL PROGRESS BAR
+        // ============================================
+        function updateScrollProgress() {
+            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const progress = (scrollTop / scrollHeight) * 100;
+            document.getElementById('scrollFill').style.width = progress + '%';
+        }
+
+        // ============================================
+        // HERO CANVAS - Polarization Wave Patterns
+        // ============================================
+        function initHeroCanvas() {
+            const canvas = document.getElementById('heroCanvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+
+            function resize() {
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                ctx.scale(dpr, dpr);
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            let time = 0;
+
+            function drawGrid(ctx, width, height) {
+                ctx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
+                ctx.lineWidth = 1;
+                const spacing = 40;
+
+                for (let x = 0; x <= width; x += spacing) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, height);
+                    ctx.stroke();
+                }
+                for (let y = 0; y <= height; y += spacing) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                    ctx.stroke();
+                }
+            }
+
+            function drawWavePattern(ctx, width, height, t) {
+                const centerY = height / 2;
+                const amplitude = 60;
+
+                // Draw grid that warps with GW
+                for (let y = 0; y < height; y += 8) {
+                    ctx.beginPath();
+                    for (let x = 0; x < width; x += 2) {
+                        const distFromCenter = Math.abs(y - centerY) / centerY;
+                        const wavePhase = x / 30 - t * 3;
+                        const displacement = amplitude * Math.sin(wavePhase) * Math.cos(wavePhase * 0.5) * distFromCenter;
+                        const newX = x + displacement;
+
+                        if (x === 0) ctx.moveTo(newX, y);
+                        else ctx.lineTo(newX, y);
+                    }
+                    ctx.strokeStyle = `rgba(0, 212, 255, ${0.1 + 0.2 * (1 - distFromCenter)})`;
+                    ctx.stroke();
+                }
+
+                // Draw test masses
+                const massRadius = 8;
+                for (let mx = width * 0.2; mx <= width * 0.8; mx += width * 0.3) {
+                    for (let my = centerY - 100; my <= centerY + 100; my += 200) {
+                        const distFromCenter = Math.abs(my - centerY) / centerY;
+                        const wavePhase = mx / 30 - t * 3;
+                        const dx = amplitude * Math.sin(wavePhase) * distFromCenter * 0.7;
+                        const dy = amplitude * Math.cos(wavePhase) * distFromCenter * 0.7;
+
+                        const grad = ctx.createRadialGradient(mx + dx, my + dy, 0, mx + dx, my + dy, massRadius * 2);
+                        grad.addColorStop(0, '#00d4ff');
+                        grad.addColorStop(0.5, 'rgba(0, 212, 255, 0.5)');
+                        grad.addColorStop(1, 'transparent');
+                        ctx.fillStyle = grad;
+                        ctx.beginPath();
+                        ctx.arc(mx + dx, my + dy, massRadius * 2, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.fillStyle = '#00d4ff';
+                        ctx.beginPath();
+                        ctx.arc(mx + dx, my + dy, massRadius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            function drawLegend(ctx, width) {
+                ctx.font = '12px Space Mono';
+                ctx.fillStyle = '#00d4ff';
+                ctx.fillText('GW150914-like Signal', 20, 30);
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillText('Strain h ~ 10⁻²¹', 20, 50);
+                ctx.fillStyle = '#f472b6';
+                ctx.fillText('Frequency: 35-150 Hz', 20, 70);
+            }
+
+            function animate() {
+                const rect = canvas.getBoundingClientRect();
+                const width = rect.width;
+                const height = rect.height;
+
+                ctx.fillStyle = 'rgba(10, 10, 30, 1)';
+                ctx.fillRect(0, 0, width, height);
+
+                drawGrid(ctx, width, height);
+                drawWavePattern(ctx, width, height, time);
+                drawLegend(ctx, width);
+
+                time += 0.02;
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // ============================================
+        // POLARIZATION CANVAS
+        // ============================================
+        let polPlaying = true;
+        let polTime = 0;
+        let polAmplitude = 50;
+        let polFrequency = 5;
+
+        function initPolarizationCanvas() {
+            const canvas = document.getElementById('polarizationCanvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = 800 * dpr;
+            canvas.height = 500 * dpr;
+            ctx.scale(dpr, dpr);
+
+            function drawPlusMode(ctx, t, amp, freq) {
+                const cx = 200, cy = 250;
+                const scale = amp * 1.5;
+
+                // Draw test mass grid
+                for (let i = -2; i <= 2; i++) {
+                    for (let j = -2; j <= 2; j++) {
+                        const baseX = cx + i * 50;
+                        const baseY = cy + j * 50;
+                        const dist = Math.sqrt(i * i + j * j);
+
+                        if (dist === 0) continue;
+
+                        const angle = Math.atan2(j, i);
+                        const stretch = Math.sin(t * freq * 2) * scale * 0.5;
+                        const dx = stretch * Math.cos(2 * angle);
+                        const dy = stretch * Math.cos(2 * angle);
+
+                        ctx.strokeStyle = 'rgba(0, 212, 255, 0.6)';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(baseX - dx * 10, baseY - dy * 10);
+                        ctx.lineTo(baseX + dx * 10, baseY + dy * 10);
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#00d4ff';
+                        ctx.beginPath();
+                        ctx.arc(baseX, baseY, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            function drawCrossMode(ctx, t, amp, freq) {
+                const cx = 600, cy = 250;
+                const scale = amp * 1.5;
+
+                for (let i = -2; i <= 2; i++) {
+                    for (let j = -2; j <= 2; j++) {
+                        const baseX = cx + i * 50;
+                        const baseY = cy + j * 50;
+                        const dist = Math.sqrt(i * i + j * j);
+
+                        if (dist === 0) continue;
+
+                        const angle = Math.atan2(j, i);
+                        const stretch = Math.sin(t * freq * 2) * scale * 0.5;
+                        const dx = stretch * Math.sin(2 * angle);
+                        const dy = stretch * Math.sin(2 * angle);
+
+                        ctx.strokeStyle = 'rgba(244, 114, 182, 0.6)';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(baseX - dx * 10, baseY - dy * 10);
+                        ctx.lineTo(baseX + dx * 10, baseY + dy * 10);
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#f472b6';
+                        ctx.beginPath();
+                        ctx.arc(baseX, baseY, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            function drawScalarMode(ctx, t, amp, freq) {
+                const cx = 200, cy = 250;
+                const scale = amp * 1.5;
+                const breath = Math.sin(t * freq * 2) * scale;
+
+                for (let i = -2; i <= 2; i++) {
+                    for (let j = -2; j <= 2; j++) {
+                        const baseX = cx + i * 50;
+                        const baseY = cy + j * 50;
+                        const dist = Math.sqrt(i * i + j * j);
+
+                        if (dist === 0) continue;
+
+                        const r = (1 + breath * 0.02) * dist * 25;
+
+                        ctx.strokeStyle = 'rgba(255, 107, 107, 0.6)';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#ff6b6b';
+                        ctx.beginPath();
+                        ctx.arc(baseX, baseY, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            function drawVectorXMode(ctx, t, amp, freq) {
+                const cx = 600, cy = 250;
+                const scale = amp * 1.5;
+
+                for (let i = -2; i <= 2; i++) {
+                    for (let j = -2; j <= 2; j++) {
+                        const baseX = cx + i * 50;
+                        const baseY = cy + j * 50;
+                        const dist = Math.sqrt(i * i + j * j);
+
+                        if (dist === 0) continue;
+
+                        const shear = Math.sin(t * freq * 2) * scale * 0.5;
+                        const dx = i * shear * 3;
+
+                        ctx.strokeStyle = 'rgba(78, 205, 196, 0.6)';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(baseX + dx * 10, baseY - 10);
+                        ctx.lineTo(baseX + dx * 10, baseY + 10);
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#4ecdc4';
+                        ctx.beginPath();
+                        ctx.arc(baseX, baseY, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            function drawVectorYMode(ctx, t, amp, freq) {
+                const cx = 200, cy = 420;
+                const scale = amp * 1.5;
+
+                for (let i = -2; i <= 2; i++) {
+                    for (let j = -2; j <= 2; j++) {
+                        const baseX = cx + i * 50;
+                        const baseY = cy + j * 50;
+                        const dist = Math.sqrt(i * i + j * j);
+
+                        if (dist === 0) continue;
+
+                        const shear = Math.sin(t * freq * 2) * scale * 0.5;
+                        const dy = j * shear * 3;
+
+                        ctx.strokeStyle = 'rgba(167, 139, 250, 0.6)';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(baseX - 10, baseY + dy * 10);
+                        ctx.lineTo(baseX + 10, baseY + dy * 10);
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#a78bfa';
+                        ctx.beginPath();
+                        ctx.arc(baseX, baseY, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            function animate() {
+                const width = 800, height = 500;
+                ctx.fillStyle = 'rgba(10, 10, 30, 1)';
+                ctx.fillRect(0, 0, width, height);
+
+                const mode = document.getElementById('polMode').value;
+
+                // Draw labels
+                ctx.font = '14px Space Mono';
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillText('PLUS MODE (h+)', 120, 30);
+                ctx.fillText('CROSS MODE (hx)', 520, 30);
+                ctx.fillText('SCALAR MODE (hs)', 120, 470);
+                ctx.fillText('VECTOR-X (vx)', 520, 470);
+
+                if (mode === 'plus' || mode === 'all') drawPlusMode(ctx, polTime, polAmplitude, polFrequency);
+                if (mode === 'cross' || mode === 'all') drawCrossMode(ctx, polTime, polAmplitude, polFrequency);
+                if (mode === 'scalar' || mode === 'all') drawScalarMode(ctx, polTime, polAmplitude, polFrequency);
+                if (mode === 'vector-x' || mode === 'all') drawVectorXMode(ctx, polTime, polAmplitude, polFrequency);
+                if (mode === 'vector-y' || mode === 'all') drawVectorYMode(ctx, polTime, polAmplitude, polFrequency);
+
+                // Update stats
+                document.getElementById('currentMode').textContent = mode.toUpperCase().replace('-', '');
+                document.getElementById('strainValue').textContent = (polAmplitude / 50 * 1e-21).toExponential(1);
+                document.getElementById('extensionValue').textContent = (polAmplitude / 50 * 2.4e-18).toExponential(1) + ' m';
+
+                if (polPlaying) {
+                    polTime += 0.02;
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // ============================================
+        // DISPERSION CANVAS
+        // ============================================
+        let dispersionTime = 0;
+        let gravitonMass = 0;
+
+        function initDispersionCanvas() {
+            const canvas = document.getElementById('dispersionCanvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = 600 * dpr;
+            canvas.height = 300 * dpr;
+            ctx.scale(dpr, dpr);
+
+            function draw(width, height, t, mass) {
+                ctx.fillStyle = 'rgba(10, 10, 30, 1)';
+                ctx.fillRect(0, 0, width, height);
+
+                // Draw frequency waves with dispersion
+                const frequencies = [50, 100, 150, 200];
+                const colors = ['#00d4ff', '#a855f7', '#fbbf24', '#f472b6'];
+
+                frequencies.forEach((f, i) => {
+                    const dispersion = mass > 0 ? 1 - (mass * mass) / (f * f) * 0.1 : 1;
+                    const effectiveFreq = f * (mass > 0 ? Math.sqrt(Math.abs(dispersion)) : 1);
+
+                    ctx.strokeStyle = colors[i];
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+
+                    for (let x = 0; x < width; x++) {
+                        const phase = (x / width) * 4 * Math.PI - t * effectiveFreq * 0.1;
+                        const y = height / 2 + Math.sin(phase) * (30 + i * 15) * dispersion;
+
+                        if (x === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                });
+
+                // Legend
+                ctx.font = '12px Space Mono';
+                ctx.fillStyle = '#9090b0';
+                ctx.fillText('Frequency Components:', 20, 280);
+                ctx.fillStyle = '#00d4ff';
+                ctx.fillText('50 Hz', 150, 280);
+                ctx.fillStyle = '#a855f7';
+                ctx.fillText('100 Hz', 200, 280);
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillText('150 Hz', 260, 280);
+                ctx.fillStyle = '#f472b6';
+                ctx.fillText('200 Hz', 320, 280);
+            }
+
+            function animate() {
+                const rect = canvas.getBoundingClientRect();
+                draw(rect.width, rect.height, dispersionTime, gravitonMass);
+                dispersionTime += 0.02;
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // ============================================
+        // NETWORK CANVAS
+        // ============================================
+        function initNetworkCanvas() {
+            const canvas = document.getElementById('networkCanvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = 600 * dpr;
+            canvas.height = 400 * dpr;
+            ctx.scale(dpr, dpr);
+
+            function draw(width, height) {
+                ctx.fillStyle = 'rgba(10, 10, 30, 1)';
+                ctx.fillRect(0, 0, width, height);
+
+                const cx = width / 2;
+                const cy = height / 2;
+
+                // Draw Earth
+                ctx.fillStyle = '#4ecdc4';
+                ctx.beginPath();
+                ctx.arc(cx, cy, 20, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.font = '12px Space Mono';
+                ctx.fillStyle = '#4ecdc4';
+                ctx.fillText('Earth', cx + 25, cy + 5);
+
+                // Draw detectors
+                const detectors = [
+                    { name: 'LIGO Hanford', angle: -115, dist: 120, color: '#00d4ff' },
+                    { name: 'LIGO Livingston', angle: -65, dist: 120, color: '#00d4ff' },
+                    { name: 'Virgo', angle: -80, dist: 100, color: '#fbbf24' },
+                    { name: 'KAGRA', angle: 130, dist: 90, color: '#f472b6' }
+                ];
+
+                detectors.forEach(d => {
+                    const rad = d.angle * Math.PI / 180;
+                    const x = cx + Math.cos(rad) * d.dist;
+                    const y = cy + Math.sin(rad) * d.dist;
+
+                    // Arm lines
+                    ctx.strokeStyle = d.color;
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + Math.cos(rad + Math.PI/2) * 30, y + Math.sin(rad + Math.PI/2) * 30);
+                    ctx.lineTo(x - Math.cos(rad + Math.PI/2) * 30, y - Math.sin(rad + Math.PI/2) * 30);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    ctx.fillStyle = d.color;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 8, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.font = '10px Space Mono';
+                    ctx.fillText(d.name, x + 12, y + 4);
+                });
+
+                // GW direction indicator
+                const gwAngle = 45;
+                const gwRad = gwAngle * Math.PI / 180;
+                const gwDist = 160;
+
+                ctx.strokeStyle = '#ff6b6b';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(cx + Math.cos(gwRad) * gwDist, cy + Math.sin(gwRad) * gwDist);
+                ctx.stroke();
+
+                // Arrow
+                const arrowX = cx + Math.cos(gwRad) * gwDist;
+                const arrowY = cy + Math.sin(gwRad) * gwDist;
+                ctx.beginPath();
+                ctx.moveTo(arrowX, arrowY);
+                ctx.lineTo(arrowX - 10 * Math.cos(gwRad - 0.3), arrowY - 10 * Math.sin(gwRad - 0.3));
+                ctx.lineTo(arrowX - 10 * Math.cos(gwRad + 0.3), arrowY - 10 * Math.sin(gwRad + 0.3));
+                ctx.closePath();
+                ctx.fillStyle = '#ff6b6b';
+                ctx.fill();
+
+                ctx.font = '12px Space Mono';
+                ctx.fillStyle = '#ff6b6b';
+                ctx.fillText('GW Direction', arrowX + 10, arrowY);
+
+                // Legend
+                ctx.font = '11px Space Mono';
+                ctx.fillStyle = '#b0b0d0';
+                ctx.fillText('LIGO-Virgo-KAGRA Network for Polarization Analysis', 20, 380);
+            }
+
+            function animate() {
+                const rect = canvas.getBoundingClientRect();
+                draw(rect.width, rect.height);
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // ============================================
+        // DETECTOR CANVAS
+        // ============================================
+        function initDetectorCanvas() {
+            const canvas = document.getElementById('detectorCanvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = 900 * dpr;
+            canvas.height = 500 * dpr;
+            ctx.scale(dpr, dpr);
+
+            let theta = 90, phi = 0, psi = 0;
+
+            function draw(width, height, t, th, ph, ps) {
+                ctx.fillStyle = 'rgba(10, 10, 30, 1)';
+                ctx.fillRect(0, 0, width, height);
+
+                const cx = width / 2;
+                const cy = height / 2;
+                const armLen = 150;
+
+                // LIGO-style detector (L-shaped)
+                ctx.strokeStyle = 'rgba(0, 212, 255, 0.8)';
+                ctx.lineWidth = 4;
+
+                // Horizontal arm
+                ctx.beginPath();
+                ctx.moveTo(cx - armLen, cy);
+                ctx.lineTo(cx + armLen, cy);
+                ctx.stroke();
+
+                // Vertical arm
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - armLen);
+                ctx.lineTo(cx, cy + armLen);
+                ctx.stroke();
+
+                // Corner circles (test masses)
+                [{x: cx, y: cy}, {x: cx + armLen, y: cy}, {x: cx, y: cy + armLen}].forEach(p => {
+                    ctx.fillStyle = '#00d4ff';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // Gravitational wave effect
+                const wavePhase = t * 2;
+                const gwDirection = th * Math.PI / 180;
+                const polarization = ps * Math.PI / 180;
+
+                // Calculate strain at each point
+                function calcStrain(baseX, baseY, cx, cy, dir, pol) {
+                    const dx = baseX - cx;
+                    const dy = baseY - cy;
+                    const proj = (dx * Math.cos(dir) + dy * Math.sin(dir));
+                    const perp = (-dx * Math.sin(dir) + dy * Math.cos(dir));
+
+                    const h_plus = Math.sin(wavePhase) * proj / 100 * Math.cos(pol);
+                    const h_cross = Math.sin(wavePhase) * perp / 100 * Math.sin(pol);
+
+                    return { dx: h_plus * Math.cos(pol) + h_cross * Math.sin(pol),
+                             dy: h_plus * Math.sin(pol) - h_cross * Math.cos(pol) };
+                }
+
+                // Draw GW ripples
+                ctx.strokeStyle = 'rgba(168, 85, 247, 0.4)';
+                ctx.lineWidth = 1;
+                for (let r = 50; r < 250; r += 30) {
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r + Math.sin(wavePhase) * 10, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                // Labels
+                ctx.font = '14px Space Mono';
+                ctx.fillStyle = '#00d4ff';
+                ctx.fillText('LIGO Detector', cx + armLen + 20, cy);
+                ctx.fillStyle = '#fbbf24';
+                ctx.fillText('GW Propagation: θ=' + th.toFixed(0) + '° φ=' + ph.toFixed(0) + '°', 20, 30);
+                ctx.fillStyle = '#f472b6';
+                ctx.fillText('Polarization: ψ=' + ps.toFixed(0) + '°', 20, 50);
+
+                // Calculate response
+                const F_plus = Math.cos(2 * ph) * Math.cos(2 * ps);
+                const F_cross = Math.cos(2 * ph) * Math.sin(2 * ps);
+                ctx.fillStyle = '#4ecdc4';
+                ctx.fillText('F+ = ' + F_plus.toFixed(3) + '  Fx = ' + F_cross.toFixed(3), 20, 480);
+            }
+
+            function animate() {
+                const rect = canvas.getBoundingClientRect();
+                draw(rect.width, rect.height, Date.now() / 1000, theta, phi, psi);
+
+                theta = parseFloat(document.getElementById('incidentTheta').value);
+                phi = parseFloat(document.getElementById('incidentPhi').value);
+                psi = parseFloat(document.getElementById('incidentPsi').value);
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // ============================================
+        // STRAIN CANVAS
+        // ============================================
+        let wavePlaying = true;
+        let waveTime = 0;
+        let signalStrength = 50;
+        let timeScale = 5;
+
+        function initStrainCanvas() {
+            const canvas = document.getElementById('strainCanvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = 900 * dpr;
+            canvas.height = 400 * dpr;
+            ctx.scale(dpr, dpr);
+
+            function drawChirp(ctx, width, height, t, strength) {
+                // Binary black hole chirp signal
+                const f0 = 35;
+                const fPeak = 150;
+                const duration = 0.2;
+
+                const chirpFreq = f0 + (fPeak - f0) * Math.pow(Math.max(0, t / duration), 2);
+                const chirpPhase = 2 * Math.PI * (f0 * t + (fPeak - f0) * t * t / (2 * duration));
+
+                const amplitude = (strength / 50) * 80 * Math.sin(t / duration * Math.PI);
+
+                ctx.strokeStyle = '#00d4ff';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+
+                for (let x = 0; x < width; x++) {
+                    const time = (x / width) * duration * 2 - duration * 0.5;
+                    const instantFreq = f0 + (fPeak - f0) * Math.pow(Math.max(0, time / duration), 2);
+                    const phase = 2 * Math.PI * (f0 * time + (fPeak - f0) * time * time / (2 * duration));
+                    const amp = time > 0 && time < duration ? (strength / 50) * 60 * Math.sin(time / duration * Math.PI) : 0;
+                    const y = height / 2 + Math.sin(phase) * amp;
+
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            function drawRingdown(ctx, width, height, t, strength) {
+                const f = 195;
+                const Q = 50;
+                const decay = Math.exp(-t * f / Q);
+                const amplitude = decay * (strength / 50) * 80;
+
+                ctx.strokeStyle = '#f472b6';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+
+                for (let x = 0; x < width; x++) {
+                    const time = x / 50;
+                    const decay = Math.exp(-time * f / Q);
+                    const y = height / 2 + Math.sin(2 * Math.PI * f * time) * decay * amplitude * 0.5;
+
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            function drawSinusoidal(ctx, width, height, t, strength) {
+                const f = 100;
+                const amplitude = (strength / 50) * 60;
+
+                ctx.strokeStyle = '#fbbf24';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+
+                for (let x = 0; x < width; x++) {
+                    const time = (x / width) * 0.1 + t;
+                    const y = height / 2 + Math.sin(2 * Math.PI * f * time) * amplitude;
+
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            function drawBurst(ctx, width, height, t, strength) {
+                const amplitude = (strength / 50) * 80;
+
+                ctx.strokeStyle = '#a855f7';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+
+                for (let x = 0; x < width; x++) {
+                    const time = (x / width) * 0.5 - 0.1 + t;
+                    const gaussian = Math.exp(-time * time * 100);
+                    const y = height / 2 + Math.sin(2 * Math.PI * 100 * time) * gaussian * amplitude;
+
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            function drawNoise(ctx, width, height, t, strength) {
+                ctx.strokeStyle = 'rgba(0, 212, 255, 0.5)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+
+                for (let x = 0; x < width; x++) {
+                    const noise = (Math.random() - 0.5) * (strength / 50) * 30;
+                    const y = height / 2 + noise;
+
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            function drawGrid(ctx, width, height) {
+                ctx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
+                ctx.lineWidth = 1;
+
+                for (let y = 0; y < height; y += 40) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                    ctx.stroke();
+                }
+
+                // Center line
+                ctx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+                ctx.beginPath();
+                ctx.moveTo(0, height / 2);
+                ctx.lineTo(width, height / 2);
+                ctx.stroke();
+            }
+
+            function animate() {
+                const width = 900, height = 400;
+                ctx.fillStyle = 'rgba(10, 10, 30, 1)';
+                ctx.fillRect(0, 0, width, height);
+
+                drawGrid(ctx, width, height);
+
+                const waveType = document.getElementById('waveType').value;
+
+                if (waveType === 'chirp') drawChirp(ctx, width, height, waveTime, signalStrength);
+                else if (waveType === 'ringdown') drawRingdown(ctx, width, height, waveTime, signalStrength);
+                else if (waveType === 'sinusoidal') drawSinusoidal(ctx, width, height, waveTime, signalStrength);
+                else if (waveType === 'burst') drawBurst(ctx, width, height, waveTime, signalStrength);
+                else if (waveType === 'noise') drawNoise(ctx, width, height, waveTime, signalStrength);
+
+                // Labels
+                ctx.font = '12px Space Mono';
+                ctx.fillStyle = '#fbbf24';
+                const labels = {
+                    chirp: 'Binary Black Hole Chirp',
+                    ringdown: 'Black Hole Ringdown',
+                    sinusoidal: 'Sinusoidal Wave',
+                    burst: 'Gaussian Burst',
+                    noise: 'Detector Noise'
+                };
+                ctx.fillText(labels[waveType], 20, 30);
+
+                // Stats
+                ctx.fillStyle = '#00d4ff';
+                const peakStrain = (signalStrength / 50 * 1e-21).toExponential(1);
+                ctx.fillText('Peak Strain: ' + peakStrain, 20, 380);
+
+                if (wavePlaying) {
+                    waveTime += 0.016;
+                }
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        function switchTab(btn, tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createStarfield();
+            initHeroCanvas();
+            initPolarizationCanvas();
+            initDispersionCanvas();
+            initNetworkCanvas();
+            initDetectorCanvas();
+            initStrainCanvas();
+
+            // Control event listeners
+            document.getElementById('polMode').addEventListener('change', function() {
+                document.getElementById('currentMode').textContent = this.value.toUpperCase().replace('-', '');
+            });
+
+            document.getElementById('polAmplitude').addEventListener('input', function() {
+                polAmplitude = parseInt(this.value);
+                document.getElementById('ampValue').textContent = 'h = ' + (this.value / 100).toFixed(2);
+                document.getElementById('strainValue').textContent = (this.value / 50 * 1e-21).toExponential(1);
+                document.getElementById('extensionValue').textContent = (this.value / 50 * 2.4e-18).toExponential(1) + ' m';
+            });
+
+            document.getElementById('polFrequency').addEventListener('input', function() {
+                polFrequency = parseInt(this.value);
+                document.getElementById('freqValue').textContent = 'f = ' + this.value + '.0 Hz';
+            });
+
+            document.getElementById('polPlayPause').addEventListener('click', function() {
+                polPlaying = !polPlaying;
+                this.textContent = polPlaying ? 'Pause' : 'Play';
+            });
+
+            document.getElementById('polReset').addEventListener('click', function() {
+                polTime = 0;
+            });
+
+            document.getElementById('gravitonMass').addEventListener('input', function() {
+                gravitonMass = parseInt(this.value);
+                document.getElementById('massValue').textContent = 'm<sub>g</sub> = ' + (this.value / 100).toFixed(2) + ' eV';
+            });
+
+            document.getElementById('incidentTheta').addEventListener('input', function() {
+                document.getElementById('thetaValue').textContent = 'θ = ' + this.value + '°';
+            });
+
+            document.getElementById('incidentPhi').addEventListener('input', function() {
+                document.getElementById('phiValue').textContent = 'φ = ' + this.value + '°';
+            });
+
+            document.getElementById('incidentPsi').addEventListener('input', function() {
+                document.getElementById('psiValue').textContent = 'ψ = ' + this.value + '°';
+            });
+
+            document.getElementById('signalStrength').addEventListener('input', function() {
+                signalStrength = parseInt(this.value);
+                document.getElementById('strengthValue').textContent = 'SNR = ' + this.value;
+                document.getElementById('peakStrain').textContent = (this.value / 50 * 1e-21).toExponential(1);
+                document.getElementById('armDisplace').textContent = (this.value / 50 * 4e-18).toExponential(1) + ' m';
+            });
+
+            document.getElementById('timeScale').addEventListener('input', function() {
+                timeScale = parseInt(this.value);
+                document.getElementById('scaleValue').textContent = 'Δt = ' + this.value + ' seconds';
+            });
+
+            document.getElementById('wavePlayPause').addEventListener('click', function() {
+                wavePlaying = !wavePlaying;
+                this.textContent = wavePlaying ? 'Pause' : 'Play';
+            });
+
+            document.getElementById('waveReset').addEventListener('click', function() {
+                waveTime = 0;
+            });
+
+            window.addEventListener('scroll', updateScrollProgress);
+
+            // Fade-in animation on scroll
+            const fadeElements = document.querySelectorAll('.card, .info-card, .equation-box');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            fadeElements.forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>
