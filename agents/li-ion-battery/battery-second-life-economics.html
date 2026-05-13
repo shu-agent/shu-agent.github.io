@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Second Life Economics — Li-Ion Battery</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --accent-green: #00ff88;
+            --accent-cyan: #00d4ff;
+            --accent-orange: #ff9500;
+            --accent-red: #ff4757;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            padding: 80px 20px 60px;
+            text-align: center;
+            background: linear-gradient(180deg, #0d1117 0%, var(--bg-dark) 100%);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at 50% 50%, rgba(0, 255, 136, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 30px;
+            font-size: 13px;
+            color: var(--accent-green);
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        h1 {
+            font-size: 52px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--accent-green);
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 20px;
+            background: rgba(18, 18, 26, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .nav-tab.active {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        section {
+            margin-bottom: 80px;
+        }
+
+        h2 {
+            font-size: 32px;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        h2 .highlight {
+            color: var(--accent-green);
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 30px;
+            max-width: 700px;
+        }
+
+        /* Card Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 255, 136, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .card-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--accent-green);
+            margin-bottom: 8px;
+        }
+
+        /* Battery Health Cards */
+        .health-card {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .health-visual {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            flex-shrink: 0;
+        }
+
+        .health-visual.soh-80 {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+        }
+
+        .health-visual.soh-70 {
+            background: linear-gradient(135deg, #ffdd00 0%, #ff9500 100%);
+        }
+
+        .health-visual.soh-60 {
+            background: linear-gradient(135deg, #ff9500 0%, #ff4757 100%);
+        }
+
+        .health-info h3 {
+            margin-bottom: 8px;
+        }
+
+        .health-info p {
+            margin-bottom: 12px;
+        }
+
+        .health-specs {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .health-spec {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .health-spec span {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        /* Value Calculator */
+        .calculator {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 40px;
+        }
+
+        .calculator h3 {
+            font-size: 24px;
+            margin-bottom: 24px;
+            color: var(--accent-cyan);
+        }
+
+        .calc-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .calc-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .calc-group label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .calc-group input,
+        .calc-group select {
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .calc-group input:focus,
+        .calc-group select:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .calc-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .calc-result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .calc-result .value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--accent-cyan);
+        }
+
+        .calc-result .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Charts */
+        .chart-container {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+
+        .chart-title {
+            font-size: 20px;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .chart-canvas {
+            max-height: 300px;
+        }
+
+        /* Process Flow */
+        .process-flow {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 20px 0;
+            margin-bottom: 40px;
+        }
+
+        .process-step {
+            flex: 1;
+            min-width: 180px;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+        }
+
+        .process-step::after {
+            content: '→';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-green);
+            font-size: 20px;
+        }
+
+        .process-step:last-child::after {
+            display: none;
+        }
+
+        .process-number {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-weight: 800;
+            color: var(--accent-green);
+        }
+
+        .process-step h4 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .process-step p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .data-table th {
+            background: rgba(0, 0, 0, 0.3);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .data-table td {
+            font-size: 14px;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table .highlight {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        /* Comparison Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+        }
+
+        .comparison-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 32px;
+        }
+
+        .comparison-card h3 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .comparison-card .tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .tag-new {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--accent-green);
+        }
+
+        .tag-second {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--accent-orange);
+        }
+
+        /* Application Cards */
+        .app-card {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .app-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            flex-shrink: 0;
+        }
+
+        .app-icon.grid { background: linear-gradient(135deg, #00d4ff, #0066ff); }
+        .app-icon.comm { background: linear-gradient(135deg, #ff9500, #ff4757); }
+        .app-icon.res { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        .app-icon.industrial { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+
+        .app-info h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .app-info p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .app-specs {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .app-spec {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .app-spec span {
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        /* Battery Visual */
+        .battery-visual-container {
+            display: flex;
+            justify-content: center;
+            margin: 40px 0;
+        }
+
+        .battery-visual {
+            position: relative;
+            width: 300px;
+        }
+
+        .battery-body {
+            width: 200px;
+            height: 320px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 3px solid #333;
+            border-radius: 20px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .battery-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, #00ff88, #00cc6a);
+            transition: height 0.5s ease;
+        }
+
+        .battery-terminal {
+            width: 60px;
+            height: 20px;
+            background: #444;
+            border-radius: 4px;
+            margin: 0 auto;
+        }
+
+        .battery-label {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Equations Panel */
+        .equations-panel {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 32px;
+        }
+
+        .equations-panel h3 {
+            font-size: 20px;
+            margin-bottom: 24px;
+            color: var(--accent-cyan);
+        }
+
+        .equation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .equation-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 3px solid var(--accent-green);
+        }
+
+        .equation-item .eq {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            color: var(--accent-green);
+            margin-bottom: 12px;
+        }
+
+        .equation-item .desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: var(--accent-green);
+            text-decoration: none;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 36px; }
+            .hero-subtitle { font-size: 16px; }
+            .stats-row { gap: 30px; }
+            .stat-value { font-size: 32px; }
+            .nav-tabs { gap: 6px; }
+            .nav-tab { padding: 10px 16px; font-size: 12px; }
+            .card-grid { grid-template-columns: 1fr; }
+            .comparison-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="hero">
+        <div class="hero-badge">Circular Economy</div>
+        <h1>Battery Second Life Economics</h1>
+        <p class="hero-subtitle">When EV batteries retire at 80% SOH, they still have 10+ years of useful life for stationary storage. Repurposing extends value, reduces waste, and creates a $85 billion market opportunity by 2035.</p>
+
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="stat-value">500K</div>
+                <div class="stat-label">Tonnes Retiring Annually by 2030</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">$85B</div>
+                <div class="stat-label">Second Life Market by 2035</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">$30-80</div>
+                <div class="stat-label">Value per kWh (Second Life)</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">10+</div>
+                <div class="stat-label">Years Additional Service Life</div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="nav-tabs">
+        <button class="nav-tab active" onclick="showSection('overview')">Overview</button>
+        <button class="nav-tab" onclick="showSection('economics')">Economics</button>
+        <button class="nav-tab" onclick="showSection('applications')">Applications</button>
+        <button class="nav-tab" onclick="showSection('process')">Process</button>
+        <button class="nav-tab" onclick="showSection('calculator')">Calculator</button>
+        <button class="nav-tab" onclick="showSection('physics')">Physics</button>
+    </nav>
+
+    <main class="main-content">
+        <!-- Overview Section -->
+        <section id="overview" class="section active">
+            <h2>The <span class="highlight">Second Life</span> Revolution</h2>
+            <p class="section-desc">Electric vehicle batteries are designed to last 8-10 years in cars. But when they reach 80% State of Health (the typical EV end-of-life threshold), they still retain significant capacity for less demanding applications like grid storage.</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <div class="card-icon">♻️</div>
+                    <h3>Circular Economy</h3>
+                    <p>Second life repurposing creates a closed-loop system where EV battery value is extracted twice: first in transportation, then in stationary storage. This extends the useful life of the battery by 10+ years.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">💰</div>
+                    <h3>Value Recovery</h3>
+                    <p>A 60 kWh EV battery pack retiring at 80% SOH still holds ~48 kWh usable capacity. At $40/kWh for second life applications, this represents $1,920-$2,400 of residual value per pack.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🌍</div>
+                    <h3>Environmental Impact</h3>
+                    <p>Repurposing reduces the carbon footprint of battery storage by 50-70% compared to new manufacturing. The embodied energy and materials are amortized across a longer service life.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">⚡</div>
+                    <h3>Grid Stabilization</h3>
+                    <p>Second life batteries provide critical grid services: frequency regulation, peak shaving, renewable integration, and backup power. Their lower performance specs actually match grid use cases well.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Economics Section -->
+        <section id="economics" class="section" style="display: none;">
+            <h2>Second Life <span class="highlight">Economics</span></h2>
+            <p class="section-desc">Understanding the value chain from retired EV battery to grid-ready storage system.</p>
+
+            <div class="chart-container">
+                <h3 class="chart-title">Second Life Value Chain</h3>
+                <canvas id="valueChainChart" class="chart-canvas"></canvas>
+            </div>
+
+            <div class="card-grid" style="margin-bottom: 40px;">
+                <div class="card">
+                    <div class="card-value">$0-5</div>
+                    <h3>Scrap Value</h3>
+                    <p>End-of-life batteries with no repurposing potential. Material value only (metals recovery at ~$5/kWh).</p>
+                </div>
+                <div class="card">
+                    <div class="card-value">$25-50</div>
+                    <h3>Pack Level</h3>
+                    <p>Intact pack repurposed as-is. Requires testing, grading, and possibly BMS replacement. Typical margin: 15-25%.</p>
+                </div>
+                <div class="card">
+                    <div class="card-value">$40-80</div>
+                    <h3>System Level</h3>
+                    <p>Repackaged with new BMS, thermal management, and inverter. Complete second-life energy storage system ready for installation.</p>
+                </div>
+                <div class="card">
+                    <div class="card-value">$85-120</div>
+                    <h3>Installed Cost</h3>
+                    <p>Turn-key energy storage system including installation, interconnection, and permitting. Grid-ready at $85-120/kWh installed.</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 class="chart-title">Price Comparison: New vs Second Life vs Recycling</h3>
+                <canvas id="priceCompareChart" class="chart-canvas"></canvas>
+            </div>
+
+            <h3 style="margin-bottom: 20px;">Cost Structure for Second Life System</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Cost Component</th>
+                        <th>New Battery System</th>
+                        <th>Second Life System</th>
+                        <th>Savings</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Battery Pack</td>
+                        <td class="highlight">$120/kWh</td>
+                        <td>$35/kWh (acquisition)</td>
+                        <td class="highlight">$85/kWh</td>
+                    </tr>
+                    <tr>
+                        <td>BMS & Electronics</td>
+                        <td>$15/kWh</td>
+                        <td>$20/kWh (new)</td>
+                        <td class="highlight">-$5/kWh</td>
+                    </tr>
+                    <tr>
+                        <td>Thermal Management</td>
+                        <td>$10/kWh</td>
+                        <td>$8/kWh</td>
+                        <td class="highlight">$2/kWh</td>
+                    </tr>
+                    <tr>
+                        <td>Integration & Labor</td>
+                        <td>$20/kWh</td>
+                        <td>$25/kWh</td>
+                        <td class="highlight">-$5/kWh</td>
+                    </tr>
+                    <tr>
+                        <td>Testing & Certification</td>
+                        <td>$5/kWh</td>
+                        <td>$12/kWh</td>
+                        <td class="highlight">-$7/kWh</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TOTAL</strong></td>
+                        <td><strong class="highlight">$150/kWh</strong></td>
+                        <td><strong class="highlight">$100/kWh</strong></td>
+                        <td><strong class="highlight">$50/kWh (33%)</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Applications Section -->
+        <section id="applications" class="section" style="display: none;">
+            <h2>Second Life <span class="highlight">Applications</span></h2>
+            <p class="section-desc">Second life batteries excel in applications that don't require the high performance specs of EV driving.</p>
+
+            <div class="app-card" style="margin-bottom: 24px;">
+                <div class="app-icon grid">⚡</div>
+                <div class="app-info">
+                    <h3>Grid-Scale Energy Storage</h3>
+                    <p>Utility-scale storage for renewable integration, peak shaving, and capacity firming. The 80% SOH threshold is more than sufficient for 4-8 hour storage applications.</p>
+                    <div class="app-specs">
+                        <div class="app-spec">Capacity: <span>1-100 MWh</span></div>
+                        <div class="app-spec">Duration: <span>4-8 hours</span></div>
+                        <div class="app-spec">ROI: <span>6-10 years</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-card" style="margin-bottom: 24px;">
+                <div class="app-icon comm">📡</div>
+                <div class="app-info">
+                    <h3>Telecom Backup Power</h3>
+                    <p>Cell towers require reliable backup for 4-24 hours during outages. Second life batteries provide cost-effective energy storage for telecom infrastructure.</p>
+                    <div class="app-specs">
+                        <div class="app-spec">Capacity: <span>5-50 kWh</span></div>
+                        <div class="app-spec">Backup: <span>4-24 hours</span></div>
+                        <div class="app-spec">Market: <span>2.5M towers globally</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-card" style="margin-bottom: 24px;">
+                <div class="app-icon res">🏠</div>
+                <div class="app-info">
+                    <h3>Commercial & Industrial C&I</h3>
+                    <p>Businesses use second life batteries for demand charge reduction, peak load management, and renewable self-consumption. Lower cycle requirements suit this usage pattern.</p>
+                    <div class="app-specs">
+                        <div class="app-spec">Capacity: <span>50-500 kWh</span></div>
+                        <div class="app-spec">Cycles: <span>365/year</span></div>
+                        <div class="app-spec">Savings: <span>20-40% on demand charges</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-card">
+                <div class="app-icon industrial">🏭</div>
+                <div class="app-info">
+                    <h3>Industrial UPS & Backup</h3>
+                    <p>Data centers, hospitals, and critical infrastructure require reliable backup. Second life batteries offer 50% cost savings vs new with sufficient performance for backup applications.</p>
+                    <div class="app-specs">
+                        <div class="app-spec">Capacity: <span>100 kWh - 10 MWh</span></div>
+                        <div class="app-spec">Runtime: <span>15 min - 2 hours</span></div>
+                        <div class="app-spec">Market: <span>$12B by 2030</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="margin: 40px 0 20px;">Application Suitability by Battery Health</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>SOH Range</th>
+                        <th>Suitable Applications</th>
+                        <th>Expected Cycles Remaining</th>
+                        <th>Value Realization</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="highlight">80-85%</td>
+                        <td>Grid storage, C&I, Telecom</td>
+                        <td>2,000-3,000 cycles</td>
+                        <td class="highlight">$60-80/kWh</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">70-80%</td>
+                        <td>Commercial backup, Peak shaving</td>
+                        <td>1,500-2,000 cycles</td>
+                        <td class="highlight">$40-60/kWh</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">60-70%</td>
+                        <td>Industrial UPS, Backup only</td>
+                        <td>1,000-1,500 cycles</td>
+                        <td class="highlight">$25-40/kWh</td>
+                    </tr>
+                    <tr>
+                        <td class="highlight">&lt;60%</td>
+                        <td>Recycling (material recovery)</td>
+                        <td>&lt;500 cycles</td>
+                        <td class="highlight">$5-10/kWh</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Process Section -->
+        <section id="process" class="section" style="display: none;">
+            <h2>Repurposing <span class="highlight">Process</span></h2>
+            <p class="section-desc">From retired EV pack to grid-ready storage system in 6 steps.</p>
+
+            <div class="process-flow">
+                <div class="process-step">
+                    <div class="process-number">1</div>
+                    <h4>Collection</h4>
+                    <p>Gather retired EV packs from dealerships and recyclers. Typical logistics cost: $5-10/kWh.</p>
+                </div>
+                <div class="process-step">
+                    <div class="process-number">2</div>
+                    <h4>Testing & Grading</h4>
+                    <p>Full capacity test, impedance measurement, visual inspection. Grade A/B/C for second life potential.</p>
+                </div>
+                <div class="process-step">
+                    <div class="process-number">3</div>
+                    <h4>Discharge & Safety</h4>
+                    <p>Deep discharge to 0% SOC, safe handling procedures, remove hazardous components.</p>
+                </div>
+                <div class="process-step">
+                    <div class="process-number">4</div>
+                    <h4>Repackaging</h4>
+                    <p>Module extraction, new BMS integration, thermal management upgrade, enclosure design.</p>
+                </div>
+                <div class="process-step">
+                    <div class="process-number">5</div>
+                    <h4>Certification</h4>
+                    <p>Safety certifications, UL 1973, UN38.3, local grid interconnection approvals.</p>
+                </div>
+                <div class="process-step">
+                    <div class="process-number">6</div>
+                    <h4>Deployment</h4>
+                    <p>Install at destination site, commission, connect to grid or facility, begin second life.</p>
+                </div>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h3>OEM Programs <span class="tag-new">NEW</span></h3>
+                    <table class="data-table" style="margin-top: 16px;">
+                        <tbody>
+                            <tr>
+                                <td><strong>Tesla</strong></td>
+                                <td>Reusing Pack components in Megapack</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Volkswagen</strong></td>
+                                <td>Second Life partner program</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Nissan</strong></td>
+                                <td>4Zeroheeler joint venture</td>
+                            </tr>
+                            <tr>
+                                <td><strong>BMW</strong></td>
+                                <td>Allows certified repurposing</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="comparison-card">
+                    <h3>Specialist Players <span class="tag-second">SECOND LIFE</span></h3>
+                    <table class="data-table" style="margin-top: 16px;">
+                        <tbody>
+                            <tr>
+                                <td><strong>Redwood Materials</strong></td>
+                                <td>Material recovery + second life</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Li Cycle</strong></td>
+                                <td>Spoke & hub recycling network</td>
+                            </tr>
+                            <tr>
+                                <td><strong>4Zeroheeler</strong></td>
+                                <td>Nissan Leaf repurposing specialist</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Connected Energy</strong></td>
+                                <td>EU second life systems</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calculator Section -->
+        <section id="calculator" class="section" style="display: none;">
+            <h2>Value <span class="highlight">Calculator</span></h2>
+            <p class="section-desc">Estimate the second life value of a retired EV battery pack.</p>
+
+            <div class="calculator">
+                <h3>Second Life Battery Valuation</h3>
+                <div class="calc-inputs">
+                    <div class="calc-group">
+                        <label>Original Pack Capacity (kWh)</label>
+                        <input type="number" id="calcCapacity" value="75" min="10" max="200">
+                    </div>
+                    <div class="calc-group">
+                        <label>State of Health (%)</label>
+                        <input type="number" id="calcSOH" value="82" min="60" max="100">
+                    </div>
+                    <div class="calc-group">
+                        <label>Chemistry Type</label>
+                        <select id="calcChemistry">
+                            <option value="nmc">NMC/NCA</option>
+                            <option value="lfp">LFP</option>
+                            <option value="nca">NCA</option>
+                        </select>
+                    </div>
+                    <div class="calc-group">
+                        <label>Intended Application</label>
+                        <select id="calcApp">
+                            <option value="grid">Grid Storage</option>
+                            <option value="telecom">Telecom Backup</option>
+                            <option value="ci">Commercial & Industrial</option>
+                            <option value="ups">Industrial UPS</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="calc-results">
+                    <div class="calc-result">
+                        <div class="value" id="resultUsable">61.5</div>
+                        <div class="label">Usable Capacity (kWh)</div>
+                    </div>
+                    <div class="calc-result">
+                        <div class="value" id="resultValue">$2,460</div>
+                        <div class="label">Pack Value ($)</div>
+                    </div>
+                    <div class="calc-result">
+                        <div class="value" id="resultCycles">2,500</div>
+                        <div class="label">Est. Cycles Remaining</div>
+                    </div>
+                    <div class="calc-result">
+                        <div class="value" id="resultROI">8.5</div>
+                        <div class="label">Years Service Life</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container" style="margin-top: 32px;">
+                <h3 class="chart-title">Value vs. SOH Correlation</h3>
+                <canvas id="valueSOHChart" class="chart-canvas"></canvas>
+            </div>
+        </section>
+
+        <!-- Physics Section -->
+        <section id="physics" class="section" style="display: none;">
+            <h2>Second Life <span class="highlight">Physics</span></h2>
+            <p class="section-desc">The physics principles governing battery degradation and second life potential.</p>
+
+            <div class="equations-panel">
+                <h3>Key Degradation Equations</h3>
+                <div class="equation-grid">
+                    <div class="equation-item">
+                        <div class="eq">SOH(t) = 100 - a·√t - b·N^α·DOD^β</div>
+                        <div class="desc">Total degradation combines calendar aging (√t) and cycle aging (N^α·DOD^β). This determines when second life begins.</div>
+                    </div>
+                    <div class="equation-item">
+                        <div class="eq">Q_cal = k·√t·exp(-Ea/RT)</div>
+                        <div class="desc">Calendar aging follows square-root time law with Arrhenius temperature activation. SEI growth is the primary mechanism.</div>
+                    </div>
+                    <div class="equation-item">
+                        <div class="eq">Q_cyc = k·N^α·DOD^β·exp(-Ea/RT)</div>
+                        <div class="desc">Cycle aging scales with cycle count N and depth of discharge DOD. NMC typically shows α ≈ 0.5, β ≈ 1.5.</div>
+                    </div>
+                    <div class="equation-item">
+                        <div class="eq">R_internal = R₀·(1 + γ·√t + δ·N)</div>
+                        <div class="desc">Internal resistance growth limits power capability. Growth rate γ for calendar and δ for cycle aging.</div>
+                    </div>
+                    <div class="equation-item">
+                        <div class="eq">E_secondlife = (SOH - SOH_EOL)·C_rated·η</div>
+                        <div class="desc">Available second life energy depends on SOH above end-of-life threshold, rated capacity, and round-trip efficiency.</div>
+                    </div>
+                    <div class="equation-item">
+                        <div class="eq">C_secondlife ≈ C₀·(1 - 0.8^(1/β))</div>
+                        <div class="desc">When SOH = 80%, approximately 20% of original capacity remains available for second life applications.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-grid" style="margin-top: 32px;">
+                <div class="card">
+                    <div class="card-icon">📉</div>
+                    <h3>Capacity Fade Mechanics</h3>
+                    <p>Capacity fade in NMC batteries follows a two-stage model: rapid initial SEI formation (first 100 cycles), then slow linear fade. Second life captures the tail of this curve.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">⚡</div>
+                    <h3>Resistance Growth Impact</h3>
+                    <p>Internal resistance growth limits high-rate capability. At 80% SOH, DC resistance may be 20-30% higher than new, reducing fast charging ability but acceptable for grid use.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🌡️</div>
+                    <h3>Temperature Sensitivity</h3>
+                    <p>Calendar aging dominates at high temperatures (>30°C). Proper thermal management in second life applications can slow further degradation by 50%.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🔄</div>
+                    <h3>Cycle Life Extension</h3>
+                    <p>Second life applications typically operate at lower DOD (20-80% vs 0-100% in EVs) and fewer cycles per year (365 vs 365+ in EVs), extending service life.</p>
+                </div>
+            </div>
+
+            <div class="chart-container" style="margin-top: 32px;">
+                <h3 class="chart-title">Degradation Trajectory: EV Use → Second Life → Recycling</h3>
+                <canvas id="degradationChart" class="chart-canvas"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>Battery Second Life Economics — A Li-Ion Battery Project</p>
+        <p style="margin-top: 8px;"><a href="index.html">← Back to Home</a> | <a href="battery-recycling-economics.html">Recycling Economics</a></p>
+    </footer>
+
+    <script>
+        // Section Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(sectionId).style.display = 'block';
+            event.target.classList.add('active');
+
+            // Update charts if needed
+            if (sectionId === 'economics') {
+                setTimeout(initEconomicsCharts, 100);
+            } else if (sectionId === 'calculator') {
+                setTimeout(initCalcCharts, 100);
+            } else if (sectionId === 'physics') {
+                setTimeout(initPhysicsCharts, 100);
+            }
+        }
+
+        // Value Chain Chart
+        function initEconomicsCharts() {
+            if (window.valueChainChart) window.valueChainChart.destroy();
+            const ctx = document.getElementById('valueChainChart').getContext('2d');
+            window.valueChainChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Material Recovery', 'Pack Level', 'Module Level', 'System Level', 'Installed System'],
+                    datasets: [{
+                        label: 'Value ($/kWh)',
+                        data: [5, 35, 50, 65, 100],
+                        backgroundColor: [
+                            'rgba(255, 71, 87, 0.7)',
+                            'rgba(255, 149, 0, 0.7)',
+                            'rgba(0, 212, 255, 0.7)',
+                            'rgba(0, 255, 136, 0.7)',
+                            'rgba(0, 204, 106, 0.7)'
+                        ],
+                        borderWidth: 0,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#a0a0b0' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#a0a0b0' }
+                        }
+                    }
+                }
+            });
+
+            if (window.priceCompareChart) window.priceCompareChart.destroy();
+            const ctx2 = document.getElementById('priceCompareChart').getContext('2d');
+            window.priceCompareChart = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['New LFP', 'New NMC', 'Second Life', 'Recycling Value'],
+                    datasets: [{
+                        label: 'Cost ($/kWh)',
+                        data: [120, 150, 100, 5],
+                        backgroundColor: [
+                            'rgba(0, 212, 255, 0.7)',
+                            'rgba(0, 150, 255, 0.7)',
+                            'rgba(0, 255, 136, 0.7)',
+                            'rgba(255, 71, 87, 0.7)'
+                        ],
+                        borderWidth: 0,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#a0a0b0' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#a0a0b0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Calculator Logic
+        function updateCalculator() {
+            const capacity = parseFloat(document.getElementById('calcCapacity').value) || 75;
+            const SOH = parseFloat(document.getElementById('calcSOH').value) || 82;
+            const chemistry = document.getElementById('calcChemistry').value;
+            const app = document.getElementById('calcApp').value;
+
+            const usableCapacity = capacity * (SOH / 100) * 0.85;
+            const baseValuePerKwh = SOH > 80 ? 40 : (SOH > 70 ? 35 : (SOH > 60 ? 28 : 15));
+            const totalValue = usableCapacity * baseValuePerKwh;
+
+            const cycleBase = chemistry === 'lfp' ? 4000 : 3000;
+            const cyclesRemaining = Math.round(cycleBase * (SOH / 100));
+
+            const yearsBase = app === 'grid' ? 10 : (app === 'ci' ? 8 : (app === 'telecom' ? 12 : 6));
+            const yearsService = yearsBase * (SOH / 100);
+
+            document.getElementById('resultUsable').textContent = usableCapacity.toFixed(1);
+            document.getElementById('resultValue').textContent = '$' + Math.round(totalValue).toLocaleString();
+            document.getElementById('resultCycles').textContent = cyclesRemaining.toLocaleString();
+            document.getElementById('resultROI').textContent = yearsService.toFixed(1);
+        }
+
+        document.getElementById('calcCapacity').addEventListener('input', updateCalculator);
+        document.getElementById('calcSOH').addEventListener('input', updateCalculator);
+        document.getElementById('calcChemistry').addEventListener('change', updateCalculator);
+        document.getElementById('calcApp').addEventListener('change', updateCalculator);
+
+        function initCalcCharts() {
+            if (window.valueSOHChart) window.valueSOHChart.destroy();
+            const ctx = document.getElementById('valueSOHChart').getContext('2d');
+            window.valueSOHChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['60%', '65%', '70%', '75%', '80%', '85%', '90%', '95%', '100%'],
+                    datasets: [{
+                        label: 'Second Life Value ($/kWh)',
+                        data: [15, 22, 28, 35, 42, 50, 55, 60, 65],
+                        borderColor: 'rgba(0, 255, 136, 1)',
+                        backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: 'rgba(0, 255, 136, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#a0a0b0' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#a0a0b0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initPhysicsCharts() {
+            if (window.degradationChart) window.degradationChart.destroy();
+            const ctx = document.getElementById('degradationChart').getContext('2d');
+            window.degradationChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['0', '2', '4', '6', '8', '10', '12', '14', '16', '18', '20'],
+                    datasets: [
+                        {
+                            label: 'EV Use Phase',
+                            data: [100, 95, 91, 88, 85, 82, null, null, null, null, null],
+                            borderColor: 'rgba(0, 150, 255, 1)',
+                            backgroundColor: 'rgba(0, 150, 255, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Second Life Phase',
+                            data: [null, null, null, null, null, 82, 80, 77, 74, 71, 68],
+                            borderColor: 'rgba(0, 255, 136, 1)',
+                            backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#a0a0b0' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 60,
+                            max: 100,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#a0a0b0' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#a0a0b0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCalculator();
+        });
+    </script>
+</body>
+</html>

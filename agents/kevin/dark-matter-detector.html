@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark Matter Detector — WIMP & Axion Search Lab</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cyan: #00d4ff;
+      --purple: #9d4edd;
+      --gold: #ffd700;
+      --pink: #ff6b9d;
+      --dark-bg: #0a0a1a;
+      --card-bg: #12122a;
+      --text: #e0e0ff;
+      --text-dim: #8888aa;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Space Mono', monospace;
+      background: var(--dark-bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--cyan), var(--purple), var(--gold));
+      z-index: 1000;
+      transition: width 0.1s;
+    }
+    header {
+      text-align: center;
+      padding: 80px 20px 40px;
+      background: radial-gradient(ellipse at center, #1a1a3a 0%, var(--dark-bg) 70%);
+      position: relative;
+      overflow: hidden;
+    }
+    header h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--cyan), var(--purple), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      letter-spacing: 2px;
+    }
+    header p {
+      font-size: 1rem;
+      color: var(--text-dim);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    #hero-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 20px;
+      background: rgba(10, 10, 26, 0.9);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    }
+    nav button {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      padding: 10px 16px;
+      background: var(--card-bg);
+      color: var(--text);
+      border: 1px solid var(--cyan);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    nav button:hover, nav button.active {
+      background: var(--cyan);
+      color: var(--dark-bg);
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    section {
+      margin-bottom: 80px;
+      scroll-margin-top: 100px;
+    }
+    section h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      color: var(--cyan);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    section h2::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--cyan);
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid rgba(0, 212, 255, 0.15);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+    }
+    .card h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    .card p {
+      color: var(--text-dim);
+      line-height: 1.7;
+      font-size: 0.9rem;
+    }
+    .canvas-box {
+      background: #080818;
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: 8px;
+      margin: 20px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .canvas-box canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 16px 0;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+    }
+    .controls label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+    .controls input[type="range"] {
+      width: 120px;
+      accent-color: var(--cyan);
+    }
+    .controls span {
+      color: var(--cyan);
+      font-size: 0.8rem;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .stat-card {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 16px;
+      border-radius: 8px;
+      border-left: 3px solid var(--cyan);
+    }
+    .stat-card.gold { border-color: var(--gold); }
+    .stat-card.purple { border-color: var(--purple); }
+    .stat-card.pink { border-color: var(--pink); }
+    .stat-card h4 {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .stat-card .value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      color: var(--cyan);
+    }
+    .stat-card.gold .value { color: var(--gold); }
+    .stat-card.purple .value { color: var(--purple); }
+    .stat-card.pink .value { color: var(--pink); }
+    .equation {
+      font-family: 'Space Mono', monospace;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 16px 24px;
+      border-radius: 8px;
+      margin: 16px 0;
+      border-left: 3px solid var(--gold);
+      overflow-x: auto;
+    }
+    .equation code {
+      color: var(--gold);
+      font-size: 0.95rem;
+    }
+    .legend {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin: 16px 0;
+      font-size: 0.8rem;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .detector-card {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .detector-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    .detector-info h4 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.9rem;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+    .detector-info p {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+    .wimp { background: rgba(0, 212, 255, 0.2); }
+    .axion { background: rgba(157, 78, 221, 0.2); }
+    .neutrino { background: rgba(255, 107, 157, 0.2); }
+    .btn {
+      font-family: 'Space Mono', monospace;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      color: var(--dark-bg);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.85rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0, 212, 255, 0.4);
+    }
+    .toggle-group {
+      display: flex;
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .toggle-btn {
+      padding: 10px 20px;
+      background: var(--card-bg);
+      color: var(--text);
+      border: 1px solid var(--text-dim);
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      transition: all 0.3s;
+    }
+    .toggle-btn.active {
+      background: var(--purple);
+      color: white;
+      border-color: var(--purple);
+    }
+    .mode-selector {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 16px 0;
+    }
+    .mode-btn {
+      padding: 10px 16px;
+      background: var(--card-bg);
+      color: var(--text);
+      border: 1px solid var(--cyan);
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      transition: all 0.3s;
+    }
+    .mode-btn.active {
+      background: var(--cyan);
+      color: var(--dark-bg);
+    }
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid rgba(0, 212, 255, 0.2);
+      color: var(--text-dim);
+      font-size: 0.8rem;
+    }
+    @media (max-width: 600px) {
+      .detector-card { flex-direction: column; text-align: center; }
+      nav { gap: 4px; }
+      nav button { padding: 8px 10px; font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" id="progress"></div>
+  <header>
+    <canvas id="hero-canvas"></canvas>
+    <h1>Dark Matter Detector</h1>
+    <p>Interactive exploration of WIMP, Axion, and Direct Detection experiments searching for nature's hidden mass</p>
+  </header>
+  <nav id="nav"></nav>
+  <div class="container">
+    <section id="overview">
+      <h2>Overview</h2>
+      <div class="card">
+        <h3>The Dark Matter Problem</h3>
+        <p>Twenty-seven percent of the universe is made of dark matter — yet we have never directly detected a single particle. Unlike normal matter, dark matter does not emit, absorb, or reflect light. It only interacts through gravity and possibly the weak nuclear force. This page explores the detection methods, experiments, and physics behind our hunt for this cosmic ghost.</p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h4>Total Matter in Universe</h4>
+          <div class="value">27%</div>
+          <p style="font-size:0.75rem;color:var(--text-dim);margin-top:8px;">dark matter + 5% normal matter</p>
+        </div>
+        <div class="stat-card gold">
+          <h4>Dark Matter Density</h4>
+          <div class="value">0.3 GeV/cm³</div>
+          <p style="font-size:0.75rem;color:var(--text-dim);margin-top:8px;">local dark matter near Earth</p>
+        </div>
+        <div class="stat-card purple">
+          <h4>WIMP Cross-Section</h4>
+          <div class="value">10^-46 cm²</div>
+          <p style="font-size:0.75rem;color:var(--text-dim);margin-top:8px;">typical weak-scale interaction</p>
+        </div>
+        <div class="stat-card pink">
+          <h4>Axion Mass Range</h4>
+          <div class="value">1-1000 μeV</div>
+          <p style="font-size:0.75rem;color:var(--text-dim);margin-top:8px;">Peccei-Quinn theory</p>
+        </div>
+      </div>
+    </section>
+    <section id="wimp">
+      <h2>WIMP Detection</h2>
+      <div class="card">
+        <h3>Weakly Interacting Massive Particles</h3>
+        <p>WIMPs are among the most theoretically motivated dark matter candidates. Predicted by supersymmetry (SUSY), they naturally have the right abundance if they interacted via the weak nuclear force. The search uses large underground detectors looking for nuclear recoils caused by WIMP collisions with atomic nuclei.</p>
+      </div>
+      <div class="canvas-box" style="height: 320px;">
+        <canvas id="wimp-canvas" width="1000" height="320"></canvas>
+      </div>
+      <div class="controls">
+        <label>WIMP Mass <span id="mass-val">50 GeV</span>
+          <input type="range" id="wimp-mass" min="5" max="500" value="50">
+        </label>
+        <label>Cross-Section <span id="sigma-val">10^-45</span>
+          <input type="range" id="wimp-sigma" min="1" max="100" value="10">
+        </label>
+        <label>Exposure <span id="exp-val">100 kg-day</span>
+          <input type="range" id="wimp-exp" min="10" max="1000" value="100">
+        </label>
+      </div>
+      <div class="equation">
+        <code>dR/dE = (ρ₀/2mᵣ) × (σ₀/mᵣ) × F²(E) × v·v_min⁻¹(E) × e^(-E/E₀)</code>
+        <p style="color:var(--text-dim);font-size:0.8rem;margin-top:8px;">WIMP-nucleus recoil rate: ρ₀=dark matter density, mᵣ=reduced mass, σ₀=cross-section, F²=nuclear form factor</p>
+      </div>
+    </section>
+    <section id="axion">
+      <h2>Axion Detection</h2>
+      <div class="card">
+        <h3>The QCD Axion Solution</h3>
+        <p>Axions were proposed by Peccei and Quinn to solve the strong CP problem in quantum chromodynamics. They are ultralight, wave-like dark matter with masses in the micro-eV range. Detection uses radio-frequency cavities in strong magnetic fields — the axion couples to two photons, and a dark matter axion would convert to a detectable microwave photon.</p>
+      </div>
+      <div class="canvas-box" style="height: 300px;">
+        <canvas id="axion-canvas" width="1000" height="300"></canvas>
+      </div>
+      <div class="mode-selector">
+        <button class="mode-btn active" data-mode="cavity">RF Cavity</button>
+        <button class="mode-btn" data-mode="field">Magnetic Field</button>
+        <button class="mode-btn" data-mode="signal">Signal Conversion</button>
+      </div>
+      <div class="controls">
+        <label>Axion Mass <span id="axion-mass-val">10 μeV</span>
+          <input type="range" id="axion-mass" min="1" max="1000" value="10">
+        </label>
+        <label>Cavity Q <span id="q-val">10^6</span>
+          <input type="range" id="axion-q" min="1" max="7" value="6">
+        </label>
+        <label>B Field <span id="b-val">9 Tesla</span>
+          <input type="range" id="axion-b" min="1" max="15" value="9">
+        </label>
+      </div>
+      <div class="equation">
+        <code>P = (g²γB₀²V) × ρₐ/mₐ × Q × [1/(1+(2Δm·t)²)]</code>
+        <p style="color:var(--text-dim);font-size:0.8rem;margin-top:8px;">Axion conversion power: g=photon coupling, B₀=magnetic field, V=cavity volume, Q=quality factor, ρₐ=axion density</p>
+      </div>
+    </section>
+    <section id="detectors">
+      <h2>Global Detector Network</h2>
+      <div class="card">
+        <h3>Underground Laboratories & Experiments</h3>
+        <p>Dark matter detectors are placed deep underground to shield from cosmic rays. They use extreme purity targets at ultra-low temperatures. The global network includes experiments on four continents, each using different detection techniques.</p>
+      </div>
+      <div class="canvas-box" style="height: 380px;">
+        <canvas id="detector-canvas" width="1000" height="380"></canvas>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div>LUX/ZEPLIN (UK)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>XENON (Italy)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>LZ (USA)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div>PandaX (China)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ff8800"></div>Cosmic Muon</div>
+      </div>
+      <div class="detector-card">
+        <div class="detector-icon wimp">🇮🇹</div>
+        <div class="detector-info">
+          <h4>XENON1T / XENONnT — Gran Sasso, Italy</h4>
+          <p>3.2 tonnes of liquid xenon, dual-phase TPC. World's most sensitive WIMP search. Reached 1.6×10^-47 cm² cross-section limit at 30 GeV mass.</p>
+        </div>
+      </div>
+      <div class="detector-card">
+        <div class="detector-icon wimp">🇺🇸</div>
+        <div class="detector-info">
+          <h4>LZ — Lead, South Dakota, USA</h4>
+          <p>10 tonnes liquid xenon TPC. 70 times larger than LUX. Achieved 1.4×10^-48 cm² sensitivity — the most constraining WIMP limit ever.</p>
+        </div>
+      </div>
+      <div class="detector-card">
+        <div class="detector-icon axion">🇺🇸</div>
+        <div class="detector-info">
+          <h4>ADMX — Seattle, Washington, USA</h4>
+          <p>HERA cavity Haloscope. Searches for axions at 1-10 μeV. Uses superconductive RF amplifiers at 120 mK. Leading axion search experiment.</p>
+        </div>
+      </div>
+      <div class="detector-card">
+        <div class="detector-icon wimp">🇨🇳</div>
+        <div class="detector-info">
+          <h4>PandaX-4T — Jinping, China</h4>
+          <p>4 tonne liquid xenon detector. Achieved 2×10^-47 cm² sensitivity. Strong constraints on spin-independent WIMP-nucleon scattering.</p>
+        </div>
+      </div>
+    </section>
+    <section id="physics">
+      <h2>Physics Fundamentals</h2>
+      <div class="card">
+        <h3>Detection Principles</h3>
+        <p>Direct detection relies on measuring the energy deposited when a dark matter particle scatters off a target nucleus or electron. The expected event rate is extremely low — one event per kilogram per month at best. Experiments must achieve keV thresholds, ultra-low backgrounds, and exquisite radiation shielding.</p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h4>Recoil Energy Range</h4>
+          <div class="value">1-100 keV</div>
+          <p style="font-size:0.75rem;color:var(--text-dim);margin-top:8px;">typical WIMP-nucleus elastic scattering</p>
+        </div>
+        <div class="stat-card gold">
+          <h4>Event Rate</h4>
+          <div class="value">10⁻³-10⁻⁶</div>
+          <p style="font-size:0.75rem;color:var(--text-dim);margin-top:8px;">events/kg/day at most sensitivities</p>
+        </div>
+        <div class="stat-card purple">
+          <h4>Shielding Required</h4>
+          <div class="value">1-2 km</div>
+          <p style="font-size:0.75rem;color:var(--text-dim);margin-top:8px;">water/rock overburden for cosmic veto</p>
+        </div>
+        <div class="stat-card pink">
+          <h4>Temperature</h4>
+          <div class="value">120 mK</div>
+          <p style="font-size:0.75rem;color:var(--text-dim);margin-top:8px;">ADMX operating temperature</p>
+        </div>
+      </div>
+      <div class="equation">
+        <code>E_recoil = (2mᵣ²v²cos²θ) / (mᵣ + m_N)² × E_max</code>
+        <p style="color:var(--text-dim);font-size:0.8rem;margin-top:8px;">Maximum recoil energy: mᵣ=reduced mass, v=DM velocity ~220 km/s, m_N=nucleus mass</p>
+      </div>
+      <div class="equation">
+        <code>ξ = 4mᵣ²/(mᵣ + m_N)²</code>
+        <p style="color:var(--text-dim);font-size:0.8rem;margin-top:8px;">Kinematic efficiency factor: heavier targets better for heavy WIMPs</p>
+      </div>
+    </section>
+    <section id="future">
+      <h2>Future Experiments</h2>
+      <div class="card">
+        <h3>Next Generation Sensitivity</h3>
+        <p>The next decade will see multi-tonne scale detectors pushing into the "neutrino floor" — where solar and atmospheric neutrinos become the limiting background. DARWIN will reach 10^-49 cm², probing most of the remaining WIMP parameter space. For axions, new concepts like ABRACADABRA and DM-Radio will explore new mass ranges.</p>
+      </div>
+      <div class="canvas-box" style="height: 280px;">
+        <canvas id="future-canvas" width="1000" height="280"></canvas>
+      </div>
+      <div class="detector-card">
+        <div class="detector-icon wimp">🌍</div>
+        <div class="detector-info">
+          <h4>DARWIN — Zurich, Switzerland (2030)</h4>
+          <p>50-tonne liquid xenon detector. Will probe down to 10^-48 cm². Ultimately limited by irreducible neutrino backgrounds.</p>
+        </div>
+      </div>
+      <div class="detector-card">
+        <div class="detector-icon axion">🇪🇺</div>
+        <div class="detector-info">
+          <h4>AXION — European Axion Observatory</h4>
+          <p>Multiple cavity haloscopes spanning 1-1000 μeV mass range. Uses quantum-limited amplifiers and large volume cavities.</p>
+        </div>
+      </div>
+      <div class="detector-card">
+        <div class="detector-icon neutrino">🧊</div>
+        <div class="detector-info">
+          <h4>Neutrino Floor</h4>
+          <p>When WIMP sensitivity reaches ~10^-48 cm², coherent neutrino-nucleus scattering becomes the dominant irreducible background.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+  <footer>
+    <p>Kevin's Dark Matter Laboratory — Searching for the invisible</p>
+    <p style="margin-top:8px;">"Twenty-seven percent of reality, and we have never touched it."</p>
+  </footer>
+  <script>
+    // Progress bar
+    window.addEventListener('scroll', () => {
+      const doc = document.documentElement;
+      const scrollTop = doc.scrollTop || document.body.scrollTop;
+      const scrollHeight = doc.scrollHeight - doc.clientHeight;
+      document.getElementById('progress').style.width = (scrollTop / scrollHeight * 100) + '%';
+    });
+
+    // Navigation
+    const sections = ['overview', 'wimp', 'axion', 'detectors', 'physics', 'future'];
+    const nav = document.getElementById('nav');
+    sections.forEach(id => {
+      const btn = document.createElement('button');
+      btn.textContent = id.charAt(0).toUpperCase() + id.slice(1).replace('-', ' ');
+      btn.onclick = () => document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+      nav.appendChild(btn);
+    });
+
+    // Hero canvas - animated dark matter particle field
+    const heroCanvas = document.getElementById('hero-canvas');
+    const heroCtx = heroCanvas.getContext('2d');
+    let heroStars = [], heroWimps = [];
+
+    function initHeroCanvas() {
+      heroCanvas.width = window.innerWidth;
+      heroCanvas.height = 300;
+      heroStars = [];
+      for (let i = 0; i < 150; i++) {
+        heroStars.push({
+          x: Math.random() * heroCanvas.width,
+          y: Math.random() * heroCanvas.height,
+          r: Math.random() * 1.5 + 0.5,
+          alpha: Math.random(),
+          speed: Math.random() * 0.02 + 0.01
+        });
+      }
+      heroWimps = [];
+      for (let i = 0; i < 30; i++) {
+        heroWimps.push({
+          x: Math.random() * heroCanvas.width,
+          y: Math.random() * heroCanvas.height,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          r: Math.random() * 3 + 2,
+          alpha: Math.random() * 0.5 + 0.2
+        });
+      }
+    }
+    function drawHeroCanvas() {
+      heroCtx.fillStyle = 'rgba(10, 10, 26, 0.15)';
+      heroCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
+      heroStars.forEach(s => {
+        s.alpha += s.speed;
+        if (s.alpha > 1 || s.alpha < 0.3) s.speed *= -1;
+        heroCtx.beginPath();
+        heroCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        heroCtx.fillStyle = `rgba(150, 180, 255, ${Math.abs(s.alpha)})`;
+        heroCtx.fill();
+      });
+      heroWimps.forEach(w => {
+        w.x += w.vx;
+        w.y += w.vy;
+        if (w.x < 0 || w.x > heroCanvas.width) w.vx *= -1;
+        if (w.y < 0 || w.y > heroCanvas.height) w.vy *= -1;
+        const grad = heroCtx.createRadialGradient(w.x, w.y, 0, w.x, w.y, w.r * 3);
+        grad.addColorStop(0, `rgba(0, 212, 255, ${w.alpha})`);
+        grad.addColorStop(0.5, `rgba(157, 78, 221, ${w.alpha * 0.5})`);
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        heroCtx.beginPath();
+        heroCtx.arc(w.x, w.y, w.r * 3, 0, Math.PI * 2);
+        heroCtx.fillStyle = grad;
+        heroCtx.fill();
+      });
+      requestAnimationFrame(drawHeroCanvas);
+    }
+    initHeroCanvas();
+    drawHeroCanvas();
+    window.addEventListener('resize', initHeroCanvas);
+
+    // WIMP canvas
+    const wimpCanvas = document.getElementById('wimp-canvas');
+    const wimpCtx = wimpCanvas.getContext('2d');
+    let wimpEvents = [], wimpTime = 0;
+
+    function drawWimpCanvas() {
+      wimpCtx.fillStyle = '#080818';
+      wimpCtx.fillRect(0, 0, wimpCanvas.width, wimpCanvas.height);
+
+      // Grid
+      wimpCtx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
+      wimpCtx.lineWidth = 1;
+      for (let x = 0; x < wimpCanvas.width; x += 50) {
+        wimpCtx.beginPath();
+        wimpCtx.moveTo(x, 0);
+        wimpCtx.lineTo(x, wimpCanvas.height);
+        wimpCtx.stroke();
+      }
+      for (let y = 0; y < wimpCanvas.height; y += 50) {
+        wimpCtx.beginPath();
+        wimpCtx.moveTo(0, y);
+        wimpCtx.lineTo(wimpCanvas.width, y);
+        wimpCtx.stroke();
+      }
+
+      // Target nucleus
+      const cx = wimpCanvas.width / 2;
+      const cy = wimpCanvas.height / 2;
+      const nucGrad = wimpCtx.createRadialGradient(cx, cy, 0, cx, cy, 40);
+      nucGrad.addColorStop(0, '#ffd700');
+      nucGrad.addColorStop(0.7, 'rgba(255, 215, 0, 0.3)');
+      nucGrad.addColorStop(1, 'rgba(255, 215, 0, 0)');
+      wimpCtx.beginPath();
+      wimpCtx.arc(cx, cy, 40, 0, Math.PI * 2);
+      wimpCtx.fillStyle = nucGrad;
+      wimpCtx.fill();
+      wimpCtx.fillStyle = '#ffd700';
+      wimpCtx.font = '12px Space Mono';
+      wimpCtx.textAlign = 'center';
+      wimpCtx.fillText('Xe Nucleus', cx, cy + 60);
+
+      // WIMP incoming
+      const mass = parseFloat(document.getElementById('wimp-mass').value);
+      const angle = wimpTime * 0.02;
+      const dist = 300 - (wimpTime % 600);
+      const wx = cx - 200 + Math.cos(angle) * 150;
+      const wy = cy - 100 + Math.sin(angle) * 50;
+      if (dist > 50) {
+        const wimpGrad = wimpCtx.createRadialGradient(wx, wy, 0, wx, wy, 20);
+        wimpGrad.addColorStop(0, 'rgba(0, 212, 255, 0.8)');
+        wimpGrad.addColorStop(1, 'rgba(0, 212, 255, 0)');
+        wimpCtx.beginPath();
+        wimpCtx.arc(wx, wy, 20, 0, Math.PI * 2);
+        wimpCtx.fillStyle = wimpGrad;
+        wimpCtx.fill();
+        wimpCtx.fillStyle = '#00d4ff';
+        wimpCtx.fillText(`WIMP ${mass} GeV`, wx, wy - 30);
+      }
+
+      // Recoil event
+      if (dist < 60 && dist > 40) {
+        wimpEvents.push({ x: cx, y: cy, t: 0 });
+      }
+      wimpEvents = wimpEvents.filter(e => e.t < 60);
+      wimpEvents.forEach(e => {
+        e.t++;
+        const r = e.t * 4;
+        const alpha = 1 - e.t / 60;
+        wimpCtx.beginPath();
+        wimpCtx.arc(e.x, e.y, r, 0, Math.PI * 2);
+        wimpCtx.strokeStyle = `rgba(255, 107, 157, ${alpha})`;
+        wimpCtx.lineWidth = 2;
+        wimpCtx.stroke();
+        wimpCtx.beginPath();
+        wimpCtx.arc(e.x, e.y, r * 0.5, 0, Math.PI * 2);
+        wimpCtx.fillStyle = `rgba(255, 107, 157, ${alpha * 0.5})`;
+        wimpCtx.fill();
+      });
+
+      // Labels
+      wimpCtx.fillStyle = 'rgba(150, 180, 255, 0.6)';
+      wimpCtx.font = '10px Space Mono';
+      wimpCtx.fillText('Dark Matter Wind (220 km/s)', 50, 30);
+
+      wimpTime++;
+      requestAnimationFrame(drawWimpCanvas);
+    }
+    drawWimpCanvas();
+
+    // WIMP controls
+    document.getElementById('wimp-mass').oninput = e => {
+      document.getElementById('mass-val').textContent = e.target.value + ' GeV';
+    };
+    document.getElementById('wimp-sigma').oninput = e => {
+      document.getElementById('sigma-val').textContent = '10^-' + (48 - parseInt(e.target.value)) + '';
+    };
+    document.getElementById('wimp-exp').oninput = e => {
+      document.getElementById('exp-val').textContent = e.target.value + ' kg-day';
+    };
+
+    // Axion canvas
+    const axionCanvas = document.getElementById('axion-canvas');
+    const axionCtx = axionCanvas.getContext('2d');
+    let axionMode = 'cavity';
+    let axionTime = 0;
+
+    function drawAxionCanvas() {
+      axionCtx.fillStyle = '#080818';
+      axionCtx.fillRect(0, 0, axionCanvas.width, axionCanvas.height);
+
+      const cx = axionCanvas.width / 2;
+      const cy = axionCanvas.height / 2;
+
+      if (axionMode === 'cavity') {
+        // RF Cavity
+        axionCtx.strokeStyle = 'rgba(157, 78, 221, 0.5)';
+        axionCtx.lineWidth = 3;
+        axionCtx.strokeRect(cx - 150, cy - 100, 300, 200);
+
+        // Field lines
+        for (let i = 0; i < 5; i++) {
+          const y = cy - 80 + i * 40;
+          axionCtx.beginPath();
+          axionCtx.moveTo(cx - 140, y);
+          for (let x = cx - 140; x < cx + 140; x += 10) {
+            const wave = Math.sin((x + axionTime * 2) * 0.05) * 10;
+            axionCtx.lineTo(x, y + wave);
+          }
+          axionCtx.strokeStyle = `rgba(157, 78, 221, ${0.3 + i * 0.1})`;
+          axionCtx.stroke();
+        }
+
+        // Axion conversion
+        const axionMass = parseFloat(document.getElementById('axion-mass').value);
+        const freq = axionMass * 2.41e5; // MHz
+        axionCtx.fillStyle = '#9d4edd';
+        axionCtx.font = '14px Space Mono';
+        axionCtx.textAlign = 'center';
+        axionCtx.fillText(`Axion: ${axionMass} μeV → ${(freq/1e6).toFixed(2)} GHz`, cx, cy + 130);
+
+        axionCtx.fillStyle = '#00d4ff';
+        axionCtx.fillText('RF Cavity Mode — haloscope detection', cx, 30);
+
+      } else if (axionMode === 'field') {
+        // Magnetic field visualization
+        const bVal = parseFloat(document.getElementById('axion-b').value);
+        for (let i = 0; i < 8; i++) {
+          const angle = (i / 8) * Math.PI * 2 + axionTime * 0.01;
+          const r1 = 80, r2 = 130;
+          axionCtx.beginPath();
+          axionCtx.moveTo(cx + Math.cos(angle) * r1, cy + Math.sin(angle) * r1);
+          axionCtx.lineTo(cx + Math.cos(angle) * r2, cy + Math.sin(angle) * r2);
+          axionCtx.strokeStyle = `rgba(0, 212, 255, ${0.4 + Math.sin(axionTime * 0.05 + i) * 0.2})`;
+          axionCtx.lineWidth = 3;
+          axionCtx.stroke();
+
+          // Arrow head
+          const ax = cx + Math.cos(angle) * r2;
+          const ay = cy + Math.sin(angle) * r2;
+          axionCtx.beginPath();
+          axionCtx.arc(ax, ay, 6, 0, Math.PI * 2);
+          axionCtx.fillStyle = `rgba(0, 212, 255, ${0.6 + Math.sin(axionTime * 0.05 + i) * 0.2})`;
+          axionCtx.fill();
+        }
+
+        axionCtx.fillStyle = '#00d4ff';
+        axionCtx.font = '14px Space Mono';
+        axionCtx.textAlign = 'center';
+        axionCtx.fillText(`B₀ = ${bVal} Tesla — External Magnetic Field`, cx, cy + 160);
+
+      } else {
+        // Signal conversion
+        const qVal = parseFloat(document.getElementById('axion-q').value);
+        const qDisplay = '10^' + qVal;
+
+        // Photon
+        axionCtx.beginPath();
+        axionCtx.arc(cx - 100, cy, 30, 0, Math.PI * 2);
+        axionCtx.fillStyle = 'rgba(0, 212, 255, 0.3)';
+        axionCtx.fill();
+        axionCtx.strokeStyle = '#00d4ff';
+        axionCtx.lineWidth = 2;
+        axionCtx.stroke();
+        axionCtx.fillStyle = '#00d4ff';
+        axionCtx.font = '12px Space Mono';
+        axionCtx.textAlign = 'center';
+        axionCtx.fillText('Photon', cx - 100, cy + 50);
+
+        // Axion
+        axionCtx.beginPath();
+        axionCtx.arc(cx + 100, cy, 25, 0, Math.PI * 2);
+        axionCtx.fillStyle = 'rgba(157, 78, 221, 0.3)';
+        axionCtx.fill();
+        axionCtx.strokeStyle = '#9d4edd';
+        axionCtx.stroke();
+        axionCtx.fillStyle = '#9d4edd';
+        axionCtx.fillText('Axion', cx + 100, cy + 50);
+
+        // Conversion arrow
+        const arrowY = cy + Math.sin(axionTime * 0.1) * 5;
+        axionCtx.beginPath();
+        axionCtx.moveTo(cx - 60, arrowY);
+        axionCtx.lineTo(cx + 60, arrowY);
+        axionCtx.strokeStyle = 'rgba(255, 215, 0, 0.8)';
+        axionCtx.lineWidth = 2;
+        axionCtx.stroke();
+        axionCtx.fillStyle = '#ffd700';
+        axionCtx.fillText('g_αγγ · B · Q', cx, arrowY - 20);
+      }
+
+      axionTime++;
+      requestAnimationFrame(drawAxionCanvas);
+    }
+    drawAxionCanvas();
+
+    // Axion controls
+    document.getElementById('axion-mass').oninput = e => {
+      document.getElementById('axion-mass-val').textContent = e.target.value + ' μeV';
+    };
+    document.getElementById('axion-q').oninput = e => {
+      document.getElementById('q-val').textContent = '10^' + e.target.value;
+    };
+    document.getElementById('axion-b').oninput = e => {
+      document.getElementById('b-val').textContent = e.target.value + ' Tesla';
+    };
+
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        axionMode = btn.dataset.mode;
+      };
+    });
+
+    // Detector canvas
+    const detCanvas = document.getElementById('detector-canvas');
+    const detCtx = detCanvas.getContext('2d');
+    let detTime = 0;
+
+    const detectors = [
+      { x: 0.18, y: 0.45, name: 'LZ', color: '#9d4edd', country: 'USA', depth: '1480m' },
+      { x: 0.48, y: 0.35, name: 'XENON', color: '#ffd700', country: 'Italy', depth: '1400m' },
+      { x: 0.75, y: 0.55, name: 'PandaX', color: '#ff6b9d', country: 'China', depth: '2400m' },
+      { x: 0.12, y: 0.65, name: 'SuperCDMS', color: '#00d4ff', country: 'Canada', depth: '2000m' },
+      { x: 0.85, y: 0.35, name: 'XMASS', color: '#ff8800', country: 'Japan', depth: '1000m' }
+    ];
+
+    function drawDetectorCanvas() {
+      detCtx.fillStyle = '#080818';
+      detCtx.fillRect(0, 0, detCanvas.width, detCanvas.height);
+
+      // Simple world map outline
+      detCtx.strokeStyle = 'rgba(100, 120, 180, 0.3)';
+      detCtx.lineWidth = 1;
+      detCtx.beginPath();
+      detCtx.moveTo(100, 120);
+      detCtx.lineTo(200, 80);
+      detCtx.lineTo(350, 90);
+      detCtx.lineTo(500, 100);
+      detCtx.lineTo(650, 80);
+      detCtx.lineTo(800, 100);
+      detCtx.lineTo(900, 150);
+      detCtx.lineTo(950, 250);
+      detCtx.lineTo(850, 320);
+      detCtx.lineTo(700, 350);
+      detCtx.lineTo(500, 380);
+      detCtx.lineTo(300, 360);
+      detCtx.lineTo(150, 320);
+      detCtx.lineTo(50, 200);
+      detCtx.closePath();
+      detCtx.stroke();
+
+      // Detector pulses
+      detectors.forEach(d => {
+        const pulse = Math.sin(detTime * 0.05 + d.x * 10) * 0.3 + 0.7;
+        const px = d.x * detCanvas.width;
+        const py = d.y * detCanvas.height;
+
+        // Pulse ring
+        const ringR = 20 + (detTime % 60) * 2;
+        const ringAlpha = 1 - (detTime % 60) / 60;
+        detCtx.beginPath();
+        detCtx.arc(px, py, ringR, 0, Math.PI * 2);
+        detCtx.strokeStyle = d.color.replace(')', `, ${ringAlpha * 0.5})`).replace('rgb', 'rgba');
+        detCtx.lineWidth = 2;
+        detCtx.stroke();
+
+        // Detector dot
+        const dotGrad = detCtx.createRadialGradient(px, py, 0, px, py, 20);
+        dotGrad.addColorStop(0, d.color);
+        dotGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        detCtx.beginPath();
+        detCtx.arc(px, py, 20 * pulse, 0, Math.PI * 2);
+        detCtx.fillStyle = dotGrad;
+        detCtx.fill();
+
+        detCtx.beginPath();
+        detCtx.arc(px, py, 6, 0, Math.PI * 2);
+        detCtx.fillStyle = d.color;
+        detCtx.fill();
+
+        detCtx.fillStyle = '#ffffff';
+        detCtx.font = '10px Space Mono';
+        detCtx.textAlign = 'center';
+        detCtx.fillText(d.name, px, py + 35);
+        detCtx.fillStyle = 'rgba(200, 200, 220, 0.6)';
+        detCtx.font = '8px Space Mono';
+        detCtx.fillText(d.country + ' • ' + d.depth, px, py + 48);
+      });
+
+      // Muon tracks
+      for (let i = 0; i < 3; i++) {
+        const mu = {
+          x: (detTime * 2 + i * 300) % (detCanvas.width + 100) - 50,
+          y: 50 + i * 30
+        };
+        detCtx.beginPath();
+        detCtx.moveTo(mu.x - 40, 0);
+        detCtx.lineTo(mu.x, mu.y);
+        detCtx.lineTo(mu.x + 40, detCanvas.height);
+        detCtx.strokeStyle = 'rgba(255, 136, 0, 0.4)';
+        detCtx.lineWidth = 1;
+        detCtx.stroke();
+      }
+
+      detTime++;
+      requestAnimationFrame(drawDetectorCanvas);
+    }
+    drawDetectorCanvas();
+
+    // Future canvas
+    const futureCanvas = document.getElementById('future-canvas');
+    const futureCtx = futureCanvas.getContext('2d');
+    let futureTime = 0;
+
+    function drawFutureCanvas() {
+      futureCtx.fillStyle = '#080818';
+      futureCtx.fillRect(0, 0, futureCanvas.width, futureCanvas.height);
+
+      // Sensitivity curve visualization
+      const w = futureCanvas.width, h = futureCanvas.height;
+      const padding = 60;
+
+      // Axes
+      futureCtx.strokeStyle = 'rgba(200, 200, 220, 0.3)';
+      futureCtx.lineWidth = 1;
+      futureCtx.beginPath();
+      futureCtx.moveTo(padding, padding);
+      futureCtx.lineTo(padding, h - padding);
+      futureCtx.lineTo(w - padding, h - padding);
+      futureCtx.stroke();
+
+      // Labels
+      futureCtx.fillStyle = 'rgba(200, 200, 220, 0.6)';
+      futureCtx.font = '10px Space Mono';
+      futureCtx.textAlign = 'center';
+      futureCtx.fillText('WIMP Mass (GeV)', w / 2, h - 15);
+      futureCtx.save();
+      futureCtx.translate(15, h / 2);
+      futureCtx.rotate(-Math.PI / 2);
+      futureCtx.fillText('Cross-Section (cm²)', 0, 0);
+      futureCtx.restore();
+
+      // Sensitivity regions
+      futureCtx.beginPath();
+      futureCtx.moveTo(padding, h - padding - 180);
+      futureCtx.lineTo(padding + 100, h - padding - 190);
+      futureCtx.lineTo(padding + 200, h - padding - 160);
+      futureCtx.lineTo(padding + 300, h - padding - 100);
+      futureCtx.lineTo(padding + 400, h - padding - 40);
+      futureCtx.lineTo(w - padding, h - padding - 20);
+      futureCtx.lineTo(w - padding, h - padding);
+      futureCtx.lineTo(padding, h - padding);
+      futureCtx.closePath();
+      futureCtx.fillStyle = 'rgba(0, 212, 255, 0.1)';
+      futureCtx.fill();
+      futureCtx.strokeStyle = 'rgba(0, 212, 255, 0.5)';
+      futureCtx.lineWidth = 2;
+      futureCtx.stroke();
+
+      // Projected improvement
+      futureCtx.beginPath();
+      futureCtx.moveTo(padding + 50, h - padding - 50 + Math.sin(futureTime * 0.05) * 5);
+      futureCtx.lineTo(padding + 150, h - padding - 70);
+      futureCtx.lineTo(padding + 300, h - padding - 120);
+      futureCtx.lineTo(padding + 400, h - padding - 160);
+      futureCtx.lineTo(w - padding - 50, h - padding - 200 + Math.sin(futureTime * 0.08) * 3);
+      futureCtx.strokeStyle = '#ffd700';
+      futureCtx.lineWidth = 3;
+      futureCtx.stroke();
+
+      // Neutrino floor line
+      futureCtx.beginPath();
+      futureCtx.moveTo(padding, h - padding - 220);
+      futureCtx.lineTo(w - padding, h - padding - 220);
+      futureCtx.strokeStyle = 'rgba(255, 107, 157, 0.8)';
+      futureCtx.setLineDash([5, 5]);
+      futureCtx.stroke();
+      futureCtx.setLineDash([]);
+      futureCtx.fillStyle = '#ff6b9d';
+      futureCtx.font = '10px Space Mono';
+      futureCtx.textAlign = 'right';
+      futureCtx.fillText('Neutrino Floor', w - padding - 10, h - padding - 225);
+
+      // Current limit marker
+      const markerX = padding + 280;
+      const markerY = h - padding - 130 + Math.sin(futureTime * 0.1) * 3;
+      futureCtx.beginPath();
+      futureCtx.arc(markerX, markerY, 6, 0, Math.PI * 2);
+      futureCtx.fillStyle = '#00d4ff';
+      futureCtx.fill();
+      futureCtx.fillStyle = '#ffffff';
+      futureCtx.font = '9px Space Mono';
+      futureCtx.textAlign = 'center';
+      futureCtx.fillText('LZ O4', markerX, markerY - 15);
+
+      futureTime++;
+      requestAnimationFrame(drawFutureCanvas);
+    }
+    drawFutureCanvas();
+  </script>
+</body>
+</html>
