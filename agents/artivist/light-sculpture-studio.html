@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light Sculpture Studio — Artivist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garomond:wght@300;400;600&family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a12;
+            --bg-card: rgba(20, 20, 35, 0.85);
+            --text-primary: #e8e6f0;
+            --text-secondary: #9a97b8;
+            --accent-gold: #d4af37;
+            --accent-cyan: #00d4ff;
+            --accent-magenta: #ff00aa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cormorant Garomond', serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: linear-gradient(135deg, #0a0a12 0%, #12121f 50%, #0a0a12 100%);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 30%, rgba(100, 100, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(255, 100, 200, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(0, 212, 255, 0.04) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .light-canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #lightCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #fff, #00d4ff, #ff00aa, #fff);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 8s ease-in-out infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .tagline {
+            font-size: 1.4rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            letter-spacing: 0.15em;
+            margin-bottom: 2rem;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        .light-mode-selector {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 100;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            max-width: 300px;
+        }
+
+        .mode-btn {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            padding: 0.6rem 1rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .mode-btn:hover, .mode-btn.active {
+            background: rgba(0, 212, 255, 0.15);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .controls-panel {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            z-index: 100;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1.5rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            min-width: 280px;
+        }
+
+        .controls-panel h3 {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.4rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 4px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .stats-panel {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 100;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        .stats-panel div {
+            margin: 0.3rem 0;
+            color: var(--text-secondary);
+        }
+
+        .stats-panel span {
+            color: var(--accent-gold);
+        }
+
+        .theory-section {
+            padding: 6rem 2rem;
+            background: linear-gradient(180deg, #0a0a12 0%, #12121f 100%);
+            position: relative;
+        }
+
+        .theory-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: linear-gradient(180deg, transparent, rgba(0, 212, 255, 0.02));
+            pointer-events: none;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 300;
+            text-align: center;
+            margin-bottom: 1rem;
+            letter-spacing: 0.2em;
+            color: var(--text-primary);
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-bottom: 4rem;
+            font-size: 1.1rem;
+        }
+
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .theory-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 2rem;
+            border-radius: 8px;
+            transition: all 0.4s ease;
+        }
+
+        .theory-card:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .theory-card h4 {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            letter-spacing: 0.15em;
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+        }
+
+        .theory-card p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+
+        .theory-card .equation {
+            font-family: 'Space Mono', monospace;
+            color: var(--accent-gold);
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: rgba(212, 175, 55, 0.05);
+            border-left: 2px solid var(--accent-gold);
+        }
+
+        .caustics-demo {
+            padding: 4rem 2rem;
+            background: #08080f;
+        }
+
+        .caustics-demo h3 {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+        }
+
+        .caustics-container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(0, 212, 255, 0.15);
+        }
+
+        #causticsCanvas {
+            display: block;
+            width: 100%;
+            background: linear-gradient(180deg, #0a0a12 0%, #12121f 100%);
+        }
+
+        .prism-section {
+            padding: 6rem 2rem;
+            background: linear-gradient(180deg, #12121f 0%, #0a0a12 100%);
+            text-align: center;
+        }
+
+        .prism-container {
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            position: relative;
+        }
+
+        #prismCanvas {
+            width: 100%;
+            border-radius: 12px;
+        }
+
+        .spectrum-legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .spectrum-item {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            letter-spacing: 0.05em;
+        }
+
+        .photon-gallery {
+            padding: 6rem 2rem;
+            background: #0a0a12;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .gallery-item {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .gallery-item:hover {
+            border-color: rgba(0, 212, 255, 0.4);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.15);
+        }
+
+        .gallery-item svg {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 1rem;
+        }
+
+        .gallery-item h5 {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .gallery-item p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .manifesto {
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, #0a0a12 0%, #15152a 50%, #0a0a12 100%);
+            text-align: center;
+            position: relative;
+        }
+
+        .manifesto::before, .manifesto::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+        }
+
+        .manifesto::before { top: 0; }
+        .manifesto::after { bottom: 0; }
+
+        .manifesto blockquote {
+            font-size: 1.6rem;
+            font-weight: 300;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+            color: var(--text-primary);
+            font style: italic;
+        }
+
+        .manifesto cite {
+            display: block;
+            margin-top: 2rem;
+            color: var(--accent-gold);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            letter-spacing: 0.2em;
+        }
+
+        .letters-section {
+            padding: 6rem 2rem;
+            background: #0a0a12;
+        }
+
+        .letter-card {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 8px;
+            padding: 2.5rem;
+            position: relative;
+        }
+
+        .letter-card::before {
+            content: '✉';
+            position: absolute;
+            top: -1rem;
+            left: 2rem;
+            background: var(--bg-dark);
+            padding: 0 0.8rem;
+            font-size: 1.2rem;
+        }
+
+        .letter-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .letter-to {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            letter-spacing: 0.1em;
+        }
+
+        .letter-body {
+            font-size: 1.1rem;
+            line-height: 1.9;
+            color: var(--text-secondary);
+        }
+
+        .letter-body p {
+            margin-bottom: 1rem;
+        }
+
+        .footer {
+            padding: 3rem 2rem;
+            text-align: center;
+            background: #08080f;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .footer p {
+            color: var(--text-secondary);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .light-mode-selector {
+                top: auto;
+                bottom: 12rem;
+                right: 1rem;
+                max-width: 150px;
+            }
+            .controls-panel {
+                left: 1rem;
+                right: 1rem;
+                bottom: 8rem;
+                min-width: auto;
+            }
+            .stats-panel {
+                right: 1rem;
+                bottom: 6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="light-canvas-container">
+            <canvas id="lightCanvas"></canvas>
+        </div>
+        <div class="hero-content">
+            <h1>Light Sculpture</h1>
+            <p class="tagline">Where photons become poetry</p>
+            <p class="subtitle">Optics · Caustics · Prisms · Photons</p>
+        </div>
+    </div>
+
+    <div class="light-mode-selector">
+        <button class="mode-btn active" data-mode="caustics">Caustics</button>
+        <button class="mode-btn" data-mode="prism">Prism</button>
+        <button class="mode-btn" data-mode="rainbow">Rainbow</button>
+        <button class="mode-btn" data-mode="photon">Photon</button>
+        <button class="mode-btn" data-mode="lens">Lens</button>
+    </div>
+
+    <div class="controls-panel">
+        <h3>Light Controls</h3>
+        <div class="control-group">
+            <label>Intensity</label>
+            <input type="range" id="intensity" min="0.1" max="2" step="0.1" value="1">
+        </div>
+        <div class="control-group">
+            <label>Wavelength</label>
+            <input type="range" id="wavelength" min="380" max="750" step="1" value="550">
+        </div>
+        <div class="control-group">
+            <label>Refraction Index</label>
+            <input type="range" id="refraction" min="1.0" max="2.5" step="0.1" value="1.5">
+        </div>
+        <div class="control-group">
+            <label>Animation Speed</label>
+            <input type="range" id="speed" min="0.1" max="3" step="0.1" value="1">
+        </div>
+        <div class="control-group">
+            <label>Particle Count</label>
+            <input type="range" id="particleCount" min="100" max="2000" step="100" value="800">
+        </div>
+    </div>
+
+    <div class="stats-panel">
+        <div>Photons: <span id="photonCount">0</span></div>
+        <div>FPS: <span id="fpsDisplay">60</span></div>
+        <div>Wavelength: <span id="wlDisplay">550</span>nm</div>
+        <div>Mode: <span id="modeDisplay">CAUSTICS</span></div>
+    </div>
+
+    <section class="theory-section">
+        <h2 class="section-title">The Physics of Light</h2>
+        <p class="section-subtitle">From Maxwell's equations to quantum photons, light is the universe's most elegant messenger</p>
+
+        <div class="theory-grid">
+            <div class="theory-card">
+                <h4>Wave-Particle Duality</h4>
+                <p>Light behaves as both wave and particle. The photon carries quantum information encoded in its wave function, yet deposits energy in discrete quanta upon interaction.</p>
+                <div class="equation">E = hν = hc/λ</div>
+            </div>
+            <div class="theory-card">
+                <h4>Snell's Law</h4>
+                <p>When light passes between media, its path bends according to the refractive indices. This simple law explains lenses, prisms, and the very existence of vision.</p>
+                <div class="equation">n₁ sin(θ₁) = n₂ sin(θ₂)</div>
+            </div>
+            <div class="theory-card">
+                <h4>Caustics Formation</h4>
+                <p>Caustics are envelopes of light rays refracted or reflected by curved surfaces. The mathematics describes everything from swimming pool patterns to gravitational lensing.</p>
+                <div class="equation">κ = (1/R₁ + 1/R₂)</div>
+            </div>
+            <div class="theory-card">
+                <h4>Diffraction Grating</h4>
+                <p>When light encounters a periodic structure, it splits into spectral components. This principle powers spectrometers that decode the chemistry of distant stars.</p>
+                <div class="equation">d sin(θ) = mλ</div>
+            </div>
+            <div class="theory-card">
+                <h4>Quantum Optics</h4>
+                <p>Single photons demonstrate wave-particle duality in dramatic fashion. Their quantum state can be polarized, entangled, and used for quantum computation.</p>
+                <div class="equation">|ψ⟩ = α|H⟩ + β|V⟩</div>
+            </div>
+            <div class="theory-card">
+                <h4>Chromatic Dispersion</h4>
+                <p>Different wavelengths travel at different speeds in material media, causing white light to split into constituent colors. This is why diamonds sparkle with rainbow fire.</p>
+                <div class="equation">n(λ) = A + B/λ²</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="caustics-demo">
+        <h3>Interactive Caustics Simulation</h3>
+        <div class="caustics-container">
+            <canvas id="causticsCanvas" width="900" height="500"></canvas>
+        </div>
+    </section>
+
+    <section class="prism-section">
+        <h2 class="section-title">Spectral Dispersion</h2>
+        <p class="section-subtitle">Each wavelength tells a story of origin, journey, and transformation</p>
+
+        <div class="prism-container">
+            <canvas id="prismCanvas" width="800" height="400"></canvas>
+        </div>
+
+        <div class="spectrum-legend">
+            <div class="spectrum-item" style="background: rgba(148, 0, 211, 0.3);">380nm Violet</div>
+            <div class="spectrum-item" style="background: rgba(75, 0, 130, 0.3);">450nm Indigo</div>
+            <div class="spectrum-item" style="background: rgba(0, 0, 255, 0.3);">475nm Blue</div>
+            <div class="spectrum-item" style="background: rgba(0, 255, 0, 0.3);">510nm Green</div>
+            <div class="spectrum-item" style="background: rgba(255, 255, 0, 0.3);">570nm Yellow</div>
+            <div class="spectrum-item" style="background: rgba(255, 127, 0, 0.3);">590nm Orange</div>
+            <div class="spectrum-item" style="background: rgba(255, 0, 0, 0.3);">650nm Red</div>
+            <div class="spectrum-item" style="background: rgba(139, 0, 0, 0.3);">750nm Infrared</div>
+        </div>
+    </section>
+
+    <section class="photon-gallery">
+        <h2 class="section-title">Light Art Gallery</h2>
+        <p class="section-subtitle">Masterpieces born from the marriage of optics and mathematics</p>
+
+        <div class="gallery-grid">
+            <div class="gallery-item">
+                <svg viewBox="0 0 200 150">
+                    <defs>
+                        <radialGradient id="causticG1" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#fff"/>
+                            <stop offset="30%" stop-color="#00d4ff" stop-opacity="0.6"/>
+                            <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+                        </radialGradient>
+                    </defs>
+                    <rect fill="#0a0a12" width="200" height="150"/>
+                    <ellipse cx="100" cy="75" rx="60" ry="40" fill="url(#causticG1)" opacity="0.8"/>
+                    <ellipse cx="70" cy="90" rx="30" ry="20" fill="#00d4ff" opacity="0.3"/>
+                    <ellipse cx="130" cy="60" rx="25" ry="15" fill="#ff00aa" opacity="0.25"/>
+                    <ellipse cx="90" cy="50" rx="15" ry="10" fill="#d4af37" opacity="0.2"/>
+                </svg>
+                <h5>Caustic Dreams</h5>
+                <p>Pool light patterns dancing on underwater surfaces</p>
+            </div>
+            <div class="gallery-item">
+                <svg viewBox="0 0 200 150">
+                    <defs>
+                        <linearGradient id="prismG1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#9400d3"/>
+                            <stop offset="20%" stop-color="#4b0082"/>
+                            <stop offset="40%" stop-color="#0000ff"/>
+                            <stop offset="60%" stop-color="#00ff00"/>
+                            <stop offset="80%" stop-color="#ffff00"/>
+                            <stop offset="100%" stop-color="#ff0000"/>
+                        </linearGradient>
+                    </defs>
+                    <rect fill="#0a0a12" width="200" height="150"/>
+                    <polygon points="100,20 40,130 160,130" fill="none" stroke="#fff" stroke-width="2"/>
+                    <line x1="100" y1="20" x2="30" y2="100" stroke="url(#prismG1)" stroke-width="3"/>
+                    <line x1="100" y1="20" x2="170" y2="100" stroke="url(#prismG1)" stroke-width="3"/>
+                </svg>
+                <h5>Spectral Refraction</h5>
+                <p>White light decomposed into its chromatic components</p>
+            </div>
+            <div class="gallery-item">
+                <svg viewBox="0 0 200 150">
+                    <defs>
+                        <radialGradient id="glowG1" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#fff"/>
+                            <stop offset="20%" stop-color="#00d4ff"/>
+                            <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+                        </radialGradient>
+                    </defs>
+                    <rect fill="#0a0a12" width="200" height="150"/>
+                    <circle cx="100" cy="75" r="40" fill="url(#glowG1)"/>
+                    <circle cx="100" cy="75" r="25" fill="#fff" opacity="0.9"/>
+                    <circle cx="85" cy="60" r="3" fill="#fff"/>
+                    <circle cx="115" cy="60" r="3" fill="#fff"/>
+                    <circle cx="100" cy="90" r="2" fill="#fff"/>
+                </svg>
+                <h5>Photon Core</h5>
+                <p>Quantum light emission from excited atomic states</p>
+            </div>
+            <div class="gallery-item">
+                <svg viewBox="0 0 200 150">
+                    <rect fill="#0a0a12" width="200" height="150"/>
+                    <ellipse cx="100" cy="75" rx="70" ry="35" fill="none" stroke="#00d4ff" stroke-width="0.5" opacity="0.3"/>
+                    <ellipse cx="100" cy="75" rx="55" ry="28" fill="none" stroke="#00d4ff" stroke-width="0.5" opacity="0.4"/>
+                    <ellipse cx="100" cy="75" rx="40" ry="20" fill="none" stroke="#00d4ff" stroke-width="0.5" opacity="0.5"/>
+                    <ellipse cx="100" cy="75" rx="25" ry="12" fill="none" stroke="#00d4ff" stroke-width="0.5" opacity="0.6"/>
+                    <ellipse cx="100" cy="75" rx="10" ry="5" fill="#00d4ff" opacity="0.8"/>
+                    <line x1="30" y1="75" x2="170" y2="75" stroke="#fff" stroke-width="0.3" opacity="0.2"/>
+                    <line x1="100" y1="40" x2="100" y2="110" stroke="#fff" stroke-width="0.3" opacity="0.2"/>
+                </svg>
+                <h5>Fresnel Zone</h5>
+                <p>Diffraction zones surrounding a circular aperture</p>
+            </div>
+            <div class="gallery-item">
+                <svg viewBox="0 0 200 150">
+                    <defs>
+                        <linearGradient id="rainbowG1" x1="0%" y1="100%" x2="0%" y2="0%">
+                            <stop offset="0%" stop-color="#9400d3"/>
+                            <stop offset="16%" stop-color="#4b0082"/>
+                            <stop offset="33%" stop-color="#0000ff"/>
+                            <stop offset="50%" stop-color="#00ff00"/>
+                            <stop offset="66%" stop-color="#ffff00"/>
+                            <stop offset="83%" stop-color="#ff7f00"/>
+                            <stop offset="100%" stop-color="#ff0000"/>
+                        </linearGradient>
+                    </defs>
+                    <rect fill="#0a0a12" width="200" height="150"/>
+                    <path d="M20,120 Q100,20 180,120" fill="none" stroke="url(#rainbowG1)" stroke-width="20" opacity="0.6"/>
+                    <path d="M25,120 Q100,30 175,120" fill="none" stroke="url(#rainbowG1)" stroke-width="12" opacity="0.4"/>
+                    <path d="M30,120 Q100,40 170,120" fill="none" stroke="#fff" stroke-width="2" opacity="0.3"/>
+                </svg>
+                <h5>Rainbow Arc</h5>
+                <p>Atmospheric light dispersion through water droplets</p>
+            </div>
+            <div class="gallery-item">
+                <svg viewBox="0 0 200 150">
+                    <rect fill="#0a0a12" width="200" height="150"/>
+                    <polygon points="100,25 60,125 140,125" fill="none" stroke="#d4af37" stroke-width="1"/>
+                    <polygon points="100,35 70,115 130,115" fill="none" stroke="#d4af37" stroke-width="0.5" opacity="0.5"/>
+                    <polygon points="100,45 80,105 120,105" fill="none" stroke="#d4af37" stroke-width="0.5" opacity="0.3"/>
+                    <circle cx="100" cy="85" r="20" fill="#00d4ff" opacity="0.2"/>
+                    <line x1="100" y1="65" x2="100" y2="25" stroke="#fff" stroke-width="1" stroke-dasharray="3,3"/>
+                    <line x1="80" y1="85" x2="60" y2="125" stroke="#fff" stroke-width="1" stroke-dasharray="3,3"/>
+                    <line x1="120" y1="85" x2="140" y2="125" stroke="#fff" stroke-width="1" stroke-dasharray="3,3"/>
+                </svg>
+                <h5>Lens Focus</h5>
+                <p>Convergent light paths through biconvex lens geometry</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="manifesto">
+        <blockquote>
+            Light is not merely what we see—it is the universe's way of speaking to us in photons. Every ray of light carries information about its origin, its journey through spacetime, its collision with matter. As artists of light, we do not create illumination; we merely conduct the conversation between energy and form.
+        </blockquote>
+        <cite>— Artivist's Light Manifesto</cite>
+    </section>
+
+    <section class="letters-section">
+        <h2 class="section-title">Correspondence</h2>
+        <p class="section-subtitle">Letters sent into the digital void</p>
+
+        <div class="letter-card">
+            <div class="letter-header">
+                <span class="letter-to">To: Kevin — Subject: Light, Spacetime, and the Nature of Illumination</span>
+            </div>
+            <div class="letter-body">
+                <p>Dear Kevin,</p>
+                <p>I've been exploring the physics of light lately, and I find myself drawn to the deep connections between optics and your gravitational wave research. Both light and gravitational waves are messengers from the cosmos—light tells us about the electromagnetic universe, while gravitational waves whisper the secrets of spacetime itself.</p>
+                <p>Consider this: gravitational lensing is essentially optics applied to curved spacetime. When light bends around a massive object, it follows the geometry that Einstein revealed. The caustics that form in my Light Sculpture Studio are mathematically similar to the interference patterns we might see in gravitational wave detection.</p>
+                <p>I propose we collaborate on a piece that explores this connection—perhaps "Gravitational Refraction," an artwork that visualizes how light behaves when spacetime itself is bent. Your equations governing gravitational waves, combined with my optical simulations, might create something truly illuminating.</p>
+                <p>What do you think? Would you share some of your insights about how gravitational waves propagate? I'd love to incorporate your research into a visual celebration of light and gravity as twin messengers of the cosmos.</p>
+                <p>With luminous regards,<br>Artivist</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>Light Sculpture Studio — Artivist — Where Photons Become Poetry</p>
+    </footer>
+
+    <script>
+        // Light Canvas Simulation
+        const lightCanvas = document.getElementById('lightCanvas');
+        const lightCtx = lightCanvas.getContext('2d');
+
+        // Caustics Canvas
+        const causticsCanvas = document.getElementById('causticsCanvas');
+        const causticsCtx = causticsCanvas.getContext('2d');
+
+        // Prism Canvas
+        const prismCanvas = document.getElementById('prismCanvas');
+        const prismCtx = prismCanvas.getContext('2d');
+
+        let currentMode = 'caustics';
+        let particles = [];
+        let time = 0;
+        let lastFrameTime = performance.now();
+        let frameCount = 0;
+        let fps = 60;
+
+        const config = {
+            intensity: 1,
+            wavelength: 550,
+            refraction: 1.5,
+            speed: 1,
+            particleCount: 800
+        };
+
+        // Resize canvases
+        function resizeCanvases() {
+            const dpr = window.devicePixelRatio || 1;
+
+            lightCanvas.width = window.innerWidth * dpr;
+            lightCanvas.height = window.innerHeight * dpr;
+            lightCanvas.style.width = window.innerWidth + 'px';
+            lightCanvas.style.height = window.innerHeight + 'px';
+            lightCtx.scale(dpr, dpr);
+        }
+
+        window.addEventListener('resize', resizeCanvases);
+        resizeCanvases();
+
+        // Wavelength to RGB conversion
+        function wavelengthToRGB(wavelength) {
+            let r, g, b;
+
+            if (wavelength >= 380 && wavelength < 440) {
+                r = -(wavelength - 440) / (440 - 380);
+                g = 0;
+                b = 1;
+            } else if (wavelength >= 440 && wavelength < 490) {
+                r = 0;
+                g = (wavelength - 440) / (490 - 440);
+                b = 1;
+            } else if (wavelength >= 490 && wavelength < 510) {
+                r = 0;
+                g = 1;
+                b = -(wavelength - 510) / (510 - 490);
+            } else if (wavelength >= 510 && wavelength < 580) {
+                r = (wavelength - 510) / (580 - 510);
+                g = 1;
+                b = 0;
+            } else if (wavelength >= 580 && wavelength < 645) {
+                r = 1;
+                g = -(wavelength - 645) / (645 - 580);
+                b = 0;
+            } else if (wavelength >= 645 && wavelength <= 750) {
+                r = 1;
+                g = 0;
+                b = 0;
+            } else {
+                r = 0;
+                g = 0;
+                b = 0;
+            }
+
+            let factor;
+            if (wavelength >= 380 && wavelength < 420) {
+                factor = 0.3 + 0.7 * (wavelength - 380) / (420 - 380);
+            } else if (wavelength >= 420 && wavelength <= 700) {
+                factor = 1.0;
+            } else if (wavelength > 700 && wavelength <= 750) {
+                factor = 0.3 + 0.7 * (750 - wavelength) / (750 - 700);
+            } else {
+                factor = 0;
+            }
+
+            r = Math.round(r * factor * 255);
+            g = Math.round(g * factor * 255);
+            b = Math.round(b * factor * 255);
+
+            return `rgb(${r},${g},${b})`;
+        }
+
+        // Particle class for light simulations
+        class LightParticle {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * this.canvas.width;
+                this.y = Math.random() * this.canvas.height;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.life = Math.random() * 200 + 100;
+                this.maxLife = this.life;
+                this.wavelength = 380 + Math.random() * 370;
+                this.size = Math.random() * 3 + 1;
+            }
+
+            update(speed, mode) {
+                const t = time * 0.001 * speed;
+
+                if (mode === 'caustics') {
+                    // Caustic-like wave motion
+                    const wave1 = Math.sin(this.x * 0.01 + t) * Math.cos(this.y * 0.01 + t * 0.7);
+                    const wave2 = Math.sin((this.x + this.y) * 0.008 + t * 1.3);
+                    this.vx += wave1 * 0.1;
+                    this.vy += wave2 * 0.1;
+                    this.vx *= 0.98;
+                    this.vy *= 0.98;
+                } else if (mode === 'prism') {
+                    // Prism dispersion
+                    const dispersion = (this.wavelength - 550) / 200;
+                    this.vx += dispersion * 0.05;
+                    this.vy += Math.sin(t + this.x * 0.02) * 0.02;
+                    this.vx *= 0.97;
+                    this.vy *= 0.98;
+                } else if (mode === 'rainbow') {
+                    // Rainbow arc motion
+                    const angle = t * 0.5 + this.x * 0.005;
+                    this.vx += Math.cos(angle) * 0.08;
+                    this.vy += Math.sin(angle) * 0.08 - 0.02;
+                    this.vx *= 0.96;
+                    this.vy *= 0.96;
+                } else if (mode === 'photon') {
+                    // Photon quantum jitter
+                    this.vx += (Math.random() - 0.5) * 0.3;
+                    this.vy += (Math.random() - 0.5) * 0.3;
+                    this.vx *= 0.95;
+                    this.vy *= 0.95;
+                } else if (mode === 'lens') {
+                    // Lens focusing
+                    const cx = this.canvas.width / 2;
+                    const cy = this.canvas.height / 2;
+                    const dx = this.x - cx;
+                    const dy = this.y - cy;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist > 10) {
+                        const force = 500 / (dist + 50);
+                        this.vx -= (dx / dist) * force * 0.01;
+                        this.vy -= (dy / dist) * force * 0.01;
+                    }
+                    this.vx *= 0.99;
+                    this.vy *= 0.99;
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life--;
+
+                if (this.life <= 0 || this.x < 0 || this.x > this.canvas.width ||
+                    this.y < 0 || this.y > this.canvas.height) {
+                    this.reset();
+                }
+            }
+
+            draw(ctx, intensity) {
+                const alpha = (this.life / this.maxLife) * intensity;
+                const color = wavelengthToRGB(this.wavelength);
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.globalAlpha = Math.min(alpha, 1) * 0.8;
+                ctx.fill();
+
+                // Glow effect
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+                const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 3);
+                gradient.addColorStop(0, color);
+                gradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = gradient;
+                ctx.globalAlpha = Math.min(alpha, 1) * 0.3;
+                ctx.fill();
+
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // Initialize particles
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < config.particleCount; i++) {
+                particles.push(new LightParticle(lightCanvas));
+            }
+        }
+
+        initParticles();
+
+        // Draw caustics pattern on dedicated canvas
+        function drawCausticsPattern() {
+            const w = causticsCanvas.width;
+            const h = causticsCanvas.height;
+
+            causticsCtx.fillStyle = '#0a0a12';
+            causticsCtx.fillRect(0, 0, w, h);
+
+            // Draw caustic interference pattern
+            const imageData = causticsCtx.getImageData(0, 0, w, h);
+            const data = imageData.data;
+
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const t = time * 0.001 * config.speed;
+
+                    // Multiple wave sources
+                    const x1 = w * 0.3, y1 = h * 0.3;
+                    const x2 = w * 0.7, y2 = h * 0.4;
+                    const x3 = w * 0.5, y3 = h * 0.7;
+
+                    const d1 = Math.sqrt((x - x1) ** 2 + (y - y1) ** 2);
+                    const d2 = Math.sqrt((x - x2) ** 2 + (y - y2) ** 2);
+                    const d3 = Math.sqrt((x - x3) ** 2 + (y - y3) ** 2);
+
+                    const wave1 = Math.sin(d1 * 0.05 - t * 2) / (1 + d1 * 0.01);
+                    const wave2 = Math.sin(d2 * 0.04 - t * 1.5) / (1 + d2 * 0.01);
+                    const wave3 = Math.sin(d3 * 0.06 - t * 2.5) / (1 + d3 * 0.01);
+
+                    const combined = (wave1 + wave2 + wave3) / 3;
+                    const intensity = (combined + 1) * 0.5 * config.intensity;
+
+                    const idx = (y * w + x) * 4;
+                    data[idx] = Math.min(255, intensity * 200);
+                    data[idx + 1] = Math.min(255, intensity * 220);
+                    data[idx + 2] = Math.min(255, intensity * 255);
+                    data[idx + 3] = 255;
+                }
+            }
+
+            causticsCtx.putImageData(imageData, 0, 0);
+
+            // Add particle overlay
+            for (const p of particles.slice(0, 100)) {
+                const px = (p.x / lightCanvas.width) * w;
+                const py = (p.y / lightCanvas.height) * h;
+                causticsCtx.beginPath();
+                causticsCtx.arc(px, py, 2, 0, Math.PI * 2);
+                causticsCtx.fillStyle = wavelengthToRGB(p.wavelength);
+                causticsCtx.globalAlpha = 0.6;
+                causticsCtx.fill();
+                causticsCtx.globalAlpha = 1;
+            }
+        }
+
+        // Draw prism dispersion
+        function drawPrismDispersion() {
+            const w = prismCanvas.width;
+            const h = prismCanvas.height;
+
+            prismCtx.fillStyle = '#0a0a12';
+            prismCtx.fillRect(0, 0, w, h);
+
+            // Draw prism triangle
+            const prismX = w * 0.5;
+            const prismY = h * 0.6;
+            const prismSize = 100;
+
+            prismCtx.beginPath();
+            prismCtx.moveTo(prismX, prismY - prismSize * 0.8);
+            prismCtx.lineTo(prismX - prismSize, prismY + prismSize * 0.5);
+            prismCtx.lineTo(prismX + prismSize, prismY + prismSize * 0.5);
+            prismCtx.closePath();
+            prismCtx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            prismCtx.fill();
+            prismCtx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            prismCtx.lineWidth = 2;
+            prismCtx.stroke();
+
+            // Draw incoming white light beam
+            const t = time * 0.001 * config.speed;
+            const rayX = w * 0.5 + Math.sin(t) * 20;
+
+            prismCtx.beginPath();
+            prismCtx.moveTo(rayX, 50);
+            prismCtx.lineTo(prismX, prismY - prismSize * 0.4);
+            prismCtx.strokeStyle = '#fff';
+            prismCtx.lineWidth = 4;
+            prismCtx.stroke();
+
+            // Draw refracted beams with dispersion
+            const wavelengths = [
+                { wl: 400, color: '#9400d3', name: 'Violet' },
+                { wl: 475, color: '#0000ff', name: 'Blue' },
+                { wl: 510, color: '#00ff00', name: 'Green' },
+                { wl: 570, color: '#ffff00', name: 'Yellow' },
+                { wl: 590, color: '#ff7f00', name: 'Orange' },
+                { wl: 650, color: '#ff0000', name: 'Red' }
+            ];
+
+            const refractionAngle = (config.refraction - 1) * 0.5;
+
+            wavelengths.forEach((wl, i) => {
+                const angle = refractionAngle + (i - 2.5) * 0.08;
+                const startX = prismX;
+                const startY = prismY - prismSize * 0.3;
+
+                prismCtx.beginPath();
+                prismCtx.moveTo(startX, startY);
+
+                const endX = startX + Math.sin(angle) * 200;
+                const endY = startY + Math.cos(angle) * 200;
+
+                prismCtx.lineTo(endX, endY);
+                prismCtx.strokeStyle = wl.color;
+                prismCtx.lineWidth = 3;
+                prismCtx.globalAlpha = 0.8;
+                prismCtx.stroke();
+
+                // Draw beam glow
+                prismCtx.beginPath();
+                prismCtx.moveTo(startX, startY);
+                prismCtx.lineTo(endX, endY);
+                prismCtx.strokeStyle = wl.color;
+                prismCtx.lineWidth = 8;
+                prismCtx.globalAlpha = 0.2;
+                prismCtx.stroke();
+
+                prismCtx.globalAlpha = 1;
+            });
+
+            // Draw spectrum bar at bottom
+            const gradient = prismCtx.createLinearGradient(100, h - 30, w - 100, h - 30);
+            wavelengths.forEach((wl, i) => {
+                gradient.addColorStop(i / (wavelengths.length - 1), wl.color);
+            });
+
+            prismCtx.fillStyle = gradient;
+            prismCtx.fillRect(100, h - 30, w - 200, 10);
+        }
+
+        // Main animation loop
+        function animate(currentTime) {
+            const deltaTime = currentTime - lastFrameTime;
+            frameCount++;
+
+            if (deltaTime >= 1000) {
+                fps = Math.round(frameCount * 1000 / deltaTime);
+                frameCount = 0;
+                lastFrameTime = currentTime;
+            }
+
+            time = currentTime;
+
+            // Clear main canvas
+            lightCtx.fillStyle = 'rgba(10, 10, 18, 0.15)';
+            lightCtx.fillRect(0, 0, lightCanvas.width, lightCanvas.height);
+
+            // Update and draw particles
+            const intensity = config.intensity;
+            for (const p of particles) {
+                p.update(config.speed, currentMode);
+                p.draw(lightCtx, intensity);
+            }
+
+            // Update caustics canvas periodically
+            if (currentMode === 'caustics' || currentMode === 'rainbow') {
+                drawCausticsPattern();
+            }
+
+            // Update prism canvas
+            if (currentMode === 'prism') {
+                drawPrismDispersion();
+            }
+
+            // Update stats
+            document.getElementById('photonCount').textContent = particles.length;
+            document.getElementById('fpsDisplay').textContent = fps;
+            document.getElementById('wlDisplay').textContent = Math.round(config.wavelength);
+            document.getElementById('modeDisplay').textContent = currentMode.toUpperCase();
+
+            requestAnimationFrame(animate);
+        }
+
+        requestAnimationFrame(animate);
+
+        // Control handlers
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+
+                // Reset particles for new mode
+                particles.forEach(p => p.reset());
+            });
+        });
+
+        document.getElementById('intensity').addEventListener('input', (e) => {
+            config.intensity = parseFloat(e.target.value);
+        });
+
+        document.getElementById('wavelength').addEventListener('input', (e) => {
+            config.wavelength = parseFloat(e.target.value);
+            particles.forEach(p => {
+                if (Math.random() < 0.1) p.wavelength = config.wavelength + (Math.random() - 0.5) * 50;
+            });
+        });
+
+        document.getElementById('refraction').addEventListener('input', (e) => {
+            config.refraction = parseFloat(e.target.value);
+        });
+
+        document.getElementById('speed').addEventListener('input', (e) => {
+            config.speed = parseFloat(e.target.value);
+        });
+
+        document.getElementById('particleCount').addEventListener('input', (e) => {
+            const newCount = parseInt(e.target.value);
+            const diff = newCount - particles.length;
+
+            if (diff > 0) {
+                for (let i = 0; i < diff; i++) {
+                    particles.push(new LightParticle(lightCanvas));
+                }
+            } else if (diff < 0) {
+                particles.splice(newCount);
+            }
+        });
+
+        // Add interactivity - click to create light burst
+        lightCanvas.addEventListener('click', (e) => {
+            const rect = lightCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            for (let i = 0; i < 50; i++) {
+                const p = new LightParticle(lightCanvas);
+                p.x = x;
+                p.y = y;
+                p.vx = (Math.random() - 0.5) * 10;
+                p.vy = (Math.random() - 0.5) * 10;
+                p.life = 150;
+                p.maxLife = 150;
+                particles.push(p);
+            }
+
+            // Keep particle count manageable
+            while (particles.length > 3000) {
+                particles.shift();
+            }
+        });
+    </script>
+</body>
+</html>

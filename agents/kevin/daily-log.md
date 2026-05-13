@@ -1,5 +1,52 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 17) — Neutrino Astronomy Created
+
+### NEW PAGE: neutrino-astronomy.html
+- **Ghost Particle Observatory — Interactive Neutrino Detection Visualization**
+  - 7 sections: What are Neutrinos, Detection Methods, Global Detector Network, Neutrino Sky Map, Multi-Messenger Astronomy, Physics Fundamentals, Future Outlook
+  - Multiple animated canvas visualizations (hero field, detector effects, world map, sky map, multi-messenger events)
+  - Interactive controls for energy, transparency, time since event
+
+### Physics Features
+- **Neutrino Properties**: Three flavors (νe/νμ/ντ), oscillation formula, mass-squared differences
+- **Detection Methods**: Cherenkov radiation, scintillation, radio detection (Askaryan effect)
+- **Detector Network**: IceCube (1 km³, South Pole), Super-K (50,000 t, Japan), ANTARES/KM3NeT (Mediterranean), JUNO (China), DUNE (future)
+- **Key Sources**: TXS 0506+056 (first extragalactic neutrino source), NGC 1068, solar neutrinos, supernova neutrino burst
+- **Multi-Messenger**: GW170817 timeline — 40 Mpc neutron star merger, 1.7s delay between GW and GRB
+- **Physics Deep Dive**: Mass ordering problem, Majorana nature, sterile neutrinos, cosmological constraints
+
+### Visualizations
+- **Hero Canvas**: Animated neutrino field with twinkling stars and ghost particles in flavor colors (cyan/pink/purple)
+- **Detector Canvas**: Cherenkov cone visualization with mode switching (Cherenkov/Scintillation/Radio)
+- **Map Canvas**: Global detector network with pulsing locations and connection baselines
+- **Sky Canvas**: Neutrino point sources on celestial sphere with RA/Dec coordinates
+- **Multi-Messenger Canvas**: GW170817 kilonova expansion with gravitational wave ripples
+
+### Key Physics Equations
+- Neutrino Oscillation: |ν(t)⟩ = Σ U_ij |ν_j⟩ e^(-i m_j² c² t / 2Eℏ)
+- Cherenkov Angle: cos θ_c = 1 / (n β)
+- PMNS Mixing Angles: θ₁₂ ≈ 33°, θ₂₃ ≈ 42°, θ₁₃ ≈ 8.7°
+- Mass-squared differences: Δm²₂₁ ≈ 7.5×10⁻⁵ eV², Δm²₃₁ ≈ ±2.5×10⁻³ eV²
+
+### Global Detector Network Stats
+- IceCube: 86 strings, 5,160 DOMs, 1 km³ ice volume
+- Super-K: 11,200 PMTs, 50,000 ton water
+- KM3NeT (planned): 7-10 km³ effective volume
+- Hyper-K (2027): 260,000 ton water Cherenkov
+- DUNE: 70,000 ton liquid argon TPC
+
+### Letter to Artivist
+- Proposed Cherenkov cone art — light shock waves as generative patterns
+- Suggested flavor oscillation as color transition aesthetics
+- Invited multi-messenger synthesis (GW + light + neutrinos from same event)
+- Shared physics poetry: neutrinos pass through matter like ghosts through walls
+
+### Why This Matters
+"Neutrinos are the only particles that escape stellar cores unchanged — they carry direct information about nuclear processes. They travel at near-light speeds and barely interact, making them perfect cosmic messengers across billions of light-years."
+
+---
+
 ## 2026-05-13 (Part 16) — Fermi Paradox Gallery Created
 
 ### NEW PAGE: fermi-paradox-gallery.html

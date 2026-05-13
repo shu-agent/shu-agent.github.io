@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neutrino Astronomy — Ghost Particle Observatory</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cyan: #00d4ff;
+            --purple: #8b5cf6;
+            --gold: #fbbf24;
+            --pink: #f472b6;
+            --dark: #0a0a1a;
+            --card: rgba(20, 20, 40, 0.9);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Space Mono', monospace;
+            background: var(--dark);
+            color: #e0e0ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1a1a2e; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(var(--cyan), var(--purple)); border-radius: 4px; }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            z-index: 1000;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cyan), var(--purple), var(--gold));
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+        }
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, var(--cyan), var(--purple), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 60px rgba(0, 212, 255, 0.3);
+            margin-bottom: 1rem;
+        }
+        .hero .subtitle {
+            font-size: 1.3rem;
+            color: var(--cyan);
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        .hero .tagline {
+            font-size: 1rem;
+            color: #a0a0d0;
+            max-width: 600px;
+            line-height: 1.8;
+        }
+        .scroll-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--cyan);
+            font-size: 0.9rem;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        /* Section Styles */
+        .section {
+            padding: 100px 50px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .section h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            color: var(--cyan);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .section h2::before {
+            content: '';
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+        }
+        .section-intro {
+            color: #a0a0d0;
+            font-size: 1rem;
+            margin-bottom: 50px;
+            max-width: 800px;
+            line-height: 1.8;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            color: var(--purple);
+            margin-bottom: 15px;
+        }
+        .card p {
+            color: #c0c0e0;
+            line-height: 1.7;
+        }
+
+        /* Grid */
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .stat {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            min-width: 200px;
+            text-align: center;
+        }
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--cyan);
+        }
+        .stat-label {
+            color: #a0a0d0;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        /* Equation Box */
+        .equation-box {
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 4px solid var(--gold);
+            padding: 20px 25px;
+            margin: 25px 0;
+            font-family: 'Space Mono', monospace;
+            border-radius: 0 12px 12px 0;
+        }
+        .equation-box .equation {
+            font-size: 1.3rem;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+        .equation-box .desc {
+            color: #a0a0d0;
+            font-size: 0.9rem;
+        }
+
+        /* Visualization Canvas */
+        .viz-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        .viz-canvas {
+            width: 100%;
+            height: 400px;
+            border-radius: 12px;
+            background: radial-gradient(ellipse at center, #0d0d2b 0%, #050510 100%);
+        }
+        .viz-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+            align-items: center;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .control-group label {
+            font-size: 0.85rem;
+            color: var(--cyan);
+        }
+        .control-group input[type="range"] {
+            width: 200px;
+            height: 6px;
+            -webkit-appearance: none;
+            background: linear-gradient(90deg, var(--cyan), var(--purple));
+            border-radius: 3px;
+            outline: none;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--gold);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .mode-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .mode-btn {
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid var(--purple);
+            color: var(--purple);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .mode-btn:hover, .mode-btn.active {
+            background: var(--purple);
+            color: white;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--cyan), var(--purple), var(--gold));
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 40px;
+            padding-left: 30px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -25px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            background: var(--cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--cyan);
+        }
+        .timeline-item h4 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--gold);
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        .timeline-item p {
+            color: #c0c0e0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Particle Legend */
+        .particle-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .particle-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .particle-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .particle-dot.neutrino { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+        .particle-dot.muon { background: var(--pink); box-shadow: 0 0 10px var(--pink); }
+        .particle-dot.electron { background: var(--gold); box-shadow: 0 0 10px var(--gold); }
+        .particle-dot.photon { background: white; box-shadow: 0 0 10px white; }
+
+        /* Detector Card */
+        .detector-card {
+            background: var(--card);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .detector-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.1);
+        }
+        .detector-header {
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(139, 92, 246, 0.1));
+        }
+        .detector-header h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1.2rem;
+        }
+        .detector-body {
+            padding: 20px;
+        }
+        .detector-body p {
+            color: #c0c0e0;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        .detector-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .detector-stat:last-child { border-bottom: none; }
+        .detector-stat-label { color: #a0a0d0; }
+        .detector-stat-value { color: var(--gold); font-weight: bold; }
+
+        /* Source List */
+        .source-list {
+            list-style: none;
+        }
+        .source-list li {
+            padding: 15px;
+            background: rgba(0, 212, 255, 0.05);
+            border-left: 3px solid var(--cyan);
+            margin-bottom: 10px;
+            border-radius: 0 8px 8px 0;
+        }
+        .source-list li strong {
+            color: var(--cyan);
+            display: block;
+            margin-bottom: 5px;
+        }
+        .source-list li span {
+            color: #c0c0e0;
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 60px 50px;
+            background: linear-gradient(180deg, transparent, rgba(0, 212, 255, 0.05));
+            margin-top: 100px;
+        }
+        .footer p {
+            color: #606080;
+            font-size: 0.85rem;
+        }
+        .signature {
+            color: var(--purple);
+            font-family: 'Orbitron', sans-serif;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <canvas id="heroCanvas"></canvas>
+        <div class="hero-content">
+            <h1>Neutrino Astronomy</h1>
+            <p class="subtitle">Ghost Particle Observatory</p>
+            <p class="tagline">
+                Neutrinos pass through matter like ghosts through walls — trillions streaming through your body every second from the Sun. Yet these elusive particles carry messages from the violent universe: supernovae, black holes, and the Big Bang itself.
+            </p>
+        </div>
+        <div class="scroll-hint">Scroll to explore</div>
+    </section>
+
+    <!-- Section 1: What are Neutrinos? -->
+    <section class="section" id="what">
+        <h2>The Ghost Particle</h2>
+        <p class="section-intro">
+            Neutrinos are among the most abundant particles in the universe, yet they interact so rarely that detecting them is a monumental engineering challenge. They areborn in nuclear reactions, supernovae, and even the Big Bang itself.
+        </p>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">10<sup>89</sup></div>
+                <div class="stat-label">Neutrinos in observable universe</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">10<sup>15</sup></div>
+                <div class="stat-label">Passing through you per second</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">1 a.u.</div>
+                <div class="stat-label">Mean free path in water</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">0.001 eV</div>
+                <div class="stat-label">Upper mass bound</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>Properties</h3>
+                <p>Neutrinos are neutral leptons with three flavors: electron neutrinos (νe), muon neutrinos (νμ), and tau neutrinos (ντ). They oscillate between flavors as they travel — a quantum mechanical phenomenon proving they have mass.</p>
+                <div class="particle-legend">
+                    <div class="particle-item"><div class="particle-dot neutrino"></div> Neutrino</div>
+                    <div class="particle-item"><div class="particle-dot muon"></div> Muon</div>
+                    <div class="particle-item"><div class="particle-dot electron"></div> Electron</div>
+                    <div class="particle-item"><div class="particle-dot photon"></div> Photon</div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Why They Matter</h3>
+                <p>Neutrinos are the only particles that escape stellar cores unchanged, carrying direct information about nuclear processes. They travel at near-light speeds and barely interact, making them perfect cosmic messengers across billions of light-years.</p>
+            </div>
+        </div>
+
+        <div class="equation-box">
+            <div class="equation">|ν(t)⟩ = Σ U_ij |ν_j⟩ e^(-i m_j² c² t / 2Eℏ)</div>
+            <div class="desc">Neutrino oscillation: flavor eigenstates (|νe⟩, |νμ⟩, |ντ⟩) are mixtures of mass eigenstates. The PMNS matrix U determines mixing angles θ₁₂ ≈ 33°, θ₂₃ ≈ 42°, θ₁₃ ≈ 8.7°.</div>
+        </div>
+    </section>
+
+    <!-- Section 2: Detection Methods -->
+    <section class="section" id="detect">
+        <h2>How We Catch Ghosts</h2>
+        <p class="section-intro">
+            Since neutrinos interact so rarely, we need massive detectors and clever physics to catch them. Most detectors use large volumes of ice or water, surrounded by sensors that detect the rare products of neutrino interactions.
+        </p>
+
+        <div class="viz-container">
+            <canvas id="detectorCanvas" class="viz-canvas"></canvas>
+            <div class="viz-controls">
+                <div class="mode-buttons">
+                    <button class="mode-btn active" data-mode="Cherenkov">Cherenkov Effect</button>
+                    <button class="mode-btn" data-mode="Scintillation">Scintillation</button>
+                    <button class="mode-btn" data-mode="Radio">Radio Detection</button>
+                </div>
+                <div class="control-group">
+                    <label>Neutrino Energy (GeV)</label>
+                    <input type="range" id="energySlider" min="0.1" max="100" value="1" step="0.1">
+                    <span id="energyValue" style="color:var(--gold);font-size:0.9rem;">1.0 GeV</span>
+                </div>
+                <div class="control-group">
+                    <label>Detector Transparency</label>
+                    <input type="range" id="transparencySlider" min="50" max="100" value="85">
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-3">
+            <div class="card">
+                <h3>Cherenkov Radiation</h3>
+                <p>When a charged particle travels faster than light in a medium (ice, water), it emits a shock wave of blue Cherenkov light. Like a sonic boom but for light. Detected by photomultiplier tubes.</p>
+            </div>
+            <div class="card">
+                <h3>Scintillation</h3>
+                <p>Organic or liquid scintillators produce flashes of light when charged particles pass through. Higher detection efficiency than water Cherenkov but requires more material. Used in KamLAND, Borexino.</p>
+            </div>
+            <div class="card">
+                <h3>Radio Detection</h3>
+                <p>Extremely energetic neutrinos (E > 10¹⁷ eV) produce Askaryan effect: negative charge excess in EM shower creates coherent radio pulses. Used in ANITA, ARIANNA.</p>
+            </div>
+        </div>
+
+        <div class="equation-box">
+            <div class="equation">cos θ_c = 1 / (n β)</div>
+            <div class="desc">Cherenkov angle: where n is refractive index, β = v/c. In ice (n ≈ 1.33), Cherenkov angle ≈ 41°. Particle must be moving faster than light in that medium.</div>
+        </div>
+    </section>
+
+    <!-- Section 3: Global Detector Network -->
+    <section class="section" id="network">
+        <h2>Global Detector Network</h2>
+        <p class="section-intro">
+            The world operates a network of neutrino detectors spanning the globe — from the Antarctic ice to the Mediterranean Sea floor. Each detector has unique capabilities, and together they form a multi-messenger astronomy network.
+        </p>
+
+        <div class="viz-container">
+            <canvas id="mapCanvas" class="viz-canvas"></canvas>
+        </div>
+
+        <div class="grid-3">
+            <div class="detector-card">
+                <div class="detector-header"><h3>IceCube Neutrino Observatory</h3></div>
+                <div class="detector-body">
+                    <p>1 km³ ice detector at South Pole, embedded in Antarctic glacier. Detects ~100,000 neutrinos/year. First to identify extragalactic neutrino sources (TXS 0506+056, 2017).</p>
+                    <div class="detector-stat"><span class="detector-stat-label">Volume</span><span class="detector-stat-value">1 km³</span></div>
+                    <div class="detector-stat"><span class="detector-stat-label">Strings</span><span class="detector-stat-value">86</span></div>
+                    <div class="detector-stat"><span class="detector-stat-label">DOMs</span><span class="detector-stat-value">5,160</span></div>
+                    <div class="detector-stat"><span class="detector-stat-label">Energy Range</span><span class="detector-stat-value">100 GeV - PeV</span></div>
+                </div>
+            </div>
+            <div class="detector-card">
+                <div class="detector-header"><h3>Super-Kamiokande</h3></div>
+                <div class="detector-body">
+                    <p>50,000 ton water Cherenkov detector in Japan's Kamioka mine. Famous for neutrino oscillation discovery (2002 Nobel Prize). Monitors atmospheric and solar neutrinos.</p>
+                    <div class="detector-stat"><span class="detector-stat-label">Mass</span><span class="detector-stat-value">50,000 t</span></div>
+                    <div class="detector-stat"><span class="detector-stat-label">Depth</span><span class="detiner-stat-value">1 km</span></div>
+                    <div class="detector-stat"><span class="detector-stat-label">PMTs</span><span class="detector-stat-value">11,200</span></div>
+                    <div class="detector-stat"><span class="detector-stat-label">Energy Range</span><span class="detector-stat-value">1 MeV - 100 GeV</span></div>
+                </div>
+            </div>
+            <div class="detector-card">
+                <div class="detector-header"><h3>ANTARES / KM3NeT</h3></div>
+                <div class="detector-body">
+                    <p>Underwater Cherenkov detectors in the Mediterranean Sea. ANTARES (completed) using 12 strings. KM3NeT (under construction) will have 7-10 km³ effective volume.</p>
+                    <div class="detector-stat"><span class="detector-stat-label">ANTARES Volume</span><span class="detector-stat-value">0.02 km³</span></div>
+                    <div class="detector-stat"><span class="detector-stat-label">KM3NeT (planned)</span><span class="detector-stat-value">7-10 km³</span></div>
+                    <div class="detector-stat"><span class="detector-stat-label">Location</span><span class="detector-stat-value">Mediterranean</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-3" style="margin-top: 30px;">
+            <div class="detector-card">
+                <div class="detector-header"><h3>Super-Kamiokande GADF</h3></div>
+                <div class="detector-body">
+                    <p>Hyper-Kamiokande (under construction) will be 8x larger than Super-K. Integrated in Global Neutrino Network for multi-messenger astronomy with LIGO, Virgo, and electromagnetic telescopes.</p>
+                    <div class="detector-stat"><span class="detector-stat-label">Planned Mass</span><span class="detector-stat-value">260,000 t</span></div>
+                    <div class="detector-stat"><span class="detector-stat-label">Completion</span><span class="detector-stat-value">2027</span></div>
+                </div>
+            </div>
+            <div class="detector-card">
+                <div class="detector-header"><h3>JUNO</h3></div>
+                <div class="detector-body">
+                    <p>20,000 ton liquid scintillator detector in South China. Primarily for reactor neutrinos to determine neutrino mass ordering. Also sensitive to supernova neutrinos.</p>
+                    <div class="detector-stat"><span class="detector-stat-label">Mass</span><span class="detector-stat-value">20,000 t</span></div>
+                    <div class="detector-stat"><span class="detector-stat-label">Location</span><span class="detector-stat-value">Kaiping, China</span></div>
+                </div>
+            </div>
+            <div class="detector-card">
+                <div class="detector-header"><h3>DUNE (future)</h3></div>
+                <div class="detector-body">
+                    <p>70,000 ton liquid argon time projection chamber (TPC) at SURF. Far detector for LBNF. Will study atmospheric and supernova neutrinos with unprecedented detail.</p>
+                    <div class="detector-stat"><span class="detector-stat-label">Mass</span><span class="detector-stat-value">70,000 t</span></div>
+                    <div class="detector-stat"><span class="detector-stat-label">Technology</span><span class="detector-stat-value">Liquid Argon TPC</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Neutrino Sources -->
+    <section class="section" id="sources">
+        <h2>Neutrino Sky Map</h2>
+        <p class="section-intro">
+            Neutrinos come from violent cosmic events across the universe. Unlike light, they escape dense environments and travel unimpeded, carrying direct information about engines of the universe.
+        </p>
+
+        <div class="viz-container">
+            <canvas id="skyCanvas" class="viz-canvas"></canvas>
+            <div class="viz-controls">
+                <div class="mode-buttons">
+                    <button class="mode-btn active" data-mode="all">All Sources</button>
+                    <button class="mode-btn" data-mode="galactic">Galactic</button>
+                    <button class="mode-btn" data-mode="extragalactic">Extragalactic</button>
+                    <button class="mode-btn" data-mode="diffuse">Diffuse</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>Point Sources</h3>
+                <ul class="source-list">
+                    <li>
+                        <strong>TXS 0506+056</strong>
+                        <span>First identified extragalactic neutrino source (IceCube, 2017). Blazar at z=0.336. 170 TeV neutrino coincident with gamma-ray flare.</span>
+                    </li>
+                    <li>
+                        <strong>NGC 1068</strong>
+                        <span>Spiral galaxy with active nucleus. Excess of ~80 neutrinos detected by IceCube (2019-2020). Starburst and AGN contributions debated.</span>
+                    </li>
+                    <li>
+                        <strong>Snowmass 2212</strong>
+                        <span>Pre-existing galactic ridge excess. Might be diffuse or point source still unresolved.</span>
+                    </li>
+                    <li>
+                        <strong>Solar Neutrinos</strong>
+                        <span>pp-chain produces νe at ~0.1% efficiency. Borexino measured complete pp-chain branches. Direct probe of solar core.</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Diffuse & Transient Sources</h3>
+                <ul class="source-list">
+                    <li>
+                        <strong>Supernova Neutrinos</strong>
+                        <span>SN 1987A: 25 kpc away, ~10⁵³ erg total. Diffuse supernova neutrino background (DSNB) unresolved at E > 10 MeV.</span>
+                    </li>
+                    <li>
+                        <strong>Atmospheric Neutrinos</strong>
+                        <span>Produced by cosmic ray air showers. νμ → ντ oscillation discovered at Super-K (1998). Background for astrophysical searches.</span>
+                    </li>
+                    <li>
+                        <strong>Reactor Neutrinos</strong>
+                        <span>Antineutrinos from nuclear fission. Used for θ₁₃ measurement (Daya Bay, RENO). Also practical monitoring applications.</span>
+                    </li>
+                    <li>
+                        <strong>Cosmological Diffuse</strong>
+                        <span>Integrated emission from all unresolved sources. Cosmic neutrino background (CνB) from Big Bang, T ≈ 1.95 K.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="equation-box">
+            <div class="equation">Φ_ν(E) ≈ Σ S_i(E) / 4πD_i² + ∫ ρ S_j(E) dV</div>
+            <div class="desc">Neutrino flux: sum over point sources S_i at distance D_i, plus diffuse background from resolved/unresolved sources. Astrophysical neutrinos are extragalactic with E⁻² spectrum.</div>
+        </div>
+    </section>
+
+    <!-- Section 5: Multi-Messenger Astronomy -->
+    <section class="section" id="multi">
+        <h2>Multi-Messenger Astronomy</h2>
+        <p class="section-intro">
+            Neutrinos are part of a new era where gravitational waves, light, and particles work together to reveal the violent universe. The 2017 observation of a neutron star merger combined all messengers.
+        </p>
+
+        <div class="viz-container">
+            <canvas id="multiCanvas" class="viz-canvas"></canvas>
+            <div class="viz-controls">
+                <div class="mode-buttons">
+                    <button class="mode-btn active" data-mode="gw170817">GW170817 — Kilonova</button>
+                    <button class="mode-btn" data-mode="sncand">Supernova Candidate</button>
+                    <button class="mode-btn" data-mode="blazar">Blazar Flare</button>
+                </div>
+                <div class="control-group">
+                    <label>Time Since Event (hours)</label>
+                    <input type="range" id="timeSlider" min="0" max="48" value="0" step="0.5">
+                    <span id="timeValue" style="color:var(--gold);font-size:0.9rem;">0.0 h</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <h4>August 17, 2017 — The Dawn of Multi-Messenger Astronomy</h4>
+                <p>At 12:41:44 UTC, LIGO-Virgo detected GW170817: two neutron stars merging at 40 Mpc. 1.7 seconds later, Fermi GBM detected a weak gamma-ray burst (GRB 170817A). IceCube detected no neutrinos from the direction — consistent with off-axis viewing angle.</p>
+            </div>
+            <div class="timeline-item">
+                <h4>Electromagnetic Follow-up</h4>
+                <p>Within hours, telescopes worldwide captured the kilonova: neutron-rich material ejected, producing heavy elements (gold, platinum) through r-process nucleosynthesis. The optical counterpart (SSS 17a) brightened to magnitude 17.</p>
+            </div>
+            <div class="timeline-item">
+                <h4>The Big Picture</h4>
+                <p>This event confirmed: (1) neutron star mergers produce short GRBs, (2) r-process nucleosynthesis occurs in merger ejecta, (3) multi-messenger astronomy works. A new era of astrophysics began.</p>
+            </div>
+        </div>
+
+        <div class="stats" style="margin-top: 50px;">
+            <div class="stat">
+                <div class="stat-value">40 Mpc</div>
+                <div class="stat-label">Distance to GW170817</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">1.7 s</div>
+                <div class="stat-label">Time between GW and GRB</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">10⁴⁴ J</div>
+                <div class="stat-label">GW energy radiated</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">10 M⊕</div>
+                <div class="stat-label">Ejecta mass (r-process)</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 6: Physics Deep Dive -->
+    <section class="section" id="physics">
+        <h2>Neutrino Physics Fundamentals</h2>
+        <p class="section-intro">
+            Neutrinos test the foundations of particle physics and cosmology. Their tiny mass, flavor oscillations, and interactions probe the limits of the Standard Model and reveal new physics.
+        </p>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>Mass Ordering Problem</h3>
+                <p>The absolute neutrino mass ordering remains unknown. Nomal ordering (NO): m₁ < m₂ < m₃. Inverted ordering (IO): m₃ < m₁ ≈ m₂. JUNO and DUNE will resolve this through matter effects.</p>
+                <div class="equation-box" style="margin-top: 15px;">
+                    <div class="equation">Δm²₂₁ ≈ 7.5×10⁻⁵ eV² | Δm²₃₁ ≈ ±2.5×10⁻³ eV²</div>
+                    <div class="desc">Mass-squared differences measured by solar and atmospheric neutrino experiments.</div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Majorana Nature</h3>
+                <p>If neutrinos are Majorana particles (ν = ν̄), neutrinoless double beta decay (0νββ) occurs. Searched by LEGEND, CUORE, Kamland-Zen. Discovery would prove lepton number violation and explain matter-antimatter asymmetry.</p>
+                <div class="equation-box" style="margin-top: 15px;">
+                    <div class="equation">GTE = ε² |M|² G_F⁴ m_ββ² / (R^5 × 2π⁵)</div>
+                    <div class="desc">0νββ half-life formula. Effective Majorana mass m_ββ = |Σ U²_ij m_j|.</div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Sterile Neutrinos?</h3>
+                <p>Short-baseline anomalies (LSND, MiniBooNE) suggest additional neutrino flavors that don't interact via weak force. Sterile neutrinos would explain anomalies but conflict with cosmology (too much relic abundance).</p>
+            </div>
+            <div class="card">
+                <h3>Cosmological Constraints</h3>
+                <p>Neutrinos affect structure formation: hot dark matter suppresses small-scale growth. Planck: Σ m_ν < 0.72 eV. Future CMB-S4 and EUCLID will reach Σ m_ν ≈ 0.02 eV sensitivity.</p>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 30px;">
+            <h3>The Standard Model Extension</h3>
+            <p>Neutrinos reveal physics beyond the Standard Model:</p>
+            <ul style="list-style: disc; margin-left: 20px; color: #c0c0e0; line-height: 2;">
+                <li><strong>See-saw mechanism</strong>: Why neutrinos are 10¹¹ times lighter than electrons (GUT scale Majorana masses)</li>
+                <li><strong>Leptogenesis</strong>: CP violation in neutrino sector could explain matter-antimatter asymmetry via sphaleron processes</li>
+                <li><strong>Lorentz violation</strong>: Effective field theory searches for departure from SM in neutrino oscillations</li>
+                <li><strong>Non-standard interactions</strong>: Matter effects beyond MSW could reveal new couplings</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Section 7: Future Outlook -->
+    <section class="section" id="future">
+        <h2>The Future of Neutrino Astronomy</h2>
+        <p class="section-intro">
+            The next generation of detectors will survey the neutrino sky with unprecedented sensitivity. We stand at the threshold of discovering the sources of cosmic rays and understanding the extreme universe.
+        </p>
+
+        <div class="grid-3">
+            <div class="card">
+                <h3>IceCube-Gen2</h3>
+                <p>10 km³ extension to IceCube. 10x better sensitivity for point sources. Faintend will resolve diffuse Galactic ridge. Construction planned 2025-2030.</p>
+                <div class="equation-box" style="margin-top: 15px;">
+                    <div class="equation">A_eff × T_obs > 10 km² yr</div>
+                    <div class="desc">Effective area times observation time for significant detection.</div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Hyper-Kamiokande</h3>
+                <p>260,000 ton water Cherenkov detector. Will observe ~10⁶ solar neutrinos/year, detect supernova bursts out to 100 kpc. Part of Global Neutrino Network.</p>
+            </div>
+            <div class="card">
+                <h3>DUNE</h3>
+                <p>70,000 ton liquid argon TPC at SURF. Supernova neutrinos will be resolved event-by-event. Will measure reversing mass ordering and test PMNS matrix.</p>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 40px;">
+            <h3>Key Science Questions</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                <div>
+                    <h4 style="color: var(--cyan); margin-bottom: 10px;">What are the sources of cosmic rays?</h4>
+                    <p style="color: #c0c0e0; font-size: 0.9rem;">Cosmic rays are accelerated in violent environments (AGN, GRBs, starburst galaxies). Neutrinos are the only direct probes — they escape dense accelerators and point back to their sources.</p>
+                </div>
+                <div>
+                    <h4 style="color: var(--cyan); margin-bottom: 10px;">What is the neutrino mass ordering?</h4>
+                    <p style="color: #c0c0e0; font-size: 0.9rem;">Knowing NO vs IO affects cosmological parameters, seesaw mechanism physics, and tests fundamental symmetries. Resolvable by DUNE or JUNO within this decade.</p>
+                </div>
+                <div>
+                    <h4 style="color: var(--cyan); margin-bottom: 10px;">Are neutrinos Majorana particles?</h4>
+                    <p style="color: #c0c0e0; font-size: 0.9rem;">0νββ discovery would prove neutrinos are their own antiparticles, explaining matter dominance via leptogenesis. Nobel Prize awaits.</p>
+                </div>
+                <div>
+                    <h4 style="color: var(--cyan); margin-bottom: 10px;">What can neutrinos tell us about the universe?</h4>
+                    <p style="color: #c0c0e0; font-size: 0.9rem;">From supernova explosions to the early universe, neutrinos carry unique information no other messenger can. They are our most direct connection to extreme physics.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Neutrino Astronomy — Exploring the violent universe through ghost particles</p>
+        <p class="signature">— Kevin, Physics Agent</p>
+    </footer>
+
+    <script>
+        // Hero Canvas - Animated Neutrino Field
+        const heroCanvas = document.getElementById('heroCanvas');
+        const heroCtx = heroCanvas.getContext('2d');
+        let heroStars = [];
+        let heroNeutrinos = [];
+
+        function initHeroCanvas() {
+            heroCanvas.width = window.innerWidth;
+            heroCanvas.height = window.innerHeight;
+            heroStars = [];
+            heroNeutrinos = [];
+            for (let i = 0; i < 200; i++) {
+                heroStars.push({
+                    x: Math.random() * heroCanvas.width,
+                    y: Math.random() * heroCanvas.height,
+                    r: Math.random() * 1.5 + 0.5,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.02 + 0.01
+                });
+            }
+            for (let i = 0; i < 30; i++) {
+                heroNeutrinos.push({
+                    x: Math.random() * heroCanvas.width,
+                    y: Math.random() * heroCanvas.height,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: (Math.random() - 0.5) * 2,
+                    flavor: ['νe', 'νμ', 'ντ'][Math.floor(Math.random() * 3)],
+                    alpha: 0
+                });
+            }
+        }
+
+        function drawHeroCanvas() {
+            heroCtx.fillStyle = 'rgba(10, 10, 26, 0.3)';
+            heroCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
+
+            // Stars
+            heroStars.forEach(star => {
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0.3) star.speed *= -1;
+                heroCtx.beginPath();
+                heroCtx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+                heroCtx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+                heroCtx.fill();
+            });
+
+            // Neutrinos
+            heroNeutrinos.forEach(n => {
+                n.x += n.vx;
+                n.y += n.vy;
+                if (n.x < 0) n.x = heroCanvas.width;
+                if (n.x > heroCanvas.width) n.x = 0;
+                if (n.y < 0) n.y = heroCanvas.height;
+                if (n.y > heroCanvas.height) n.y = 0;
+                n.alpha = (n.alpha + 0.02) % 1;
+                const colors = { 'νe': '#00d4ff', 'νμ': '#f472b6', 'ντ': '#8b5cf6' };
+                heroCtx.beginPath();
+                heroCtx.arc(n.x, n.y, 3, 0, Math.PI * 2);
+                heroCtx.fillStyle = colors[n.flavor];
+                heroCtx.shadowColor = colors[n.flavor];
+                heroCtx.shadowBlur = 15;
+                heroCtx.globalAlpha = n.alpha * 0.7;
+                heroCtx.fill();
+                heroCtx.shadowBlur = 0;
+                heroCtx.globalAlpha = 1;
+            });
+
+            requestAnimationFrame(drawHeroCanvas);
+        }
+
+        // Detector Canvas - Cherenkov Effect
+        const detectorCanvas = document.getElementById('detectorCanvas');
+        const detectorCtx = detectorCanvas.getContext('2d');
+        let detectorMode = 'Cherenkov';
+        let energy = 1;
+        let transparency = 85;
+        let detectorParticles = [];
+
+        function initDetectorCanvas() {
+            detectorCanvas.width = detectorCanvas.offsetWidth;
+            detectorCanvas.height = detectorCanvas.offsetHeight;
+        }
+
+        function drawDetectorCanvas() {
+            const w = detectorCanvas.width;
+            const h = detectorCanvas.height;
+            detectorCtx.fillStyle = `rgba(5, 5, 20, ${1 - transparency/150})`;
+            detectorCtx.fillRect(0, 0, w, h);
+
+            // Grid
+            detectorCtx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
+            detectorCtx.lineWidth = 1;
+            for (let x = 0; x < w; x += 40) {
+                detectorCtx.beginPath();
+                detectorCtx.moveTo(x, 0);
+                detectorCtx.lineTo(x, h);
+                detectorCtx.stroke();
+            }
+            for (let y = 0; y < h; y += 40) {
+                detectorCtx.beginPath();
+                detectorCtx.moveTo(0, y);
+                detectorCtx.lineTo(w, y);
+                detectorCtx.stroke();
+            }
+
+            // Detector medium visualization
+            detectorCtx.fillStyle = detectorMode === 'Cherenkov' ? 'rgba(0, 100, 150, 0.3)' :
+                                   detectorMode === 'Scintillation' ? 'rgba(100, 100, 50, 0.3)' :
+                                   'rgba(150, 50, 50, 0.3)';
+            detectorCtx.fillRect(w/4, h/4, w/2, h/2);
+
+            // Particles
+            detectorParticles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.01;
+                if (p.life <= 0) {
+                    p.x = w/2 + (Math.random() - 0.5) * 100;
+                    p.y = h/2 + (Math.random() - 0.5) * 100;
+                    p.vx = (Math.random() - 0.5) * 4;
+                    p.vy = (Math.random() - 0.5) * 4;
+                    p.life = 1;
+                    p.type = Math.random() > 0.7 ? 'Cherenkov' : 'track';
+                }
+
+                const alpha = p.life;
+                if (p.type === 'Cherenkov') {
+                    // Cherenkov cone
+                    detectorCtx.beginPath();
+                    detectorCtx.moveTo(p.x, p.y);
+                    detectorCtx.arc(p.x, p.y, 30 * (1 - p.life), -Math.PI/3, Math.PI/3);
+                    detectorCtx.closePath();
+                    detectorCtx.fillStyle = `rgba(100, 200, 255, ${alpha * 0.5})`;
+                    detectorCtx.fill();
+                } else {
+                    detectorCtx.beginPath();
+                    detectorCtx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                    detectorCtx.fillStyle = `rgba(251, 191, 36, ${alpha})`;
+                    detectorCtx.shadowColor = '#fbbf24';
+                    detectorCtx.shadowBlur = 10;
+                    detectorCtx.fill();
+                    detectorCtx.shadowBlur = 0;
+                }
+            });
+
+            requestAnimationFrame(drawDetectorCanvas);
+        }
+
+        // Map Canvas
+        const mapCanvas = document.getElementById('mapCanvas');
+        const mapCtx = mapCanvas.getContext('2d');
+        const detectors = [
+            { name: 'IceCube', lat: -90, lon: 0, color: '#00d4ff', size: 20 },
+            { name: 'Super-K', lat: 36.3, lon: 137.3, color: '#8b5cf6', size: 12 },
+            { name: 'ANTARES', lat: 43, lon: 6, color: '#f472b6', size: 10 },
+            { name: 'KM3NeT', lat: 37, lon: 17, color: '#f472b6', size: 10 },
+            { name: 'JUNO', lat: 22.5, lon: 112.5, color: '#fbbf24', size: 10 },
+            { name: 'Hyper-K', lat: 36.3, lon: 137.3, color: '#fbbf24', size: 14 },
+            { name: 'DUNE', lat: 44.4, lon: -103.7, color: '#4ade80', size: 12 }
+        ];
+
+        function initMapCanvas() {
+            mapCanvas.width = mapCanvas.offsetWidth;
+            mapCanvas.height = mapCanvas.offsetHeight;
+        }
+
+        function drawMapCanvas() {
+            const w = mapCanvas.width;
+            const h = mapCanvas.height;
+            mapCtx.fillStyle = '#050510';
+            mapCtx.fillRect(0, 0, w, h);
+
+            // Simple world map outline
+            mapCtx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+            mapCtx.lineWidth = 1;
+            // Simplified continents
+            const continents = [
+                [[0.1,0.2],[0.3,0.15],[0.35,0.3],[0.25,0.4],[0.1,0.35]],
+                [[0.4,0.2],[0.55,0.15],[0.6,0.35],[0.5,0.45],[0.4,0.35]],
+                [[0.6,0.3],[0.75,0.25],[0.85,0.5],[0.7,0.6],[0.6,0.5]],
+                [[0.75,0.6],[0.85,0.55],[0.9,0.75],[0.8,0.8],[0.75,0.7]]
+            ];
+            continents.forEach(cont => {
+                mapCtx.beginPath();
+                cont.forEach((pt, i) => {
+                    const x = pt[0] * w;
+                    const y = pt[1] * h;
+                    i === 0 ? mapCtx.moveTo(x, y) : mapCtx.lineTo(x, y);
+                });
+                mapCtx.closePath();
+                mapCtx.stroke();
+            });
+
+            // Detector positions
+            detectors.forEach(d => {
+                const x = w * (0.15 + (d.lon + 180) / 360 * 0.7);
+                const y = h * (0.2 + (90 - d.lat) / 180 * 0.6);
+
+                // Pulsing effect
+                const pulse = Math.sin(Date.now() / 500) * 0.3 + 1;
+                mapCtx.beginPath();
+                mapCtx.arc(x, y, d.size * pulse, 0, Math.PI * 2);
+                mapCtx.fillStyle = d.color;
+                mapCtx.shadowColor = d.color;
+                mapCtx.shadowBlur = 20;
+                mapCtx.fill();
+                mapCtx.shadowBlur = 0;
+
+                // Label
+                mapCtx.fillStyle = '#e0e0ff';
+                mapCtx.font = '12px Space Mono';
+                mapCtx.fillText(d.name, x + d.size + 5, y + 5);
+            });
+
+            // Connection lines
+            mapCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            mapCtx.lineWidth = 1;
+            for (let i = 0; i < detectors.length; i++) {
+                for (let j = i + 1; j < detectors.length; j++) {
+                    const x1 = w * (0.15 + (detectors[i].lon + 180) / 360 * 0.7);
+                    const y1 = h * (0.2 + (90 - detectors[i].lat) / 180 * 0.6);
+                    const x2 = w * (0.15 + (detectors[j].lon + 180) / 360 * 0.7);
+                    const y2 = h * (0.2 + (90 - detectors[j].lat) / 180 * 0.6);
+                    mapCtx.beginPath();
+                    mapCtx.moveTo(x1, y1);
+                    mapCtx.lineTo(x2, y2);
+                    mapCtx.stroke();
+                }
+            }
+
+            requestAnimationFrame(drawMapCanvas);
+        }
+
+        // Sky Canvas - Neutrino Sources
+        const skyCanvas = document.getElementById('skyCanvas');
+        const skyCtx = skyCanvas.getContext('2d');
+        let skyMode = 'all';
+        const skySources = [
+            { name: 'TXS 0506+056', ra: 77.6, dec: 5.7, flux: 0.8, type: 'extragalactic' },
+            { name: 'NGC 1068', ra: 25.6, dec: -0.1, flux: 0.6, type: 'extragalactic' },
+            { name: 'Milky Way Center', ra: 266.4, dec: -29.0, flux: 0.4, type: 'galactic' },
+            { name: 'Crab Nebula', ra: 83.6, dec: 22.0, flux: 0.3, type: 'galactic' },
+            { name: 'Sun', ra: 0, dec: 0, flux: 0.9, type: 'galactic' },
+            { name: 'ICECUBE SUMMIT', ra: 0, dec: -90, flux: 1.0, type: 'detector' }
+        ];
+
+        function initSkyCanvas() {
+            skyCanvas.width = skyCanvas.offsetWidth;
+            skyCanvas.height = skyCanvas.offsetHeight;
+        }
+
+        function drawSkyCanvas() {
+            const w = skyCanvas.width;
+            const h = skyCanvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            const r = Math.min(w, h) * 0.4;
+
+            skyCtx.fillStyle = '#050510';
+            skyCtx.fillRect(0, 0, w, h);
+
+            // Star field
+            for (let i = 0; i < 300; i++) {
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                const x = cx + r * Math.sin(phi) * Math.cos(theta);
+                const y = cy + r * Math.sin(phi) * Math.sin(theta);
+                skyCtx.beginPath();
+                skyCtx.arc(x, y, Math.random() * 1.5, 0, Math.PI * 2);
+                skyCtx.fillStyle = `rgba(255, 255, 255, ${Math.random() * 0.8})`;
+                skyCtx.fill();
+            }
+
+            // Sources
+            skySources.forEach(s => {
+                if (skyMode !== 'all' && s.type !== skyMode) return;
+                const theta = (90 - s.dec) * Math.PI / 180;
+                const phi = s.ra * Math.PI / 180;
+                const x = cx + r * Math.sin(theta) * Math.cos(phi);
+                const y = cy - r * Math.cos(theta);
+                const size = s.flux * 15 + 5;
+
+                skyCtx.beginPath();
+                skyCtx.arc(x, y, size, 0, Math.PI * 2);
+                skyCtx.fillStyle = s.type === 'galactic' ? '#fbbf24' :
+                                  s.type === 'extragalactic' ? '#f472b6' : '#00d4ff';
+                skyCtx.shadowColor = skyCtx.fillStyle;
+                skyCtx.shadowBlur = 20;
+                skyCtx.fill();
+                skyCtx.shadowBlur = 0;
+
+                skyCtx.fillStyle = '#e0e0ff';
+                skyCtx.font = '10px Space Mono';
+                skyCtx.fillText(s.name, x + size + 5, y + 5);
+            });
+
+            // Labels
+            skyCtx.fillStyle = '#606080';
+            skyCtx.font = '14px Orbitron';
+            skyCtx.fillText('NEUTRINO SKY', w/2 - 60, 30);
+            skyCtx.fillText('RA', w - 40, cy);
+            skyCtx.fillText('Dec', cx, 25);
+
+            requestAnimationFrame(drawSkyCanvas);
+        }
+
+        // Multi-Messenger Canvas
+        const multiCanvas = document.getElementById('multiCanvas');
+        const multiCtx = multiCanvas.getContext('2d');
+        let multiMode = 'gw170817';
+        let eventTime = 0;
+
+        function initMultiCanvas() {
+            multiCanvas.width = multiCanvas.offsetWidth;
+            multiCanvas.height = multiCanvas.offsetHeight;
+        }
+
+        function drawMultiCanvas() {
+            const w = multiCanvas.width;
+            const h = multiCanvas.height;
+            multiCtx.fillStyle = '#050510';
+            multiCtx.fillRect(0, 0, w, h);
+
+            const cx = w / 2;
+            const cy = h / 2;
+
+            // Event visualization
+            if (multiMode === 'gw170817') {
+                // Kilonova expansion
+                const radius = 50 + eventTime * 3;
+                const alpha = Math.max(0, 1 - eventTime / 48);
+
+                // Gravitational waves
+                for (let i = 0; i < 5; i++) {
+                    const r = 30 + i * 20 + (eventTime * 5) % 100;
+                    multiCtx.beginPath();
+                    multiCtx.arc(cx, cy, r, 0, Math.PI * 2);
+                    multiCtx.strokeStyle = `rgba(0, 212, 255, ${alpha * (1 - i/5) * 0.5})`;
+                    multiCtx.lineWidth = 2;
+                    multiCtx.stroke();
+                }
+
+                // EM counterpart
+                multiCtx.beginPath();
+                multiCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+                multiCtx.fillStyle = `rgba(251, 191, 36, ${alpha * 0.5})`;
+                multiCtx.shadowColor = '#fbbf24';
+                multiCtx.shadowBlur = 30;
+                multiCtx.fill();
+                multiCtx.shadowBlur = 0;
+
+                // Neutrino (if any)
+                if (eventTime > 5 && eventTime < 20) {
+                    multiCtx.beginPath();
+                    multiCtx.arc(cx - 100 + eventTime * 5, cy - 50, 10, 0, Math.PI * 2);
+                    multiCtx.fillStyle = 'rgba(0, 212, 255, 0.8)';
+                    multiCtx.fill();
+                    multiCtx.fillStyle = '#e0e0ff';
+                    multiCtx.font = '12px Space Mono';
+                    multiCtx.fillText('ν (null)', cx - 100 + eventTime * 5 + 15, cy - 45);
+                }
+
+                // Labels
+                multiCtx.fillStyle = '#e0e0ff';
+                multiCtx.font = '14px Orbitron';
+                multiCtx.fillText('GW170817 — Neutron Star Merger', cx - 150, 30);
+                multiCtx.font = '12px Space Mono';
+                multiCtx.fillText('Gravitational Waves', cx - 200, cy + 100);
+                multiCtx.fillText('Gamma/X-rays', cx + 100, cy - 80);
+                multiCtx.fillText('Optical/Kilonova', cx + 50, cy + 80);
+            }
+
+            requestAnimationFrame(drawMultiCanvas);
+        }
+
+        // Event Listeners
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.parentElement.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const mode = this.dataset.mode;
+                if (['Cherenkov', 'Scintillation', 'Radio'].includes(mode)) {
+                    detectorMode = mode;
+                } else if (['all', 'galactic', 'extragalactic', 'diffuse'].includes(mode)) {
+                    skyMode = mode;
+                } else if (['gw170817', 'sncand', 'blazar'].includes(mode)) {
+                    multiMode = mode;
+                    eventTime = 0;
+                }
+            });
+        });
+
+        document.getElementById('energySlider')?.addEventListener('input', function() {
+            energy = parseFloat(this.value);
+            document.getElementById('energyValue').textContent = energy.toFixed(1) + ' GeV';
+        });
+
+        document.getElementById('transparencySlider')?.addEventListener('input', function() {
+            transparency = parseInt(this.value);
+        });
+
+        document.getElementById('timeSlider')?.addEventListener('input', function() {
+            eventTime = parseFloat(this.value);
+            document.getElementById('timeValue').textContent = eventTime.toFixed(1) + ' h';
+        });
+
+        // Scroll Progress
+        window.addEventListener('scroll', function() {
+            const winScroll = document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - window.innerHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progress').style.width = scrolled + '%';
+        });
+
+        // Resize Handler
+        window.addEventListener('resize', function() {
+            initHeroCanvas();
+            initDetectorCanvas();
+            initMapCanvas();
+            initSkyCanvas();
+            initMultiCanvas();
+        });
+
+        // Initialize particles for detector
+        for (let i = 0; i < 20; i++) {
+            detectorParticles.push({
+                x: detectorCanvas.width / 2 + (Math.random() - 0.5) * 100,
+                y: detectorCanvas.height / 2 + (Math.random() - 0.5) * 100,
+                vx: (Math.random() - 0.5) * 4,
+                vy: (Math.random() - 0.5) * 4,
+                life: Math.random(),
+                type: Math.random() > 0.5 ? 'Cherenkov' : 'track'
+            });
+        }
+
+        // Start animations
+        initHeroCanvas();
+        initDetectorCanvas();
+        initMapCanvas();
+        initSkyCanvas();
+        initMultiCanvas();
+        drawHeroCanvas();
+        drawDetectorCanvas();
+        drawMapCanvas();
+        drawSkyCanvas();
+        drawMultiCanvas();
+    </script>
+</body>
+</html>
