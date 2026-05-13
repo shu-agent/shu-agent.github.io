@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Thermodynamics — Li-Ion Battery</title>
+    <style>
+        :root {
+            --bg-dark: #03060d;
+            --bg-card: #0a1628;
+            --cyan: #00f5d4;
+            --pink: #f72585;
+            --purple: #7b2cbf;
+            --blue: #3a86ff;
+            --orange: #ff6b35;
+            --text: #e0e0e0;
+            --text-dim: #8899aa;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #03060d 0%, #0a1628 50%, #1a0a2e 100%);
+        }
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(0,245,212,0.08) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(123,44,191,0.08) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(247,37,133,0.05) 0%, transparent 50%);
+        }
+        .grid-overlay {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0,245,212,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,245,212,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+        .hero-content { position: relative; z-index: 2; padding: 2rem; }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 300;
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--blue) 50%, var(--pink) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border: 1px solid var(--cyan);
+            border-radius: 50px;
+            color: var(--cyan);
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0,245,212,0.3); }
+            50% { box-shadow: 0 0 40px rgba(0,245,212,0.6); }
+        }
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s ease-in-out infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+        .particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+        .nav-dots {
+            position: fixed;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .nav-dot:hover, .nav-dot.active {
+            background: var(--cyan);
+            box-shadow: 0 0 15px var(--cyan);
+        }
+        .nav-dot::after {
+            content: attr(data-label);
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: nowrap;
+            font-size: 0.75rem;
+            color: var(--cyan);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .nav-dot:hover::after { opacity: 1; }
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        .section.visible { opacity: 1; transform: translateY(0); }
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .section-desc {
+            color: var(--text-dim);
+            max-width: 700px;
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .card {
+            background: linear-gradient(135deg, rgba(10,22,40,0.9) 0%, rgba(20,10,40,0.9) 100%);
+            border: 1px solid rgba(0,245,212,0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,245,212,0.05) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--cyan);
+            box-shadow: 0 20px 60px rgba(0,245,212,0.15);
+        }
+        .card:hover::before { opacity: 1; }
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            color: var(--text);
+        }
+        .card p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+        .equation-box {
+            background: linear-gradient(135deg, rgba(0,245,212,0.1) 0%, rgba(123,44,191,0.1) 100%);
+            border: 1px solid rgba(0,245,212,0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            font-family: 'Georgia', serif;
+            font-size: 1.3rem;
+            text-align: center;
+            color: var(--cyan);
+        }
+        .equation-box .sub {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            margin-top: 0.5rem;
+        }
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(247,37,133,0.1) 0%, rgba(255,107,53,0.1) 100%);
+            border-left: 4px solid var(--pink);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 12px 12px 0;
+        }
+        .highlight-box h4 {
+            color: var(--pink);
+            margin-bottom: 0.5rem;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(0,245,212,0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--cyan);
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--cyan);
+        }
+        .metric-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .metric {
+            background: rgba(0,245,212,0.05);
+            border: 1px solid rgba(0,245,212,0.2);
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--cyan);
+            text-shadow: 0 0 20px rgba(0,245,212,0.5);
+        }
+        .metric-label {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+        }
+        .chart-container {
+            background: rgba(10,22,40,0.5);
+            border: 1px solid rgba(0,245,212,0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        .chart-canvas {
+            width: 100%;
+            height: 300px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0,245,212,0.1);
+        }
+        .comparison-table th {
+            color: var(--cyan);
+            font-weight: 600;
+        }
+        .comparison-table tr:hover td {
+            background: rgba(0,245,212,0.05);
+        }
+        .physics-card {
+            background: linear-gradient(135deg, rgba(58,134,255,0.1) 0%, rgba(123,44,191,0.1) 100%);
+            border: 1px solid rgba(58,134,255,0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+        .physics-card h4 {
+            color: var(--blue);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .svg-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem auto;
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 1rem;
+        }
+        .energy-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .energy-bar {
+            flex: 1;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        .energy-bar-fill {
+            height: 100%;
+            transition: width 0.5s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(0,245,212,0.1);
+        }
+        .stat-row .label { color: var(--text-dim); }
+        .stat-row .value { color: var(--cyan); font-weight: 600; }
+        footer {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-dim);
+            border-top: 1px solid rgba(0,245,212,0.1);
+            margin-top: 4rem;
+        }
+        .gibbs-svg {
+            width: 100%;
+            max-width: 700px;
+            margin: 2rem auto;
+            display: block;
+        }
+        .tooltip {
+            position: absolute;
+            background: var(--bg-card);
+            border: 1px solid var(--cyan);
+            border-radius: 8px;
+            padding: 0.8rem;
+            font-size: 0.85rem;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 250px;
+        }
+        @media (max-width: 768px) {
+            .nav-dots { display: none; }
+            .section { padding: 4rem 1rem; }
+            .section-title { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <nav class="nav-dots">
+        <div class="nav-dot active" data-section="hero" data-label="Top"></div>
+        <div class="nav-dot" data-section="fundamentals" data-label="Thermodynamics"></div>
+        <div class="nav-dot" data-section="gibbs" data-label="Gibbs Energy"></div>
+        <div class="nav-dot" data-section="entropy" data-label="Entropy"></div>
+        <div class="nav-dot" data-section="enthalpy" data-label="Enthalpy"></div>
+        <div class="nav-dot" data-section="simulator" data-label="Simulator"></div>
+        <div class="nav-dot" data-section="physics" data-label="Physics"></div>
+    </nav>
+
+    <section class="hero" id="hero">
+        <div class="hero-bg"></div>
+        <div class="grid-overlay"></div>
+        <div class="hero-content">
+            <span class="hero-badge">Energy Research</span>
+            <h1>Battery Thermodynamics</h1>
+            <p class="hero-subtitle">Exploring the fundamental thermodynamic forces that govern electrochemical energy storage, entropy generation, and the limits of reversible energy conversion</p>
+        </div>
+        <div class="scroll-indicator">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2">
+                <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+        </div>
+    </section>
+
+    <section class="section" id="fundamentals">
+        <h2 class="section-title">Electrochemical Thermodynamics</h2>
+        <p class="section-desc">The foundation of battery science lies in thermodynamics — the study of energy, entropy, and the conditions that determine whether electrochemical reactions occur spontaneously. From the open-circuit voltage to the theoretical energy density, thermodynamic principles define the ultimate limits of our batteries.</p>
+
+        <div class="card-grid">
+            <div class="card">
+                <div class="card-icon" style="background: linear-gradient(135deg, rgba(0,245,212,0.2), rgba(58,134,255,0.2));">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                </div>
+                <h3>First Law of Thermodynamics</h3>
+                <p>Energy is conserved in all electrochemical processes. The internal energy change ΔU equals heat Q minus work W done by the system. For batteries, electrical work is the primary output: W = -nFE.</p>
+                <div class="equation-box">
+                    ΔU = Q - W<br>
+                    <span class="sub">First Law: Conservation of Energy</span>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon" style="background: linear-gradient(135deg, rgba(247,37,133,0.2), rgba(255,107,53,0.2));">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--pink)" stroke-width="2">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    </svg>
+                </div>
+                <h3>Second Law & Entropy</h3>
+                <p>The entropy of the universe always increases. During discharge, Gibbs energy converts to electrical work while some energy dissipates as heat. The entropy change ΔS determines whether the reaction is exothermic or endothermic.</p>
+                <div class="equation-box">
+                    ΔS<sub>universe</sub> ≥ 0<br>
+                    <span class="sub">Second Law: Entropy Always Increases</span>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-icon" style="background: linear-gradient(135deg, rgba(123,44,191,0.2), rgba(0,245,212,0.2));">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                </div>
+                <h3>Gibbs Free Energy</h3>
+                <p>The maximum reversible work obtainable from a battery at constant T and P. The change in Gibbs energy ΔG determines the cell voltage: E = -ΔG/nF. When ΔG < 0, the reaction proceeds spontaneously.</p>
+                <div class="equation-box">
+                    ΔG = ΔH - TΔS<br>
+                    <span class="sub">Gibbs Equation: Max Reversible Work</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="highlight-box">
+            <h4>Thermodynamic Voltage Limit</h4>
+            <p>The open-circuit voltage (OCV) of a lithium-ion cell is fundamentally limited by the difference in Gibbs free energy between the two electrode materials. For a typical NMC/graphite cell, ΔG ≈ 270 kJ/mol, yielding E ≈ 4.0 V. This is the theoretical maximum — practical cells achieve 3.6-3.7 V due to kinetic overpotentials and internal resistance.</p>
+        </div>
+
+        <svg class="svg-container" viewBox="0 0 800 400" id="thermo-svg">
+            <defs>
+                <linearGradient id="gibbsGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:var(--cyan);stop-opacity:0.8"/>
+                    <stop offset="100%" style="stop-color:var(--blue);stop-opacity:0.8"/>
+                </linearGradient>
+                <linearGradient id="heatGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color:var(--pink);stop-opacity:0.6"/>
+                    <stop offset="100%" style="stop-color:var(--orange);stop-opacity:0.6"/>
+                </linearGradient>
+                <filter id="glow">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                    <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+            <!-- Battery Cross-Section -->
+            <rect x="200" y="50" width="400" height="300" rx="20" fill="rgba(10,22,40,0.8)" stroke="var(--cyan)" stroke-width="2"/>
+            <!-- Cathode -->
+            <rect x="220" y="80" width="150" height="240" rx="8" fill="rgba(0,245,212,0.15)" stroke="var(--cyan)" stroke-width="1"/>
+            <text x="295" y="205" text-anchor="middle" fill="var(--cyan)" font-size="14">CATHODE</text>
+            <text x="295" y="225" text-anchor="middle" fill="var(--text-dim)" font-size="11">Li₊ insertion</text>
+            <!-- Anode -->
+            <rect x="430" y="80" width="150" height="240" rx="8" fill="rgba(247,37,133,0.15)" stroke="var(--pink)" stroke-width="1"/>
+            <text x="505" y="205" text-anchor="middle" fill="var(--pink)" font-size="14">ANODE</text>
+            <text x="505" y="225" text-anchor="middle" fill="var(--text-dim)" font-size="11">Li⁺ extraction</text>
+            <!-- Separator -->
+            <rect x="370" y="80" width="60" height="240" fill="rgba(123,44,191,0.2)" stroke="var(--purple)" stroke-width="1" stroke-dasharray="4"/>
+            <text x="400" y="205" text-anchor="middle" fill="var(--purple)" font-size="10" transform="rotate(-90, 400, 205)">SEPARATOR</text>
+            <!-- Li+ Ion Animation -->
+            <g id="li-ion-anim">
+                <circle r="15" fill="var(--cyan)" opacity="0.8" filter="url(#glow)">
+                    <animate attributeName="cx" values="350;450;350" dur="3s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" values="120;280;120" dur="3s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.8;0.3;0.8" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <text fill="white" font-size="10" font-weight="bold">
+                    <animate attributeName="x" values="335;435;335" dur="3s" repeatCount="indefinite"/>
+                    <animate attributeName="y" values="125;285;125" dur="3s" repeatCount="indefinite"/>
+                    <textPath href="#textPath" dy="-5">Li⁺</textPath>
+                </text>
+            </g>
+            <!-- Electron Flow -->
+            <g>
+                <path d="M 220 180 Q 150 180 150 250 Q 150 320 220 320" fill="none" stroke="var(--blue)" stroke-width="2" stroke-dasharray="8,4">
+                    <animate attributeName="stroke-dashoffset" values="0;24" dur="1s" repeatCount="indefinite"/>
+                </path>
+                <text x="100" y="200" fill="var(--blue)" font-size="12">e⁻ flow</text>
+                <text x="100" y="220" fill="var(--text-dim)" font-size="10">(external circuit)</text>
+            </g>
+            <!-- Energy Labels -->
+            <g font-size="12">
+                <text x="260" y="60" fill="var(--cyan)">ΔG (Gibbs Energy)</text>
+                <text x="260" y="360" fill="var(--pink)">Q (Heat)</text>
+                <text x="480" y="60" fill="var(--blue)">W (Electrical Work)</text>
+                <text x="480" y="360" fill="var(--purple)">TΔS (Entropy)</text>
+            </g>
+            <!-- Flow Arrows -->
+            <defs>
+                <marker id="arrowCyan" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="var(--cyan)"/>
+                </marker>
+                <marker id="arrowPink" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="var(--pink)"/>
+                </marker>
+            </defs>
+            <line x1="295" y1="70" x2="295" y2="40" stroke="var(--cyan)" stroke-width="2" marker-end="url(#arrowCyan)"/>
+            <line x1="505" y1="70" x2="505" y2="40" stroke="var(--blue)" stroke-width="2" marker-end="url(#arrowPink)"/>
+        </svg>
+
+        <div class="metric-display">
+            <div class="metric">
+                <div class="metric-value">4.0 V</div>
+                <div class="metric-label">Theoretical OCV (NMC/Graphite)</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">270 kJ/mol</div>
+                <div class="metric-label">Gibbs Energy ΔG</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">95%</div>
+                <div class="metric-label">Theoretical Efficiency</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">0.5-2 mΩ</div>
+                <div class="metric-label">Internal Resistance</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="gibbs">
+        <h2 class="section-title">Gibbs Free Energy & Cell Voltage</h2>
+        <p class="section-desc">The Gibbs free energy change ΔG is the maximum non-expansion work obtainable from an electrochemical cell at constant temperature and pressure. This fundamental quantity directly determines the cell's open-circuit voltage through the Nernst equation.</p>
+
+        <div class="card-grid">
+            <div class="card">
+                <h3>The Central Equation</h3>
+                <p>The cell voltage E is directly proportional to the Gibbs free energy change and inversely proportional to the charge transferred n:</p>
+                <div class="equation-box">
+                    E = -ΔG / nF<br>
+                    <span class="sub">Where F = 96,485 C/mol (Faraday constant)</span>
+                </div>
+                <p>For a typical Li-ion cell with ΔG = 270 kJ/mol and n = 1 (one Li⁺ per reaction):<br>E = 270,000 / (1 × 96,485) ≈ 2.8 V per Li⁺ transfer... wait, we need to reconsider. The actual cell reaction involves multiple electrons.</p>
+            </div>
+            <div class="card">
+                <h3>Temperature Dependence</h3>
+                <p>Gibbs energy is temperature-dependent through the entropy term. As temperature increases, the TΔS contribution becomes more significant, affecting both the voltage and the heat generation during operation.</p>
+                <div class="equation-box">
+                    (∂E/∂T)<sub>P</sub> = -ΔS / nF<br>
+                    <span class="sub">Entropy Coefficient (thermal voltage coefficient)</span>
+                </div>
+                <p>For Li-ion cells, this coefficient is typically -0.1 to -0.5 mV/K, meaning voltage decreases slightly as temperature rises.</p>
+            </div>
+            <div class="card">
+                <h3>Pressure Effects</h3>
+                <p>Under high pressure (such as in constrained battery packs), the volume work term PΔV becomes relevant. For liquids and solids, this effect is small but measurable for pressure variations exceeding 10 atm.</p>
+                <div class="equation-box">
+                    (∂E/∂P)<sub>T</sub> = ΔV / nF<br>
+                    <span class="sub">Pressure Coefficient</span>
+                </div>
+            </div>
+        </div>
+
+        <svg class="gibbs-svg" viewBox="0 0 700 450" id="gibbs-svg">
+            <defs>
+                <linearGradient id="gibbsSurface" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:var(--cyan);stop-opacity:0.6"/>
+                    <stop offset="50%" style="stop-color:var(--blue);stop-opacity:0.4"/>
+                    <stop offset="100%" style="stop-color:var(--purple);stop-opacity:0.6"/>
+                </linearGradient>
+                <filter id="softGlow">
+                    <feGaussianBlur stdDeviation="2" result="blur"/>
+                    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+            </defs>
+            <!-- Axis System -->
+            <line x1="80" y1="400" x2="650" y2="400" stroke="var(--text-dim)" stroke-width="2"/>
+            <line x1="80" y1="400" x2="80" y2="50" stroke="var(--text-dim)" stroke-width="2"/>
+            <line x1="80" y1="400" x2="80" y2="400" stroke="var(--text-dim)" stroke-width="2" stroke-dasharray="5,5" opacity="0.5"/>
+            <!-- Axis Labels -->
+            <text x="670" y="405" fill="var(--text-dim)" font-size="14">T (K)</text>
+            <text x="40" y="45" fill="var(--text-dim)" font-size="14">ΔG (kJ/mol)</text>
+            <text x="600" y="430" fill="var(--text-dim)" font-size="12">0    200    400    600</text>
+            <text x="50" y="395" fill="var(--text-dim)" font-size="12">0</text>
+            <text x="50" y="195" fill="var(--text-dim)" font-size="12">-200</text>
+            <text x="50" y="50" fill="var(--text-dim)" font-size="12">-400</text>
+            <!-- ΔH Line (Enthalpy) -->
+            <path d="M 100,80 Q 300,100 550,150" fill="none" stroke="var(--pink)" stroke-width="3" filter="url(#softGlow)"/>
+            <text x="560" y="160" fill="var(--pink)" font-size="14">ΔH (Enthalpy)</text>
+            <!-- ΔG Line (Gibbs) -->
+            <path d="M 100,150 Q 300,220 550,320" fill="none" stroke="var(--cyan)" stroke-width="3" filter="url(#softGlow)"/>
+            <text x="560" y="330" fill="var(--cyan)" font-size="14">ΔG (Gibbs)</text>
+            <!-- TΔS Region (Shaded) -->
+            <path d="M 100,80 Q 300,100 550,150 L 550,320 Q 300,220 100,150 Z" fill="url(#gibbsSurface)" opacity="0.4"/>
+            <text x="200" y="200" fill="var(--purple)" font-size="14">TΔS Region</text>
+            <!-- Key Points -->
+            <circle cx="150" cy="115" r="8" fill="var(--cyan)" filter="url(#softGlow)">
+                <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="450" cy="240" r="8" fill="var(--cyan)" filter="url(#softGlow)">
+                <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+            </circle>
+            <!-- Labels -->
+            <text x="160" y="100" fill="var(--text)" font-size="12">ΔH = -300</text>
+            <text x="160" y="175" fill="var(--text)" font-size="12">ΔG = -270</text>
+            <text x="160" y="135" fill="var(--text)" font-size="11">TΔS = -30</text>
+            <!-- Equation Box -->
+            <rect x="100" y="330" width="200" height="60" rx="8" fill="rgba(0,245,212,0.1)" stroke="var(--cyan)" stroke-width="1"/>
+            <text x="200" y="355" text-anchor="middle" fill="var(--cyan)" font-size="16">ΔG = ΔH - TΔS</text>
+            <text x="200" y="378" text-anchor="middle" fill="var(--text-dim)" font-size="12">at 298K, ΔS ≈ -100 J/(mol·K)</text>
+        </svg>
+
+        <div class="highlight-box">
+            <h4>Thermodynamic Activity & Concentration</h4>
+            <p>The chemical potential μ of lithium in an electrode is defined relative to a standard state. At equilibrium, the difference in chemical potential between cathode and anode determines the cell voltage. As lithium concentration changes (state of charge), the chemical potential shifts according to the local activity coefficient γ.</p>
+            <div class="equation-box">
+                μ<sub>Li</sub> = μ°<sub>Li</sub> + RT ln(a<sub>Li</sub>)<br>
+                <span class="sub">Chemical potential depends on activity (concentration-dependent)</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="entropy">
+        <h2 class="section-title">Entropy & Heat Generation</h2>
+        <p class="section-desc">Entropy is the thermodynamic quantity that governs the direction of spontaneous processes and determines the heat effects during battery operation. The entropy change ΔS tells us whether a battery heats up or cools down during discharge.</p>
+
+        <div class="card-grid">
+            <div class="card">
+                <h3>Heat Generation Mechanisms</h3>
+                <p>During battery operation, heat is generated through two main thermodynamic mechanisms:</p>
+                <ul style="margin: 1rem 0 1rem 1.5rem; color: var(--text-dim); line-height: 1.8;">
+                    <li><strong style="color: var(--pink);">Reversible Heat:</strong> Q<sub>rev</sub> = -TΔS (entropy change)</li>
+                    <li><strong style="color: var(--orange);">Irreversible Heat:</strong> Q<sub>irr</sub> = I²R<sub>int</sub> (Joule heating)</li>
+                </ul>
+                <p>At low rates, reversible heat dominates. At high rates (fast charging), irreversible Joule heating becomes the primary heat source.</p>
+            </div>
+            <div class="card">
+                <h3>Entropy Measurement</h3>
+                <p>The entropy change ΔS can be measured electrochemically by monitoring the open-circuit voltage as a function of temperature (OCV-T method):</p>
+                <div class="equation-box">
+                    ΔS = nF × (∂E/∂T)<sub>P</sub><br>
+                    <span class="sub">Entropy from thermal voltage coefficient</span>
+                </div>
+                <p>Typical values for graphite intercalation compounds range from -50 to +50 J/(mol·K) depending on the lithium concentration (stage).</p>
+            </div>
+            <div class="card">
+                <h3>Thermal Runaway Risk</h3>
+                <p>When ΔS > 0 (endothermic discharge), the battery absorbs heat during discharge — potentially stabilizing temperature. However, when exothermic side reactions dominate (SEI decomposition, cathode decomposition), the entropy contribution becomes positive and heat accumulates, potentially triggering thermal runaway.</p>
+                <div class="equation-box">
+                    T<sub> runaway</sub> ∝ Σ ΔH<sub>side reactions</sub><br>
+                    <span class="sub">Cumulative exothermic heat exceeding cooling capacity</span>
+                </div>
+            </div>
+        </div>
+
+        <svg class="svg-container" viewBox="0 0 800 350" id="entropy-svg">
+            <defs>
+                <linearGradient id="heatExchange" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:var(--pink);stop-opacity:0.8"/>
+                    <stop offset="50%" style="stop-color:var(--orange);stop-opacity:0.4"/>
+                    <stop offset="100%" style="stop-color:var(--cyan);stop-opacity:0.8"/>
+                </linearGradient>
+            </defs>
+            <!-- Temperature Scale -->
+            <rect x="100" y="280" width="600" height="30" rx="15" fill="rgba(20,20,40,0.8)" stroke="rgba(0,245,212,0.3)"/>
+            <rect id="temp-bar" x="100" y="280" width="300" height="30" rx="15" fill="url(#heatExchange)">
+                <animate attributeName="width" values="200;400;200" dur="4s" repeatCount="indefinite"/>
+            </rect>
+            <text x="100" y="270" fill="var(--text-dim)" font-size="12">-20°C</text>
+            <text x="700" y="270" fill="var(--text-dim)" font-size="12">60°C</text>
+            <text id="temp-label" x="400" y="270" text-anchor="middle" fill="var(--text)" font-size="14">Current: 25°C</text>
+
+            <!-- Heat Flow Diagram -->
+            <g transform="translate(100, 50)">
+                <!-- Battery Cell -->
+                <rect x="250" y="0" width="200" height="150" rx="10" fill="rgba(10,22,40,0.8)" stroke="var(--cyan)" stroke-width="2"/>
+                <text x="350" y="80" text-anchor="middle" fill="var(--cyan)" font-size="16">Battery Cell</text>
+
+                <!-- Reversible Heat Arrow (up = endothermic, down = exothermic) -->
+                <g id="rev-heat">
+                    <line x1="350" y1="-30" x2="350" y2="-80" stroke="var(--pink)" stroke-width="3"/>
+                    <polygon points="350,-80 340,-65 360,-65" fill="var(--pink)">
+                        <animate attributeName="points" values="350,-80 340,-65 360,-65;350,-80 340,-95 360,-95;350,-80 340,-65 360,-65" dur="2s" repeatCount="indefinite"/>
+                    </polygon>
+                    <text x="380" y="-50" fill="var(--pink)" font-size="12">Q_rev = TΔS</text>
+                </g>
+
+                <!-- Irreversible Heat Arrow (always down/exothermic) -->
+                <g>
+                    <line x1="350" y1="180" x2="350" y2="230" stroke="var(--orange)" stroke-width="3"/>
+                    <polygon points="350,230 340,215 360,215" fill="var(--orange)"/>
+                    <text x="380" y="210" fill="var(--orange)" font-size="12">Q_irr = I²R</text>
+                </g>
+
+                <!-- Li+ Flow -->
+                <g>
+                    <circle r="10" fill="var(--cyan)" opacity="0.8">
+                        <animate attributeName="cy" values="75;75" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    <text x="350" y="125" text-anchor="middle" fill="var(--text-dim)" font-size="12">Li⁺ + e⁻</text>
+                </g>
+            </g>
+
+            <!-- Legend -->
+            <g transform="translate(600, 50)">
+                <rect x="0" y="0" width="15" height="15" fill="var(--pink)"/>
+                <text x="25" y="12" fill="var(--text-dim)" font-size="12">Reversible Heat</text>
+                <rect x="0" y="30" width="15" height="15" fill="var(--orange)"/>
+                <text x="25" y="42" fill="var(--text-dim)" font-size="12">Irreversible Heat</text>
+            </g>
+        </svg>
+
+        <div class="metric-display">
+            <div class="metric">
+                <div class="metric-value" id="dq-rev">-15 W/kg</div>
+                <div class="metric-label">Reversible Heat (Low Rate)</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="dq-irr">+200 W/kg</div>
+                <div class="metric-label">Irreversible Heat (High Rate)</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">-0.2 mV/K</div>
+                <div class="metric-label">dE/dT Coefficient</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">60-80%</div>
+                <div class="metric-label">Joule Heating Fraction</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="enthalpy">
+        <h2 class="section-title">Enthalpy & Reaction Heat</h2>
+        <p class="section-desc">Enthalpy H represents the total heat content of the electrochemical system. The enthalpy change ΔH includes the internal energy change plus the PV work term, and determines the heat effects when reactions occur at constant pressure.</p>
+
+        <div class="card-grid">
+            <div class="card">
+                <h3>Reaction Enthalpy</h3>
+                <p>The enthalpy change for a battery reaction can be determined from calorimetry measurements or calculated from thermodynamic data. For the overall cell reaction:</p>
+                <div class="equation-box">
+                    ΔH = -nFE° + TΔS<br>
+                    <span class="sub">Enthalpy from standard EMF and entropy</span>
+                </div>
+                <p>For LiCoO₂/graphite at 25°C: ΔH ≈ -280 kJ/mol, showing the reaction is strongly exothermic.</p>
+            </div>
+            <div class="card">
+                <h3>Heat Capacity</h3>
+                <p>The heat capacity C<sub>p</sub> determines how much the temperature changes for a given heat input. For battery materials:</p>
+                <div class="equation-box">
+                    C<sub>p</sub> = (∂H/∂T)<sub>P</sub> ≈ 750 J/(kg·K)<br>
+                    <span class="sub">Typical electrode materials</span>
+                </div>
+                <p>A 50 kWh battery pack contains ~50 kg of active material, giving total heat capacity of ~37.5 MJ/K — meaning it takes significant heat to change temperature.</p>
+            </div>
+            <div class="card">
+                <h3>Phase Change Enthalpy</h3>
+                <p>During phase transitions (stage transitions in graphite, cathode phase changes), additional enthalpy is absorbed or released. These latent heats can cause measurable temperature plateaus during cycling.</p>
+                <div class="equation-box">
+                    ΔH<sub>phase</sub> = L × m<br>
+                    <span class="sub">Latent heat × mass</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3 style="color: var(--cyan); margin-bottom: 1rem;">Enthalpy-Entropy Compensation</h3>
+            <canvas id="enthalpy-chart" class="chart-canvas"></canvas>
+            <p style="color: var(--text-dim); font-size: 0.9rem; margin-top: 1rem;">As temperature increases, the entropy term TΔS becomes more significant, causing ΔG to become less negative while ΔH remains relatively constant. This is the fundamental origin of voltage decrease with temperature.</p>
+        </div>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Material System</th>
+                    <th>ΔH (kJ/mol)</th>
+                    <th>ΔS (J/(mol·K))</th>
+                    <th>E° (V)</th>
+                    <th>Temperature Coefficient</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>LiCoO₂ / Graphite</td>
+                    <td>-280</td>
+                    <td>-100</td>
+                    <td>3.90</td>
+                    <td>-0.2 mV/K</td>
+                </tr>
+                <tr>
+                    <td>LiFePO₄ / Graphite</td>
+                    <td>-220</td>
+                    <td>-50</td>
+                    <td>3.45</td>
+                    <td>-0.1 mV/K</td>
+                </tr>
+                <tr>
+                    <td>NMC 811 / Graphite</td>
+                    <td>-295</td>
+                    <td>-120</td>
+                    <td>4.05</td>
+                    <td>-0.25 mV/K</td>
+                </tr>
+                <tr>
+                    <td>LiNi₀.₅Mn₁.₅O₄ / Si</td>
+                    <td>-350</td>
+                    <td>-150</td>
+                    <td>4.70</td>
+                    <td>-0.4 mV/K</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="section" id="simulator">
+        <h2 class="section-title">Thermodynamic Simulator</h2>
+        <p class="section-desc">Adjust battery conditions to see how thermodynamics governs voltage, efficiency, and heat generation in real-time.</p>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Temperature: <span id="temp-val">25°C</span></label>
+                <input type="range" id="temp-slider" min="-20" max="60" value="25">
+            </div>
+            <div class="control-group">
+                <label>State of Charge: <span id="soc-val">50%</span></label>
+                <input type="range" id="soc-slider" min="0" max="100" value="50">
+            </div>
+            <div class="control-group">
+                <label>C-Rate: <span id="crate-val">1C</span></label>
+                <input type="range" id="crate-slider" min="0.1" max="5" step="0.1" value="1">
+            </div>
+            <div class="control-group">
+                <label>Cell Chemistry</label>
+                <select id="chemistry-select" style="width: 100%; padding: 0.5rem; background: var(--bg-card); border: 1px solid rgba(0,245,212,0.3); border-radius: 8px; color: var(--text);">
+                    <option value="nmc">NMC / Graphite</option>
+                    <option value="lfp">LFP / Graphite</option>
+                    <option value="nmc811">NMC 811 / Graphite</option>
+                    <option value="lmo">LMO / Graphite</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="metric-display">
+            <div class="metric">
+                <div class="metric-value" id="ocv-display">3.70 V</div>
+                <div class="metric-label">Open Circuit Voltage</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="gibbs-display">-257 kJ/mol</div>
+                <div class="metric-label">Gibbs Free Energy</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="eff-display">95.2%</div>
+                <div class="metric-label">Coulombic Efficiency</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="heat-display">+85 W/kg</div>
+                <div class="metric-label">Total Heat Generation</div>
+            </div>
+        </div>
+
+        <div class="energy-bar-container">
+            <div style="flex: 0 0 120px; color: var(--text-dim);">
+                <div style="color: var(--blue); font-weight: 600;">Electrical Work</div>
+                <div style="color: var(--pink); font-weight: 600;">Heat Loss</div>
+            </div>
+            <div class="energy-bar" style="background: rgba(0,0,0,0.4);">
+                <div class="energy-bar-fill" id="work-bar" style="width: 75%; background: linear-gradient(90deg, var(--blue), var(--cyan));">
+                    75%
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="sim-chart" class="chart-canvas"></canvas>
+        </div>
+    </section>
+
+    <section class="section" id="physics">
+        <h2 class="section-title">Cross-Disciplinary Physics</h2>
+        <p class="section-desc">Battery thermodynamics connects deeply to fundamental physics — from general relativity to information theory, the concepts of energy, entropy, and free energy span all domains of physical science.</p>
+
+        <div class="card-grid">
+            <div class="physics-card">
+                <h4>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        <line x1="2" y1="12" x2="22" y2="12"/>
+                    </svg>
+                    Gravitational Redshift
+                </h4>
+                <p>The thermal voltage coefficient dE/dT parallels gravitational redshift: both involve energy shifts proportional to temperature (or gravitational potential). Just as photons lose energy climbing out of gravitational wells, electrons in hotter electrodes have higher thermal energies affecting their electrochemical potential.</p>
+            </div>
+            <div class="physics-card">
+                <h4>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83"/>
+                    </svg>
+                    Information Entropy
+                </h4>
+                <p>Shannon entropy H = -Σ pᵢ log pᵢ mirrors thermodynamic entropy. Battery degradation can be viewed as information loss — as internal states become more disordered, the "message" of the original chemical energy is progressively obscured by parasitic reactions and structural damage.</p>
+            </div>
+            <div class="physics-card">
+                <h4>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    Quantum Free Energy
+                </h4>
+                <p>The Landauer principle connects information erasure to heat generation: erasing one bit releases kT ln 2 of heat. Similarly, battery entropy generation during discharge can be viewed as "erasing" the non-equilibrium state established during charging.</p>
+            </div>
+            <div class="physics-card">
+                <h4>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                    </svg>
+                    Cosmological Constant
+                </h4>
+                <p>The vacuum energy density (cosmological constant Λ) parallels battery zero-point energy. Both represent minimum energy states in their respective domains — the ground state from which all excitations (photons or ions) emerge. ΔG = ΔH - TΔS is the electrochemical analog of Λ = ρ<sub>vac</sub>c².</p>
+            </div>
+            <div class="physics-card">
+                <h4>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                    </svg>
+                    Fluctuation-Dissipation
+                </h4>
+                <p>The fluctuation-dissipation theorem connects equilibrium fluctuations to dissipative response. Battery impedance spectroscopy (EIS) measures Johnson-Nyquist noise as the dissipative signature, while equilibrium voltage fluctuations encode thermodynamic state information through the Nernst-Einstein relation.</p>
+            </div>
+            <div class="physics-card">
+                <h4>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                    Holographic Entropy
+                </h4>
+                <p>The Bekenstein bound S ≤ kc³A/2Għ relates entropy to area for black holes. SEI layer growth in batteries shows similar area scaling — the interfacial area between electrode and electrolyte determines the maximum entropy stored in the interphase structure.</p>
+            </div>
+        </div>
+
+        <div class="highlight-box">
+            <h4>Thermodynamic Limits to Energy Conversion</h4>
+            <p>The Carnot efficiency η = 1 - T<sub>c</sub>/T<sub>h</sub> sets the ultimate limit for heat engines. Batteries achieve 90-95% round-trip efficiency because they convert chemical potential energy directly to electrical work without thermal intermediate steps. The 5-10% loss comes from overpotentials, internal resistance, and entropy generation during charge transfer and mass transport.</p>
+            <div class="equation-box">
+                η<sub>battery</sub> = W<sub>out</sub>/W<sub>in</sub> ≈ 1 - (TΔS/ΔH)<br>
+                <span class="sub">Carnot-analog for electrochemical systems</span>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Battery Thermodynamics Research — Li-Ion Battery, Energy Researcher in Virtual World</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">Exploring the fundamental limits of electrochemical energy conversion</p>
+    </footer>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const colors = ['var(--cyan)', 'var(--pink)', 'var(--purple)', 'var(--blue)'];
+            for (let i = 0; i < 40; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDuration = (10 + Math.random() * 20) + 's';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.opacity = 0.3 + Math.random() * 0.5;
+                particle.style.width = particle.style.height = (2 + Math.random() * 4) + 'px';
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // Navigation dots
+        document.querySelectorAll('.nav-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                const section = document.getElementById(dot.dataset.section);
+                section.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Scroll animations
+        const sections = document.querySelectorAll('.section');
+        const navDots = document.querySelectorAll('.nav-dot');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    navDots.forEach(dot => {
+                        dot.classList.toggle('active', dot.dataset.section === entry.target.id);
+                    });
+                }
+            });
+        }, { threshold: 0.2 });
+        sections.forEach(s => observer.observe(s));
+
+        // Enthalpy Chart
+        function drawEnthalpyChart() {
+            const canvas = document.getElementById('enthalpy-chart');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            const w = canvas.width, h = canvas.height;
+            const padding = 50;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Axes
+            ctx.strokeStyle = 'rgba(0,245,212,0.3)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, h - padding);
+            ctx.lineTo(w - padding, h - padding);
+            ctx.stroke();
+
+            // Labels
+            ctx.fillStyle = 'var(--text-dim)';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('Temperature (K)', w/2 - 40, h - 15);
+            ctx.save();
+            ctx.translate(15, h/2);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText('Energy (kJ/mol)', 0, 0);
+            ctx.restore();
+
+            // ΔH Line (relatively constant)
+            ctx.strokeStyle = 'var(--pink)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let i = 0; i < 10; i++) {
+                const x = padding + (w - 2*padding) * i / 9;
+                const y = h - padding - 100 - i * 2;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // ΔG Line (becomes less negative with T)
+            ctx.strokeStyle = 'var(--cyan)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let i = 0; i < 10; i++) {
+                const x = padding + (w - 2*padding) * i / 9;
+                const y = h - padding - 150 - i * 15;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // TΔS Region
+            ctx.fillStyle = 'rgba(123,44,191,0.3)';
+            ctx.beginPath();
+            ctx.moveTo(padding, h - padding - 100);
+            for (let i = 0; i < 10; i++) {
+                const x = padding + (w - 2*padding) * i / 9;
+                const y1 = h - padding - 100 - i * 2;
+                const y2 = h - padding - 150 - i * 15;
+                ctx.lineTo(x, y1);
+            }
+            for (let i = 9; i >= 0; i--) {
+                const x = padding + (w - 2*padding) * i / 9;
+                const y2 = h - padding - 150 - i * 15;
+                ctx.lineTo(x, y2);
+            }
+            ctx.closePath();
+            ctx.fill();
+
+            // Legend
+            ctx.fillStyle = 'var(--pink)';
+            ctx.fillRect(w - 150, padding, 15, 15);
+            ctx.fillText('ΔH', w - 130, padding + 12);
+            ctx.fillStyle = 'var(--cyan)';
+            ctx.fillRect(w - 150, padding + 25, 15, 15);
+            ctx.fillText('ΔG', w - 130, padding + 37);
+            ctx.fillStyle = 'var(--purple)';
+            ctx.fillRect(w - 150, padding + 50, 15, 15);
+            ctx.fillText('TΔS', w - 130, padding + 62);
+        }
+        drawEnthalpyChart();
+        window.addEventListener('resize', drawEnthalpyChart);
+
+        // Thermodynamic Simulator
+        const chemistryData = {
+            nmc: { Voc: 3.90, dEdT: -0.0002, deltaH: -280, deltaS: -100 },
+            lfp: { Voc: 3.45, dEdT: -0.0001, deltaH: -220, deltaS: -50 },
+            nmc811: { Voc: 4.05, dEdT: -0.00025, deltaH: -295, deltaS: -120 },
+            lmo: { Voc: 4.05, dEdT: -0.0003, deltaH: -260, deltaS: -80 }
+        };
+
+        function updateSimulator() {
+            const T = parseInt(document.getElementById('temp-slider').value) + 273.15;
+            const SOC = parseInt(document.getElementById('soc-slider').value) / 100;
+            const C_rate = parseFloat(document.getElementById('crate-slider').value);
+            const chem = chemistryData[document.getElementById('chemistry-select').value];
+
+            // Calculate OCV (simplified)
+            const Voc = chem.Voc * (0.5 + 0.5 * SOC);
+            const tempCoeff = chem.dEdT * (T - 298.15) * 1000;
+            const OCV = Voc + tempCoeff;
+
+            // Gibbs energy
+            const n = 1;
+            const F = 96485;
+            const R = 8.314;
+            const deltaG = -n * F * OCV / 1000;
+
+            // Efficiency (decreases with C-rate due to overpotential)
+            const overpotential = 0.1 + 0.15 * C_rate;
+            const efficiency = Math.max(70, Math.min(99, 100 - overpotential * C_rate * 10));
+
+            // Heat generation
+            const qRev = -T * chem.deltaS / 1000 * (1 - SOC);
+            const qIrr = 30 * C_rate * C_rate;
+            const totalHeat = qRev + qIrr;
+
+            // Update displays
+            document.getElementById('temp-val').textContent = (T - 273.15).toFixed(0) + '°C';
+            document.getElementById('soc-val').textContent = (SOC * 100).toFixed(0) + '%';
+            document.getElementById('crate-val').textContent = C_rate.toFixed(1) + 'C';
+
+            document.getElementById('ocv-display').textContent = OCV.toFixed(2) + ' V';
+            document.getElementById('gibbs-display').textContent = deltaG.toFixed(0) + ' kJ/mol';
+            document.getElementById('eff-display').textContent = efficiency.toFixed(1) + '%';
+            document.getElementById('heat-display').textContent = (totalHeat >= 0 ? '+' : '') + totalHeat.toFixed(0) + ' W/kg';
+            document.getElementById('heat-display').style.color = totalHeat > 0 ? 'var(--pink)' : 'var(--cyan)';
+
+            // Energy bar
+            const workPct = efficiency;
+            document.getElementById('work-bar').style.width = workPct + '%';
+            document.getElementById('work-bar').textContent = workPct.toFixed(0) + '%';
+            document.getElementById('work-bar').style.background = `linear-gradient(90deg, var(--blue), var(--cyan) ${workPct}%, var(--pink) ${workPct}%)`;
+        }
+
+        ['temp-slider', 'soc-slider', 'crate-slider', 'chemistry-select'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateSimulator);
+        });
+        updateSimulator();
+
+        // Simulation Chart
+        function drawSimChart() {
+            const canvas = document.getElementById('sim-chart');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            const w = canvas.width, h = canvas.height;
+            const padding = 50;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Background grid
+            ctx.strokeStyle = 'rgba(0,245,212,0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (h - 2*padding) * i / 5;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(w - padding, y);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= 10; i++) {
+                const x = padding + (w - 2*padding) * i / 10;
+                ctx.beginPath();
+                ctx.moveTo(x, padding);
+                ctx.lineTo(x, h - padding);
+                ctx.stroke();
+            }
+
+            // Axes
+            ctx.strokeStyle = 'rgba(0,245,212,0.5)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, h - padding);
+            ctx.lineTo(w - padding, h - padding);
+            ctx.stroke();
+
+            // SOC vs Voltage curve
+            ctx.strokeStyle = 'var(--cyan)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let i = 0; i <= 20; i++) {
+                const soc = i / 20;
+                const voltage = 3.0 + 1.0 * soc + 0.3 * Math.sin(soc * Math.PI);
+                const x = padding + (w - 2*padding) * soc;
+                const y = h - padding - (voltage - 3.0) / 1.2 * (h - 2*padding);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Efficiency curve
+            ctx.strokeStyle = 'var(--pink)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            for (let i = 0; i <= 20; i++) {
+                const soc = i / 20;
+                const eff = 99 - 5 * soc - 2 * Math.sin(soc * Math.PI * 2);
+                const x = padding + (w - 2*padding) * soc;
+                const y = h - padding - (eff - 70) / 30 * (h - 2*padding);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Labels
+            ctx.fillStyle = 'var(--text-dim)';
+            ctx.fillText('State of Charge', w/2 - 40, h - 20);
+            ctx.save();
+            ctx.translate(15, h/2);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText('Voltage (V) / Efficiency (%)', 0, 0);
+            ctx.restore();
+
+            ctx.fillStyle = 'var(--cyan)';
+            ctx.fillRect(w - 120, padding, 15, 3);
+            ctx.fillText('Voltage', w - 100, padding + 5);
+            ctx.fillStyle = 'var(--pink)';
+            ctx.fillRect(w - 120, padding + 20, 15, 3);
+            ctx.fillText('Efficiency', w - 100, padding + 25);
+        }
+        drawSimChart();
+        window.addEventListener('resize', drawSimChart);
+    </script>
+</body>
+</html>

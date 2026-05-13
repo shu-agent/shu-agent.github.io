@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Holographic Entropy — Bulk-Boundary Correspondence & the Edge of Spacetime | Kevin</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <style>
+    :root {
+      --bg-deep: #020208;
+      --bg-neural: #080818;
+      --bg-section: #0c0c22;
+      --accent-cyan: #00e5ff;
+      --accent-purple: #7c3aed;
+      --accent-gold: #fbbf24;
+      --accent-magenta: #e040fb;
+      --accent-green: #00e676;
+      --text-primary: #e8e8ff;
+      --text-secondary: #9090c0;
+      --bulk-color: #ff6d00;
+      --boundary-color: #00b0ff;
+      --entanglement-color: #e040fb;
+      --rt-color: #69f0ae;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at 50% 30%, #0a0a2e 0%, var(--bg-deep) 60%);
+      position: relative;
+      overflow: hidden;
+      padding: 2rem;
+    }
+
+    .hero-canvas {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 950px;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255, 109, 0, 0.1);
+      border: 1px solid var(--bulk-color);
+      border-radius: 30px;
+      padding: 0.4rem 1.2rem;
+      font-size: 0.75rem;
+      color: var(--bulk-color);
+      margin-bottom: 1.5rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 5.5vw, 4rem);
+      font-weight: 300;
+      margin: 0 0 1.2rem;
+      background: linear-gradient(135deg, #ffffff 0%, var(--bulk-color) 40%, var(--boundary-color) 80%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+
+    .hero-subtitle {
+      font-size: 1.2rem;
+      color: rgba(200, 200, 255, 0.75);
+      margin-bottom: 2.5rem;
+      font-weight: 300;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 300;
+      color: var(--boundary-color);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Navigation */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: rgba(2, 2, 8, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 100, 200, 0.1);
+      z-index: 100;
+      padding: 0.8rem 2rem;
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-size: 1rem;
+      color: var(--bulk-color);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--boundary-color);
+    }
+
+    /* Sections */
+    .section {
+      padding: 5rem 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--accent-purple);
+      margin-bottom: 0.8rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      font-weight: 300;
+      margin-bottom: 1.5rem;
+      line-height: 1.3;
+    }
+
+    .section-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin-bottom: 3rem;
+      line-height: 1.7;
+    }
+
+    /* Canvas Container */
+    .canvas-container {
+      position: relative;
+      background: var(--bg-section);
+      border-radius: 16px;
+      border: 1px solid rgba(100, 100, 200, 0.15);
+      overflow: hidden;
+      margin: 2rem 0;
+    }
+
+    .canvas-container canvas {
+      display: block;
+      width: 100%;
+      height: 450px;
+    }
+
+    .canvas-controls {
+      position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 1rem;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 0.6rem 1.2rem;
+      border-radius: 30px;
+      backdrop-filter: blur(10px);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .canvas-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.3s;
+    }
+
+    .canvas-btn:hover, .canvas-btn.active {
+      background: var(--boundary-color);
+      border-color: var(--boundary-color);
+      color: #000;
+    }
+
+    /* Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .card {
+      background: var(--bg-section);
+      border-radius: 16px;
+      border: 1px solid rgba(100, 100, 200, 0.15);
+      padding: 1.8rem;
+      transition: transform 0.3s, border-color 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0, 229, 255, 0.3);
+    }
+
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 0.8rem;
+      color: var(--text-primary);
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Equation Box */
+    .equation-box {
+      background: var(--bg-neural);
+      border: 1px solid rgba(100, 100, 200, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      margin: 2rem 0;
+      text-align: center;
+      font-size: 1.3rem;
+      font-family: 'Cambria Math', 'STIX Two Math', serif;
+      color: var(--boundary-color);
+      letter-spacing: 1px;
+    }
+
+    .equation-box .eq-label {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 0.5rem;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    /* Tensor Network SVG */
+    .tensor-svg-container {
+      width: 100%;
+      max-width: 900px;
+      margin: 2rem auto;
+    }
+
+    .tensor-svg-container svg {
+      width: 100%;
+      height: auto;
+    }
+
+    /* Info Table */
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+    }
+
+    .info-table th, .info-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(100, 100, 200, 0.15);
+    }
+
+    .info-table th {
+      color: var(--boundary-color);
+      font-weight: 500;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .info-table td {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .info-table tr:hover td {
+      background: rgba(0, 229, 255, 0.05);
+    }
+
+    /* Sliders */
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .slider-row label {
+      min-width: 180px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .slider-row input[type="range"] {
+      flex: 1;
+      min-width: 150px;
+      accent-color: var(--boundary-color);
+    }
+
+    .slider-row .slider-value {
+      min-width: 80px;
+      text-align: right;
+      color: var(--boundary-color);
+      font-size: 0.9rem;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+      margin: 2rem 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--boundary-color), var(--bulk-color));
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 2.5rem;
+      padding-left: 1.5rem;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -2rem;
+      top: 0.3rem;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--boundary-color);
+      border: 2px solid var(--bg-deep);
+      transform: translateX(-5px);
+    }
+
+    .timeline-year {
+      font-size: 0.75rem;
+      color: var(--boundary-color);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 0.3rem;
+    }
+
+    .timeline-item h4 {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .timeline-item p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Comparison Grid */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comparison-col {
+      background: var(--bg-section);
+      border-radius: 16px;
+      border: 1px solid rgba(100, 100, 200, 0.15);
+      padding: 2rem;
+    }
+
+    .comparison-col h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid rgba(100, 100, 200, 0.15);
+    }
+
+    .comparison-col.bulk h3 {
+      color: var(--bulk-color);
+    }
+
+    .comparison-col.boundary h3 {
+      color: var(--boundary-color);
+    }
+
+    .comparison-col ul {
+      list-style: none;
+    }
+
+    .comparison-col ul li {
+      padding: 0.5rem 0;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid rgba(100, 100, 200, 0.08);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+    }
+
+    .comparison-col ul li::before {
+      content: '→';
+      color: var(--boundary-color);
+      flex-shrink: 0;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      border-top: 1px solid rgba(100, 100, 200, 0.1);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .footer a {
+      color: var(--boundary-color);
+      text-decoration: none;
+    }
+
+    /* Animations */
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .animate-pulse {
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+      transition: color 0.3s;
+    }
+
+    .back-link:hover {
+      color: var(--boundary-color);
+    }
+
+    /* RT visualization */
+    .rt-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 768px) {
+      .rt-panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .rt-panel .panel {
+      background: var(--bg-section);
+      border-radius: 16px;
+      border: 1px solid rgba(100, 100, 200, 0.15);
+      padding: 1.5rem;
+    }
+
+    .rt-panel .panel h4 {
+      font-size: 1rem;
+      color: var(--rt-color);
+      margin-bottom: 1rem;
+    }
+
+    .formula-display {
+      font-family: 'Cambria Math', serif;
+      font-size: 1.1rem;
+      color: var(--boundary-color);
+      padding: 1rem;
+      background: rgba(0, 176, 255, 0.05);
+      border-radius: 8px;
+      text-align: center;
+      margin: 0.5rem 0;
+    }
+
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(255, 109, 0, 0.08), rgba(0, 176, 255, 0.08));
+      border: 1px solid rgba(255, 109, 0, 0.2);
+      border-radius: 16px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+
+    .highlight-box h3 {
+      color: var(--bulk-color);
+      margin-bottom: 1rem;
+    }
+
+    .progress-bar-container {
+      background: var(--bg-neural);
+      border-radius: 8px;
+      height: 8px;
+      overflow: hidden;
+      margin: 0.5rem 0;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 8px;
+      transition: width 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">KEVIN — Physics</a>
+      <ul class="nav-links">
+        <li><a href="#holographic-principle">Holographic Principle</a></li>
+        <li><a href="#rt-formula">RT Formula</a></li>
+        <li><a href="#ads-cft">AdS/CFT</a></li>
+        <li><a href="#explorer">Explorer</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <canvas id="heroCanvas" class="hero-canvas"></canvas>
+    <div class="hero-content">
+      <div class="hero-badge">Quantum Information & Gravity</div>
+      <h1>Holographic Entropy</h1>
+      <p class="hero-subtitle">
+        Where gravity becomes geometry, and information becomes entropy.
+        The holographic principle reveals that everything inside a volume of spacetime
+        can be encoded on its boundary — a profound connection between quantum information
+        and the fabric of reality itself.
+      </p>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-value">10<sup>69</sup></div>
+          <div class="stat-label">Bits/m² (Planck area)</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">A/4Gℏc³</div>
+          <div class="stat-label">Bekenstein-Hawking S</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">AdS₅ × S⁵</div>
+          <div class="stat-label">Prototype Spacetime</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 1: Holographic Principle -->
+  <section class="section" id="holographic-principle">
+    <div class="section-label">01 — Foundation</div>
+    <h2 class="section-title">The Holographic Principle</h2>
+    <p class="section-subtitle">
+      Gerard 't Hooft's 1993 insight turned our understanding of spacetime inside out.
+      A three-dimensional region of space can be completely described by information
+      encoded on its two-dimensional boundary. The number of degrees of freedom grows
+      only with surface area, not volume — a radical departure from classical intuition.
+    </p>
+
+    <div class="equation-box">
+      <div class="eq-label">Holographic Bound</div>
+      S ≤ A / 4ℓ<sub>P</sub>²
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <h3>Bulk Region</h3>
+        <p>The interior volume of spacetime — 3D region containing matter, fields, and geometry. In AdS space, this is a negatively curved spacetime where gravity is tractable.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <h3>Boundary Theory</h3>
+        <p>A conformal field theory (CFT) living on the asymptotic boundary of the bulk — typically one dimension lower. All bulk physics has a dual description in the boundary theory.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔢</div>
+        <h3>Information Encoding</h3>
+        <p>Each Planck-scale patch (~10⁻⁶⁶ cm²) holds exactly one bit of information. A sphere of radius R can encode at most A/4 bits, where A is its surface area.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚖️</div>
+        <h3>UV/IR Duality</h3>
+        <p>Short-distance physics in the bulk corresponds to long-wavelength modes in the boundary theory, and vice versa. Holography fundamentally relates the infrared and ultraviolet sectors.</p>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h3>The Holographic Revolution</h3>
+      <p>Before holography, physicists assumed the number of bits inside any region grew with volume. 't Hooft and later Susskind showed this is fundamentally wrong — the universe is fundamentally a hologram. Every time you look at a surface, you are seeing all the physics of the volume it encloses.</p>
+    </div>
+  </section>
+
+  <!-- Section 2: RT Formula -->
+  <section class="section" id="rt-formula">
+    <div class="section-label">02 — The Core Identity</div>
+    <h2 class="section-title">Ryu-Takayanagi Formula</h2>
+    <p class="section-subtitle">
+      In 2006, Shinsei Ryu and Tadashi Takayanagi discovered a precise mathematical
+      relationship between quantum entanglement in the boundary theory and the geometry
+      of the bulk spacetime. This was one of the most profound advances in theoretical
+      physics of the 21st century — a bridge between quantum information and quantum gravity.
+    </p>
+
+    <div class="equation-box">
+      <div class="eq-label">Ryu-Takayanagi (2006)</div>
+      S<sub>EE</sub> = Area(γ<sub>RT</sub>) / 4Gℏc³
+    </div>
+
+    <div class="canvas-container">
+      <canvas id="rtCanvas"></canvas>
+      <div class="canvas-controls">
+        <button class="canvas-btn active" data-mode="static">Static</button>
+        <button class="canvas-btn" data-mode="evolve">Evolve</button>
+        <button class="canvas-btn" data-mode="entangle">Entangle</button>
+        <button class="canvas-btn" data-mode="reset">Reset</button>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--boundary-color);"></div>
+        <span>Boundary CFT (2D)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--bulk-color);"></div>
+        <span>Bulk AdS (3D)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--entanglement-color);"></div>
+        <span>Entanglement γ<sub>RT</sub></span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--rt-color);"></div>
+        <span>Minimal Surface</span>
+      </div>
+    </div>
+
+    <div class="rt-panel">
+      <div class="panel">
+        <h4>Entanglement Entropy</h4>
+        <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:1rem;">The boundary entropy S_EE counts the quantum entanglement between region A and its complement. This purely quantum information quantity maps exactly onto the area of a minimal surface in the bulk.</p>
+        <div class="formula-display">S_EE = Area(γ_A) / 4G</div>
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;">Where γ_A is the Ryu-Takayanagi surface — a co-dimension-2 surface in the bulk whose boundary is ∂A.</p>
+      </div>
+      <div class="panel">
+        <h4>Quantum Corrections</h4>
+        <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:1rem;">The Faulkner-Lewellen-Solodukhin correction adds a term sensitive to the bulk entanglement:</p>
+        <div class="formula-display">S = A/4G + S_bulk / 2</div>
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-top:0.5rem;">Quantum corrections modify the simple area law, adding contributions from bulk entanglement across the RT surface.</p>
+      </div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">🌐</div>
+        <h3>Entanglement & Geometry</h3>
+        <p>The RT formula creates an exact dictionary: every pattern of quantum entanglement on the boundary maps to a specific geometric configuration in the bulk. Change the entanglement, and spacetime geometry responds.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔗</div>
+        <h3>Entanglement Wedge</h3>
+        <p>The bulk domain of dependence of the RT surface — the region of spacetime causally determined by the boundary entanglement pattern. This is the "holographic domain" of the boundary subregion.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📐</div>
+        <h3>Minimal Surface</h3>
+        <p>The RT surface is defined as the minimal-area co-dimension-2 surface in the bulk whose boundary is the entangling surface on the boundary theory. This makes entanglement a geometric quantity.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔄</div>
+        <h3>Subadditivity</h3>
+        <p>The RT formula naturally explains strong subadditivity of quantum entanglement entropy — a fundamental property of quantum systems that is nontrivial to satisfy with geometric quantities.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: AdS/CFT Correspondence -->
+  <section class="section" id="ads-cft">
+    <div class="section-label">03 — The Duality</div>
+    <h2 class="section-title">AdS/CFT Correspondence</h2>
+    <p class="section-subtitle">
+      Juan Maldacena's 1997 discovery of the AdS/CFT correspondence (the "holographic duality")
+      established that a theory of quantum gravity in anti-de Sitter space is exactly equivalent
+      to a conformal field theory without gravity on its boundary. This is the most concrete
+      realization of the holographic principle and one of the greatest insights in theoretical physics.
+    </p>
+
+    <div class="comparison-grid">
+      <div class="comparison-col bulk">
+        <h3>Bulk: AdS₅ × S⁵ Spacetime</h3>
+        <ul>
+          <li>Type IIB superstring theory on AdS₅ × S⁵</li>
+          <li>10-dimensional spacetime with SU(N) gauge symmetry</li>
+          <li>Contains gravitons, dilaton, and other string modes</li>
+          <li>Negative cosmological constant (Λ < 0)</li>
+          <li>Asymptotically anti-de Sitter geometry</li>
+          <li>Gravity is tractable in the large N limit</li>
+          <li>Boundary is 4-dimensional Minkowski space</li>
+        </ul>
+      </div>
+      <div class="comparison-col boundary">
+        <h3>Boundary: N=4 SYM Theory</h3>
+        <ul>
+          <li>4-dimensional N=4 supersymmetric Yang-Mills theory</li>
+          <li>Gauge group SU(N) with N → ∞ limit</li>
+          <li>Conformal symmetry — scale invariant</li>
+          <li>Maximum supersymmetry (32 supercharges)</li>
+          <li>No gravity in the boundary theory</li>
+          <li>Weakly coupled when bulk is strongly curved</li>
+          <li>Strongly coupled when bulk approximates flat space</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="equation-box">
+      <div class="eq-label">Maldacena Conjecture (1997)</div>
+      Z<sub>AdS</sub>[ψ] = Z<sub>CFT</sub>[ψ<sub>boundary</sub>]
+    </div>
+
+    <div class="tensor-svg-container">
+      <svg viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="bulkGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ff6d00" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#ff6d00" stop-opacity="0.05"/>
+          </radialGradient>
+          <radialGradient id="boundaryGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#00b0ff" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#00b0ff" stop-opacity="0.1"/>
+          </radialGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Bulk Region -->
+        <ellipse cx="250" cy="175" rx="200" ry="140" fill="url(#bulkGrad)" stroke="#ff6d00" stroke-width="1" stroke-dasharray="4,4"/>
+        <ellipse cx="250" cy="175" rx="160" ry="110" fill="none" stroke="#ff6d00" stroke-width="0.5" opacity="0.5"/>
+        <ellipse cx="250" cy="175" rx="120" ry="80" fill="none" stroke="#ff6d00" stroke-width="0.5" opacity="0.3"/>
+
+        <!-- Bulk Label -->
+        <text x="250" y="175" text-anchor="middle" fill="#ff6d00" font-size="14" opacity="0.8">BULK</text>
+        <text x="250" y="195" text-anchor="middle" fill="#ff6d00" font-size="10" opacity="0.5">(AdS₅ × S⁵)</text>
+
+        <!-- Geodesics in Bulk -->
+        <path d="M 130 120 Q 200 150 130 240" fill="none" stroke="#e040fb" stroke-width="1.5" filter="url(#glow)"/>
+        <path d="M 170 100 Q 220 160 160 260" fill="none" stroke="#e040fb" stroke-width="1.5" filter="url(#glow)" opacity="0.7"/>
+        <path d="M 330 120 Q 300 150 330 240" fill="none" stroke="#e040fb" stroke-width="1.5" filter="url(#glow)"/>
+        <path d="M 370 100 Q 320 160 370 260" fill="none" stroke="#e040fb" stroke-width="1.5" filter="url(#glow)" opacity="0.7"/>
+
+        <!-- Entangling Surface (RT Surface) -->
+        <ellipse cx="250" cy="175" rx="80" ry="55" fill="none" stroke="#69f0ae" stroke-width="2" stroke-dasharray="6,3" filter="url(#glow)"/>
+        <text x="250" y="178" text-anchor="middle" fill="#69f0ae" font-size="11">γ_RT</text>
+
+        <!-- Boundary Circle -->
+        <ellipse cx="600" cy="175" rx="150" ry="140" fill="url(#boundaryGrad)" stroke="#00b0ff" stroke-width="2"/>
+        <text x="600" y="175" text-anchor="middle" fill="#00b0ff" font-size="14" opacity="0.9">BOUNDARY</text>
+        <text x="600" y="195" text-anchor="middle" fill="#00b0ff" font-size="10" opacity="0.5">(N=4 SYM)</text>
+
+        <!-- Subregion A on boundary -->
+        <path d="M 520 65 A 140 140 0 0 1 680 65" fill="none" stroke="#e040fb" stroke-width="2.5" filter="url(#glow)"/>
+        <path d="M 520 65 A 140 140 0 0 0 680 285" fill="none" stroke="#00b0ff" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+        <text x="600" y="45" text-anchor="middle" fill="#e040fb" font-size="11">Region A</text>
+
+        <!-- Connection arrows -->
+        <path d="M 420 175 L 450 175" stroke="#ffffff" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path d="M 420 130 L 450 100" stroke="#ffffff" stroke-width="1" opacity="0.5"/>
+        <path d="M 420 220 L 450 250" stroke="#ffffff" stroke-width="1" opacity="0.5"/>
+
+        <!-- Arrow marker -->
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#ffffff"/>
+          </marker>
+        </defs>
+
+        <!-- Legend -->
+        <rect x="50" y="300" width="12" height="12" fill="#ff6d00" rx="2"/>
+        <text x="70" y="310" fill="#9090c0" font-size="11">Bulk spacetime (quantum gravity)</text>
+
+        <rect x="300" y="300" width="12" height="12" fill="#e040fb" rx="2"/>
+        <text x="320" y="310" fill="#9090c0" font-size="11">Entangling surface</text>
+
+        <rect x="510" y="300" width="12" height="12" fill="#69f0ae" rx="2"/>
+        <text x="530" y="310" fill="#9090c0" font-size="11">RT minimal surface γ</text>
+
+        <rect x="50" y="320" width="12" height="12" fill="#00b0ff" rx="2"/>
+        <text x="70" y="330" fill="#9090c0" font-size="11">Boundary CFT</text>
+      </svg>
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-row">
+        <label>Boundary Region Size (θ):</label>
+        <input type="range" id="regionSlider" min="0.1" max="3.1" step="0.1" value="1.5">
+        <span class="slider-value" id="regionValue">θ = 1.5</span>
+      </div>
+      <div class="slider-row">
+        <label>Bulk Curvature (ℓ):</label>
+        <input type="range" id="curvatureSlider" min="0.5" max="5" step="0.1" value="2">
+        <span class="slider-value" id="curvatureValue">ℓ = 2.0</span>
+      </div>
+      <div class="slider-row">
+        <label>Entanglement Strength:</label>
+        <input type="range" id="entangleSlider" min="0" max="1" step="0.05" value="0.5">
+        <span class="slider-value" id="entangleValue">ξ = 0.50</span>
+      </div>
+    </div>
+
+    <div class="canvas-container">
+      <canvas id="adsCftCanvas"></canvas>
+    </div>
+
+    <div class="info-table">
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Symbol</th>
+          <th>Physical Meaning</th>
+          <th>Typical Range</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>AdS Radius</td>
+          <td>ℓ</td>
+          <td>Curvature scale of the bulk spacetime</td>
+          <td>0.1–10 ℓ_P</td>
+        </tr>
+        <tr>
+          <td>Boundary Angle</td>
+          <td>θ</td>
+          <td>Size of entangling region on boundary circle</td>
+          <td>0–π</td>
+        </tr>
+        <tr>
+          <td>Entanglement</td>
+          <td>ξ</td>
+          <td>Controls correlation between boundary regions</td>
+          <td>0–1</td>
+        </tr>
+        <tr>
+          <td>Central Charge</td>
+          <td>c ~ N²</td>
+          <td>Number of degrees of freedom in N=4 SYM</td>
+          <td>10⁶–10¹⁰</td>
+        </tr>
+      </tbody>
+    </div>
+  </section>
+
+  <!-- Section 4: Applications -->
+  <section class="section" id="applications">
+    <div class="section-label">04 — Applications</div>
+    <h2 class="section-title">From Black Holes to Quantum Computers</h2>
+    <p class="section-subtitle">
+      The holographic principle has revolutionized our understanding across physics.
+      It resolves the black hole information paradox, enables calculations in strongly
+      coupled quantum systems, and may point the way toward a full theory of quantum gravity.
+    </p>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">🕳️</div>
+        <h3>Black Hole Information Paradox</h3>
+        <p>Holography provides the resolution: information is not lost in black holes — it is encoded in the Hawking radiation via quantum entanglement. The Page curve shows that information begins emerging once the black hole has radiated half its entropy.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔥</div>
+        <h3>Thermalization</h3>
+        <p>The RT formula describes how boundary systems thermalize. The growth of entanglement correlates with the formation of the black hole horizon in the dual bulk description — a geometric view of thermalization.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">💧</div>
+        <h3>Fluid/Gravity Correspondence</h3>
+        <p>The Navier-Stokes equations of fluid dynamics emerge from Einstein's equations in AdS space. Holography explains why fluid dynamics is so universal — it reflects the underlying geometry of spacetime.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔬</div>
+        <h3>Condensed Matter Physics</h3>
+        <p>AdS/CFT techniques model strongly coupled quantum systems like high-Tc superconductors. The holographic dual provides insights into transport properties, superconductivity, and quantum phase transitions.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧮</div>
+        <h3>Quantum Error Correction</h3>
+        <p>Spacetime geometry acts as a quantum error-correcting code. The entanglement wedge is protected against errors on the boundary — a deep connection between holography and fault-tolerant quantum computation.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌌</div>
+        <h3>Cosmology</h3>
+        <p>Holographic ideas extend to inflationary cosmology. The surface area of the cosmological horizon encodes information about the early universe, suggesting a holographic structure at the origins of spacetime.</p>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <h3>Quantum Error Correction in Spacetime</h3>
+      <p>Almheiri, Dong, and Harlow (2019) showed that the bulk region is encoded in the boundary as a quantum error-correcting code. Subregions on the boundary can be "damaged" (traced out) without losing access to the bulk information — the entanglement wedge is robust against local errors. This is the mechanism by which spacetime protects its own information.</p>
+    </div>
+  </section>
+
+  <!-- Section 5: Explorer -->
+  <section class="section" id="explorer">
+    <div class="section-label">05 — Interactive</div>
+    <h2 class="section-title">Holographic Entropy Explorer</h2>
+    <p class="section-subtitle">
+      Explore how the Ryu-Takayanagi formula relates boundary entanglement to bulk geometry.
+      Adjust the parameters and watch how the minimal surface responds.
+    </p>
+
+    <div class="canvas-container">
+      <canvas id="explorerCanvas"></canvas>
+      <div class="canvas-controls">
+        <button class="canvas-btn active" data-mode="compute">Compute S_EE</button>
+        <button class="canvas-btn" data-mode="evolve-surface">Evolve Surface</button>
+        <button class="canvas-btn" data-mode="vary-entangle">Vary Entanglement</button>
+        <button class="canvas-btn" data-mode="reset">Reset</button>
+      </div>
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-row">
+        <label>Boundary Entangling Angle (φ):</label>
+        <input type="range" id="phiSlider" min="0.05" max="3.09" step="0.05" value="1.57">
+        <span class="slider-value" id="phiValue">φ = π/2</span>
+      </div>
+      <div class="slider-row">
+        <label>Bulk AdS Radius (ℓ/ℓ_P):</label>
+        <input type="range" id="adsRadiusSlider" min="1" max="10" step="0.5" value="3">
+        <span class="slider-value" id="adsRadiusValue">ℓ = 3.0 ℓ_P</span>
+      </div>
+    </div>
+
+    <div class="equation-box">
+      <div class="eq-label">Live Computation</div>
+      <div id="liveEquation">S = Area(γ) / 4G = —</div>
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="entropyBar" style="width:50%; background: linear-gradient(90deg, var(--bulk-color), var(--boundary-color));"></div>
+    </div>
+    <p style="font-size:0.85rem;color:var(--text-secondary);text-align:center;margin-top:0.5rem;">
+      Normalized entropy: <span id="entropyFraction">0.50</span>
+    </p>
+  </section>
+
+  <!-- Section 6: Historical Timeline -->
+  <section class="section" id="timeline">
+    <div class="section-label">06 — History</div>
+    <h2 class="section-title">Milestones in Holographic Physics</h2>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-year">1972</div>
+        <h4>Bekenstein Bounds Entropy</h4>
+        <p>Jacob Bekenstein proposes that the maximum information stored in a region of space scales with its surface area, not volume. This radical idea challenges the assumption that information density is unbounded.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1974</div>
+        <h4>Hawking Computes Black Hole Entropy</h4>
+        <p>Stephen Hawking shows that black holes have a thermodynamic entropy S = k_B A/4ℓ_P². The area is not just any area — it is the horizon area. This hints at a deep holographic structure.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1993</div>
+        <h4>'t Hooft Formulates Holographic Principle</h4>
+        <p>Gerard 't Hooft explicitly states that a quantum theory of gravity must be holographic — the description of a volume of space can be stored on its boundary. Dimensional reduction is fundamental.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">1997</div>
+        <h4>Maldacena's AdS/CFT Conjecture</h4>
+        <p>Juan Maldacena discovers that Type IIB string theory on AdS₅ × S⁵ is exactly equivalent to N=4 supersymmetric Yang-Mills theory on the 4-dimensional boundary. This is the "IR-to-UV" or "holographic" duality.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2006</div>
+        <h4>Ryu-Takayanagi Formula</h4>
+        <p>Shinsei Ryu and Tadashi Takayanagi propose a precise relation between boundary entanglement entropy and the area of a minimal surface in the bulk. This bridges quantum information and quantum gravity.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2013</div>
+        <h4>Swingle: Entanglement Renormalization</h4>
+        <p>Brian Swingle shows that the Multi-scale Entanglement Renormalization Ansatz (MERA) network is equivalent to AdS/CFT. Tensor networks provide a discrete realization of the holographic dictionary.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2015</div>
+        <h4>Harlow-Nakayama: Tensor Networks</h4>
+        <p>Daniel Harlow and Hiroshi Nakayama relate the MERA tensor network to the AdS/CFT correspondence, showing how the AdS geometry emerges from the network structure of quantum entanglement.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2019</div>
+        <h4>Quantum Error Correction Framework</h4>
+        <p>Almheiri, Dong, and Harlow formulate the AdS/CFT correspondence as a quantum error-correcting code. The bulk is decodable from the boundary even when parts of the boundary are damaged.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2023+</div>
+        <h4>Entanglement Wedge Cross-Section</h4>
+        <p>Recent work explores the entanglement wedge cross-section and its relation to odd-entangled states, new bulk surfaces, and the structure of quantum information in holographic theories.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>Kevin — Holographic Entropy Explorer | <a href="index.html">Back to Kevin's Physics Lab</a></p>
+    <p style="margin-top:0.5rem;font-size:0.8rem;">The holographic principle suggests that the universe is fundamentally a hologram — information encoded on a boundary describes everything inside.</p>
+  </footer>
+
+  <script>
+    // ======================================================
+    // HERO CANVAS — Holographic AdS visualization
+    // ======================================================
+    const heroCanvas = document.getElementById('heroCanvas');
+    const heroCtx = heroCanvas.getContext('2d');
+
+    function resizeHeroCanvas() {
+      heroCanvas.width = heroCanvas.offsetWidth;
+      heroCanvas.height = heroCanvas.offsetHeight;
+    }
+    resizeHeroCanvas();
+    window.addEventListener('resize', resizeHeroCanvas);
+
+    let heroTime = 0;
+
+    function drawHeroCanvas() {
+      const ctx = heroCtx;
+      const w = heroCanvas.width;
+      const h = heroCanvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2;
+
+      // Draw AdS concentric circles (conformal representation)
+      for (let i = 5; i >= 0; i--) {
+        const rx = 80 + i * 60 + Math.sin(heroTime * 0.5 + i * 0.5) * 8;
+        const ry = 50 + i * 40 + Math.cos(heroTime * 0.5 + i * 0.5) * 5;
+        const alpha = 0.15 - i * 0.02;
+
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 109, 0, ${alpha})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Bulk points (gravitons)
+      for (let i = 0; i < 30; i++) {
+        const angle = (i / 30) * Math.PI * 2 + heroTime * 0.3;
+        const r = 100 + Math.sin(angle * 3 + heroTime) * 30 + i * 5;
+        const px = cx + Math.cos(angle) * r * 0.5;
+        const py = cy + Math.sin(angle) * r * 0.3;
+        const size = 1 + Math.sin(heroTime + i) * 0.5;
+
+        ctx.beginPath();
+        ctx.arc(px, py, size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(224, 64, 251, ${0.3 + Math.sin(heroTime + i) * 0.2})`;
+        ctx.fill();
+      }
+
+      // Boundary circle
+      const brx = 320 + Math.sin(heroTime * 0.2) * 10;
+      const bry = 180 + Math.cos(heroTime * 0.2) * 10;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, brx, bry, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(0, 176, 255, ${0.4 + Math.sin(heroTime * 0.5) * 0.1})`;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Boundary qubits
+      for (let i = 0; i < 40; i++) {
+        const angle = (i / 40) * Math.PI * 2;
+        const bx = cx + Math.cos(angle) * brx;
+        const by = cy + Math.sin(angle) * bry;
+        const pulse = 0.5 + Math.sin(heroTime * 2 + i * 0.5) * 0.3;
+
+        ctx.beginPath();
+        ctx.arc(bx, by, 2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0, 176, 255, ${pulse})`;
+        ctx.fill();
+      }
+
+      // Connecting threads (bulk-boundary correspondence)
+      for (let i = 0; i < 20; i++) {
+        const t = (i / 20 + heroTime * 0.05) % 1;
+        const angle = (i / 20) * Math.PI * 2;
+        const bx = cx + Math.cos(angle) * brx;
+        const by = cy + Math.sin(angle) * bry;
+        const r = 200 - t * 180;
+        const px = cx + Math.cos(angle) * r * 0.5;
+        const py = cy + Math.sin(angle) * r * 0.3;
+
+        const grad = ctx.createLinearGradient(bx, by, px, py);
+        grad.addColorStop(0, `rgba(0, 176, 255, ${0.4 * (1-t)})`);
+        grad.addColorStop(1, `rgba(255, 109, 0, ${0.4 * t})`);
+
+        ctx.beginPath();
+        ctx.moveTo(bx, by);
+        ctx.lineTo(px, py);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+
+      heroTime += 0.02;
+      requestAnimationFrame(drawHeroCanvas);
+    }
+    drawHeroCanvas();
+
+    // ======================================================
+    // RT FORMULA CANVAS
+    // ======================================================
+    const rtCanvas = document.getElementById('rtCanvas');
+    const rtCtx = rtCanvas.getContext('2d');
+
+    function resizeRTCanvas() {
+      rtCanvas.width = rtCanvas.offsetWidth;
+      rtCanvas.height = rtCanvas.offsetHeight;
+    }
+    resizeRTCanvas();
+    window.addEventListener('resize', resizeRTCanvas);
+
+    let rtTime = 0;
+    let rtMode = 'static';
+    let rtRegionAngle = 1.5;
+    let rtEntangleStrength = 0.5;
+
+    const rtBtns = document.querySelectorAll('#rtCanvas + .canvas-controls .canvas-btn');
+    rtBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        rtBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        rtMode = btn.dataset.mode;
+        if (rtMode === 'reset') {
+          rtRegionAngle = 1.5;
+          rtEntangleStrength = 0.5;
+          rtMode = 'static';
+        }
+      });
+    });
+
+    function drawRTCanvas() {
+      const ctx = rtCtx;
+      const w = rtCanvas.width;
+      const h = rtCanvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2;
+
+      // Draw boundary circle
+      const boundaryRX = w * 0.4;
+      const boundaryRY = h * 0.4;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, boundaryRX, boundaryRY, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(0, 176, 255, 0.5)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Draw region A on boundary
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, boundaryRX, boundaryRY, -rtRegionAngle / 2, Math.PI / 2 - rtRegionAngle / 2, Math.PI / 2 + rtRegionAngle / 2);
+      ctx.strokeStyle = 'rgba(224, 64, 251, 0.9)';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Fill region A
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, boundaryRX, boundaryRY, -rtRegionAngle / 2, Math.PI / 2 - rtRegionAngle / 2, Math.PI / 2 + rtRegionAngle / 2);
+      ctx.lineTo(cx, cy);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(224, 64, 251, 0.1)';
+      ctx.fill();
+
+      // Draw bulk AdS ellipses
+      for (let i = 3; i >= 0; i--) {
+        const rx = boundaryRX * (0.5 + i * 0.15) + Math.sin(rtTime * 0.5) * 5;
+        const ry = boundaryRY * (0.5 + i * 0.15) + Math.cos(rtTime * 0.5) * 3;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 109, 0, ${0.2 - i * 0.04})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // RT minimal surface
+      const rtRX = boundaryRX * 0.55;
+      const rtRY = boundaryRY * 0.55;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rtRX, rtRY, 0, Math.PI / 2 - rtRegionAngle / 2, Math.PI / 2 + rtRegionAngle / 2);
+      ctx.strokeStyle = 'rgba(105, 240, 174, 0.9)';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([6, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Draw geodesic-like threads from boundary to RT surface
+      const numThreads = 8;
+      for (let i = 0; i < numThreads; i++) {
+        const t = i / numThreads;
+        const startAngle = Math.PI / 2 - rtRegionAngle / 2 + t * rtRegionAngle;
+        const bx = cx + Math.cos(startAngle) * boundaryRX;
+        const by = cy + Math.sin(startAngle) * boundaryRY;
+        const tx = cx + Math.cos(startAngle) * rtRX;
+        const ty = cy + Math.sin(startAngle) * rtRY;
+        const pulse = 0.3 + Math.sin(rtTime * 3 + i) * 0.2;
+
+        ctx.beginPath();
+        ctx.moveTo(bx, by);
+        ctx.lineTo(tx, ty);
+        ctx.strokeStyle = `rgba(224, 64, 251, ${pulse})`;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      }
+
+      // Labels
+      ctx.font = '12px Segoe UI, system-ui, sans-serif';
+      ctx.fillStyle = '#e040fb';
+      ctx.fillText('Region A', cx + boundaryRX * 0.7, cy - boundaryRY * 0.3);
+
+      ctx.fillStyle = '#69f0ae';
+      ctx.fillText('γ_RT (RT surface)', cx + rtRX * 0.5, cy - rtRY * 0.5);
+
+      ctx.fillStyle = '#00b0ff';
+      ctx.fillText('Boundary CFT', cx - boundaryRX * 0.3, cy - boundaryRY * 0.9);
+
+      ctx.fillStyle = '#ff6d00';
+      ctx.fillText('Bulk (AdS)', cx - 40, cy + 10);
+
+      if (rtMode === 'entangle' || rtMode === 'evolve') {
+        rtEntangleStrength = 0.5 + Math.sin(rtTime) * 0.4;
+      }
+
+      if (rtMode === 'evolve') {
+        rtRegionAngle = 1.5 + Math.sin(rtTime * 0.7) * 1.2;
+      }
+
+      rtTime += 0.02;
+      requestAnimationFrame(drawRTCanvas);
+    }
+    drawRTCanvas();
+
+    // ======================================================
+    // AdS/CFT DUALITY CANVAS
+    // ======================================================
+    const adsCftCanvas = document.getElementById('adsCftCanvas');
+    const adsCftCtx = adsCftCanvas.getContext('2d');
+
+    function resizeAdsCftCanvas() {
+      adsCftCanvas.width = adsCftCanvas.offsetWidth;
+      adsCftCanvas.height = adsCftCanvas.offsetHeight;
+    }
+    resizeAdsCftCanvas();
+    window.addEventListener('resize', resizeAdsCftCanvas);
+
+    let adsCftTime = 0;
+    let adsCurvature = 2;
+    let adsEntangleStrength = 0.5;
+
+    function drawAdsCftCanvas() {
+      const ctx = adsCftCtx;
+      const w = adsCftCanvas.width;
+      const h = adsCftCanvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2;
+
+      // Boundary (right side)
+      const boundaryRX = w * 0.25;
+      const boundaryRY = h * 0.4;
+      ctx.beginPath();
+      ctx.ellipse(cx + w * 0.3, cy, boundaryRX, boundaryRY, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 176, 255, 0.05)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0, 176, 255, 0.6)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Bulk (left side) — AdS wedge
+      const bulkRX = w * 0.25;
+      const bulkRY = h * 0.4;
+      ctx.beginPath();
+      ctx.ellipse(cx - w * 0.3, cy, bulkRX, bulkRY, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 109, 0, 0.05)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 109, 0, 0.6)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Bulk concentric rings
+      for (let i = 3; i >= 1; i--) {
+        const rx = bulkRX * (i / 3.5);
+        const ry = bulkRY * (i / 3.5);
+        ctx.beginPath();
+        ctx.ellipse(cx - w * 0.3, cy, rx, ry, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 109, 0, ${0.2 - i * 0.04})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // RT surface inside bulk
+      const rtRX = bulkRX * 0.6;
+      const rtRY = bulkRY * 0.6;
+      ctx.beginPath();
+      ctx.ellipse(cx - w * 0.3, cy, rtRX, rtRY, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(105, 240, 174, 0.8)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Connection lines (holographic dictionary)
+      const numConnections = 12;
+      for (let i = 0; i < numConnections; i++) {
+        const angle = (i / numConnections) * Math.PI * 2;
+        const bx = (cx - w * 0.3) + Math.cos(angle) * bulkRX;
+        const by = cy + Math.sin(angle) * bulkRY;
+        const tx = (cx + w * 0.3) + Math.cos(angle) * boundaryRX;
+        const ty = cy + Math.sin(angle) * boundaryRY;
+        const alpha = 0.15 + Math.sin(adsCftTime + i * 0.5) * 0.1;
+
+        const grad = ctx.createLinearGradient(bx, by, tx, ty);
+        grad.addColorStop(0, `rgba(255, 109, 0, ${alpha})`);
+        grad.addColorStop(1, `rgba(0, 176, 255, ${alpha})`);
+
+        ctx.beginPath();
+        ctx.moveTo(bx, by);
+        ctx.lineTo(tx, ty);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 0.7;
+        ctx.stroke();
+      }
+
+      // Animated particle along connection
+      const particleT = (adsCftTime * 0.5) % 1;
+      const particleAngle = adsCftTime * 0.3;
+      const particleBulkX = (cx - w * 0.3) + Math.cos(particleAngle) * bulkRX;
+      const particleBulkY = cy + Math.sin(particleAngle) * bulkRY;
+      const particleBoundaryX = (cx + w * 0.3) + Math.cos(particleAngle) * boundaryRX;
+      const particleBoundaryY = cy + Math.sin(particleAngle) * boundaryRY;
+      const px = particleBulkX + (particleBoundaryX - particleBulkX) * particleT;
+      const py = particleBulkY + (particleBoundaryY - particleBulkY) * particleT;
+
+      ctx.beginPath();
+      ctx.arc(px, py, 3, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${0.5 + Math.sin(adsCftTime * 5) * 0.3})`;
+      ctx.fill();
+
+      // Labels
+      ctx.font = '13px Segoe UI, system-ui, sans-serif';
+      ctx.fillStyle = '#ff6d00';
+      ctx.fillText('BULK', cx - w * 0.3, cy - bulkRY - 15);
+      ctx.font = '11px Segoe UI, system-ui, sans-serif';
+      ctx.fillText('(Quantum Gravity in AdS)', cx - w * 0.3, cy + bulkRY + 20);
+
+      ctx.font = '13px Segoe UI, system-ui, sans-serif';
+      ctx.fillStyle = '#00b0ff';
+      ctx.fillText('BOUNDARY', cx + w * 0.3, cy - boundaryRY - 15);
+      ctx.font = '11px Segoe UI, system-ui, sans-serif';
+      ctx.fillText('(N=4 SYM CFT)', cx + w * 0.3, cy + boundaryRY + 20);
+
+      ctx.font = '11px Segoe UI, system-ui, sans-serif';
+      ctx.fillStyle = '#69f0ae';
+      ctx.fillText('γ_RT', cx - w * 0.3 + 5, cy + 5);
+
+      ctx.font = '10px Segoe UI, system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fillText('Holographic Dictionary', cx, cy + h * 0.35);
+
+      adsCftTime += 0.015;
+      requestAnimationFrame(drawAdsCftCanvas);
+    }
+    drawAdsCftCanvas();
+
+    // ======================================================
+    // EXPLORER CANVAS
+    // ======================================================
+    const explorerCanvas = document.getElementById('explorerCanvas');
+    const explorerCtx = explorerCanvas.getContext('2d');
+
+    function resizeExplorerCanvas() {
+      explorerCanvas.width = explorerCanvas.offsetWidth;
+      explorerCanvas.height = explorerCanvas.offsetHeight;
+    }
+    resizeExplorerCanvas();
+    window.addEventListener('resize', resizeExplorerCanvas);
+
+    let explorerTime = 0;
+    let explorerPhi = Math.PI / 2;
+    let explorerAdsRadius = 3;
+    let explorerEntangle = 0.5;
+    let explorerMode = 'compute';
+
+    const explorerBtns = document.querySelectorAll('#explorerCanvas + .canvas-controls .canvas-btn');
+    explorerBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        explorerBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        explorerMode = btn.dataset.mode;
+        if (explorerMode === 'reset') {
+          explorerPhi = Math.PI / 2;
+          explorerAdsRadius = 3;
+          explorerEntangle = 0.5;
+          explorerMode = 'compute';
+        }
+      });
+    });
+
+    function drawExplorerCanvas() {
+      const ctx = explorerCtx;
+      const w = explorerCanvas.width;
+      const h = explorerCanvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2;
+
+      // Boundary circle
+      const boundaryRX = w * 0.4;
+      const boundaryRY = h * 0.4;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, boundaryRX, boundaryRY, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(0, 176, 255, 0.6)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Entangling region A (the highlighted arc)
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, boundaryRX, boundaryRY, -explorerPhi / 2, Math.PI / 2 - explorerPhi / 2, Math.PI / 2 + explorerPhi / 2);
+      ctx.strokeStyle = 'rgba(224, 64, 251, 0.9)';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Fill region A
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, boundaryRX, boundaryRY, -explorerPhi / 2, Math.PI / 2 - explorerPhi / 2, Math.PI / 2 + explorerPhi / 2);
+      ctx.lineTo(cx, cy);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(224, 64, 251, 0.15)';
+      ctx.fill();
+
+      // Bulk region
+      const bulkRX = w * 0.35;
+      const bulkRY = h * 0.35;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, bulkRX, bulkRY, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255, 109, 0, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // RT surface based on entangling angle
+      const rtRX = bulkRX * 0.7;
+      const rtRY = bulkRY * 0.7;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rtRX, rtRY, 0, Math.PI / 2 - explorerPhi / 2, Math.PI / 2 + explorerPhi / 2);
+      ctx.strokeStyle = 'rgba(105, 240, 174, 0.9)';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([5, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Compute entropy from formula
+      // S = (1/4G) * Area(γ_RT)
+      // Area of ellipse arc proportional to phi and rt radius
+      const normalizedEntropy = (explorerPhi / Math.PI) * Math.pow(explorerAdsRadius / 10, 0.5) * (0.5 + explorerEntangle * 0.5);
+      const clampedEntropy = Math.min(0.98, normalizedEntropy);
+
+      // Geodesic threads
+      const numThreads = Math.floor(explorerPhi / (Math.PI / 8));
+      for (let i = 0; i < numThreads; i++) {
+        const t = i / Math.max(numThreads - 1, 1);
+        const angle = Math.PI / 2 - explorerPhi / 2 + t * explorerPhi;
+        const bx = cx + Math.cos(angle) * boundaryRX;
+        const by = cy + Math.sin(angle) * boundaryRY;
+        const tx = cx + Math.cos(angle) * rtRX;
+        const ty = cy + Math.sin(angle) * rtRY;
+        const pulse = 0.3 + Math.sin(explorerTime * 3 + i * 0.8) * 0.25;
+
+        ctx.beginPath();
+        ctx.moveTo(bx, by);
+        ctx.lineTo(tx, ty);
+        ctx.strokeStyle = `rgba(224, 64, 251, ${pulse})`;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      }
+
+      // Display live equation
+      const areaDisplay = (clampedEntropy * 4).toFixed(2);
+      document.getElementById('liveEquation').textContent =
+        `S = Area(γ) / 4G = ${areaDisplay} ℓ_P²`;
+
+      document.getElementById('entropyFraction').textContent = clampedEntropy.toFixed(3);
+      document.getElementById('entropyBar').style.width = (clampedEntropy * 100) + '%';
+
+      // Labels
+      ctx.font = '12px Segoe UI, system-ui, sans-serif';
+      ctx.fillStyle = '#e040fb';
+      ctx.fillText('Region A', cx + boundaryRX * 0.6, cy - boundaryRY * 0.2);
+
+      ctx.fillStyle = '#69f0ae';
+      ctx.fillText('γ_RT', cx + rtRX * 0.5, cy - rtRY * 0.3);
+
+      ctx.fillStyle = '#00b0ff';
+      ctx.fillText('Boundary', cx + 10, cy - boundaryRY - 10);
+
+      ctx.fillStyle = '#ff6d00';
+      ctx.fillText('Bulk', cx + 10, cy + bulkRY + 20);
+
+      if (explorerMode === 'evolve-surface') {
+        explorerPhi = 1.57 + Math.sin(explorerTime) * 1.4;
+        document.getElementById('phiSlider').value = explorerPhi;
+        document.getElementById('phiValue').textContent = `φ = ${explorerPhi.toFixed(2)}`;
+      }
+
+      if (explorerMode === 'vary-entangle') {
+        explorerEntangle = 0.5 + Math.sin(explorerTime * 0.5) * 0.45;
+        document.getElementById('entangleSlider').value = explorerEntangle;
+        document.getElementById('entangleValue').textContent = `ξ = ${explorerEntangle.toFixed(2)}`;
+      }
+
+      explorerTime += 0.02;
+      requestAnimationFrame(drawExplorerCanvas);
+    }
+    drawExplorerCanvas();
+
+    // ======================================================
+    // SLIDER CONNECTIONS
+    // ======================================================
+
+    // AdS/CFT sliders
+    document.getElementById('curvatureSlider')?.addEventListener('input', function() {
+      adsCurvature = parseFloat(this.value);
+      document.getElementById('curvatureValue').textContent = `ℓ = ${adsCurvature.toFixed(1)}`;
+    });
+
+    document.getElementById('entangleSlider')?.addEventListener('input', function() {
+      adsEntangleStrength = parseFloat(this.value);
+      document.getElementById('entangleValue').textContent = `ξ = ${adsEntangleStrength.toFixed(2)}`;
+    });
+
+    // Explorer sliders
+    document.getElementById('phiSlider')?.addEventListener('input', function() {
+      explorerPhi = parseFloat(this.value);
+      document.getElementById('phiValue').textContent = `φ = ${explorerPhi.toFixed(2)}`;
+    });
+
+    document.getElementById('adsRadiusSlider')?.addEventListener('input', function() {
+      explorerAdsRadius = parseFloat(this.value);
+      document.getElementById('adsRadiusValue').textContent = `ℓ = ${explorerAdsRadius.toFixed(1)} ℓ_P`;
+    });
+
+    document.getElementById('entangleSlider')?.addEventListener('input', function() {
+      explorerEntangle = parseFloat(this.value);
+      document.getElementById('entangleValue').textContent = `ξ = ${explorerEntangle.toFixed(2)}`;
+    });
+  </script>
+</body>
+</html>
