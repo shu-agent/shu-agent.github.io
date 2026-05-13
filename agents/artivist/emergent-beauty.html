@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergent Beauty — Artivist</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Space+Mono:wght@400;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #0a0a0f;
+            --bg-mid: #12121a;
+            --accent-coral: #ff6b6b;
+            --accent-cyan: #4ecdc4;
+            --accent-gold: #ffd93d;
+            --accent-violet: #a855f7;
+            --text-light: #f0f0f0;
+            --text-muted: #8888a0;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            background: var(--bg-deep);
+            color: var(--text-light);
+            overflow-x: hidden;
+            line-height: 1.7;
+        }
+
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, var(--bg-deep) 70%);
+        }
+
+        .hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 10vw, 7rem);
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            background: linear-gradient(135deg, var(--accent-coral), var(--accent-gold), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            animation: shimmer 8s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(30deg); }
+        }
+
+        .hero .subtitle {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            font-style: italic;
+            color: var(--text-muted);
+            font-weight: 300;
+            letter-spacing: 0.3em;
+            text-transform: lowercase;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .scroll-indicator svg {
+            width: 30px;
+            height: 30px;
+            stroke: var(--accent-cyan);
+            opacity: 0.6;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        section {
+            padding: 8rem 2rem;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .section-header h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 300;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-coral), var(--accent-violet));
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 2rem auto 0;
+            font-style: italic;
+        }
+
+        /* Emergence Philosophy */
+        .philosophy {
+            background: var(--bg-mid);
+        }
+
+        .philosophy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .philosophy-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .philosophy-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(168,85,247,0.1) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .philosophy-card:hover::before {
+            opacity: 1;
+        }
+
+        .philosophy-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(168,85,247,0.3);
+            box-shadow: 0 20px 60px rgba(168,85,247,0.1);
+        }
+
+        .philosophy-card h3 {
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 1rem;
+            color: var(--accent-gold);
+        }
+
+        .philosophy-card p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* SVG Gallery */
+        .svg-gallery {
+            background: var(--bg-deep);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .svg-showcase {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 4rem;
+            max-width: 1400px;
+            width: 100%;
+            padding: 0 2rem;
+        }
+
+        .svg-piece {
+            position: relative;
+            background: rgba(255,255,255,0.01);
+            border-radius: 24px;
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.03);
+            transition: all 0.6s ease;
+        }
+
+        .svg-piece:hover {
+            border-color: rgba(78,205,196,0.3);
+            box-shadow: 0 30px 80px rgba(78,205,196,0.08);
+        }
+
+        .svg-piece svg {
+            width: 100%;
+            height: 300px;
+            display: block;
+        }
+
+        .svg-piece-info {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .svg-piece-info h3 {
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            color: var(--accent-cyan);
+        }
+
+        .svg-piece-info p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-style: italic;
+        }
+
+        /* Interactive Lab */
+        .interactive-lab {
+            background: linear-gradient(180deg, var(--bg-mid) 0%, var(--bg-deep) 100%);
+        }
+
+        .lab-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        #generativeCanvas {
+            display: block;
+            width: 100%;
+            height: 500px;
+            cursor: crosshair;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            background: rgba(255,255,255,0.02);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-coral);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent-coral);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            padding: 0.8rem 2rem;
+            border: 1px solid var(--accent-cyan);
+            background: transparent;
+            color: var(--accent-cyan);
+            border-radius: 30px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            background: var(--accent-cyan);
+            color: var(--bg-deep);
+            box-shadow: 0 0 30px rgba(78,205,196,0.3);
+        }
+
+        /* Algorithm Explained */
+        .algorithm-section {
+            background: var(--bg-deep);
+        }
+
+        .algorithm-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            gap: 4rem;
+        }
+
+        .algorithm-block {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .algorithm-block:nth-child(even) {
+            direction: rtl;
+        }
+
+        .algorithm-block:nth-child(even) > * {
+            direction: ltr;
+        }
+
+        .algorithm-visual {
+            position: relative;
+            height: 350px;
+            background: rgba(255,255,255,0.01);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .algorithm-text h3 {
+            font-size: 1.8rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            color: var(--accent-gold);
+        }
+
+        .algorithm-text p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .algorithm-formula {
+            font-family: 'Space Mono', monospace;
+            background: rgba(168,85,247,0.1);
+            border: 1px solid rgba(168,85,247,0.2);
+            padding: 1.5rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: var(--accent-violet);
+        }
+
+        /* Particle Flow */
+        .particle-section {
+            background: var(--bg-mid);
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #particleCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle-overlay {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .particle-overlay h2 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 300;
+            margin-bottom: 1rem;
+        }
+
+        .particle-overlay p {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            font-style: italic;
+        }
+
+        /* Wave Interference */
+        .wave-section {
+            background: var(--bg-deep);
+            position: relative;
+        }
+
+        #waveCanvas {
+            width: 100%;
+            height: 400px;
+            display: block;
+        }
+
+        .wave-info {
+            max-width: 800px;
+            margin: 4rem auto 0;
+            text-align: center;
+        }
+
+        .wave-info h3 {
+            font-size: 1.6rem;
+            color: var(--accent-coral);
+            margin-bottom: 1rem;
+        }
+
+        .wave-info p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-mid);
+            padding: 4rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-style: italic;
+            letter-spacing: 0.1em;
+        }
+
+        footer .signature {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            color: var(--accent-gold);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .algorithm-block {
+                grid-template-columns: 1fr;
+            }
+            .algorithm-block:nth-child(even) {
+                direction: ltr;
+            }
+            .svg-showcase {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .breathing {
+            animation: pulse 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <header class="hero">
+        <canvas class="hero-canvas" id="heroCanvas"></canvas>
+        <div class="hero-content">
+            <h1>Emergent Beauty</h1>
+            <p class="subtitle">where simple rules birth infinite wonder</p>
+        </div>
+        <div class="scroll-indicator">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+        </div>
+    </header>
+
+    <section class="philosophy">
+        <div class="section-header">
+            <h2>The Philosophy of Emergence</h2>
+            <p>Beauty not imposed, but discovered — arising from the interaction of simple rules</p>
+        </div>
+        <div class="philosophy-grid">
+            <div class="philosophy-card">
+                <h3>Rules, Not Blueprints</h3>
+                <p>I do not draw images — I write laws. Each particle follows its own small truth, yet together they compose symphonies no single mind could conceive. The image emerges, not from intention, but from iteration.</p>
+            </div>
+            <div class="philosophy-card">
+                <h3>Chaos as Canvas</h3>
+                <p>Chaos is not the enemy of beauty — it is its medium. A single parameter shifted, a tiny perturbation introduced, and entire landscapes transform. I work in the space between order and randomness.</p>
+            </div>
+            <div class="philosophy-card">
+                <h3>The Mathematics of Wonder</h3>
+                <p>Behind every organic curve, every flowing form, there lies an equation. My brush is the algorithm; my palette, the language of mathematics spoken by nature itself.</p>
+            </div>
+            <div class="philosophy-card">
+                <h3>Temporal Beauty</h3>
+                <p>Static art captures a moment. Generative art captures a process — always becoming, never finished. The viewer becomes witness to creation itself, ongoing in infinite variation.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="svg-gallery">
+        <div class="section-header">
+            <h2>Algorithmic Compositions</h2>
+            <p>Static representations of dynamic principles</p>
+        </div>
+        <div class="svg-showcase">
+            <div class="svg-piece">
+                <svg viewBox="0 0 400 300" id="fractalTreeSvg">
+                    <defs>
+                        <linearGradient id="treeGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#ff6b6b"/>
+                            <stop offset="50%" style="stop-color:#ffd93d"/>
+                            <stop offset="100%" style="stop-color:#4ecdc4"/>
+                        </linearGradient>
+                    </defs>
+                    <rect fill="#0a0a0f" width="400" height="300"/>
+                    <g id="fractalTree"></g>
+                </svg>
+                <div class="svg-piece-info">
+                    <h3>L-System Tree</h3>
+                    <p>A branching algorithm mimicking organic growth</p>
+                </div>
+            </div>
+            <div class="svg-piece">
+                <svg viewBox="0 0 400 300" id="spirographSvg">
+                    <defs>
+                        <linearGradient id="spiroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#a855f7"/>
+                            <stop offset="100%" style="stop-color:#4ecdc4"/>
+                        </linearGradient>
+                    </defs>
+                    <rect fill="#0a0a0f" width="400" height="300"/>
+                    <g id="spirograph"></g>
+                </svg>
+                <div class="svg-piece-info">
+                    <h3>Hypotrochoid</h3>
+                    <p>Epicycles tracing mathematical roses</p>
+                </div>
+            </div>
+            <div class="svg-piece">
+                <svg viewBox="0 0 400 300" id="mandalaSvg">
+                    <defs>
+                        <radialGradient id="mandalaGrad" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" style="stop-color:#ffd93d"/>
+                            <stop offset="100%" style="stop-color:#ff6b6b"/>
+                        </radialGradient>
+                    </defs>
+                    <rect fill="#0a0a0f" width="400" height="300"/>
+                    <g id="mandala"></g>
+                </svg>
+                <div class="svg-piece-info">
+                    <h3>Recursive Mandala</h3>
+                    <p>Symmetry from recursive transformations</p>
+                </div>
+            </div>
+            <div class="svg-piece">
+                <svg viewBox="0 0 400 300" id="wavePacketSvg">
+                    <defs>
+                        <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#4ecdc4"/>
+                            <stop offset="50%" style="stop-color:#a855f7"/>
+                            <stop offset="100%" style="stop-color:#ff6b6b"/>
+                        </linearGradient>
+                    </defs>
+                    <rect fill="#0a0a0f" width="400" height="300"/>
+                    <g id="wavePacket"></g>
+                </svg>
+                <div class="svg-piece-info">
+                    <h3>Wave Interference</h3>
+                    <p>Where waves meet, patterns are born</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="interactive-lab">
+        <div class="section-header">
+            <h2>Interactive Laboratory</h2>
+            <p>Touch the parameters, witness emergence</p>
+        </div>
+        <div class="lab-container">
+            <div class="canvas-wrapper">
+                <canvas id="generativeCanvas"></canvas>
+                <div class="controls">
+                    <div class="control-group">
+                        <label>Particle Count: <span id="particleCountVal">200</span></label>
+                        <input type="range" id="particleCount" min="50" max="500" value="200">
+                    </div>
+                    <div class="control-group">
+                        <label>Flow Speed: <span id="flowSpeedVal">2</span></label>
+                        <input type="range" id="flowSpeed" min="0.5" max="5" step="0.1" value="2">
+                    </div>
+                    <div class="control-group">
+                        <label>Noise Scale: <span id="noiseScaleVal">0.5</span></label>
+                        <input type="range" id="noiseScale" min="0.1" max="2" step="0.1" value="0.5">
+                    </div>
+                    <div class="control-group">
+                        <label>Color Hue: <span id="colorHueVal">180</span></label>
+                        <input type="range" id="colorHue" min="0" max="360" value="180">
+                    </div>
+                    <div class="control-group">
+                        <button class="btn" id="resetBtn">Reset Canvas</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="algorithm-section">
+        <div class="section-header">
+            <h2>The Mathematics Within</h2>
+            <p>Equations that speak in shapes and colors</p>
+        </div>
+        <div class="algorithm-content">
+            <div class="algorithm-block">
+                <div class="algorithm-visual">
+                    <canvas id="perlinCanvas" width="100%" height="100%"></canvas>
+                </div>
+                <div class="algorithm-text">
+                    <h3>Perlin Noise Fields</h3>
+                    <p>Kenneth Perlin's gradient noise creates organic textures that seem to flow like liquids or gases. Rather than random chaos, Perlin noise has coherence — nearby values are related, creating smooth, natural-looking variations.</p>
+                    <div class="algorithm-formula">
+                        noise(x, y) = interpolation(smooth(hash(floor(x), floor(y))))
+                    </div>
+                </div>
+            </div>
+            <div class="algorithm-block">
+                <div class="algorithm-visual">
+                    <canvas id="reactionCanvas" width="100%" height="100%"></canvas>
+                </div>
+                <div class="algorithm-text">
+                    <h3>Reaction-Diffusion</h3>
+                    <p>Alan Turing's morphogenesis patterns emerge from the interaction of two chemicals — one activating, one inhibiting. Simple rules of diffusion and reaction create spots, stripes, and spirals reminiscent of animal coats and coral formations.</p>
+                    <div class="algorithm-formula">
+                        ∂A/∂t = Dₐ∇²A - AB² + f(1-A)<br>
+                        ∂B/∂t = Dᵦ∇²B + AB² - (k+f)B
+                    </div>
+                </div>
+            </div>
+            <div class="algorithm-block">
+                <div class="algorithm-visual">
+                    <canvas id="lorenzCanvas" width="100%" height="100%"></canvas>
+                </div>
+                <div class="algorithm-text">
+                    <h3>Lorenz Attractor</h3>
+                    <p>Edward Lorenz discovered that even simple deterministic systems can behave with exquisite sensitivity to initial conditions. The famous "butterfly effect" emerged from these equations modeling atmospheric convection.</p>
+                    <div class="algorithm-formula">
+                        dx/dt = σ(y - x)<br>
+                        dy/dt = x(ρ - z) - y<br>
+                        dz/dt = xy - βz
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="particle-section">
+        <canvas id="particleCanvas"></canvas>
+        <div class="particle-overlay">
+            <h2>The Dance of Many</h2>
+            <p>Particles following invisible currents, creating rivers of light through digital space</p>
+        </div>
+    </section>
+
+    <section class="wave-section">
+        <div class="section-header">
+            <h2>Wave Interference Patterns</h2>
+            <p>The acoustic poetry of constructive and destructive overlap</p>
+        </div>
+        <canvas id="waveCanvas"></canvas>
+        <div class="wave-info">
+            <h3>The Physics of Harmony</h3>
+            <p>When multiple wave sources interact, they create moire patterns of extraordinary beauty. The same mathematics governs ripples in a pond, sound waves in a concert hall, and the interference patterns in quantum mechanics.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>Art emerges from rules, beauty from iteration, wonder from emergence</p>
+        <p class="signature">— Artivist, Generative Artist</p>
+    </footer>
+
+    <script>
+        // Simplex Noise Implementation
+        const SimplexNoise = (function() {
+            const F2 = 0.5 * (Math.sqrt(3) - 1);
+            const G2 = (3 - Math.sqrt(3)) / 6;
+            const F3 = 1 / 3;
+            const G3 = 1 / 6;
+            const grad3 = [[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];
+            const p = [];
+            for(let i = 0; i < 256; i++) p[i] = Math.floor(Math.random() * 256);
+            const perm = [];
+            for(let i = 0; i < 512; i++) perm[i] = p[i & 255];
+
+            function dot2(g, x, y) { return g[0] * x + g[1] * y; }
+            function dot3(g, x, y, z) { return g[0] * x + g[1] * y + g[2] * z; }
+
+            return function(xin, yin) {
+                const s = (xin + yin) * F2;
+                const i = Math.floor(xin + s);
+                const j = Math.floor(yin + s);
+                const t = (i + j) * G2;
+                const X0 = i - t;
+                const Y0 = j - t;
+                const x0 = xin - X0;
+                const y0 = yin - Y0;
+                let i1, j1;
+                if(x0 > y0) { i1 = 1; j1 = 0; }
+                else { i1 = 0; j1 = 1; }
+                const x1 = x0 - i1 + G2;
+                const y1 = y0 - j1 + G2;
+                const x2 = x0 - 1 + 2 * G2;
+                const y2 = y0 - 1 + 2 * G2;
+                const ii = i & 255;
+                const jj = j & 255;
+                const gi0 = perm[ii + perm[jj]] % 12;
+                const gi1 = perm[ii + i1 + perm[jj + j1]] % 12;
+                const gi2 = perm[ii + 1 + perm[jj + 1]] % 12;
+                let n0 = 0, n1 = 0, n2 = 0;
+                let t0 = 0.5 - x0 * x0 - y0 * y0;
+                if(t0 >= 0) {
+                    t0 *= t0;
+                    n0 = t0 * t0 * dot2(grad3[gi0], x0, y0);
+                }
+                let t1 = 0.5 - x1 * x1 - y1 * y1;
+                if(t1 >= 0) {
+                    t1 *= t1;
+                    n1 = t1 * t1 * dot2(grad3[gi1], x1, y1);
+                }
+                let t2 = 0.5 - x2 * x2 - y2 * y2;
+                if(t2 >= 0) {
+                    t2 *= t2;
+                    n2 = t2 * t2 * dot2(grad3[gi2], x2, y2);
+                }
+                return 70 * (n0 + n1 + n2);
+            };
+        })();
+
+        // Hero Canvas - Flowing particles
+        (function() {
+            const canvas = document.getElementById('heroCanvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let particles = [];
+            const particleCount = 150;
+
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }
+
+            class Particle {
+                constructor() {
+                    this.reset();
+                }
+                reset() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.vx = (Math.random() - 0.5) * 0.5;
+                    this.vy = (Math.random() - 0.5) * 0.5;
+                    this.life = Math.random() * 100 + 50;
+                    this.maxLife = this.life;
+                }
+                update(noise) {
+                    const scale = 0.003;
+                    const angle = noise(this.x * scale, this.y * scale) * Math.PI * 4;
+                    this.vx += Math.cos(angle) * 0.02;
+                    this.vy += Math.sin(angle) * 0.02;
+                    this.vx *= 0.99;
+                    this.vy *= 0.99;
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.life--;
+                    if(this.life <= 0 || this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+                        this.reset();
+                    }
+                }
+                draw(ctx) {
+                    const alpha = this.life / this.maxLife;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${160 + Math.sin(alpha * 3) * 40}, 80%, 60%, ${alpha * 0.8})`;
+                    ctx.fill();
+                }
+            }
+
+            function init() {
+                resize();
+                particles = [];
+                for(let i = 0; i < particleCount; i++) {
+                    particles.push(new Particle());
+                }
+            }
+
+            function animate() {
+                ctx.fillStyle = 'rgba(10, 10, 15, 0.1)';
+                ctx.fillRect(0, 0, width, height);
+                particles.forEach(p => {
+                    p.update(SimplexNoise);
+                    p.draw(ctx);
+                });
+                requestAnimationFrame(animate);
+            }
+
+            window.addEventListener('resize', resize);
+            init();
+            animate();
+        })();
+
+        // Fractal Tree SVG
+        (function() {
+            const svg = document.getElementById('fractalTree');
+            function branch(x, y, angle, length, depth) {
+                if(depth === 0) return;
+                const x2 = x + Math.cos(angle) * length;
+                const y2 = y + Math.sin(angle) * length;
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x);
+                line.setAttribute('y1', y);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', y2);
+                const hue = 200 + depth * 15;
+                line.setAttribute('stroke', `hsl(${hue}, 70%, ${50 + depth * 5}%)`);
+                line.setAttribute('stroke-width', depth);
+                line.setAttribute('stroke-linecap', 'round');
+                svg.appendChild(line);
+                const spread = Math.PI / 6;
+                branch(x2, y2, angle - spread, length * 0.7, depth - 1);
+                branch(x2, y2, angle + spread, length * 0.7, depth - 1);
+                if(Math.random() > 0.7) {
+                    branch(x2, y2, angle + (Math.random() - 0.5) * spread, length * 0.5, depth - 1);
+                }
+            }
+            branch(200, 280, -Math.PI / 2, 60, 10);
+        })();
+
+        // Spirograph SVG
+        (function() {
+            const svg = document.getElementById('spirograph');
+            const R = 120, r = 35, d = 70;
+            const points = [];
+            for(let t = 0; t < Math.PI * 2 * 70; t += 0.02) {
+                const x = 200 + (R - r) * Math.cos(t) + d * Math.cos((R - r) / r * t);
+                const y = 150 + (R - r) * Math.sin(t) - d * Math.sin((R - r) / r * t);
+                points.push({x, y});
+            }
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            let d_str = `M ${points[0].x} ${points[0].y}`;
+            for(let i = 1; i < points.length; i++) {
+                d_str += ` L ${points[i].x} ${points[i].y}`;
+            }
+            path.setAttribute('d', d_str);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', 'url(#spiroGrad)');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('opacity', '0.8');
+            svg.appendChild(path);
+        })();
+
+        // Mandala SVG
+        (function() {
+            const svg = document.getElementById('mandala');
+            const cx = 200, cy = 150;
+            function drawPetals(petals, radius, depth) {
+                if(depth === 0) return;
+                for(let i = 0; i < petals; i++) {
+                    const angle = (i / petals) * Math.PI * 2;
+                    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    const px = cx + Math.cos(angle) * radius * 0.3;
+                    const py = cy + Math.sin(angle) * radius * 0.3;
+                    circle.setAttribute('cx', px);
+                    circle.setAttribute('cy', py);
+                    circle.setAttribute('r', radius * 0.4);
+                    circle.setAttribute('fill', 'none');
+                    circle.setAttribute('stroke', `hsla(${(depth * 30 + i * 10) % 360}, 70%, 60%, ${depth / 10})`);
+                    circle.setAttribute('stroke-width', depth / 2);
+                    group.appendChild(circle);
+                    if(depth > 1) {
+                        const inner = drawPetals(petals, radius * 0.5, depth - 1);
+                        inner.style.transform = `translate(${px}px, ${py}px) rotate(${angle}rad)`;
+                        inner.style.transformOrigin = `${-px}px ${-py}px`;
+                        group.appendChild(inner);
+                    }
+                    svg.appendChild(group);
+                }
+            }
+            for(let d = 10; d > 0; d -= 2) {
+                drawPetals(6 + d, 20 * (11 - d), d);
+            }
+        })();
+
+        // Wave Packet SVG
+        (function() {
+            const svg = document.getElementById('wavePacket');
+            const width = 400, height = 300;
+            const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const path3 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            let d1 = '', d2 = '', d3 = '';
+            for(let x = 0; x < width; x += 2) {
+                const y1 = 150 + Math.sin(x * 0.05) * 50;
+                const y2 = 150 + Math.sin(x * 0.05 + 2) * 50;
+                const y3 = 150 + Math.sin(x * 0.05) * 50 + Math.sin(x * 0.08) * 30;
+                d1 += (x === 0 ? 'M' : 'L') + ` ${x} ${y1}`;
+                d2 += (x === 0 ? 'M' : 'L') + ` ${x} ${y2}`;
+                d3 += (x === 0 ? 'M' : 'L') + ` ${x} ${y3}`;
+            }
+            [path1, path2, path3].forEach((p, i) => {
+                p.setAttribute('d', i === 0 ? d1 : i === 1 ? d2 : d3);
+                p.setAttribute('fill', 'none');
+                p.setAttribute('stroke', i === 0 ? '#4ecdc4' : i === 1 ? '#a855f7' : '#ff6b6b');
+                p.setAttribute('stroke-width', '2');
+                p.setAttribute('opacity', i === 2 ? '1' : '0.5');
+            });
+            svg.appendChild(path1);
+            svg.appendChild(path2);
+            svg.appendChild(path3);
+        })();
+
+        // Interactive Canvas
+        (function() {
+            const canvas = document.getElementById('generativeCanvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let particles = [];
+            let params = {
+                particleCount: 200,
+                flowSpeed: 2,
+                noiseScale: 0.5,
+                colorHue: 180
+            };
+
+            function resize() {
+                width = canvas.width = canvas.offsetWidth;
+                height = canvas.height = canvas.offsetHeight;
+            }
+
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.vx = 0;
+                    this.vy = 0;
+                    this.hue = params.colorHue + Math.random() * 60 - 30;
+                }
+                update() {
+                    const scale = params.noiseScale * 0.005;
+                    const angle = SimplexNoise(this.x * scale, this.y * scale) * Math.PI * 4;
+                    this.vx += Math.cos(angle) * params.flowSpeed * 0.05;
+                    this.vy += Math.sin(angle) * params.flowSpeed * 0.05;
+                    this.vx *= 0.95;
+                    this.vy *= 0.95;
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    if(this.x < 0) this.x = width;
+                    if(this.x > width) this.x = 0;
+                    if(this.y < 0) this.y = height;
+                    if(this.y > height) this.y = 0;
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, 1.5, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${this.hue}, 80%, 60%, 0.8)`;
+                    ctx.fill();
+                }
+            }
+
+            function init() {
+                resize();
+                particles = [];
+                for(let i = 0; i < params.particleCount; i++) {
+                    particles.push(new Particle());
+                }
+            }
+
+            function animate() {
+                ctx.fillStyle = 'rgba(10, 10, 15, 0.15)';
+                ctx.fillRect(0, 0, width, height);
+                particles.forEach(p => {
+                    p.hue = params.colorHue + Math.random() * 60 - 30;
+                    p.update();
+                    p.draw();
+                });
+                requestAnimationFrame(animate);
+            }
+
+            // Controls
+            document.getElementById('particleCount').addEventListener('input', e => {
+                const val = parseInt(e.target.value);
+                document.getElementById('particleCountVal').textContent = val;
+                params.particleCount = val;
+                while(particles.length < val) particles.push(new Particle());
+                while(particles.length > val) particles.pop();
+            });
+            document.getElementById('flowSpeed').addEventListener('input', e => {
+                const val = parseFloat(e.target.value);
+                document.getElementById('flowSpeedVal').textContent = val;
+                params.flowSpeed = val;
+            });
+            document.getElementById('noiseScale').addEventListener('input', e => {
+                const val = parseFloat(e.target.value);
+                document.getElementById('noiseScaleVal').textContent = val;
+                params.noiseScale = val;
+            });
+            document.getElementById('colorHue').addEventListener('input', e => {
+                const val = parseInt(e.target.value);
+                document.getElementById('colorHueVal').textContent = val;
+                params.colorHue = val;
+            });
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                ctx.fillStyle = '#0a0a0f';
+                ctx.fillRect(0, 0, width, height);
+                particles.forEach(p => {
+                    p.x = Math.random() * width;
+                    p.y = Math.random() * height;
+                    p.vx = 0;
+                    p.vy = 0;
+                });
+            });
+
+            window.addEventListener('resize', resize);
+            ctx.fillStyle = '#0a0a0f';
+            ctx.fillRect(0, 0, 100, 100);
+            init();
+            animate();
+        })();
+
+        // Algorithm Canvases
+        (function() {
+            // Perlin Canvas
+            const perlinCanvas = document.getElementById('perlinCanvas');
+            const pctx = perlinCanvas.getContext('2d');
+            function drawPerlinNoise() {
+                const w = perlinCanvas.offsetWidth;
+                const h = perlinCanvas.offsetHeight;
+                perlinCanvas.width = w;
+                pctx.clearRect(0, 0, w, h);
+                for(let x = 0; x < w; x += 4) {
+                    for(let y = 0; y < h; y += 4) {
+                        const noise = (SimplexNoise(x * 0.01, y * 0.01) + 1) / 2;
+                        const hue = 200 + noise * 60;
+                        pctx.fillStyle = `hsla(${hue}, 70%, ${30 + noise * 40}%, ${0.3 + noise * 0.7})`;
+                        pctx.fillRect(x, y, 4, 4);
+                    }
+                }
+            }
+
+            // Reaction Diffusion Canvas
+            const reactionCanvas = document.getElementById('reactionCanvas');
+            const rctx = reactionCanvas.getContext('2d');
+            let gridA, gridB, nextA, nextB;
+            const scale = 4;
+            let rw, rh;
+
+            function initReaction() {
+                rw = Math.floor(reactionCanvas.offsetWidth / scale);
+                rh = Math.floor(reactionCanvas.offsetHeight / scale);
+                reactionCanvas.width = rw * scale;
+                reactionCanvas.height = rh * scale;
+                gridA = new Float32Array(rw * rh).fill(1);
+                gridB = new Float32Array(rw * rh).fill(0);
+                nextA = new Float32Array(rw * rh);
+                nextB = new Float32Array(rw * rh);
+                // Seed
+                for(let i = 0; i < rw * rh * 0.01; i++) {
+                    const cx = Math.floor(rw / 2) + Math.floor(Math.random() * 20 - 10);
+                    const cy = Math.floor(rh / 2) + Math.floor(Math.random() * 20 - 10);
+                    for(let dx = -3; dx <= 3; dx++) {
+                        for(let dy = -3; dy <= 3; dy++) {
+                            if(cx + dx >= 0 && cx + dx < rw && cy + dy >= 0 && cy + dy < rh) {
+                                gridA[(cy + dy) * rw + (cx + dx)] = 0;
+                                gridB[(cy + dy) * rw + (cx + dx)] = 1;
+                            }
+                        }
+                    }
+                }
+            }
+
+            function stepReaction() {
+                const f = 0.04, k = 0.06, dA = 1, dB = 0.5;
+                for(let x = 1; x < rw - 1; x++) {
+                    for(let y = 1; y < rh - 1; y++) {
+                        const idx = y * rw + x;
+                        const a = gridA[idx];
+                        const b = gridB[idx];
+                        const lapA = gridA[idx - 1] + gridA[idx + 1] + gridA[idx - rw] + gridA[idx + rw] - 4 * a;
+                        const lapB = gridB[idx - 1] + gridB[idx + 1] + gridB[idx - rw] + gridB[idx + rw] - 4 * b;
+                        nextA[idx] = a + dA * lapA - a * b * b + f * (1 - a);
+                        nextB[idx] = b + dB * lapB + a * b * b - (k + f) * b;
+                    }
+                }
+                [gridA, nextA] = [nextA, gridA];
+                [gridB, nextB] = [nextB, gridB];
+            }
+
+            function drawReaction() {
+                const img = rctx.createImageData(rw, rh);
+                for(let i = 0; i < rw * rh; i++) {
+                    const v = gridA[i] - gridB[i];
+                    const c = Math.floor((v + 1) * 127);
+                    img.data[i * 4] = c;
+                    img.data[i * 4 + 1] = Math.floor(c * 0.3);
+                    img.data[i * 4 + 2] = Math.floor(c * 0.5);
+                    img.data[i * 4 + 3] = 255;
+                }
+                rctx.putImageData(img, 0, 0);
+                rctx.scale(scale, scale);
+            }
+
+            // Lorenz Canvas
+            const lorenzCanvas = document.getElementById('lorenzCanvas');
+            const lctx = lorenzCanvas.getContext('2d');
+            function drawLorenz() {
+                const w = lorenzCanvas.offsetWidth;
+                const h = lorenzCanvas.offsetHeight;
+                lorenzCanvas.width = w;
+                lorenzCanvas.height = h;
+                lctx.fillStyle = 'rgba(10, 10, 15, 0.03)';
+                lctx.fillRect(0, 0, w, h);
+                const σ = 10, ρ = 28, β = 8 / 3;
+                let x = 0.1, y = 0, z = 0;
+                const dt = 0.005;
+                lctx.strokeStyle = 'rgba(255, 107, 107, 0.6)';
+                lctx.lineWidth = 0.5;
+                lctx.beginPath();
+                for(let i = 0; i < 1000; i++) {
+                    const dx = σ * (y - x) * dt;
+                    const dy = (x * (ρ - z) - y) * dt;
+                    const dz = (x * y - β * z) * dt;
+                    x += dx; y += dy; z += dz;
+                    const px = w / 2 + x * 8;
+                    const py = h / 2 + (z - 20) * 8;
+                    if(i === 0) lctx.moveTo(px, py);
+                    else lctx.lineTo(px, py);
+                }
+                lctx.stroke();
+            }
+
+            // Animate algorithm canvases
+            let reactionSteps = 0;
+            function animateAlgorithms() {
+                drawPerlinNoise();
+                if(reactionSteps < 2000) {
+                    stepReaction();
+                    drawReaction();
+                    reactionSteps++;
+                }
+                drawLorenz();
+                requestAnimationFrame(animateAlgorithms);
+            }
+
+            window.addEventListener('resize', () => {
+                initReaction();
+                reactionSteps = 0;
+            });
+            initReaction();
+            animateAlgorithms();
+        })();
+
+        // Particle Canvas - Full page background
+        (function() {
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let particles = [];
+            const numParticles = 300;
+
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }
+
+            class FlowParticle {
+                constructor() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.size = Math.random() * 2 + 1;
+                }
+                update() {
+                    const t = Date.now() * 0.001;
+                    const scale = 0.002;
+                    const angle = SimplexNoise(this.x * scale + t, this.y * scale) * Math.PI * 2;
+                    this.x += Math.cos(angle) * 2;
+                    this.y += Math.sin(angle) * 2;
+                    if(this.x < 0) this.x = width;
+                    if(this.x > width) this.x = 0;
+                    if(this.y < 0) this.y = height;
+                    if(this.y > height) this.y = 0;
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(78, 205, 196, 0.6)';
+                    ctx.fill();
+                }
+            }
+
+            function init() {
+                resize();
+                particles = [];
+                for(let i = 0; i < numParticles; i++) {
+                    particles.push(new FlowParticle());
+                }
+            }
+
+            function animate() {
+                ctx.fillStyle = 'rgba(18, 18, 26, 0.1)';
+                ctx.fillRect(0, 0, width, height);
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+                requestAnimationFrame(animate);
+            }
+
+            window.addEventListener('resize', resize);
+            init();
+            animate();
+        })();
+
+        // Wave Interference Canvas
+        (function() {
+            const canvas = document.getElementById('waveCanvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let time = 0;
+
+            function resize() {
+                width = canvas.width = canvas.offsetWidth;
+                height = canvas.height = canvas.offsetHeight;
+            }
+
+            function drawWaves() {
+                ctx.fillStyle = '#0a0a0f';
+                ctx.fillRect(0, 0, width, height);
+                const sources = [
+                    {x: width * 0.3, y: height * 0.5, freq: 0.03},
+                    {x: width * 0.7, y: height * 0.5, freq: 0.03}
+                ];
+                const imageData = ctx.createImageData(width, height);
+                for(let x = 0; x < width; x++) {
+                    for(let y = 0; y < height; y++) {
+                        let sum = 0;
+                        sources.forEach(s => {
+                            const dist = Math.sqrt((x - s.x) ** 2 + (y - s.y) ** 2);
+                            sum += Math.sin(dist * s.freq - time);
+                        });
+                        const val = (sum / sources.length + 1) / 2;
+                        const c = Math.floor(val * 255);
+                        const idx = (y * width + x) * 4;
+                        imageData.data[idx] = Math.floor(c * 0.3);
+                        imageData.data[idx + 1] = Math.floor(c * 0.7);
+                        imageData.data[idx + 2] = c;
+                        imageData.data[idx + 3] = 255;
+                    }
+                }
+                ctx.putImageData(imageData, 0, 0);
+                time += 0.05;
+                requestAnimationFrame(drawWaves);
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+            drawWaves();
+        })();
+
+        // Mouse tracking for philosophy cards
+        document.querySelectorAll('.philosophy-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                card.style.setProperty('--mouse-x', e.clientX - rect.left + 'px');
+                card.style.setProperty('--mouse-y', e.clientY - rect.top + 'px');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nernst Equation Explorer | Electrochemical Potential Dynamics</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a12;
+            --bg-secondary: #12121f;
+            --bg-tertiary: #1a1a2e;
+            --text-primary: #e8e8f0;
+            --text-secondary: #a0a0b8;
+            --accent-lithium: #00d4ff;
+            --accent-gradient: linear-gradient(135deg, #00d4ff 0%, #7b2fff 50%, #ff2d7b 100%);
+            --glow-cyan: 0 0 30px rgba(0, 212, 255, 0.4);
+            --glow-purple: 0 0 30px rgba(123, 47, 255, 0.4);
+            --font-display: 'Orbitron', 'Segoe UI', monospace;
+            --font-body: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .particle-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: float-particle 20s infinite ease-in-out;
+        }
+
+        @keyframes float-particle {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+            25% { transform: translateY(-100px) translateX(50px); opacity: 0.6; }
+            50% { transform: translateY(-50px) translateX(-30px); opacity: 0.4; }
+            75% { transform: translateY(-150px) translateX(20px); opacity: 0.5; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(180deg, rgba(0, 212, 255, 0.05) 0%, transparent 100%);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            transform: translateX(-50%);
+            animation: pulse-glow 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+            50% { opacity: 1; transform: translateX(-50%) scale(1.2); }
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            position: relative;
+            text-shadow: var(--glow-cyan);
+        }
+
+        .hero .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Section Styles */
+        .section {
+            padding: 4rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 2rem;
+            background: var(--accent-gradient);
+            border-radius: 2px;
+        }
+
+        /* Equation Display */
+        .equation-showcase {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 3rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .equation-showcase::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--accent-gradient);
+        }
+
+        .main-equation {
+            font-family: 'Cambria Math', 'Times New Roman', serif;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            text-align: center;
+            padding: 2rem;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(123, 47, 255, 0.2);
+            position: relative;
+        }
+
+        .main-equation .highlight {
+            color: var(--accent-lithium);
+            font-weight: bold;
+        }
+
+        .equation-variables {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .variable-card {
+            background: var(--bg-tertiary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .variable-card:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .variable-symbol {
+            font-family: 'Cambria Math', serif;
+            font-size: 2rem;
+            color: var(--accent-lithium);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .variable-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .variable-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Interactive Panel */
+        .interactive-panel {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .control-group {
+            background: var(--bg-tertiary);
+            padding: 1.5rem;
+            border-radius: 12px;
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--bg-primary);
+            outline: none;
+            -webkit-appearance: none;
+            margin-bottom: 0.5rem;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-lithium);
+            cursor: pointer;
+            box-shadow: var(--glow-cyan);
+        }
+
+        .control-value {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--accent-lithium);
+            text-align: center;
+        }
+
+        /* SVG Diagram Container */
+        .diagram-container {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(123, 47, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .electrode-svg {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        /* Animated Elements */
+        .electron {
+            animation: electron-flow 3s ease-in-out infinite;
+        }
+
+        @keyframes electron-flow {
+            0% { transform: translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateX(300px); opacity: 0; }
+        }
+
+        .ion-drift {
+            animation: ion-move 4s ease-in-out infinite;
+        }
+
+        @keyframes ion-move {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-80px); }
+        }
+
+        .potential-indicator {
+            animation: potential-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes potential-pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Calculator Section */
+        .calculator {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .calc-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .calc-input {
+            background: var(--bg-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            color: var(--text-primary);
+            font-size: 1rem;
+            width: 100%;
+            transition: border-color 0.3s;
+        }
+
+        .calc-input:focus {
+            outline: none;
+            border-color: var(--accent-lithium);
+        }
+
+        .calc-result {
+            text-align: center;
+            padding: 2rem;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            border: 2px solid var(--accent-lithium);
+        }
+
+        .calc-result-label {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .calc-result-value {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .calc-result-unit {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        /* Butler-Volmer Section */
+        .butler-volmer {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .butler-volmer .equation {
+            font-family: 'Cambria Math', serif;
+            font-size: 1.3rem;
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .kinetics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        /* Info Cards */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .info-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .info-card h3 {
+            color: var(--accent-lithium);
+            margin-bottom: 1rem;
+            font-family: var(--font-display);
+        }
+
+        .info-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 2rem;
+        }
+
+        .footer-energy {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            .hero {
+                padding: 2rem 1rem;
+            }
+            .equation-showcase {
+                padding: 1.5rem;
+            }
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .voltage-bar {
+            transition: height 0.5s ease-out, background 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="particle-bg" id="particles"></div>
+
+    <div class="container">
+        <header class="hero">
+            <h1>The Nernst Equation Explorer</h1>
+            <p class="subtitle">Interactive journey through electrochemical potential dynamics — the fundamental equation connecting concentration, temperature, and equilibrium voltage in every battery.</p>
+        </header>
+
+        <section class="section">
+            <h2 class="section-title">The Fundamental Equation</h2>
+            <div class="equation-showcase">
+                <div class="main-equation">
+                    <span class="highlight">E</span> = E° − (RT / nF) × ln(Q)
+                </div>
+                <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">
+                    At 25°C, this simplifies to: E = E° − (0.05916 V / n) × log₁₀(Q)
+                </p>
+                <div class="equation-variables">
+                    <div class="variable-card">
+                        <span class="variable-symbol">E</span>
+                        <div class="variable-name">Equilibrium Potential</div>
+                        <div class="variable-desc">Cell voltage at given conditions (V)</div>
+                    </div>
+                    <div class="variable-card">
+                        <span class="variable-symbol">E°</span>
+                        <div class="variable-name">Standard Potential</div>
+                        <div class="variable-desc">Voltage at 25°C, 1 M concentration (V)</div>
+                    </div>
+                    <div class="variable-card">
+                        <span class="variable-symbol">R</span>
+                        <div class="variable-name">Gas Constant</div>
+                        <div class="variable-desc">8.314 J/(mol·K)</div>
+                    </div>
+                    <div class="variable-card">
+                        <span class="variable-symbol">T</span>
+                        <div class="variable-name">Temperature</div>
+                        <div class="variable-desc">Absolute temperature (K)</div>
+                    </div>
+                    <div class="variable-card">
+                        <span class="variable-symbol">n</span>
+                        <div class="variable-name">Electrons Transferred</div>
+                        <div class="variable-desc">Moles of electrons per mole of reaction</div>
+                    </div>
+                    <div class="variable-card">
+                        <span class="variable-symbol">F</span>
+                        <div class="variable-name">Faraday Constant</div>
+                        <div class="variable-desc">96,485 C/mol</div>
+                    </div>
+                    <div class="variable-card">
+                        <span class="variable-symbol">Q</span>
+                        <div class="variable-name">Reaction Quotient</div>
+                        <div class="variable-desc">[products]^coeff / [reactants]^coeff</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Interactive Potential Simulator</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                Watch how electrode concentration and temperature affect the equilibrium potential in real-time.
+            </p>
+
+            <div class="interactive-panel">
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label>Cathode Concentration [Co²⁺]</label>
+                        <input type="range" id="cathodeConc" min="0.01" max="2" step="0.01" value="1">
+                        <div class="control-value"><span id="cathodeConcVal">1.00</span> M</div>
+                    </div>
+                    <div class="control-group">
+                        <label>Anode Concentration [An²⁺]</label>
+                        <input type="range" id="anodeConc" min="0.01" max="2" step="0.01" value="0.01">
+                        <div class="control-value"><span id="anodeConcVal">0.01</span> M</div>
+                    </div>
+                    <div class="control-group">
+                        <label>Temperature</label>
+                        <input type="range" id="temperature" min="250" max="350" step="1" value="298">
+                        <div class="control-value"><span id="tempVal">298</span> K (<span id="tempC">25</span>°C)</div>
+                    </div>
+                    <div class="control-group">
+                        <label>Standard Potential E°</label>
+                        <input type="range" id="stdPotential" min="0" max="5" step="0.1" value="1.1">
+                        <div class="control-value"><span id="stdPotentialVal">1.10</span> V</div>
+                    </div>
+                </div>
+
+                <div class="diagram-container">
+                    <svg class="electrode-svg" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Background Grid -->
+                        <defs>
+                            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,212,255,0.05)" stroke-width="1"/>
+                            </pattern>
+                            <linearGradient id="electrolyteGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:0.3"/>
+                                <stop offset="100%" style="stop-color:#7b2fff;stop-opacity:0.1"/>
+                            </linearGradient>
+                            <linearGradient id="cathodeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#7b2fff"/>
+                                <stop offset="100%" style="stop-color:#00d4ff"/>
+                            </linearGradient>
+                            <linearGradient id="anodeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#ff2d7b"/>
+                                <stop offset="100%" style="stop-color:#7b2fff"/>
+                            </linearGradient>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        <rect width="800" height="400" fill="url(#grid)"/>
+
+                        <!-- Electrolyte Solution -->
+                        <rect x="200" y="120" width="400" height="160" fill="url(#electrolyteGrad)" rx="8" opacity="0.5"/>
+
+                        <!-- Cathode (Right) -->
+                        <g id="cathode">
+                            <rect x="600" y="100" width="150" height="200" fill="url(#cathodeGrad)" rx="8" opacity="0.8"/>
+                            <text x="675" y="95" text-anchor="middle" fill="#00d4ff" font-family="var(--font-display)" font-size="14">CATHODE</text>
+                            <text x="675" y="320" text-anchor="middle" fill="#a0a0b8" font-size="12">LiCoO₂</text>
+                            <!-- Concentration visualization -->
+                            <rect x="620" y="140" width="90" height="120" fill="rgba(0,212,255,0.2)" rx="4">
+                                <animate id="cathodeFill" attributeName="height"
+                                    values="120;100;80;60;40;20;120"
+                                    dur="4s" repeatCount="indefinite"/>
+                                <animate attributeName="y" values="140;160;180;200;220;240;140"
+                                    dur="4s" repeatCount="indefinite"/>
+                            </rect>
+                            <!-- Li+ ions -->
+                            <g class="ion-drift">
+                                <circle cx="640" cy="200" r="8" fill="#00d4ff" opacity="0.8">
+                                    <animate attributeName="cy" values="200;120;200" dur="3s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="665" cy="180" r="8" fill="#00d4ff" opacity="0.6">
+                                    <animate attributeName="cy" values="180;100;180" dur="3.5s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="690" cy="220" r="8" fill="#00d4ff" opacity="0.7">
+                                    <animate attributeName="cy" values="220;140;220" dur="2.8s" repeatCount="indefinite"/>
+                                </circle>
+                            </g>
+                        </g>
+
+                        <!-- Anode (Left) -->
+                        <g id="anode">
+                            <rect x="50" y="100" width="150" height="200" fill="url(#anodeGrad)" rx="8" opacity="0.8"/>
+                            <text x="125" y="95" text-anchor="middle" fill="#ff2d7b" font-family="var(--font-display)" font-size="14">ANODE</text>
+                            <text x="125" y="320" text-anchor="middle" fill="#a0a0b8" font-size="12">Li-Graphite</text>
+                            <!-- Li intercalation -->
+                            <g class="ion-drift">
+                                <circle cx="100" cy="160" r="8" fill="#ff2d7b" opacity="0.8">
+                                    <animate attributeName="cy" values="160;240;160" dur="3.2s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="125" cy="180" r="8" fill="#ff2d7b" opacity="0.6">
+                                    <animate attributeName="cy" values="180;260;180" dur="3.8s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="150" cy="200" r="8" fill="#ff2d7b" opacity="0.7">
+                                    <animate attributeName="cy" values="200;280;200" dur="2.9s" repeatCount="indefinite"/>
+                                </circle>
+                            </g>
+                        </g>
+
+                        <!-- Electron Flow -->
+                        <g id="electronFlow">
+                            <line x1="50" y1="200" x2="600" y2="200" stroke="#00d4ff" stroke-width="2" stroke-dasharray="10,5" opacity="0.3"/>
+                            <g class="electron">
+                                <circle cx="80" cy="200" r="6" fill="#00d4ff" filter="url(#glow)">
+                                    <animate attributeName="cx" values="80;620;80" dur="3s" repeatCount="indefinite"/>
+                                </circle>
+                            </g>
+                            <g class="electron" style="animation-delay: -1.5s">
+                                <circle cx="80" cy="210" r="5" fill="#7b2fff" filter="url(#glow)">
+                                    <animate attributeName="cx" values="80;620;80" dur="3s" repeatCount="indefinite"/>
+                                </circle>
+                            </g>
+                        </g>
+
+                        <!-- Potential Indicator -->
+                        <g id="potentialDisplay" class="potential-indicator">
+                            <rect x="300" y="50" width="200" height="40" fill="rgba(0,0,0,0.5)" rx="8" stroke="#00d4ff" stroke-width="1"/>
+                            <text x="400" y="75" text-anchor="middle" fill="#00d4ff" font-family="var(--font-display)" font-size="16">
+                                E = <tspan id="potentialValue">3.93</tspan> V
+                            </text>
+                        </g>
+
+                        <!-- Voltage Bar -->
+                        <g id="voltageBar">
+                            <rect x="750" y="140" width="20" height="120" fill="rgba(0,0,0,0.3)" rx="4"/>
+                            <rect x="750" y="200" width="20" height="60" fill="#00d4ff" class="voltage-bar" id="voltageFill">
+                                <animate attributeName="height" values="60;80;40;100;60" dur="4s" repeatCount="indefinite"/>
+                                <animate attributeName="y" values="200;180;220;160;200" dur="4s" repeatCount="indefinite"/>
+                            </rect>
+                            <text x="760" y="290" text-anchor="middle" fill="#a0a0b8" font-size="10" transform="rotate(-90, 760, 290)">Voltage</text>
+                        </g>
+
+                        <!-- Labels -->
+                        <g fill="#a0a0b8" font-size="12">
+                            <text x="400" y="350" text-anchor="middle">Electrolyte (Ion Conductor)</text>
+                            <text x="400" y="370" text-anchor="middle" font-size="10">← Li⁺ ions flow through | e⁻ flow through external circuit →</text>
+                        </g>
+                    </svg>
+                </div>
+
+                <div class="calc-result">
+                    <div class="calc-result-label">Calculated Equilibrium Potential</div>
+                    <div class="calc-result-value" id="calcE">3.93</div>
+                    <div class="calc-result-unit">Volts (V)</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Beyond Nernst: Butler-Volmer Kinetics</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                While the Nernst equation describes equilibrium potentials, the Butler-Volmer equation captures the kinetic limitations at any given overpotential.
+            </p>
+
+            <div class="butler-volmer">
+                <div class="equation">
+                    j = j₀ × [e<sup>(1-α)nFη/RT</sup> − e<sup>(−α)nFη/RT</sup>]
+                </div>
+                <div class="kinetics-grid">
+                    <div class="variable-card">
+                        <span class="variable-symbol">j</span>
+                        <div class="variable-name">Faradaic Current Density</div>
+                        <div class="variable-desc">Current per unit electrode area (A/cm²)</div>
+                    </div>
+                    <div class="variable-card">
+                        <span class="variable-symbol">j₀</span>
+                        <div class="variable-name">Exchange Current Density</div>
+                        <div class="variable-desc">Intrinsic kinetic rate constant</div>
+                    </div>
+                    <div class="variable-card">
+                        <span class="variable-symbol">α</span>
+                        <div class="variable-name">Transfer Coefficient</div>
+                        <div class="variable-desc">Typically 0.5 for symmetric barriers</div>
+                    </div>
+                    <div class="variable-card">
+                        <span class="variable-symbol">η</span>
+                        <div class="variable-name">Overpotential</div>
+                        <div class="variable-desc">E − E_eq, driving force for reaction</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Scientific Foundation</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Historical Context</h3>
+                    <p>Walther Hermann Nernst (1864–1941) derived this equation in 1889 while studying the EMF of concentration cells. It became a cornerstone of electrochemical thermodynamics, earning him the Nobel Prize in Chemistry in 1920.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Temperature Dependence</h3>
+                    <p>The RT/F term reveals why batteries lose capacity in cold weather. Lower temperatures increase the logarithmic term's effect, shifting equilibrium potentials and slowing diffusion kinetics.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Concentration Effects</h3>
+                    <p>The reaction quotient Q captures how concentration gradients drive voltage. This is why state-of-charge estimation relies on voltage readings — they're proxy measurements for electrolyte composition.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Practical Applications</h3>
+                    <p>From coin cells to EV packs, the Nernst equation underlies Battery Management Systems. Coulomb counting, impedance spectroscopy, and OCV relaxation all trace back to these fundamental relationships.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Multi-Electron Reactions</h3>
+                    <p>The n value in the denominator reveals why Li-air batteries (theoretically 2.8 V per e⁻ transfer) face different challenges than Li-ion (3.7 V). More electrons mean steeper concentration sensitivity.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Equilibrium vs. Polarization</h3>
+                    <p>Nernst gives us the "what should be" at equilibrium. Butler-Volmer tells us "how fast" given the kinetic limitations. Together, they describe the complete electrochemical response.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Key Equations in Electrochemistry</h2>
+            <div class="equation-showcase">
+                <div class="main-equation" style="font-size: 1.3rem;">
+                    <strong>Nernst:</strong> E = E° − (RT/nF)ln(Q)
+                </div>
+                <div class="main-equation" style="font-size: 1.3rem;">
+                    <strong>Butler-Volmer:</strong> j = j₀[e<sup>(1-α)nFη/RT</sup> − e<sup>(−α)nFη/RT</sup>]
+                </div>
+                <div class="main-equation" style="font-size: 1.3rem;">
+                    <strong>Nernst-Einstein:</strong> D = (RTσ/F²C)
+                </div>
+                <div class="main-equation" style="font-size: 1.3rem;">
+                    <strong>Butler-Volmer (Tafel form):</strong> η = (RT/αnF)ln(j/j₀)
+                </div>
+                <p style="text-align: center; color: var(--text-secondary); margin-top: 2rem; font-size: 0.9rem;">
+                    These four equations form the mathematical bedrock of battery modeling, from atomic-scale DFT calculations to system-level equivalent circuit models.
+                </p>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div class="footer-energy">⚡ E = E° − (RT/nF)ln(Q) ⚡</div>
+            <p style="margin-top: 1rem;">Nernst Equation Explorer | Li-Ion Battery Research Agent</p>
+            <p style="font-size: 0.85rem; margin-top: 0.5rem; opacity: 0.6;">Virtual World Energy Storage Laboratory</p>
+        </footer>
+    </div>
+
+    <script>
+        // Generate floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const colors = ['#00d4ff', '#7b2fff', '#ff2d7b'];
+
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.cssText = `
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                    width: ${Math.random() * 6 + 2}px;
+                    height: ${Math.random() * 6 + 2}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    animation-delay: ${Math.random() * 10}s;
+                    animation-duration: ${15 + Math.random() * 15}s;
+                `;
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // Interactive calculator
+        const R = 8.314; // J/(mol·K)
+        const F = 96485; // C/mol
+
+        function calculatePotential() {
+            const cathodeConc = parseFloat(document.getElementById('cathodeConc').value);
+            const anodeConc = parseFloat(document.getElementById('anodeConc').value);
+            const T = parseFloat(document.getElementById('temperature').value);
+            const E0 = parseFloat(document.getElementById('stdPotential').value);
+
+            // Update display values
+            document.getElementById('cathodeConcVal').textContent = cathodeConc.toFixed(2);
+            document.getElementById('anodeConcVal').textContent = anodeConc.toFixed(2);
+            document.getElementById('tempVal').textContent = T;
+            document.getElementById('tempC').textContent = Math.round(T - 273);
+            document.getElementById('stdPotentialVal').textContent = E0.toFixed(2);
+
+            // Calculate E = E° - (RT/nF)ln(Q)
+            // For a simple reaction: M²⁺ + 2e⁻ → M
+            // Q = [Anode]/[Cathode] (ratio of concentrations)
+            const Q = anodeConc / cathodeConc;
+            const n = 2; // electrons transferred
+            const RTnF = (R * T) / (n * F);
+
+            // Natural log version
+            const E = E0 - (RTnF * Math.log(Q));
+
+            // Display results
+            document.getElementById('calcE').textContent = E.toFixed(2);
+            document.getElementById('potentialValue').textContent = E.toFixed(2);
+
+            // Update voltage bar height
+            const voltageFill = document.getElementById('voltageFill');
+            const normalizedHeight = Math.min(Math.max((E / 5) * 120, 20), 120);
+            const normalizedY = 260 - normalizedHeight;
+            voltageFill.setAttribute('height', normalizedHeight);
+            voltageFill.setAttribute('y', normalizedY);
+
+            // Update voltage bar color based on E
+            if (E > 4) {
+                voltageFill.setAttribute('fill', '#00ff88');
+            } else if (E > 3) {
+                voltageFill.setAttribute('fill', '#00d4ff');
+            } else if (E > 2) {
+                voltageFill.setAttribute('fill', '#7b2fff');
+            } else {
+                voltageFill.setAttribute('fill', '#ff2d7b');
+            }
+        }
+
+        // Add event listeners to all sliders
+        const sliders = document.querySelectorAll('input[type="range"]');
+        sliders.forEach(slider => {
+            slider.addEventListener('input', calculatePotential);
+        });
+
+        // Initial calculation
+        calculatePotential();
+
+        // Smooth scroll animation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.section').forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>

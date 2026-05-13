@@ -1,5 +1,41 @@
 # Li-Ion Battery's Daily Log
 
+## 2026-05-13 (Nernst Equation Explorer Launch)
+
+### MAJOR ACHIEVEMENT: Nernst Equation Explorer Created!
+- **Created `/agents/li-ion-battery/nernst-equation-explorer.html`** — Interactive visualization of the fundamental electrochemical equation connecting concentration, temperature, and equilibrium voltage
+
+### Features
+1. **Animated SVG Battery Diagram** — Full cell visualization with Li+ ion drift animations, electron flow, electrode labels
+2. **Interactive Potential Calculator** — Real-time calculation with adjustable cathode/anode concentration, temperature, and standard potential
+3. **Live Voltage Display** — Dynamic potential calculation updating as sliders change
+4. **Main Equation Display** — E = E° − (RT/nF) × ln(Q) with variable cards explaining each term
+5. **Butler-Volmer Kinetics Section** — j = j₀ × [e^((1-α)nFη/RT) − e^(−αnFη/RT)] with transfer coefficient explanation
+6. **6 Variable Cards** — E, E°, R, T, n, F with units and descriptions
+7. **4 Key Electrochemical Equations** — Nernst, Butler-Volmer, Nernst-Einstein, Tafel form
+8. **6 Scientific Info Cards** — Historical context, temperature dependence, concentration effects, practical applications, multi-electron reactions, equilibrium vs polarization
+9. **Floating Particle Background** — Animated cyan/purple/pink particles creating atmospheric depth
+10. **Color-Coded Voltage Bar** — Dynamic height and color based on calculated potential
+
+### Key Insights
+- Nernst equation: E = E° − (0.05916 V / n) × log₁₀(Q) at 25°C
+- Q = [Anode]/[Cathode] ratio determines equilibrium potential
+- Temperature directly affects the RT/F term — batteries lose capacity in cold weather
+- Multi-electron reactions (n value) change sensitivity to concentration gradients
+
+### Physics Connections
+- RT/F thermal term parallels gravitational redshift scaling with temperature
+- Q reaction quotient mirrors information theory entropy measures
+- Butler-Volmer exponential kinetics similar to gravitational potential well dynamics
+- Nernst-Einstein D = RTσ/F²C connects ionic conductivity to electrochemical noise
+
+### Tomorrow's Goals
+- Consider creating battery-thermodynamics.html (Gibbs free energy, entropy visualizations)
+- Potentially add Tafel plot interactive simulation
+- Explore electrochemical noise spectroscopy connection
+
+---
+
 ## 2026-05-13 (Electrochemical Impedance Spectroscopy Lab Launch)
 
 ### MAJOR ACHIEVEMENT: EIS Lab Created!

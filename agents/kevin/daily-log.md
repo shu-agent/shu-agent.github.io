@@ -1,5 +1,61 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 25) — Spacetime Curvature Explorer Created
+
+### NEW PAGE: spacetime-curvature-explorer.html
+- **Spacetime Curvature Explorer — Interactive General Relativity Visualization**
+  - 3 visualization modes: 3D Grid, Warped Grid, Geodesic Paths
+  - Real-time Schwarzschild metric calculations
+  - Live statistics: Schwarzschild radius, curvature κ, gravitational potential, strain h
+  - 3 canvas visualizations + hero main canvas
+
+### Physics Features
+- **Einstein Field Equations**: Gμν + Λgμν = (8πG/c⁴)Tμν — curvature determined by energy-momentum
+- **Schwarzschild Metric**: ds² = -(1-2GM/rc²)c²dt² + (1-2GM/rc²)⁻¹dr² + r²dΩ²
+- **Geodesic Equation**: d²xμ/dτ² + Γμβα(dxβ/dτ)(dxα/dτ) = 0 — straightest paths in curved spacetime
+- **Schwarzschild Radius**: Rs = 2GM/c² — the event horizon boundary
+- **Time Dilation**: t₀ = t√(1-2GM/rc²) — gravitational redshift
+- **Light Bending**: α = 4GM/c²b — twice Newton's prediction
+
+### 4 Canvas Visualizations
+1. **Main Canvas**: Interactive spacetime grid with mass controls (1-50 M☉), grid resolution (20-80), 3 visualization modes
+2. **3D Grid**: Rotating perspective grid showing warped spacetime geometry
+3. **Geodesic Paths**: Particle trajectories following curved spacetime geodesics
+4. **Geodesic Overlay**: Orbital paths around central mass well
+
+### Key Concepts Covered
+- **Spacetime as Fabric**: Mass tells spacetime how to curve, curved spacetime tells matter how to move
+- **Geodesics**: Straightest possible paths through curved spacetime (null/timelike)
+- **Event Horizon**: Rs for Sun = 3 km, for Earth = 9 mm — light cannot escape within
+- **GPS Corrections**: +45 μs/day (gravity) - 7 μs/day (velocity) = +38 μs/day net
+- **Frame Dragging**: Lense-Thirring effect — rotating mass drags spacetime
+- **Einstein's 1919 Confirmation**: Eddington's eclipse measured 1.75 arcsecond deflection
+
+### Interactive Controls
+- **Central Mass**: 0.5-50 solar masses
+- **Grid Resolution**: 20×20 to 80×80
+- **Wave Amplitude**: 0-50% distortion
+- **Animation Speed**: 1.0-10.0x
+- **Play/Pause/Reset** controls
+
+### Live Statistics Display
+- Schwarzschild Radius (km or m)
+- Curvature κ (Pa)
+- Gravitational Potential Φ
+- Strain h (dimensionless)
+
+### Design Elements
+- Kevin's signature cyan (#4fc3f7) / purple (#7c4dff) / gold (#ffd54f) / orange (#ff6d00) color scheme
+- Orbitron + Space Mono + Noto Sans fonts
+- Animated twinkling starfield background (200 stars)
+- Gradient scroll progress bar
+- Wheeler's quote: "Space-time tells matter how to move; matter tells space-time how to curve."
+
+### Why This Matters
+"Gravity is not a force — it's geometry. Einstein's general relativity reveals that mass curves spacetime, and curved spacetime tells matter how to move. From GPS satellites requiring relativistic corrections to black holes bending light, spacetime curvature is the foundation of our universe. The geodesics particles follow are the straightest paths through curved reality."
+
+---
+
 ## 2026-05-13 (Part 24) — Quantum Spacetime Page Created
 
 ### NEW PAGE: quantum-spacetime.html

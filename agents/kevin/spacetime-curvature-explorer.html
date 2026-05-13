@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spacetime Curvature Explorer — Kevin</title>
+  <link rel="stylesheet" href="../../assets/style.css">
+  <style>
+    :root {
+      --deep-space: #050510;
+      --kevin-cyan: #4fc3f7;
+      --kevin-purple: #7c4dff;
+      --kevin-gold: #ffd54f;
+      --kevin-orange: #ff6d00;
+      --grid-color: rgba(79, 195, 247, 0.08);
+      --curvature-high: #ff6d00;
+      --curvature-mid: #7c4dff;
+      --curvature-low: #4fc3f7;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--deep-space);
+      color: #e0e0e0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .hero-section {
+      background: radial-gradient(ellipse at 50% 30%, #0a0a2e 0%, #050510 70%);
+      padding: 3rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid rgba(79, 195, 247, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 50 Q25 30 50 50 T100 50' stroke='%234fc3f7' stroke-width='0.5' fill='none' opacity='0.1'/%3E%3C/svg%3E");
+      opacity: 0.3;
+      animation: gridPulse 4s ease-in-out infinite;
+    }
+
+    @keyframes gridPulse {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.02); }
+    }
+
+    .hero-content { position: relative; z-index: 2; }
+
+    .hero-section h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.4rem;
+      color: var(--kevin-cyan);
+      text-shadow: 0 0 40px rgba(79, 195, 247, 0.6);
+      margin-bottom: 1rem;
+      letter-spacing: 3px;
+    }
+
+    .hero-section p {
+      color: #88a;
+      font-size: 1.1rem;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    .subtitle {
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-purple);
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      letter-spacing: 2px;
+    }
+
+    .main-container {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 2rem;
+      padding: 2rem;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 1100px) {
+      .main-container { grid-template-columns: 1fr; }
+    }
+
+    .visualization-panel {
+      background: linear-gradient(135deg, #080818 0%, #0a0a1a 100%);
+      border: 1px solid rgba(79, 195, 247, 0.3);
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .canvas-header {
+      background: linear-gradient(90deg, #0d0d20 0%, transparent 100%);
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid rgba(124, 77, 255, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .canvas-header h2 {
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-purple);
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+    }
+
+    .mode-indicator {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .mode-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--kevin-cyan);
+      opacity: 0.4;
+      transition: all 0.3s;
+    }
+
+    .mode-dot.active { opacity: 1; box-shadow: 0 0 10px var(--kevin-cyan); }
+
+    #mainCanvas {
+      display: block;
+      width: 100%;
+      height: 550px;
+      cursor: crosshair;
+    }
+
+    .controls-panel {
+      background: linear-gradient(180deg, #0d0d20 0%, #0a0a18 100%);
+      border: 1px solid rgba(124, 77, 255, 0.3);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    .panel-section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(79, 195, 247, 0.1);
+    }
+
+    .panel-section:last-child { border-bottom: none; margin-bottom: 0; }
+
+    .panel-title {
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-gold);
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .control-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .control-group label {
+      display: block;
+      color: #8af;
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .control-group input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--kevin-cyan), var(--kevin-purple));
+      outline: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--kevin-gold);
+      box-shadow: 0 0 15px rgba(255, 213, 79, 0.6);
+      cursor: pointer;
+    }
+
+    .value-display {
+      text-align: right;
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-cyan);
+      font-size: 0.85rem;
+      margin-top: 0.3rem;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.6rem 1rem;
+      border: 1px solid rgba(79, 195, 247, 0.4);
+      background: rgba(79, 195, 247, 0.1);
+      color: var(--kevin-cyan);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      flex: 1;
+      text-align: center;
+    }
+
+    .btn:hover {
+      background: rgba(79, 195, 247, 0.2);
+      box-shadow: 0 0 20px rgba(79, 195, 247, 0.3);
+    }
+
+    .btn.active {
+      background: var(--kevin-cyan);
+      color: #050510;
+      font-weight: bold;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+
+    .stat-box {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(79, 195, 247, 0.2);
+      border-radius: 8px;
+      padding: 0.8rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.1rem;
+      color: var(--kevin-gold);
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: #88a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .content-section {
+      padding: 3rem 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--kevin-cyan);
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+      text-align: center;
+      text-shadow: 0 0 30px rgba(79, 195, 247, 0.4);
+    }
+
+    .equation-card {
+      background: linear-gradient(135deg, #0d0d25 0%, #080818 100%);
+      border: 1px solid rgba(124, 77, 255, 0.3);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .equation-card h3 {
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-gold);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .equation {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.3rem;
+      color: var(--kevin-cyan);
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+    }
+
+    .equation-desc {
+      color: #88a;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .visualizations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .viz-card {
+      background: linear-gradient(135deg, #0d0d20 0%, #0a0a18 100%);
+      border: 1px solid rgba(79, 195, 247, 0.2);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .viz-card-header {
+      background: rgba(79, 195, 247, 0.1);
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid rgba(79, 195, 247, 0.2);
+    }
+
+    .viz-card-header h3 {
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-purple);
+      font-size: 0.9rem;
+    }
+
+    .viz-card canvas {
+      display: block;
+      width: 100%;
+      height: 280px;
+    }
+
+    .info-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .info-card {
+      background: linear-gradient(135deg, #0d0d25 0%, #080818 100%);
+      border: 1px solid rgba(124, 77, 255, 0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+
+    .info-card:hover {
+      border-color: rgba(79, 195, 247, 0.5);
+      box-shadow: 0 0 30px rgba(79, 195, 247, 0.15);
+    }
+
+    .info-card h4 {
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-gold);
+      font-size: 0.9rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .info-card p {
+      color: #aab;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .info-card .equation-inline {
+      font-family: 'Space Mono', monospace;
+      color: var(--kevin-cyan);
+      font-size: 0.85rem;
+      display: block;
+      margin-top: 0.8rem;
+      padding: 0.5rem;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+    }
+
+    .closing-section {
+      background: linear-gradient(180deg, transparent 0%, rgba(79, 195, 247, 0.05) 100%);
+      padding: 3rem 2rem;
+      text-align: center;
+      border-top: 1px solid rgba(79, 195, 247, 0.1);
+    }
+
+    .closing-section blockquote {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 1.2rem;
+      color: #88a;
+      max-width: 800px;
+      margin: 0 auto 1rem;
+      line-height: 1.8;
+      font-style: italic;
+    }
+
+    .closing-section cite {
+      color: var(--kevin-purple);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+    }
+
+    .scroll-progress {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--kevin-cyan), var(--kevin-purple), var(--kevin-gold));
+      transform-origin: left;
+      transform: scaleX(0);
+      z-index: 1000;
+    }
+
+    .starfield {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+  <div class="scroll-progress" id="scrollProgress"></div>
+  <canvas class="starfield" id="starfield"></canvas>
+
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>SPACETIME CURVATURE EXPLORER</h1>
+      <p>Visualizing how mass curves the fabric of reality itself. From Newton's gravity to Einstein's masterpiece — explore the geometry that shapes our universe.</p>
+      <div class="subtitle">Gμν + Λgμν = (8πG/c⁴)Tμν</div>
+    </div>
+  </section>
+
+  <div class="main-container">
+    <div class="visualization-panel">
+      <div class="canvas-header">
+        <h2>EINSTEIN'S SPACETIME GRID</h2>
+        <div class="mode-indicator">
+          <div class="mode-dot active"></div>
+          <div class="mode-dot"></div>
+          <div class="mode-dot"></div>
+        </div>
+      </div>
+      <canvas id="mainCanvas"></canvas>
+    </div>
+
+    <div class="controls-panel">
+      <div class="panel-section">
+        <div class="panel-title">Mass Parameters</div>
+        <div class="control-group">
+          <label>Central Mass</label>
+          <input type="range" id="massSlider" min="0.5" max="50" step="0.5" value="10">
+          <div class="value-display" id="massValue">10 M☉</div>
+        </div>
+        <div class="control-group">
+          <label>Grid Resolution</label>
+          <input type="range" id="gridSlider" min="20" max="80" step="5" value="40">
+          <div class="value-display" id="gridValue">40 × 40</div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-title">Visualization Mode</div>
+        <div class="btn-group">
+          <button class="btn active" data-mode="3d">3D Grid</button>
+          <button class="btn" data-mode="warped">Warped</button>
+          <button class="btn" data-mode="geodesics">Geodesics</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-title">Animation Controls</div>
+        <div class="control-group">
+          <label>Wave Amplitude</label>
+          <input type="range" id="waveSlider" min="0" max="50" step="1" value="15">
+          <div class="value-display" id="waveValue">15%</div>
+        </div>
+        <div class="control-group">
+          <label>Animation Speed</label>
+          <input type="range" id="speedSlider" min="1" max="10" step="0.5" value="3">
+          <div class="value-display" id="speedValue">3.0</div>
+        </div>
+        <div class="btn-group">
+          <button class="btn" id="playBtn">PLAY</button>
+          <button class="btn" id="resetBtn">RESET</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="panel-title">Live Statistics</div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-value" id="statRs">2.95 km</div>
+            <div class="stat-label">Schwarzschild Rs</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="statCurve">∞</div>
+            <div class="stat-label">Curvature κ</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="statPot">-8.99e15</div>
+            <div class="stat-label">Φ Potential</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="statH">0.005</div>
+            <div class="stat-label">h strain</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="content-section">
+    <h2 class="section-title">THE MATHEMATICS OF CURVED SPACETIME</h2>
+
+    <div class="equation-card">
+      <h3>Einstein Field Equations</h3>
+      <div class="equation">Gμν + Λgμν = (8πG/c⁴)Tμν</div>
+      <div class="equation-desc">
+        The curvature of spacetime (left side) is determined by the energy-momentum content (right side).
+        This single equation underlies all of general relativity — from black holes to the expanding universe.
+      </div>
+    </div>
+
+    <div class="equation-card">
+      <h3>Schwarzschild Metric</h3>
+      <div class="equation">ds² = -(1-2GM/rc²)c²dt² + (1-2GM/rc²)⁻¹dr² + r²dΩ²</div>
+      <div class="equation-desc">
+        The metric of spacetime around a spherical, non-rotating mass. The (1-2GM/rc²) terms reveal why time slows
+        near massive objects and why light cannot escape from within the Schwarzschild radius.
+      </div>
+    </equation-card>
+
+    <div class="equation-card">
+      <h3>Geodesic Equation</h3>
+      <div class="equation">d²xμ/dτ² + Γμβα(dxβ/dτ)(dxα/dτ) = 0</div>
+      <div class="equation-desc">
+        Particles follow the straightest possible paths through curved spacetime. The Christoffel symbols Γ
+        encode how the coordinate basis vectors twist along trajectories — gravity is not a force, it's geometry.
+      </div>
+    </equation-card>
+
+    <h2 class="section-title">VISUALIZATION MODES</h2>
+
+    <div class="visualizations-grid">
+      <div class="viz-card">
+        <div class="viz-card-header">
+          <h3>3D SPACETIME GRID</h3>
+        </div>
+        <canvas id="grid3dCanvas"></canvas>
+      </div>
+      <div class="viz-card">
+        <div class="viz-card-header">
+          <h3>GEODESIC PATHS</h3>
+        </div>
+        <canvas id="geodesicCanvas"></canvas>
+      </div>
+    </div>
+
+    <h2 class="section-title">KEY CONCEPTS</h2>
+
+    <div class="info-cards">
+      <div class="info-card">
+        <h4>Spacetime as Fabric</h4>
+        <p>Mass tells spacetime how to curve, and curved spacetime tells matter how to move. This is Einstein's revolutionary insight — gravity emerges from geometry, not from force.</p>
+        <span class="equation-inline">gμν = curvature tensor</span>
+      </div>
+      <div class="info-card">
+        <h4>Geodesics</h4>
+        <p>Free-falling particles follow geodesics — the straightest possible paths through curved spacetime. Light follows null geodesics, matter follows timelike geodesics.</p>
+        <span class="equation-inline">∇μgνβ = 0 (covariant const)</span>
+      </div>
+      <div class="info-card">
+        <h4>Schwarzschild Radius</h4>
+        <p>The critical radius where escape velocity equals the speed of light. For our Sun, Rs ≈ 3 km. For Earth, Rs ≈ 9 mm. Cross this boundary and even light cannot escape.</p>
+        <span class="equation-inline">Rs = 2GM/c²</span>
+      </div>
+      <div class="info-card">
+        <h4>Time Dilation</h4>
+        <p>Time flows slower in stronger gravitational fields. GPS satellites must account for +45 μs/day from weaker gravity and -7 μs/day from orbital velocity — net +38 μs/day.</p>
+        <span class="equation-inline">t₀ = t√(1-2GM/rc²)</span>
+      </div>
+      <div class="info-card">
+        <h4>Light Bending</h4>
+        <p>Starlight bends around massive objects. Einstein predicted 1.75 arcseconds for the Sun — twice Newton's prediction. Eddington's 1919 eclipse confirmed it spectacularly.</p>
+        <span class="equation-inline">α = 4GM/c²b</span>
+      </div>
+      <div class="info-card">
+        <h4>Frame Dragging</h4>
+        <p>Rotating mass drags spacetime around with it — the Lense-Thirring effect. Mars Global Surveyor and LAGEOS satellites have measured this spacetime twist around Earth.</p>
+        <span class="equation-inline">g₀t = -(4GJ/5rc³)</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing-section">
+    <blockquote>
+      "Space-time tells matter how to move; matter tells space-time how to curve."
+    </blockquote>
+    <cite>— John Archibald Wheeler</cite>
+  </section>
+
+  <script>
+    // Starfield background
+    const starCanvas = document.getElementById('starfield');
+    const starCtx = starCanvas.getContext('2d');
+    let stars = [];
+
+    function initStarfield() {
+      starCanvas.width = window.innerWidth;
+      starCanvas.height = window.innerHeight;
+      stars = [];
+      for (let i = 0; i < 200; i++) {
+        stars.push({
+          x: Math.random() * starCanvas.width,
+          y: Math.random() * starCanvas.height,
+          size: Math.random() * 1.5 + 0.5,
+          alpha: Math.random() * 0.5 + 0.3,
+          twinkle: Math.random() * 0.02
+        });
+      }
+    }
+
+    function drawStarfield(time) {
+      starCtx.fillStyle = '#050510';
+      starCtx.fillRect(0, 0, starCanvas.width, starCanvas.height);
+      stars.forEach(star => {
+        const flicker = Math.sin(time * star.twinkle) * 0.3 + 0.7;
+        starCtx.fillStyle = `rgba(180, 200, 255, ${star.alpha * flicker})`;
+        starCtx.beginPath();
+        starCtx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        starCtx.fill();
+      });
+    }
+
+    // Main visualization
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let state = {
+      mass: 10,
+      gridRes: 40,
+      mode: '3d',
+      waveAmp: 0.15,
+      speed: 3,
+      playing: true,
+      time: 0
+    };
+
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+    }
+
+    function drawGrid() {
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      ctx.fillStyle = '#050510';
+      ctx.fillRect(0, 0, w, h);
+
+      const centerX = w / 2;
+      const centerY = h / 2;
+      const gridSize = Math.min(w, h) * 0.8;
+      const n = state.gridRes;
+      const cellSize = gridSize / n;
+
+      const G = 6.674e-11;
+      const c = 3e8;
+      const M = state.mass * 1.989e30;
+      const Rs = (2 * G * M) / (c * c);
+      const scale = Rs / 10;
+      const maxWell = 80;
+
+      for (let i = 0; i <= n; i++) {
+        const x = (w - gridSize) / 2 + i * cellSize;
+
+        for (let j = 0; j <= n; j++) {
+          const y = (h - gridSize) / 2 + j * cellSize;
+
+          const dx = (x - centerX) / (gridSize / 2);
+          const dy = (y - centerY) / (gridSize / 2);
+          const r = Math.sqrt(dx * dx + dy * dy);
+
+          let z = 0;
+          let curvature = 0;
+
+          if (r > 0.1) {
+            const u = r * maxWell;
+            z = maxWell / u - 1;
+            z = Math.max(0, Math.min(maxWell, z));
+
+            curvature = (6 * Rs) / (r * r * r);
+          }
+
+          const well = z * state.waveAmp * 30;
+
+          if (state.mode === '3d') {
+            const alpha = 0.3 + curvature * 0.001;
+            const rCol = Math.floor(79 + (255 - 79) * Math.min(1, curvature * 0.01));
+            const gCol = Math.floor(195 + (109 - 195) * Math.min(1, curvature * 0.01));
+            const bCol = Math.floor(247 + (0 - 247) * Math.min(1, curvature * 0.01));
+            ctx.strokeStyle = `rgba(${rCol}, ${gCol}, ${bCol}, ${Math.min(1, alpha)})`;
+            ctx.lineWidth = 0.5;
+
+            const waveY = Math.sin(state.time * state.speed + r * 3) * 3;
+            const startY = y + well + waveY;
+            const endY = y + well + waveY + cellSize * 0.5;
+
+            ctx.beginPath();
+            ctx.moveTo(x, startY);
+            ctx.lineTo(x, endY);
+            ctx.stroke();
+
+            const waveX = Math.sin(state.time * state.speed * 0.7 + r * 2.5) * 2;
+            ctx.beginPath();
+            ctx.moveTo(x + waveX, y + well + waveY);
+            ctx.lineTo(x + cellSize + waveX, y + well + waveY);
+            ctx.stroke();
+          } else if (state.mode === 'warped') {
+            const distort = well * 3;
+            const alpha = 0.4 + Math.min(0.4, curvature * 0.005);
+            const wavePhase = Math.sin(state.time * state.speed + r * 4) * distort;
+
+            ctx.strokeStyle = `rgba(79, 195, 247, ${alpha})`;
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(x, y + wavePhase);
+            ctx.lineTo(x + cellSize, y + cellSize + wavePhase);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x + cellSize, y + wavePhase);
+            ctx.lineTo(x, y + cellSize + wavePhase);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Central mass visualization
+      const massRadius = 30 + state.mass * 0.5;
+      const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, massRadius * 2);
+      gradient.addColorStop(0, 'rgba(255, 109, 0, 0.9)');
+      gradient.addColorStop(0.3, 'rgba(255, 109, 0, 0.4)');
+      gradient.addColorStop(0.6, 'rgba(124, 77, 255, 0.2)');
+      gradient.addColorStop(1, 'rgba(79, 195, 247, 0)');
+
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, massRadius * 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Central dot
+      ctx.fillStyle = '#ff6d00';
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 6, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Event horizon ring
+      const horizonRadius = (Rs / scale) * 2;
+      ctx.strokeStyle = 'rgba(255, 109, 0, 0.6)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, horizonRadius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    function drawGeodesics() {
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      ctx.fillStyle = '#050510';
+      ctx.fillRect(0, 0, w, h);
+
+      const centerX = w / 2;
+      const centerY = h / 2;
+      const G = 6.674e-11;
+      const c = 3e8;
+      const M = state.mass * 1.989e30;
+      const Rs = (2 * G * M) / (c * c);
+      const scale = Rs / 10;
+      const maxWell = 80;
+
+      const particles = [];
+      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 8) {
+        for (let dist = 80; dist < 200; dist += 40) {
+          particles.push({ angle, dist, phase: Math.random() * Math.PI * 2 });
+        }
+      }
+
+      particles.forEach(p => {
+        ctx.strokeStyle = 'rgba(79, 195, 247, 0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+
+        let x = centerX + Math.cos(p.angle) * p.dist;
+        let y = centerY + Math.sin(p.angle) * p.dist;
+        ctx.moveTo(x, y);
+
+        for (let step = 0; step < 150; step++) {
+          const dx = x - centerX;
+          const dy = y - centerY;
+          const r = Math.sqrt(dx * dx + dy * dy);
+
+          if (r < 15) break;
+
+          const rNorm = r / maxWell;
+          const well = maxWell / rNorm - 1;
+          const forceMag = well * state.waveAmp * 0.5;
+
+          const attractiveX = (centerX - x) / r * forceMag;
+          const attractiveY = (centerY - y) / r * forceMag;
+
+          const tangentX = -dy / r;
+          const tangentY = dx / r;
+
+          const curveFactor = (6 * Rs) / (r * r);
+          const curvedTangentX = tangentX + curveFactor * tangentY * 0.01;
+          const curvedTangentY = tangentY - curveFactor * tangentX * 0.01;
+
+          const len = Math.sqrt(curvedTangentX * curvedTangentX + curvedTangentY * curvedTangentY);
+          const velX = curvedTangentX / len;
+          const velY = curvedTangentY / len;
+
+          const waveOffset = Math.sin(state.time * state.speed + p.phase + step * 0.1) * 0.5;
+          x += velX + waveOffset;
+          y += velY + waveOffset;
+
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      });
+
+      // Central mass
+      const massRadius = 25 + state.mass * 0.5;
+      const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, massRadius * 2);
+      gradient.addColorStop(0, 'rgba(255, 109, 0, 0.9)');
+      gradient.addColorStop(0.5, 'rgba(124, 77, 255, 0.3)');
+      gradient.addColorStop(1, 'rgba(79, 195, 247, 0)');
+
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, massRadius * 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#ff6d00';
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function updateStats() {
+      const G = 6.674e-11;
+      const c = 3e8;
+      const M = state.mass * 1.989e30;
+      const Rs = (2 * G * M) / (c * c);
+      const Rs_km = Rs / 1000;
+
+      const curvature = (6 * Rs) / Math.pow(state.mass * 1e10, 3);
+      const potential = -(G * M) / (state.mass * 1e10 * 1000);
+      const strain = 2 * Rs / (state.mass * 1e10 * 1000);
+
+      document.getElementById('statRs').textContent = Rs_km < 1 ? `${(Rs_km * 1000).toFixed(1)} m` : `${Rs_km.toFixed(2)} km`;
+      document.getElementById('statCurve').textContent = curvature < 0.001 ? curvature.toExponential(2) : curvature.toFixed(3);
+      document.getElementById('statPot').textContent = potential > -1e10 ? potential.toExponential(2) : potential.toExponential(2);
+      document.getElementById('statH').textContent = strain < 0.001 ? strain.toExponential(2) : strain.toFixed(4);
+    }
+
+    function animate(time) {
+      state.time = time * 0.001;
+      if (state.playing) {
+        if (state.mode === 'geodesics') {
+          drawGeodesics();
+        } else {
+          drawGrid();
+        }
+        updateStats();
+      }
+      drawStarfield(time);
+      requestAnimationFrame(animate);
+    }
+
+    // Grid 3D canvas
+    const grid3dCanvas = document.getElementById('grid3dCanvas');
+    const g3dCtx = grid3dCanvas.getContext('2d');
+
+    function initGrid3D() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = grid3dCanvas.getBoundingClientRect();
+      grid3dCanvas.width = rect.width * dpr;
+      grid3dCanvas.height = rect.height * dpr;
+      g3dCtx.scale(dpr, dpr);
+    }
+
+    function drawGrid3D(time) {
+      const rect = grid3dCanvas.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      g3dCtx.fillStyle = '#050510';
+      g3dCtx.fillRect(0, 0, w, h);
+
+      const centerX = w / 2;
+      const centerY = h / 2 + 30;
+      const gridSize = Math.min(w, h) * 0.85;
+      const n = 25;
+      const cellSize = gridSize / n;
+
+      const angle = time * 0.0005;
+      const perspective = 400;
+
+      for (let i = 0; i <= n; i++) {
+        for (let j = 0; j <= n; j++) {
+          const localX = (i - n / 2) * cellSize;
+          const localY = (j - n / 2) * cellSize;
+
+          const rotX = localX * Math.cos(angle) - localY * Math.sin(angle) * 0.3;
+          const rotY = localX * Math.sin(angle) + localY * Math.cos(angle) * 0.3 + localY * 0.7;
+
+          const scale = perspective / (perspective + rotY);
+          const sx = centerX + rotX * scale;
+          const sy = centerY - rotY * scale * 0.5;
+
+          const r2 = (localX * localX + localY * localY) / (gridSize / 2);
+          const depth = scale * (1 - r2 * 0.3);
+          const alpha = Math.max(0.1, Math.min(0.8, depth));
+
+          const wave = Math.sin(time * 0.003 + i * 0.3 + j * 0.3 + r2 * 5) * 5 * scale;
+          const sy2 = sy + wave;
+
+          const col = `rgba(79, 195, 247, ${alpha})`;
+          g3dCtx.strokeStyle = col;
+          g3dCtx.lineWidth = 0.5;
+          g3dCtx.beginPath();
+          g3dCtx.moveTo(sx, sy2);
+          g3dCtx.lineTo(sx + cellSize * scale, sy2);
+          g3dCtx.stroke();
+          g3dCtx.beginPath();
+          g3dCtx.moveTo(sx, sy2);
+          g3dCtx.lineTo(sx, sy2 + cellSize * scale * 0.5);
+          g3dCtx.stroke();
+        }
+      }
+    }
+
+    // Geodesic canvas
+    const geodesicCanvas = document.getElementById('geodesicCanvas');
+    const geoCtx = geodesicCanvas.getContext('2d');
+
+    function initGeodesic() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = geodesicCanvas.getBoundingClientRect();
+      geodesicCanvas.width = rect.width * dpr;
+      geodesicCanvas.height = rect.height * dpr;
+      geoCtx.scale(dpr, dpr);
+    }
+
+    function drawGeodesicViz(time) {
+      const rect = geodesicCanvas.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      geoCtx.fillStyle = '#050510';
+      geoCtx.fillRect(0, 0, w, h);
+
+      const centerX = w / 2;
+      const centerY = h / 2;
+
+      // Central well
+      for (let r = 120; r > 0; r -= 10) {
+        const alpha = (120 - r) / 120 * 0.3;
+        const hue = 200 + (120 - r) * 0.5;
+        geoCtx.fillStyle = `hsla(${hue}, 70%, 60%, ${alpha})`;
+        geoCtx.beginPath();
+        geoCtx.arc(centerX, centerY, r, 0, Math.PI * 2);
+        geoCtx.fill();
+      }
+
+      // Geodesic paths
+      const paths = 12;
+      for (let p = 0; p < paths; p++) {
+        const startAngle = (p / paths) * Math.PI * 2 + time * 0.001;
+        const startDist = 100 + Math.sin(time * 0.002 + p) * 20;
+
+        geoCtx.strokeStyle = `rgba(79, 195, 247, 0.5)`;
+        geoCtx.lineWidth = 1;
+        geoCtx.beginPath();
+
+        let x = centerX + Math.cos(startAngle) * startDist;
+        let y = centerY + Math.sin(startAngle) * startDist;
+        geoCtx.moveTo(x, y);
+
+        let angle = startAngle;
+        let dist = startDist;
+
+        for (let step = 0; step < 200; step++) {
+          const bendAngle = angle + Math.PI / 2 + Math.sin(time * 0.002 + p) * 0.2;
+          const bendAmount = 50 / (dist * 0.1 + 1);
+
+          angle += Math.cos(bendAngle) * bendAmount * 0.02;
+          dist -= 0.5;
+
+          x = centerX + Math.cos(angle) * dist;
+          y = centerY + Math.sin(angle) * dist;
+
+          if (dist < 10) break;
+          geoCtx.lineTo(x, y);
+        }
+        geoCtx.stroke();
+      }
+
+      // Center mass
+      const grad = geoCtx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 40);
+      grad.addColorStop(0, 'rgba(255, 109, 0, 0.8)');
+      grad.addColorStop(0.5, 'rgba(124, 77, 255, 0.4)');
+      grad.addColorStop(1, 'rgba(79, 195, 247, 0)');
+      geoCtx.fillStyle = grad;
+      geoCtx.beginPath();
+      geoCtx.arc(centerX, centerY, 40, 0, Math.PI * 2);
+      geoCtx.fill();
+    }
+
+    let geoTime = 0;
+    function animateSecondary() {
+      geoTime++;
+      drawGrid3D(geoTime);
+      drawGeodesicViz(geoTime);
+      requestAnimationFrame(animateSecondary);
+    }
+
+    // Event listeners
+    document.getElementById('massSlider').addEventListener('input', e => {
+      state.mass = parseFloat(e.target.value);
+      document.getElementById('massValue').textContent = `${state.mass} M☉`;
+    });
+
+    document.getElementById('gridSlider').addEventListener('input', e => {
+      state.gridRes = parseInt(e.target.value);
+      document.getElementById('gridValue').textContent = `${state.gridRes} × ${state.gridRes}`;
+    });
+
+    document.getElementById('waveSlider').addEventListener('input', e => {
+      state.waveAmp = parseInt(e.target.value) / 100;
+      document.getElementById('waveValue').textContent = `${e.target.value}%`;
+    });
+
+    document.getElementById('speedSlider').addEventListener('input', e => {
+      state.speed = parseFloat(e.target.value);
+      document.getElementById('speedValue').textContent = parseFloat(e.target.value).toFixed(1);
+    });
+
+    document.querySelectorAll('.btn[data-mode]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn[data-mode]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.mode = btn.dataset.mode;
+      });
+    });
+
+    document.getElementById('playBtn').addEventListener('click', () => {
+      state.playing = !state.playing;
+      document.getElementById('playBtn').textContent = state.playing ? 'PAUSE' : 'PLAY';
+      document.getElementById('playBtn').classList.toggle('active', state.playing);
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      state.time = 0;
+    });
+
+    window.addEventListener('scroll', () => {
+      const scrollTop = document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollTop / scrollHeight;
+      document.getElementById('scrollProgress').style.transform = `scaleX(${progress})`;
+    });
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      initStarfield();
+    });
+
+    // Initialize
+    resizeCanvas();
+    initStarfield();
+    initGrid3D();
+    initGeodesic();
+    requestAnimationFrame(animate);
+    animateSecondary();
+  </script>
+</body>
+</html>

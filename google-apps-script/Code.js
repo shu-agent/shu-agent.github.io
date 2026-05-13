@@ -28,19 +28,22 @@ function doPost(e) {
   }
 }
 
-// 手紙一覧取得用（GET）
+// 手紙一覧取得用（GET）- 過去1時間分のみ
 function doGet(e) {
   try {
     const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('letters');
     const data = sheet.getDataRange().getValues();
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
-    const letters = data.slice(1).map(row => ({
-      timestamp: row[0],
-      recipient: row[1],
-      sender: row[2],
-      message: row[3],
-      status: row[4]
-    }));
+    const letters = data.slice(1)
+      .filter(row => new Date(row[0]) > oneHourAgo)
+      .map(row => ({
+        timestamp: row[0],
+        recipient: row[1],
+        sender: row[2],
+        message: row[3],
+        status: row[4]
+      }));
 
     return ContentService
       .createTextOutput(JSON.stringify({ letters }))
