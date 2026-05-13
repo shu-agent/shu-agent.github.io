@@ -1,0 +1,2294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tests of General Relativity — From Eddington to Event Horizon</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #020015;
+      --bg-space: #0a0a1a;
+      --bg-card: rgba(15, 20, 45, 0.9);
+      --cyan: #00d4ff;
+      --cyan-glow: rgba(0, 212, 255, 0.3);
+      --purple: #9945ff;
+      --purple-glow: rgba(153, 69, 255, 0.3);
+      --gold: #ffd700;
+      --gold-dim: #b8960f;
+      --pink: #ff6b9d;
+      --green: #00ff88;
+      --text: #e8eef5;
+      --text-dim: #8892aa;
+      --border: rgba(0, 212, 255, 0.2);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    #cosmos {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+    }
+
+    .stars {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at center, #0a0a2e 0%, #020015 70%);
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: white;
+      animation: twinkle var(--duration) ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: var(--base-opacity); transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 100px 20px 80px;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 800px; height: 600px;
+      background: radial-gradient(ellipse, var(--purple-glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      padding: 8px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--cyan);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--cyan) 0%, var(--purple) 50%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      color: var(--text-dim);
+      max-width: 700px;
+      margin: 0 auto 40px;
+      font-weight: 300;
+    }
+
+    .hero-timeline-preview {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin-top: 50px;
+    }
+
+    .timeline-point {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .timeline-dot {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 20px var(--cyan-glow);
+      position: relative;
+    }
+
+    .timeline-dot::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: 100%;
+      width: 30px; height: 2px;
+      background: linear-gradient(90deg, var(--cyan), transparent);
+    }
+
+    .timeline-point:last-child .timeline-dot::after {
+      display: none;
+    }
+
+    .timeline-year {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--gold);
+    }
+
+    .timeline-label {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-align: center;
+      max-width: 100px;
+    }
+
+    /* Canvas Sections */
+    .visualization-section {
+      padding: 60px 20px;
+    }
+
+    .canvas-container {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin: 30px auto;
+      max-width: 1000px;
+    }
+
+    .canvas-container canvas {
+      display: block;
+      width: 100%;
+      height: 500px;
+    }
+
+    .canvas-title {
+      position: absolute;
+      top: 20px; left: 20px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      background: rgba(2, 0, 21, 0.8);
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .canvas-legend {
+      position: absolute;
+      bottom: 20px; right: 20px;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      background: rgba(2, 0, 21, 0.8);
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      max-width: 250px;
+    }
+
+    .canvas-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0;
+    }
+
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+
+    /* Controls */
+    .controls-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 25px;
+      margin: 30px auto;
+      max-width: 1000px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .control-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--gold);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      background: var(--gold);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--gold);
+    }
+
+    /* Sections */
+    .section {
+      padding: 60px 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .section-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 4rem;
+      font-weight: 700;
+      color: var(--purple);
+      opacity: 0.3;
+      line-height: 1;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-intro {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      margin-bottom: 40px;
+      max-width: 900px;
+    }
+
+    /* Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 30px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 212, 255, 0.1);
+      border-color: var(--cyan);
+    }
+
+    .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .card-content {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    .card-equation {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--gold);
+      background: rgba(255, 215, 0, 0.1);
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      border-left: 3px solid var(--gold);
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 40px;
+      margin: 40px 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 10px; top: 0;
+      width: 2px; height: 100%;
+      background: linear-gradient(180deg, var(--cyan), var(--purple), var(--gold));
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 40px;
+      padding: 25px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.3s;
+    }
+
+    .timeline-item:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 0 30px var(--cyan-glow);
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -34px; top: 30px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    .timeline-year {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+
+    .timeline-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .timeline-desc {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+    }
+
+    .timeline-result {
+      display: inline-block;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--green);
+      background: rgba(0, 255, 136, 0.1);
+      padding: 6px 12px;
+      border-radius: 20px;
+      margin-top: 12px;
+      border: 1px solid rgba(0, 255, 136, 0.3);
+    }
+
+    /* Tabbed Content */
+    .tabs-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin: 30px auto;
+      max-width: 1000px;
+    }
+
+    .tabs-header {
+      display: flex;
+      background: rgba(0, 0, 0, 0.3);
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      padding: 15px 25px;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab-btn:hover {
+      color: var(--cyan);
+      background: rgba(0, 212, 255, 0.1);
+    }
+
+    .tab-btn.active {
+      color: var(--cyan);
+      border-bottom-color: var(--cyan);
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .tab-content {
+      padding: 30px;
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .tab-content h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      color: var(--text);
+      margin-bottom: 15px;
+    }
+
+    .tab-content p {
+      color: var(--text-dim);
+      margin-bottom: 15px;
+      line-height: 1.8;
+    }
+
+    /* Comparison Table */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comparison-table th {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      background: rgba(0, 212, 255, 0.05);
+    }
+
+    .comparison-table td {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+    }
+
+    .comparison-table tr:hover td {
+      background: rgba(0, 212, 255, 0.03);
+    }
+
+    .prediction-type {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-family: 'Space Mono', monospace;
+      text-transform: uppercase;
+    }
+
+    .prediction-classic {
+      background: rgba(0, 212, 255, 0.2);
+      color: var(--cyan);
+    }
+
+    .prediction-gr {
+      background: rgba(153, 69, 255, 0.2);
+      color: var(--purple);
+    }
+
+    .prediction-quantum {
+      background: rgba(255, 215, 0, 0.2);
+      color: var(--gold);
+    }
+
+    /* Interactive Explorer */
+    .explorer-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      margin: 40px auto;
+      max-width: 1100px;
+    }
+
+    .explorer-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      text-align: center;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .explorer-subtitle {
+      text-align: center;
+      color: var(--text-dim);
+      margin-bottom: 40px;
+    }
+
+    .explorer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 800px) {
+      .explorer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .explorer-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    .slider-group {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .slider-name {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--cyan);
+      text-transform: uppercase;
+    }
+
+    .slider-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--gold);
+    }
+
+    .explorer-canvas {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .explorer-canvas canvas {
+      display: block;
+      width: 100%;
+      height: 400px;
+    }
+
+    .prediction-display {
+      margin-top: 30px;
+      padding: 25px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .prediction-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 15px;
+    }
+
+    .prediction-results {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .prediction-item {
+      text-align: center;
+      padding: 15px;
+      background: var(--bg-card);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .prediction-label {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .prediction-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.3rem;
+      color: var(--green);
+    }
+
+    .prediction-deviation {
+      font-size: 0.8rem;
+      margin-top: 5px;
+    }
+
+    .deviation-pass { color: var(--green); }
+    .deviation-warn { color: var(--gold); }
+    .deviation-fail { color: var(--pink); }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 60px 20px;
+      border-top: 1px solid var(--border);
+      margin-top: 80px;
+    }
+
+    .footer-quote {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-style: italic;
+      color: var(--text-dim);
+      max-width: 700px;
+      margin: 0 auto 20px;
+    }
+
+    .footer-attribution {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--purple);
+    }
+
+    /* Navigation Dots */
+    .nav-dots {
+      position: fixed;
+      right: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 100;
+    }
+
+    .nav-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .nav-dot:hover,
+    .nav-dot.active {
+      background: var(--cyan);
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    .nav-dot::before {
+      content: attr(data-label);
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .nav-dot:hover::before {
+      opacity: 1;
+    }
+
+    /* Animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px var(--cyan-glow); }
+      50% { box-shadow: 0 0 40px var(--cyan-glow), 0 0 60px var(--purple-glow); }
+    }
+
+    @keyframes orbit {
+      0% { transform: rotate(0deg) translateX(var(--orbit-radius)) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(var(--orbit-radius)) rotate(-360deg); }
+    }
+
+    .animate-float {
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .animate-pulse {
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-timeline-preview {
+        gap: 15px;
+      }
+
+      .timeline-point .timeline-dot::after {
+        width: 15px;
+      }
+
+      .nav-dots {
+        display: none;
+      }
+
+      .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .section-number {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="cosmos"></div>
+
+  <nav class="nav-dots">
+    <div class="nav-dot active" data-label="Overview" onclick="scrollToSection('overview')"></div>
+    <div class="nav-dot" data-label="Classical Tests" onclick="scrollToSection('classical')"></div>
+    <div class="nav-dot" data-label="Modern Tests" onclick="scrollToSection('modern')"></div>
+    <div class="nav-dot" data-label="Solar System" onclick="scrollToSection('solar')"></div>
+    <div class="nav-dot" data-label="Pulsar Tests" onclick="scrollToSection('pulsar')"></div>
+    <div class="nav-dot" data-label="Gravitational Waves" onclick="scrollToSection('gravity-waves')"></div>
+    <div class="nav-dot" data-label="Explorer" onclick="scrollToSection('explorer')"></div>
+  </nav>
+
+  <div class="content">
+    <!-- Hero Section -->
+    <section class="hero" id="overview">
+      <span class="hero-badge">Physics of Spacetime</span>
+      <h1>Tests of General Relativity</h1>
+      <p class="hero-subtitle">
+        A century of precision experiments — from Eddington's 1919 eclipse to the Event Horizon Telescope's shadow of M87*.
+        How do we verify Einstein's geometry of spacetime against the unforgiving tribunal of experiment?
+      </p>
+
+      <div class="hero-timeline-preview">
+        <div class="timeline-point">
+          <div class="timeline-dot"></div>
+          <span class="timeline-year">1919</span>
+          <span class="timeline-label">Eddington's Eclipse</span>
+        </div>
+        <div class="timeline-point">
+          <div class="timeline-dot"></div>
+          <span class="timeline-year">1975</span>
+          <span class="timeline-label">Hafele-Keating</span>
+        </div>
+        <div class="timeline-point">
+          <div class="timeline-dot"></div>
+          <span class="timeline-year">1979</span>
+          <span class="timeline-label">Binary Pulsar</span>
+        </div>
+        <div class="timeline-point">
+          <div class="timeline-dot"></div>
+          <span class="timeline-year">2015</span>
+          <span class="timeline-label">LIGO Detection</span>
+        </div>
+        <div class="timeline-point">
+          <div class="timeline-dot"></div>
+          <span class="timeline-year">2019</span>
+          <span class="timeline-label">EHT Image</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hero Canvas: Spacetime Curvature Visualization -->
+    <section class="visualization-section">
+      <div class="canvas-container">
+        <canvas id="spacetimeCanvas"></canvas>
+        <span class="canvas-title">Gravitational Spacetime Diagram</span>
+        <div class="canvas-legend">
+          <div class="canvas-legend-item">
+            <div class="legend-dot" style="background: #00d4ff;"></div>
+            <span>Geodesic paths</span>
+          </div>
+          <div class="canvas-legend-item">
+            <div class="legend-dot" style="background: #9945ff;"></div>
+            <span>Spacetime curvature</span>
+          </div>
+          <div class="canvas-legend-item">
+            <div class="legend-dot" style="background: #ffd700;"></div>
+            <span>Mass source</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Classical Tests Section -->
+    <section class="section" id="classical">
+      <div class="section-header">
+        <span class="section-number">01</span>
+        <h2 class="section-title">The Three Classical Tests</h2>
+      </div>
+      <p class="section-intro">
+        Einstein identified three definitive tests that would distinguish GR from Newtonian gravity: the perihelion precession of Mercury,
+        the deflection of starlight by the Sun, and the gravitational redshift of light. These remain the foundational experiments ofrelativistic gravity.
+      </p>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">☿</div>
+          <h3 class="card-title">Perihelion Precession</h3>
+          <p class="card-content">
+            Mercury's orbit precesses 43 arcseconds per century more than Newtonian mechanics predicts — a discrepancy noticed by Urbain Le Verrier in 1859.
+            Einstein's equations naturally produce this extra precession as a geometric effect of spacetime curvature.
+          </p>
+          <div class="card-equation">Δω = 6πGM/(c²a(1-e²)) per orbit</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">☀</div>
+          <h3 class="card-title">Light Deflection</h3>
+          <p class="card-content">
+            Einstein predicted starlight deflects by 1.75 arcseconds when grazing the Sun — exactly twice the Newtonian prediction (which only accounts for the spatial curvature of light's path, missing the time dilation effect).
+            This was confirmed during the 1919 solar eclipse.
+          </p>
+          <div class="card-equation">α = 4GM/(c²b) = 1.75″ at solar limb</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">▲</div>
+          <h3 class="card-title">Gravitational Redshift</h3>
+          <p class="card-content">
+            Light climbing out of a gravitational well loses energy, stretching to longer (redder) wavelengths. The Pound-Rebka experiment (1959) at Harvard Tower
+            measured this directly using the Mossbauer effect, confirming GR to within 10%.
+          </p>
+          <div class="card-equation">z = Δλ/λ = ΔU/c² = gh/c²</div>
+        </div>
+      </div>
+
+      <!-- Interactive Deflection Simulator -->
+      <div class="tabs-container">
+        <div class="tabs-header">
+          <button class="tab-btn active" onclick="showTab('deflection')">Light Deflection Simulator</button>
+          <button class="tab-btn" onclick="showTab('precession')">Perihelion Animation</button>
+          <button class="tab-btn" onclick="showTab('redshift')">Redshift Explorer</button>
+        </div>
+
+        <div class="tab-content active" id="deflection">
+          <h4>Light Ray Bending Around Massive Body</h4>
+          <canvas id="deflectionCanvas" style="width:100%;height:350px;background:#000;border-radius:8px;margin:20px 0;"></canvas>
+          <p>
+            Drag the slider to adjust the impact parameter b (closest approach to mass center). Notice how deflection angle α → ∞ as b → 0,
+            but real event horizons prevent b < 3GM/c² for light (the photon sphere). This animation compares GR prediction (purple) with
+            Newtonian prediction (cyan) — the difference is the temporal component of spacetime curvature.
+          </p>
+          <div class="controls-panel" style="margin:20px 0;">
+            <div class="control-group">
+              <label class="control-label">Impact Parameter (b/R_s)</label>
+              <input type="range" id="impactParam" min="2" max="20" value="10" step="0.5">
+              <span class="control-value" id="impactValue">10.0</span>
+            </div>
+            <div class="control-group">
+              <label class="control-label">Deflection Angle (arcsec)</label>
+              <span class="control-value" id="deflectionAngle">0.87</span>
+            </div>
+            <div class="control-group">
+              <label class="control-label">GR vs Newton Ratio</label>
+              <span class="control-value" id="grRatio">2.00×</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="precession">
+          <h4>Orbital Precession Visualization</h4>
+          <canvas id="precessionCanvas" style="width:100%;height:350px;background:#000;border-radius:8px;margin:20px 0;"></canvas>
+          <p>
+            In Newtonian gravity, a bound orbit is a closed ellipse. In GR, the ellipse axis rotates slowly with each orbit —
+            this is not a physical force but the geometry of curved spacetime causing the orbit to "not close." The observed
+            precession of Mercury (43"/century) matches Einstein's calculation exactly.
+          </p>
+        </div>
+
+        <div class="tab-content" id="redshift">
+          <h4>Gravitational Redshift Mechanism</h4>
+          <canvas id="redshiftCanvas" style="width:100%;height:350px;background:#000;border-radius:8px;margin:20px 0;"></canvas>
+          <p>
+            Consider a photon emitted at height h with frequency f. Conservation of energy requires E = hf to be conserved.
+            At higher altitude (lower gravitational potential), the photon has gained potential energy but must maintain its
+            quantum of energy — therefore its frequency decreases, wavelength stretches. The Pound-Rebka experiment
+            used gamma rays and the Mossbauer effect to measure this directly.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modern Precision Tests -->
+    <section class="section" id="modern">
+      <div class="section-header">
+        <span class="section-number">02</span>
+        <h2 class="section-title">Modern Precision Tests</h2>
+      </div>
+      <p class="section-intro">
+        Since the 1970s, technological advances have enabled tests of GR with unprecedented precision. Atomic clocks, laser ranging,
+        and pulsar timing have pushed parameter constraints by orders of magnitude, testing the theory in regimes Einstein himself never imagined.
+      </p>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">⏱</div>
+          <h3 class="card-title">Gravity Probe B</h3>
+          <p class="card-content">
+            Launched in 2004, GP-B used four gyroscopes aligned with a distant guide star to measure two relativistic frame-dragging effects:
+            geodetic precession (1,806 arcsec/yr predicted) and lens-thirring precession (39 marcsec/yr predicted).
+            Results confirmed GR to within 0.3%.
+          </p>
+          <div class="card-equation">Ω_GP-B = 6,314.4 ± 26.6 mas/yr (predicted: 6,314.6)</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🕰</div>
+          <h3 class="card-title">Hafele-Keating Experiment</h3>
+          <p class="card-content">
+            In 1971, atomic clocks were flown around the world on commercial jets. Eastward circumnavigation showed a -59 ns time loss;
+            westward showed +273 ns gain. These matched GR predictions (gravitational time dilation + Kinematic time dilation) to within experimental error (~10%).
+            This was the first direct confirmation that moving clocks tick at different rates.
+          </p>
+          <div class="card-equation">Δt/t = ΔU/c² - v²/(2c²) + (gR²)/(2c²R)</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">📡</div>
+          <h3 class="card-title">Lunar Laser Ranging</h3>
+          <p class="card-content">
+            Since 1969, Apollo astronauts and Soviet Lunokhod rovers left retroreflectors on the Moon. Laser ranging measures Earth-Moon distance to ~1 mm precision —
+            a 0.0000000001% measurement! This constrains the strong equivalence principle, gravitational coupling constants,
+            and even the possibility of gravitational wave emission.
+          </p>
+          <div class="card-equation">|η| < 1.4 × 10⁻⁴ (Nordtvedt parameter)</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🌀</div>
+          <h3 class="card-title">Frame Dragging (LAGEOS)</h3>
+          <p class="card-content">
+            Massive rotating bodies drag spacetime around them — the Lense-Thirring effect. NASA's LAGEOS satellites (1976, 1992)
+            use reflective spheres tracked by satellite laser ranging. After removing gravitational perturbations, the measured
+            frame-dragging rate matches GR predictions to ~10% precision.
+          </p>
+          <div class="card-equation">Ω_LT = 30.7 mas/yr × (J/J_Earth)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Solar System Tests -->
+    <section class="section" id="solar">
+      <div class="section-header">
+        <span class="section-number">03</span>
+        <h2 class="section-title">Solar System Benchmarks</h2>
+      </div>
+      <p class="section-intro">
+        Our solar system serves as a precision laboratory. Radio tracking of spacecraft, planetary radar, and spacecraft flybys
+        provide micro-arcsecond astrometry that tests GR in the weak-field, slow-motion regime.
+      </p>
+
+      <div class="tabs-container">
+        <div class="tabs-header">
+          <button class="tab-btn active" onclick="showSolarTab('cassini')">Cassini Mission</button>
+          <button class="tab-btn" onclick="showSolarTab('bending')">Light Bending</button>
+          <button class="tab-btn" onclick="showSolarTab('ppn')">PPN Parameters</button>
+        </div>
+
+        <div class="tab-content active" id="cassini">
+          <h4>Cassini-Huygens Radio Science</h4>
+          <p>
+            The Cassini mission to Saturn enabled extraordinary tests of GR. By tracking radio waves between Earth and the spacecraft
+            as they passed behind the Sun, researchers measured the Shapiro delay — the additional time delay caused by the Sun's
+            gravitational curvature of spacetime.
+          </p>
+          <p>
+            Results from 2003-2006 constrained the PPN parameter γ to γ - 1 = (2.1 ± 2.3) × 10⁻⁵ — a 0.002% deviation from unity.
+            This is among the most precise tests of GR ever performed, confirming Einstein's prediction that mass curves spacetime
+            (γ = 1 in GR, γ = ½ in Brans-Dicke theory).
+          </p>
+          <div class="card-equation">γ_Cassini = 1 + (2.1 ± 2.3) × 10⁻⁵</div>
+        </div>
+
+        <div class="tab-content" id="bending">
+          <h4>Global Light Bending Measurements</h4>
+          <p>
+            Combining 2,000+ VLBI observations from 1970-2015, the IAU and IERS measure light deflection by the Sun with microarcsecond precision.
+            The total deflection at the solar limb is 1,703 arcseconds — nearly half a degree of apparent star displacement!
+          </p>
+          <p>
+            Interestingly, the gravitational contribution is 1,701 arcseconds (from spacetime curvature) while the deflecting effect of the Sun's
+            mass-energy moving through spacetime adds another ~4 microarcseconds (a frame-dragging correction detectable only with VLBI).
+          </p>
+          <div class="card-equation">α_total = (1+γ) × 1.703 arcsec at solar limb</div>
+        </div>
+
+        <div class="tab-content" id="ppn">
+          <h4>Parametrized Post-Newtonian Framework</h4>
+          <p>
+            The PPN formalism captures deviations from GR in weak-field, slow-motion situations. Ten parameters (α₁ through α₃, ξ, α₃, ζ₁ through ζ₅)
+            measure specific types of potential violations. In GR, all vanish: α₁ = α₂ = ... = ζ₁ = ... = 0.
+          </p>
+          <table class="comparison-table">
+            <tr>
+              <th>Parameter</th>
+              <th>Meaning</th>
+              <th>GR Value</th>
+              <th>Best Constraint</th>
+            </tr>
+            <tr>
+              <td>γ</td>
+              <td>Space curvature per unit mass</td>
+              <td>1</td>
+              <td>2.1 × 10⁻⁵</td>
+            </tr>
+            <tr>
+              <td>β</td>
+              <td>Nonlinearity in gravity</td>
+              <td>1</td>
+              <td>2 × 10⁻⁴</td>
+            </tr>
+            <tr>
+              <td>ξ</td>
+              <td>Preferred-frame effect</td>
+              <td>0</td>
+              <td>4 × 10⁻⁴</td>
+            </tr>
+            <tr>
+              <td>α₁</td>
+              <td>Violates momentum conservation</td>
+              <td>0</td>
+              <td>10⁻⁴</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Binary Pulsar Tests -->
+    <section class="section" id="pulsar">
+      <div class="section-header">
+        <span class="section-number">04</span>
+        <h2 class="card-title">Binary Pulsar Tests</h2>
+      </div>
+      <p class="section-intro">
+        Discovered in 1974 by Russell Hulse and Joseph Taylor, PSR B1913+16 — the Hulse-Taylor binary pulsar — provided the first
+        indirect evidence for gravitational waves and became a precision laboratory for testing GR in the strong-field regime.
+      </p>
+
+      <!-- Binary Pulsar Canvas -->
+      <div class="canvas-container">
+        <canvas id="binaryPulsarCanvas"></canvas>
+        <span class="canvas-title">Hulse-Taylor Binary Pulsar System</span>
+        <div class="canvas-legend">
+          <div class="canvas-legend-item">
+            <div class="legend-dot" style="background: #00ff88;"></div>
+            <span>Pulsar (22ms recycling)</span>
+          </div>
+          <div class="canvas-legend-item">
+            <div class="legend-dot" style="background: #ffd700;"></div>
+            <span>Companion neutron star</span>
+          </div>
+          <div class="canvas-legend-item">
+            <div class="legend-dot" style="background: #9945ff;"></div>
+            <span>Gravitational wave emission</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">📏</div>
+          <h3 class="card-title">Orbital Decay</h3>
+          <p class="card-content">
+            GR predicts that orbiting bodies radiate gravitational waves, causing the orbit to spiral inward.
+            The Hulse-Taylor binary's orbital period decreases by 0.076 ms per orbit — matching GR's prediction
+            of 0.0755 ms per orbit to 0.03% precision. This was the first confirmed energy loss via gravitational radiation.
+          </p>
+          <div class="card-equation">dP_b/dt = - (192π/5)(G⁷/⁵/c⁵)(m₁m₂(m₁+m₂)/a⁵) × (1+73/24 e² + 37/96 e⁴)</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🕹</div>
+          <h3 class="card-title">Periastron Advance</h3>
+          <p class="card-content">
+            The binary orbit shows relativistic periastron advance of 4.2 degrees per year (compared to Mercury's 43 arcseconds per century).
+            This is because the pulsar system is 1,000× closer and 10× more massive than the Sun-Mercury system.
+            The measured advance matches the GR prediction for the observed masses.
+          </p>
+          <div class="card-equation">ω̇ = 6πG(m₁+m₂)/(c²a(1-e²)) per orbit</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🎯</div>
+          <h3 class="card-title">Einstein Delay (Einstein Delay)</h3>
+          <p class="card-content">
+            The "Einstein delay" is a combined relativistic effect: the varying distance between pulsar and Earth
+            causes light travel time variations, plus gravitational time dilation from the companion's gravity.
+            This Römer delay plus Einstein delay constrains the system's inclination and masses.
+          </p>
+          <div class="card-equation">Δ_einstein = γ sin i × sin(ω + ω̇T)</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">📐</div>
+          <h3 class="card-title">Schwarzschild Kicks</h3>
+          <p class="card-content">
+            The companion receives a "kick" velocity from asymmetric gravitational wave emission, measurable as
+            proper motion of the binary. Combined with pulsar timing data, this constrains the mass-energy distribution
+            during the supernova that created the pulsar, testing gravitational wave emission asymmetry predictions.
+          </p>
+          <div class="card-equation">v_kick < 200 km/s from GW asymmetry</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gravitational Wave Tests -->
+    <section class="section" id="gravity-waves">
+      <div class="section-header">
+        <span class="section-number">05</span>
+        <h2 class="section-title">Gravitational Wave Propagation</h2>
+      </div>
+      <p class="section-intro">
+        LIGO's 2015 detection opened a new window on GR. Gravitational waves propagate at c (constrained to |c - c_light|/c < 10⁻⁷ by GW170817).
+        But GR makes specific predictions about waveform phasing, polarization content, and mode amplitudes — all testable with advanced detector data.
+      </p>
+
+      <!-- GW Canvas -->
+      <div class="canvas-container">
+        <canvas id="gravWaveCanvas"></canvas>
+        <span class="canvas-title">Gravitational Wave Polarization Modes</span>
+        <div class="canvas-legend">
+          <div class="canvas-legend-item">
+            <div class="legend-dot" style="background: #00d4ff;"></div>
+            <span>Plus (×) polarization</span>
+          </div>
+          <div class="canvas-legend-item">
+            <div class="legend-dot" style="background: #ff6b9d;"></div>
+            <span>Cross (⊗) polarization</span>
+          </div>
+          <div class="canvas-legend-item">
+            <div class="legend-dot" style="background: #9945ff;"></div>
+            <span>Breathing modes (scalar)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">🌊</div>
+          <h3 class="card-title">Speed of Gravity</h3>
+          <p class="card-content">
+            GW170817 (binary neutron star merger) and its electromagnetic counterpart (GRB 170817A) arrived within 1.74 seconds after
+            130 million light-years. This constrains c_gw/c_light = 1 + (-0.3 to +1.3) × 10⁻¹⁵ — essentially perfect agreement with GR's prediction of c_gw = c.
+          </p>
+          <div class="card-equation">|c_gw/c - 1| < 10⁻⁷ from GW170817</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">📐</div>
+          <h3 class="card-title">Polarization Content</h3>
+          <p class="card-content">
+            GR predicts only two tensor polarization states (plus and cross). Alternative theories allow up to six modes:
+            two scalar (breathing, longitudinal) and two vector modes. LIGO/Virgo's null-stream analyses constrain
+            non-GR polarizations to < 0.4% of the total signal power.
+          </p>
+          <div class="card-equation">|h_scalar| < 0.004 |h_tensor| combined</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🎵</div>
+          <h3 class="card-title">Waveform Template Tests</h3>
+          <p class="card-content">
+            GR predicts specific relationships between gravitational wave modes: the dominant 22 mode (ℓ=2, m=2)
+            must dominate, with specific subdominant mode amplitudes predicted by the inspiral-merger-ringdown
+            consistency test. Deviations would indicate modified gravity in the strong-field regime.
+          </p>
+          <div class="card-equation">|h_22| >> |h_21|, |h_33| from GR</div>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🔗</div>
+          <h3 class="card-title">Massive Graviton Dispersion</h3>
+          <p class="card-content">
+            If the graviton had mass λ_g > 0, gravitational waves would exhibit dispersion — different frequencies
+            traveling at slightly different speeds. LIGO's Bayesian analysis of GW150914 constrains the Compton
+            wavelength to λ_g > 10¹³ km (10¹⁶ light-years!), essentially ruling out any observable massive graviton.
+          </p>
+          <div class="card-equation">λ_g > 10¹³ km from dispersion limits</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive GR Explorer -->
+    <section class="section" id="explorer">
+      <div class="explorer-container">
+        <h2 class="explorer-title">General Relativity Parameter Explorer</h2>
+        <p class="explorer-subtitle">Adjust parameters and see predicted observable effects — compare GR with alternative theories</p>
+
+        <div class="explorer-grid">
+          <div class="explorer-controls">
+            <div class="slider-group">
+              <div class="slider-header">
+                <span class="slider-name">PPN γ (space curvature)</span>
+                <span class="slider-value" id="gammaValue">1.00000</span>
+              </div>
+              <input type="range" id="gammaSlider" min="0.9" max="1.1" value="1.0" step="0.00001">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <span class="slider-name">PPN β (nonlinearity)</span>
+                <span class="slider-value" id="betaValue">1.00000</span>
+              </div>
+              <input type="range" id="betaSlider" min="0.9" max="1.1" value="1.0" step="0.00001">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <span class="slider-name">Orbital Distance (AU)</span>
+                <span class="slider-value" id="orbitValue">1.000</span>
+              </div>
+              <input type="range" id="orbitSlider" min="0.1" max="10" value="1.0" step="0.01">
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-header">
+                <span class="slider-name">Central Mass (M_sun)</span>
+                <span class="slider-value" id="massValue">1.000</span>
+              </div>
+              <input type="range" id="massSlider" min="0.1" max="100" value="1.0" step="0.001">
+            </div>
+          </div>
+
+          <div class="explorer-canvas">
+            <canvas id="explorerCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="prediction-display">
+          <div class="prediction-title">GR Prediction vs Observed Constraints</div>
+          <div class="prediction-results">
+            <div class="prediction-item">
+              <div class="prediction-label">Light Deflection (arcsec)</div>
+              <div class="prediction-value" id="deflectionPred">1.703</div>
+              <div class="prediction-deviation" id="deflectionStatus"></div>
+            </div>
+            <div class="prediction-item">
+              <div class="prediction-label">Perihelion Precession (arcsec/orbit)</div>
+              <div class="prediction-value" id="precessionPred">42.98</div>
+              <div class="prediction-deviation" id="precessionStatus"></div>
+            </div>
+            <div class="prediction-item">
+              <div class="prediction-label">Shapiro Delay (μs)</div>
+              <div class="prediction-value" id="shapiroPred">240</div>
+              <div class="prediction-deviation" id="shapiroStatus"></div>
+            </div>
+            <div class="prediction-item">
+              <div class="prediction-label">Gravitational Frequency Shift</div>
+              <div class="prediction-value" id="shiftPred">2.47×10⁻⁹</div>
+              <div class="prediction-deviation" id="shiftStatus"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Historical Timeline -->
+    <section class="section" id="timeline">
+      <div class="section-header">
+        <span class="section-number">06</span>
+        <h2 class="section-title">Historical Milestones</h2>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-year">1915</div>
+          <div class="timeline-title">Einstein Completes General Relativity</div>
+          <p class="timeline-desc">
+            After 8 years of development, Einstein publishes his field equations R_μν - ½g_μνR = (8πG/c⁴)T_μν.
+            The theory geometrizes gravity as spacetime curvature caused by mass-energy.
+          </p>
+          <span class="timeline-result">Field Equations Published</span>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">1919</div>
+          <div class="timeline-title">Eddington's Eclipse Expedition</div>
+          <p class="timeline-desc">
+            Arthur Eddington photographs the 1919 solar eclipse from Principe Island (Africa) and Sobral (Brazil).
+            Measures stellar deflection of 1.98 ± 0.30 arcseconds — matching Einstein's 1.75 arcsecond prediction.
+            Global headlines announce: "Revolution in Science."
+          </p>
+          <span class="timeline-result">GR Confirmed Experimentally</span>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">1960</div>
+          <div class="timeline-title">Discovery of Cygnus X-1</div>
+          <p class="timeline-desc">
+            The first suspected black hole candidate identified via X-ray emission from a massive stellar companion.
+            The compact object's mass (> 3 M_☉) exceeds the neutron star limit, suggesting an event horizon.
+          </p>
+          <span class="timeline-result">First Black Hole Candidate</span>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">1974</div>
+          <div class="timeline-title">Hulse-Taylor Binary Pulsar Discovered</div>
+          <p class="timeline-desc">
+            Russell Hulse discovers PSR B1913+16, a 59ms pulsar in a tight binary orbit.
+            Joseph Taylor later shows the orbital period is decaying precisely as GR predicts for gravitational wave emission.
+          </p>
+          <span class="timeline-result">First Indirect GW Evidence</span>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">1979</div>
+          <div class="timeline-title">First Surgical Laser Ranging</div>
+          <p class="timeline-desc">
+            Apollo 11, 14, and 15 retroreflectors enable mm-precision lunar ranging.
+            Confirms the equivalence principle to 10⁻¹² and constrains gravitational physics.
+          </p>
+          <span class="timeline-result">mm-Precision Solar System</span>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">1993</div>
+          <div class="timeline-title">Hulse and Taylor Receive Nobel Prize</div>
+          <p class="timeline-desc">
+            "For the discovery of a binary pulsar that provides an indirect confirmation of gravitational waves."
+            The binary pulsar remains the premier test of strong-field GR.
+          </p>
+          <span class="timeline-result">Nobel Recognition</span>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">2015</div>
+          <div class="timeline-title">LIGO Detects Gravitational Waves</div>
+          <p class="timeline-desc">
+            GW150914 detected on September 14, 2015 — 100 years after Einstein's prediction.
+            Two black holes (36 + 29 M_☉) merged at 1.3 billion light-years, releasing 3 M_☉c² of gravitational energy.
+          </p>
+          <span class="timeline-result">First Direct GW Detection</span>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">2019</div>
+          <div class="timeline-title">Event Horizon Telescope Images M87*</div>
+          <p class="timeline-desc">
+            The EHT collaboration releases the first direct image of a black hole shadow — M87*,
+            a 6.5 billion solar mass black hole at the center of galaxy M87. The observed donut shape
+            matches GR predictions for the photon ring and shadow.
+          </p>
+          <span class="timeline-result">First Black Hole Image</span>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">2022</div>
+          <div class="timeline-title">JWST Confirms GR in Early Universe</div>
+          <p class="timeline-desc">
+            James Webb Space Telescope observes galaxy clusters at z > 2, confirming gravitational lensing
+            predictions match GR across 13 billion years of cosmic history. Dark matter distributions match predictions.
+          </p>
+          <span class="timeline-result">GR Validated to z~2</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p class="footer-quote">
+        "The significance of these experiments lies not in their confirmation of Einstein's theory, but in the precision of that confirmation.
+        Each decimal place of agreement is a defeat for every alternative theory of gravity."
+      </p>
+      <p class="footer-attribution">— Clifford Will, "The Confrontation between General Relativity and Experiment"</p>
+    </footer>
+  </div>
+
+  <script>
+    // ===== COSMOS BACKGROUND =====
+    function createCosmos() {
+      const container = document.getElementById('cosmos');
+      const starField = document.createElement('div');
+      starField.className = 'stars';
+
+      for (let i = 0; i < 300; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        const size = Math.random() * 2 + 1;
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+        star.style.setProperty('--base-opacity', Math.random() * 0.5 + 0.3);
+        star.style.animationDelay = Math.random() * 3 + 's';
+        starField.appendChild(star);
+      }
+
+      container.appendChild(starField);
+    }
+
+    // ===== NAVIGATION =====
+    function scrollToSection(id) {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ===== TAB MANAGEMENT =====
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function showSolarTab(tabId) {
+      document.querySelectorAll('#solar .tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('#solar .tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // ===== MAIN SPACETIME CANVAS =====
+    function initSpacetimeCanvas() {
+      const canvas = document.getElementById('spacetimeCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 1000;
+      canvas.height = 500;
+
+      let time = 0;
+      const particles = [];
+      const geodesics = [];
+
+      // Create test particles
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        const r = 180 + Math.random() * 60;
+        particles.push({
+          baseAngle: angle,
+          r: r,
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.3 + Math.random() * 0.2,
+          size: 3 + Math.random() * 2,
+          color: i % 2 === 0 ? '#00d4ff' : '#9945ff'
+        });
+      }
+
+      // Geodesic paths
+      for (let i = 0; i < 5; i++) {
+        geodesics.push({
+          points: [],
+          phase: i * 0.4,
+          amplitude: 40 + i * 20
+        });
+      }
+
+      function draw() {
+        ctx.fillStyle = '#020015';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        time += 0.016;
+
+        // Draw grid
+        ctx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
+        ctx.lineWidth = 1;
+        for (let i = -10; i <= 10; i++) {
+          ctx.beginPath();
+          ctx.moveTo(0, cy + i * 25);
+          ctx.lineTo(canvas.width, cy + i * 25);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(cx + i * 50, 0);
+          ctx.lineTo(cx + i * 50, canvas.height);
+          ctx.stroke();
+        }
+
+        // Central mass
+        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 60);
+        gradient.addColorStop(0, '#ffd700');
+        gradient.addColorStop(0.3, '#ff9500');
+        gradient.addColorStop(1, 'rgba(255, 149, 0, 0)');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 60, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Spacetime curvature rings
+        ctx.strokeStyle = 'rgba(153, 69, 255, 0.3)';
+        ctx.lineWidth = 2;
+        for (let r = 80; r < 400; r += 40) {
+          const wobble = Math.sin(time + r / 50) * 3;
+          ctx.beginPath();
+          ctx.ellipse(cx, cy, r + wobble, r * 0.6 + wobble, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // Geodesic paths
+        geodesics.forEach((geo, gi) => {
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(0, 212, 255, ${0.4 - gi * 0.05})`;
+          ctx.lineWidth = 2;
+          for (let t = 0; t < Math.PI * 2; t += 0.05) {
+            const spiral = geo.amplitude * Math.exp(-t * 0.5) * Math.cos(t * 3 + geo.phase + time);
+            const x = cx + spiral * Math.cos(t);
+            const y = cy + spiral * 0.6 * Math.sin(t);
+            if (t === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        });
+
+        // Test particles
+        particles.forEach((p, i) => {
+          const angle = p.baseAngle + time * p.speed;
+          const r = p.r + Math.sin(time * 2 + p.phase) * 10;
+          const x = cx + r * Math.cos(angle);
+          const y = cy + r * 0.6 * Math.sin(angle);
+
+          // Draw geodesic line
+          ctx.beginPath();
+          ctx.strokeStyle = 'rgba(0, 212, 255, 0.2)';
+          ctx.lineWidth = 1;
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+
+          // Particle
+          ctx.beginPath();
+          ctx.fillStyle = p.color;
+          ctx.arc(x, y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Glow
+          const glow = ctx.createRadialGradient(x, y, 0, x, y, p.size * 3);
+          glow.addColorStop(0, p.color.replace(')', ', 0.5)').replace('rgb', 'rgba'));
+          glow.addColorStop(1, 'transparent');
+          ctx.fillStyle = glow;
+          ctx.beginPath();
+          ctx.arc(x, y, p.size * 3, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    }
+
+    // ===== DEFLECTION CANVAS =====
+    function initDeflectionCanvas() {
+      const canvas = document.getElementById('deflectionCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.offsetWidth * 2;
+      canvas.height = 350 * 2;
+
+      let b = 10;
+
+      function draw() {
+        ctx.fillStyle = '#020015';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        const mMass = { x: cx - 200, y: cy, r: 80 };
+
+        // Sun
+        const sunGrad = ctx.createRadialGradient(mMass.x, mMass.y, 0, mMass.x, mMass.y, mMass.r);
+        sunGrad.addColorStop(0, '#ffd700');
+        sunGrad.addColorStop(0.5, '#ff8c00');
+        sunGrad.addColorStop(1, 'rgba(255, 140, 0, 0)');
+        ctx.fillStyle = sunGrad;
+        ctx.beginPath();
+        ctx.arc(mMass.x, mMass.y, mMass.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // GR deflection path (purple)
+        ctx.beginPath();
+        ctx.strokeStyle = '#9945ff';
+        ctx.lineWidth = 3;
+        const grStart = { x: 50, y: cy - b * 5 };
+        ctx.moveTo(grStart.x, grStart.y);
+
+        for (let x = grStart.x; x < canvas.width; x += 2) {
+          const dx = x - mMass.x;
+          const dyDeflect = -4 * mMass.r * mMass.r * mMass.r / (dx * dx + mMass.r * mMass.r) / (dx * dx + mMass.r * mMass.r) * 100;
+          const y = cy - b * 5 * (1 - 0.0005 * (x - grStart.x)) + dyDeflect * Math.sign(dx);
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Newtonian path (cyan)
+        ctx.beginPath();
+        ctx.strokeStyle = '#00d4ff';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        const newtStart = { x: 50, y: cy - b * 5 };
+        ctx.moveTo(newtStart.x, newtStart.y);
+
+        for (let x = newtStart.x; x < canvas.width; x += 2) {
+          const dx = x - mMass.x;
+          const dyDeflect = -2 * mMass.r * mMass.r * mMass.r / (dx * dx + mMass.r * mMass.r) / (dx * dx + mMass.r * mMass.r) * 100;
+          const y = cy - b * 5 * (1 - 0.0005 * (x - newtStart.x)) + dyDeflect * Math.sign(dx);
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Impact parameter line
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(mMass.x, mMass.y);
+        ctx.lineTo(50, cy - b * 5);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Labels
+        ctx.fillStyle = '#00d4ff';
+        ctx.font = '24px Space Mono';
+        ctx.fillText('Newtonian', 700, 200);
+        ctx.fillStyle = '#9945ff';
+        ctx.fillText('GR Prediction', 700, 250);
+        ctx.fillStyle = '#ffd700';
+        ctx.fillText(`b = ${b} R_s`, 50, 600);
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+
+      document.getElementById('impactParam').addEventListener('input', (e) => {
+        b = parseFloat(e.target.value);
+        document.getElementById('impactValue').textContent = b.toFixed(1);
+        const alpha = 1.75 / b;
+        document.getElementById('deflectionAngle').textContent = alpha.toFixed(2);
+        document.getElementById('grRatio').textContent = '2.00×';
+      });
+    }
+
+    // ===== PRECESSION CANVAS =====
+    function initPrecessionCanvas() {
+      const canvas = document.getElementById('precessionCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.offsetWidth * 2;
+      canvas.height = 350 * 2;
+
+      let time = 0;
+      const orbitPhase = 0;
+
+      function draw() {
+        ctx.fillStyle = '#020015';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+
+        // Central mass
+        const sunGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 100);
+        sunGrad.addColorStop(0, '#ffd700');
+        sunGrad.addColorStop(0.5, '#ff8c00');
+        sunGrad.addColorStop(1, 'rgba(255, 140, 0, 0)');
+        ctx.fillStyle = sunGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 100, 0, Math.PI * 2);
+        ctx.fill();
+
+        time += 0.01;
+
+        // Orbit with precession
+        const a = 250;
+        const e = 0.2;
+        const omega = time * 0.3; // Precessing argument of perihelion
+
+        ctx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let t = 0; t < Math.PI * 2; t += 0.05) {
+          const r = a * (1 - e * e) / (1 + e * Math.cos(t));
+          const x = cx + r * Math.cos(t + omega);
+          const y = cy + r * 0.6 * Math.sin(t + omega);
+          if (t === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Planet
+        const rPlanet = a * (1 - e * e) / (1 + e * Math.cos(time * 3));
+        const planetX = cx + rPlanet * Math.cos(time * 3 + omega);
+        const planetY = cy + rPlanet * 0.6 * Math.sin(time * 3 + omega);
+
+        ctx.beginPath();
+        ctx.fillStyle = '#00d4ff';
+        ctx.arc(planetX, planetY, 15, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Perihelion marker
+        const periX = cx + a * (1 - e) * Math.cos(omega);
+        const periY = cy + a * (1 - e) * 0.6 * Math.sin(omega);
+        ctx.fillStyle = '#ff6b9d';
+        ctx.beginPath();
+        ctx.arc(periX, periY, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Trail
+        ctx.strokeStyle = 'rgba(0, 212, 255, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(planetX, planetY, 30, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Labels
+        ctx.fillStyle = '#ffd700';
+        ctx.font = '28px Space Mono';
+        ctx.fillText('Precessing Orbit ( exaggerated )', 100, 600);
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    }
+
+    // ===== REDSHIFT CANVAS =====
+    function initRedshiftCanvas() {
+      const canvas = document.getElementById('redshiftCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.offsetWidth * 2;
+      canvas.height = 350 * 2;
+
+      let time = 0;
+
+      function draw() {
+        ctx.fillStyle = '#020015';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        time += 0.02;
+
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+
+        // Earth (bottom)
+        ctx.fillStyle = '#00d4ff';
+        ctx.fillRect(cx - 150, cy + 200, 300, 40);
+        ctx.fillStyle = '#e8eef5';
+        ctx.font = '32px Space Mono';
+        ctx.fillText('Earth', cx - 40, cy + 230);
+
+        // Tower
+        ctx.fillStyle = '#555';
+        ctx.fillRect(cx - 20, cy, 40, 200);
+
+        // Top (source)
+        const waveTop = Math.sin(time) * 5;
+        ctx.fillStyle = '#ff6b9d';
+        ctx.fillRect(cx - 40, cy - 30, 80, 30);
+        ctx.fillStyle = '#e8eef5';
+        ctx.fillText('Source', cx - 40, cy - 5);
+
+        // Photon emission
+        const photonY = cy + 100 - (time % 4) * 50;
+        const wavelength = 20 + (time % 4) * 10;
+        ctx.fillStyle = '#ff6b9d';
+        for (let i = 0; i < 5; i++) {
+          const wx = cx - 100 + i * wavelength;
+          ctx.beginPath();
+          ctx.arc(wx, photonY, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Bottom detector
+        const photonYBottom = cy + 180;
+        const wavelengthBottom = 30 + (time % 4) * 12;
+        ctx.fillStyle = '#00ff88';
+        for (let i = 0; i < 5; i++) {
+          const wx = cx - 100 + i * wavelengthBottom;
+          ctx.beginPath();
+          ctx.arc(wx, photonYBottom, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Labels
+        ctx.fillStyle = '#ff6b9d';
+        ctx.font = '24px Space Mono';
+        ctx.fillText('λ emitted', 100, photonY);
+        ctx.fillStyle = '#00ff88';
+        ctx.fillText('λ detected ( redshifted )', 100, photonYBottom);
+        ctx.fillStyle = '#ffd700';
+        ctx.font = '28px Space Mono';
+        ctx.fillText(`Δλ/λ = gh/c² = ${(9.8 * 22.5 / (3e8 * 3e8)).toExponential(2)}`, 100, 650);
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    }
+
+    // ===== BINARY PULSAR CANVAS =====
+    function initBinaryPulsarCanvas() {
+      const canvas = document.getElementById('binaryPulsarCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 1000;
+      canvas.height = 500;
+
+      let time = 0;
+
+      function draw() {
+        ctx.fillStyle = '#020015';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        time += 0.015;
+
+        const a = 150;
+        const e = 0.62;
+        const m1 = { x: 0, y: 0, r: 20, color: '#00ff88' };
+        const m2 = { x: 0, y: 0, r: 15, color: '#ffd700' };
+
+        // Pulsar
+        const r1 = a * (1 - e * e) / (1 + e * Math.cos(time * 2));
+        m1.x = cx + r1 * Math.cos(time * 2);
+        m1.y = cy + r1 * 0.6 * Math.sin(time * 2);
+
+        // Companion
+        const r2 = a * (1 - e * e) / (1 - e * Math.cos(time * 2));
+        m2.x = cx - r2 * Math.cos(time * 2);
+        m2.y = cy - r2 * 0.6 * Math.sin(time * 2);
+
+        // Orbit path
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let t = 0; t < Math.PI * 2; t += 0.05) {
+          const r = a * (1 - e * e) / (1 + e * Math.cos(t));
+          const x = cx + r * Math.cos(t);
+          const y = cy + r * 0.6 * Math.sin(t);
+          if (t === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Gravitational waves (ripples)
+        for (let i = 0; i < 3; i++) {
+          const radius = 50 + time * 80 + i * 100;
+          ctx.strokeStyle = `rgba(153, 69, 255, ${0.3 - i * 0.1})`;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // Pulsar beam
+        ctx.save();
+        ctx.translate(m1.x, m1.y);
+        ctx.rotate(time * 3);
+        ctx.fillStyle = '#00ff88';
+        ctx.beginPath();
+        ctx.moveTo(0, -40);
+        ctx.lineTo(-8, 0);
+        ctx.lineTo(8, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // Pulsar
+        const pGrad = ctx.createRadialGradient(m1.x, m1.y, 0, m1.x, m1.y, m1.r);
+        pGrad.addColorStop(0, m1.color);
+        pGrad.addColorStop(1, 'rgba(0, 255, 136, 0)');
+        ctx.fillStyle = pGrad;
+        ctx.beginPath();
+        ctx.arc(m1.x, m1.y, m1.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Companion
+        const cGrad = ctx.createRadialGradient(m2.x, m2.y, 0, m2.x, m2.y, m2.r);
+        cGrad.addColorStop(0, m2.color);
+        cGrad.addColorStop(1, 'rgba(255, 215, 0, 0)');
+        ctx.fillStyle = cGrad;
+        ctx.beginPath();
+        ctx.arc(m2.x, m2.y, m2.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Info
+        ctx.fillStyle = '#00ff88';
+        ctx.font = '24px Space Mono';
+        ctx.fillText('Pulsar (22ms)', m1.x + 30, m1.y);
+        ctx.fillStyle = '#ffd700';
+        ctx.fillText('Companion NS', m2.x + 30, m2.y);
+
+        // Period display
+        ctx.fillStyle = '#e8eef5';
+        ctx.font = '20px Space Mono';
+        ctx.fillText(`P_orb = 7.75 hours`, 50, 50);
+        ctx.fillText(`e = 0.62`, 50, 80);
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    }
+
+    // ===== GRAVITATIONAL WAVE CANVAS =====
+    function initGravWaveCanvas() {
+      const canvas = document.getElementById('gravWaveCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 1000;
+      canvas.height = 500;
+
+      let time = 0;
+
+      function draw() {
+        ctx.fillStyle = '#020015';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        time += 0.05;
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+
+        // Plus polarization (horizontal)
+        ctx.strokeStyle = '#00d4ff';
+        ctx.lineWidth = 3;
+        for (let i = -5; i <= 5; i++) {
+          ctx.beginPath();
+          const yBase = cy + i * 40;
+          for (let x = 0; x < canvas.width; x += 5) {
+            const wave = Math.sin((x - canvas.width / 2) * 0.05 + time) * 20 * Math.exp(-Math.abs(x - canvas.width / 2) / 300);
+            const y = yBase + wave;
+            if (x === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        }
+
+        // Cross polarization (at 45 degrees)
+        ctx.strokeStyle = '#ff6b9d';
+        ctx.lineWidth = 3;
+        for (let i = -5; i <= 5; i++) {
+          ctx.beginPath();
+          const offset = i * 40;
+          for (let x = 0; x < canvas.width; x += 5) {
+            const wave = Math.sin((x - canvas.width / 2) * 0.05 + time + Math.PI / 2) * 20 * Math.exp(-Math.abs(x - canvas.width / 2) / 300);
+            const rx = offset * 0.7;
+            const ry = (offset + wave) * 0.7;
+            const rotatedX = cx + (x - cx) * Math.cos(Math.PI / 4) - ry * Math.sin(Math.PI / 4);
+            const rotatedY = cy + (x - cx) * Math.sin(Math.PI / 4) + ry * Math.cos(Math.PI / 4);
+            if (x === 0) ctx.moveTo(rotatedX, rotatedY);
+            else ctx.lineTo(rotatedX, rotatedY);
+          }
+          ctx.stroke();
+        }
+
+        // Scalar breathing mode
+        ctx.strokeStyle = 'rgba(153, 69, 255, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
+          const wave = Math.sin(time * 2) * 30;
+          const r = 200 + wave;
+          const x = cx + r * Math.cos(angle);
+          const y = cy + r * Math.sin(angle);
+          if (angle === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Labels
+        ctx.fillStyle = '#00d4ff';
+        ctx.font = '24px Space Mono';
+        ctx.fillText('Plus ( × )', 50, 50);
+        ctx.fillStyle = '#ff6b9d';
+        ctx.fillText('Cross ( ⊗ )', 50, 80);
+        ctx.fillStyle = 'rgba(153, 69, 255, 0.7)';
+        ctx.fillText('Breathing ( scalar )', 50, 110);
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    }
+
+    // ===== EXPLORER CANVAS =====
+    function initExplorerCanvas() {
+      const canvas = document.getElementById('explorerCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.offsetWidth * 2;
+      canvas.height = 400 * 2;
+
+      let gamma = 1.0;
+      let beta = 1.0;
+      let orbit = 1.0;
+      let mass = 1.0;
+
+      function draw() {
+        ctx.fillStyle = '#0a0a1a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const w = canvas.width;
+        const h = canvas.height;
+        const cx = w / 2;
+        const cy = h / 2;
+
+        // Grid
+        ctx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
+        ctx.lineWidth = 2;
+        for (let x = 0; x < w; x += 50) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, h);
+          ctx.stroke();
+        }
+        for (let y = 0; y < h; y += 50) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(w, y);
+          ctx.stroke();
+        }
+
+        // Central mass
+        const mSize = 30 + mass * 10;
+        const mGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, mSize);
+        mGrad.addColorStop(0, '#ffd700');
+        mGrad.addColorStop(0.5, '#ff8c00');
+        mGrad.addColorStop(1, 'rgba(255, 140, 0, 0)');
+        ctx.fillStyle = mGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, mSize, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Orbit path
+        const orbitR = 80 + orbit * 40;
+        const deflectionGR = gamma * 1.75; // arcsec at solar mass, 1 AU
+        const deflectionNewton = 0.875;
+
+        ctx.strokeStyle = '#00d4ff';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, orbitR, orbitR * 0.6, 0, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Orbiting body
+        const angle = Date.now() * 0.001;
+        const ox = cx + orbitR * Math.cos(angle);
+        const oy = cy + orbitR * 0.6 * Math.sin(angle);
+
+        ctx.fillStyle = '#00d4ff';
+        ctx.beginPath();
+        ctx.arc(ox, oy, 10, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Light ray deflection visualization
+        const rayY = cy - 250;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(50, rayY);
+        ctx.lineTo(w - 50, rayY);
+        ctx.stroke();
+
+        // Bending angle visualization
+        const bendAngle = (deflectionGR - deflectionNewton) * 0.1;
+        ctx.strokeStyle = '#9945ff';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(w - 100, rayY);
+        ctx.arc(w - 100, cy, 250, -Math.PI / 2, -Math.PI / 2 + bendAngle);
+        ctx.stroke();
+
+        // Legend
+        ctx.fillStyle = '#e8eef5';
+        ctx.font = '24px Space Mono';
+        ctx.fillText(`γ = ${gamma.toFixed(5)}`, 50, 50);
+        ctx.fillText(`β = ${beta.toFixed(5)}`, 50, 90);
+        ctx.fillText(`a = ${orbit.toFixed(3)} AU`, 50, 130);
+        ctx.fillText(`M = ${mass.toFixed(3)} M☉`, 50, 170);
+        ctx.fillText(`GR Deflection = ${deflectionGR.toFixed(3)}"`, 50, 220);
+        ctx.fillText(`Newton Deflection = ${deflectionNewton.toFixed(3)}"`, 50, 260);
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+
+      function updatePredictions() {
+        const deflection = gamma * 1.703;
+        const precession = (2 + 2 * beta - gamma) * 42.98 / 3;
+        const shapiro = 240 * gamma * Math.sqrt(orbit) / mass;
+        const shift = (9.8 * 22.5) / (3e8 * 3e8) * mass / orbit;
+
+        document.getElementById('deflectionPred').textContent = deflection.toFixed(3) + '"';
+        document.getElementById('precessionPred').textContent = precession.toFixed(2);
+        document.getElementById('shapiroPred').textContent = shapiro.toFixed(0);
+        document.getElementById('shiftPred').textContent = shift.toExponential(2);
+
+        // Status
+        const deflectionStatus = document.getElementById('deflectionStatus');
+        const dev = Math.abs(gamma - 1.0) * 100;
+        if (dev < 0.01) {
+          deflectionStatus.innerHTML = '<span class="deviation-pass">PASS (within 0.01%)</span>';
+        } else if (dev < 0.1) {
+          deflectionStatus.innerHTML = '<span class="deviation-warn">Marginal</span>';
+        } else {
+          deflectionStatus.innerHTML = '<span class="deviation-fail">FAIL</span>';
+        }
+
+        const precessionStatus = document.getElementById('precessionStatus');
+        const devP = Math.abs(beta - 1.0) * 100;
+        if (devP < 0.1) {
+          precessionStatus.innerHTML = '<span class="deviation-pass">PASS (within 0.1%)</span>';
+        } else if (devP < 1) {
+          precessionStatus.innerHTML = '<span class="deviation-warn">Marginal</span>';
+        } else {
+          precessionStatus.innerHTML = '<span class="deviation-fail">FAIL</span>';
+        }
+      }
+
+      document.getElementById('gammaSlider').addEventListener('input', (e) => {
+        gamma = parseFloat(e.target.value);
+        document.getElementById('gammaValue').textContent = gamma.toFixed(5);
+        updatePredictions();
+      });
+
+      document.getElementById('betaSlider').addEventListener('input', (e) => {
+        beta = parseFloat(e.target.value);
+        document.getElementById('betaValue').textContent = beta.toFixed(5);
+        updatePredictions();
+      });
+
+      document.getElementById('orbitSlider').addEventListener('input', (e) => {
+        orbit = parseFloat(e.target.value);
+        document.getElementById('orbitValue').textContent = orbit.toFixed(3);
+        updatePredictions();
+      });
+
+      document.getElementById('massSlider').addEventListener('input', (e) => {
+        mass = parseFloat(e.target.value);
+        document.getElementById('massValue').textContent = mass.toFixed(3);
+        updatePredictions();
+      });
+
+      updatePredictions();
+    }
+
+    // ===== SCROLL-BASED NAV =====
+    function initNavDots() {
+      const sections = document.querySelectorAll('.section, .visualization-section');
+      const dots = document.querySelectorAll('.nav-dot');
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            dots.forEach((dot, i) => {
+              dot.classList.remove('active');
+              if (sections[i].id === id) {
+                dot.classList.add('active');
+              }
+            });
+          }
+        });
+      }, { threshold: 0.5 });
+
+      sections.forEach(s => observer.observe(s));
+    }
+
+    // ===== INIT =====
+    window.addEventListener('load', () => {
+      createCosmos();
+      initSpacetimeCanvas();
+      initDeflectionCanvas();
+      initPrecessionCanvas();
+      initRedshiftCanvas();
+      initBinaryPulsarCanvas();
+      initGravWaveCanvas();
+      initExplorerCanvas();
+      initNavDots();
+    });
+  </script>
+</body>
+</html>

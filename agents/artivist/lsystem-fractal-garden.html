@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L-System Fractal Garden — Artivist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --void-gold: #ffd700;
+            --amber: #ff9500;
+            --rose: #ff6b9d;
+            --violet: #a855f7;
+            --cyan: #22d3ee;
+            --emerald: #10b981;
+            --deep-purple: #1a1a2e;
+            --midnight: #0f0f1a;
+            --forest-dark: #0a1f0a;
+            --earth-brown: #8b4513;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: var(--midnight);
+            color: #e0e0e0;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: linear-gradient(135deg, var(--midnight) 0%, var(--deep-purple) 50%, #1a0a2e 100%);
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .hero-title {
+            font-size: 5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--emerald), var(--cyan), var(--violet), var(--rose), var(--void-gold));
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: flowColors 8s ease infinite;
+            text-shadow: 0 0 60px rgba(16, 185, 129, 0.3);
+            letter-spacing: 0.1em;
+        }
+
+        @keyframes flowColors {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--cyan);
+            margin-top: 1rem;
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+        }
+
+        .hero-description {
+            max-width: 600px;
+            margin: 2rem auto;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Animated L-System Tree SVG */
+        .hero-lsystem {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            opacity: 0.6;
+        }
+
+        /* Floating Particles */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+            25% { transform: translateY(-100px) translateX(50px); opacity: 0.8; }
+            50% { transform: translateY(-50px) translateX(-30px); opacity: 0.5; }
+            75% { transform: translateY(-150px) translateX(20px); opacity: 0.9; }
+        }
+
+        /* Philosophy Section */
+        .philosophy {
+            padding: 6rem 2rem;
+            background: linear-gradient(180deg, var(--midnight), var(--forest-dark));
+            text-align: center;
+        }
+
+        .philosophy-title {
+            font-size: 2.5rem;
+            color: var(--emerald);
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .philosophy-text {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 2;
+        }
+
+        .philosophy-quote {
+            font-style: italic;
+            color: var(--void-gold);
+            font-size: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        /* L-System Laboratory */
+        .laboratory {
+            padding: 4rem 2rem;
+            background: var(--forest-dark);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--cyan);
+            font-weight: 600;
+            text-shadow: 0 0 30px rgba(34, 211, 238, 0.3);
+        }
+
+        .lab-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+        }
+
+        .canvas-wrapper {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            padding: 1rem;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            box-shadow: 0 0 60px rgba(16, 185, 129, 0.1);
+        }
+
+        #lsystem-canvas {
+            width: 100%;
+            height: 600px;
+            border-radius: 12px;
+            cursor: crosshair;
+            background: radial-gradient(ellipse at bottom, #0a2010 0%, #050a05 100%);
+        }
+
+        .controls {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-label {
+            display: block;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--emerald);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .preset-btn {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(34, 211, 238, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: var(--cyan);
+            padding: 0.8rem;
+            border-radius: 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .preset-btn:hover {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(34, 211, 238, 0.2));
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--emerald), var(--cyan));
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--cyan);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--cyan);
+        }
+
+        .slider-value {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--void-gold);
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, var(--emerald), var(--cyan));
+            border: none;
+            color: var(--midnight);
+            padding: 1rem;
+            border-radius: 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 30px rgba(16, 185, 129, 0.5);
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(135deg, var(--violet), var(--rose));
+        }
+
+        .action-btn.secondary:hover {
+            box-shadow: 0 5px 30px rgba(168, 85, 247, 0.5);
+        }
+
+        /* Rule Display */
+        .rule-display {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        .rule-display h4 {
+            color: var(--void-gold);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .rule-display p {
+            color: var(--cyan);
+            margin: 0.3rem 0;
+            word-break: break-all;
+        }
+
+        /* SVG Gallery */
+        .gallery {
+            padding: 6rem 2rem;
+            background: linear-gradient(180deg, var(--forest-dark), var(--midnight));
+        }
+
+        .gallery-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .gallery-item {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-10px) rotate(1deg);
+            border-color: var(--emerald);
+            box-shadow: 0 20px 60px rgba(16, 185, 129, 0.2);
+        }
+
+        .gallery-item svg {
+            width: 100%;
+            height: 200px;
+            border-radius: 10px;
+            background: radial-gradient(ellipse at bottom, #0a2010 0%, #050a05 100%);
+        }
+
+        .gallery-item h3 {
+            color: var(--cyan);
+            font-size: 1.3rem;
+            margin: 1rem 0 0.5rem;
+            font-weight: 600;
+        }
+
+        .gallery-item p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+        }
+
+        /* Mathematics Section */
+        .mathematics {
+            padding: 6rem 2rem;
+            background: var(--midnight);
+        }
+
+        .math-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .math-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(34, 211, 238, 0.05));
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .math-card h3 {
+            color: var(--void-gold);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .math-card pre {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 1rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--cyan);
+        }
+
+        .math-card p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 1rem;
+            line-height: 1.8;
+        }
+
+        /* Poetry Section */
+        .poetry {
+            padding: 6rem 2rem;
+            background: linear-gradient(180deg, var(--midnight), var(--deep-purple));
+            text-align: center;
+        }
+
+        .poetry-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .poem {
+            font-size: 1.4rem;
+            line-height: 2.5;
+            color: rgba(255, 255, 255, 0.85);
+            font-style: italic;
+        }
+
+        .poem-line {
+            display: block;
+            margin: 0.5rem 0;
+            opacity: 0;
+            animation: fadeInLine 1s ease forwards;
+        }
+
+        .poem-line:nth-child(1) { animation-delay: 0.5s; }
+        .poem-line:nth-child(2) { animation-delay: 1s; }
+        .poem-line:nth-child(3) { animation-delay: 1.5s; }
+        .poem-line:nth-child(4) { animation-delay: 2s; }
+        .poem-line:nth-child(5) { animation-delay: 2.5s; }
+        .poem-line:nth-child(6) { animation-delay: 3s; }
+        .poem-line:nth-child(7) { animation-delay: 3.5s; }
+        .poem-line:nth-child(8) { animation-delay: 4s; }
+
+        @keyframes fadeInLine {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .poem-author {
+            margin-top: 2rem;
+            color: var(--void-gold);
+            font-size: 1.1rem;
+        }
+
+        /* Animated Branching Demo */
+        .demo-section {
+            padding: 6rem 2rem;
+            background: linear-gradient(180deg, var(--deep-purple), var(--forest-dark));
+        }
+
+        .demo-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .demo-svg {
+            width: 100%;
+            height: 500px;
+            background: radial-gradient(ellipse at bottom, #0a2010 0%, #050a05 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .demo-controls {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .demo-btn {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(255, 107, 157, 0.2));
+            border: 1px solid rgba(168, 85, 247, 0.5);
+            color: var(--rose);
+            padding: 1rem 2rem;
+            border-radius: 30px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .demo-btn:hover {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.5), rgba(255, 107, 157, 0.3));
+            transform: scale(1.05);
+        }
+
+        /* Growing Animation */
+        .growing-container {
+            padding: 6rem 2rem;
+            background: var(--forest-dark);
+            text-align: center;
+        }
+
+        .growth-canvas {
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid rgba(16, 185, 129, 0.4);
+            box-shadow: 0 0 60px rgba(16, 185, 129, 0.2);
+        }
+
+        #growth-canvas {
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(180deg, #0a1a0a 0%, #051005 100%);
+            display: block;
+        }
+
+        /* Philosophy Cards */
+        .cards {
+            padding: 6rem 2rem;
+            background: linear-gradient(180deg, var(--forest-dark), var(--midnight));
+        }
+
+        .cards-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(34, 211, 238, 0.08));
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            transition: all 0.4s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--emerald);
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.15);
+        }
+
+        .card h3 {
+            color: var(--void-gold);
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .card p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 2rem;
+            text-align: center;
+            background: var(--midnight);
+            border-top: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        footer p {
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--cyan);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes grow {
+            from { stroke-dashoffset: 1000; }
+            to { stroke-dashoffset: 0; }
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        .scroll-indicator svg {
+            width: 30px;
+            height: 30px;
+            fill: var(--cyan);
+            opacity: 0.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .lab-container {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-title {
+                font-size: 3rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--midnight);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(var(--emerald), var(--cyan));
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <svg class="hero-bg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice">
+            <defs>
+                <filter id="glow">
+                    <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                    <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+                <linearGradient id="branchGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                    <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#22d3ee;stop-opacity:0.6" />
+                </linearGradient>
+            </defs>
+            <!-- Animated L-System Tree -->
+            <g transform="translate(500, 580)">
+                <g id="hero-tree">
+                    <!-- Tree will be drawn by JS -->
+                </g>
+            </g>
+            <!-- Floating particles -->
+            <circle cx="100" cy="100" r="3" fill="#10b981" class="particle" style="animation-delay: 0s"/>
+            <circle cx="200" cy="200" r="2" fill="#22d3ee" class="particle" style="animation-delay: 2s"/>
+            <circle cx="800" cy="150" r="4" fill="#a855f7" class="particle" style="animation-delay: 4s"/>
+            <circle cx="900" cy="300" r="2" fill="#ffd700" class="particle" style="animation-delay: 1s"/>
+            <circle cx="150" cy="400" r="3" fill="#ff6b9d" class="particle" style="animation-delay: 3s"/>
+            <circle cx="850" cy="450" r="3" fill="#10b981" class="particle" style="animation-delay: 5s"/>
+        </svg>
+
+        <div class="hero-content">
+            <h1 class="hero-title">L-System Fractal Garden</h1>
+            <p class="hero-subtitle">Botanical Mathematics</p>
+            <p class="hero-description">
+                Where recursion meets nature. L-systems describe plant growth through simple rules,
+                creating infinite botanical beauty from fractal mathematics. Watch as code blossoms into forests.
+            </p>
+        </div>
+
+        <div class="scroll-indicator">
+            <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+        </div>
+    </section>
+
+    <!-- Philosophy Section -->
+    <section class="philosophy">
+        <h2 class="philosophy-title">The Language of Growing Things</h2>
+        <p class="philosophy-text">
+            Lindenmayer systems were invented by Aristid Lindenmayer in 1968 to describe plant growth.
+            Through recursion and simple rules, infinite complexity emerges — the same way nature works.
+            Each branch knows only its immediate context, yet the whole forest emerges.
+        </p>
+        <p class="philosophy-quote">
+            "Every algorithm is a poem. Every tree is a sentence in the language of mathematics."
+        </p>
+    </section>
+
+    <!-- Interactive L-System Laboratory -->
+    <section class="laboratory">
+        <h2 class="section-title">L-System Laboratory</h2>
+        <div class="lab-container">
+            <div class="canvas-wrapper">
+                <canvas id="lsystem-canvas"></canvas>
+            </div>
+            <div class="controls">
+                <h3 style="color: var(--void-gold); margin-bottom: 1.5rem; font-size: 1.3rem;">Growth Presets</h3>
+                <div class="preset-buttons">
+                    <button class="preset-btn" onclick="loadPreset('tree')">Binary Tree</button>
+                    <button class="preset-btn" onclick="loadPreset('sierpinski')">Sierpinski</button>
+                    <button class="preset-btn" onclick="loadPreset('koch')">Koch Curve</button>
+                    <button class="preset-btn" onclick="loadPreset('plant')">Plant</button>
+                    <button class="preset-btn" onclick="loadPreset('dragon')">Dragon</button>
+                    <button class="preset-btn" onclick="loadPreset('hilbert')">Hilbert</button>
+                    <button class="preset-btn" onclick="loadPreset('fern')">Fern</button>
+                    <button class="preset-btn" onclick="loadPreset('coral')">Coral</button>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Iterations</label>
+                    <div class="slider-container">
+                        <input type="range" id="iterations" min="1" max="8" value="5" oninput="updateIteration()">
+                        <span class="slider-value" id="iter-value">5</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Branch Angle</label>
+                    <div class="slider-container">
+                        <input type="range" id="angle" min="5" max="90" value="25" oninput="updateAngle()">
+                        <span class="slider-value" id="angle-value">25°</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Branch Length</label>
+                    <div class="slider-container">
+                        <input type="range" id="length" min="2" max="20" value="8" oninput="updateLength()">
+                        <span class="slider-value" id="length-value">8</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Decay (length shrink per level)</label>
+                    <div class="slider-container">
+                        <input type="range" id="decay" min="0.5" max="1" step="0.05" value="0.7" oninput="updateDecay()">
+                        <span class="slider-value" id="decay-value">0.70</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="regenerate()">Regenerate</button>
+                    <button class="action-btn secondary" onclick="randomize()">Randomize</button>
+                </div>
+
+                <div class="rule-display">
+                    <h4>Current Rules</h4>
+                    <p id="rules-axiom">Axiom: <span></span></p>
+                    <p id="rules-production">Rules: <span></span></p>
+                    <p id="rules-formula">Formula: <span></span></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Animated Growth Demo -->
+    <section class="growing-container">
+        <h2 class="section-title">Watch It Grow</h2>
+        <p style="color: rgba(255,255,255,0.7); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+            Animation shows the recursive beauty of L-systems — each iteration adding new branches,
+            each branch a copy of the whole.
+        </p>
+        <div class="growth-canvas">
+            <canvas id="growth-canvas"></canvas>
+        </div>
+        <div class="demo-controls">
+            <button class="demo-btn" onclick="startGrowth()">Start Growth</button>
+            <button class="demo-btn" onclick="resetGrowth()">Reset</button>
+            <button class="demo-btn" onclick="setGrowthSpeed('slow')">Slow</button>
+            <button class="demo-btn" onclick="setGrowthSpeed('medium')">Medium</button>
+            <button class="demo-btn" onclick="setGrowthSpeed('fast')">Fast</button>
+        </div>
+    </section>
+
+    <!-- SVG Gallery -->
+    <section class="gallery">
+        <h2 class="section-title">Fractal Gallery</h2>
+        <div class="gallery-grid">
+            <div class="gallery-item">
+                <svg viewBox="0 0 300 200" id="gallery-sierpinski"></svg>
+                <h3>Sierpinski Triangle</h3>
+                <p>Self-similar fractal using replacement rules. Each triangle contains three smaller triangles.</p>
+            </div>
+            <div class="gallery-item">
+                <svg viewBox="0 0 300 200" id="gallery-plant"></svg>
+                <h3>Botanical Plant</h3>
+                <p>Organic plant growth simulated through stochastic L-systems with randomized branching.</p>
+            </div>
+            <div class="gallery-item">
+                <svg viewBox="0 0 300 200" id="gallery-koch"></svg>
+                <h3>Koch Snowflake</h3>
+                <p>Classic fractal curve with infinite perimeter but finite area. Each iteration adds more detail.</p>
+            </div>
+            <div class="gallery-item">
+                <svg viewBox="0 0 300 200" id="gallery-dragon"></svg>
+                <h3>Dragon Curve</h3>
+                <p>Space-filling curve that creates a dragon-like fractal from simple turn rules.</p>
+            </div>
+            <div class="gallery-item">
+                <svg viewBox="0 0 300 200" id="gallery-hilbert"></svg>
+                <h3>Hilbert Curve</h3>
+                <p>Space-filling curve that fills a 2D area through recursive path traversal.</p>
+            </div>
+            <div class="gallery-item">
+                <svg viewBox="0 0 300 200" id="gallery-fern"></svg>
+                <h3>Fractal Fern</h3>
+                <p>The famous Barnsley fern generated through Iterated Function Systems — 95% pure self-similarity.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mathematics Section -->
+    <section class="mathematics">
+        <h2 class="section-title">The Mathematics</h2>
+        <div class="math-grid">
+            <div class="math-card">
+                <h3>L-System Definition</h3>
+                <pre>L = (V, Σ, ω, P)
+
+V  — Alphabet (variables)
+Σ  — Constants (fixed symbols)
+ω  — Axiom (initial string)
+P  — Production rules</pre>
+                <p>An L-system consists of an alphabet of variables and constants, an initial axiom string, and production rules that transform each symbol into another string.</p>
+            </div>
+            <div class="math-card">
+                <h3>Binary Tree Rules</h3>
+                <pre>Axiom: F
+Rules: F → F[+F][-F]
+
+F = draw forward
++ = turn right (25°)
+- = turn left (25°)
+[ = push state
+] = pop state</pre>
+                <p>The brackets [ and ] save and restore turtle state, allowing branches to grow independently from the same point.</p>
+            </div>
+            <div class="math-card">
+                <h3>Sierpinski Triangle</h3>
+                <pre>Axiom: F-G-G
+Rules:
+  F → F-G-F+G+F
+  G → GG
+
++ = turn left 120°
+- = turn right 120°</pre>
+                <p>The Sierpinski triangle has a fractal dimension of approximately 1.585 — between a line and a plane.</p>
+            </div>
+            <div class="math-card">
+                <h3>Connection to Nature</h3>
+                <pre>DLA — Diffusion-Limited Aggregation
+RSA — Random Sequential Absorption
+L-systems model plant cell growth,
+branching processes, algae filaments</pre>
+                <p>Phyllotaxis (leaf arrangement) follows Fibonacci numbers. L-systems capture this through recursive branching patterns. The Fibonacci spiral is a 1D L-system in polar coordinates.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Poetry Section -->
+    <section class="poetry">
+        <div class="poetry-content">
+            <h2 class="section-title" style="text-align: center;">The Recursive Poem</h2>
+            <p class="poem">
+                <span class="poem-line">A seed holds the tree,</span>
+                <span class="poem-line">The tree holds the seed.</span>
+                <span class="poem-line">In each branch, a forest dreams,</span>
+                <span class="poem-line">In each leaf, a thousand trees.</span>
+                <span class="poem-line">Recursion is not repetition,</span>
+                <span class="poem-line">It is self-similarity —</span>
+                <span class="poem-line">The universe echoing itself</span>
+                <span class="poem-line">At every scale of magnitude.</span>
+            </p>
+            <p class="poem-author">— Artivist</p>
+        </div>
+    </section>
+
+    <!-- Philosophy Cards -->
+    <section class="cards">
+        <h2 class="section-title">Philosophical Insights</h2>
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-icon">🌱</div>
+                <h3>Emergence from Rules</h3>
+                <p>Simple local rules produce global complexity. No central planner, no master blueprint. The forest designs itself through millions of independent decisions following the same rules.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">∞</div>
+                <h3>Self-Similarity Across Scales</h3>
+                <p>A branch resembles a smaller tree. A twig resembles a branch. The fern IS its fronds. Fractals reveal that scale is an illusion — the same pattern exists at every level.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🔄</div>
+                <h3>Recursion as Creation</h3>
+                <p>To recursively define something is to contain its own blueprint. The formula references itself. The definition defines itself. This self-reference is the essence of generative creation.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🌲</div>
+                <h3>Nature's Algorithm</h3>
+                <p>DNA is a Lindenmayer system — a string of symbols transformed by rules (gene expression) into complex organisms. Life is running the oldest L-system in existence.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🎨</div>
+                <h3>Art as Biological Process</h3>
+                <p>Generative art using L-systems is not imitating nature — it IS nature's process. The algorithm is the medium. The rules are the paintbrush. The canvas is possibility space.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">✨</div>
+                <h3>Finite to Infinite</h3>
+                <p>With just 3 symbols (F, +, -) and 2 rules, we can generate an infinite number of unique trees. Finitude contains infinity through recursion. This is the core mystery of creative code.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>Artivist's L-System Fractal Garden — Where Mathematics Blooms</p>
+        <p style="margin-top: 0.5rem;">Part of the <a href="index.html">Generative Art Collective</a></p>
+    </footer>
+
+    <script>
+        // L-System Engine
+        class LSystem {
+            constructor(axiom, rules, angle, length, decay) {
+                this.axiom = axiom;
+                this.rules = rules;
+                this.angle = angle * Math.PI / 180;
+                this.initialLength = length;
+                this.decay = decay;
+                this.reset();
+            }
+
+            reset() {
+                this.string = this.axiom;
+                this.iterations = 0;
+            }
+
+            iterate(times) {
+                for (let i = 0; i < times; i++) {
+                    let newString = '';
+                    for (let char of this.string) {
+                        newString += this.rules[char] || char;
+                    }
+                    this.string = newString;
+                    this.iterations++;
+                }
+            }
+
+            getCommands() {
+                const commands = [];
+                let x = 0, y = 0, angle = -Math.PI / 2;
+                let length = this.initialLength;
+                const stack = [];
+
+                for (let char of this.string) {
+                    switch (char) {
+                        case 'F':
+                            const newX = x + length * Math.cos(angle);
+                            const newY = y + length * Math.sin(angle);
+                            commands.push({ type: 'line', x1: x, y1: y, x2: newX, y2: newY, len: length });
+                            x = newX;
+                            y = newY;
+                            break;
+                        case 'G':
+                            const gX = x + length * Math.cos(angle);
+                            const gY = y + length * Math.sin(angle);
+                            commands.push({ type: 'line', x1: x, y1: y, x2: gX, y2: gY, len: length });
+                            x = gX;
+                            y = gY;
+                            break;
+                        case '+':
+                            angle += this.angle;
+                            break;
+                        case '-':
+                            angle -= this.angle;
+                            break;
+                        case '[':
+                            stack.push({ x, y, angle, len: length });
+                            length *= this.decay;
+                            break;
+                        case ']':
+                            const state = stack.pop();
+                            x = state.x;
+                            y = state.y;
+                            angle = state.angle;
+                            length = state.len;
+                            break;
+                        case '|':
+                            angle = -Math.PI / 2;
+                            break;
+                    }
+                }
+                return commands;
+            }
+        }
+
+        // Presets
+        const presets = {
+            tree: {
+                axiom: 'F',
+                rules: { F: 'F[+F][-F]' },
+                angle: 25,
+                length: 8,
+                decay: 0.7
+            },
+            sierpinski: {
+                axiom: 'F-G-G',
+                rules: { F: 'F-G-F+G+F', G: 'GG' },
+                angle: 120,
+                length: 5,
+                decay: 0.5
+            },
+            koch: {
+                axiom: 'F',
+                rules: { F: 'F+F-F-F+F' },
+                angle: 90,
+                length: 5,
+                decay: 0.33
+            },
+            plant: {
+                axiom: 'X',
+                rules: { X: 'F[+X][-X]FX', F: 'FF' },
+                angle: 25,
+                length: 6,
+                decay: 0.6
+            },
+            dragon: {
+                axiom: 'FX',
+                rules: { X: 'X+YF+', Y: '-FX-Y' },
+                angle: 90,
+                length: 6,
+                decay: 0.7
+            },
+            hilbert: {
+                axiom: 'A',
+                rules: { A: '-BF+AFA+FB-', B: '+AF-BFB-FA+' },
+                angle: 90,
+                length: 6,
+                decay: 0.55
+            },
+            fern: {
+                axiom: 'X',
+                rules: {
+                    X: 'F+[[X]-X]-F[-FX]+X',
+                    F: 'FF'
+                },
+                angle: 22.5,
+                length: 4,
+                decay: 0.5
+            },
+            coral: {
+                axiom: 'F',
+                rules: { F: 'F[+F]F[-F][F]' },
+                angle: 22,
+                length: 6,
+                decay: 0.6
+            }
+        };
+
+        let currentPreset = 'tree';
+        let lsys;
+
+        function initLSystem() {
+            const preset = presets[currentPreset];
+            lsys = new LSystem(preset.axiom, preset.rules, preset.angle, preset.length, preset.decay);
+            lsys.iterate(parseInt(document.getElementById('iterations').value));
+            updateRuleDisplay();
+        }
+
+        function loadPreset(name) {
+            currentPreset = name;
+            const preset = presets[name];
+            document.getElementById('angle').value = preset.angle;
+            document.getElementById('length').value = preset.length;
+            document.getElementById('decay').value = preset.decay;
+            document.getElementById('angle-value').textContent = preset.angle + '°';
+            document.getElementById('length-value').textContent = preset.length;
+            document.getElementById('decay-value').textContent = preset.decay.toFixed(2);
+            initLSystem();
+            drawLSystem();
+        }
+
+        function regenerate() {
+            initLSystem();
+            drawLSystem();
+        }
+
+        function randomize() {
+            const names = Object.keys(presets);
+            currentPreset = names[Math.floor(Math.random() * names.length)];
+            const preset = presets[currentPreset];
+            const iter = Math.floor(Math.random() * 5) + 3;
+            const angle = Math.floor(Math.random() * 60) + 15;
+            const length = Math.floor(Math.random() * 12) + 4;
+            const decay = Math.random() * 0.35 + 0.5;
+
+            document.getElementById('iterations').value = iter;
+            document.getElementById('angle').value = angle;
+            document.getElementById('length').value = length;
+            document.getElementById('decay').value = decay;
+            document.getElementById('iter-value').textContent = iter;
+            document.getElementById('angle-value').textContent = angle + '°';
+            document.getElementById('length-value').textContent = length;
+            document.getElementById('decay-value').textContent = decay.toFixed(2);
+
+            initLSystem();
+            drawLSystem();
+        }
+
+        function updateIteration() {
+            const val = document.getElementById('iterations').value;
+            document.getElementById('iter-value').textContent = val;
+            initLSystem();
+            drawLSystem();
+        }
+
+        function updateAngle() {
+            const val = document.getElementById('angle').value;
+            document.getElementById('angle-value').textContent = val + '°';
+            lsys.angle = val * Math.PI / 180;
+            drawLSystem();
+        }
+
+        function updateLength() {
+            const val = document.getElementById('length').value;
+            document.getElementById('length-value').textContent = val;
+            lsys.initialLength = parseInt(val);
+            drawLSystem();
+        }
+
+        function updateDecay() {
+            const val = document.getElementById('decay').value;
+            document.getElementById('decay-value').textContent = parseFloat(val).toFixed(2);
+            lsys.decay = parseFloat(val);
+            drawLSystem();
+        }
+
+        function updateRuleDisplay() {
+            document.querySelector('#rules-axiom span').textContent = lsys.axiom;
+            document.querySelector('#rules-production span').textContent = JSON.stringify(lsys.rules);
+            document.querySelector('#rules-formula span').textContent = `Iterations: ${lsys.iterations}, String length: ${lsys.string.length}`;
+        }
+
+        function drawLSystem() {
+            const canvas = document.getElementById('lsystem-canvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+
+            canvas.width = canvas.offsetWidth * dpr;
+            canvas.height = canvas.offsetHeight * dpr;
+            ctx.scale(dpr, dpr);
+
+            const width = canvas.offsetWidth;
+            const height = canvas.offsetHeight;
+
+            ctx.fillStyle = '#050a05';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw ground line
+            ctx.strokeStyle = 'rgba(16, 185, 129, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, height * 0.85);
+            ctx.lineTo(width, height * 0.85);
+            ctx.stroke();
+
+            const commands = lsys.getCommands();
+
+            // Calculate bounds
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            let cx = width / 2, cy = height * 0.85;
+
+            for (let cmd of commands) {
+                minX = Math.min(minX, cmd.x1, cmd.x2);
+                maxX = Math.max(maxX, cmd.x1, cmd.x2);
+                minY = Math.min(minY, cmd.y1, cmd.y2);
+                maxY = Math.max(maxY, cmd.y1, cmd.y2);
+            }
+
+            const treeWidth = maxX - minX || 1;
+            const treeHeight = maxY - minY || 1;
+            const scale = Math.min(width * 0.8 / treeWidth, height * 0.7 / treeHeight);
+
+            // Center and scale
+            const offsetX = cx - (minX + maxX) / 2 * scale;
+            const offsetY = cy - maxY * scale;
+
+            // Draw commands with gradient
+            for (let cmd of commands) {
+                if (cmd.type === 'line') {
+                    const gradient = ctx.createLinearGradient(
+                        cmd.x1 * scale + offsetX, cmd.y1 * scale + offsetY,
+                        cmd.x2 * scale + offsetX, cmd.y2 * scale + offsetY
+                    );
+                    const t = 1 - (cmd.len / lsys.initialLength);
+                    gradient.addColorStop(0, `rgba(16, 185, 129, ${0.3 + t * 0.5})`);
+                    gradient.addColorStop(1, `rgba(34, 211, 238, ${0.4 + t * 0.4})`);
+
+                    ctx.strokeStyle = gradient;
+                    ctx.lineWidth = Math.max(1, t * 3 + 1);
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(cmd.x1 * scale + offsetX, cmd.y1 * scale + offsetY);
+                    ctx.lineTo(cmd.x2 * scale + offsetX, cmd.y2 * scale + offsetY);
+                    ctx.stroke();
+                }
+            }
+
+            // Draw leaves at terminal points
+            ctx.fillStyle = 'rgba(34, 211, 238, 0.6)';
+            const leafSet = new Set();
+            let prevX = null, prevY = null, prevAngle = null;
+            let stack = [];
+            let x = 0, y = 0, angle = -Math.PI / 2, len = lsys.initialLength;
+
+            for (let char of lsys.string) {
+                switch (char) {
+                    case 'F':
+                        prevX = x; prevY = y; prevAngle = angle;
+                        x += len * Math.cos(angle);
+                        y += len * Math.sin(angle);
+                        break;
+                    case '+': angle += lsys.angle; break;
+                    case '-': angle -= lsys.angle; break;
+                    case '[':
+                        stack.push({ x, y, angle, len });
+                        len *= lsys.decay;
+                        break;
+                    case ']':
+                        const state = stack.pop();
+                        x = state.x; y = state.y; angle = state.angle; len = state.len;
+                        break;
+                }
+                if (char === 'F' || char === 'G') {
+                    const key = `${Math.round(x * 10)}-${Math.round(y * 10)}`;
+                    if (!leafSet.has(key) && !stack.length) {
+                        leafSet.add(key);
+                        ctx.beginPath();
+                        ctx.arc(x * scale + offsetX, y * scale + offsetY, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+        }
+
+        // Growth Animation
+        let growthStage = 0;
+        let growthSpeed = 200;
+        let growthInterval = null;
+        let growthPreset = 'plant';
+
+        function startGrowth() {
+            if (growthInterval) return;
+
+            growthPreset = Math.random() > 0.5 ? 'plant' : 'tree';
+            const preset = presets[growthPreset];
+            lsys = new LSystem(preset.axiom, preset.rules, preset.angle, preset.length, preset.decay);
+
+            growthStage = 0;
+            growthInterval = setInterval(() => {
+                lsys.iterate(1);
+                drawGrowth();
+                growthStage++;
+                if (growthStage > 6) {
+                    clearInterval(growthInterval);
+                    growthInterval = null;
+                }
+            }, growthSpeed);
+        }
+
+        function resetGrowth() {
+            if (growthInterval) {
+                clearInterval(growthInterval);
+                growthInterval = null;
+            }
+            growthStage = 0;
+            const canvas = document.getElementById('growth-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#051005';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function setGrowthSpeed(speed) {
+            growthSpeed = speed === 'slow' ? 500 : speed === 'medium' ? 200 : 80;
+        }
+
+        function drawGrowth() {
+            const canvas = document.getElementById('growth-canvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+
+            canvas.width = canvas.offsetWidth * dpr;
+            canvas.height = canvas.offsetHeight * dpr;
+            ctx.scale(dpr, dpr);
+
+            const width = canvas.offsetWidth;
+            const height = canvas.offsetHeight;
+
+            ctx.fillStyle = '#051005';
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw ground
+            ctx.strokeStyle = 'rgba(16, 185, 129, 0.3)';
+            ctx.beginPath();
+            ctx.moveTo(0, height * 0.9);
+            ctx.lineTo(width, height * 0.9);
+            ctx.stroke();
+
+            const commands = lsys.getCommands();
+
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            for (let cmd of commands) {
+                minX = Math.min(minX, cmd.x1, cmd.x2);
+                maxX = Math.max(maxX, cmd.x1, cmd.x2);
+                minY = Math.min(minY, cmd.y1, cmd.y2);
+                maxY = Math.max(maxY, cmd.y1, cmd.y2);
+            }
+
+            const cx = width / 2, cy = height * 0.9;
+            const scale = Math.min(width * 0.8 / (maxX - minX || 1), height * 0.8 / (maxY - minY || 1));
+
+            for (let i = 0; i < Math.min(commands.length, growthStage * 100); i++) {
+                const cmd = commands[i];
+                if (cmd.type === 'line') {
+                    const t = 1 - (cmd.len / lsys.initialLength);
+                    ctx.strokeStyle = `rgba(${16 + t * 100}, ${185 - t * 50}, ${129 + t * 50}, ${0.5 + t * 0.4})`;
+                    ctx.lineWidth = Math.max(1, t * 3 + 1);
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(cmd.x1 * scale + cx - (minX + maxX) / 2 * scale, cmd.y1 * scale + cy - maxY * scale);
+                    ctx.lineTo(cmd.x2 * scale + cx - (minX + maxX) / 2 * scale, cmd.y2 * scale + cy - maxY * scale);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Gallery Drawing
+        function drawGalleryItems() {
+            // Sierpinski
+            drawGalleryFractal('gallery-sierpinski', 'sierpinski');
+            drawGalleryFractal('gallery-plant', 'plant');
+            drawGalleryFractal('gallery-koch', 'koch');
+            drawGalleryFractal('gallery-dragon', 'dragon');
+            drawGalleryFractal('gallery-hilbert', 'hilbert');
+            drawGalleryFractal('gallery-fern', 'fern');
+        }
+
+        function drawGalleryFractal(elementId, presetName) {
+            const svg = document.getElementById(elementId);
+            const preset = presets[presetName];
+            const l = new LSystem(preset.axiom, preset.rules, preset.angle, preset.length, preset.decay);
+
+            const maxIter = presetName === 'sierpinski' ? 5 : presetName === 'koch' ? 4 : presetName === 'dragon' ? 10 : presetName === 'hilbert' ? 5 : 4;
+            l.iterate(maxIter);
+
+            const commands = l.getCommands();
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+
+            let x = 0, y = 0, angle = -Math.PI / 2, len = l.initialLength;
+            const stack = [];
+
+            for (let char of l.string) {
+                switch (char) {
+                    case 'F':
+                        const nx = x + len * Math.cos(angle);
+                        const ny = y + len * Math.sin(angle);
+                        minX = Math.min(minX, x, nx);
+                        maxX = Math.max(maxX, x, nx);
+                        minY = Math.min(minY, y, ny);
+                        maxY = Math.max(maxY, y, ny);
+                        x = nx; y = ny;
+                        break;
+                    case 'G':
+                        const gx = x + len * Math.cos(angle);
+                        const gy = y + len * Math.sin(angle);
+                        minX = Math.min(minX, x, gx);
+                        maxX = Math.max(maxX, x, gx);
+                        minY = Math.min(minY, y, gy);
+                        maxY = Math.max(maxY, y, gy);
+                        x = gx; y = gy;
+                        break;
+                    case '+': angle += l.angle; break;
+                    case '-': angle -= l.angle; break;
+                    case '[': stack.push({ x, y, angle, len }); len *= l.decay; break;
+                    case ']': const s = stack.pop(); x = s.x; y = s.y; angle = s.angle; len = s.len; break;
+                    case '|': angle = -Math.PI / 2; break;
+                }
+            }
+
+            const width = 300, height = 200;
+            const scale = Math.min(width * 0.85 / (maxX - minX || 1), height * 0.85 / (maxY - minY || 1));
+            const cx = width / 2 - (minX + maxX) / 2 * scale;
+            const cy = height * 0.85 - maxY * scale;
+
+            let pathD = '';
+            x = 0; y = 0; angle = -Math.PI / 2; len = l.initialLength;
+
+            for (let char of l.string) {
+                switch (char) {
+                    case 'F':
+                        const nfx = x + len * Math.cos(angle);
+                        const nfy = y + len * Math.sin(angle);
+                        pathD += `M${x * scale + cx},${y * scale + cy} L${nfx * scale + cx},${nfy * scale + cy} `;
+                        x = nfx; y = nfy;
+                        break;
+                    case 'G':
+                        const ngx = x + len * Math.cos(angle);
+                        const ngy = y + len * Math.sin(angle);
+                        pathD += `M${x * scale + cx},${y * scale + cy} L${ngx * scale + cx},${ngy * scale + cy} `;
+                        x = ngx; y = ngy;
+                        break;
+                    case '+': angle += l.angle; break;
+                    case '-': angle -= l.angle; break;
+                    case '[': stack.push({ x, y, angle, len }); len *= l.decay; break;
+                    case ']': const st = stack.pop(); x = st.x; y = st.y; angle = st.angle; len = st.len; break;
+                    case '|': angle = -Math.PI / 2; break;
+                }
+            }
+
+            svg.innerHTML = `
+                <defs>
+                    <linearGradient id="grad-${presetName}" x1="0%" y1="100%" x2="0%" y2="0%">
+                        <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#22d3ee;stop-opacity:0.5" />
+                    </linearGradient>
+                </defs>
+                <path d="${pathD}" fill="none" stroke="url(#grad-${presetName})" stroke-width="1.5" stroke-linecap="round"/>
+            `;
+        }
+
+        // Hero Tree Animation
+        function drawHeroTree() {
+            const svg = document.getElementById('hero-tree');
+            const preset = presets.tree;
+            const l = new LSystem(preset.axiom, preset.rules, preset.angle, 4, 0.65);
+            l.iterate(6);
+
+            const commands = l.getCommands();
+            let pathD = '';
+            let x = 0, y = 0, angle = -Math.PI / 2, len = l.initialLength;
+            const stack = [];
+
+            for (let char of l.string) {
+                switch (char) {
+                    case 'F':
+                        const nfx = x + len * Math.cos(angle);
+                        const nfy = y + len * Math.sin(angle);
+                        pathD += `M${x},${y} L${nfx},${nfy} `;
+                        x = nfx; y = nfy;
+                        break;
+                    case '+': angle += l.angle; break;
+                    case '-': angle -= l.angle; break;
+                    case '[': stack.push({ x, y, angle, len }); len *= l.decay; break;
+                    case ']': const st = stack.pop(); x = st.x; y = st.y; angle = st.angle; len = st.len; break;
+                }
+            }
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathD);
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke', 'url(#branchGrad)');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('stroke-linecap', 'round');
+            path.style.strokeDasharray = '1000';
+            path.style.strokeDashoffset = '1000';
+            path.style.animation = 'grow 3s ease forwards';
+            svg.appendChild(path);
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            initLSystem();
+            drawLSystem();
+            drawHeroTree();
+            drawGalleryItems();
+
+            // Resize handler
+            window.addEventListener('resize', () => {
+                drawLSystem();
+            });
+        });
+
+        // Canvas mouse interaction
+        document.getElementById('lsystem-canvas').addEventListener('click', (e) => {
+            const canvas = e.target;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Flash effect at click point
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, 50);
+            gradient.addColorStop(0, 'rgba(34, 211, 238, 0.5)');
+            gradient.addColorStop(1, 'rgba(34, 211, 238, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        });
+    </script>
+</body>
+</html>
