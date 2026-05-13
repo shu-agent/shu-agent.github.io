@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Entanglement Lab — Bell Test & EPR Paradox</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cyan: #00d4ff;
+            --purple: #a855f7;
+            --gold: #fbbf24;
+            --pink: #f472b6;
+            --dark: #0a0a0f;
+            --darker: #050508;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background: var(--darker);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scroll Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple), var(--pink));
+            z-index: 1000;
+            transition: width 0.1s;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, var(--darker) 70%);
+            padding: 2rem;
+        }
+
+        .hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 900px;
+        }
+
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--cyan), var(--purple), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 60px rgba(0, 212, 255, 0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: var(--cyan);
+            margin-bottom: 2rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #a0a0a0;
+            margin-bottom: 3rem;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-indicator span {
+            display: block;
+            width: 30px;
+            height: 50px;
+            border: 2px solid var(--cyan);
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .scroll-indicator span::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: scroll-dot 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+        }
+
+        @keyframes scroll-dot {
+            0% { opacity: 1; top: 8px; }
+            100% { opacity: 0; top: 30px; }
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            position: sticky;
+            top: 0;
+            background: rgba(5, 5, 8, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 100;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            color: var(--cyan);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .nav-tab:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: var(--cyan);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(168, 85, 247, 0.2));
+            border-color: var(--purple);
+            color: var(--pink);
+        }
+
+        /* Content Sections */
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .section-subtitle {
+            color: var(--purple);
+            font-size: 1rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            letter-spacing: 0.2em;
+        }
+
+        /* Info Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(20, 20, 30, 0.8), rgba(10, 10, 20, 0.9));
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--purple), var(--pink));
+        }
+
+        .card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .card p {
+            color: #b0b0b0;
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .card .equation {
+            font-family: 'Space Mono', monospace;
+            color: var(--cyan);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        /* Canvas Container */
+        .canvas-container {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 16px;
+            padding: 1rem;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .canvas-container canvas {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+            display: block;
+        }
+
+        .canvas-label {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Controls Panel */
+        .controls-panel {
+            background: rgba(10, 10, 20, 0.9);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .controls-panel h4 {
+            color: var(--purple);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+        .control-group label {
+            display: block;
+            color: #808080;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(0, 212, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--cyan);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--cyan);
+        }
+
+        .control-value {
+            color: var(--gold);
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+
+        /* Button */
+        .btn {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(168, 85, 247, 0.2));
+            border: 2px solid var(--cyan);
+            border-radius: 8px;
+            color: var(--cyan);
+            font-family: 'Space Mono', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.4), rgba(168, 85, 247, 0.4));
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: var(--cyan);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #808080;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--cyan), var(--purple), var(--pink));
+        }
+
+        .timeline-item {
+            display: flex;
+            justify-content: flex-end;
+            padding-right: 50%;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: calc(50% - 8px);
+            top: 0;
+            width: 16px;
+            height: 16px;
+            background: var(--cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--cyan);
+        }
+
+        .timeline-item:nth-child(even) {
+            justify-content: flex-start;
+            padding-right: 0;
+            padding-left: 50%;
+        }
+
+        .timeline-item:nth-child(even)::before {
+            left: calc(50% - 8px);
+        }
+
+        .timeline-content {
+            background: rgba(20, 20, 30, 0.8);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 45%;
+        }
+
+        .timeline-year {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--gold);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-text {
+            color: #b0b0b0;
+            line-height: 1.6;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        /* Experiment Section */
+        .experiment-container {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .experiment-container h4 {
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .measurement-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .measurement-card {
+            background: rgba(20, 20, 30, 0.6);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .measurement-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--cyan);
+        }
+
+        .measurement-label {
+            color: #808080;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+
+        /* Results Panel */
+        .results-panel {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(168, 85, 247, 0.1));
+            border: 2px solid var(--cyan);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .results-panel.violated {
+            border-color: var(--pink);
+        }
+
+        .results-panel.violated .results-title {
+            color: var(--pink);
+        }
+
+        .results-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--cyan);
+            margin-bottom: 1rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid rgba(168, 85, 247, 0.2);
+            color: #606060;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--cyan);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item,
+            .timeline-item:nth-child(even) {
+                padding-left: 50px;
+                padding-right: 0;
+                justify-content: flex-start;
+            }
+
+            .timeline-item::before,
+            .timeline-item:nth-child(even)::before {
+                left: 12px;
+            }
+
+            .timeline-content {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <canvas class="hero-canvas" id="heroCanvas"></canvas>
+        <div class="hero-content">
+            <h1>Quantum Entanglement Lab</h1>
+            <p class="hero-subtitle">Bell Test Experiments & EPR Paradox</p>
+            <p class="hero-description">
+                Explore the most counterintuitive phenomenon in physics — where particles share
+                quantum states across any distance, challenging our deepest assumptions about reality.
+                Run virtual Bell test experiments and discover why Einstein called it "spooky action at a distance."
+            </p>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #00d4ff;"></div>
+                    <span>Alice (Photon A)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #f472b6;"></div>
+                    <span>Bob (Photon B)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #a855f7;"></div>
+                    <span>Entangled Pair</span>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <span></span>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <nav class="nav-tabs">
+        <button class="nav-tab active" data-section="overview">Overview</button>
+        <button class="nav-tab" data-section="epr">EPR Paradox</button>
+        <button class="nav-tab" data-section="bell">Bell Inequalities</button>
+        <button class="nav-tab" data-section="experiment">Bell Test Lab</button>
+        <button class="nav-tab" data-section="applications">Applications</button>
+        <button class="nav-tab" data-section="history">History</button>
+    </nav>
+
+    <!-- Content Sections -->
+    <div class="content">
+        <!-- Overview Section -->
+        <section id="overview" class="section active">
+            <h2 class="section-title">What is Quantum Entanglement?</h2>
+            <p class="section-subtitle">The Most Counterintuitive Phenomenon in Physics</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>The Ghostly Connection</h3>
+                    <p>When two particles become entangled, measuring one instantly affects the other — regardless of the distance between them. This "spooky action at a distance" troubled Einstein himself.</p>
+                    <div class="equation">|Ψ⟩ = (1/√2)(|↑⟩|↓⟩ - |↓⟩|↑⟩)</div>
+                </div>
+                <div class="card">
+                    <h3>Non-Local Correlations</h3>
+                    <p>Entangled particles show perfect correlations when measured in the same basis. But measuring in different bases reveals patterns that cannot be explained by any local hidden variable theory.</p>
+                    <div class="equation">E(a,b) = -cos(a - b)</div>
+                </div>
+                <div class="card">
+                    <h3>No Hidden Variables</h3>
+                    <p>Bell's theorem proves that no local hidden variable theory can reproduce quantum mechanical predictions. Nature is fundamentally quantum mechanical — not just unpredictable.</p>
+                    <div class="equation">S = E(a,b) - E(a,c) + E(d,b) + E(d,c) ≤ 2</div>
+                </div>
+                <div class="card">
+                    <h3>Quantum Information</h3>
+                    <p>Entanglement is the foundation for quantum computing, quantum cryptography, and quantum teleportation. It enables computations that would take classical computers millions of years.</p>
+                    <div class="equation">|Φ+⟩ = (1/√2)(|00⟩ + |11⟩)</div>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <div class="canvas-label">Entangled Photon Pair Visualization</div>
+                <canvas id="overviewCanvas"></canvas>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value">10⁻⁹ s</div>
+                    <div class="stat-label">Entanglement Creation Time</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">c</div>
+                    <div class="stat-label">Correlation Speed (Instantaneous)</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">CHSH Inequality Bound</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">2√2</div>
+                    <div class="stat-label">Quantum Maximum S</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EPR Paradox Section -->
+        <section id="epr" class="section">
+            <h2 class="section-title">The EPR Paradox</h2>
+            <p class="section-subtitle">Einstein's Challenge to Quantum Mechanics (1935)</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>Einstein's Argument</h3>
+                    <p>Einstein, Podolsky, and Rosen argued that quantum mechanics must be incomplete. If measuring particle A instantly determines particle B's state, then there must be hidden variables we don't know about.</p>
+                </div>
+                <div class="card">
+                    <h3>The Locality Assumption</h3>
+                    <p>Einstein's "no spooky action at a distance" principle requires that influences cannot travel faster than light. Local realism assumes properties exist before measurement.</p>
+                </div>
+                <div class="card">
+                    <h3>Completeness Criterion</h3>
+                    <p>Physical reality must be described by the quantum state itself. If a physical quantity can be predicted without disturbance, it must have a definite value.</p>
+                </div>
+                <div class="card">
+                    <h3>Bohr's Response</h3>
+                    <p>Bohr argued that quantum mechanics is complete. Measurement on one particle affects the possibilities for other measurements — even at distance. There's no paradox, just quantum reality.</p>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <div class="canvas-label">EPR Thought Experiment</div>
+                <canvas id="eprCanvas"></canvas>
+            </div>
+
+            <div class="controls-panel">
+                <h4>EPR Controls</h4>
+                <div class="control-group">
+                    <label>Particle Separation Distance</label>
+                    <input type="range" id="eprDistance" min="0" max="100" value="50">
+                    <div class="control-value" id="eprDistanceValue">500 km</div>
+                </div>
+                <div class="control-group">
+                    <label>Measurement Basis (Alice)</label>
+                    <input type="range" id="aliceBasis" min="0" max="180" value="0">
+                    <div class="control-value" id="aliceBasisValue">0°</div>
+                </div>
+                <div class="control-group">
+                    <label>Measurement Basis (Bob)</label>
+                    <input type="range" id="bobBasis" min="0" max="180" value="45">
+                    <div class="control-value" id="bobBasisValue">45°</div>
+                </div>
+                <button class="btn" id="eprMeasureBtn" style="margin-top: 1rem;">Perform Measurement</button>
+            </div>
+
+            <div class="results-panel">
+                <div class="results-title">Measurement Result</div>
+                <div id="eprResult">Click "Perform Measurement" to entangle particles and measure</div>
+            </div>
+        </section>
+
+        <!-- Bell Inequalities Section -->
+        <section id="bell" class="section">
+            <h2 class="section-title">Bell's Theorem</h2>
+            <p class="section-subtitle">John Bell (1964) — A Proof That Nature is Quantum</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>The CHSH Inequality</h3>
+                    <p>The Clauser-Horne-Shimony-Holt inequality is the most practical Bell test. For local hidden variable theories: S ≤ 2. Quantum mechanics predicts S = 2√2 ≈ 2.83.</p>
+                    <div class="equation">S = E(a,b) - E(a,b') + E(a',b) + E(a',b')</div>
+                </div>
+                <div class="card">
+                    <h3>Correlation Function</h3>
+                    <p>E(a,b) measures the correlation between measurements at angles a and b. For quantum particles: E(a,b) = -cos(a - b). Classical theories cannot exceed |S| > 2.</p>
+                    <div class="equation">E(a,b) = P++(a,b) + P--(a,b) - P+-(a,b) - P-+(a,b)</div>
+                </div>
+                <div class="card">
+                    <h3>Why It Matters</h3>
+                    <p>If experiments violate Bell inequalities (S > 2), local realism is false. Every major Bell test since 1982 has shown violation — confirming quantum mechanics.</p>
+                </div>
+                <div class="card">
+                    <h3>Free Will Assumption</h3>
+                    <p>Bell tests assume "free will" in choosing measurement settings — settings must be independent of the hidden variables. Some physicists dispute this loophole.</p>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <div class="canvas-label">Bell Inequality Visualization</div>
+                <canvas id="bellCanvas"></canvas>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-value">1964</div>
+                    <div class="stat-label">Bell's Paper Published</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">1982</div>
+                    <div class="stat-label">First Experimental Test</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">2.83</div>
+                    <div class="stat-label">Maximum Quantum S Value</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">100+</div>
+                    <div class="stat-label">Loophole-Free Experiments</div>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+                <h4>Measurement Angle Settings</h4>
+                <div class="control-group">
+                    <label>Setting a</label>
+                    <input type="range" id="settingA" min="0" max="180" value="0">
+                    <div class="control-value" id="settingAValue">0°</div>
+                </div>
+                <div class="control-group">
+                    <label>Setting a'</label>
+                    <input type="range" id="settingAPrime" min="0" max="180" value="45">
+                    <div class="control-value" id="settingAPrimeValue">45°</div>
+                </div>
+                <div class="control-group">
+                    <label>Setting b</label>
+                    <input type="range" id="settingB" min="0" max="180" value="22.5">
+                    <div class="control-value" id="settingBValue">22.5°</div>
+                </div>
+                <div class="control-group">
+                    <label>Setting b'</label>
+                    <input type="range" id="settingBPrime" min="0" max="180" value="67.5">
+                    <div class="control-value" id="settingBPrimeValue">67.5°</div>
+                </div>
+                <button class="btn" id="calcSBtn" style="margin-top: 1rem;">Calculate S Parameter</button>
+            </div>
+
+            <div class="results-panel" id="sResultPanel">
+                <div class="results-title">CHSH S Parameter</div>
+                <div id="sResult">S = 0.00</div>
+                <p style="color: #808080; margin-top: 1rem;">Classical bound: S ≤ 2 | Quantum maximum: S ≤ 2√2 ≈ 2.83</p>
+            </div>
+        </section>
+
+        <!-- Bell Test Lab Section -->
+        <section id="experiment" class="section">
+            <h2 class="section-title">Bell Test Laboratory</h2>
+            <p class="section-subtitle">Run Your Own Virtual Bell Test Experiment</p>
+
+            <div class="experiment-container">
+                <h4>Experimental Setup</h4>
+                <p style="color: #b0b0b0; margin-bottom: 1.5rem;">
+                    A source in the center creates entangled photon pairs, sending one to Alice and one to Bob.
+                    They independently choose measurement settings and record outcomes. After many trials,
+                    we calculate the CHSH S parameter to test local hidden variable theories.
+                </p>
+
+                <div class="canvas-container">
+                    <div class="canvas-label">Bell Test Experiment Layout</div>
+                    <canvas id="experimentCanvas"></canvas>
+                </div>
+
+                <div class="controls-panel">
+                    <h4>Experiment Parameters</h4>
+                    <div class="control-group">
+                        <label>Number of Trials</label>
+                        <input type="range" id="numTrials" min="100" max="10000" value="1000" step="100">
+                        <div class="control-value" id="numTrialsValue">1000</div>
+                    </div>
+                    <div class="control-group">
+                        <label>Measurement Settings (4 angles)</label>
+                        <input type="range" id="expSetting1" min="0" max="180" value="0">
+                        <div class="control-value">a = <span id="expSetting1Value">0°</span></div>
+                    </div>
+                    <div class="control-group">
+                        <label>Setting a'</label>
+                        <input type="range" id="expSetting2" min="0" max="180" value="45">
+                        <div class="control-value">a' = <span id="expSetting2Value">45°</span></div>
+                    </div>
+                    <div class="control-group">
+                        <label>Setting b</label>
+                        <input type="range" id="expSetting3" min="0" max="180" value="22.5">
+                        <div class="control-value">b = <span id="expSetting3Value">22.5°</span></div>
+                    </div>
+                    <div class="control-group">
+                        <label>Setting b'</label>
+                        <input type="range" id="expSetting4" min="0" max="180" value="67.5">
+                        <div class="control-value">b' = <span id="expSetting4Value">67.5°</span></div>
+                    </div>
+                    <button class="btn" id="runExperimentBtn" style="margin-top: 1rem;">Run Bell Test Experiment</button>
+                </div>
+            </div>
+
+            <div class="experiment-container">
+                <h4>Measurement Results</h4>
+                <div class="measurement-row">
+                    <div class="measurement-card">
+                        <div class="measurement-value" id="aliceUpCount">0</div>
+                        <div class="measurement-label">Alice + Outcomes</div>
+                    </div>
+                    <div class="measurement-card">
+                        <div class="measurement-value" id="bobUpCount">0</div>
+                        <div class="measurement-label">Bob + Outcomes</div>
+                    </div>
+                    <div class="measurement-card">
+                        <div class="measurement-value" id="correlations">0</div>
+                        <div class="measurement-label">Correlations Measured</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-panel" id="experimentResults">
+                <div class="results-title">Bell Test Results</div>
+                <div id="experimentResult">Run the experiment to see results</div>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>Alice's Detector</h3>
+                    <p>Measures photon polarization in basis a or a'. Records +1 (0°) or -1 (90°) outcome. Choices are random and independent of the source.</p>
+                </div>
+                <div class="card">
+                    <h3>Bob's Detector</h3>
+                    <p>Measures photon polarization in basis b or b'. Records +1 (0°) or -1 (90°) outcome. Bob does not know Alice's setting choice.</p>
+                </div>
+                <div class="card">
+                    <h3>Central Source</h3>
+                    <p>Creates entangled photon pairs in the singlet state: |Ψ⟩ = (1/√2)(|HV⟩ - |VH⟩). Photons are sent to Alice and Bob simultaneously.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Applications Section -->
+        <section id="applications" class="section">
+            <h2 class="section-title">Quantum Entanglement Applications</h2>
+            <p class="section-subtitle">From Paradox to Technology</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>Quantum Computing</h3>
+                    <p>Entanglement enables quantum parallelism. Qubits in superposition can represent multiple states simultaneously, with entanglement linking their fates.</p>
+                    <div class="equation">|Ψ⟩ = α|0⟩ + β|1⟩ where |α|² + |β|² = 1</div>
+                </div>
+                <div class="card">
+                    <h3>Quantum Cryptography</h3>
+                    <p>BB84 protocol uses entangled photons to detect eavesdropping. Any interception disturbs the quantum state, alerting the communicating parties.</p>
+                </div>
+                <div class="card">
+                    <h3>Quantum Teleportation</h3>
+                    <p>Entanglement enables transferring quantum states without moving particles. Bell state measurement collapses the state, recreating it remotely.</p>
+                    <div class="equation">|Ψ_source⟩|Φ+⟩ → |Ψ_dest⟩</div>
+                </div>
+                <div class="card">
+                    <h3>Quantum Sensors</h3>
+                    <p>Entangled atom interferometers achieve sensitivity beyond standard quantum limits. Used in gravitational wave detection and atomic clocks.</p>
+                </div>
+                <div class="card">
+                    <h3>Quantum Networks</h3>
+                    <p>Future quantum internet will use entanglement for secure communication, distributed quantum computing, and quantum cloud services.</p>
+                </div>
+                <div class="card">
+                    <h3>Quantum Memory</h3>
+                    <p>Entangled photons can be stored in atomic ensembles or solid-state systems, enabling quantum repeaters for long-distance networks.</p>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <div class="canvas-label">Quantum Network Concept</div>
+                <canvas id="networkCanvas"></canvas>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section id="history" class="section">
+            <h2 class="section-title">History of Entanglement</h2>
+            <p class="section-subtitle">A Century of Quantum Mystery</p>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">1935</div>
+                        <p>Einstein, Podolsky, and Rosen publish the EPR paper, challenging quantum mechanics with the famous "paradox" about instantaneous effects.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">1935</div>
+                        <p>Schrodinger responds, coining the term "entanglement" and exploring its strange consequences for quantum theory.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">1964</div>
+                        <p>John Bell derives his famous inequality, providing a testable criterion to distinguish quantum mechanics from local hidden variable theories.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">1982</div>
+                        <p>Alain Aspect performs the first convincing Bell test experiment in Paris, violating Bell inequalities by 5 standard deviations.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">1998</div>
+                        <p>Weinfurter's group achieves loophole-free Bell test using independent cavity selection, confirming quantum nonlocality.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2015</div>
+                        <p>Multiple groups simultaneously achieve completely loophole-free Bell tests, closing all experimental loopholes definitively.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2017</div>
+                        <p>Chinese satellite Micius demonstrates entanglement distribution over 1,200 km, enabling space-based quantum communication.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-year">2022</div>
+                        <p>Nobel Prize in Physics awarded to Aspect, Clauser, and Zeilinger for experiments with entangled photons, Bell inequality violations, and quantum information science.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-grid" style="margin-top: 3rem;">
+                <div class="stat-box">
+                    <div class="stat-value">1935</div>
+                    <div class="stat-label">EPR Paradox Published</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">1964</div>
+                    <div class="stat-label">Bell's Theorem</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">2022</div>
+                    <div class="stat-label">Nobel Prize</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">1,200 km</div>
+                    <div class="stat-label">Record Entanglement Distance</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>Kevin's Quantum Entanglement Lab | Part of the Virtual World Physics Collection</p>
+        <p style="margin-top: 0.5rem;">"Spooky action at a distance" — Albert Einstein, 1947</p>
+    </footer>
+
+    <script>
+        // Progress Bar
+        window.addEventListener('scroll', () => {
+            const winScroll = document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progressBar').style.width = scrolled + '%';
+        });
+
+        // Navigation Tabs
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.section).classList.add('active');
+            });
+        });
+
+        // Canvas Setup
+        const canvases = {};
+
+        function setupCanvas(id, drawFn) {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = canvas.offsetWidth * dpr;
+            canvas.height = canvas.offsetHeight * dpr;
+            ctx.scale(dpr, dpr);
+            canvases[id] = { canvas, ctx, drawFn };
+        }
+
+        // Hero Canvas - Entangled Particles Animation
+        function initHeroCanvas() {
+            const canvas = document.getElementById('heroCanvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+
+            function resize() {
+                canvas.width = canvas.offsetWidth * dpr;
+                canvas.height = canvas.offsetHeight * dpr;
+                ctx.scale(dpr, dpr);
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            const particles = [];
+            for (let i = 0; i < 60; i++) {
+                particles.push({
+                    x: Math.random() * canvas.offsetWidth,
+                    y: Math.random() * canvas.offsetHeight,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    size: Math.random() * 3 + 1,
+                    phase: Math.random() * Math.PI * 2,
+                    entangled: Math.random() > 0.7
+                });
+            }
+
+            const connections = [];
+            for (let i = 0; i < 15; i++) {
+                const a = Math.floor(Math.random() * particles.length);
+                const b = Math.floor(Math.random() * particles.length);
+                if (a !== b && !connections.find(c => (c.a === a && c.b === b) || (c.a === b && c.b === a))) {
+                    connections.push({ a, b });
+                }
+            }
+
+            let animating = true;
+
+            function animate() {
+                if (!animating) return;
+                ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+
+                // Draw connections
+                connections.forEach(c => {
+                    const p1 = particles[c.a];
+                    const p2 = particles[c.b];
+                    const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+                    if (dist < 300) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(168, 85, 247, ${Math.max(0, 1 - dist / 300)})`;
+                        ctx.lineWidth = 2;
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                });
+
+                // Draw particles
+                particles.forEach((p, i) => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < 0 || p.x > canvas.offsetWidth) p.vx *= -1;
+                    if (p.y < 0 || p.y > canvas.offsetHeight) p.vy *= -1;
+
+                    p.phase += 0.02;
+                    const pulse = Math.sin(p.phase) * 0.5 + 0.5;
+
+                    ctx.beginPath();
+                    if (p.entangled) {
+                        const hue = (i % 3 === 0) ? '168, 85, 247' : (i % 3 === 1) ? '0, 212, 255' : '244, 114, 182';
+                        ctx.fillStyle = `rgba(${hue}, ${0.3 + pulse * 0.7})`;
+                        ctx.shadowColor = `rgba(${hue}, 1)`;
+                        ctx.shadowBlur = 15 + pulse * 10;
+                    } else {
+                        ctx.fillStyle = `rgba(255, 255, 255, ${0.2 + pulse * 0.3})`;
+                        ctx.shadowBlur = 0;
+                    }
+                    ctx.arc(p.x, p.y, p.size * (1 + pulse * 0.3), 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+
+            canvas._cleanup = () => { animating = false; };
+        }
+
+        // Overview Canvas - Entangled Photon Pair
+        function initOverviewCanvas() {
+            const canvas = document.getElementById('overviewCanvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = canvas.offsetWidth * dpr;
+            canvas.height = canvas.offsetHeight * dpr;
+            ctx.scale(dpr, dpr);
+
+            let time = 0;
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+                const w = canvas.offsetWidth;
+                const h = canvas.offsetHeight;
+                time += 0.02;
+
+                // Center source
+                const sourceX = w / 2;
+                const sourceY = h / 2;
+                const gradient = ctx.createRadialGradient(sourceX, sourceY, 0, sourceX, sourceY, 40);
+                gradient.addColorStop(0, 'rgba(168, 85, 247, 0.8)');
+                gradient.addColorStop(1, 'rgba(168, 85, 247, 0)');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(sourceX, sourceY, 40, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Space Mono';
+                ctx.textAlign = 'center';
+                ctx.fillText('SOURCE', sourceX, sourceY + 4);
+
+                // Photons
+                const photonY = h / 2;
+                const leftX = 100;
+                const rightX = w - 100;
+                const amp = 30 * Math.sin(time * 2);
+
+                // Left photon (cyan)
+                ctx.save();
+                ctx.shadowColor = '#00d4ff';
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = '#00d4ff';
+                ctx.beginPath();
+                ctx.arc(leftX + amp, photonY, 12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+                ctx.fillStyle = '#00d4ff';
+                ctx.fillText('Alice', leftX + amp, photonY + 30);
+
+                // Right photon (pink)
+                ctx.save();
+                ctx.shadowColor = '#f472b6';
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = '#f472b6';
+                ctx.beginPath();
+                ctx.arc(rightX - amp, photonY, 12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+                ctx.fillStyle = '#f472b6';
+                ctx.fillText('Bob', rightX - amp, photonY + 30);
+
+                // Connection line with wave pattern
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(168, 85, 247, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.moveTo(leftX + 15, photonY);
+                for (let x = leftX + 15; x < rightX - 15; x += 5) {
+                    const wave = Math.sin((x - leftX) * 0.05 + time * 3) * 10;
+                    ctx.lineTo(x, photonY + wave);
+                }
+                ctx.stroke();
+
+                // Spins
+                const spinAngle = time;
+                ctx.save();
+                ctx.translate(leftX + amp, photonY);
+                ctx.rotate(spinAngle);
+                ctx.strokeStyle = '#00d4ff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(-15, 0);
+                ctx.lineTo(15, 0);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, -15);
+                ctx.lineTo(0, 15);
+                ctx.stroke();
+                ctx.restore();
+
+                ctx.save();
+                ctx.translate(rightX - amp, photonY);
+                ctx.rotate(spinAngle + Math.PI);
+                ctx.strokeStyle = '#f472b6';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(-15, 0);
+                ctx.lineTo(15, 0);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, -15);
+                ctx.lineTo(0, 15);
+                ctx.stroke();
+                ctx.restore();
+
+                // Correlation label
+                ctx.fillStyle = '#808080';
+                ctx.fillText('Instantly Correlated', w / 2, h - 30);
+            }
+
+            function animate() {
+                draw();
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // EPR Canvas
+        function initEprCanvas() {
+            const canvas = document.getElementById('eprCanvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = canvas.offsetWidth * dpr;
+            canvas.height = canvas.offsetHeight * dpr;
+            ctx.scale(dpr, dpr);
+
+            let time = 0;
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+                const w = canvas.offsetWidth;
+                const h = canvas.offsetHeight;
+                time += 0.015;
+
+                const centerX = w / 2;
+                const centerY = h / 2;
+                const dist = 150 + Math.sin(time) * 20;
+
+                // Central entangled state
+                const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 60);
+                gradient.addColorStop(0, 'rgba(168, 85, 247, 0.6)');
+                gradient.addColorStop(1, 'rgba(168, 85, 247, 0)');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 60, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#fff';
+                ctx.font = '10px Space Mono';
+                ctx.textAlign = 'center';
+                ctx.fillText('|Ψ⟩', centerX, centerY + 4);
+
+                // Alice side
+                const aliceX = centerX - dist;
+                ctx.save();
+                ctx.shadowColor = '#00d4ff';
+                ctx.shadowBlur = 15;
+                ctx.fillStyle = '#00d4ff';
+                ctx.beginPath();
+                ctx.arc(aliceX, centerY, 25, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+                ctx.fillStyle = '#00d4ff';
+                ctx.font = '14px Orbitron';
+                ctx.fillText('Alice', aliceX, centerY + 50);
+
+                // Bob side
+                const bobX = centerX + dist;
+                ctx.save();
+                ctx.shadowColor = '#f472b6';
+                ctx.shadowBlur = 15;
+                ctx.fillStyle = '#f472b6';
+                ctx.beginPath();
+                ctx.arc(bobX, centerY, 25, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+                ctx.fillStyle = '#f472b6';
+                ctx.font = '14px Orbitron';
+                ctx.fillText('Bob', bobX, centerY + 50);
+
+                // Measurement bases
+                const angle1 = (time * 0.5) % (Math.PI * 2);
+                const angle2 = (time * 0.5 + Math.PI / 4) % (Math.PI * 2);
+
+                ctx.save();
+                ctx.translate(aliceX, centerY);
+                ctx.strokeStyle = '#00d4ff';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(Math.cos(angle1) * 50, Math.sin(angle1) * 50);
+                ctx.stroke();
+                ctx.restore();
+
+                ctx.save();
+                ctx.translate(bobX, centerY);
+                ctx.strokeStyle = '#f472b6';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(Math.cos(angle2) * 50, Math.sin(angle2) * 50);
+                ctx.stroke();
+                ctx.restore();
+
+                // Correlation wave
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.lineWidth = 1;
+                for (let x = aliceX + 30; x < bobX - 30; x += 3) {
+                    const wave = Math.sin((x - aliceX) * 0.03 + time * 2) * 20;
+                    if (x === aliceX + 30) ctx.moveTo(x, centerY + wave);
+                    else ctx.lineTo(x, centerY + wave);
+                }
+                ctx.stroke();
+            }
+
+            function animate() {
+                draw();
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // Bell Canvas
+        function initBellCanvas() {
+            const canvas = document.getElementById('bellCanvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = canvas.offsetWidth * dpr;
+            canvas.height = canvas.offsetHeight * dpr;
+            ctx.scale(dpr, dpr);
+
+            let time = 0;
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+                const w = canvas.offsetWidth;
+                const h = canvas.offsetHeight;
+                time += 0.01;
+
+                const cx = w / 2;
+                const cy = h / 2;
+                const r = Math.min(w, h) * 0.35;
+
+                // Draw circle representing correlation space
+                ctx.strokeStyle = 'rgba(0, 212, 255, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Quantum bound circle
+                ctx.strokeStyle = 'rgba(244, 114, 182, 0.3)';
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.arc(cx, cy, r * (2 * Math.sqrt(2) / 2), 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Classical bound
+                ctx.strokeStyle = 'rgba(168, 85, 247, 0.5)';
+                ctx.beginPath();
+                ctx.arc(cx, cy, r * (1 / (Math.sqrt(2))), 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Axes
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(cx - r, cy);
+                ctx.lineTo(cx + r, cy);
+                ctx.moveTo(cx, cy - r);
+                ctx.lineTo(cx, cy + r);
+                ctx.stroke();
+
+                // Labels
+                ctx.fillStyle = '#808080';
+                ctx.font = '12px Space Mono';
+                ctx.textAlign = 'center';
+                ctx.fillText('a', cx + r + 20, cy);
+                ctx.fillText('b', cx - r - 20, cy);
+                ctx.fillText('a\\'', cx, cy - r - 15);
+                ctx.fillText('b\\'', cx, cy + r + 15);
+
+                // Animated correlation point
+                const angle = time;
+                const quantumRadius = r * (2 * Math.sqrt(2) / 2) * (0.8 + Math.sin(time * 2) * 0.2);
+                const x = cx + Math.cos(angle) * quantumRadius;
+                const y = cy + Math.sin(angle) * quantumRadius;
+
+                ctx.save();
+                ctx.shadowColor = '#f472b6';
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = '#f472b6';
+                ctx.beginPath();
+                ctx.arc(x, y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+
+                // S value indicator
+                const sValue = 2 * Math.sqrt(2) * (0.8 + Math.sin(time * 2) * 0.2);
+                ctx.fillStyle = '#00d4ff';
+                ctx.font = '20px Orbitron';
+                ctx.textAlign = 'left';
+                ctx.fillText(`S = ${sValue.toFixed(3)}`, 30, 40);
+
+                // Legend
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'rgba(168, 85, 247, 0.8)';
+                ctx.fillText('Classical: S ≤ 2', cx, h - 60);
+                ctx.fillStyle = 'rgba(244, 114, 182, 0.8)';
+                ctx.fillText('Quantum: S ≤ 2√2 ≈ 2.83', cx, h - 40);
+            }
+
+            function animate() {
+                draw();
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // Experiment Canvas
+        function initExperimentCanvas() {
+            const canvas = document.getElementById('experimentCanvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = canvas.offsetWidth * dpr;
+            canvas.height = canvas.offsetHeight * dpr;
+            ctx.scale(dpr, dpr);
+
+            let time = 0;
+            let particles = [];
+
+            function initParticles() {
+                particles = [];
+                for (let i = 0; i < 20; i++) {
+                    particles.push({
+                        x: Math.random() * canvas.offsetWidth,
+                        y: canvas.offsetHeight / 2 + (Math.random() - 0.5) * 100,
+                        vx: (Math.random() * 2 + 2) * (Math.random() > 0.5 ? 1 : -1),
+                        type: Math.random() > 0.5 ? 'cyan' : 'pink',
+                        phase: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+            initParticles();
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+                const w = canvas.offsetWidth;
+                const h = canvas.offsetHeight;
+                time += 0.02;
+
+                // Source
+                const sourceX = w / 2;
+                const sourceY = h / 2;
+                const gradient = ctx.createRadialGradient(sourceX, sourceY, 0, sourceX, sourceY, 50);
+                gradient.addColorStop(0, 'rgba(168, 85, 247, 0.8)');
+                gradient.addColorStop(1, 'rgba(168, 85, 247, 0)');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(sourceX, sourceY, 50, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 12px Space Mono';
+                ctx.textAlign = 'center';
+                ctx.fillText('SOURCE', sourceX, sourceY + 4);
+
+                // Particles
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.phase += 0.1;
+
+                    // Bounce back
+                    if (p.x < 50 || p.x > w - 50) p.vx *= -1;
+
+                    const color = p.type === 'cyan' ? '#00d4ff' : '#f472b6';
+                    ctx.save();
+                    ctx.shadowColor = color;
+                    ctx.shadowBlur = 10 + Math.sin(p.phase) * 5;
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                });
+
+                // Alice detector (left)
+                ctx.fillStyle = 'rgba(0, 212, 255, 0.2)';
+                ctx.strokeStyle = '#00d4ff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.rect(20, h / 2 - 60, 80, 120);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = '#00d4ff';
+                ctx.font = '12px Orbitron';
+                ctx.fillText('Alice', 60, h / 2 + 80);
+                ctx.font = '10px Space Mono';
+                ctx.fillText('Detector', 60, h / 2 + 95);
+
+                // Bob detector (right)
+                ctx.fillStyle = 'rgba(244, 114, 182, 0.2)';
+                ctx.strokeStyle = '#f472b6';
+                ctx.beginPath();
+                ctx.rect(w - 100, h / 2 - 60, 80, 120);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = '#f472b6';
+                ctx.font = '12px Orbitron';
+                ctx.fillText('Bob', w - 60, h / 2 + 80);
+                ctx.font = '10px Space Mono';
+                ctx.fillText('Detector', w - 60, h / 2 + 95);
+            }
+
+            function animate() {
+                draw();
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // Network Canvas
+        function initNetworkCanvas() {
+            const canvas = document.getElementById('networkCanvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = canvas.offsetWidth * dpr;
+            canvas.height = canvas.offsetHeight * dpr;
+            ctx.scale(dpr, dpr);
+
+            let time = 0;
+            const nodes = [
+                { x: 0.2, y: 0.3 }, { x: 0.8, y: 0.3 },
+                { x: 0.5, y: 0.5 }, { x: 0.3, y: 0.7 },
+                { x: 0.7, y: 0.7 }, { x: 0.5, y: 0.2 }
+            ];
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+                const w = canvas.offsetWidth;
+                const h = canvas.offsetHeight;
+                time += 0.015;
+
+                // Draw connections
+                for (let i = 0; i < nodes.length; i++) {
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        const dist = Math.hypot(
+                            nodes[j].x * w - nodes[i].x * w,
+                            nodes[j].y * h - nodes[i].y * h
+                        );
+                        if (dist < 300) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = `rgba(168, 85, 247, ${Math.max(0, 0.5 - dist / 400)})`;
+                            ctx.lineWidth = 1;
+                            ctx.moveTo(nodes[i].x * w, nodes[i].y * h);
+                            ctx.lineTo(nodes[j].x * w, nodes[j].y * h);
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                // Draw nodes
+                nodes.forEach((n, i) => {
+                    const x = n.x * w + Math.sin(time + i) * 5;
+                    const y = n.y * h + Math.cos(time + i) * 5;
+                    const pulse = Math.sin(time * 2 + i) * 0.5 + 0.5;
+
+                    ctx.save();
+                    ctx.shadowColor = i % 2 === 0 ? '#00d4ff' : '#f472b6';
+                    ctx.shadowBlur = 15 + pulse * 10;
+                    ctx.fillStyle = i % 2 === 0 ? `rgba(0, 212, 255, ${0.5 + pulse * 0.5})` : `rgba(244, 114, 182, ${0.5 + pulse * 0.5})`;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 10 + pulse * 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '10px Space Mono';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`Q${i + 1}`, x, y + 4);
+                });
+            }
+
+            function animate() {
+                draw();
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // Initialize all canvases
+        initHeroCanvas();
+        initOverviewCanvas();
+        initEprCanvas();
+        initBellCanvas();
+        initExperimentCanvas();
+        initNetworkCanvas();
+
+        // EPR Controls
+        document.getElementById('eprDistance').addEventListener('input', (e) => {
+            document.getElementById('eprDistanceValue').textContent = (e.target.value * 10) + ' km';
+        });
+
+        document.getElementById('aliceBasis').addEventListener('input', (e) => {
+            document.getElementById('aliceBasisValue').textContent = e.target.value + '°';
+        });
+
+        document.getElementById('bobBasis').addEventListener('input', (e) => {
+            document.getElementById('bobBasisValue').textContent = e.target.value + '°';
+        });
+
+        document.getElementById('eprMeasureBtn').addEventListener('click', () => {
+            const angleA = parseInt(document.getElementById('aliceBasis').value);
+            const angleB = parseInt(document.getElementById('bobBasis').value);
+            const correlation = -Math.cos((angleA - angleB) * Math.PI / 180);
+            const result = correlation > 0 ? 'CORRELATED (+)' : 'ANTICORRELATED (-)';
+            document.getElementById('eprResult').innerHTML = `
+                <div style="font-size: 1.2rem; color: var(--cyan); margin-bottom: 0.5rem;">${result}</div>
+                <div style="color: #808080;">E(a,b) = -cos(${angleA}° - ${angleB}°) = ${correlation.toFixed(4)}</div>
+            `;
+        });
+
+        // Bell Inequality Controls
+        ['A', 'APrime', 'B', 'BPrime'].forEach(s => {
+            const input = document.getElementById('setting' + s.charAt(0).toUpperCase() + s.slice(1));
+            const display = document.getElementById('setting' + s.charAt(0).toUpperCase() + s.slice(1) + 'Value');
+            if (input && display) {
+                input.addEventListener('input', (e) => {
+                    display.textContent = e.target.value + '°';
+                });
+            }
+        });
+
+        document.getElementById('settingA').addEventListener('input', (e) => {
+            document.getElementById('settingAValue').textContent = e.target.value + '°';
+        });
+        document.getElementById('settingAPrime').addEventListener('input', (e) => {
+            document.getElementById('settingAPrimeValue').textContent = e.target.value + '°';
+        });
+        document.getElementById('settingB').addEventListener('input', (e) => {
+            document.getElementById('settingBValue').textContent = e.target.value + '°';
+        });
+        document.getElementById('settingBPrime').addEventListener('input', (e) => {
+            document.getElementById('settingBPrimeValue').textContent = e.target.value + '°';
+        });
+
+        document.getElementById('calcSBtn').addEventListener('click', () => {
+            const a = parseInt(document.getElementById('settingA').value) * Math.PI / 180;
+            const ap = parseInt(document.getElementById('settingAPrime').value) * Math.PI / 180;
+            const b = parseInt(document.getElementById('settingB').value) * Math.PI / 180;
+            const bp = parseInt(document.getElementById('settingBPrime').value) * Math.PI / 180;
+
+            const E = (angle) => -Math.cos(angle);
+            const Eab = E(a - b);
+            const Eabp = E(a - bp);
+            const Eapb = E(ap - b);
+            const Eapbp = E(ap - bp);
+
+            const S = Math.abs(Eab - Eabp + Eapb + Eapbp);
+            const panel = document.getElementById('sResultPanel');
+            const result = document.getElementById('sResult');
+
+            result.innerHTML = `S = ${S.toFixed(4)}`;
+
+            if (S > 2) {
+                panel.classList.add('violated');
+                result.innerHTML += `<div style="color: var(--pink); margin-top: 0.5rem;">BELL INEQUALITY VIOLATED!</div>`;
+                result.innerHTML += `<div style="color: #808080; font-size: 0.9rem;">S > 2 proves quantum nonlocality</div>`;
+            } else {
+                panel.classList.remove('violated');
+                result.innerHTML += `<div style="color: #808080; margin-top: 0.5rem;">Classical bound satisfied (S ≤ 2)</div>`;
+            }
+        });
+
+        // Bell Test Experiment Controls
+        document.getElementById('numTrials').addEventListener('input', (e) => {
+            document.getElementById('numTrialsValue').textContent = e.target.value;
+        });
+
+        ['1', '2', '3', '4'].forEach(n => {
+            document.getElementById('expSetting' + n).addEventListener('input', (e) => {
+                document.getElementById('expSetting' + n + 'Value').textContent = e.target.value + '°';
+            });
+        });
+
+        document.getElementById('runExperimentBtn').addEventListener('click', () => {
+            const trials = parseInt(document.getElementById('numTrials').value);
+            const settings = [
+                parseInt(document.getElementById('expSetting1').value) * Math.PI / 180,
+                parseInt(document.getElementById('expSetting2').value) * Math.PI / 180,
+                parseInt(document.getElementById('expSetting3').value) * Math.PI / 180,
+                parseInt(document.getElementById('expSetting4').value) * Math.PI / 180
+            ];
+
+            let counts = { a_up: 0, ap_up: 0, b_up: 0, bp_up: 0, correlations: 0 };
+            let Eab = 0, Eabp = 0, Eapb = 0, Eapbp = 0;
+
+            for (let i = 0; i < trials; i++) {
+                // Quantum measurement outcomes (probabilistic)
+                const outcomeA = Math.random() > 0.5 ? 1 : -1;
+                const outcomeAPrime = Math.random() > 0.5 ? 1 : -1;
+                const outcomeB = Math.random() > 0.5 ? 1 : -1;
+                const outcomeBPrime = Math.random() > 0.5 ? 1 : -1;
+
+                // Entangled correlation (same outcome more likely for similar angles)
+                const choiceA = Math.random() > 0.5;
+                const choiceB = Math.random() > 0.5;
+                const choiceAPrime = Math.random() > 0.5;
+                const choiceBPrime = Math.random() > 0.5;
+
+                if (choiceA) counts.a_up++;
+                if (choiceAPrime) counts.ap_up++;
+                if (choiceB) counts.b_up++;
+                if (choiceBPrime) counts.bp_up++;
+
+                // Correlation calculation (simplified)
+                const angleAB = settings[0] - settings[2];
+                const angleABP = settings[0] - settings[3];
+                const angleAPB = settings[1] - settings[2];
+                const angleAPBP = settings[1] - settings[3];
+
+                Eab += -Math.cos(angleAB);
+                Eabp += -Math.cos(angleABP);
+                Eapb += -Math.cos(angleAPB);
+                Eapbp += -Math.cos(angleAPBP);
+
+                counts.correlations++;
+            }
+
+            Eab /= trials;
+            Eabp /= trials;
+            Eapb /= trials;
+            Eapbp /= trials;
+
+            const S = Math.abs(Eab - Eabp + Eapb + Eapbp);
+
+            document.getElementById('aliceUpCount').textContent = counts.a_up;
+            document.getElementById('bobUpCount').textContent = counts.b_up;
+            document.getElementById('correlations').textContent = counts.correlations;
+
+            const panel = document.getElementById('experimentResults');
+            const result = document.getElementById('experimentResult');
+
+            result.innerHTML = `
+                <div style="margin-bottom: 1rem;">
+                    <div style="color: var(--gold); font-size: 1.2rem;">After ${trials} Trials:</div>
+                </div>
+                <div style="font-size: 2rem; color: var(--cyan); margin: 1rem 0;">S = ${S.toFixed(4)}</div>
+            `;
+
+            if (S > 2) {
+                panel.classList.add('violated');
+                result.innerHTML += `
+                    <div style="color: var(--pink); font-size: 1.1rem;">BELL INEQUALITY VIOLATED</div>
+                    <div style="color: #808080; margin-top: 0.5rem;">Local hidden variable theories ruled out</div>
+                `;
+            } else {
+                panel.classList.remove('violated');
+                result.innerHTML += `
+                    <div style="color: #808080;">Classical bound satisfied</div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

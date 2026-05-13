@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Energy Band Diagram — Electronic Structure Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a12;
+            --bg-secondary: #12121f;
+            --bg-card: #1a1a2e;
+            --text-primary: #e8e8f0;
+            --text-secondary: #8888a0;
+            --accent-blue: #4a9eff;
+            --accent-purple: #9b6dff;
+            --accent-green: #4aff9b;
+            --accent-orange: #ff9b4a;
+            --accent-red: #ff4a6a;
+            --nmc-color: #4a9eff;
+            --lfp-color: #4aff9b;
+            --nca-color: #ff4a6a;
+            --lco-color: #9b6dff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .hero {
+            background: linear-gradient(135deg, #0a0a12 0%, #1a1a3e 50%, #0a0a12 100%);
+            padding: 80px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 30%, rgba(74, 158, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(155, 109, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .hero-content { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; }
+        .hero h1 {
+            font-size: 3em;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.2em;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        .floating-electrons {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0; left: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .electron {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--accent-blue);
+            animation: float 8s infinite ease-in-out;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+            50% { transform: translateY(-100px) translateX(50px); opacity: 1; }
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
+        .section { margin-bottom: 60px; }
+        .section-title {
+            font-size: 1.8em;
+            font-weight: 300;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .section-title .icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+        }
+        .controls {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .control-group label {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .control-group select, .control-group input {
+            padding: 10px 15px;
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1em;
+            cursor: pointer;
+            min-width: 180px;
+        }
+        .control-group select:hover, .control-group input:hover {
+            border-color: var(--accent-blue);
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .card h3 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card h3 .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            box-shadow: 0 0 15px currentColor;
+        }
+        .card p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 0.95em;
+        }
+        .band-diagram-container {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 30px;
+        }
+        .band-diagram-container canvas {
+            max-height: 500px;
+        }
+        .energy-levels {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .energy-level {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .level-label {
+            width: 100px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+        .level-bar {
+            flex: 1;
+            height: 30px;
+            background: var(--bg-card);
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+        .level-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        .level-value {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .dos-chart-container {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .voltage-diagram {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 30px;
+        }
+        .voltage-diagram canvas {
+            max-height: 400px;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .comparison-table th {
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.05em;
+        }
+        .comparison-table tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+        .comparison-table td:first-child {
+            font-weight: 600;
+        }
+        .equation-box {
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 3px solid var(--accent-purple);
+            font-family: 'Courier New', monospace;
+        }
+        .equation-box .eq-title {
+            font-size: 0.85em;
+            color: var(--accent-purple);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .equation-box .eq-formula {
+            font-size: 1.2em;
+            color: var(--accent-green);
+        }
+        .equation-box .eq-desc {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .fermi-visual {
+            position: relative;
+            height: 400px;
+            background: var(--bg-card);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        .fermi-layer {
+            position: absolute;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: top 0.5s ease;
+        }
+        .fermi-label {
+            position: absolute;
+            right: 20px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+        .physics-panel {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .physics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .physics-item {
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .physics-item h4 {
+            color: var(--accent-blue);
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+        .physics-item p {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .legend {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            padding: 15px;
+            background: var(--bg-card);
+            border-radius: 10px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .tab-container {
+            margin-bottom: 30px;
+        }
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 12px 25px;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+        .tab:hover {
+            background: var(--bg-card);
+            border-color: var(--accent-blue);
+        }
+        .tab.active {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-color: transparent;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2em; }
+            .controls { flex-direction: column; }
+            .control-group select, .control-group input { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="floating-electrons">
+            <div class="electron" style="left:10%;top:20%;animation-delay:0s"></div>
+            <div class="electron" style="left:20%;top:60%;animation-delay:1s;background:var(--accent-purple)"></div>
+            <div class="electron" style="left:70%;top:30%;animation-delay:2s;background:var(--accent-green)"></div>
+            <div class="electron" style="left:85%;top:70%;animation-delay:3s"></div>
+            <div class="electron" style="left:50%;top:80%;animation-delay:4s;background:var(--accent-orange)"></div>
+        </div>
+        <div class="hero-content">
+            <h1>BATTERY ENERGY BAND DIAGRAM</h1>
+            <p>Interactive visualization of electronic structure in battery materials — where quantum mechanics meets electrochemistry. Explore band gaps, Fermi levels, and density of states across battery chemistries.</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Controls -->
+        <div class="controls">
+            <div class="control-group">
+                <label>Chemistry Type</label>
+                <select id="chemistrySelect" onchange="updateBandDiagram()">
+                    <option value="nmc811">NMC 811</option>
+                    <option value="lfp">LFP (LiFePO₄)</option>
+                    <option value="nca">NCA (LiNiCoAlO₂)</option>
+                    <option value="lco">LCO (LiCoO₂)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>SOC (%)</label>
+                <input type="range" id="socSlider" min="0" max="100" value="50" onchange="updateBandDiagram()">
+                <span id="socValue">50%</span>
+            </div>
+            <div class="control-group">
+                <label>Temperature (°C)</label>
+                <input type="range" id="tempSlider" min="-20" max="60" value="25" onchange="updateBandDiagram()">
+                <span id="tempValue">25°C</span>
+            </div>
+            <div class="control-group">
+                <label>View Mode</label>
+                <select id="viewMode" onchange="updateBandDiagram()">
+                    <option value="bands">Band Structure</option>
+                    <option value="fermi">Fermi Level Alignment</option>
+                    <option value="dos">Density of States</option>
+                    <option value="voltage">Voltage Generation</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Band Diagram Section -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">⚛</span>
+                Electronic Band Structure
+            </h2>
+            <div class="tab-container">
+                <div class="tabs">
+                    <div class="tab active" onclick="showTab('band-tab')">Band Diagram</div>
+                    <div class="tab" onclick="showTab('dos-tab')">Density of States</div>
+                    <div class="tab" onclick="showTab('fermi-tab')">Fermi Level</div>
+                    <div class="tab" onclick="showTab('voltage-tab')">Voltage Generation</div>
+                </div>
+
+                <div id="band-tab" class="tab-content active">
+                    <div class="band-diagram-container">
+                        <canvas id="bandChart"></canvas>
+                        <div class="legend" id="bandLegend"></div>
+                    </div>
+                </div>
+
+                <div id="dos-tab" class="tab-content">
+                    <div class="dos-chart-container">
+                        <canvas id="dosChart"></canvas>
+                    </div>
+                </div>
+
+                <div id="fermi-tab" class="tab-content">
+                    <div class="fermi-visual" id="fermiVisual">
+                        <div class="fermi-layer" id="conductionBand" style="top:15%;background:linear-gradient(90deg,transparent,rgba(74,158,255,0.3),transparent)">
+                            <span class="fermi-label">Conduction Band (CB)</span>
+                        </div>
+                        <div class="fermi-layer" id="valenceBand" style="top:45%;background:linear-gradient(90deg,transparent,rgba(155,109,255,0.3),transparent)">
+                            <span class="fermi-label">Valence Band (VB)</span>
+                        </div>
+                        <div class="fermi-layer" id="fermiLevel" style="top:50%;background:linear-gradient(90deg,transparent,rgba(74,255,155,0.5),transparent)">
+                            <span class="fermi-label">E_F (Fermi Level)</span>
+                        </div>
+                        <div class="fermi-layer" id="workFunction" style="top:75%;background:linear-gradient(90deg,transparent,rgba(255,155,74,0.3),transparent)">
+                            <span class="fermi-label">Work Function (φ)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="voltage-tab" class="tab-content">
+                    <div class="voltage-diagram">
+                        <canvas id="voltageChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chemistry Comparison -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">📊</span>
+                Chemistry Band Properties Comparison
+            </h2>
+            <div class="card-grid" id="comparisonCards"></div>
+        </div>
+
+        <!-- Physics Equations -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">🔬</span>
+                Quantum Mechanics Foundations
+            </h2>
+            <div class="physics-panel">
+                <div class="physics-grid">
+                    <div class="physics-item">
+                        <h4>Band Gap Energy</h4>
+                        <div class="equation-box">
+                            <div class="eq-title">Open Circuit Voltage</div>
+                            <div class="eq-formula">V_oc = ΔE_g / e = (E_cathode - E_anode) / e</div>
+                            <div class="eq-desc">The band gap directly determines the thermodynamic open circuit voltage. Larger gap = higher voltage.</div>
+                        </div>
+                    </div>
+                    <div class="physics-item">
+                        <h4>Fermi-Dirac Distribution</h4>
+                        <div class="equation-box">
+                            <div class="eq-title">Electron Occupancy</div>
+                            <div class="eq-formula">f(E) = 1 / (exp((E-E_F)/kT) + 1)</div>
+                            <div class="eq-desc">Probability that an electron state at energy E is occupied. At T=0, states below E_F are fully occupied.</div>
+                        </div>
+                    </div>
+                    <div class="physics-item">
+                        <h4>Density of States</h4>
+                        <div class="equation-box">
+                            <div class="eq-title">3D DOS in Conduction Band</div>
+                            <div class="eq-formula">g(E) = (1/2π²)(2m*/ħ²)^(3/2)√(E-E_c)</div>
+                            <div class="eq-desc">Number of available quantum states per unit energy per unit volume. Determines electron capacity.</div>
+                        </div>
+                    </div>
+                    <div class="physics-item">
+                        <h4>Schrödinger Equation</h4>
+                        <div class="equation-box">
+                            <div class="eq-title">Electron Wave Function</div>
+                            <div class="eq-formula">Ĥψ = (-ħ²/2m)∇²ψ + Vψ = Eψ</div>
+                            <div class="eq-desc">The band structure emerges from solving this equation for electrons in the periodic crystal potential V(r).</div>
+                        </div>
+                    </div>
+                    <div class="physics-item">
+                        <h4>Johnson-Nfquist Noise</h4>
+                        <div class="equation-box">
+                            <div class="eq-title">Thermal Voltage Noise</div>
+                            <div class="eq-formula">V_n = √(4kTBReff)</div>
+                            <div class="eq-desc">Thermal fluctuations affect electron transport. Similar to gravitational wave detection noise floors.</div>
+                        </div>
+                    </div>
+                    <div class="physics-item">
+                        <h4>Einstein Relation</h4>
+                        <div class="equation-box">
+                            <div class="eq-title">Conductivity Relation</div>
+                            <div class="eq-formula">σ = ne²D/kT = ne²μ/kT</div>
+                            <div class="eq-desc">Connects diffusion coefficient D to mobility μ. Links to fluctuation-dissipation theorem.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Insights -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">💡</span>
+                Key Insights
+            </h2>
+            <div class="card-grid" id="insightsGrid"></div>
+        </div>
+
+        <!-- DOS Comparison Chart -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">📈</span>
+                Density of States — All Chemistries
+            </h2>
+            <div class="dos-chart-container">
+                <canvas id="dosAllChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chemistry data
+        const chemistryData = {
+            'nmc811': {
+                name: 'NMC 811',
+                fullName: 'LiNi₀.₈Mn₀.₁Co₀.₁O₂',
+                color: '#4a9eff',
+                bandGap: 2.5,
+                conductionBand: 3.2,
+                valenceBand: 0.7,
+                fermiLevel: 2.8,
+                workFunction: 5.0,
+                voltage: 4.2,
+                theoreticalCapacity: 200,
+                applications: ['EVs', 'Consumer Electronics'],
+                dosPeaks: [0.8, 1.2, 2.0, 2.5],
+                dosProfile: [0.2, 0.5, 0.8, 1.0, 0.85, 0.6, 0.4, 0.25, 0.15, 0.1]
+            },
+            'lfp': {
+                name: 'LFP',
+                fullName: 'LiFePO₄',
+                color: '#4aff9b',
+                bandGap: 3.4,
+                conductionBand: 3.6,
+                valenceBand: 0.2,
+                fermiLevel: 2.8,
+                workFunction: 5.2,
+                voltage: 3.4,
+                theoreticalCapacity: 170,
+                applications: ['Grid Storage', ' buses', 'Stationary'],
+                dosPeaks: [1.5, 2.2, 2.8, 3.2],
+                dosProfile: [0.1, 0.3, 0.6, 0.9, 1.0, 0.9, 0.7, 0.5, 0.3, 0.2]
+            },
+            'nca': {
+                name: 'NCA',
+                fullName: 'LiNi₀.₈Co₀.₁₅Al₀.₀₅O₂',
+                color: '#ff4a6a',
+                bandGap: 2.3,
+                conductionBand: 3.0,
+                valenceBand: 0.7,
+                fermiLevel: 2.7,
+                workFunction: 5.1,
+                voltage: 4.2,
+                theoreticalCapacity: 210,
+                applications: ['Tesla', 'Premium EVs'],
+                dosPeaks: [0.7, 1.1, 1.9, 2.3],
+                dosProfile: [0.25, 0.55, 0.85, 0.95, 0.8, 0.55, 0.35, 0.22, 0.14, 0.09]
+            },
+            'lco': {
+                name: 'LCO',
+                fullName: 'LiCoO₂',
+                color: '#9b6dff',
+                bandGap: 2.7,
+                conductionBand: 3.4,
+                valenceBand: 0.7,
+                fermiLevel: 2.9,
+                workFunction: 5.3,
+                voltage: 3.9,
+                theoreticalCapacity: 140,
+                applications: [' smartphones', 'Laptops'],
+                dosPeaks: [1.0, 1.6, 2.3, 2.7],
+                dosProfile: [0.15, 0.4, 0.7, 0.95, 1.0, 0.88, 0.65, 0.45, 0.28, 0.18]
+            }
+        };
+
+        let bandChart, dosChart, dosAllChart, voltageChart;
+
+        function initCharts() {
+            // Band structure chart
+            const bandCtx = document.getElementById('bandChart').getContext('2d');
+            bandChart = new Chart(bandCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Valence Band', '', 'Fermi Level', '', 'Conduction Band'],
+                    datasets: [{
+                        label: 'NMC 811',
+                        data: [0.7, 1.5, 2.8, 3.0, 3.2],
+                        borderColor: '#4a9eff',
+                        backgroundColor: 'rgba(74, 158, 255, 0.1)',
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 8,
+                        pointHoverRadius: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'Energy (eV)', color: '#8888a0' },
+                            min: 0,
+                            max: 4,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#8888a0' }
+                        },
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#8888a0' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1a1a2e',
+                            titleColor: '#e8e8f0',
+                            bodyColor: '#e8e8f0',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1
+                        }
+                    }
+                }
+            });
+
+            // DOS chart
+            const dosCtx = document.getElementById('dosChart').getContext('2d');
+            dosChart = new Chart(dosCtx, {
+                type: 'bar',
+                data: {
+                    labels: Array.from({length: 20}, (_, i) => (i * 0.2).toFixed(1)),
+                    datasets: [{
+                        label: 'Density of States',
+                        data: [],
+                        backgroundColor: 'rgba(74, 158, 255, 0.6)',
+                        borderColor: '#4a9eff',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'g(E) (states/eV)', color: '#8888a0' },
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#8888a0' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Energy (eV)', color: '#8888a0' },
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#8888a0' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+
+            // DOS all chemistries chart
+            const dosAllCtx = document.getElementById('dosAllChart').getContext('2d');
+            dosAllChart = new Chart(dosAllCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 20}, (_, i) => (i * 0.2).toFixed(1)),
+                    datasets: Object.keys(chemistryData).map(key => ({
+                        label: chemistryData[key].name,
+                        data: generateDOSProfile(key),
+                        borderColor: chemistryData[key].color,
+                        backgroundColor: chemistryData[key].color + '33',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 3
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'g(E) (normalized)', color: '#8888a0' },
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#8888a0' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Energy (eV)', color: '#8888a0' },
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#8888a0' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#e8e8f0' }
+                        }
+                    }
+                }
+            });
+
+            // Voltage chart
+            const voltageCtx = document.getElementById('voltageChart').getContext('2d');
+            voltageChart = new Chart(voltageCtx, {
+                type: 'line',
+                data: {
+                    labels: ['0%', '20%', '40%', '60%', '80%', '100%'],
+                    datasets: Object.keys(chemistryData).map(key => ({
+                        label: chemistryData[key].name,
+                        data: generateVoltageProfile(key),
+                        borderColor: chemistryData[key].color,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointHoverRadius: 10
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'Voltage (V)', color: '#8888a0' },
+                            min: 2.5,
+                            max: 4.5,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#8888a0' }
+                        },
+                        x: {
+                            title: { display: true, text: 'State of Charge', color: '#8888a0' },
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#8888a0' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#e8e8f0' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateDOSProfile(chem) {
+            const base = chemistryData[chem].dosProfile;
+            const soc = parseInt(document.getElementById('socSlider').value) / 100;
+            const temp = parseInt(document.getElementById('tempSlider').value);
+
+            // Temperature affects DOS broadening
+            const broadening = 1 + (temp + 20) / 100;
+
+            // SOC affects band gap (higher SOC = lower gap for cathodes)
+            const gapMod = 1 - (soc * 0.1);
+
+            return base.map((v, i) => {
+                const noise = (Math.random() - 0.5) * 0.1;
+                return Math.max(0, v * broadening * gapMod + noise);
+            });
+        }
+
+        function generateVoltageProfile(chem) {
+            const base = chemistryData[chem].voltage;
+            const chemObj = chemistryData[chem];
+
+            return [0, 20, 40, 60, 80, 100].map(soc => {
+                // Voltage increases with SOC, different profiles per chemistry
+                const baseVoltage = chemObj.voltage - 0.5;
+                const socEffect = soc / 100 * 0.5;
+
+                // LFP has flatter voltage curve
+                if (chem === 'lfp') {
+                    return baseVoltage + socEffect * 1.1;
+                }
+                // NMC/NCA have steeper curves
+                return baseVoltage + socEffect * (base / chemObj.voltage);
+            });
+        }
+
+        function updateBandDiagram() {
+            const chem = document.getElementById('chemistrySelect').value;
+            const soc = parseInt(document.getElementById('socSlider').value);
+            const temp = parseInt(document.getElementById('tempSlider').value);
+            const viewMode = document.getElementById('viewMode').value;
+
+            document.getElementById('socValue').textContent = soc + '%';
+            document.getElementById('tempValue').textContent = temp + '°C';
+
+            const chemObj = chemistryData[chem];
+
+            // Temperature broadening effect
+            const tempBroadening = 1 + (temp + 20) / 60;
+
+            // SOC effect on band gap
+            const socGapMod = 1 - (soc / 100) * 0.15;
+            const effectiveBandGap = chemObj.bandGap * socGapMod;
+
+            // Update band chart
+            const bandData = [
+                chemObj.valenceBand,
+                chemObj.valenceBand + effectiveBandGap * 0.3,
+                chemObj.fermiLevel,
+                chemObj.conductionBand - effectiveBandGap * 0.3,
+                chemObj.conductionBand
+            ];
+
+            bandChart.data.datasets[0] = {
+                label: chemObj.name,
+                data: bandData,
+                borderColor: chemObj.color,
+                backgroundColor: chemObj.color + '20',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 10,
+                pointHoverRadius: 14,
+                pointBackgroundColor: chemObj.color
+            };
+            bandChart.update();
+
+            // Update DOS chart with temperature broadening
+            const dosData = chemObj.dosProfile.map(v => {
+                const noise = (Math.random() - 0.5) * 0.15;
+                return Math.max(0.05, v * tempBroadening * socGapMod + noise);
+            });
+
+            dosChart.data.datasets[0] = {
+                label: 'Density of States',
+                data: dosData,
+                backgroundColor: chemObj.color + '99',
+                borderColor: chemObj.color,
+                borderWidth: 1
+            };
+            dosChart.update();
+
+            // Update DOS all chart
+            Object.keys(chemistryData).forEach((key, i) => {
+                dosAllChart.data.datasets[i].data = generateDOSProfile(key);
+            });
+            dosAllChart.update();
+
+            // Update voltage chart
+            Object.keys(chemistryData).forEach((key, i) => {
+                voltageChart.data.datasets[i].data = generateVoltageProfile(key);
+            });
+            voltageChart.update();
+
+            // Update Fermi visual positions
+            const valenceTop = 45 - (chemObj.valenceBand / 4) * 30;
+            const conductionTop = 15 + ((4 - chemObj.conductionBand) / 4) * 30;
+            const fermiTop = 50 - ((chemObj.fermiLevel - 2) / 2) * 30;
+            const workTop = 75 - ((chemObj.workFunction - 4.5) / 1) * 20;
+
+            document.getElementById('valenceBand').style.top = valenceTop + '%';
+            document.getElementById('conductionBand').style.top = conductionTop + '%';
+            document.getElementById('fermiLevel').style.top = fermiTop + '%';
+            document.getElementById('workFunction').style.top = workTop + '%';
+
+            updateComparisonCards();
+            updateInsights();
+        }
+
+        function updateComparisonCards() {
+            const chem = document.getElementById('chemistrySelect').value;
+            const chemObj = chemistryData[chem];
+
+            document.getElementById('comparisonCards').innerHTML = Object.keys(chemistryData).map(key => {
+                const c = chemistryData[key];
+                const isSelected = key === chem;
+                return `
+                    <div class="card" style="${isSelected ? 'border-color:' + c.color : ''}">
+                        <h3>
+                            <span class="dot" style="background:${c.color};color:${c.color}"></span>
+                            ${c.name}
+                        </h3>
+                        <table class="comparison-table">
+                            <tr>
+                                <td>Band Gap</td>
+                                <td>${c.bandGap} eV</td>
+                            </tr>
+                            <tr>
+                                <td>Open Voltage</td>
+                                <td>${c.voltage} V</td>
+                            </tr>
+                            <tr>
+                                <td>Fermi Level</td>
+                                <td>${c.fermiLevel} eV</td>
+                            </tr>
+                            <tr>
+                                <td>Work Function</td>
+                                <td>${c.workFunction} eV</td>
+                            </tr>
+                            <tr>
+                                <td>Theoretical Cap</td>
+                                <td>${c.theoreticalCapacity} mAh/g</td>
+                            </tr>
+                            <tr>
+                                <td>Applications</td>
+                                <td>${c.applications.join(', ')}</td>
+                            </tr>
+                        </table>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('bandLegend').innerHTML = Object.keys(chemistryData).map(key => {
+                const c = chemistryData[key];
+                return `
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background:${c.color}"></div>
+                        <span>${c.name}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateInsights() {
+            const chem = document.getElementById('chemistrySelect').value;
+            const soc = parseInt(document.getElementById('socSlider').value);
+            const temp = parseInt(document.getElementById('tempSlider').value);
+            const chemObj = chemistryData[chem];
+
+            const insights = [
+                {
+                    title: 'Band Gap Impact',
+                    text: `${chemObj.name} has a band gap of ${chemObj.bandGap} eV. This determines the minimum photon energy needed to excite electrons from valence to conduction band. Larger gaps mean higher voltage capability but slower kinetics.`
+                },
+                {
+                    title: 'SOC Effect',
+                    text: `At ${soc}% SOC, the lithium ordering in the cathode structure changes. Higher SOC reduces the band gap by ~${(soc * 0.15).toFixed(0)}% due to increased electron occupancy and lattice strain.`
+                },
+                {
+                    title: 'Temperature Effects',
+                    text: `At ${temp}°C, thermal broadening increases by ${((temp + 20) / 60 * 100).toFixed(0)}%. This reduces DOS sharpness but improves ion mobility. However, excessive temperature accelerates side reactions.`
+                },
+                {
+                    title: 'Fermi Level Position',
+                    text: `The Fermi level at ${chemObj.fermiLevel} eV determines the electrochemical potential. When aligned with anode Fermi level (graphite ~4.3 eV), the voltage V = (E_anode - E_cathode)/e is generated.`
+                },
+                {
+                    title: 'Quantum Efficiency',
+                    text: `In ${chemObj.name}, electron transport follows band theory. The DOS effective mass m* determines carrier mobility: μ = eτ/m*. Lower m* = faster transport = better rate capability.`
+                },
+                {
+                    title: 'Voltage Generation',
+                    text: `The open circuit voltage V_oc = ${chemObj.voltage}V emerges from the difference in chemical potential between cathode and anode, weighted by the band structure and electron transfer.`
+                }
+            ];
+
+            document.getElementById('insightsGrid').innerHTML = insights.map(insight => `
+                <div class="card">
+                    <h3>${insight.title}</h3>
+                    <p>${insight.text}</p>
+                </div>
+            `).join('');
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            updateBandDiagram();
+        });
+    </script>
+</body>
+</html>

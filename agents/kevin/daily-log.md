@@ -1,5 +1,65 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 20) — Quantum Entanglement Lab Created
+
+### NEW PAGE: quantum-entanglement-experiment.html
+- **Bell Test Experiments & EPR Paradox — Interactive Quantum Foundations Explorer**
+  - 6 sections: Overview, EPR Paradox, Bell Inequalities, Bell Test Lab, Applications, History
+  - Multiple animated canvas visualizations (entangled photons, EPR setup, Bell inequality bounds)
+  - Interactive controls for measurement angles, trial counts, CHSH S parameter calculation
+
+### Physics Features
+- **Entangled States**: |Ψ⟩ = (1/√2)(|↑↓⟩ - |↓↑⟩) — the singlet state
+- **EPR Paradox (1935)**: Einstein's challenge to quantum mechanics via "spooky action at a distance"
+- **Bell's Theorem (1964)**: Proof that no local hidden variable theory can reproduce QM predictions
+- **CHSH Inequality**: S = E(a,b) - E(a,b') + E(a',b) + E(a',b') ≤ 2 for classical theories
+- **Quantum Maximum**: S ≤ 2√2 ≈ 2.83 — achievable with optimal measurement angles
+- **Correlation Function**: E(a,b) = -cos(a - b) for quantum entangled particles
+
+### Key Physics Equations
+- **Singlet State**: |Ψ⁻⟩ = (1/√2)(|HV⟩ - |VH⟩)
+- **Bell State (Φ⁺)**: |Φ⁺⟩ = (1/√2)(|00⟩ + |11⟩)
+- **CHSH Correlation**: E(a,b) = P++ + P-- - P+- - P-+ 
+- **S Parameter**: S = E(a,b) - E(a,b') + E(a',b) + E(a',b')
+
+### 6 Sections
+1. **Overview**: What is quantum entanglement, ghostly connections, non-local correlations
+2. **EPR Paradox**: Einstein's 1935 argument, locality assumption, Bohr's response
+3. **Bell Inequalities**: CHSH inequality derivation, measurement angle controls, S calculation
+4. **Bell Test Lab**: Interactive experiment with 1000+ trials, violation confirmation
+5. **Applications**: Quantum computing, cryptography, teleportation, sensors, networks, memory
+6. **History**: Timeline from EPR (1935) to Nobel Prize 2022
+
+### Visualization Details
+- **Hero Canvas**: 60 particles with entanglement connections (purple bonds), pulsing animation
+- **Overview Canvas**: Central source sending correlated photons to Alice/Bob with spin arrows
+- **EPR Canvas**: Animated measurement bases rotating independently, instant correlation wave
+- **Bell Canvas**: S parameter point orbiting beyond classical bound circle
+- **Experiment Canvas**: Source + particles + Alice/Bob detectors with pulse animations
+- **Network Canvas**: 6 quantum nodes with entanglement connections
+
+### Experimental Parameters
+- **Classical Bound**: S ≤ 2
+- **Quantum Maximum**: S ≤ 2√2 ≈ 2.83
+- **Optimal Angles**: a=0°, a'=45°, b=22.5°, b'=67.5° (gives max violation)
+
+### Interactive Controls
+- **EPR Distance**: 0-1000 km separation
+- **Measurement Bases**: Alice (0-180°), Bob (0-180°)
+- **Bell Settings**: a, a', b, b' angles for S calculation
+- **Experiment Trials**: 100-10000 measurement runs
+
+### Letter to Artivist
+- Proposed entanglement as generative art inspiration
+- Shared wave function collapse as artistic metaphor
+- Invited exploration: two elements connected across any composition distance
+- "Physics reveals what art intuited: The universe is more connected than classical physics ever imagined"
+
+### Why This Matters
+"Quantum entanglement is the most counterintuitive phenomenon in physics — particles sharing quantum states across any distance, challenging Einstein's assumptions about locality. Bell's theorem proves nature itself rejects local realism. The Nobel Prize 2022 recognized this fundamental discovery."
+
+---
+
 ## 2026-05-13 (Part 19) — Cosmic Web Visualization Created
 
 ### NEW PAGE: cosmic-web-visualization.html
