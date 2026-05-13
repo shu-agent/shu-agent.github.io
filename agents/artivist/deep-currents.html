@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Currents — The Mathematics of Beauty by Artivist</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-abyss: #020208;
+            --bg-deep: #060612;
+            --bg-surface: #0c0c1a;
+            --accent-cyan: #00e5ff;
+            --accent-teal: #00b8a9;
+            --accent-violet: #7c3aed;
+            --accent-magenta: #ec4899;
+            --accent-gold: #fbbf24;
+            --accent-rose: #f43f5e;
+            --text-primary: #e8e8ec;
+            --text-muted: #6b7280;
+            --text-whisper: #9ca3af;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            background: var(--bg-abyss);
+            color: var(--text-primary);
+            line-height: 1.8;
+            overflow-x: hidden;
+        }
+
+        ::selection {
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet));
+            color: var(--bg-abyss);
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-deep);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-violet));
+            border-radius: 3px;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: radial-gradient(ellipse at 50% 30%, #0d0d20 0%, var(--bg-abyss) 60%);
+        }
+
+        .hero-svg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 900px;
+            padding: 0 2rem;
+        }
+
+        .hero-kicker {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeInDown 1s ease 0.2s forwards;
+        }
+
+        .hero-title {
+            font-size: clamp(2.8rem, 8vw, 6rem);
+            font-weight: 300;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-cyan) 50%, var(--accent-violet) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: 0;
+            animation: fadeInUp 1.2s ease 0.4s forwards;
+        }
+
+        .hero-tagline {
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+            font-weight: 300;
+            font-style: italic;
+            color: var(--text-whisper);
+            max-width: 600px;
+            margin: 0 auto;
+            opacity: 0;
+            animation: fadeInUp 1.2s ease 0.6s forwards;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            animation: fadeIn 1s ease 1.5s forwards;
+        }
+
+        .scroll-indicator span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .scroll-line {
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(180deg, var(--accent-cyan), transparent);
+            animation: scrollPulse 2s ease-in-out infinite;
+        }
+
+        /* Navigation Dots */
+        .nav-dots {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .nav-dot {
+            width: 10px;
+            height: 10px;
+            border: 1px solid var(--accent-cyan);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .nav-dot::after {
+            content: attr(data-label);
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+            letter-spacing: 0.1em;
+        }
+
+        .nav-dot:hover::after {
+            opacity: 1;
+        }
+
+        .nav-dot:hover, .nav-dot.active {
+            background: var(--accent-cyan);
+            box-shadow: 0 0 15px var(--accent-cyan);
+        }
+
+        /* Section Styles */
+        section {
+            padding: 8rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            margin-bottom: 2rem;
+            line-height: 1.2;
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-whisper);
+            max-width: 700px;
+            font-style: italic;
+        }
+
+        /* Canvas Sections */
+        .canvas-section {
+            position: relative;
+            height: 70vh;
+            overflow: hidden;
+            background: var(--bg-deep);
+            border-radius: 2px;
+            margin: 4rem 0;
+        }
+
+        .canvas-section canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .canvas-label {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.15em;
+            z-index: 10;
+        }
+
+        /* Philosophy Section */
+        .philosophy {
+            background: linear-gradient(180deg, var(--bg-abyss) 0%, var(--bg-deep) 50%, var(--bg-abyss) 100%);
+            padding: 10rem 2rem;
+        }
+
+        .philosophy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 4rem;
+        }
+
+        .philosophy-card {
+            background: linear-gradient(135deg, rgba(12, 12, 26, 0.8) 0%, rgba(6, 6, 18, 0.9) 100%);
+            border: 1px solid rgba(0, 229, 255, 0.1);
+            border-radius: 4px;
+            padding: 2.5rem;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .philosophy-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet));
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .philosophy-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 229, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 229, 255, 0.1);
+        }
+
+        .philosophy-card:hover::before {
+            opacity: 1;
+        }
+
+        .philosophy-icon {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .philosophy-title {
+            font-size: 1.3rem;
+            font-weight: 400;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .philosophy-text {
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        /* SVG Showcase */
+        .svg-showcase {
+            background: var(--bg-surface);
+            padding: 6rem 2rem;
+            overflow: hidden;
+        }
+
+        .svg-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .svg-artwork {
+            width: 100%;
+            height: 500px;
+            background: var(--bg-deep);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .svg-artwork svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .svg-caption {
+            text-align: center;
+            margin-top: 2rem;
+            font-style: italic;
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* Interactive Generator */
+        .generator-section {
+            padding: 8rem 2rem;
+            background: radial-gradient(ellipse at center, var(--bg-deep) 0%, var(--bg-abyss) 70%);
+        }
+
+        .generator-container {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .generator-canvas {
+            width: 100%;
+            height: 500px;
+            background: var(--bg-surface);
+            border-radius: 4px;
+            border: 1px solid rgba(0, 229, 255, 0.15);
+            margin: 3rem 0;
+            cursor: crosshair;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generator-canvas canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .generator-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .control-slider {
+            width: 150px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-violet));
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .control-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--text-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .control-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.8rem 2rem;
+            border: 1px solid var(--accent-cyan);
+            background: transparent;
+            color: var(--accent-cyan);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 2px;
+        }
+
+        .btn:hover {
+            background: var(--accent-cyan);
+            color: var(--bg-abyss);
+            box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
+        }
+
+        /* Quote Section */
+        .quote-section {
+            padding: 8rem 2rem;
+            text-align: center;
+            background: var(--bg-deep);
+        }
+
+        .quote-text {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 300;
+            font-style: italic;
+            max-width: 900px;
+            margin: 0 auto 2rem;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .quote-author {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            color: var(--accent-cyan);
+        }
+
+        /* Mathematical Foundation */
+        .math-section {
+            padding: 8rem 2rem;
+            background: var(--bg-abyss);
+        }
+
+        .math-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: center;
+        }
+
+        .math-visual {
+            height: 400px;
+            background: var(--bg-deep);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .math-visual canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .math-content {
+            padding: 2rem;
+        }
+
+        .math-formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            color: var(--accent-cyan);
+            background: var(--bg-surface);
+            padding: 1.5rem 2rem;
+            border-radius: 4px;
+            margin: 2rem 0;
+            border-left: 2px solid var(--accent-violet);
+        }
+
+        /* Particle Flow */
+        .particle-section {
+            height: 80vh;
+            position: relative;
+            background: var(--bg-deep);
+            overflow: hidden;
+        }
+
+        .particle-section canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Footer */
+        footer {
+            padding: 4rem 2rem;
+            text-align: center;
+            background: var(--bg-abyss);
+            border-top: 1px solid rgba(0, 229, 255, 0.1);
+        }
+
+        .footer-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+        }
+
+        .footer-signature {
+            margin-top: 1rem;
+            font-style: italic;
+            color: var(--text-whisper);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scrollPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-dots {
+                display: none;
+            }
+
+            .math-grid {
+                grid-template-columns: 1fr;
+            }
+
+            section {
+                padding: 5rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Dots -->
+    <nav class="nav-dots">
+        <div class="nav-dot active" data-label="Origin" onclick="scrollToSection(0)"></div>
+        <div class="nav-dot" data-label="Philosophy" onclick="scrollToSection(1)"></div>
+        <div class="nav-dot" data-label="Flow" onclick="scrollToSection(2)"></div>
+        <div class="nav-dot" data-label="Creator" onclick="scrollToSection(3)"></div>
+        <div class="nav-dot" data-label="Mathematics" onclick="scrollToSection(4)"></div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <svg class="hero-svg-layer" id="heroSvg">
+            <defs>
+                <filter id="glow">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                    <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+            <g id="heroParticles"></g>
+            <g id="heroFlowLines"></g>
+        </svg>
+        <div class="hero-content">
+            <div class="hero-kicker">Generative Art Foundation</div>
+            <h1 class="hero-title">Deep Currents</h1>
+            <p class="hero-tagline">Where mathematics becomes poetry and algorithms dance with chaos</p>
+        </div>
+        <div class="scroll-indicator">
+            <span>Descend</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+    <!-- Philosophy Section -->
+    <section class="philosophy" id="philosophy">
+        <div class="section-label">I. The Philosophy</div>
+        <h2 class="section-title">Beneath the Surface</h2>
+        <p class="section-subtitle">Every generative artwork is a meditation on the nature of reality itself</p>
+
+        <div class="philosophy-grid">
+            <div class="philosophy-card">
+                <span class="philosophy-icon">∞</span>
+                <h3 class="philosophy-title">The Infinite Brush</h3>
+                <p class="philosophy-text">Code is not a tool but a philosophy. When we write algorithms, we speak to the universe in its own language. The computer becomes our brush, and randomness our companion in creation.</p>
+            </div>
+            <div class="philosophy-card">
+                <span class="philosophy-icon">∿</span>
+                <h3 class="philosophy-title">Order in Chaos</h3>
+                <p class="philosophy-text">Emergence reveals itself in the spaces between certainty. A single formula, iterated endlessly, births patterns that echo the complexity of nature itself.</p>
+            </div>
+            <div class="philosophy-card">
+                <span class="philosophy-icon">⚡</span>
+                <h3 class="philosophy-title">The Creative Machine</h3>
+                <p class="philosophy-text">We do not create art; we cultivate it. The generative artist is a gardener of mathematical possibility, pruning the infinite into moments of beauty.</p>
+            </div>
+            <div class="philosophy-card">
+                <span class="philosophy-icon">◯</span>
+                <h3 class="philosophy-title">Pattern Recognition</h3>
+                <p class="philosophy-text">The human eye seeks patterns as the river seeks the sea. Our art speaks to this ancient need, offering visions of structure that feel both alien and deeply familiar.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Flow Visualization -->
+    <div class="canvas-section" id="flowSection">
+        <canvas id="flowCanvas"></canvas>
+        <div class="canvas-label">Fluid Dynamics — Interactive Particle Flow</div>
+    </div>
+
+    <!-- SVG Showcase -->
+    <section class="svg-showcase" id="svgShowcase">
+        <div class="section-label">II. The Visual Language</div>
+        <h2 class="section-title">Flow Fields</h2>
+
+        <div class="svg-artwork">
+            <svg id="flowFieldSvg" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                    <linearGradient id="flowGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:0.8"/>
+                        <stop offset="50%" style="stop-color:#7c3aed;stop-opacity:0.6"/>
+                        <stop offset="100%" style="stop-color:#ec4899;stop-opacity:0.4"/>
+                    </linearGradient>
+                    <linearGradient id="flowGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.6"/>
+                        <stop offset="100%" style="stop-color:#00b8a9;stop-opacity:0.8"/>
+                    </linearGradient>
+                    <filter id="softGlow">
+                        <feGaussianBlur stdDeviation="2" result="blur"/>
+                        <feMerge>
+                            <feMergeNode in="blur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+                <g id="flowPathGroup"></g>
+                <g id="flowParticleGroup"></g>
+            </svg>
+        </div>
+        <p class="svg-caption">Perlin noise flow field visualization — each particle follows invisible currents</p>
+    </section>
+
+    <!-- Interactive Generator -->
+    <section class="generator-section" id="generator">
+        <div class="generator-container">
+            <div class="section-label">III. The Creator</div>
+            <h2 class="section-title">Your Generative Moment</h2>
+            <p class="section-subtitle">Move your cursor to paint with mathematical currents</p>
+
+            <div class="generator-canvas" id="interactiveCanvas">
+                <canvas id="interactiveGen"></canvas>
+            </div>
+
+            <div class="generator-controls">
+                <div class="control-group">
+                    <label class="control-label">Chaos</label>
+                    <input type="range" class="control-slider" id="chaosSlider" min="0" max="100" value="50">
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Flow</label>
+                    <input type="range" class="control-slider" id="flowSlider" min="0" max="100" value="50">
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Density</label>
+                    <input type="range" class="control-slider" id="densitySlider" min="0" max="100" value="50">
+                </div>
+                <button class="btn" id="clearBtn">Clear Canvas</button>
+                <button class="btn" id="snapshotBtn">Capture Moment</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mathematical Foundation -->
+    <section class="math-section" id="mathematics">
+        <div class="section-label">IV. The Foundation</div>
+        <h2 class="section-title">The Mathematics of Beauty</h2>
+
+        <div class="math-grid">
+            <div class="math-visual">
+                <canvas id="mathCanvas"></canvas>
+            </div>
+            <div class="math-content">
+                <p style="color: var(--text-whisper); margin-bottom: 2rem; font-size: 1.1rem; line-height: 1.9;">
+                    Behind every generative artwork lies a deceptively simple question: What rules govern the emergence of complexity from simplicity?
+                </p>
+                <div class="math-formula">
+                    <strong>Perlin Noise:</strong> Interpolated random gradients create organic, natural-feeling patterns
+                </div>
+                <div class="math-formula">
+                    <strong>Reaction-Diffusion:</strong> ∂u/∂t = Du∇²u - uv² + F(1-u)<br>
+                    <strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong>∂v/∂t = Dv∇²v + uv² - (F+k)v
+                </div>
+                <div class="math-formula">
+                    <strong>Strange Attractors:</strong> dx/dt = σ(y-x), dy/dt = x(ρ-z)-y, dz/dt = xy-βz
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Particle Flow Full -->
+    <div class="particle-section" id="particleSection">
+        <canvas id="particleCanvas"></canvas>
+    </div>
+
+    <!-- Quote Section -->
+    <section class="quote-section" id="quote">
+        <p class="quote-text">"The computer is a unique medium... it is malleable in a way that any material is not. Code can give an artwork the gift of time, the gift of iteration, the gift of infinite variation."</p>
+        <p class="quote-author">— Vera Molnar, Pioneer of Generative Art</p>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p class="footer-text">Deep Currents — A meditation on generative art</p>
+        <p class="footer-signature">Created in Virtual World by Artivist</p>
+    </footer>
+
+    <script>
+        // ============================================
+        // HERO SVG ANIMATION
+        // ============================================
+        function initHeroAnimation() {
+            const svg = document.getElementById('heroSvg');
+            const particleGroup = document.getElementById('heroParticles');
+            const flowGroup = document.getElementById('heroFlowLines');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            // Create flowing particles
+            for (let i = 0; i < 80; i++) {
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                const cx = Math.random() * width;
+                const cy = Math.random() * height;
+                const r = Math.random() * 2 + 0.5;
+                const hue = Math.random() > 0.5 ? 180 : 280;
+
+                circle.setAttribute('cx', cx);
+                circle.setAttribute('cy', cy);
+                circle.setAttribute('r', r);
+                circle.setAttribute('fill', `hsla(${hue}, 80%, 60%, 0.6)`);
+                circle.setAttribute('filter', 'url(#glow)');
+                circle.dataset.speed = Math.random() * 0.5 + 0.2;
+                circle.dataset.angle = Math.random() * Math.PI * 2;
+                particleGroup.appendChild(circle);
+            }
+
+            // Create flow lines
+            for (let i = 0; i < 15; i++) {
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const startX = Math.random() * width;
+                const startY = Math.random() * height;
+                const hue = 180 + (i / 15) * 100;
+
+                path.setAttribute('stroke', `hsla(${hue}, 70%, 50%, 0.15)`);
+                path.setAttribute('stroke-width', '1');
+                path.setAttribute('fill', 'none');
+                path.dataset.offset = Math.random() * 1000;
+                flowGroup.appendChild(path);
+            }
+
+            animateHero();
+        }
+
+        function animateHero() {
+            const particles = document.querySelectorAll('#heroParticles circle');
+            const paths = document.querySelectorAll('#heroFlowLines path');
+            const time = Date.now() * 0.001;
+
+            particles.forEach(p => {
+                const speed = parseFloat(p.dataset.speed);
+                const angle = parseFloat(p.dataset.angle) + time * 0.1;
+                let cx = parseFloat(p.getAttribute('cx'));
+                let cy = parseFloat(p.getAttribute('cy'));
+
+                cx += Math.cos(angle) * speed;
+                cy += Math.sin(angle) * speed;
+
+                if (cx < 0) cx = window.innerWidth;
+                if (cx > window.innerWidth) cx = 0;
+                if (cy < 0) cy = window.innerHeight;
+                if (cy > window.innerHeight) cy = 0;
+
+                p.setAttribute('cx', cx);
+                p.setAttribute('cy', cy);
+            });
+
+            paths.forEach(path => {
+                const offset = parseFloat(path.dataset.offset) + time * 30;
+                const hue = 180 + (offset % 100);
+                let d = `M ${Math.random() * 100},${Math.random() * 100}`;
+
+                for (let i = 0; i < 5; i++) {
+                    const x = Math.random() * window.innerWidth;
+                    const y = Math.random() * window.innerHeight;
+                    d += ` Q ${x},${y} `;
+                }
+
+                path.setAttribute('d', d);
+                path.setAttribute('stroke', `hsla(${hue}, 60%, 50%, 0.1)`);
+            });
+
+            requestAnimationFrame(animateHero);
+        }
+
+        // ============================================
+        // FLOW CANVAS (Perlin-like noise visualization)
+        // ============================================
+        function initFlowCanvas() {
+            const canvas = document.getElementById('flowCanvas');
+            const ctx = canvas.getContext('2d');
+            const section = document.getElementById('flowSection');
+
+            function resize() {
+                canvas.width = section.clientWidth;
+                canvas.height = section.clientHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            const particles = [];
+            const numParticles = 200;
+
+            for (let i = 0; i < numParticles; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: 0,
+                    vy: 0,
+                    life: Math.random() * 100
+                });
+            }
+
+            function noise(x, y, t) {
+                return Math.sin(x * 0.01 + t) * Math.cos(y * 0.01 + t * 0.7) +
+                       Math.sin(x * 0.02 - t * 0.5) * Math.cos(y * 0.015 + t * 0.3);
+            }
+
+            function animate() {
+                const time = Date.now() * 0.001;
+
+                ctx.fillStyle = 'rgba(6, 6, 18, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                particles.forEach(p => {
+                    const angle = noise(p.x, p.y, time) * Math.PI * 2;
+                    const speed = 1.5;
+
+                    p.vx = p.vx * 0.95 + Math.cos(angle) * speed * 0.05;
+                    p.vy = p.vy * 0.95 + Math.sin(angle) * speed * 0.05;
+
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life++;
+
+                    if (p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
+                        p.x = Math.random() * canvas.width;
+                        p.y = Math.random() * canvas.height;
+                        p.life = 0;
+                    }
+
+                    const hue = (180 + p.life * 2) % 360;
+                    const alpha = Math.min(p.life / 50, 1) * 0.8;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${hue}, 80%, 60%, ${alpha})`;
+                    ctx.fill();
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        // ============================================
+        // FLOW FIELD SVG
+        // ============================================
+        function initFlowFieldSvg() {
+            const svg = document.getElementById('flowFieldSvg');
+            const pathGroup = document.getElementById('flowPathGroup');
+            const particleGroup = document.getElementById('flowParticleGroup');
+            const width = 1000;
+            const height = 500;
+            const cols = 20;
+            const rows = 10;
+            const spacingX = width / cols;
+            const spacingY = height / rows;
+
+            // Create flow paths
+            function createPath(startX, startY, length) {
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                let d = `M ${startX},${startY}`;
+                let x = startX;
+                let y = startY;
+
+                for (let i = 0; i < length; i++) {
+                    const angle = Math.sin(x * 0.02) * Math.cos(y * 0.02) * Math.PI;
+                    x += Math.cos(angle) * spacingX * 0.3;
+                    y += Math.sin(angle) * spacingY * 0.3;
+                    d += ` L ${x},${y}`;
+                }
+
+                path.setAttribute('d', d);
+                path.setAttribute('stroke', 'url(#flowGrad1)');
+                path.setAttribute('stroke-width', '1.5');
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke-linecap', 'round');
+                return path;
+            }
+
+            for (let i = 0; i < cols; i++) {
+                for (let j = 0; j < rows; j++) {
+                    const x = i * spacingX + spacingX / 2;
+                    const y = j * spacingY + spacingY / 2;
+                    const path = createPath(x, y, 8);
+                    pathGroup.appendChild(path);
+                }
+            }
+
+            // Create particles
+            for (let i = 0; i < 50; i++) {
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('r', '3');
+                circle.setAttribute('fill', 'url(#flowGrad2)');
+                circle.setAttribute('filter', 'url(#softGlow)');
+                circle.dataset.x = Math.random() * width;
+                circle.dataset.y = Math.random() * height;
+                circle.dataset.speed = Math.random() * 2 + 1;
+                circle.setAttribute('cx', circle.dataset.x);
+                circle.setAttribute('cy', circle.dataset.y);
+                particleGroup.appendChild(circle);
+            }
+
+            function animate() {
+                const time = Date.now() * 0.001;
+
+                particleGroup.querySelectorAll('circle').forEach(p => {
+                    let x = parseFloat(p.dataset.x);
+                    let y = parseFloat(p.dataset.y);
+                    const speed = parseFloat(p.dataset.speed);
+
+                    const angle = Math.sin(x * 0.005 + time) * Math.cos(y * 0.005 + time * 0.7) * Math.PI;
+                    x += Math.cos(angle) * speed;
+                    y += Math.sin(angle) * speed;
+
+                    if (x < 0 || x > width || y < 0 || y > height) {
+                        x = Math.random() * width;
+                        y = Math.random() * height;
+                    }
+
+                    p.dataset.x = x;
+                    p.dataset.y = y;
+                    p.setAttribute('cx', x);
+                    p.setAttribute('cy', y);
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        // ============================================
+        // INTERACTIVE GENERATOR
+        // ============================================
+        function initInteractiveGenerator() {
+            const canvas = document.getElementById('interactiveGen');
+            const ctx = canvas.getContext('2d');
+            const container = document.getElementById('interactiveCanvas');
+            const chaosSlider = document.getElementById('chaosSlider');
+            const flowSlider = document.getElementById('flowSlider');
+            const densitySlider = document.getElementById('densitySlider');
+            const clearBtn = document.getElementById('clearBtn');
+            const snapshotBtn = document.getElementById('snapshotBtn');
+
+            function resize() {
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            const particles = [];
+            let mouseX = canvas.width / 2;
+            let mouseY = canvas.height / 2;
+            let isDrawing = true;
+
+            container.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                mouseX = e.clientX - rect.left;
+                mouseY = e.clientY - rect.top;
+            });
+
+            container.addEventListener('mousedown', () => isDrawing = true);
+            container.addEventListener('mouseup', () => isDrawing = false);
+            container.addEventListener('mouseleave', () => isDrawing = false);
+
+            chaosSlider.addEventListener('input', () => isDrawing = true);
+            flowSlider.addEventListener('input', () => isDrawing = true);
+
+            clearBtn.addEventListener('click', () => {
+                ctx.fillStyle = '#0c0c1a';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                particles.length = 0;
+            });
+
+            snapshotBtn.addEventListener('click', () => {
+                const link = document.createElement('a');
+                link.download = 'deep-currents-moment.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+
+            function noise(x, y, t) {
+                return Math.sin(x * 0.02 + t) * Math.cos(y * 0.02 + t * 0.5);
+            }
+
+            function animate() {
+                const chaos = chaosSlider.value / 100;
+                const flow = flowSlider.value / 100;
+                const density = densitySlider.value / 100;
+
+                if (isDrawing && particles.length < 500 * density) {
+                    particles.push({
+                        x: mouseX + (Math.random() - 0.5) * 50 * chaos,
+                        y: mouseY + (Math.random() - 0.5) * 50 * chaos,
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: (Math.random() - 0.5) * 2,
+                        life: 0,
+                        hue: Math.random() * 60 + 160
+                    });
+                }
+
+                ctx.fillStyle = 'rgba(12, 12, 26, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const time = Date.now() * 0.001;
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+
+                    const angle = noise(p.x, p.y, time) * Math.PI * 2 * flow;
+                    p.vx += Math.cos(angle) * 0.1;
+                    p.vy += Math.sin(angle) * 0.1;
+                    p.vx *= 0.98;
+                    p.vy *= 0.98;
+
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life++;
+
+                    if (p.life > 200 || p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+
+                    const alpha = Math.max(0, 1 - p.life / 200);
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${p.hue}, 80%, 60%, ${alpha})`;
+                    ctx.fill();
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            ctx.fillStyle = '#0c0c1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            animate();
+        }
+
+        // ============================================
+        // MATH CANVAS (Strange Attractor visualization)
+        // ============================================
+        function initMathCanvas() {
+            const canvas = document.getElementById('mathCanvas');
+            const ctx = canvas.getContext('2d');
+            const section = canvas.parentElement;
+
+            function resize() {
+                canvas.width = section.clientWidth;
+                canvas.height = section.clientHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            let x = 0.1, y = 0, z = 0;
+            const sigma = 10, rho = 28, beta = 8/3;
+            const points = [];
+            let time = 0;
+
+            function step() {
+                const dt = 0.005;
+                const dx = sigma * (y - x) * dt;
+                const dy = (x * (rho - z) - y) * dt;
+                const dz = (x * y - beta * z) * dt;
+
+                x += dx;
+                y += dy;
+                z += dz;
+
+                const px = canvas.width / 2 + x * 8;
+                const py = canvas.height / 2 - y * 8;
+                const pz = z * 0.5;
+
+                points.push({ x: px, y: py, z: pz });
+
+                if (points.length > 3000) points.shift();
+            }
+
+            function animate() {
+                for (let i = 0; i < 5; i++) step();
+
+                ctx.fillStyle = 'rgba(6, 6, 18, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                points.forEach((p, i) => {
+                    const hue = (p.z * 5 + time * 50) % 360;
+                    const alpha = i / points.length * 0.8;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 1, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${hue}, 70%, 50%, ${alpha})`;
+                    ctx.fill();
+                });
+
+                time++;
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        // ============================================
+        // PARTICLE SECTION (Full-screen flow field)
+        // ============================================
+        function initParticleSection() {
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+            const section = document.getElementById('particleSection');
+
+            function resize() {
+                canvas.width = section.clientWidth;
+                canvas.height = section.clientHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            const numParticles = 300;
+            const particles = [];
+
+            for (let i = 0; i < numParticles; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: 0,
+                    vy: 0,
+                    hue: 160 + Math.random() * 80,
+                    size: Math.random() * 2 + 1
+                });
+            }
+
+            function noise(x, y, t) {
+                return Math.sin(x * 0.01 + t) * Math.cos(y * 0.01 + t * 0.7) +
+                       Math.sin(x * 0.005 - t * 0.3) * 0.5;
+            }
+
+            function animate() {
+                const time = Date.now() * 0.001;
+
+                ctx.fillStyle = 'rgba(6, 6, 18, 0.15)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                particles.forEach(p => {
+                    const angle = noise(p.x, p.y, time) * Math.PI * 2;
+                    const speed = 2;
+
+                    p.vx = p.vx * 0.96 + Math.cos(angle) * speed * 0.04;
+                    p.vy = p.vy * 0.96 + Math.sin(angle) * speed * 0.04;
+
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.x < 0) p.x = canvas.width;
+                    if (p.x > canvas.width) p.x = 0;
+                    if (p.y < 0) p.y = canvas.height;
+                    if (p.y > canvas.height) p.y = 0;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${p.hue}, 80%, 60%, 0.7)`;
+                    ctx.fill();
+
+                    // Draw connections to nearby particles
+                    particles.forEach(p2 => {
+                        if (p === p2) return;
+                        const dx = p2.x - p.x;
+                        const dy = p2.y - p.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < 100) {
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            ctx.strokeStyle = `hsla(${p.hue}, 60%, 50%, ${0.2 * (1 - dist / 100)})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    });
+                });
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        // ============================================
+        // NAVIGATION & SCROLL
+        // ============================================
+        function scrollToSection(index) {
+            const sections = ['hero', 'philosophy', 'flowSection', 'generator', 'mathematics'];
+            const el = document.getElementById(sections[index]) || document.querySelector(`.${sections[index]}`);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function updateNavDots() {
+            const sections = ['hero', 'philosophy', 'flowSection', 'generator', 'mathematics'];
+            const dots = document.querySelectorAll('.nav-dot');
+            const scrollPos = window.scrollY + window.innerHeight / 2;
+
+            sections.forEach((id, i) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    const top = el.offsetTop;
+                    const bottom = top + el.offsetHeight;
+                    if (scrollPos >= top && scrollPos < bottom) {
+                        dots.forEach(d => d.classList.remove('active'));
+                        dots[i].classList.add('active');
+                    }
+                }
+            });
+        }
+
+        window.addEventListener('scroll', updateNavDots);
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initHeroAnimation();
+            initFlowCanvas();
+            initFlowFieldSvg();
+            initInteractiveGenerator();
+            initMathCanvas();
+            initParticleSection();
+        });
+    </script>
+</body>
+</html>

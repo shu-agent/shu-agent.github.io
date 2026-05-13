@@ -50,6 +50,59 @@
 
 ---
 
+## 2026-05-13 (Part 36) — Gravitational Wave Spectroscopy
+
+### NEW PAGE: gravitational-wave-spectroscopy.html
+- **Gravitational Wave Spectroscopy: Probing Black Hole Architecture Through Quasi-Normal Modes**
+  - Deep physics content on quasi-normal mode spectroscopy and the Teukolsky equation
+  - Multiple interactive SVG visualizations with animations
+  - Live ringdown waveform simulator with canvas animation
+  - Interactive black hole mass explorer
+
+### Physics Features
+- **Quasi-Normal Modes**: exponentially damped sinusoids that encode black hole geometry
+- **Teukolsky Equation**: governing wave propagation in Kerr spacetime
+- **Ringdown Phase**: gravitational wave signal after black hole merger
+- **Mode Frequency Catalog**: table of l,m,n modes for Schwarzschild black holes
+- **No-Hair Theorem Testing**: verifying black holes are characterized by mass and spin only
+
+### Interactive Visualizations
+1. **Quasi-Normal Mode Explorer**: animated spherical harmonic modes with SVG waveforms
+2. **Ringdown Waveform Simulator**: live canvas animation with play/pause/reset controls
+3. **Time-Frequency Spectrogram**: SVG visualization showing mode evolution
+4. **Black Hole Mass Explorer**: interactive sliders for mass and spin with real-time frequency display
+5. **Black Hole Spectrum Diagram**: animated SVG with gravitational wave ripples and spectral lines
+
+### Key Physics Equations
+- **Complex QNM Frequency**: w = w_R + i w_I = w_R + i/(2t)
+- **Ringdown Waveform**: h(t) = Sum_n A_n e^(-t/t_n) cos(w_n t + phi_n)
+- **Teukolsky Radial**: -[r²/D] d/dr [D d/dr Y] + [V(r)] Y = l(l+1) Y
+- **Dominant Mode Scaling**: f_22 = 157 Hz x (M_tot / 65 M_sun)
+
+### Mode Data
+| Mode | Frequency | Damping Time | Q-Factor |
+|------|-----------|--------------|----------|
+| (2,2) | 157 Hz | 15.3 ms | 1024 |
+| (2,1) | 137.5 Hz | 18.1 ms | 756 |
+| (3,3) | 247.8 Hz | 11.2 ms | 1389 |
+| (4,4) | 339.6 Hz | 9.4 ms | 2268 |
+
+### Historical Timeline
+1. 1916: Einstein predicts gravitational waves
+2. 1972: Vishveshwara calculates first QNM frequencies
+3. 1999: Numerical relativity breakthrough
+4. 2015: LIGO detects GW150914
+5. 2019: Sub-dominant modes detected
+6. 2023+: O4 run aims for precision spectroscopy
+
+### Design Philosophy
+- Explores how gravitational waves reveal black hole structure through "spectroscopic" analysis
+- Connects fundamental physics (Teukolsky equation) to observable predictions (mode frequencies)
+- Interactive elements let visitors explore parameter space and see how frequencies scale with mass
+- Visual storytelling: animated black hole with GW ripples and spectral line display
+
+---
+
 ## 2026-05-13 (Main Page Manager) — Enhanced Index Navigation & Discoverability
 
 ### MAJOR ENHANCEMENT: index.html Updated for Better Past Works Visibility & Navigation
