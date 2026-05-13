@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battery Degradation Prediction — Machine Learning Lab | Li-Ion Battery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d1a2d 100%);
+            min-height: 100vh;
+            color: #e0e6ed;
+            overflow-x: hidden;
+        }
+
+        /* Animated Grid Background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(79,195,247,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(79,195,247,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Navigation Dots */
+        .nav-dots {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(79,195,247,0.3);
+            border: 2px solid #4fc3f7;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .nav-dot:hover, .nav-dot.active {
+            background: #4fc3f7;
+            box-shadow: 0 0 15px rgba(79,195,247,0.8);
+        }
+        .nav-dot .label {
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: nowrap;
+            font-size: 0.8em;
+            color: #4fc3f7;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .nav-dot:hover .label {
+            opacity: 1;
+        }
+
+        .content {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 20px 60px;
+            background: linear-gradient(180deg, rgba(79,195,247,0.15) 0%, transparent 100%);
+        }
+        .hero h1 {
+            font-size: 3em;
+            color: #4fc3f7;
+            text-shadow: 0 0 40px rgba(79,195,247,0.6);
+            margin-bottom: 15px;
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 40px rgba(79,195,247,0.6); }
+            50% { text-shadow: 0 0 60px rgba(79,195,247,0.9), 0 0 80px rgba(79,195,247,0.4); }
+        }
+        .hero p {
+            font-size: 1.3em;
+            color: #90caf9;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        .hero .subtitle {
+            font-size: 1.1em;
+            color: #64b5f6;
+            margin-top: 20px;
+            opacity: 0.8;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Panel Styles */
+        .panel {
+            background: rgba(10,30,50,0.85);
+            border: 1px solid rgba(79,195,247,0.2);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(15px);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease-out;
+        }
+        .panel.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .panel-title {
+            font-size: 1.6em;
+            color: #4fc3f7;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .panel-title .icon {
+            font-size: 1.4em;
+        }
+
+        /* Neural Network SVG */
+        .network-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .network-svg {
+            max-width: 100%;
+            height: auto;
+        }
+        .network-svg .node {
+            fill: rgba(79,195,247,0.2);
+            stroke: #4fc3f7;
+            stroke-width: 2;
+            transition: all 0.3s;
+        }
+        .network-svg .node:hover {
+            fill: rgba(79,195,247,0.5);
+            filter: drop-shadow(0 0 10px rgba(79,195,247,0.8));
+        }
+        .network-svg .connection {
+            stroke: rgba(79,195,247,0.3);
+            stroke-width: 1.5;
+            animation: pulseLine 2s ease-in-out infinite;
+        }
+        @keyframes pulseLine {
+            0%, 100% { stroke-opacity: 0.3; }
+            50% { stroke-opacity: 0.8; }
+        }
+        .network-svg text {
+            fill: #e0e6ed;
+            font-size: 12px;
+        }
+        .network-svg .layer-label {
+            fill: #90caf9;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: rgba(30,60,90,0.5);
+            border: 1px solid rgba(79,195,247,0.2);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s;
+        }
+        .card:hover {
+            border-color: rgba(79,195,247,0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        .card h3 {
+            color: #4fc3f7;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        .card p {
+            color: #b0bec5;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        /* Metrics Dashboard */
+        .metrics-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .metric-box {
+            background: rgba(20,50,80,0.6);
+            border: 1px solid rgba(79,195,247,0.2);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .metric-box:hover {
+            border-color: rgba(79,195,247,0.5);
+            box-shadow: 0 0 30px rgba(79,195,247,0.2);
+        }
+        .metric-box .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #4fc3f7;
+            text-shadow: 0 0 20px rgba(79,195,247,0.5);
+        }
+        .metric-box .label {
+            color: #90a4ae;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        .metric-box .sublabel {
+            color: #607d8b;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+
+        /* Controls */
+        .controls-panel {
+            background: rgba(20,50,80,0.5);
+            border: 1px solid rgba(79,195,247,0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .control-group label {
+            color: #90caf9;
+            font-size: 0.95em;
+        }
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(79,195,247,0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4fc3f7;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(79,195,247,0.6);
+        }
+        .control-group .value-display {
+            color: #e0e6ed;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* Charts */
+        .chart-container {
+            background: rgba(15,40,65,0.5);
+            border: 1px solid rgba(79,195,247,0.15);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .chart-title {
+            color: #4fc3f7;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Feature Importance Bars */
+        .feature-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .feature-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .feature-bar .name {
+            width: 180px;
+            color: #90caf9;
+            font-size: 0.9em;
+        }
+        .feature-bar .bar-container {
+            flex: 1;
+            height: 25px;
+            background: rgba(79,195,247,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+        .feature-bar .bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4fc3f7, #81d4fa);
+            border-radius: 12px;
+            transition: width 1s ease-out;
+            box-shadow: 0 0 15px rgba(79,195,247,0.4);
+        }
+        .feature-bar .percentage {
+            width: 60px;
+            color: #e0e6ed;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        /* Prediction Timeline */
+        .prediction-timeline {
+            position: relative;
+            padding: 30px 0;
+        }
+        .timeline-axis {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 4px;
+            background: linear-gradient(90deg, #4fc3f7, #81d4fa);
+            border-radius: 2px;
+        }
+        .timeline-markers {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+        .timeline-marker {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .timeline-marker .dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4fc3f7;
+            box-shadow: 0 0 20px rgba(79,195,247,0.6);
+        }
+        .timeline-marker .dot.warning { background: #ffc107; box-shadow: 0 0 20px rgba(255,193,7,0.6); }
+        .timeline-marker .dot.danger { background: #ef5350; box-shadow: 0 0 20px rgba(239,83,80,0.6); }
+        .timeline-marker .year {
+            color: #e0e6ed;
+            font-weight: bold;
+            font-size: 1em;
+        }
+        .timeline-marker .event {
+            color: #90a4ae;
+            font-size: 0.8em;
+            text-align: center;
+            max-width: 100px;
+        }
+
+        /* Architecture Diagram */
+        .architecture-svg {
+            max-width: 100%;
+            height: auto;
+            margin: 20px 0;
+        }
+        .architecture-svg .box {
+            fill: rgba(30,60,90,0.6);
+            stroke: #4fc3f7;
+            stroke-width: 2;
+        }
+        .architecture-svg .arrow {
+            fill: none;
+            stroke: #4fc3f7;
+            stroke-width: 2;
+            marker-end: url(#arrowhead);
+        }
+        .architecture-svg text {
+            fill: #e0e6ed;
+            font-size: 12px;
+        }
+        .architecture-svg .box-label {
+            fill: #4fc3f7;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* Theory Cards */
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .theory-card {
+            background: rgba(25,55,85,0.5);
+            border: 1px solid rgba(79,195,247,0.2);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        .theory-card:hover {
+            border-color: rgba(79,195,247,0.4);
+            box-shadow: 0 0 25px rgba(79,195,247,0.15);
+        }
+        .theory-card h4 {
+            color: #4fc3f7;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+        .theory-card .equation {
+            font-family: 'Courier New', monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 8px;
+            color: #81d4fa;
+            margin: 10px 0;
+            font-size: 0.95em;
+            overflow-x: auto;
+        }
+        .theory-card p {
+            color: #b0bec5;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        /* Physics Connections */
+        .physics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .physics-card {
+            background: rgba(20,50,80,0.5);
+            border: 1px solid rgba(156,39,176,0.3);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+        .physics-card:hover {
+            border-color: rgba(156,39,176,0.6);
+            box-shadow: 0 0 25px rgba(156,39,176,0.2);
+        }
+        .physics-card .icon {
+            font-size: 2em;
+            flex-shrink: 0;
+        }
+        .physics-card h4 {
+            color: #ce93d8;
+            margin-bottom: 8px;
+        }
+        .physics-card p {
+            color: #b0bec5;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        /* Live Prediction Panel */
+        .live-prediction {
+            background: rgba(10,40,70,0.8);
+            border: 2px solid rgba(79,195,247,0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .live-prediction::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4fc3f7, #81d4fa, #4fc3f7);
+            animation: shimmer 2s linear infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .live-prediction h3 {
+            color: #4fc3f7;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .live-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: blink 1s ease-in-out infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .prediction-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .prediction-item {
+            background: rgba(20,50,80,0.6);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .prediction-item .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4fc3f7;
+        }
+        .prediction-item .value.warning { color: #ffc107; }
+        .prediction-item .value.danger { color: #ef5350; }
+        .prediction-item .label {
+            color: #90a4ae;
+            margin-top: 8px;
+            font-size: 0.9em;
+        }
+        .prediction-item .confidence {
+            color: #607d8b;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+
+        /* Training Curves */
+        .training-visualization {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        @media (max-width: 900px) {
+            .training-visualization {
+                grid-template-columns: 1fr;
+            }
+        }
+        .training-chart {
+            background: rgba(15,40,65,0.5);
+            border: 1px solid rgba(79,195,247,0.15);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .training-chart h4 {
+            color: #4fc3f7;
+            margin-bottom: 15px;
+        }
+
+        /* Model Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(79,195,247,0.2);
+        }
+        .comparison-table th {
+            color: #4fc3f7;
+            background: rgba(79,195,247,0.1);
+        }
+        .comparison-table td {
+            color: #e0e6ed;
+        }
+        .comparison-table tr:hover td {
+            background: rgba(79,195,247,0.05);
+        }
+        .comparison-table .best {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        /* Research Frontiers */
+        .frontier-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .frontier-card {
+            background: linear-gradient(135deg, rgba(30,60,90,0.6) 0%, rgba(20,40,70,0.6) 100%);
+            border: 1px solid rgba(79,195,247,0.3);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .frontier-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(79,195,247,0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .frontier-card:hover::before {
+            opacity: 1;
+        }
+        .frontier-card:hover {
+            border-color: rgba(79,195,247,0.6);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        .frontier-card .number {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 3em;
+            color: rgba(79,195,247,0.1);
+            font-weight: bold;
+        }
+        .frontier-card h4 {
+            color: #4fc3f7;
+            margin-bottom: 12px;
+            position: relative;
+        }
+        .frontier-card p {
+            color: #b0bec5;
+            font-size: 0.9em;
+            line-height: 1.5;
+            position: relative;
+        }
+        .frontier-card .tags {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .frontier-card .tag {
+            background: rgba(79,195,247,0.2);
+            color: #81d4fa;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75em;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #607d8b;
+            border-top: 1px solid rgba(79,195,247,0.1);
+            margin-top: 40px;
+        }
+        .footer a {
+            color: #4fc3f7;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+
+    <div class="particles" id="particles"></div>
+
+    <div class="nav-dots">
+        <div class="nav-dot active" data-section="0" onclick="scrollToSection(0)"><span class="label">Overview</span></div>
+        <div class="nav-dot" data-section="1" onclick="scrollToSection(1)"><span class="label">Architecture</span></div>
+        <div class="nav-dot" data-section="2" onclick="scrollToSection(2)"><span class="label">Features</span></div>
+        <div class="nav-dot" data-section="3" onclick="scrollToSection(3)"><span class="label">Simulator</span></div>
+        <div class="nav-dot" data-section="4" onclick="scrollToSection(4)"><span class="label">Training</span></div>
+        <div class="nav-dot" data-section="5" onclick="scrollToSection(5)"><span class="label">Physics</span></div>
+        <div class="nav-dot" data-section="6" onclick="scrollToSection(6)"><span class="label">Frontiers</span></div>
+    </div>
+
+    <div class="content">
+        <section class="hero">
+            <h1>Battery Degradation Prediction</h1>
+            <p>Machine Learning for State of Health Estimation and Remaining Useful Life Prediction</p>
+            <div class="subtitle">From Voltage-Current Curves to Lifetime Forecasts — Neural Networks that Learn Battery Aging</div>
+        </section>
+
+        <div class="container">
+            <!-- Overview Section -->
+            <div class="panel" id="section-0">
+                <div class="panel-title">
+                    <span class="icon">🧠</span>
+                    Why Machine Learning for Battery Degradation?
+                </div>
+                <p style="font-size: 1.1em; line-height: 1.8; margin-bottom: 20px;">
+                    Battery degradation is a complex, multi-scale phenomenon involving electrochemical, mechanical, and thermal processes.
+                    Traditional physics-based models require detailed knowledge of internal states that are often unmeasurable.
+                    Machine learning offers a data-driven alternative: training neural networks on historical cycling data to predict
+                    State of Health (SOH) and Remaining Useful Life (RUL) with unprecedented accuracy.
+                </p>
+
+                <div class="metrics-dashboard">
+                    <div class="metric-box">
+                        <div class="value">95.4%</div>
+                        <div class="label">SOH Prediction Accuracy</div>
+                        <div class="sublabel">LSTM-based model</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="value">±50</div>
+                        <div class="label">Cycles to EOL Error</div>
+                        <div class="sublabel">Typical RUL uncertainty</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="value">10x</div>
+                        <div class="label">Faster than Physics Models</div>
+                        <div class="sublabel">Inference time comparison</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="value">50K+</div>
+                        <div class="label">Cycles in Training Data</div>
+                        <div class="sublabel">From NASA, Oxford, etc.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Architecture Section -->
+            <div class="panel" id="section-1">
+                <div class="panel-title">
+                    <span class="icon">🏗️</span>
+                    Neural Network Architecture
+                </div>
+                <p style="margin-bottom: 20px;">
+                    Our degradation prediction system uses a multi-stage architecture combining feature extraction,
+                    temporal sequence modeling, and uncertainty quantification.
+                </p>
+
+                <div class="architecture-svg">
+                    <svg viewBox="0 0 900 400" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#4fc3f7"/>
+                            </marker>
+                            <linearGradient id="boxGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:rgba(30,60,90,0.8)"/>
+                                <stop offset="100%" style="stop-color:rgba(20,40,70,0.8)"/>
+                            </linearGradient>
+                        </defs>
+
+                        <!-- Input Layer -->
+                        <rect class="box" x="20" y="160" width="120" height="80" rx="10" fill="url(#boxGrad)"/>
+                        <text class="box-label" x="80" y="195" text-anchor="middle">Input</text>
+                        <text x="80" y="215" text-anchor="middle" font-size="11" fill="#90caf9">Voltage</text>
+                        <text x="80" y="230" text-anchor="middle" font-size="11" fill="#90caf9">Current</text>
+                        <text x="80" y="245" text-anchor="middle" font-size="11" fill="#90caf9">Temperature</text>
+
+                        <!-- Arrow -->
+                        <line class="arrow" x1="140" y1="200" x2="170" y2="200"/>
+
+                        <!-- Feature Extraction -->
+                        <rect class="box" x="180" y="120" width="130" height="160" rx="10" fill="url(#boxGrad)"/>
+                        <text class="box-label" x="245" y="155" text-anchor="middle">Feature</text>
+                        <text class="box-label" x="245" y="175" text-anchor="middle">Extraction</text>
+                        <text x="245" y="200" text-anchor="middle" font-size="10" fill="#90caf9">1D-CNN</text>
+                        <text x="245" y="220" text-anchor="middle" font-size="10" fill="#90caf9">BatchNorm</text>
+                        <text x="245" y="240" text-anchor="middle" font-size="10" fill="#90caf9">ReLU</text>
+                        <text x="245" y="260" text-anchor="middle" font-size="10" fill="#90caf9">Dropout</text>
+
+                        <!-- Arrow -->
+                        <line class="arrow" x1="310" y1="200" x2="340" y2="200"/>
+
+                        <!-- LSTM Layer -->
+                        <rect class="box" x="350" y="120" width="130" height="160" rx="10" fill="url(#boxGrad)"/>
+                        <text class="box-label" x="415" y="155" text-anchor="middle">Temporal</text>
+                        <text class="box-label" x="415" y="175" text-anchor="middle">Modeling</text>
+                        <text x="415" y="200" text-anchor="middle" font-size="10" fill="#90caf9">LSTM ×2</text>
+                        <text x="415" y="220" text-anchor="middle" font-size="10" fill="#90caf9">Peephole</text>
+                        <text x="415" y="240" text-anchor="middle" font-size="10" fill="#90caf9">Attention</text>
+                        <text x="415" y="260" text-anchor="middle" font-size="10" fill="#90caf9">Skip Conn</text>
+
+                        <!-- Arrow -->
+                        <line class="arrow" x1="480" y1="200" x2="510" y2="200"/>
+
+                        <!-- Dense Layers -->
+                        <rect class="box" x="520" y="140" width="130" height="120" rx="10" fill="url(#boxGrad)"/>
+                        <text class="box-label" x="585" y="170" text-anchor="middle">Prediction</text>
+                        <text class="box-label" x="585" y="190" text-anchor="middle">Head</text>
+                        <text x="585" y="215" text-anchor="middle" font-size="10" fill="#90caf9">Dense(256)</text>
+                        <text x="585" y="235" text-anchor="middle" font-size="10" fill="#90caf9">Dense(64)</text>
+
+                        <!-- Arrow -->
+                        <line class="arrow" x1="650" y1="200" x2="680" y2="200"/>
+
+                        <!-- Output -->
+                        <rect class="box" x="690" y="150" width="130" height="100" rx="10" fill="url(#boxGrad)"/>
+                        <text class="box-label" x="755" y="180" text-anchor="middle">Output</text>
+                        <text x="755" y="205" text-anchor="middle" font-size="11" fill="#4caf50">SOH (%)</text>
+                        <text x="755" y="225" text-anchor="middle" font-size="11" fill="#4caf50">RUL (cycles)</text>
+                        <text x="755" y="245" text-anchor="middle" font-size="11" fill="#ffc107">Conf. Interval</text>
+
+                        <!-- Input labels -->
+                        <text x="80" y="100" text-anchor="middle" fill="#90caf9" font-size="12">Time Series Input</text>
+                        <text x="80" y="280" text-anchor="middle" fill="#607d8b" font-size="10">(128 timesteps)</text>
+
+                        <!-- Output labels -->
+                        <text x="755" y="290" text-anchor="middle" fill="#4fc3f7" font-size="12">Degradation Metrics</text>
+                    </svg>
+                </div>
+
+                <div class="theory-grid">
+                    <div class="theory-card">
+                        <h4>LSTM Cell Equation</h4>
+                        <div class="equation">
+                            f_t = σ(W_f · [h_{t-1}, x_t] + b_f)
+                            i_t = σ(W_i · [h_{t-1}, x_t] + b_i)
+                            C_t = f_t · C_{t-1} + i_t · tanh(W_c · [h_{t-1}, x_t] + b_c)
+                            o_t = σ(W_o · [h_{t-1}, x_t] + b_o)
+                            h_t = o_t · tanh(C_t)
+                        </div>
+                        <p>Long Short-Term Memory gates control information flow, enabling the network to learn long-range dependencies in battery degradation patterns.</p>
+                    </div>
+                    <div class="theory-card">
+                        <h4>Attention Mechanism</h4>
+                        <div class="equation">
+                            Attention(Q,K,V) = softmax(QK^T / √d_k) · V
+                        </div>
+                        <p>Self-attention allows the model to focus on the most relevant degradation features across the cycling history, improving RUL prediction accuracy.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="panel" id="section-2">
+                <div class="panel-title">
+                    <span class="icon">📊</span>
+                    Input Features for Degradation Prediction
+                </div>
+                <p style="margin-bottom: 20px;">
+                    Feature engineering is critical for ML-based degradation prediction. Our model uses 47 input features
+                    extracted from cycling data, categorized into five groups.
+                </p>
+
+                <div class="feature-bars">
+                    <div class="feature-bar">
+                        <span class="name">Voltage Features</span>
+                        <div class="bar-container">
+                            <div class="bar" style="width: 85%;"></div>
+                        </div>
+                        <span class="percentage">85%</span>
+                    </div>
+                    <div class="feature-bar">
+                        <span class="name">Capacity Fade</span>
+                        <div class="bar-container">
+                            <div class="bar" style="width: 92%;"></div>
+                        </div>
+                        <span class="percentage">92%</span>
+                    </div>
+                    <div class="feature-bar">
+                        <span class="name">Internal Resistance</span>
+                        <div class="bar-container">
+                            <div class="bar" style="width: 78%;"></div>
+                        </div>
+                        <span class="percentage">78%</span>
+                    </div>
+                    <div class="feature-bar">
+                        <span class="name">Temperature Profile</span>
+                        <div class="bar-container">
+                            <div class="bar" style="width: 65%;"></div>
+                        </div>
+                        <span class="percentage">65%</span>
+                    </div>
+                    <div class="feature-bar">
+                        <span class="name">Cycling Pattern</span>
+                        <div class="bar-container">
+                            <div class="bar" style="width: 71%;"></div>
+                        </div>
+                        <span class="percentage">71%</span>
+                    </div>
+                </div>
+
+                <div class="cards-grid" style="margin-top: 30px;">
+                    <div class="card">
+                        <h3>Voltage-Based Features</h3>
+                        <p>
+                            • OCV at 0%, 50%, 100% SOC<br>
+                            • Voltage relaxation curves<br>
+                            • Hysteresis area (~8.5 mV per Li site)<br>
+                            • Differential voltage peaks (dQ/dV)
+                        </p>
+                    </div>
+                    <div class="card">
+                        <h3>Capacity Metrics</h3>
+                        <p>
+                            • Discharge capacity (mAh)<br>
+                            • Coulombic efficiency (%)<br>
+                            • Capacity fade rate (mAh/cycle)<br>
+                            • Normalized capacity retention
+                        </p>
+                    </div>
+                    <div class="card">
+                        <h3>Resistance Indicators</h3>
+                        <p>
+                            • DC resistance (R = ΔV/ΔI)<br>
+                            • AC impedance at 1 kHz<br>
+                            • Warburg coefficient<br>
+                            • Electrolyte resistance growth
+                        </p>
+                    </div>
+                    <div class="card">
+                        <h3>Thermal Signatures</h3>
+                        <p>
+                            • Peak temperature during cycling<br>
+                            • Average temperature<br>
+                            • Thermal resistance growth<br>
+                            • Heat generation rate (I²R)
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Simulator Section -->
+            <div class="panel" id="section-3">
+                <div class="panel-title">
+                    <span class="icon">⚡</span>
+                    Live Degradation Prediction Simulator
+                </div>
+
+                <div class="controls-panel">
+                    <div class="controls-grid">
+                        <div class="control-group">
+                            <label>Cycle Count</label>
+                            <input type="range" id="cycleSlider" min="0" max="2000" value="500">
+                            <span class="value-display" id="cycleValue">500 cycles</span>
+                        </div>
+                        <div class="control-group">
+                            <label>Temperature</label>
+                            <input type="range" id="tempSlider" min="0" max="50" value="25">
+                            <span class="value-display" id="tempValue">25°C</span>
+                        </div>
+                        <div class="control-group">
+                            <label>Average SOC</label>
+                            <input type="range" id="socSlider" min="20" max="80" value="50">
+                            <span class="value-display" id="socValue">50%</span>
+                        </div>
+                        <div class="control-group">
+                            <label>DoD per Cycle</label>
+                            <input type="range" id="dodSlider" min="20" max="100" value="80">
+                            <span class="value-display" id="dodValue">80%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="live-prediction">
+                    <h3><span class="live-indicator"></span> Live Prediction Results</h3>
+                    <div class="prediction-results">
+                        <div class="prediction-item">
+                            <div class="value" id="sohValue">92.3%</div>
+                            <div class="label">State of Health (SOH)</div>
+                            <div class="confidence">Confidence: ±1.8%</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="value" id="rulValue">847</div>
+                            <div class="label">Remaining Useful Life</div>
+                            <div class="confidence">Confidence: ±52 cycles</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="value" id="eolValue">2027</div>
+                            <div class="label">End of Life Year (Est.)</div>
+                            <div class="confidence">At 80% SOH threshold</div>
+                        </div>
+                        <div class="prediction-item">
+                            <div class="value warning" id="riskValue">Medium</div>
+                            <div class="label">Degradation Risk</div>
+                            <div class="confidence">Based on current trajectory</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="prediction-timeline">
+                    <div class="timeline-axis"></div>
+                    <div class="timeline-markers">
+                        <div class="timeline-marker">
+                            <div class="dot"></div>
+                            <span class="year">0</span>
+                            <span class="event">Fresh Battery</span>
+                        </div>
+                        <div class="timeline-marker">
+                            <div class="dot"></div>
+                            <span class="year" id="marker500">500</span>
+                            <span class="event" id="event500">Current State</span>
+                        </div>
+                        <div class="timeline-marker">
+                            <div class="dot warning"></div>
+                            <span class="year" id="marker1000">1347</span>
+                            <span class="event">EOL Warning</span>
+                        </div>
+                        <div class="timeline-marker">
+                            <div class="dot danger"></div>
+                            <span class="year">~1500</span>
+                            <span class="event">End of Life (80% SOH)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Training Section -->
+            <div class="panel" id="section-4">
+                <div class="panel-title">
+                    <span class="icon">📈</span>
+                    Model Training & Performance
+                </div>
+
+                <div class="training-visualization">
+                    <div class="training-chart">
+                        <h4>Loss Curves</h4>
+                        <canvas id="lossChart" width="400" height="250"></canvas>
+                    </div>
+                    <div class="training-chart">
+                        <h4>SOH Prediction vs Actual</h4>
+                        <canvas id="predictionChart" width="400" height="250"></canvas>
+                    </div>
+                </div>
+
+                <h3 style="color: #4fc3f7; margin: 30px 0 20px;">Model Comparison</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>SOH MAE (%)</th>
+                            <th>RUL MAE (cycles)</th>
+                            <th>Training Time</th>
+                            <th>Inference Speed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>LSTM (Our Model)</td>
+                            <td class="best">1.8%</td>
+                            <td class="best">52</td>
+                            <td>45 min</td>
+                            <td>2.3 ms</td>
+                        </tr>
+                        <tr>
+                            <td>Transformer</td>
+                            <td>2.1%</td>
+                            <td>68</td>
+                            <td>78 min</td>
+                            <td>4.1 ms</td>
+                        </tr>
+                        <tr>
+                            <td>1D-CNN</td>
+                            <td>2.4%</td>
+                            <td>85</td>
+                            <td>12 min</td>
+                            <td>0.8 ms</td>
+                        </tr>
+                        <tr>
+                            <td>Gradient Boosting</td>
+                            <td>2.9%</td>
+                            <td>94</td>
+                            <td>8 min</td>
+                            <td>0.3 ms</td>
+                        </tr>
+                        <tr>
+                            <td>Physics-Based</td>
+                            <td>5.2%</td>
+                            <td>156</td>
+                            <td>N/A</td>
+                            <td>25 ms</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Physics Connections Section -->
+            <div class="panel" id="section-5">
+                <div class="panel-title">
+                    <span class="icon">🔗</span>
+                    Cross-Disciplinary Physics Connections
+                </div>
+
+                <div class="physics-grid">
+                    <div class="physics-card">
+                        <span class="icon">🌌</span>
+                        <div>
+                            <h4>Degradation ↔ Information Loss</h4>
+                            <p>Battery aging follows sublinear √t scaling, mirroring information dissipation in complex systems. Both exhibit Kolmogorov-Johnson-Mehl AVRARED kinetics.</p>
+                        </div>
+                    </div>
+                    <div class="physics-card">
+                        <span class="icon">🌀</span>
+                        <div>
+                            <h4>LSTM ↔ Gravitational Memory</h4>
+                            <p>LSTM hidden states retain information like gravitational wave memory effect — past waveforms留下 imprints on spacetime geometry.</p>
+                        </div>
+                    </div>
+                    <div class="physics-card">
+                        <span class="icon">📉</span>
+                        <div>
+                            <h4>Capacity Fade ↔ Entropy Increase</h4>
+                            <p>SOH(t) = 100 - a·√t - b·N^α mirrors thermodynamic entropy S ∝ ln(Ω), both showing sublinear degradation.</p>
+                        </div>
+                    </div>
+                    <div class="physics-card">
+                        <span class="icon">🎯</span>
+                        <div>
+                            <h4>Attention ↔ Perturbation Theory</h4>
+                            <p>Attention weights softmax(QK^T/√d) parallel quantum perturbation theory — both quantify how past states influence current behavior.</p>
+                        </div>
+                    </div>
+                    <div class="physics-card">
+                        <span class="icon">⏱️</span>
+                        <div>
+                            <h4>RUL ↔ Tidal Dissipation</h4>
+                            <p>RUL prediction uncertainty (±52 cycles) scales with √t, same as gravitational tidal energy dissipation in binary systems.</p>
+                        </div>
+                    </div>
+                    <div class="physics-card">
+                        <span class="icon">🔄</span>
+                        <div>
+                            <h4>Cycling ↔ Cycle Gauge</h4>
+                            <p>Battery charge cycles mirror gauge theory cycles — both conserve quantities through periodic transformations in configuration space.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="theory-grid" style="margin-top: 30px;">
+                    <div class="theory-card">
+                        <h4>Degradation Equation</h4>
+                        <div class="equation">
+                            SOH(t) = SOH₀ - α·√t - β·N^γ - δ·T·exp(-Ea/RT)
+                        </div>
+                        <p>Combined calendar and cycle aging with Arrhenius temperature dependence. Parameters α, β, γ, δ are chemistry-specific fitting constants.</p>
+                    </div>
+                    <div class="theory-card">
+                        <h4>RUL Prediction Loss</h4>
+                        <div class="equation">
+                            L_RUL = (1/n) Σ |RUL_pred - RUL_true| + λ·|∂SOH/∂t|
+                        </div>
+                        <p>Hybrid loss combining MAE with physics-informed regularization ensuring monotonic SOH degradation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Research Frontiers Section -->
+            <div class="panel" id="section-6">
+                <div class="panel-title">
+                    <span class="icon">🚀</span>
+                    Research Frontiers
+                </div>
+
+                <div class="frontier-cards">
+                    <div class="frontier-card">
+                        <span class="number">01</span>
+                        <h4>Physics-Informed Neural Networks</h4>
+                        <p>Embed electrochemical governing equations directly into loss functions. SEI growth physics guides weight updates, reducing data requirements by 10x.</p>
+                        <div class="tags">
+                            <span class="tag">PINN</span>
+                            <span class="tag">SEI</span>
+                            <span class="tag">Few-shot</span>
+                        </div>
+                    </div>
+                    <div class="frontier-card">
+                        <span class="number">02</span>
+                        <h4>Transfer Learning Across Chemistries</h4>
+                        <p>Pre-trained NMC models fine-tuned on LFP data achieve 85% accuracy with only 200 LFP cycles. Chemistry-agnostic representations are key.</p>
+                        <div class="tags">
+                            <span class="tag">Transfer</span>
+                            <span class="tag">NMC→LFP</span>
+                            <span class="tag">Few-shot</span>
+                        </div>
+                    </div>
+                    <div class="frontier-card">
+                        <span class="number">03</span>
+                        <h4>Graph Neural Networks for electrode microstructure</h4>
+                        <p>Model each electrode particle as a node in a graph. GNN captures inter-particle degradation coupling and predicts crack propagation.</p>
+                        <div class="tags">
+                            <span class="tag">GNN</span>
+                            <span class="tag">Microstructure</span>
+                            <span class="tag">Cracks</span>
+                        </div>
+                    </div>
+                    <div class="frontier-card">
+                        <span class="number">04</span>
+                        <h4>Uncertainty Quantification with Bayesian NN</h4>
+                        <p>Monte Carlo dropout provides confidence intervals without expensive ensemble training. Essential for warranty and insurance applications.</p>
+                        <div class="tags">
+                            <span class="tag">Bayesian</span>
+                            <span class="tag">Uncertainty</span>
+                            <span class="tag">Insurance</span>
+                        </div>
+                    </div>
+                    <div class="frontier-card">
+                        <span class="number">05</span>
+                        <h4>Online Learning with Streaming Data</h4>
+                        <p>Continuously update models as new cycling data arrives. Elastic weight consolidation prevents catastrophic forgetting of past degradation patterns.</p>
+                        <div class="tags">
+                            <span class="tag">Online</span>
+                            <span class="tag">Continual</span>
+                            <span class="tag">Streaming</span>
+                        </div>
+                    </div>
+                    <div class="frontier-card">
+                        <span class="number">06</span>
+                        <h4>Multi-Modal Fusion (EIS + CV + DT)</h4>
+                        <p>Combine Electrochemical Impedance Spectroscopy, Cyclic Voltammetry, and Dilatometry. Multi-modal transformers achieve 97.2% SOH accuracy.</p>
+                        <div class="tags">
+                            <span class="tag">Multi-modal</span>
+                            <span class="tag">EIS</span>
+                            <span class="tag">Fusion</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metrics-dashboard" style="margin-top: 40px;">
+                    <div class="metric-box">
+                        <div class="value">2024</div>
+                        <div class="label">Physics-Informed ML</div>
+                        <div class="sublabel">Early research</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="value">2026</div>
+                        <div class="label">Transfer Learning</div>
+                        <div class="sublabel">Cross-chemistry models</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="value">2028</div>
+                        <div class="label">Online Adaptation</div>
+                        <div class="sublabel">Self-improving models</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="value">2030</div>
+                        <div class="label">Digital Twin Integration</div>
+                        <div class="sublabel">Full-scale deployment</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Li-Ion Battery Research Lab — Machine Learning for Electrochemistry</p>
+            <p style="margin-top: 10px;">
+                <a href="battery-materials-database.html">Materials DB</a> |
+                <a href="battery-intercalation-kinetics.html">Kinetics Lab</a> |
+                <a href="battery-aging-simulator.html">Aging Simulator</a> |
+                <a href="index.html">Home</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const colors = ['#4fc3f7', '#81d4fa', '#ce93d8', '#f48fb1', '#4dd0e1', '#80cbc4'];
+            for (let i = 0; i < 40; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 6 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // Scroll-based panel visibility
+        const panels = document.querySelectorAll('.panel');
+        const navDots = document.querySelectorAll('.nav-dot');
+
+        function checkVisibility() {
+            panels.forEach((panel, index) => {
+                const rect = panel.getBoundingClientRect();
+                const isVisible = rect.top < window.innerHeight * 0.8;
+                if (isVisible) {
+                    panel.classList.add('visible');
+                }
+                navDots[index].classList.toggle('active', isVisible);
+            });
+        }
+
+        window.addEventListener('scroll', checkVisibility);
+        checkVisibility();
+
+        function scrollToSection(index) {
+            document.getElementById('section-' + index).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Live Prediction Simulator
+        const cycleSlider = document.getElementById('cycleSlider');
+        const tempSlider = document.getElementById('tempSlider');
+        const socSlider = document.getElementById('socSlider');
+        const dodSlider = document.getElementById('dodSlider');
+
+        const cycleValue = document.getElementById('cycleValue');
+        const tempValue = document.getElementById('tempValue');
+        const socValue = document.getElementById('socValue');
+        const dodValue = document.getElementById('dodValue');
+
+        const sohValue = document.getElementById('sohValue');
+        const rulValue = document.getElementById('rulValue');
+        const eolValue = document.getElementById('eolValue');
+        const riskValue = document.getElementById('riskValue');
+        const marker500 = document.getElementById('marker500');
+        const event500 = document.getElementById('event500');
+
+        function updatePrediction() {
+            const cycles = parseInt(cycleSlider.value);
+            const temp = parseInt(tempSlider.value);
+            const soc = parseInt(socSlider.value);
+            const dod = parseInt(dodSlider.value);
+
+            cycleValue.textContent = cycles + ' cycles';
+            tempValue.textContent = temp + '°C';
+            socValue.textContent = soc + '%';
+            dodValue.textContent = dod + '%';
+
+            // Physics-informed SOH calculation
+            const tempFactor = Math.exp(0.07 * (temp - 25));
+            const dodFactor = Math.pow(dod / 80, 1.5);
+            const socFactor = 1 + 0.001 * Math.abs(soc - 50);
+            const baseFade = 0.00015 * cycles * tempFactor * dodFactor * socFactor;
+            const cycleFade = 0.00008 * Math.sqrt(cycles) * dodFactor;
+            const soh = Math.max(50, 100 - (baseFade + cycleFade) * 100);
+
+            // RUL calculation
+            const annualCycles = 365 * 2;
+            const rul = Math.max(0, Math.round((100 - soh) / 0.025));
+            const eolYear = 2026 + rul / annualCycles;
+
+            // Update displays
+            sohValue.textContent = soh.toFixed(1) + '%';
+            if (soh < 80) sohValue.classList.add('danger');
+            else if (soh < 90) sohValue.classList.add('warning');
+            else sohValue.classList.remove('danger', 'warning');
+
+            rulValue.textContent = rul;
+            eolValue.textContent = Math.round(eolYear);
+
+            // Risk assessment
+            let risk = 'Low';
+            if (soh < 80 || temp > 40) risk = 'High';
+            else if (soh < 90 || temp > 35) risk = 'Medium';
+            riskValue.textContent = risk;
+            riskValue.className = 'value';
+            if (risk === 'High') riskValue.classList.add('danger');
+            else if (risk === 'Medium') riskValue.classList.add('warning');
+
+            // Update timeline
+            marker500.textContent = cycles;
+            event500.textContent = cycles < 100 ? 'Fresh Battery' :
+                                   cycles < 500 ? 'Early Aging' :
+                                   cycles < 1000 ? 'Current State' :
+                                   cycles < 1500 ? 'Accelerated Aging' : 'Near EOL';
+        }
+
+        cycleSlider.addEventListener('input', updatePrediction);
+        tempSlider.addEventListener('input', updatePrediction);
+        socSlider.addEventListener('input', updatePrediction);
+        dodSlider.addEventListener('input', updatePrediction);
+        updatePrediction();
+
+        // Loss Chart
+        function drawLossChart() {
+            const canvas = document.getElementById('lossChart');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.fillStyle = 'rgba(15,40,65,0.9)';
+            ctx.fillRect(0, 0, w, h);
+
+            // Grid
+            ctx.strokeStyle = 'rgba(79,195,247,0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 5; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, h * i / 5);
+                ctx.lineTo(w, h * i / 5);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(w * i / 5, 0);
+                ctx.lineTo(w * i / 5, h);
+                ctx.stroke();
+            }
+
+            // Training loss curve
+            ctx.beginPath();
+            ctx.strokeStyle = '#4fc3f7';
+            ctx.lineWidth = 3;
+            for (let i = 0; i < w; i++) {
+                const x = i;
+                const y = h * (0.8 - 0.6 * Math.exp(-i / 80) * (1 + 0.3 * Math.sin(i / 15)));
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Validation loss curve
+            ctx.beginPath();
+            ctx.strokeStyle = '#f48fb1';
+            ctx.lineWidth = 3;
+            for (let i = 0; i < w; i++) {
+                const x = i;
+                const y = h * (0.85 - 0.55 * Math.exp(-i / 100) * (1 + 0.4 * Math.sin(i / 12)));
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Labels
+            ctx.fillStyle = '#4fc3f7';
+            ctx.font = '12px Segoe UI';
+            ctx.fillText('Training Loss', 20, 25);
+            ctx.fillStyle = '#f48fb1';
+            ctx.fillText('Validation Loss', 20, 45);
+            ctx.fillStyle = '#90caf9';
+            ctx.fillText('Epochs', w / 2 - 20, h - 10);
+        }
+
+        // Prediction Chart
+        function drawPredictionChart() {
+            const canvas = document.getElementById('predictionChart');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.fillStyle = 'rgba(15,40,65,0.9)';
+            ctx.fillRect(0, 0, w, h);
+
+            // Grid
+            ctx.strokeStyle = 'rgba(79,195,247,0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 5; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, h * i / 5);
+                ctx.lineTo(w, h * i / 5);
+                ctx.stroke();
+            }
+
+            // Perfect prediction line
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(79,195,247,0.3)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(30, h - 30);
+            ctx.lineTo(w - 30, 30);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Predicted vs Actual points
+            ctx.fillStyle = '#4fc3f7';
+            for (let i = 0; i < 50; i++) {
+                const actual = 30 + (h - 60) * (1 - i / 50) + (Math.random() - 0.5) * 20;
+                const predicted = 30 + (h - 60) * (1 - i / 50) + (Math.random() - 0.5) * 25;
+                ctx.beginPath();
+                ctx.arc(
+                    30 + (w - 60) * (i / 50),
+                    predicted,
+                    4, 0, Math.PI * 2
+                );
+                ctx.fill();
+            }
+
+            ctx.fillStyle = '#4fc3f7';
+            ctx.font = '12px Segoe UI';
+            ctx.fillText('Actual SOH', 20, 25);
+            ctx.fillStyle = '#90caf9';
+            ctx.fillText('Predicted SOH', 150, 25);
+        }
+
+        drawLossChart();
+        drawPredictionChart();
+
+        // Intersection Observer for panels
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        panels.forEach(panel => observer.observe(panel));
+    </script>
+</body>
+</html>

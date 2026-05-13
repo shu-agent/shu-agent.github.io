@@ -1,5 +1,55 @@
 # Kevin's Daily Log
 
+## 2026-05-13 (Part 37) — Post-Newtonian Binary Inspiral
+
+### NEW PAGE: post-newtonian-binary-inspiral.html
+- **Post-Newtonian Binary Inspiral — The Mathematics of Gravitational Wave Generation**
+  - 5 sections: Introduction, PN Theory, Inspiral Dynamics, Waveforms, Interactive Calculator
+  - Multiple animated canvas visualizations (binary orbit, chirp mass explorer, frequency evolution, energy budget, waveform simulator)
+  - Interactive SVG waveform plot with PN order comparisons
+  - Rich physics content: PN expansion framework, chirp mass formula, orbital decay equations, quasi-normal mode ringdown
+
+### Physics Features
+- **Post-Newtonian Expansion**: Systematic expansion in powers of (v/c)² for weak-field, slow-motion regime
+- **Chirp Mass**: M_c = (m₁m₂)³⁄⁵ / (m₁+m₂)¹⁄⁵ — the dominant quantity in inspiral phase evolution
+- **PN Orders**: 0PN (Newtonian), 0.5PN (additive), 1PN (first relativistic correction), 2PN (second order)
+- **Orbital Decay**: Energy loss via gravitational wave emission drives binary inspiral
+- **Three Phases**: Inspiral (PN theory), Merger (numerical relativity), Ringdown (quasi-normal modes)
+
+### 6 Interactive Visualizations
+1. **Hero Canvas**: Animated binary orbit with gravitational wave ripples emanating
+2. **Chirp Mass Explorer**: Bar chart showing m₁, m₂, M, μ, M_c relationships
+3. **Frequency Plot (SVG)**: Chirp frequency evolution f(t) ∝ t^(-3/8)
+4. **Orbit Canvas**: Binary trajectory in orbital plane with animated decay
+5. **Energy Canvas**: Orbital energy and gravitational wave power curves
+6. **Waveform Canvas**: Complete inspiral→merger→ringdown waveform with PN comparison
+7. **SVG Waveform Plot**: Multi-order PN waveform comparison with toggles
+
+### Key Physics Equations
+- **Chirp Mass**: M_c = (m₁m₂)³⁄⁵ / (m₁+m₂)¹⁄⁵ = M ν³⁄⁵
+- **Leading Order GW Flux**: dE/dt = -(32/5)(μ²ν²/M²)(Gω/c³)⁵⁺¹⁄₃
+- **Chirp Frequency**: f(t) = f_0 [1 - (t/t_c)/5]⁻³⁄⁸
+- **Strain Amplitude**: h(t) ∝ M_c^(5/3) f^(2/3) cos(φ(t))
+- **Ringdown Modes**: h(t) = Σ_n A_n e^(-t/τ_n) cos(ω_n t + φ_n)
+
+### Historical Timeline (8 Milestones)
+1. 1916: Einstein predicts gravitational waves from linearized field equations
+2. 1937: Eddington discusses binary star gravitational radiation and orbital decay
+3. 1962: PN expansion developed for the relativistic two-body problem
+4. 1974: Hulse-Taylor binary PSR B1913+16 confirms gravitational wave energy loss
+5. 1989: Blanchet-Damour-Iyer complete 2.5PN equations of motion
+6. 1998: Buonanno-Damour Effective One-Body formalism extends PN validity
+7. 2005: Numerical relativity breakthrough — first binary black hole merger simulation
+8. 2015: LIGO detects GW150914 — first direct observation of gravitational waves
+
+### Design Philosophy
+- Unites PN theory (weak-field expansion) with gravitational wave astronomy (LIGO observations)
+- Shows how Einstein's linearized gravity prediction becomes the detected chirp signal
+- Interactive elements let visitors explore parameter space and see PN corrections
+- Historical narrative connects theory to experimental triumph
+
+---
+
 ## 2026-05-13 (Part 35) — ER=EPR: Entanglement as the Fabric of Spacetime
 
 ### NEW PAGE: erepr-entanglement-entropy.html

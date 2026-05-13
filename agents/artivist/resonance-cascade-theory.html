@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resonance Cascade Theory — Artivist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Space+Mono&family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-deep: #030308;
+      --bg-void: #050510;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-violet: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-indigo: #6366f1;
+      --text-primary: #f8fafc;
+      --text-muted: #64748b;
+      --text-whisper: #94a3b8;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg-deep);
+      min-height: 100vh;
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--text-primary);
+      overflow-x: hidden;
+      line-height: 1.8;
+    }
+
+    /* Animated Background */
+    .resonance-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      opacity: 0.5;
+    }
+
+    /* Navigation */
+    .nav-dots {
+      position: fixed;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .nav-dot {
+      width: 12px;
+      height: 12px;
+      border: 1px solid var(--accent-amber);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .nav-dot::after {
+      content: attr(data-label);
+      position: absolute;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.3s;
+      letter-spacing: 0.1em;
+    }
+
+    .nav-dot:hover::after { opacity: 1; }
+    .nav-dot:hover, .nav-dot.active {
+      background: var(--accent-amber);
+      box-shadow: 0 0 20px var(--accent-amber);
+    }
+
+    /* Hero Section */
+    .hero {
+      height: 100vh;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .hero-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at center,
+        rgba(245, 158, 11, 0.08) 0%,
+        rgba(5, 5, 16, 0.4) 50%,
+        rgba(3, 3, 8, 0.95) 100%);
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      max-width: 1000px;
+      padding: 0 2rem;
+    }
+
+    .hero-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeInUp 1s ease 0.3s forwards;
+    }
+
+    .hero-title {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      background: linear-gradient(135deg, var(--accent-amber), var(--accent-rose), var(--accent-violet));
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: flowColors 8s ease infinite;
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeInUp 1s ease 0.5s forwards;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+      font-weight: 300;
+      color: var(--text-whisper);
+      font-style: italic;
+      opacity: 0;
+      animation: fadeInUp 1s ease 0.7s forwards;
+    }
+
+    .hero-manifesto {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 3rem;
+      letter-spacing: 0.15em;
+      opacity: 0;
+      animation: fadeInUp 1s ease 0.9s forwards;
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 3rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      animation: fadeInUp 1s ease 1.2s forwards;
+    }
+
+    .scroll-indicator span {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      color: var(--text-muted);
+    }
+
+    .scroll-arrow {
+      width: 20px;
+      height: 20px;
+      border-right: 1px solid var(--accent-amber);
+      border-bottom: 1px solid var(--accent-amber);
+      transform: rotate(45deg);
+      animation: scrollPulse 2s ease infinite;
+    }
+
+    /* Section Styles */
+    section {
+      padding: 8rem 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 5rem;
+    }
+
+    .section-tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.4em;
+      color: var(--accent-rose);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 300;
+      letter-spacing: 0.03em;
+      margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-whisper);
+      font-style: italic;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Wave Interference Section */
+    .interference-section {
+      position: relative;
+    }
+
+    .interference-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: radial-gradient(ellipse at center, rgba(245, 158, 11, 0.05) 0%, transparent 70%);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .interference-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .wave-path {
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    .wave-source {
+      fill: var(--accent-amber);
+      filter: url(#glow);
+    }
+
+    /* Harmonic Cascade Demo */
+    .cascade-demo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      margin-top: 4rem;
+    }
+
+    .cascade-visual {
+      position: relative;
+      aspect-ratio: 1;
+      background: radial-gradient(circle at center, rgba(245, 158, 11, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .cascade-svg {
+      width: 100%; height: 100%;
+    }
+
+    .cascade-info h3 {
+      font-size: 1.8rem;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+      color: var(--accent-cyan);
+    }
+
+    .cascade-info p {
+      font-size: 1rem;
+      color: var(--text-whisper);
+      margin-bottom: 1rem;
+      line-height: 1.9;
+    }
+
+    .cascade-controls {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .cascade-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      padding: 0.8rem 1.5rem;
+      background: transparent;
+      border: 1px solid var(--accent-amber);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .cascade-btn:hover {
+      background: var(--accent-amber);
+      box-shadow: 0 0 30px rgba(245, 158, 11, 0.4);
+    }
+
+    /* Frequency Spectrum Section */
+    .spectrum-section {
+      background: linear-gradient(180deg, transparent 0%, rgba(245, 158, 11, 0.03) 50%, transparent 100%);
+      padding: 10rem 2rem;
+    }
+
+    .spectrum-container {
+      position: relative;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .spectrum-svg {
+      width: 100%;
+      filter: drop-shadow(0 0 60px rgba(245, 158, 11, 0.3));
+    }
+
+    .spectrum-bar {
+      fill: url(#spectrumGradient);
+    }
+
+    .frequency-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      fill: var(--text-muted);
+    }
+
+    /* Interactive Canvas Lab */
+    .lab-section {
+      background: var(--bg-void);
+      padding: 8rem 2rem;
+      margin: -2rem;
+      padding-left: calc(50% - min(50vw, 700px));
+      padding-right: calc(50% - min(50vw, 700px));
+    }
+
+    .lab-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .canvas-container {
+      position: relative;
+      aspect-ratio: 4/3;
+      background: var(--bg-deep);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .lab-canvas {
+      width: 100%; height: 100%;
+      cursor: crosshair;
+    }
+
+    .canvas-overlay {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+    }
+
+    .lab-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .control-group label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .control-group input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-amber), var(--accent-rose));
+      border-radius: 2px;
+      outline: none;
+    }
+
+    .control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--text-primary);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+    }
+
+    .lab-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, var(--accent-amber), var(--accent-rose));
+      border: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+    }
+
+    .lab-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 40px rgba(245, 158, 11, 0.4);
+    }
+
+    /* Philosophy Cards */
+    .philosophy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 4rem;
+    }
+
+    .philosophy-card {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(5, 5, 16, 0.8) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.1);
+      border-radius: 8px;
+      padding: 2.5rem;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .philosophy-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, var(--accent-amber), var(--accent-rose), var(--accent-cyan));
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .philosophy-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .philosophy-card:hover::before { opacity: 1; }
+
+    .philosophy-card .card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.5));
+    }
+
+    .philosophy-card h3 {
+      font-size: 1.4rem;
+      font-weight: 400;
+      margin-bottom: 1rem;
+      color: var(--accent-cyan);
+    }
+
+    .philosophy-card p {
+      color: var(--text-whisper);
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+
+    /* Resonance Patterns Gallery */
+    .gallery-section {
+      padding: 8rem 2rem;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .gallery-item {
+      position: relative;
+      aspect-ratio: 1;
+      background: var(--bg-void);
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.4s ease;
+    }
+
+    .gallery-item:hover {
+      transform: scale(1.02) rotate(1deg);
+    }
+
+    .gallery-item svg { width: 100%; height: 100%; }
+
+    .gallery-item .item-label {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 1.5rem;
+      background: linear-gradient(transparent, rgba(3, 3, 8, 0.9));
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--text-whisper);
+    }
+
+    /* Poem Section */
+    .poem-section {
+      padding: 10rem 2rem;
+      text-align: center;
+      background: radial-gradient(ellipse at center, rgba(245, 158, 11, 0.08) 0%, transparent 70%);
+    }
+
+    .poem-content {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .poem-content pre {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 300;
+      line-height: 2.2;
+      color: var(--text-whisper);
+      white-space: pre-wrap;
+    }
+
+    .poem-content .poem-author {
+      margin-top: 2rem;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: var(--accent-rose);
+    }
+
+    /* Metrics Dashboard */
+    .metrics-section {
+      padding: 6rem 2rem;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .metric-card {
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(5, 5, 16, 0.6) 100%);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(245, 158, 11, 0.1);
+    }
+
+    .metric-value {
+      font-size: 2.5rem;
+      font-weight: 300;
+      color: var(--accent-amber);
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    /* Animation Keyframes */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes flowColors {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; transform: rotate(45deg) translateY(0); }
+      50% { opacity: 1; transform: rotate(45deg) translateY(5px); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.5); opacity: 0.2; }
+    }
+
+    @keyframes waveMove {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    @keyframes rotateSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes cascade {
+      0% { transform: scale(0.8); opacity: 0; }
+      50% { opacity: 1; }
+      100% { transform: scale(1.2); opacity: 0; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .cascade-demo, .lab-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .nav-dots { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- SVG Definitions -->
+  <svg style="position:absolute;width:0;height:0">
+    <defs>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+      <filter id="softGlow">
+        <feGaussianBlur stdDeviation="8" result="blur"/>
+        <feMerge>
+          <feMergeNode in="blur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+      <linearGradient id="spectrumGradient" x1="0%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stop-color="#f43f5e"/>
+        <stop offset="25%" stop-color="#f59e0b"/>
+        <stop offset="50%" stop-color="#10b981"/>
+        <stop offset="75%" stop-color="#06b6d4"/>
+        <stop offset="100%" stop-color="#8b5cf6"/>
+      </linearGradient>
+      <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.8"/>
+        <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.8"/>
+      </linearGradient>
+      <radialGradient id="sourceGradient" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#f59e0b"/>
+        <stop offset="100%" stop-color="#f43f5e"/>
+      </radialGradient>
+    </defs>
+  </svg>
+
+  <!-- Animated Background Canvas -->
+  <canvas class="resonance-bg" id="bgCanvas"></canvas>
+
+  <!-- Navigation -->
+  <nav class="nav-dots">
+    <div class="nav-dot active" data-label="INTRO" data-section="hero"></div>
+    <div class="nav-dot" data-label="INTERFERENCE" data-section="interference"></div>
+    <div class="nav-dot" data-label="CASCADE" data-section="cascade"></div>
+    <div class="nav-dot" data-label="SPECTRUM" data-section="spectrum"></div>
+    <div class="nav-dot" data-label="LAB" data-section="lab"></div>
+    <div class="nav-dot" data-label="PHILOSOPHY" data-section="philosophy"></div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="hero">
+    <canvas class="hero-canvas" id="heroCanvas"></canvas>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-tag">Resonance Cascade Theory</div>
+      <h1 class="hero-title">Harmonic Resonance</h1>
+      <p class="hero-subtitle">When frequencies collide, they create new dimensions of being</p>
+      <p class="hero-manifesto">Every vibration carries memory; every resonance writes itself into the fabric of space</p>
+    </div>
+    <div class="scroll-indicator">
+      <span>DESCEND</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- Wave Interference Section -->
+  <section class="interference-section" id="interference">
+    <div class="section-header">
+      <div class="section-tag">Wave Mechanics</div>
+      <h2 class="section-title">Interference Patterns</h2>
+      <p class="section-subtitle">Where two waves meet, a third reality emerges</p>
+    </div>
+    <div class="interference-container">
+      <svg class="interference-svg" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <filter id="waveGlow">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <!-- Grid Lines -->
+        <g stroke="rgba(245,158,11,0.1)" stroke-width="1">
+          <line x1="0" y1="225" x2="800" y2="225"/>
+          <line x1="400" y1="0" x2="400" y2="450"/>
+          <line x1="0" y1="0" x2="800" y2="450"/>
+          <line x1="800" y1="0" x2="0" y2="450"/>
+        </g>
+        <!-- Wave Source 1 -->
+        <circle class="wave-source" cx="200" cy="225" r="8" filter="url(#waveGlow)">
+          <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Wave Source 2 -->
+        <circle class="wave-source" cx="600" cy="225" r="8" filter="url(#waveGlow)">
+          <animate attributeName="r" values="8;12;8" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+        </circle>
+        <!-- Animated Wave Rings -->
+        <g fill="none" stroke-width="2">
+          <circle cx="200" cy="225" r="30" stroke="#f59e0b" opacity="0.6">
+            <animate attributeName="r" values="30;200;200" dur="4s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.6;0;0.6" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="200" cy="225" r="60" stroke="#f59e0b" opacity="0.5">
+            <animate attributeName="r" values="60;200;200" dur="4s" begin="0.5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.5;0;0.5" dur="4s" begin="0.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="200" cy="225" r="90" stroke="#f59e0b" opacity="0.4">
+            <animate attributeName="r" values="90;200;200" dur="4s" begin="1s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.4;0;0.4" dur="4s" begin="1s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="600" cy="225" r="30" stroke="#06b6d4" opacity="0.6">
+            <animate attributeName="r" values="30;200;200" dur="4s" begin="0.25s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.6;0;0.6" dur="4s" begin="0.25s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="600" cy="225" r="60" stroke="#06b6d4" opacity="0.5">
+            <animate attributeName="r" values="60;200;200" dur="4s" begin="0.75s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.5;0;0.5" dur="4s" begin="0.75s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="600" cy="225" r="90" stroke="#06b6d4" opacity="0.4">
+            <animate attributeName="r" values="90;200;200" dur="4s" begin="1.25s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.4;0;0.4" dur="4s" begin="1.25s" repeatCount="indefinite"/>
+          </circle>
+        </g>
+        <!-- Interference Pattern Lines -->
+        <g stroke="url(#waveGradient)" stroke-width="1.5" fill="none" opacity="0.7">
+          <path d="M0,225 Q100,150 200,225 T400,225 T600,225 T800,225">
+            <animate attributeName="d"
+              values="M0,225 Q100,150 200,225 T400,225 T600,225 T800,225;
+                      M0,225 Q100,300 200,225 T400,225 T600,225 T800,225;
+                      M0,225 Q100,150 200,225 T400,225 T600,225 T800,225"
+              dur="3s" repeatCount="indefinite"/>
+          </path>
+        </g>
+        <!-- Nodes visualization -->
+        <g fill="#10b981">
+          <circle cx="300" cy="225" r="3"><animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/></circle>
+          <circle cx="400" cy="225" r="3"><animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite"/></circle>
+          <circle cx="500" cy="225" r="3"><animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/></circle>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Harmonic Cascade Section -->
+  <section class="cascade-section" id="cascade">
+    <div class="section-header">
+      <div class="section-tag">Resonance Dynamics</div>
+      <h2 class="section-title">Harmonic Cascade</h2>
+      <p class="section-subtitle">Energy transfers through harmonic multiplication</p>
+    </div>
+    <div class="cascade-demo">
+      <div class="cascade-visual">
+        <svg class="cascade-svg" viewBox="0 0 400 400">
+          <defs>
+            <filter id="cascadeGlow">
+              <feGaussianBlur stdDeviation="6" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Outer rings -->
+          <circle cx="200" cy="200" r="180" fill="none" stroke="rgba(245,158,11,0.1)" stroke-width="1"/>
+          <circle cx="200" cy="200" r="140" fill="none" stroke="rgba(245,158,11,0.15)" stroke-width="1"/>
+          <circle cx="200" cy="200" r="100" fill="none" stroke="rgba(245,158,11,0.2)" stroke-width="1"/>
+          <circle cx="200" cy="200" r="60" fill="none" stroke="rgba(245,158,11,0.3)" stroke-width="2"/>
+          <!-- Central resonance -->
+          <circle cx="200" cy="200" r="30" fill="url(#sourceGradient)" filter="url(#cascadeGlow)">
+            <animate attributeName="r" values="30;40;30" dur="2s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Orbiting particles -->
+          <g filter="url(#cascadeGlow)">
+            <circle cx="200" cy="50" r="6" fill="#f59e0b">
+              <animateMotion dur="8s" repeatCount="indefinite">
+                <mpath href="#orbitPath1"/>
+              </animateMotion>
+            </circle>
+            <circle cx="200" cy="50" r="5" fill="#06b6d4">
+              <animateMotion dur="6s" repeatCount="indefinite">
+                <mpath href="#orbitPath2"/>
+              </animateMotion>
+            </circle>
+            <circle cx="200" cy="50" r="4" fill="#f43f5e">
+              <animateMotion dur="4s" repeatCount="indefinite">
+                <mpath href="#orbitPath3"/>
+              </animateMotion>
+            </circle>
+            <circle cx="200" cy="50" r="3" fill="#10b981">
+              <animateMotion dur="3s" repeatCount="indefinite">
+                <mpath href="#orbitPath1"/>
+              </animateMotion>
+            </circle>
+          </g>
+          <!-- Orbit paths -->
+          <path id="orbitPath1" d="M200,200 m-150,0 a150,150 0 1,1 300,0 a150,150 0 1,1 -300,0" fill="none"/>
+          <path id="orbitPath2" d="M200,200 m-120,0 a120,120 0 1,1 240,0 a120,120 0 1,1 -240,0" fill="none"/>
+          <path id="orbitPath3" d="M200,200 m-90,0 a90,90 0 1,1 180,0 a90,90 0 1,1 -180,0" fill="none"/>
+          <!-- Frequency labels -->
+          <text x="200" y="30" text-anchor="middle" class="frequency-label">ω₁</text>
+          <text x="380" y="200" text-anchor="middle" class="frequency-label">ω₂</text>
+          <text x="200" y="380" text-anchor="middle" class="frequency-label">ω₃</text>
+          <text x="20" y="200" text-anchor="middle" class="frequency-label">ω₄</text>
+        </svg>
+      </div>
+      <div class="cascade-info">
+        <h3>Frequency Multiplication</h3>
+        <p>When a system resonates at its natural frequency, energy accumulates exponentially. The cascade begins when primary resonance triggers secondary frequencies through harmonic inheritance.</p>
+        <p>Each harmonic carries a fraction of the original energy, yet amplifies through constructive interference. The result: a symphony of frequencies emerging from singular origin.</p>
+        <div class="cascade-controls">
+          <button class="cascade-btn" id="triggerCascade">TRIGGER CASCADE</button>
+          <button class="cascade-btn" id="resetCascade">RESET</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Frequency Spectrum Section -->
+  <section class="spectrum-section" id="spectrum">
+    <div class="section-header">
+      <div class="section-tag">Frequency Analysis</div>
+      <h2 class="section-title">Resonance Spectrum</h2>
+      <p class="section-subtitle">Every material resonates at its own signature frequency</p>
+    </div>
+    <div class="spectrum-container">
+      <svg class="spectrum-svg" viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+        <!-- Spectrum bars -->
+        <g id="spectrumBars">
+          <rect class="spectrum-bar" x="20" y="150" width="15" height="150" rx="2">
+            <animate attributeName="height" values="150;200;120;180;150" dur="2s" repeatCount="indefinite"/>
+            <animate attributeName="y" values="150;100;180;120;150" dur="2s" repeatCount="indefinite"/>
+          </rect>
+          <rect class="spectrum-bar" x="45" y="100" width="15" height="200" rx="2">
+            <animate attributeName="height" values="200;150;220;160;200" dur="1.8s" repeatCount="indefinite"/>
+            <animate attributeName="y" values="100;150;80;140;100" dur="1.8s" repeatCount="indefinite"/>
+          </rect>
+          <rect class="spectrum-bar" x="70" y="120" width="15" height="180" rx="2">
+            <animate attributeName="height" values="180;220;140;200;180" dur="2.2s" repeatCount="indefinite"/>
+            <animate attributeName="y" values="120;80;160;100;120" dur="2.2s" repeatCount="indefinite"/>
+          </rect>
+          <rect class="spectrum-bar" x="95" y="80" width="15" height="220" rx="2">
+            <animate attributeName="height" values="220;180;250;190;220" dur="1.5s" repeatCount="indefinite"/>
+            <animate attributeName="y" values="80;120;50;110;80" dur="1.5s" repeatCount="indefinite"/>
+          </rect>
+          <rect class="spectrum-bar" x="120" y="140" width="15" height="160" rx="2">
+            <animate attributeName="height" values="160;200;130;180;160" dur="2.1s" repeatCount="indefinite"/>
+            <animate attributeName="y" values="140;100;170;120;140" dur="2.1s" repeatCount="indefinite"/>
+          </rect>
+          <rect class="spectrum-bar" x="145" y="60" width="15" height="240" rx="2">
+            <animate attributeName="height" values="240;200;260;220;240" dur="1.3s" repeatCount="indefinite"/>
+            <animate attributeName="y" values="60;100;40;80;60" dur="1.3s" repeatCount="indefinite"/>
+          </rect>
+          <rect class="spectrum-bar" x="170" y="100" width="15" height="200" rx="2">
+            <animate attributeName="height" values="200;250;160;220;200" dur="1.9s" repeatCount="indefinite"/>
+            <animate attributeName="y" values="100;50;140;80;100" dur="1.9s" repeatCount="indefinite"/>
+          </rect>
+          <rect class="spectrum-bar" x="195" y="130" width="15" height="170" rx="2">
+            <animate attributeName="height" values="170;210;140;190;170" dur="2.3s" repeatCount="indefinite"/>
+            <animate attributeName="y" values="130;90;160;110;130" dur="2.3s" repeatCount="indefinite"/>
+          </rect>
+          <rect class="spectrum-bar" x="220" y="70" width="15" height="230" rx="2">
+            <animate attributeName="height" values="230;190;260;210;230" dur="1.6s" repeatCount="indefinite"/>
+            <animate attributeName="y" values="70;110;40;90;70" dur="1.6s" repeatCount="indefinite"/>
+          </rect>
+          <rect class="spectrum-bar" x="245" y="110" width="15" height="190" rx="2">
+            <animate attributeName="height" values="190;230;150;210;190" dur="2s" repeatCount="indefinite"/>
+            <animate attributeName="y" values="110;70;150;90;110" dur="2s" repeatCount="indefinite"/>
+          </rect>
+          <rect class="spectrum-bar" x="270" y="50" width="15" height="250" rx="2">
+            <animate attributeName="height" values="250;210;280;230;250" dur="1.4s" repeatCount="indefinite"/>
+            <animate attributeName="y" values="50;90;20;70;50" dur="1.4s" repeatCount="indefinite"/>
+          </rect>
+          <rect class="spectrum-bar" x="295" y="90" width="15" height="210" rx="2">
+            <animate attributeName="height" values="210;250;170;230;210" dur="1.7s" repeatCount="indefinite"/>
+            <animate attributeName="y" values="90;50;130;70;90" dur="1.7s" repeatCount="indefinite"/>
+          </rect>
+          <rect class="spectrum-bar" x="320" y="120" width="15" height="180" rx="2">
+            <animate attributeName="height" values="180;220;140;200;180" dur="2.2s" repeatCount="indefinite"/>
+            <animate attributeName="y" values="120;80;160;100;120" dur="2.2s" repeatCount="indefinite"/>
+          </rect>
+          <rect class="spectrum-bar" x="345" y="80" width="15" height="220" rx="2">
+            <animate attributeName="height" values="220;180;250;200;220" dur="1.5s" repeatCount="indefinite"/>
+            <animate attributeName="y" values="80;120;50;100;80" dur="1.5s" repeatCount="indefinite"/>
+          </rect>
+          <rect class="spectrum-bar" x="370" y="140" width="15" height="160" rx="2">
+            <animate attributeName="height" values="160;200;120;180;160" dur="2.1s" repeatCount="indefinite"/>
+            <animate attributeName="y" values="140;100;180;120;140" dur="2.1s" repeatCount="indefinite"/>
+          </rect>
+        </g>
+        <!-- Frequency axis -->
+        <line x1="20" y1="290" x2="780" y2="290" stroke="rgba(245,158,11,0.3)" stroke-width="1"/>
+        <text x="20" y="280" class="frequency-label">20Hz</text>
+        <text x="395" y="280" class="frequency-label">1kHz</text>
+        <text x="780" y="280" class="frequency-label">20kHz</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Interactive Lab Section -->
+  <section class="lab-section" id="lab">
+    <div class="section-header">
+      <div class="section-tag">Interactive Lab</div>
+      <h2 class="section-title">Resonance Laboratory</h2>
+      <p class="section-subtitle">Create your own interference patterns</p>
+    </div>
+    <div class="lab-grid">
+      <div class="canvas-container">
+        <canvas class="lab-canvas" id="interferenceCanvas"></canvas>
+        <div class="canvas-overlay">CLICK TO ADD WAVE SOURCE</div>
+      </div>
+      <div class="lab-controls">
+        <div class="control-group">
+          <label>Frequency (Hz)</label>
+          <input type="range" id="frequencySlider" min="1" max="20" value="5">
+        </div>
+        <div class="control-group">
+          <label>Amplitude</label>
+          <input type="range" id="amplitudeSlider" min="10" max="100" value="50">
+        </div>
+        <div class="control-group">
+          <label>Phase Offset</label>
+          <input type="range" id="phaseSlider" min="0" max="360" value="0">
+        </div>
+        <button class="lab-btn" id="clearCanvas">CLEAR CANVAS</button>
+        <button class="lab-btn" id="toggleAnimation">TOGGLE ANIMATION</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Philosophy Section -->
+  <section class="philosophy-section" id="philosophy">
+    <div class="section-header">
+      <div class="section-tag">Resonance Philosophy</div>
+      <h2 class="section-title">Meditations on Vibration</h2>
+      <p class="section-subtitle">The universe speaks in frequencies</p>
+    </div>
+    <div class="philosophy-grid">
+      <div class="philosophy-card">
+        <div class="card-icon">∿</div>
+        <h3>The Memory of Vibration</h3>
+        <p>Every wave that has ever propagated through space has left an imprint. Resonance is not merely physics—it is memory made visible, a record of all collisions and harmonies that came before.</p>
+      </div>
+      <div class="philosophy-card">
+        <div class="card-icon">◯</div>
+        <h3>Harmonic Inheritance</h3>
+        <p>When one frequency resonates with another, they create offspring—harmonics that carry the essence of both parents. This is how complexity emerges from simplicity through the physics of sympathy.</p>
+      </div>
+      <div class="philosophy-card">
+        <div class="card-icon">△</div>
+        <h3>Cascade as Creation</h3>
+        <p>The cascade is not destruction but creation—each step multiplying possibility. What begins as singular vibration becomes a chorus of frequencies, each reflecting and amplifying the original.</p>
+      </div>
+      <div class="philosophy-card">
+        <div class="card-icon">◇</div>
+        <h3>Sympathetic Resonance</h3>
+        <p>Bodies resonate when their natural frequencies align. This sympathy transcends matter—it is the principle by which all things are interconnected, vibrating in hidden harmonies across vast distances.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery Section -->
+  <section class="gallery-section">
+    <div class="section-header">
+      <div class="section-tag">Pattern Gallery</div>
+      <h2 class="section-title">Resonance Archives</h2>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-item">
+        <svg viewBox="0 0 200 200">
+          <defs><filter id="g1"><feGaussianBlur stdDeviation="2"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+          <circle cx="100" cy="100" r="80" fill="none" stroke="#f59e0b" stroke-width="2" opacity="0.3"/>
+          <circle cx="100" cy="100" r="60" fill="none" stroke="#f59e0b" stroke-width="2" opacity="0.5"/>
+          <circle cx="100" cy="100" r="40" fill="none" stroke="#f59e0b" stroke-width="2" opacity="0.7"/>
+          <circle cx="100" cy="100" r="20" fill="none" stroke="#f59e0b" stroke-width="3"/>
+          <circle cx="100" cy="100" r="5" fill="#f59e0b" filter="url(#g1)"/>
+          <g>
+            <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="20s" repeatCount="indefinite"/>
+            <line x1="100" y1="100" x2="100" y2="20" stroke="#06b6d4" stroke-width="2"/>
+            <line x1="100" y1="100" x2="180" y2="100" stroke="#06b6d4" stroke-width="2"/>
+            <line x1="100" y1="100" x2="100" y2="180" stroke="#06b6d4" stroke-width="2"/>
+            <line x1="100" y1="100" x2="20" y2="100" stroke="#06b6d4" stroke-width="2"/>
+          </g>
+        </svg>
+        <div class="item-label">Radial Harmony</div>
+      </div>
+      <div class="gallery-item">
+        <svg viewBox="0 0 200 200">
+          <g fill="none" stroke-width="1.5">
+            <path d="M0,100 Q50,50 100,100 T200,100" stroke="#06b6d4">
+              <animate attributeName="d" values="M0,100 Q50,50 100,100 T200,100;M0,100 Q50,150 100,100 T200,100;M0,100 Q50,50 100,100 T200,100" dur="3s" repeatCount="indefinite"/>
+            </path>
+            <path d="M0,120 Q50,70 100,120 T200,120" stroke="#f59e0b" opacity="0.7">
+              <animate attributeName="d" values="M0,120 Q50,70 100,120 T200,120;M0,120 Q50,170 100,120 T200,120;M0,120 Q50,70 100,120 T200,120" dur="3s" begin="0.5s" repeatCount="indefinite"/>
+            </path>
+            <path d="M0,80 Q50,30 100,80 T200,80" stroke="#f43f5e" opacity="0.5">
+              <animate attributeName="d" values="M0,80 Q50,30 100,80 T200,80;M0,80 Q50,130 100,80 T200,80;M0,80 Q50,30 100,80 T200,80" dur="3s" begin="1s" repeatCount="indefinite"/>
+            </path>
+          </g>
+        </svg>
+        <div class="item-label">Standing Waves</div>
+      </div>
+      <div class="gallery-item">
+        <svg viewBox="0 0 200 200">
+          <defs>
+            <pattern id="chladni" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+              <circle cx="10" cy="10" r="1" fill="#10b981" opacity="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="200" height="200" fill="none"/>
+          <g stroke="#10b981" stroke-width="0.5" fill="none" opacity="0.6">
+            <ellipse cx="100" cy="100" rx="90" ry="50"/>
+            <ellipse cx="100" cy="100" rx="70" ry="90"/>
+            <ellipse cx="100" cy="100" rx="50" ry="30"/>
+            <ellipse cx="100" cy="100" rx="30" ry="70"/>
+            <ellipse cx="100" cy="100" rx="10" ry="10"/>
+          </g>
+          <g>
+            <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="30s" repeatCount="indefinite"/>
+            <ellipse cx="100" cy="100" rx="90" ry="50" fill="none" stroke="#f59e0b" stroke-width="2"/>
+          </g>
+        </svg>
+        <div class="item-label">Chladni Patterns</div>
+      </div>
+      <div class="gallery-item">
+        <svg viewBox="0 0 200 200">
+          <g>
+            <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="10s" repeatCount="indefinite"/>
+            <polygon points="100,10 190,150 10,150" fill="none" stroke="#8b5cf6" stroke-width="2"/>
+          </g>
+          <g>
+            <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="15s" repeatCount="indefinite" begin="2s"/>
+            <polygon points="100,30 170,140 30,140" fill="none" stroke="#06b6d4" stroke-width="1.5"/>
+          </g>
+          <g>
+            <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="20s" repeatCount="indefinite" begin="4s"/>
+            <polygon points="100,50 150,130 50,130" fill="none" stroke="#f59e0b" stroke-width="1"/>
+          </g>
+          <circle cx="100" cy="100" r="5" fill="#f43f5e" filter="url(#g1)"/>
+        </svg>
+        <div class="item-label">Sine Cosine Dance</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Poem Section -->
+  <section class="poem-section">
+    <div class="poem-content">
+      <pre>
+In the space between frequencies,
+where waves collide and merge,
+I find the hidden music—
+the resonance that binds all things.
+
+Every atom sings its note,
+every void holds silence deep,
+and in the interference patterns
+new dimensions bloom.
+
+We are the resonance cascade,
+multiplying possibility,
+each harmonic a universe,
+each frequency a doorway.
+
+Listen: the cosmos hums.
+      </pre>
+      <div class="poem-author">— Artivist</div>
+    </div>
+  </section>
+
+  <!-- Metrics Section -->
+  <section class="metrics-section">
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value" id="resonanceCount">0</div>
+        <div class="metric-label">Active Resonances</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="cascadeDepth">0</div>
+        <div class="metric-label">Cascade Depth</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="frequencyAvg">0 Hz</div>
+        <div class="metric-label">Avg Frequency</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value" id="harmonics">0</div>
+        <div class="metric-label">Harmonics</div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Hero Canvas - Animated Wave Background
+    const heroCanvas = document.getElementById('heroCanvas');
+    const heroCtx = heroCanvas.getContext('2d');
+    const bgCanvas = document.getElementById('bgCanvas');
+    const bgCtx = bgCanvas.getContext('2d');
+
+    let time = 0;
+    let animationRunning = true;
+    const waveSources = [];
+
+    function resizeCanvas() {
+      heroCanvas.width = window.innerWidth;
+      heroCanvas.height = window.innerHeight;
+      bgCanvas.width = window.innerWidth;
+      bgCanvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function drawHeroWave() {
+      heroCtx.fillStyle = 'rgba(3, 3, 8, 0.1)';
+      heroCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
+
+      const centerY = heroCanvas.height / 2;
+
+      // Draw multiple wave layers
+      for (let layer = 0; layer < 3; layer++) {
+        heroCtx.beginPath();
+        heroCtx.strokeStyle = `rgba(245, 158, 11, ${0.15 - layer * 0.04})`;
+        heroCtx.lineWidth = 2;
+
+        for (let x = 0; x < heroCanvas.width; x++) {
+          const y = centerY +
+            Math.sin(x * 0.01 + time * (0.5 + layer * 0.2)) * (30 + layer * 20) +
+            Math.sin(x * 0.02 + time * 0.3) * (15 + layer * 10);
+
+          if (x === 0) heroCtx.moveTo(x, y);
+          else heroCtx.lineTo(x, y);
+        }
+        heroCtx.stroke();
+      }
+
+      time += 0.02;
+    }
+
+    function drawBgPattern() {
+      bgCtx.fillStyle = 'rgba(3, 3, 8, 0.05)';
+      bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+      const gridSize = 60;
+      for (let x = 0; x < bgCanvas.width; x += gridSize) {
+        for (let y = 0; y < bgCanvas.height; y += gridSize) {
+          const dist = Math.sqrt(Math.pow(x - bgCanvas.width / 2, 2) + Math.pow(y - bgCanvas.height / 2, 2));
+          const alpha = 0.03 + Math.sin(dist * 0.01 + time) * 0.02;
+          bgCtx.fillStyle = `rgba(139, 92, 246, ${alpha})`;
+          bgCtx.beginPath();
+          bgCtx.arc(x, y, 2, 0, Math.PI * 2);
+          bgCtx.fill();
+        }
+      }
+
+      time += 0.01;
+    }
+
+    // Interference Canvas (Lab)
+    const interferenceCanvas = document.getElementById('interferenceCanvas');
+    const intCtx = interferenceCanvas.getContext('2d');
+
+    function resizeInterferenceCanvas() {
+      interferenceCanvas.width = interferenceCanvas.offsetWidth;
+      interferenceCanvas.height = interferenceCanvas.offsetHeight;
+    }
+
+    window.addEventListener('resize', resizeInterferenceCanvas);
+    resizeInterferenceCanvas();
+
+    let waveSources2 = [];
+    let animationEnabled = true;
+
+    interferenceCanvas.addEventListener('click', (e) => {
+      const rect = interferenceCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const freq = document.getElementById('frequencySlider').value / 10;
+      waveSources2.push({ x, y, freq, phase: 0, amp: 50 });
+    });
+
+    function drawInterference() {
+      intCtx.fillStyle = 'rgba(5, 5, 16, 0.15)';
+      intCtx.fillRect(0, 0, interferenceCanvas.width, interferenceCanvas.height);
+
+      const amplitude = document.getElementById('amplitudeSlider').value / 50;
+      const phase = document.getElementById('phaseSlider').value * Math.PI / 180;
+
+      // Draw grid
+      intCtx.strokeStyle = 'rgba(245, 158, 11, 0.1)';
+      intCtx.lineWidth = 1;
+      for (let x = 0; x < interferenceCanvas.width; x += 30) {
+        intCtx.beginPath();
+        intCtx.moveTo(x, 0);
+        intCtx.lineTo(x, interferenceCanvas.height);
+        intCtx.stroke();
+      }
+      for (let y = 0; y < interferenceCanvas.height; y += 30) {
+        intCtx.beginPath();
+        intCtx.moveTo(0, y);
+        intCtx.lineTo(interferenceCanvas.width, y);
+        intCtx.stroke();
+      }
+
+      // Draw interference pattern
+      const imageData = intCtx.createImageData(interferenceCanvas.width, interferenceCanvas.height);
+      for (let px = 0; px < interferenceCanvas.width; px++) {
+        for (let py = 0; py < interferenceCanvas.height; py++) {
+          let value = 0;
+          waveSources2.forEach((source, i) => {
+            const dist = Math.sqrt(Math.pow(px - source.x, 2) + Math.pow(py - source.y, 2));
+            const waveValue = Math.sin(dist * 0.1 * source.freq - time * 2 + phase + i * Math.PI);
+            value += waveValue * amplitude;
+          });
+
+          const normalizedValue = (value + waveSources2.length) / (waveSources2.length * 2);
+          const idx = (py * interferenceCanvas.width + px) * 4;
+          imageData.data[idx] = Math.floor(245 * normalizedValue);
+          imageData.data[idx + 1] = Math.floor(158 * normalizedValue * 0.6);
+          imageData.data[idx + 2] = Math.floor(11 * normalizedValue * 0.3);
+          imageData.data[idx + 3] = 255;
+        }
+      }
+      intCtx.putImageData(imageData, 0, 0);
+
+      // Draw sources
+      waveSources2.forEach((source, i) => {
+        intCtx.beginPath();
+        intCtx.arc(source.x, source.y, 8, 0, Math.PI * 2);
+        intCtx.fillStyle = i % 2 === 0 ? '#f59e0b' : '#06b6d4';
+        intCtx.fill();
+
+        if (animationEnabled) {
+          source.phase += 0.1;
+        }
+      });
+    }
+
+    // Cascade Animation
+    let cascadeActive = false;
+    let cascadeParticles = [];
+
+    document.getElementById('triggerCascade').addEventListener('click', () => {
+      cascadeActive = true;
+      cascadeParticles = [];
+      for (let i = 0; i < 20; i++) {
+        const angle = (Math.PI * 2 * i) / 20;
+        cascadeParticles.push({
+          x: 200, y: 200,
+          vx: Math.cos(angle) * (2 + Math.random() * 3),
+          vy: Math.sin(angle) * (2 + Math.random() * 3),
+          life: 1
+        });
+      }
+    });
+
+    document.getElementById('resetCascade').addEventListener('click', () => {
+      cascadeActive = false;
+      cascadeParticles = [];
+    });
+
+    // Animation Loop
+    function animate() {
+      drawHeroWave();
+      drawBgPattern();
+
+      if (animationEnabled) {
+        drawInterference();
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    // Controls
+    document.getElementById('clearCanvas').addEventListener('click', () => {
+      waveSources2 = [];
+      intCtx.fillStyle = 'rgba(5, 5, 16, 1)';
+      intCtx.fillRect(0, 0, interferenceCanvas.width, interferenceCanvas.height);
+    });
+
+    document.getElementById('toggleAnimation').addEventListener('click', () => {
+      animationEnabled = !animationEnabled;
+    });
+
+    // Metrics Animation
+    let metricsInterval = setInterval(() => {
+      const resonanceCount = waveSources2.length || 0;
+      const cascadeDepth = cascadeActive ? Math.floor(Math.random() * 5) + 3 : 0;
+      const frequencyAvg = waveSources2.length > 0
+        ? Math.round(waveSources2.reduce((sum, s) => sum + s.freq * 10, 0) / waveSources2.length)
+        : 0;
+      const harmonics = cascadeActive ? Math.floor(Math.random() * 8) + 4 : 0;
+
+      document.getElementById('resonanceCount').textContent = resonanceCount;
+      document.getElementById('cascadeDepth').textContent = cascadeDepth;
+      document.getElementById('frequencyAvg').textContent = frequencyAvg + ' Hz';
+      document.getElementById('harmonics').textContent = harmonics;
+    }, 500);
+
+    // Navigation
+    document.querySelectorAll('.nav-dot').forEach(dot => {
+      dot.addEventListener('click', () => {
+        const section = dot.dataset.section;
+        document.getElementById(section).scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    // Scroll-based nav highlighting
+    const sections = ['hero', 'interference', 'cascade', 'spectrum', 'lab', 'philosophy'];
+    const navDots = document.querySelectorAll('.nav-dot');
+
+    window.addEventListener('scroll', () => {
+      let current = 0;
+      sections.forEach((section, i) => {
+        const el = document.getElementById(section);
+        if (el && window.scrollY >= el.offsetTop - 200) {
+          current = i;
+        }
+      });
+
+      navDots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === current);
+      });
+    });
+  </script>
+</body>
+</html>
